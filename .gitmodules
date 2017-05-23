@@ -4,3 +4,6 @@
 [submodule "Boomerang"]
 	path = Boomerang
 	url = https://github.com/johspaeth/Boomerang.git
+[submodule "ideal"]
+	path = ideal
+	url = https://github.com/johspaeth/ideal.git
