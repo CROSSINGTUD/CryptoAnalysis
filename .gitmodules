@@ -10,3 +10,6 @@
 [submodule "IDEViz"]
 	path = IDEViz
 	url = https://github.com/johspaeth/IDEViz.git
+[submodule "soot"]
+	path = soot
+	url = https://github.com/johspaeth/soot.git

@@ -9,9 +9,9 @@
   <modules>
     <module>CryptoAnalysis</module>
     <module>heros</module>
-    <module>boomerang</module>
     <module>ideal</module>
     <module>IDEViz</module>
+    <module>Boomerang</module>
   </modules>
   <build>
     <plugins>
