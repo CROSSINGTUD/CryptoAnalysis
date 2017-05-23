@@ -7,3 +7,6 @@
 [submodule "ideal"]
 	path = ideal
 	url = https://github.com/johspaeth/ideal.git
+[submodule "IDEViz"]
+	path = IDEViz
+	url = https://github.com/johspaeth/IDEViz.git
