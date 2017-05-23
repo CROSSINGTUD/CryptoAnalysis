@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="ASCII"?>
+<cryptSL:Domainmodel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cryptSL="http://www.darmstadt.de/tu/crossing/CryptSL" xmlns:types="http://www.eclipse.org/xtext/common/JavaVMTypes">
+  <javaType xsi:type="types:JvmGenericType" href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest"/>
+  <object>
+    <objectType xsi:type="types:JvmGenericType" href="java:/Objects/java.lang.String#java.lang.String"/>
+    <objectName xsi:type="cryptSL:Object" name="alg"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="pre_inbyte"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="pre_inbytearr"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#int"/>
+    <objectName xsi:type="cryptSL:Object" name="pre_off"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#int"/>
+    <objectName xsi:type="cryptSL:Object" name="pre_len"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmGenericType" href="java:/Objects/java.nio.ByteBuffer#java.nio.ByteBuffer"/>
+    <objectName xsi:type="cryptSL:Object" name="pre_inpBuf"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="inbytearr"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#int"/>
+    <objectName xsi:type="cryptSL:Object" name="off"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#int"/>
+    <objectName xsi:type="cryptSL:Object" name="len"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="out"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="comp1"/>
+  </object>
+  <object>
+    <objectType xsi:type="types:JvmPrimitiveType" href="java:/Primitives#byte"/>
+    <objectName xsi:type="cryptSL:Object" name="comp2"/>
+  </object>
+  <method rep="//@event.15">
+    <javaMeth href="java:/Objects/java.lang.Object#java.lang.Object.equals(java.lang.Object)"/>
+  </method>
+  <event xsi:type="cryptSL:LabelMethodCall" name="g1">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.getInstance(java.lang.String)"/>
+      <parList>
+        <parameters val="//@object.0/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="g2">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.getInstance(java.lang.String,java.lang.String)"/>
+      <parList>
+        <parameters val="//@object.0/@objectName"/>
+        <parameters/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:Aggegate" name="Gets" lab="//@event.0 //@event.1"/>
+  <event xsi:type="cryptSL:LabelMethodCall" name="u1">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.update(byte[],int,int)"/>
+      <parList>
+        <parameters val="//@object.1/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="u2">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.update(byte[],int,int)"/>
+      <parList>
+        <parameters val="//@object.2/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="u3">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.update(byte[])"/>
+      <parList>
+        <parameters val="//@object.2/@objectName"/>
+        <parameters val="//@object.3/@objectName"/>
+        <parameters val="//@object.4/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="u4">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.update(java.nio.ByteBuffer)"/>
+      <parList>
+        <parameters val="//@object.5/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:Aggegate" name="Updates" lab="//@event.3 //@event.4 //@event.5 //@event.6"/>
+  <event xsi:type="cryptSL:LabelMethodCall" name="d1">
+    <meth leftSide="//@object.9/@objectName">
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.digest()"/>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="d2">
+    <meth leftSide="//@object.9/@objectName">
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.digest(byte[])"/>
+      <parList>
+        <parameters val="//@object.6/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="d3">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.digest(byte[],int,int)"/>
+      <parList>
+        <parameters val="//@object.9/@objectName"/>
+        <parameters val="//@object.7/@objectName"/>
+        <parameters val="//@object.8/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:Aggegate" name="DWOU" lab="//@event.9"/>
+  <event xsi:type="cryptSL:Aggegate" name="DWU" lab="//@event.8 //@event.10"/>
+  <event xsi:type="cryptSL:Aggegate" name="Digests" lab="//@event.12 //@event.11"/>
+  <event xsi:type="cryptSL:LabelMethodCall" name="r">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.reset()"/>
+    </meth>
+  </event>
+  <event xsi:type="cryptSL:LabelMethodCall" name="iE">
+    <meth>
+      <methName href="java:/Objects/java.security.MessageDigest#java.security.MessageDigest.isEqual(byte[],byte[])"/>
+      <parList>
+        <parameters val="//@object.10/@objectName"/>
+        <parameters val="//@object.11/@objectName"/>
+      </parList>
+    </meth>
+  </event>
+  <order xsi:type="cryptSL:Order" orderop=",">
+    <left xsi:type="cryptSL:SimpleOrder" orderop="|">
+      <left orderEv="//@event.2"/>
+      <right orderEv="//@event.14"/>
+    </left>
+    <right xsi:type="cryptSL:SimpleOrder" orderop="|">
+      <left orderEv="//@event.11"/>
+      <right xsi:type="cryptSL:Order" orderop=",">
+        <left orderEv="//@event.7" orderop="+"/>
+        <right orderEv="//@event.13"/>
+      </right>
+    </right>
+  </order>
+  <req xsi:type="cryptSL:LiteralExpression">
+    <cons>
+      <name xsi:type="cryptSL:LiteralExpression" value="//@object.0/@objectName"/>
+    </cons>
+    <litsleft>
+      <parameters/>
+      <parameters/>
+      <parameters/>
+    </litsleft>
+  </req>
+  <req xsi:type="cryptSL:ComparisonExpression">
+    <leftExpression xsi:type="cryptSL:LiteralExpression">
+      <cons>
+        <name xsi:type="cryptSL:LiteralExpression" value="//@object.4/@objectName"/>
+      </cons>
+    </leftExpression>
+    <operator xsi:type="cryptSL:ComparingOperator" GREATER=">"/>
+    <rightExpression xsi:type="cryptSL:LiteralExpression">
+      <cons>
+        <name xsi:type="cryptSL:LiteralExpression" value="//@object.3/@objectName"/>
+      </cons>
+    </rightExpression>
+  </req>
+  <req xsi:type="cryptSL:ComparisonExpression">
+    <leftExpression xsi:type="cryptSL:LiteralExpression">
+      <cons>
+        <name xsi:type="cryptSL:LiteralExpression" value="//@object.8/@objectName"/>
+      </cons>
+    </leftExpression>
+    <operator xsi:type="cryptSL:ComparingOperator" GREATER=">"/>
+    <rightExpression xsi:type="cryptSL:LiteralExpression">
+      <cons>
+        <name xsi:type="cryptSL:LiteralExpression" value="//@object.7/@objectName"/>
+      </cons>
+    </rightExpression>
+  </req>
+  <ens predName="digested">
+    <parList>
+      <parameters>
+        <val>
+          <name xsi:type="cryptSL:LiteralExpression" value="//@object.6/@objectName"/>
+        </val>
+      </parameters>
+      <parameters>
+        <val>
+          <name xsi:type="cryptSL:LiteralExpression" value="//@object.9/@objectName"/>
+        </val>
+      </parameters>
+    </parList>
+  </ens>
+</cryptSL:Domainmodel>
