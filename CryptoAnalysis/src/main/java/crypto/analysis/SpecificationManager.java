@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import crypto.DSL.CryptSLRule;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.solver.Pair;
@@ -34,10 +35,11 @@ public class SpecificationManager {
 		this.worklist = worklist;
 		this.errorReporter = errorReporter;
 	}
-	public void addSpecification(File file) {
-		file = new File(SPECIFICATION_DIR.getPath() +File.separator+file.getPath());
-		specifications.add(new ClassSpecification(file, icfg, this, errorReporter));
+	
+	public void addSpecification(CryptSLRule spec) {
+		specifications.add(new ClassSpecification(spec, icfg, this, errorReporter));
 	}
+	
 	public List<ClassSpecification> getClassSpecifiction() {
 		return specifications;
 	}

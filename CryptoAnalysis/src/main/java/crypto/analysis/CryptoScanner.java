@@ -1,12 +1,13 @@
 package crypto.analysis;
 
-import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.Lists;
 
+import crypto.DSL.CryptSLRule;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class CryptoScanner {
@@ -16,15 +17,12 @@ public abstract class CryptoScanner {
 	
 
 	private final SpecificationManager specManager;
-	public CryptoScanner(){
+	public CryptoScanner(List<CryptSLRule> specs){
 		specManager = new SpecificationManager(icfg(), worklist, errorReporter());
-		specManager.addSpecification(new File("Cipher.smg"));
-		specManager.addSpecification(new File("KeyGenerator.smg"));
-		specManager.addSpecification(new File("KeyPairGenerator.smg"));
-//		specManager.addSpecification(new File("Mac.smg"));
-		specManager.addSpecification(new File("MessageDigest.smg"));
-		specManager.addSpecification(new File("PBEKeySpec.smg"));
-//		specManager.addSpecification(new File("SecretKeyFactory.smg"));
+		
+		for (CryptSLRule rule : specs) {
+			specManager.addSpecification(rule);	
+		}		
 	}
 	
 	

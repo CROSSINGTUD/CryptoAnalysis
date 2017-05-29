@@ -1,46 +1,37 @@
 package crypto.statemachine;
 
-import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.beust.jcommander.internal.Sets;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
-import boomerang.Query;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
+import crypto.DSL.CryptSLPredicate;
+import crypto.DSL.ISLConstraint;
 import crypto.rules.StateMachineGraph;
-import crypto.rules.StateMachineGraphReader;
 import crypto.rules.StateNode;
-import crypto.statemachine.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.EdgeFunction;
 import heros.utilities.DefaultValueMap;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
-import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateAnalysisProblem;
-import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
 public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisProblem<StateNode> {
 
-	private StateMachineGraph smg;
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private Multimap<String,Value> collectedValues = HashMultimap.create(); 
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
@@ -61,12 +52,14 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		return this.changeFunction;
 	}
 	public StateMachineGraph getStateMachineGraph(){
-		if(smg == null)
-			smg = StateMachineGraphReader.readFromFile(getStateMachineFile());
-		return smg; 
+		return getStateMachine(); 
 	}
 	
-	public abstract File getStateMachineFile(); 
+	public abstract StateMachineGraph getStateMachine(); 
+	public abstract String getClassName();
+	public abstract List<String> getForbiddenMethods();
+	public abstract List<ISLConstraint> getConstraints();
+	public abstract List<CryptSLPredicate> getPredicates();
 	public NonIdentityEdgeFlowHandler<typestate.TypestateDomainValue<StateNode>> nonIdentityEdgeFlowHandler() {
 		return new NonIdentityEdgeFlowHandler<TypestateDomainValue<StateNode>>() {
 
@@ -204,4 +197,6 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	public void log(String string) {
 		System.out.println(string);
 	}
+
+
 }

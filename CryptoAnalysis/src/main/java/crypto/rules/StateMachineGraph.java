@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import typestate.interfaces.FiniteStateMachine;
-import typestate.interfaces.Transition;
 
 
 public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {

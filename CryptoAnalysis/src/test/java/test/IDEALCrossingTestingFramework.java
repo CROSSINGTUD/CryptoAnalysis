@@ -9,14 +9,15 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
-import crypto.rules.StateMachineGraphReader;
+import crypto.DSL.CryptSLPredicate;
+import crypto.DSL.ISLConstraint;
+import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
-import crypto.statemachine.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
 import ideal.ResultReporter;
-import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
+import ideal.debug.NullDebugger;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -30,13 +31,12 @@ import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
-import typestate.TypestateChangeFunction;
 import typestate.TypestateDomainValue;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
 	protected IInfoflowCFG icfg;
 	protected long analysisTime;
-	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
+	private  IDebugger<TypestateDomainValue<StateNode>>  debugger;
 	protected TestingResultReporter<StateNode> testingResultReporter;
 	protected String RESOURCE_PATH = "src/test/resources/";
 	
@@ -46,8 +46,9 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		return new Analysis<TypestateDomainValue<StateNode>>(new CryptoTypestateAnaylsisProblem() {
 
 			@Override
-			public File getStateMachineFile() {
-				return new File(RESOURCE_PATH + getSMGFile());
+			public StateMachineGraph getStateMachine() {
+				return null;
+//				return new File(RESOURCE_PATH + getSMGFile());
 			}
 
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
@@ -62,12 +63,32 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			@Override
 			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
 				return IDEALCrossingTestingFramework.this.getDebugger();
+			}
+
+			@Override
+			public String getClassName() {
+				return null;
+			}
+
+			@Override
+			public List<String> getForbiddenMethods() {
+				return null;
+			}
+
+			@Override
+			public List<ISLConstraint> getConstraints() {
+				return null;
+			}
+
+			@Override
+			public List<CryptSLPredicate> getPredicates() {
+				return null;
 			}});
 	}
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new NullDebugger();// new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
 	}
 

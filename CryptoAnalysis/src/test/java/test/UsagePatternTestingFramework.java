@@ -20,7 +20,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				final InfoflowCFG icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
-				CryptoScanner scanner = new CryptoScanner() {
+				CryptoScanner scanner = new CryptoScanner(null) {
 					
 					@Override
 					public IInfoflowCFG icfg() {
