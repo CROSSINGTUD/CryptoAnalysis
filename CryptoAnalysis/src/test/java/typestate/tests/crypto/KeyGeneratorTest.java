@@ -12,8 +12,8 @@ import test.IDEALCrossingTestingFramework;
 public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getSMGFile() {
-		return new File("KeyGenerator.smg");
+	protected File getCryptSLFile() {
+		return new File("KeyGenerator.cryptslbin");
 	}
 
 	@Test

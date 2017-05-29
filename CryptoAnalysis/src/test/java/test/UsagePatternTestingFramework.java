@@ -7,13 +7,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 
-import boomerang.accessgraph.AccessGraph;
-import crypto.analysis.ClassSpecification;
-import crypto.analysis.CryptoScanner;
-import crypto.analysis.ErrorReporter;
-import crypto.rules.StateNode;
 import soot.Body;
-import soot.Local;
 import soot.SceneTransformer;
 import soot.SootMethod;
 import soot.Unit;
@@ -21,7 +15,6 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;

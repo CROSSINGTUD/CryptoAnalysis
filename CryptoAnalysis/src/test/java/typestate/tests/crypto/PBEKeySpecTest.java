@@ -12,8 +12,8 @@ import test.IDEALCrossingTestingFramework;
 public class PBEKeySpecTest  extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getSMGFile() {
-		return new File("PBEKeySpec.smg");
+	protected File getCryptSLFile() {
+		return new File("PBEKeySpec.cryptslbin");
 	}
 
 	@Test

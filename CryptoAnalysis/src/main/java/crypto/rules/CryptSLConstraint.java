@@ -1,8 +1,10 @@
 package crypto.rules;
 
+import java.io.Serializable;
+
 import typestate.interfaces.ISLConstraint;
 
-public class CryptSLConstraint implements ISLConstraint{
+public class CryptSLConstraint implements ISLConstraint, Serializable{
 	
 	public enum LogOps { and , or , implies , eq}
 	

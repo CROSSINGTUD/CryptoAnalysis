@@ -1,6 +1,8 @@
 package crypto.rules;
 
-public class CryptSLArithmeticConstraint extends CryptSLLiteral {
+public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public enum ArithOp { p, n}
 	

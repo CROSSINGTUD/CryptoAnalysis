@@ -2,7 +2,7 @@ package crypto.rules;
 
 import java.util.List;
 
-public class CryptSLPredicate extends CryptSLLiteral {
+public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
 	private String predName;
 	private List<String> parameters;
