@@ -4,8 +4,6 @@ import java.io.File;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.KeyGenerator;
-
 import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
@@ -13,8 +11,8 @@ import test.IDEALCrossingTestingFramework;
 public class KeyPairGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getSMGFile() {
-		return new File("KeyPairGenerator.smg");
+	protected File getCryptSLFile() {
+		return new File("KeyPairGenerator.cryptslbin");
 	}
 
 	@Test

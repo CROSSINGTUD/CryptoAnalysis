@@ -1,5 +1,5 @@
 package typestate.interfaces;
 
-public interface ISLConstraint {
+public interface ISLConstraint extends java.io.Serializable {
 
 }

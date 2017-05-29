@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
@@ -40,15 +41,14 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected TestingResultReporter<StateNode> testingResultReporter;
 	protected String RESOURCE_PATH = "src/test/resources/";
 	
-	protected abstract File getSMGFile();
+	protected abstract File getCryptSLFile();
 
 	protected Analysis<TypestateDomainValue<StateNode>> createAnalysis() {
 		return new Analysis<TypestateDomainValue<StateNode>>(new CryptoTypestateAnaylsisProblem() {
 
 			@Override
 			public StateMachineGraph getStateMachine() {
-				return null;
-//				return new File(RESOURCE_PATH + getSMGFile());
+				return CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern();
 			}
 
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {

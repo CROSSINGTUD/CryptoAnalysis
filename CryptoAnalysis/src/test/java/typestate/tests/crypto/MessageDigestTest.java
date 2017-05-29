@@ -12,8 +12,8 @@ import test.IDEALCrossingTestingFramework;
 public class MessageDigestTest  extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getSMGFile() {
-		return new File("MessageDigest.smg");
+	protected File getCryptSLFile() {
+		return new File("MessageDigest.cryptslbin");
 	}
 
 	@Test

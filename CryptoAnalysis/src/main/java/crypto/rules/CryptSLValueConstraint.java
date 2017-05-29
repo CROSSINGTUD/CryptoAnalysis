@@ -3,7 +3,7 @@ package crypto.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CryptSLValueConstraint extends CryptSLLiteral {
+public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Serializable {
 	
 	String varName;
 	List<String> valueRange;

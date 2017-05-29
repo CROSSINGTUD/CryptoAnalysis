@@ -4,7 +4,7 @@ import java.util.List;
 
 import typestate.interfaces.ISLConstraint;
 
-public class CryptSLRule {
+public class CryptSLRule implements java.io.Serializable {
 
 	private final String className;
 	

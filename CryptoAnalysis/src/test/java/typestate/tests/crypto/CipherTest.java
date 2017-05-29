@@ -17,8 +17,8 @@ import test.IDEALCrossingTestingFramework;
 public class CipherTest extends IDEALCrossingTestingFramework{
 
 	@Override
-	protected File getSMGFile() {
-		return new File("Cipher.smg");
+	protected File getCryptSLFile() {
+		return new File("Cipher.cryptslbin");
 	}
 	@Test
 	public void testCipher1() throws NoSuchAlgorithmException, NoSuchPaddingException {

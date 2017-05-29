@@ -1,7 +1,7 @@
 package crypto.rules;
 
 
-public class CryptSLComparisonConstraint extends CryptSLLiteral {
+public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.io.Serializable {
 
 	public enum CompOp { l, g, le, ge, eq}
 	
