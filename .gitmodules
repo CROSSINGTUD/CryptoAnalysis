@@ -13,6 +13,3 @@
 [submodule "soot"]
 	path = soot
 	url = https://github.com/johspaeth/soot.git
-[submodule "Jatalog"]
-	path = Jatalog
-	url = https://github.com/wernsey/Jatalog.git

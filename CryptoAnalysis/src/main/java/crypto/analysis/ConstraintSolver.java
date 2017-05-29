@@ -1,28 +1,20 @@
 package crypto.analysis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLConstraint.LogOps;
 import crypto.rules.CryptSLValueConstraint;
 import typestate.interfaces.ISLConstraint;
-import za.co.wstoop.jatalog.DatalogException;
-import za.co.wstoop.jatalog.Expr;
-import za.co.wstoop.jatalog.Jatalog;
 
 public class ConstraintSolver {
 
-	Jatalog jat;
-	List<Expr> pastExpressions;
+//	Jatalog jat;
+//	List<Expr> pastExpressions;
 	
 	public ConstraintSolver() {
-		jat = new Jatalog();
-		pastExpressions = new ArrayList<Expr>();
+//		jat = new Jatalog();
+//		pastExpressions = new ArrayList<Expr>();
 	}
 	
 	
@@ -42,19 +34,19 @@ public class ConstraintSolver {
 		if (actualValue == null || actualValue.isEmpty()) {
 			return false;
 		}
-		try {
-			jat.fact("value", "algActual", actualValue.toLowerCase());
-			for (String allowedValue : valueCons.getValueRange()) {
-				jat.fact("value", "algAllowed", allowedValue.toLowerCase());
-			}
-			jat.rule(Expr.expr("ValueCons", "A", "C"), Expr.expr("value", "A", "B"), Expr.expr("value", "C", "D"), Expr.eq("B", "D"));
-			Collection<Map<String, String>> answers = jat.executeAll("ValueCons(algActual, algAllowed)?");
-			for (Map<String, String> answer : answers) {
-				answer.get("");
-			}
-		} catch (DatalogException e) {
-			return false;
-		}
+//		try {
+//			jat.fact("value", "algActual", actualValue.toLowerCase());
+//			for (String allowedValue : valueCons.getValueRange()) {
+//				jat.fact("value", "algAllowed", allowedValue.toLowerCase());
+//			}
+//			jat.rule(Expr.expr("ValueCons", "A", "C"), Expr.expr("value", "A", "B"), Expr.expr("value", "C", "D"), Expr.eq("B", "D"));
+//			Collection<Map<String, String>> answers = jat.executeAll("ValueCons(algActual, algAllowed)?");
+//			for (Map<String, String> answer : answers) {
+//				answer.get("");
+//			}
+//		} catch (DatalogException e) {
+//			return false;
+//		}
 		return false;
 	}
 

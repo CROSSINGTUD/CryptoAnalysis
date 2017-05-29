@@ -78,10 +78,5 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>za.co.wstoop</groupId>
-			<artifactId>jatalog</artifactId>
-			<version>0.9-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 </project>
