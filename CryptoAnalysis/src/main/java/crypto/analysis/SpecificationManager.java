@@ -30,14 +30,16 @@ public class SpecificationManager {
 	private final ErrorReporter errorReporter;
 
 	public static final File SPECIFICATION_DIR = new File("src/test/resources/");
-	public SpecificationManager(IInfoflowCFG icfg, LinkedList<AnalysisSeedWithSpecification> worklist, ErrorReporter errorReporter){
+	private CrypSLAnalysisDebugger crypSLAnalysisDebugger;
+	public SpecificationManager(IInfoflowCFG icfg, LinkedList<AnalysisSeedWithSpecification> worklist, ErrorReporter errorReporter, CrypSLAnalysisDebugger crypSLAnalysisDebugger){
 		this.icfg = icfg;
 		this.worklist = worklist;
 		this.errorReporter = errorReporter;
+		this.crypSLAnalysisDebugger = crypSLAnalysisDebugger;
 	}
 	
 	public void addSpecification(CryptSLRule spec) {
-		specifications.add(new ClassSpecification(spec, icfg, this, errorReporter));
+		specifications.add(new ClassSpecification(spec, icfg, this, errorReporter, crypSLAnalysisDebugger));
 	}
 	
 	public List<ClassSpecification> getClassSpecifiction() {

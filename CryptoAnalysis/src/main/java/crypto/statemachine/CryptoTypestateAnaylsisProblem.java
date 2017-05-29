@@ -13,7 +13,6 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import heros.EdgeFunction;
@@ -28,12 +27,11 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateDomainValue;
-import typestate.interfaces.ISLConstraint;
 
 public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisProblem<StateNode> {
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
-	private Multimap<String,Value> collectedValues = HashMultimap.create(); 
+	private Multimap<CallSiteWithParamIndex,Value> collectedValues = HashMultimap.create(); 
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
@@ -57,9 +55,6 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	
 	public abstract StateMachineGraph getStateMachine(); 
 	public abstract String getClassName();
-	public abstract List<String> getForbiddenMethods();
-	public abstract List<ISLConstraint> getConstraints();
-	public abstract List<CryptSLPredicate> getPredicates();
 	public NonIdentityEdgeFlowHandler<typestate.TypestateDomainValue<StateNode>> nonIdentityEdgeFlowHandler() {
 		return new NonIdentityEdgeFlowHandler<TypestateDomainValue<StateNode>>() {
 
@@ -80,10 +75,10 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			q.solve();
 		}
 	}
-	public void addQueryAtCallsite(String matchingDescriptor, final Stmt stmt,final int index, AccessGraph d1) {
+	public void addQueryAtCallsite(final String matchingDescriptor, final Stmt stmt,final int index,final AccessGraph d1) {
 		Value parameter = stmt.getInvokeExpr().getArg(index);
 		if(!(parameter instanceof Local)){
-			collectedValues.put(stmt +" " + index, parameter);
+			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, matchingDescriptor), parameter);
 			return;
 		}
 		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(d1, stmt,new AccessGraph((Local) parameter, parameter.getType())));
@@ -91,7 +86,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			@Override
 			public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 				for(Value v : res.getValues()){
-					collectedValues.put(stmt +" " + index, v);
+					collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, matchingDescriptor), v);
 				}
 			}
 		});
@@ -190,7 +185,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		public void solved(AdditionalBoomerangQuery q, AliasResults res);
 	}
 	
-	public Multimap<String, Value> getCollectedValues(){
+	public Multimap<CallSiteWithParamIndex, Value> getCollectedValues(){
 		return collectedValues;
 	}
 

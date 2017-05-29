@@ -39,7 +39,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  IDebugger<TypestateDomainValue<StateNode>>  debugger;
 	protected TestingResultReporter<StateNode> testingResultReporter;
-	protected String RESOURCE_PATH = "src/test/resources/";
+	public final static String RESOURCE_PATH = "src/test/resources/";
 	
 	protected abstract File getCryptSLFile();
 
@@ -69,21 +69,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			public String getClassName() {
 				return null;
 			}
-
-			@Override
-			public List<String> getForbiddenMethods() {
-				return null;
-			}
-
-			@Override
-			public List<ISLConstraint> getConstraints() {
-				return null;
-			}
-
-			@Override
-			public List<CryptSLPredicate> getPredicates() {
-				return null;
-			}});
+		});
 	}
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {

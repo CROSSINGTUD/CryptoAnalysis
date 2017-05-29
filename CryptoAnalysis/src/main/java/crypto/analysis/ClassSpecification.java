@@ -15,6 +15,7 @@ import crypto.rules.CryptSLValueConstraint;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
+import crypto.statemachine.CallSiteWithParamIndex;
 import crypto.statemachine.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
@@ -46,11 +47,13 @@ public class ClassSpecification {
 			}
 		}
 	};
-	public ClassSpecification(final CryptSLRule specification, IInfoflowCFG icfg, SpecificationManager specificationManager, ErrorReporter errorReporter) {
+	private CrypSLAnalysisDebugger crypSLAnalysisDebugger;
+	public ClassSpecification(final CryptSLRule specification, IInfoflowCFG icfg, SpecificationManager specificationManager, ErrorReporter errorReporter, CrypSLAnalysisDebugger crypSLAnalysisDebugger) {
 		this.specification = specification;
 		this.icfg = icfg;
 		this.specManager = specificationManager;
 		this.errorReporter = errorReporter;
+		this.crypSLAnalysisDebugger = crypSLAnalysisDebugger;
 		this.problem = new CryptoTypestateAnaylsisProblem() {
 			@Override
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
@@ -79,26 +82,12 @@ public class ClassSpecification {
 				return new NullDebugger<>();
 			}
 			
-			@Override
-			public List<String> getForbiddenMethods() {
-				return specification.getForbiddenMethods();
-			}
 			
 			@Override
 			public StateMachineGraph getStateMachine() {
 				return specification.getUsagePattern();
 			}
 			
-			@Override
-			public List<ISLConstraint> getConstraints() {
-				return specification.getConstraints();
-			}
-			
-			@Override
-			public List<CryptSLPredicate> getPredicates() {
-				return specification.getPredicates();
-			}
-
 			@Override
 			public String getClassName() {
 				return specification.getClassName();
@@ -113,29 +102,31 @@ public class ClassSpecification {
 	
 	public void runTypestateAnalysisForAllSeeds() {
 		analysis.run();
+		crypSLAnalysisDebugger.collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	
 	
 	private void checkConstraintSystem() {
-		Multimap<String, Value> actualValues = problem.getCollectedValues();
-		ConstraintSolver solver = new ConstraintSolver();
-		for (ISLConstraint cons : specification.getConstraints()) {
-			if (cons instanceof CryptSLValueConstraint) {
-				CryptSLValueConstraint valueCons = (CryptSLValueConstraint) cons;
-				if (!solver.evaluate(valueCons, actualValues.get(valueCons.getVarName()).toString())) {
-					this.errorReporter.report(this, null, null);
-				}
-			} else {
-				if (!solver.evaluate(cons)) {
-					this.errorReporter.report(this, null, null);
-				}
-			}
-		}
+//		Multimap<FactAtStatementWithVarName, Value> actualValues = problem.getCollectedValues();
+//		ConstraintSolver solver = new ConstraintSolver();
+//		for (ISLConstraint cons : specification.getConstraints()) {
+//			if (cons instanceof CryptSLValueConstraint) {
+//				CryptSLValueConstraint valueCons = (CryptSLValueConstraint) cons;
+//				if (!solver.evaluate(valueCons, actualValues.get(valueCons.getVarName()).toString())) {
+//					this.errorReporter.report(this, null, null);
+//				}
+//			} else {
+//				if (!solver.evaluate(cons)) {
+//					this.errorReporter.report(this, null, null);
+//				}
+//			}
+//		}
 		
 	}
 	public void runTypestateAnalysisForConcreteSeed(FactAtStatement seed) {
 		analysis.analysisForSeed(seed);
+		crypSLAnalysisDebugger.collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	public CryptoTypestateAnaylsisProblem getAnalysisProblem(){

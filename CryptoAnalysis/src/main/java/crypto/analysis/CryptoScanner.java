@@ -6,8 +6,11 @@ import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLRule;
+import crypto.statemachine.CallSiteWithParamIndex;
+import soot.Value;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class CryptoScanner {
@@ -18,7 +21,7 @@ public abstract class CryptoScanner {
 
 	private final SpecificationManager specManager;
 	public CryptoScanner(List<CryptSLRule> specs){
-		specManager = new SpecificationManager(icfg(), worklist, errorReporter());
+		specManager = new SpecificationManager(icfg(), worklist, errorReporter(), debugger());
 		
 		for (CryptSLRule rule : specs) {
 			specManager.addSpecification(rule);	
@@ -48,5 +51,15 @@ public abstract class CryptoScanner {
 				continue;
 			spec.runTypestateAnalysisForAllSeeds();
 		}
+	}
+	
+	public CrypSLAnalysisDebugger debugger(){
+		return new CrypSLAnalysisDebugger() {
+			
+			@Override
+			public void collectedValues(ClassSpecification classSpecification,
+					Multimap<CallSiteWithParamIndex, Value> collectedValues) {
+			}
+		};
 	}
 }

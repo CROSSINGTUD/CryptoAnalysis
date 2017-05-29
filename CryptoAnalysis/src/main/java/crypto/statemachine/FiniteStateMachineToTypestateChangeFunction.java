@@ -38,10 +38,11 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		}
 	};
 	private CryptoTypestateAnaylsisProblem analysisProblem;
+	private StateMachineGraph stateMachineGraph;
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
-		StateMachineGraph stateMachineGraph = analysisProblem.getStateMachineGraph();
+		stateMachineGraph = analysisProblem.getStateMachineGraph();
 		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().label());
 		initialState = stateMachineGraph.getInitialTransition().to();
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
@@ -62,34 +63,37 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		for (Transition<StateNode> t : res) {
 			if (!(t instanceof MatcherTransition))
 				continue;
-			for(String matchingDescriptor : splitDescriptor(t.toString())){
-				for(SootMethod m : descriptorToSootMethod.getOrCreate(matchingDescriptor)){
-					if (!(callSite instanceof Stmt))
-						continue;
-					Stmt stmt = (Stmt) callSite;
-					if (!stmt.containsInvokeExpr())
-						continue;
-					SootMethod method = stmt.getInvokeExpr().getMethod();
-					if (!m.equals(method))
-						continue;
-					{
-						int index = 0;
-						for(String param : getParameters(matchingDescriptor)){
-							if(!param.equals("_")){
-								soot.Type parameterType = method.getParameterType(index);
-								if(parameterType.toString().equals(param)){
-									analysisProblem.addQueryAtCallsite(matchingDescriptor, stmt, index, d1);
-								}
+			injectQueryAtCallSite(t.toString(),callSite, d1);
+		}
+		return res;
+	}
+	
+	private void injectQueryAtCallSite(String descriptor, Unit callSite, AccessGraph context) {
+		for(String matchingDescriptor : splitDescriptor(descriptor.toString())){
+			for(SootMethod m : descriptorToSootMethod.getOrCreate(matchingDescriptor)){
+				if (!(callSite instanceof Stmt))
+					continue;
+				Stmt stmt = (Stmt) callSite;
+				if (!stmt.containsInvokeExpr())
+					continue;
+				SootMethod method = stmt.getInvokeExpr().getMethod();
+				if (!m.equals(method))
+					continue;
+				{
+					int index = 0;
+					for(String param : getParameters(matchingDescriptor)){
+						if(!param.equals("_")){
+							soot.Type parameterType = method.getParameterType(index);
+							if(parameterType.toString().equals(param)){
+								analysisProblem.addQueryAtCallsite(matchingDescriptor, stmt, index, context);
 							}
-							index++;
 						}
+						index++;
 					}
 				}
 			}
 		}
-		return res;
 	}
-
 
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
@@ -107,6 +111,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
 		}
+		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().label(),unit,null);
 		return out;
 	}
 
