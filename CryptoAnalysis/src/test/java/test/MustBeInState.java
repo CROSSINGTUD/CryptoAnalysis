@@ -5,7 +5,7 @@ import crypto.rules.StateNode;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
-public class MustBeInState implements IExpectedResults<StateNode> {
+public class MustBeInState implements Assertion, ComparableResult<StateNode> {
 
 	private Unit unit;
 	private AccessGraph accessGraph;
@@ -19,7 +19,6 @@ public class MustBeInState implements IExpectedResults<StateNode> {
 		this.state = state;
 	}
 
-	@Override
 	public void computedResults(TypestateDomainValue<StateNode> results) {
 		if(state.toString().equals("-1")){
 			satisfied = true;
@@ -34,7 +33,6 @@ public class MustBeInState implements IExpectedResults<StateNode> {
 		}
 	}
 
-	@Override
 	public Unit getStmt() {
 		return unit;
 	}
@@ -49,7 +47,6 @@ public class MustBeInState implements IExpectedResults<StateNode> {
 		return imprecise;
 	}
 
-	@Override
 	public AccessGraph getAccessGraph() {
 		return accessGraph;
 	}

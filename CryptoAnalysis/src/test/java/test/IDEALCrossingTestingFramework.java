@@ -97,18 +97,18 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
-				Set<IExpectedResults<StateNode>> expectedResults = parseExpectedQueryResults(sootTestMethod);
+				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
 				
 				executeAnalysis();
-				List<IExpectedResults<StateNode>> unsound = Lists.newLinkedList();
-				List<IExpectedResults<StateNode>> imprecise = Lists.newLinkedList();
-				for (IExpectedResults<StateNode> r : expectedResults) {
+				List<Assertion> unsound = Lists.newLinkedList();
+				List<Assertion> imprecise = Lists.newLinkedList();
+				for (Assertion r : expectedResults) {
 					if (!r.isSatisfied()) {
 						unsound.add(r);
 					}
 				}
-				for (IExpectedResults<StateNode> r : expectedResults) {
+				for (Assertion r : expectedResults) {
 					if (r.isImprecise()) {
 						imprecise.add(r);
 					}
@@ -127,13 +127,13 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		IDEALCrossingTestingFramework.this.createAnalysis().run();
 	}
 
-	private Set<IExpectedResults<StateNode>> parseExpectedQueryResults(SootMethod sootTestMethod) {
-		Set<IExpectedResults<StateNode>> results = new HashSet<>();
+	private Set<Assertion> parseExpectedQueryResults(SootMethod sootTestMethod) {
+		Set<Assertion> results = new HashSet<>();
 		parseExpectedQueryResults(sootTestMethod, results, new HashSet<SootMethod>());
 		return results;
 	}
 
-	private void parseExpectedQueryResults(SootMethod m, Set<IExpectedResults<StateNode>> queries, Set<SootMethod> visited) {
+	private void parseExpectedQueryResults(SootMethod m, Set<Assertion> queries, Set<SootMethod> visited) {
 		if (!m.hasActiveBody() || visited.contains(m))
 			return;
 		visited.add(m);
