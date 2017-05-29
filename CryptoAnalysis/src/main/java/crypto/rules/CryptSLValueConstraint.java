@@ -1,4 +1,4 @@
-package crypto.DSL;
+package crypto.rules;
 
 import java.util.ArrayList;
 import java.util.List;

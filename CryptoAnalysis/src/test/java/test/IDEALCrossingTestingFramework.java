@@ -9,8 +9,7 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
-import crypto.DSL.CryptSLPredicate;
-import crypto.DSL.ISLConstraint;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
@@ -32,6 +31,7 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
 	protected IInfoflowCFG icfg;

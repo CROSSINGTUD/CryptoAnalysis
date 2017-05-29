@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
-import crypto.DSL.CryptSLRule;
+import crypto.rules.CryptSLRule;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.solver.Pair;

@@ -1,4 +1,6 @@
-package crypto.DSL;
+package crypto.rules;
+
+import typestate.interfaces.ISLConstraint;
 
 public class CryptSLConstraint implements ISLConstraint{
 	

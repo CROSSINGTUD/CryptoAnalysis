@@ -7,7 +7,7 @@ import java.util.Set;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.Lists;
 
-import crypto.DSL.CryptSLRule;
+import crypto.rules.CryptSLRule;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 
 public abstract class CryptoScanner {

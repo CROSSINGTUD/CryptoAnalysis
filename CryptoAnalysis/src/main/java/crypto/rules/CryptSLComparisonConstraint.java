@@ -1,4 +1,4 @@
-package crypto.DSL;
+package crypto.rules;
 
 
 public class CryptSLComparisonConstraint extends CryptSLLiteral {
@@ -7,10 +7,10 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral {
 	
 	private CompOp operator;
 	
-	private String left;
-	private String right;
+	private CryptSLArithmeticConstraint left;
+	private CryptSLArithmeticConstraint right;
 	
-	public CryptSLComparisonConstraint(String l, String r, CompOp op) {
+	public CryptSLComparisonConstraint(CryptSLArithmeticConstraint l, CryptSLArithmeticConstraint r, CompOp op) {
 		left = l;
 		right = r;
 		operator = op;
@@ -31,7 +31,7 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral {
 	/**
 	 * @return the left
 	 */
-	public String getLeft() {
+	public CryptSLArithmeticConstraint getLeft() {
 		return left;
 	}
 
@@ -39,7 +39,7 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral {
 	/**
 	 * @return the right
 	 */
-	public String getRight() {
+	public CryptSLArithmeticConstraint getRight() {
 		return right;
 	}
 	

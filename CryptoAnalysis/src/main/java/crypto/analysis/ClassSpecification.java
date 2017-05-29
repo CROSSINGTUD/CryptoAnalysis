@@ -3,14 +3,15 @@ package crypto.analysis;
 import java.util.List;
 import java.util.Set;
 
+import javax.crypto.KeyGenerator;
+
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
-import crypto.DSL.CryptSLPredicate;
-import crypto.DSL.CryptSLRule;
-import crypto.DSL.CryptSLValueConstraint;
-import crypto.DSL.ISLConstraint;
+import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
+import crypto.rules.CryptSLValueConstraint;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.statemachine.CryptoTypestateAnaylsisProblem;
@@ -26,6 +27,7 @@ import soot.Value;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.Transition;
+import typestate.interfaces.ISLConstraint;
 
 public class ClassSpecification {
 	private CryptoTypestateAnaylsisProblem problem;

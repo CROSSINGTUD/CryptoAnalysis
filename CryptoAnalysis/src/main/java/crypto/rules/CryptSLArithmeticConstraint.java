@@ -1,4 +1,4 @@
-package crypto.DSL;
+package crypto.rules;
 
 public class CryptSLArithmeticConstraint extends CryptSLLiteral {
 

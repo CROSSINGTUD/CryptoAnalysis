@@ -1,8 +1,8 @@
-package crypto.DSL;
+package crypto.rules;
 
 import java.util.List;
 
-import crypto.rules.StateMachineGraph;
+import typestate.interfaces.ISLConstraint;
 
 public class CryptSLRule {
 

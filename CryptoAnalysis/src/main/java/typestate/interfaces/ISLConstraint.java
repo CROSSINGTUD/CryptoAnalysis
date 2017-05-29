@@ -1,4 +1,4 @@
-package crypto.DSL;
+package typestate.interfaces;
 
 public interface ISLConstraint {
 

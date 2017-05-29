@@ -13,8 +13,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
-import crypto.DSL.CryptSLPredicate;
-import crypto.DSL.ISLConstraint;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import heros.EdgeFunction;
@@ -29,6 +28,7 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisProblem<StateNode> {
 
