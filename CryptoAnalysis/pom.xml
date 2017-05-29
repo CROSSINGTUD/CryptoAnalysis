@@ -28,7 +28,7 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-            <outputDirectory>build</outputDirectory>
+					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -78,5 +78,10 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>za.co.wstoop</groupId>
+			<artifactId>jatalog</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>
