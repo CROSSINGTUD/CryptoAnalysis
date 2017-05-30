@@ -2,7 +2,7 @@ package crypto.analysis;
 
 import com.google.common.collect.Multimap;
 
-import crypto.statemachine.CallSiteWithParamIndex;
+import crypto.typestate.CallSiteWithParamIndex;
 import soot.Value;
 
 public interface CrypSLAnalysisDebugger {

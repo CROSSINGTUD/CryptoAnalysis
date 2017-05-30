@@ -1,4 +1,4 @@
-package crypto.statemachine;
+package crypto.typestate;
 
 import java.util.List;
 
@@ -86,7 +86,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			@Override
 			public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 				for(Value v : res.getValues()){
-					collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, matchingDescriptor), v);
+					collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, matchingDescriptor), v);
 				}
 			}
 		});

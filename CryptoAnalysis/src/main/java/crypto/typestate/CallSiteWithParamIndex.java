@@ -1,4 +1,4 @@
-package crypto.statemachine;
+package crypto.typestate;
 
 import boomerang.accessgraph.AccessGraph;
 import ideal.FactAtStatement;

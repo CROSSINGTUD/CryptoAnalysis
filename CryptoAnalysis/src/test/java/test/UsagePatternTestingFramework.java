@@ -6,20 +6,27 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table.Cell;
 
+import boomerang.accessgraph.AccessGraph;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrypSLAnalysisDebugger;
+import crypto.analysis.CryptSLAnalysisReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.ErrorReporter;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import crypto.statemachine.CallSiteWithParamIndex;
+import crypto.typestate.CallSiteWithParamIndex;
+import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import soot.Body;
+import soot.Local;
 import soot.SceneTransformer;
 import soot.SootMethod;
 import soot.Unit;
@@ -32,6 +39,7 @@ import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
+import typestate.TypestateDomainValue;
 import typestate.tests.crypto.Benchmark;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
@@ -53,14 +61,24 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public ErrorReporter errorReporter() {
+					public CryptSLAnalysisReporter errorReporter() {
 						// TODO Auto-generated method stub
-						return new ErrorReporter(){
-
+						return new CryptSLAnalysisReporter(){
 							@Override
-							public void report(ClassSpecification spec, Unit stmt, Violation details) {
-								System.err.println("Class Specification " + spec +" reporter Error at \n\t" + stmt);
+							public void onSeedFinished(FactAtStatement seed,
+									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+								for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
+									for(Assertion e : expectedResults){
+										if(e instanceof ComparableResult){
+											ComparableResult expectedResults = (ComparableResult) e;
+											TypestateDomainValue<StateNode> resultAt = solver.resultAt(expectedResults.getStmt(), expectedResults.getAccessGraph());
+											if(resultAt != null)
+												expectedResults.computedResults(resultAt);
+										}
+									}
+								}
 							}
+
 							
 						};
 					}
@@ -77,6 +95,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
 									}
 								}
+								System.out.println("Collected values " + collectedValues);
 							}
 						};
 					}
@@ -145,6 +164,25 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				IntConstant paramIndex = (IntConstant) param;
 				for(Unit pred : icfg.getPredsOf(stmt))
 					queries.add(new ExtractedValueAssertion(pred, paramIndex.value));
+			}
+			
+			if(invocationName.startsWith("assertNotErrorState")){
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof Local))
+					continue;
+				Local queryVar = (Local) param;
+				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				queries.add(new NotInErrorStateAssertion(stmt, val));
+			}
+			
+
+			if(invocationName.startsWith("assertErrorState")){
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof Local))
+					continue;
+				Local queryVar = (Local) param;
+				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				queries.add(new InErrorStateAssertion(stmt, val));
 			}
 		}
 	}

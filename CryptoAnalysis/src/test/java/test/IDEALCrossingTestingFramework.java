@@ -13,7 +13,7 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.statemachine.CryptoTypestateAnaylsisProblem;
+import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;

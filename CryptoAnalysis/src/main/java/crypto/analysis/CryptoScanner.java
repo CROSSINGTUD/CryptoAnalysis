@@ -9,9 +9,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLRule;
-import crypto.statemachine.CallSiteWithParamIndex;
+import crypto.rules.StateNode;
+import crypto.typestate.CallSiteWithParamIndex;
+import ideal.ResultReporter;
 import soot.Value;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
+import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
 	
@@ -30,7 +33,7 @@ public abstract class CryptoScanner {
 	
 	
 	public abstract IInfoflowCFG icfg();
-	public abstract ErrorReporter errorReporter();
+	public abstract CryptSLAnalysisReporter errorReporter();
 
 	public void scan(){
 		initialize();

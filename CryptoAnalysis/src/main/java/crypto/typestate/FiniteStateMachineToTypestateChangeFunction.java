@@ -1,4 +1,4 @@
-package crypto.statemachine;
+package crypto.typestate;
 
 import java.util.Collection;
 import java.util.HashSet;

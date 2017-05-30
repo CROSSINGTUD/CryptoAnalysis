@@ -4,7 +4,7 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Multimap;
 
-import crypto.statemachine.CallSiteWithParamIndex;
+import crypto.typestate.CallSiteWithParamIndex;
 import soot.Unit;
 import soot.Value;
 

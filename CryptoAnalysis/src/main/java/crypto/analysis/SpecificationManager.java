@@ -9,10 +9,12 @@ import com.google.common.collect.Lists;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLRule;
-import crypto.statemachine.CryptoTypestateAnaylsisProblem;
-import crypto.statemachine.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
+import crypto.rules.StateNode;
+import crypto.typestate.CryptoTypestateAnaylsisProblem;
+import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.solver.Pair;
 import ideal.FactAtStatement;
+import ideal.ResultReporter;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -21,17 +23,18 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
+import typestate.TypestateDomainValue;
 
 public class SpecificationManager {
 
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final IInfoflowCFG icfg;
 	private final LinkedList<AnalysisSeedWithSpecification> worklist;
-	private final ErrorReporter errorReporter;
+	private final ResultReporter<TypestateDomainValue<StateNode>> errorReporter;
 
 	public static final File SPECIFICATION_DIR = new File("src/test/resources/");
 	private CrypSLAnalysisDebugger crypSLAnalysisDebugger;
-	public SpecificationManager(IInfoflowCFG icfg, LinkedList<AnalysisSeedWithSpecification> worklist, ErrorReporter errorReporter, CrypSLAnalysisDebugger crypSLAnalysisDebugger){
+	public SpecificationManager(IInfoflowCFG icfg, LinkedList<AnalysisSeedWithSpecification> worklist, ResultReporter<TypestateDomainValue<StateNode>> errorReporter, CrypSLAnalysisDebugger crypSLAnalysisDebugger){
 		this.icfg = icfg;
 		this.worklist = worklist;
 		this.errorReporter = errorReporter;
