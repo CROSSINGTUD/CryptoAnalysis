@@ -16,6 +16,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.Analysis;
 import ideal.ResultReporter;
+import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.Body;
@@ -75,7 +76,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
 		if(debugger == null)
-			debugger = new NullDebugger();// new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
 	}
 

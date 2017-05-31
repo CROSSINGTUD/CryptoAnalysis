@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
@@ -16,10 +15,8 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.analysis.ClassSpecification;
-import crypto.analysis.CrypSLAnalysisDebugger;
-import crypto.analysis.CryptSLAnalysisReporter;
+import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.ErrorReporter;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -65,9 +62,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public CryptSLAnalysisReporter errorReporter() {
+					public CryptSLAnalysisListener analysisListsner() {
 						// TODO Auto-generated method stub
-						return new CryptSLAnalysisReporter(){
+						return new CryptSLAnalysisListener(){
 							@Override
 							public void onSeedFinished(FactAtStatement seed,
 									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
@@ -83,14 +80,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								}
 							}
 
-							
-						};
-					}
-
-					@Override
-					public CrypSLAnalysisDebugger debugger() {
-						return new CrypSLAnalysisDebugger() {
-							
 							@Override
 							public void collectedValues(ClassSpecification classSpecification,
 									Multimap<CallSiteWithParamIndex, Value> collectedValues) {
@@ -101,8 +90,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								}
 								System.out.println("Collected values " + collectedValues);
 							}
+
+							
 						};
 					}
+
 				};
 				scanner.scan();
 				List<Assertion> unsound = Lists.newLinkedList();
