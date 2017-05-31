@@ -1,8 +1,10 @@
-package test;
+package test.assertions;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateNode;
 import soot.Unit;
+import test.Assertion;
+import test.ComparableResult;
 import typestate.TypestateDomainValue;
 
 public class MustBeInState implements Assertion, ComparableResult<StateNode> {
@@ -13,7 +15,7 @@ public class MustBeInState implements Assertion, ComparableResult<StateNode> {
 	private boolean satisfied;
 	private boolean imprecise;
 
-	MustBeInState(Unit unit, AccessGraph accessGraph, String state) {
+	public MustBeInState(Unit unit, AccessGraph accessGraph, String state) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;
