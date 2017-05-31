@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -124,7 +125,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	}
 	protected List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();        
-//		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
@@ -162,7 +163,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof IntConstant))
 					continue;
 				IntConstant paramIndex = (IntConstant) param;
-				for(Unit pred : icfg.getPredsOf(stmt))
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new ExtractedValueAssertion(pred, paramIndex.value));
 			}
 			
@@ -185,5 +186,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new InErrorStateAssertion(stmt, val));
 			}
 		}
+	}
+	private Set<Unit> getPredecessorsNotBenchmark(Stmt stmt) {
+		Set<Unit> res = Sets.newHashSet();
+		Set<Unit> visited = Sets.newHashSet();
+		LinkedList<Unit> worklist = Lists.newLinkedList();
+		worklist.add(stmt);
+		while(!worklist.isEmpty()){
+			Unit curr = worklist.poll();
+			if(!visited.add(curr))
+				continue;
+			if(!curr.toString().contains("Benchmark")){
+				res.add(curr);
+				continue;
+			}
+			worklist.addAll(icfg.getPredsOf(curr));
+		}
+		return res;
 	}
 }
