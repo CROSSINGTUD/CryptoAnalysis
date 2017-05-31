@@ -43,14 +43,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
 		stateMachineGraph = analysisProblem.getStateMachineGraph();
-		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().label());
+		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().getLabel().getMethodName());
 		initialState = stateMachineGraph.getInitialTransition().to();
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
-			this.addTransition(new MatcherTransition<StateNode>(t.from(), completeDescriptorToSootMethod(t.label()),
+			this.addTransition(new MatcherTransition<StateNode>(t.from(), completeDescriptorToSootMethod(t.getLabel().getMethodName()),
 					Parameter.This, t.to(), Type.OnCallToReturn) {
 				@Override
 				public String toString() {
-					return t.label();
+					return t.getLabel().getMethodName();
 				}
 			});
 		}
@@ -111,7 +111,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
 		}
-		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().label(),unit,null);
+		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel().getMethodName(),unit,null);
 		return out;
 	}
 

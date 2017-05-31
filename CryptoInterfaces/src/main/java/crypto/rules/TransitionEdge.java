@@ -3,15 +3,12 @@ import typestate.interfaces.Transition;
 
 public class TransitionEdge implements Transition<StateNode>, java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private StateNode left = null;
 	private StateNode right = null;
-	private String label = "";
+	private StatementLabel label = null;
 
-	public TransitionEdge(String _label, StateNode _left, StateNode _right) {
+	public TransitionEdge(StatementLabel _label, StateNode _left, StateNode _right) {
 		left = _left;
 		right = _right;
 		label = _label;
@@ -25,7 +22,7 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 		return right;
 	}
 
-	public String getLabel() {
+	public StatementLabel getLabel() {
 		return label;
 	}
 
@@ -46,10 +43,6 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 
 	public StateNode to() {
 		return right;
-	}
-
-	public String label() {
-		return label;
 	}
 
 	@Override
@@ -88,7 +81,5 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 			return false;
 		return true;
 	}
-	
-	
 	
 }

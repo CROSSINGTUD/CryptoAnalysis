@@ -78,5 +78,10 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>crossing.darmstadt.tu.de</groupId>
+			<artifactId>crossing.crypto.interfaces</artifactId>
+			<version>20-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>
