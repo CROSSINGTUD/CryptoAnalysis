@@ -23,6 +23,8 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.debug.IDEVizDebugger;
+import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -46,7 +48,13 @@ import typestate.tests.crypto.Benchmark;
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected InfoflowCFG icfg;
+	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
 
+	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
+		if(debugger == null)
+			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+		return debugger;
+	}
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
@@ -88,11 +96,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
 									}
 								}
-								System.out.println("Collected values " + collectedValues);
 							}
-
-							
 						};
+					}
+					@Override
+					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+						return UsagePatternTestingFramework.this.getDebugger();
 					}
 
 				};

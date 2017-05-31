@@ -10,10 +10,13 @@ import com.google.common.collect.Lists;
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLRule;
+import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.solver.Pair;
 import ideal.FactAtStatement;
+import ideal.debug.IDebugger;
+import ideal.debug.NullDebugger;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -22,6 +25,7 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
+import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
 	
@@ -92,5 +96,9 @@ public abstract class CryptoScanner {
 			}
 			
 		}
+	}
+
+	public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+		return new NullDebugger<>();
 	}
 }

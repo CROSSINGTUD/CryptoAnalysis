@@ -67,10 +67,6 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				return IDEALCrossingTestingFramework.this.getDebugger();
 			}
 
-			@Override
-			public String getClassName() {
-				return null;
-			}
 		});
 	}
 

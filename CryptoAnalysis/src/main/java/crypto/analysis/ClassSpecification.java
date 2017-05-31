@@ -54,7 +54,7 @@ public class ClassSpecification {
 			
 			@Override
 			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return new NullDebugger<>();
+				return cryptoScanner.debugger();
 			}
 			
 			
@@ -63,10 +63,6 @@ public class ClassSpecification {
 				return rule.getUsagePattern();
 			}
 			
-			@Override
-			public String getClassName() {
-				return rule.getClassName();
-			}
 			@Override
 			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
 					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
