@@ -1,4 +1,6 @@
 package crypto.rules;
+import java.util.List;
+
 import typestate.interfaces.Transition;
 
 public class TransitionEdge implements Transition<StateNode>, java.io.Serializable {
@@ -6,9 +8,9 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 	private static final long serialVersionUID = 1L;
 	private StateNode left = null;
 	private StateNode right = null;
-	private StatementLabel label = null;
+	private List<StatementLabel> label = null;
 
-	public TransitionEdge(StatementLabel _label, StateNode _left, StateNode _right) {
+	public TransitionEdge(List<StatementLabel> _label, StateNode _left, StateNode _right) {
 		left = _left;
 		right = _right;
 		label = _label;
@@ -22,7 +24,7 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 		return right;
 	}
 
-	public StatementLabel getLabel() {
+	public List<StatementLabel> getLabel() {
 		return label;
 	}
 

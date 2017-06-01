@@ -14,6 +14,27 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		negated = not;
 	}
 	
+	/**
+	 * @return the predName
+	 */
+	public String getPredName() {
+		return predName;
+	}
+
+	/**
+	 * @return the parameters
+	 */
+	public List<String> getParameters() {
+		return parameters;
+	}
+
+	/**
+	 * @return the negated
+	 */
+	public Boolean isNegated() {
+		return negated;
+	}
+	
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
 		predSB.append("P:");
