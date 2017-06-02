@@ -132,7 +132,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
+//		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 		return rules;
 	}

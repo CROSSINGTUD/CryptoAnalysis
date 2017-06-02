@@ -66,7 +66,7 @@ public class ClassSpecification {
 			@Override
 			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
 					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
-				return new ExtendedStandardFlowFunction(context);
+				return new ExtendedStandardFlowFunction(context,rule);
 			}
 		};
 		analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);	

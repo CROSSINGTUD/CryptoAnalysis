@@ -34,19 +34,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	private StateNode initialState;
 	private Collection<SootMethod> initialTransitonLabel;
 	private Collection<SootMethod> allMatchedMethods = Sets.newHashSet();
-	private DefaultValueMap<StatementLabel, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<StatementLabel, Collection<SootMethod>>() {
-		@Override
-		protected Collection<SootMethod> createItem(StatementLabel key) {
-			return descriptorToSootMethod(key);
-		}
-	};
+	
 	private CryptoTypestateAnaylsisProblem analysisProblem;
 	private StateMachineGraph stateMachineGraph;
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
 		stateMachineGraph = analysisProblem.getStateMachineGraph();
-		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().getLabel());
+		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
 		initialState = stateMachineGraph.getInitialTransition().to();
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
 			this.addTransition(new LabeledMatcherTransition(t.from(), t.getLabel(),
@@ -54,6 +49,18 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		}
 	}
 
+	private Collection<SootMethod> convert(List<StatementLabel> label) {
+		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
+		allMatchedMethods.addAll(converted);
+		return converted;
+	}
+
+
+	private Collection<SootMethod> convert(StatementLabel label) {
+		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
+		allMatchedMethods.addAll(converted);
+		return converted;
+	}
 	@Override
 	public Set<Transition<StateNode>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
 			Unit returnSite, AccessGraph d3) {
@@ -68,7 +75,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	
 	private void injectQueryAtCallSite(List<StatementLabel> list, Unit callSite, AccessGraph context) {
 		for(StatementLabel matchingDescriptor : list){
-			for(SootMethod m : descriptorToSootMethod.getOrCreate(matchingDescriptor)){
+			for(SootMethod m : convert(matchingDescriptor)){
 				if (!(callSite instanceof Stmt))
 					continue;
 				Stmt stmt = (Stmt) callSite;
@@ -82,10 +89,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					List<Boolean> backward = matchingDescriptor.getBackward();
 					for(Entry<String, String> param : matchingDescriptor.getParameters()){
 						if( index > 0 && backward.get(index) ){
-							if(!param.getValue().equals("_")){
+							if(!param.getKey().equals("_")){
 								soot.Type parameterType = method.getParameterType(index - 1);
-								if(parameterType.toString().equals(param)){
-									analysisProblem.addQueryAtCallsite(param.getValue(), stmt, index, context);
+								if(parameterType.toString().equals(param.getValue())){
+									analysisProblem.addQueryAtCallsite(param.getValue(), stmt, index - 1, context);
 								}
 							}
 						}
@@ -116,40 +123,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		return out;
 	}
 
-	private Collection<SootMethod> descriptorToSootMethod(StatementLabel label) {
-		String methodName = label.getMethodName();
-		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
-		Set<SootMethod> res = Sets.newHashSet();
-		String declaringClass = getDeclaringClass(methodName);
-		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
-		SootClass sootClass = Scene.v().getSootClass(declaringClass);
-		for (SootMethod m : sootClass.getMethods()) {
-			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams)
-				res.add(m);
-		}
-		allMatchedMethods.addAll(res);
-		return res;
-	}
-	private String getMethodNameWithoutDeclaringClass(String desc) {
-		try{
-			if(Scene.v().containsClass(desc))
-				return "<init>";
-		} catch(RuntimeException e){
-			
-		}
-		return desc.substring(desc.lastIndexOf(".") +1);
-	}
-
-	private Collection<SootMethod> completeDescriptorToSootMethod(List<StatementLabel> list) {
-		Set<SootMethod> res = Sets.newHashSet();
-		for(StatementLabel l : list)
-			res.addAll(descriptorToSootMethod(l));
-		return res;
-	}
 	
-	private String getDeclaringClass(String label) {
-		return label.substring(0, label.lastIndexOf("."));
-	}
 
 	@Override
 	public TypestateDomainValue<StateNode> getBottomElement() {
@@ -168,7 +142,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		public LabeledMatcherTransition(StateNode from, List<StatementLabel> label,
 				Parameter param, StateNode to,
 				Type type) {
-			super(from,completeDescriptorToSootMethod(label), param, to, type);
+			super(from,convert(label), param, to, type);
 			this.label = label;
 		}}
 }
