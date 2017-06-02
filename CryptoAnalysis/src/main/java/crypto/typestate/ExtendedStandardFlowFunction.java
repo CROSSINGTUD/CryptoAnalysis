@@ -38,9 +38,9 @@ public class ExtendedStandardFlowFunction extends StandardFlowFunctions<Typestat
 		public Set<AccessGraph> computeTargets(AccessGraph arg) {
 			Set<AccessGraph> targets = res.computeTargets(arg);
 			if(callStmt.toString().contains("generateKey") && callStmt instanceof AssignStmt){
+				//TODO Replace by flow function described in concrete rule
 				AssignStmt as = (AssignStmt) callStmt;
 				targets.add(new AccessGraph((Local) as.getLeftOp(), as.getLeftOp().getType()));
-				System.out.println("FLOWs FTO " + targets);
 			}
 			return targets;
 		}

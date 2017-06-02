@@ -54,7 +54,6 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	}
 	
 	public abstract StateMachineGraph getStateMachine(); 
-	public abstract String getClassName();
 	public NonIdentityEdgeFlowHandler<typestate.TypestateDomainValue<StateNode>> nonIdentityEdgeFlowHandler() {
 		return new NonIdentityEdgeFlowHandler<TypestateDomainValue<StateNode>>() {
 
@@ -190,7 +189,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	}
 
 	public void log(String string) {
-		System.out.println(string);
+//		System.out.println(string);
 	}
 
 

@@ -41,8 +41,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		keygen.init(129);
 		Benchmark.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Benchmark.failedConstraint(keygen);
 		Benchmark.assertNotErrorState(keygen);
+		Benchmark.failedConstraint(keygen);
 		
 		Cipher cCipher = Cipher.getInstance("AES");
 		Benchmark.extValue(0);

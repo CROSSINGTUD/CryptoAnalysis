@@ -1,25 +1,15 @@
 package crypto.analysis;
 
-import java.util.List;
 import java.util.Set;
 
-import javax.crypto.KeyGenerator;
-
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Table.Cell;
-
 import boomerang.accessgraph.AccessGraph;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLValueConstraint;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
-import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
 import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
@@ -27,38 +17,22 @@ import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import ideal.flowfunctions.StandardFlowFunctions;
 import soot.Unit;
-import soot.Value;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.Transition;
-import typestate.interfaces.ISLConstraint;
 
 public class ClassSpecification {
 	private CryptoTypestateAnaylsisProblem problem;
-	private CryptSLRule specification;
+	private CryptSLRule cryptSLRule;
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
-	private IInfoflowCFG icfg;
-	private final SpecificationManager specManager;
-//	private ResultReporter<TypestateDomainValue<StateNode>> resultReporter = new ResultReporter<TypestateDomainValue<StateNode>>() {
-//		@Override
-//		public void onSeedFinished(FactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-//			for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
-//				if(c.getValue().getStates().isEmpty()){
-//					errorReporter.report(ClassSpecification.this, c.getRowKey(), new ErrorReporter.TypestateViolation());
-//				}
-//			}
-//		}
-//	};
-	private CrypSLAnalysisDebugger crypSLAnalysisDebugger;
-	public ClassSpecification(final CryptSLRule specification, IInfoflowCFG icfg, SpecificationManager specificationManager, final ResultReporter<TypestateDomainValue<StateNode>>  resultReporter, CrypSLAnalysisDebugger crypSLAnalysisDebugger) {
-		this.specification = specification;
-		this.icfg = icfg;
-		this.specManager = specificationManager;
-		this.crypSLAnalysisDebugger = crypSLAnalysisDebugger;
+	private final CryptoScanner cryptoScanner;
+	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
+		this.cryptSLRule = rule;
+		this.cryptoScanner = cScanner;
 		this.problem = new CryptoTypestateAnaylsisProblem() {
 			@Override
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return resultReporter;
+				return cryptoScanner.analysisListsner();
 			}
 			
 			@Override
@@ -67,7 +41,7 @@ public class ClassSpecification {
 					@Override
 					public Set<Transition<StateNode>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite,
 							AccessGraph d2, Unit returnSite, AccessGraph d3) {
-						specManager.onCallToReturnFlow(ClassSpecification.this, d1,callSite, d2);
+						cryptoScanner.onCallToReturnFlow(ClassSpecification.this, d1,callSite, d2);
 						return super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
 					}
 				};
@@ -75,24 +49,20 @@ public class ClassSpecification {
 
 			@Override
 			public IInfoflowCFG icfg() {
-				return ClassSpecification.this.icfg;
+				return cryptoScanner.icfg();
 			}
 			
 			@Override
 			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return new NullDebugger<>();
+				return cryptoScanner.debugger();
 			}
 			
 			
 			@Override
 			public StateMachineGraph getStateMachine() {
-				return specification.getUsagePattern();
+				return rule.getUsagePattern();
 			}
 			
-			@Override
-			public String getClassName() {
-				return specification.getClassName();
-			}
 			@Override
 			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
 					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
@@ -108,7 +78,7 @@ public class ClassSpecification {
 	
 	public void runTypestateAnalysisForAllSeeds() {
 		analysis.run();
-		crypSLAnalysisDebugger.collectedValues(this,problem.getCollectedValues());
+		cryptoScanner.analysisListsner().collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	
@@ -132,7 +102,7 @@ public class ClassSpecification {
 	}
 	public void runTypestateAnalysisForConcreteSeed(FactAtStatement seed) {
 		analysis.analysisForSeed(seed);
-		crypSLAnalysisDebugger.collectedValues(this,problem.getCollectedValues());
+		cryptoScanner.analysisListsner().collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	public CryptoTypestateAnaylsisProblem getAnalysisProblem(){
@@ -141,7 +111,7 @@ public class ClassSpecification {
 	
 	@Override
 	public String toString() {
-		return specification.toString();
+		return cryptSLRule.toString();
 	}
 	public void checkForForbiddenMethods() {
 		//TODO Iterate over ICFG and report on usage of forbidden method.

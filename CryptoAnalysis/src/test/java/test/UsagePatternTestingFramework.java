@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -15,16 +15,16 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.analysis.ClassSpecification;
-import crypto.analysis.CrypSLAnalysisDebugger;
-import crypto.analysis.CryptSLAnalysisReporter;
+import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.ErrorReporter;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.debug.IDEVizDebugger;
+import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -37,6 +37,9 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import test.assertions.ExtractedValueAssertion;
+import test.assertions.InErrorStateAssertion;
+import test.assertions.NotInErrorStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -45,7 +48,13 @@ import typestate.tests.crypto.Benchmark;
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected InfoflowCFG icfg;
+	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
 
+	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
+		if(debugger == null)
+			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+		return debugger;
+	}
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
@@ -61,9 +70,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public CryptSLAnalysisReporter errorReporter() {
+					public CryptSLAnalysisListener analysisListsner() {
 						// TODO Auto-generated method stub
-						return new CryptSLAnalysisReporter(){
+						return new CryptSLAnalysisListener(){
 							@Override
 							public void onSeedFinished(FactAtStatement seed,
 									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
@@ -79,14 +88,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								}
 							}
 
-							
-						};
-					}
-
-					@Override
-					public CrypSLAnalysisDebugger debugger() {
-						return new CrypSLAnalysisDebugger() {
-							
 							@Override
 							public void collectedValues(ClassSpecification classSpecification,
 									Multimap<CallSiteWithParamIndex, Value> collectedValues) {
@@ -95,10 +96,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
 									}
 								}
-								System.out.println("Collected values " + collectedValues);
 							}
 						};
 					}
+					@Override
+					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+						return UsagePatternTestingFramework.this.getDebugger();
+					}
+
 				};
 				scanner.scan();
 				List<Assertion> unsound = Lists.newLinkedList();
@@ -124,7 +129,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	}
 	protected List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();        
-//		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
@@ -162,7 +167,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof IntConstant))
 					continue;
 				IntConstant paramIndex = (IntConstant) param;
-				for(Unit pred : icfg.getPredsOf(stmt))
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new ExtractedValueAssertion(pred, paramIndex.value));
 			}
 			
@@ -185,5 +190,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new InErrorStateAssertion(stmt, val));
 			}
 		}
+	}
+	private Set<Unit> getPredecessorsNotBenchmark(Stmt stmt) {
+		Set<Unit> res = Sets.newHashSet();
+		Set<Unit> visited = Sets.newHashSet();
+		LinkedList<Unit> worklist = Lists.newLinkedList();
+		worklist.add(stmt);
+		while(!worklist.isEmpty()){
+			Unit curr = worklist.poll();
+			if(!visited.add(curr))
+				continue;
+			if(!curr.toString().contains("Benchmark")){
+				res.add(curr);
+				continue;
+			}
+			worklist.addAll(icfg.getPredsOf(curr));
+		}
+		return res;
 	}
 }
