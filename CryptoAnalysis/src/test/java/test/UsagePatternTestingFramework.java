@@ -70,7 +70,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public CryptSLAnalysisListener analysisListsner() {
+					public CryptSLAnalysisListener analysisListener() {
 						// TODO Auto-generated method stub
 						return new CryptSLAnalysisListener(){
 							@Override

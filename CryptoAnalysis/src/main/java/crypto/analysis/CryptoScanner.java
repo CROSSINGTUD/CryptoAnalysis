@@ -40,7 +40,7 @@ public abstract class CryptoScanner {
 	
 	
 	public abstract IInfoflowCFG icfg();
-	public abstract CryptSLAnalysisListener analysisListsner();
+	public abstract CryptSLAnalysisListener analysisListener();
 
 	public void scan(){
 		initialize();

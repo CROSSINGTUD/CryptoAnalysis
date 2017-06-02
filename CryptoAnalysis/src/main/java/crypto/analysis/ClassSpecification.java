@@ -32,7 +32,7 @@ public class ClassSpecification {
 		this.problem = new CryptoTypestateAnaylsisProblem() {
 			@Override
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return cryptoScanner.analysisListsner();
+				return cryptoScanner.analysisListener();
 			}
 			
 			@Override
@@ -78,7 +78,7 @@ public class ClassSpecification {
 	
 	public void runTypestateAnalysisForAllSeeds() {
 		analysis.run();
-		cryptoScanner.analysisListsner().collectedValues(this,problem.getCollectedValues());
+		cryptoScanner.analysisListener().collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	
@@ -102,7 +102,7 @@ public class ClassSpecification {
 	}
 	public void runTypestateAnalysisForConcreteSeed(FactAtStatement seed) {
 		analysis.analysisForSeed(seed);
-		cryptoScanner.analysisListsner().collectedValues(this,problem.getCollectedValues());
+		cryptoScanner.analysisListener().collectedValues(this,problem.getCollectedValues());
 		checkConstraintSystem();
 	}
 	public CryptoTypestateAnaylsisProblem getAnalysisProblem(){
