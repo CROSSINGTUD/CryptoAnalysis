@@ -44,7 +44,7 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 	public void testKeyGenerator4() throws NoSuchAlgorithmException {
 		KeyGenerator c = KeyGenerator.getInstance("AES");
 		c.generateKey();
-
+		//TODO fails because init is missing. Shouldn't we test for -1? I.e. KeyGenerator is in an error state.
 		Benchmark.assertState(c, 2);
 	}
 }
