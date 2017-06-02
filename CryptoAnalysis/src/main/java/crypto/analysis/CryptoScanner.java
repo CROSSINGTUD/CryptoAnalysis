@@ -49,7 +49,6 @@ public abstract class CryptoScanner {
 			AnalysisSeedWithSpecification curr = worklist.poll();
 			if(!visited.add(curr))
 				continue;
-			System.out.println(curr);
 			curr.spec.runTypestateAnalysisForConcreteSeed(curr.factAtStmt);
 		}
 	}

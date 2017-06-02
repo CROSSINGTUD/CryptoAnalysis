@@ -38,6 +38,7 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
+import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.InErrorStateAssertion;
 import test.assertions.NotInErrorStateAssertion;
@@ -94,6 +95,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								for(Assertion a: expectedResults){
 									if(a instanceof ExtractedValueAssertion){
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
+									}
+								}
+							}
+
+							@Override
+							public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
+								for(Assertion e : expectedResults){
+									if(e instanceof CallToForbiddenMethodAssertion){
+										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
+										expectedResults.reported(callSite);
 									}
 								}
 							}
@@ -170,7 +181,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new ExtractedValueAssertion(pred, paramIndex.value));
 			}
-			
+			if(invocationName.startsWith("callToForbiddenMethod")){
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
+					queries.add(new CallToForbiddenMethodAssertion(pred));
+			}
 			if(invocationName.startsWith("assertNotErrorState")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
@@ -200,7 +214,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			Unit curr = worklist.poll();
 			if(!visited.add(curr))
 				continue;
-			if(!curr.toString().contains("Benchmark")){
+			if(!curr.toString().contains(Assertions.class.getSimpleName()) && (curr instanceof Stmt) && ((Stmt) curr).containsInvokeExpr()){
 				res.add(curr);
 				continue;
 			}
