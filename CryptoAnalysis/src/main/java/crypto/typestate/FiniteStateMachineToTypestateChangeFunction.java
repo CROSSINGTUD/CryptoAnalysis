@@ -2,6 +2,8 @@ package crypto.typestate;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -9,6 +11,7 @@ import com.google.common.collect.Sets;
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
+import crypto.rules.StatementLabel;
 import heros.utilities.DefaultValueMap;
 import soot.Local;
 import soot.Scene;
@@ -31,9 +34,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	private StateNode initialState;
 	private Collection<SootMethod> initialTransitonLabel;
 	private Collection<SootMethod> allMatchedMethods = Sets.newHashSet();
-	private DefaultValueMap<String, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<String, Collection<SootMethod>>() {
+	private DefaultValueMap<StatementLabel, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<StatementLabel, Collection<SootMethod>>() {
 		@Override
-		protected Collection<SootMethod> createItem(String key) {
+		protected Collection<SootMethod> createItem(StatementLabel key) {
 			return descriptorToSootMethod(key);
 		}
 	};
@@ -43,16 +46,11 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
 		stateMachineGraph = analysisProblem.getStateMachineGraph();
-		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().getLabel().getMethodName());
+		initialTransitonLabel = completeDescriptorToSootMethod(stateMachineGraph.getInitialTransition().getLabel());
 		initialState = stateMachineGraph.getInitialTransition().to();
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
-			this.addTransition(new MatcherTransition<StateNode>(t.from(), completeDescriptorToSootMethod(t.getLabel().getMethodName()),
-					Parameter.This, t.to(), Type.OnCallToReturn) {
-				@Override
-				public String toString() {
-					return t.getLabel().getMethodName();
-				}
-			});
+			this.addTransition(new LabeledMatcherTransition(t.from(), t.getLabel(),
+					Parameter.This, t.to(), Type.OnCallToReturn));
 		}
 	}
 
@@ -61,15 +59,15 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			Unit returnSite, AccessGraph d3) {
 		Set<Transition<StateNode>> res = super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
 		for (Transition<StateNode> t : res) {
-			if (!(t instanceof MatcherTransition))
+			if (!(t instanceof LabeledMatcherTransition))
 				continue;
-			injectQueryAtCallSite(t.toString(),callSite, d1);
+			injectQueryAtCallSite(((LabeledMatcherTransition)t).label,callSite, d1);
 		}
 		return res;
 	}
 	
-	private void injectQueryAtCallSite(String descriptor, Unit callSite, AccessGraph context) {
-		for(String matchingDescriptor : splitDescriptor(descriptor.toString())){
+	private void injectQueryAtCallSite(List<StatementLabel> list, Unit callSite, AccessGraph context) {
+		for(StatementLabel matchingDescriptor : list){
 			for(SootMethod m : descriptorToSootMethod.getOrCreate(matchingDescriptor)){
 				if (!(callSite instanceof Stmt))
 					continue;
@@ -81,11 +79,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					continue;
 				{
 					int index = 0;
-					for(String param : getParameters(matchingDescriptor)){
-						if(!param.equals("_")){
-							soot.Type parameterType = method.getParameterType(index);
-							if(parameterType.toString().equals(param)){
-								analysisProblem.addQueryAtCallsite(matchingDescriptor, stmt, index, context);
+					List<Boolean> backward = matchingDescriptor.getBackward();
+					for(Entry<String, String> param : matchingDescriptor.getParameters()){
+						if( index > 0 && backward.get(index) ){
+							if(!param.getValue().equals("_")){
+								soot.Type parameterType = method.getParameterType(index - 1);
+								if(parameterType.toString().equals(param)){
+									analysisProblem.addQueryAtCallsite(param.getValue(), stmt, index, context);
+								}
 							}
 						}
 						index++;
@@ -111,70 +112,43 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
 		}
-		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel().getMethodName(),unit,null);
+		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),unit,null);
 		return out;
 	}
 
-	private Collection<SootMethod> descriptorToSootMethod(String desc) {
-		desc = addInitStringIfConstructor(desc);
+	private Collection<SootMethod> descriptorToSootMethod(StatementLabel label) {
+		String methodName = label.getMethodName();
+		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
 		Set<SootMethod> res = Sets.newHashSet();
-		String methodName = getMethodName(desc);
-		String declaringClass = getDeclaringClass(desc);
-		int noOfParams = getNumberOfParams(desc);
+		String declaringClass = getDeclaringClass(methodName);
+		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		for (SootMethod m : sootClass.getMethods()) {
-			if (m.getName().equals(methodName) && m.getParameterCount() == noOfParams)
+			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams)
 				res.add(m);
 		}
 		allMatchedMethods.addAll(res);
 		return res;
 	}
-	private String addInitStringIfConstructor(String desc) {
-		String prefix = desc.substring(0, desc.indexOf("("));
-		String suffix = desc.substring( desc.indexOf("("));
+	private String getMethodNameWithoutDeclaringClass(String desc) {
 		try{
-			if(Scene.v().containsClass(prefix))
-				return prefix +".<init>"+suffix;
+			if(Scene.v().containsClass(desc))
+				return "<init>";
 		} catch(RuntimeException e){
 			
 		}
-		return desc;
+		return desc.substring(desc.lastIndexOf(".") +1);
 	}
 
-	private int getNumberOfParams(String desc) {
-		return getParameters(desc).length;
-	}
-	private String getParameterSubString(String desc) {
-		return desc.substring(desc.indexOf("(") +1,desc.indexOf(")"));
-	}
-
-	private String[] getParameters(String desc) {
-		if(getParameterSubString(desc).length() == 0)
-			return new String[]{};
-		return getParameterSubString(desc).split(",");
-	}
-	private Collection<SootMethod> completeDescriptorToSootMethod(String desc) {
+	private Collection<SootMethod> completeDescriptorToSootMethod(List<StatementLabel> list) {
 		Set<SootMethod> res = Sets.newHashSet();
-		for(String l : splitDescriptor(desc))
+		for(StatementLabel l : list)
 			res.addAll(descriptorToSootMethod(l));
 		return res;
 	}
-	private String[] splitDescriptor(String label) {
-		String[] split = label.split(";");
-		return split;
-	}
 	
-	
-
-	private String getMethodName(String label) {
-		String substring = label.substring(0, label.indexOf("("));
-		String[] split = substring.split("\\.");
-		return split[split.length - 1];
-	}
-
 	private String getDeclaringClass(String label) {
-		String substring = label.substring(0, label.indexOf("("));
-		return substring.substring(0, substring.lastIndexOf("."));
+		return label.substring(0, label.lastIndexOf("."));
 	}
 
 	@Override
@@ -186,4 +160,15 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	public Collection<SootMethod> getAllMatchedMethods(){
 		return Sets.newHashSet(allMatchedMethods);
 	}
+	
+	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
+
+		private final List<StatementLabel> label;
+
+		public LabeledMatcherTransition(StateNode from, List<StatementLabel> label,
+				Parameter param, StateNode to,
+				Type type) {
+			super(from,completeDescriptorToSootMethod(label), param, to, type);
+			this.label = label;
+		}}
 }
