@@ -1,5 +1,6 @@
 package crypto.typestate;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -32,22 +33,17 @@ public class ExtendedStandardFlowFunction extends StandardFlowFunctions<Typestat
 	}
 
 	private void extractFlows(CryptSLRule rule) {
-		for (CryptSLPredicate pred : rule.getPredicates()) {
-			if (pred.getParameters().isEmpty()) {
-				continue;
-			}
-			String trackForward = pred.getParameters().get(0);
-			for (TransitionEdge transEdge : rule.getUsagePattern().getAllTransitions()) {
-				for (StatementLabel label : transEdge.getLabel()) {
-					int index = -1;
-					for (Entry<String, String> e : label.getParameters()) {
-						if (e.getKey().equals(trackForward)) {
-							for(SootMethod callee : StatementLabelToSootMethod.v().convert(label)){
-								additionalFlows.add(new FlowAtCallsite(callee, index));
-							}
+		for (TransitionEdge transEdge : rule.getUsagePattern().getAllTransitions()) {
+			for (StatementLabel label : transEdge.getLabel()) {
+				int index = 0;
+				List<Boolean> backward = label.getBackward();
+				for (Boolean trackBackward : backward) {
+					if (!trackBackward) {
+						for(SootMethod callee : StatementLabelToSootMethod.v().convert(label)){
+							additionalFlows.add(new FlowAtCallsite(callee, index - 1));
 						}
-						index++;
 					}
+					index++;
 				}
 			}
 		}
