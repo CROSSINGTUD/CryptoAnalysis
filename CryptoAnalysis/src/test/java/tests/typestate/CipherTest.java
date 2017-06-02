@@ -1,4 +1,4 @@
-package typestate.tests.crypto;
+package tests.typestate;
 
 import java.io.File;
 import java.security.InvalidKeyException;
@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
+import test.assertions.Assertions;
 
 public class CipherTest extends IDEALCrossingTestingFramework{
 
@@ -23,7 +24,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 	@Test
 	public void testCipher1() throws NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");
-		Benchmark.assertState(c, 0);
+		Assertions.assertState(c, 0);
 	}
 
 	@Test
@@ -31,7 +32,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		Cipher c = Cipher.getInstance("AES");
 		c.init(1, new SecretKeySpec(null, "AES"));
 		
-		Benchmark.assertState(c, 1);
+		Assertions.assertState(c, 1);
 	}
 
 	@Test
@@ -40,7 +41,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, 2);
+		Assertions.assertState(c, 2);
 	}
 
 	@Test
@@ -51,7 +52,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.doFinal(null);
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, 2);
+		Assertions.assertState(c, 2);
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.update(null);
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, 2);
+		Assertions.assertState(c, 2);
 	}
 
 	@Test
@@ -70,7 +71,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.update(null);
 		
-		Benchmark.assertState(c, 3);
+		Assertions.assertState(c, 3);
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.doFinal(null);
 		c.init(2, new SecretKeySpec(null, "AES"));
 		
-		Benchmark.assertState(c, -1);
+		Assertions.assertState(c, -1);
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.init(2, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, 2);
+		Assertions.assertState(c, 2);
 	}
 
 	@Test
@@ -102,7 +103,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.update(null);
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, -1);
+		Assertions.assertState(c, -1);
 	}
 
 	@Test
@@ -110,6 +111,6 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		Cipher c = Cipher.getInstance("AES");
 		c.doFinal(null);
 		
-		Benchmark.assertState(c, -1);	
+		Assertions.assertState(c, -1);	
 	}
 }

@@ -37,13 +37,13 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import test.assertions.Assertions;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.InErrorStateAssertion;
 import test.assertions.NotInErrorStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
-import typestate.tests.crypto.Benchmark;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
@@ -159,7 +159,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			if (!(stmt.containsInvokeExpr()))
 				continue;
 			InvokeExpr invokeExpr = stmt.getInvokeExpr();
-			if (!invokeExpr.getMethod().getDeclaringClass().toString().equals(Benchmark.class.getName()))
+			if (!invokeExpr.getMethod().getDeclaringClass().toString().equals(Assertions.class.getName()))
 				continue;
 			String invocationName = invokeExpr.getMethod().getName();
 			if(invocationName.startsWith("extValue")){

@@ -1,4 +1,4 @@
-package typestate.tests.crypto;
+package tests.pattern;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -14,57 +14,58 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 public class UsagePatternTest extends UsagePatternTestingFramework{
 
 	@Test
 	public void UsagePatternTest1() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		keygen.init(128);
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Benchmark.assertNotErrorState(keygen);
+		Assertions.assertNotErrorState(keygen);
 		
 		Cipher cCipher = Cipher.getInstance("AES");
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
-		Benchmark.assertNotErrorState(cCipher);
+		Assertions.assertNotErrorState(cCipher);
 	}
 
 	@Test
 	public void UsagePatternTest2() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		keygen.init(129);
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Benchmark.assertNotErrorState(keygen);
-		Benchmark.failedConstraint(keygen);
+		Assertions.assertNotErrorState(keygen);
+		Assertions.failedConstraint(keygen);
 		
 		Cipher cCipher = Cipher.getInstance("AES");
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
-		Benchmark.assertErrorState(cCipher);
+		Assertions.assertErrorState(cCipher);
 	}
 
 	@Test
 	public void UsagePatternTest3() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		keygen.init(128);
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Benchmark.assertNotErrorState(keygen);
+		Assertions.assertNotErrorState(keygen);
 		Cipher cCipher = Cipher.getInstance("AES");
 		cCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(new byte[18], "AES"));
-		Benchmark.extValue(0);
+		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
-		Benchmark.assertErrorState(cCipher);
+		Assertions.assertErrorState(cCipher);
 		
 	}
 
