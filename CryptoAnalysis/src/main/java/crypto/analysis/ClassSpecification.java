@@ -1,15 +1,10 @@
 package crypto.analysis;
 
-import java.util.List;
 import java.util.Set;
 
-import javax.crypto.KeyGenerator;
-
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.rules.StateMachineGraph;
@@ -19,7 +14,6 @@ import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
-import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
 import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
@@ -115,19 +109,23 @@ public class ClassSpecification {
 	
 	private void checkConstraintSystem() {
 //		Multimap<FactAtStatementWithVarName, Value> actualValues = problem.getCollectedValues();
-//		ConstraintSolver solver = new ConstraintSolver();
-//		for (ISLConstraint cons : specification.getConstraints()) {
+		Multimap<CallSiteWithParamIndex, Value> actualValues = problem.getCollectedValues();
+		ConstraintSolver solver = new ConstraintSolver();
+		for (ISLConstraint cons : specification.getConstraints()) {
+			if (!solver.evaluate(cons, actualValues)) {
+				// report error
+			}
 //			if (cons instanceof CryptSLValueConstraint) {
 //				CryptSLValueConstraint valueCons = (CryptSLValueConstraint) cons;
 //				if (!solver.evaluate(valueCons, actualValues.get(valueCons.getVarName()).toString())) {
-//					this.errorReporter.report(this, null, null);
+//					//report error
 //				}
 //			} else {
 //				if (!solver.evaluate(cons)) {
-//					this.errorReporter.report(this, null, null);
+//					//report error
 //				}
 //			}
-//		}
+		}
 		
 	}
 	public void runTypestateAnalysisForConcreteSeed(FactAtStatement seed) {
