@@ -1,25 +1,23 @@
-package test.assertions;
+package test;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateNode;
 import soot.Unit;
-import test.Assertion;
-import test.ComparableResult;
 import typestate.TypestateDomainValue;
 
-public class InErrorStateAssertion implements Assertion, ComparableResult<StateNode> {
+public class NotInErrorStateAssertion implements Assertion, ComparableResult<StateNode> {
 
 	private Unit unit;
 	private AccessGraph accessGraph;
 	private boolean satisfied;
 
-	public InErrorStateAssertion(Unit unit, AccessGraph accessGraph) {
+	NotInErrorStateAssertion(Unit unit, AccessGraph accessGraph) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 	}
 
 	public void computedResults(TypestateDomainValue<StateNode> results) {
-		satisfied |= results.getStates().isEmpty();
+		satisfied |= !results.getStates().isEmpty();
 	}
 
 	public Unit getStmt() {

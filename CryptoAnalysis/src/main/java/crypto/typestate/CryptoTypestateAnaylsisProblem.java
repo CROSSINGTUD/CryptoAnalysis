@@ -189,7 +189,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	}
 
 	public void log(String string) {
-//		System.out.println(string);
+		System.out.println(string);
 	}
 
 

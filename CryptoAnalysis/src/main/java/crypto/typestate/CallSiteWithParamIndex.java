@@ -2,12 +2,19 @@ package crypto.typestate;
 
 import boomerang.accessgraph.AccessGraph;
 import ideal.FactAtStatement;
-import soot.Unit;
 import soot.jimple.Stmt;
 
 public class CallSiteWithParamIndex extends FactAtStatement{
 
 	private String varName;
+	
+	/**
+	 * @return the varName
+	 */
+	public String getVarName() {
+		return varName;
+	}
+
 	private int index;
 
 	public CallSiteWithParamIndex(Stmt u, AccessGraph fact, int index, String varName) {

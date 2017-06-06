@@ -16,7 +16,6 @@ import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.Analysis;
 import ideal.ResultReporter;
-import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.Body;
@@ -30,7 +29,6 @@ import soot.jimple.Stmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
-import test.assertions.MustBeInState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -72,7 +70,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new NullDebugger();// new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
 	}
 
