@@ -7,6 +7,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -50,7 +51,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
-		Assertions.assertErrorState(cCipher);
+		Assertions.failedConstraint(cCipher);
 	}
 
 	@Test
@@ -67,6 +68,25 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.doFinal("".getBytes());
 		Assertions.assertErrorState(cCipher);
 		
+	}
+
+
+	@Test
+	public void UsagePatternTest4() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.assertNotErrorState(keygen);
+		
+		Cipher cCipher = Cipher.getInstance("Blowfish");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		Assertions.extValue(0);
+		cCipher.doFinal("".getBytes());
+		Assertions.assertNotErrorState(cCipher);
+		Assertions.failedConstraint(cCipher);
 	}
 
 }
