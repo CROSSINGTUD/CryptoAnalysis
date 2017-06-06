@@ -11,7 +11,7 @@ import typestate.TypestateDomainValue;
 
 public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainValue<StateNode>> {
 
-	void collectedValues(ClassSpecification classSpecification,
+	void collectedValues(AnalysisSeedWithSpecification seed,
 			Multimap<CallSiteWithParamIndex, Value> collectedValues);
 
 	void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite);

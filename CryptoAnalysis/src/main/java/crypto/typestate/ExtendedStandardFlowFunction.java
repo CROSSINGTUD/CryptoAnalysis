@@ -1,13 +1,11 @@
 package crypto.typestate;
 
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.rules.StatementLabel;
@@ -90,11 +88,6 @@ public class ExtendedStandardFlowFunction extends StandardFlowFunctions<Typestat
 						}
 					}
 				}
-			}
-			if (callStmt.toString().contains("generateKey") && callStmt instanceof AssignStmt) {
-				// TODO Replace by flow function described in concrete rule
-				AssignStmt as = (AssignStmt) callStmt;
-				targets.add(new AccessGraph((Local) as.getLeftOp(), as.getLeftOp().getType()));
 			}
 			return targets;
 		}

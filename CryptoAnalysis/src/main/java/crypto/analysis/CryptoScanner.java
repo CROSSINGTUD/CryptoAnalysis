@@ -31,6 +31,7 @@ public abstract class CryptoScanner {
 	
 	private final LinkedList<AnalysisSeedWithSpecification> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
+	private AnalysisSeedWithSpecification curr;
 
 	public CryptoScanner(List<CryptSLRule> specs){
 		for (CryptSLRule rule : specs) {
@@ -49,7 +50,8 @@ public abstract class CryptoScanner {
 			AnalysisSeedWithSpecification curr = worklist.poll();
 			if(!visited.add(curr))
 				continue;
-			curr.spec.runTypestateAnalysisForConcreteSeed(curr.factAtStmt);
+			this.curr = curr;
+			curr.execute();
 		}
 	}
 
@@ -58,7 +60,10 @@ public abstract class CryptoScanner {
 			spec.checkForForbiddenMethods();
 			if(!spec.isRootNode())
 				continue;
-			spec.runTypestateAnalysisForAllSeeds();
+
+			for(FactAtStatement seed : spec.getInitialSeeds()){
+				worklist.add(new AnalysisSeedWithSpecification(this, seed, spec));
+			}
 		}
 	}
 
@@ -86,7 +91,7 @@ public abstract class CryptoScanner {
 							@Override
 							public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 								for(Pair<Unit, AccessGraph> p : res.keySet()){
-									worklist.add(new AnalysisSeedWithSpecification(new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()), specification));
+									worklist.add(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()), specification, curr));
 								}
 							}
 						});

@@ -1,13 +1,34 @@
 package crypto.analysis;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Multimap;
+
+import crypto.rules.CryptSLPredicate;
+import crypto.typestate.CallSiteWithParamIndex;
 import ideal.FactAtStatement;
+import soot.Value;
+import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification {
-	public final FactAtStatement factAtStmt;
-	public final ClassSpecification spec;
-	public AnalysisSeedWithSpecification(FactAtStatement factAtStmt, ClassSpecification spec){
+	private final FactAtStatement factAtStmt;
+	private final ClassSpecification spec;
+	private final AnalysisSeedWithSpecification parent;
+	private CryptoScanner cryptoScanner;
+	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, FactAtStatement factAtStmt, ClassSpecification spec){
+		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
 		this.spec = spec;
+		this.parent = null;
+	}
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, FactAtStatement factAtStmt, ClassSpecification spec, AnalysisSeedWithSpecification parent){
+		this.cryptoScanner = cryptoScanner;
+		this.factAtStmt = factAtStmt;
+		this.spec = spec;
+		this.parent = parent;
 	}
 	@Override
 	public int hashCode() {
@@ -42,6 +63,36 @@ public class AnalysisSeedWithSpecification {
 	public String toString() {
 		return "AnalysisSeedWithSpecification [factAtStmt=" + factAtStmt + ", spec=" + spec + "]";
 	}
+	public void execute() {
+		spec.createTypestateAnalysis().analysisForSeed(factAtStmt);
+		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
+		checkConstraintSystem();
+		//TODO only execute when typestate and constraint solving did not fail.
+		ensuresPredicate();
+	}
+
+	private void ensuresPredicate() {
+		//TODO match to appropriate predicates. 
+		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){
+			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, spec.getAnalysisProblem().getCollectedValues()));
+		}
+	}
+	private void checkConstraintSystem() {
+		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
+		ConstraintSolver solver = new ConstraintSolver(this);
+		for (ISLConstraint cons : spec.getRule().getConstraints()) {
+			if (!solver.evaluate(cons, actualValues)) {
+				// report error
+			}
+		}
+	}
+
 	
-	
+	public AnalysisSeedWithSpecification getParent(){
+		return parent;
+	}
+
+	public LinkedList<EnsuredCryptSLPredicate> getEnsuredPredicates(){
+		return Lists.newLinkedList(ensuredPredicates);
+	}
 }

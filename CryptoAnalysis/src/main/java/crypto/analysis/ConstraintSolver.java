@@ -15,7 +15,7 @@ import typestate.interfaces.ISLConstraint;
 public class ConstraintSolver {
 
 	
-	public ConstraintSolver() {
+	public ConstraintSolver(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 	}
 	
 	public boolean evaluate(CryptSLComparisonConstraint comp, Multimap<CallSiteWithParamIndex, Value> actualValues) {
@@ -118,15 +118,15 @@ public class ConstraintSolver {
 	
 
 	public Boolean evaluate(ISLConstraint cons, Multimap<CallSiteWithParamIndex, Value> actualValues) {
-		if (cons instanceof CryptSLComparisonConstraint) {
-			return evaluate((CryptSLComparisonConstraint) cons, actualValues);
-		} else if (cons instanceof CryptSLValueConstraint) {
-			return evaluate((CryptSLValueConstraint)cons, actualValues);
-		} else if (cons instanceof CryptSLPredicate) {
-			return evaluate((CryptSLPredicate)cons, actualValues);
-		} else if (cons instanceof CryptSLConstraint) {
-			return evaluate(cons, actualValues);
-		}
+//		if (cons instanceof CryptSLComparisonConstraint) {
+//			return evaluate((CryptSLComparisonConstraint) cons, actualValues);
+//		} else if (cons instanceof CryptSLValueConstraint) {
+//			return evaluate((CryptSLValueConstraint)cons, actualValues);
+//		} else if (cons instanceof CryptSLPredicate) {
+//			return evaluate((CryptSLPredicate)cons, actualValues);
+//		} else if (cons instanceof CryptSLConstraint) {
+//			return evaluate(cons, actualValues);
+//		}
 		return false;
 	}
 

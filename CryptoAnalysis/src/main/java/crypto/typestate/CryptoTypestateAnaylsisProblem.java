@@ -74,10 +74,10 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			q.solve();
 		}
 	}
-	public void addQueryAtCallsite(final String matchingDescriptor, final Stmt stmt,final int index,final AccessGraph d1) {
+	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt,final int index,final AccessGraph d1) {
 		Value parameter = stmt.getInvokeExpr().getArg(index);
 		if(!(parameter instanceof Local)){
-			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, matchingDescriptor), parameter);
+			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, varNameInSpecification), parameter);
 			return;
 		}
 		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(d1, stmt,new AccessGraph((Local) parameter, parameter.getType())));
@@ -85,7 +85,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			@Override
 			public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 				for(Value v : res.getValues()){
-					collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, matchingDescriptor), v);
+					collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, varNameInSpecification), v);
 				}
 			}
 		});

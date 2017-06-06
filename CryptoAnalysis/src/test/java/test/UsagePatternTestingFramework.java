@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
@@ -87,7 +88,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void collectedValues(ClassSpecification classSpecification,
+							public void collectedValues(AnalysisSeedWithSpecification seed,
 									Multimap<CallSiteWithParamIndex, Value> collectedValues) {
 								for(Assertion a: expectedResults){
 									if(a instanceof ExtractedValueAssertion){
