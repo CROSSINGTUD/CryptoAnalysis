@@ -12,6 +12,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
+import crypto.typestate.StatementLabelToSootMethod;
 import ideal.Analysis;
 import ideal.FactAtStatement;
 import ideal.PerSeedAnalysisContext;
@@ -88,12 +89,12 @@ public class ClassSpecification {
 
 	private boolean isForbiddenMethod(SootMethod method) {
 		// TODO replace by real specification once available.
-		if (method.getDeclaringClass().toString().equals(PBEKeySpec.class.getName())) {
-			if (method.isConstructor() && method.getParameterCount() < 4)
+		List<String> forbiddenMethods = cryptSLRule.getForbiddenMethods();
+		for(String m : forbiddenMethods){
+			Set<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m);
+			if(matchingMatched.contains(method))
 				return true;
 		}
-		List<String> forbiddenMethods = cryptSLRule.getForbiddenMethods();
-		System.out.println(forbiddenMethods);
 		return false;
 	}
 

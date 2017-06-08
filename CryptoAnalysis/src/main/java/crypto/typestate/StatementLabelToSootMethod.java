@@ -11,6 +11,7 @@ import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Type;
 
 public class StatementLabelToSootMethod {
 	private static StatementLabelToSootMethod instance;
@@ -67,5 +68,39 @@ public class StatementLabelToSootMethod {
 		if(instance == null)
 			instance = new StatementLabelToSootMethod();
 		return instance;
+	}
+	public Set<SootMethod> convert(String label) {
+		String removedParameters = label.substring(0,label.indexOf("("));
+		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(removedParameters);
+		Set<SootMethod> res = Sets.newHashSet();
+		String declaringClass = getDeclaringClass(removedParameters);
+		String[] params = getParameters(label);
+		SootClass sootClass = Scene.v().getSootClass(declaringClass);
+		for(SootMethod m : sootClass.getMethods()){
+			if(m.getName().equals(methodNameWithoutDeclaringClass)){
+				System.out.println(m);
+				if(m.getParameterCount() == params.length){
+					boolean paramTypesMatch = true;
+					int i = 0;
+					for(Type t : m.getParameterTypes()){
+						if(!paramsTypeMatch(t, params[i])){
+							paramTypesMatch = false;
+							break;
+						}
+						i++;
+					}
+					if(paramTypesMatch)
+						res.add(m);
+				}
+			}
+		}
+		return res;
+	}
+	private boolean paramsTypeMatch(Type t, String string) {
+		return t.toString().equals(string);
+	}
+	private String[] getParameters(String label) {	
+		String substring = label.substring(label.indexOf("(")+1, label.indexOf(")"));
+		return substring.split(",");
 	}
 }
