@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
@@ -24,7 +25,6 @@ import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
@@ -40,7 +40,7 @@ public abstract class CryptoScanner {
 	}
 	
 	
-	public abstract IInfoflowCFG icfg();
+	public abstract IExtendedICFG icfg();
 	public abstract CryptSLAnalysisListener analysisListener();
 
 	public void scan(){
@@ -53,6 +53,7 @@ public abstract class CryptoScanner {
 			this.curr = curr;
 			curr.execute();
 		}
+		debugger().afterAnalysis();
 	}
 
 	private void initialize() {

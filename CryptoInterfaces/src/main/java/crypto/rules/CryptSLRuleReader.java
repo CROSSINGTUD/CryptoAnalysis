@@ -13,7 +13,6 @@ public class CryptSLRuleReader {
 			FileInputStream fileIn = new FileInputStream(file);
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			crytpSLRule = (CryptSLRule) in.readObject();
-			System.err.println(crytpSLRule);
 			in.close();
 			fileIn.close();		
 		} catch (IOException | ClassNotFoundException e) {

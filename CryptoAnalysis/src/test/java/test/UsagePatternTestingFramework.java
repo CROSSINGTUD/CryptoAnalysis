@@ -14,6 +14,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
+import boomerang.cfg.IExtendedICFG;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptSLAnalysisListener;
@@ -35,8 +37,6 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
@@ -46,7 +46,7 @@ import typestate.TypestateDomainValue;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
-	protected InfoflowCFG icfg;
+	protected ExtendedICFG icfg;
 	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
@@ -58,13 +58,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
 //				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 					
 					@Override
-					public IInfoflowCFG icfg() {
+					public IExtendedICFG icfg() {
 						return icfg;
 					}
 

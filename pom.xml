@@ -7,11 +7,14 @@
   <packaging>pom</packaging>
   <name>crypto-analysis-root</name>
   <modules>
+    <module>android-callgraph</module>
     <module>CryptoAnalysis</module>
     <module>heros</module>
     <module>ideal</module>
     <module>IDEViz</module>
     <module>Boomerang</module>
+    <module>soot-infoflow</module>
+    <module>soot-infoflow-android</module>
   </modules>
   <build>
     <plugins>

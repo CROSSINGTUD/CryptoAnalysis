@@ -78,7 +78,6 @@ public class StatementLabelToSootMethod {
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		for(SootMethod m : sootClass.getMethods()){
 			if(m.getName().equals(methodNameWithoutDeclaringClass)){
-				System.out.println(m);
 				if(m.getParameterCount() == params.length){
 					boolean paramTypesMatch = true;
 					int i = 0;

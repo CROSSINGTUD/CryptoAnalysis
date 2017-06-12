@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.crypto.spec.PBEKeySpec;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -26,7 +27,6 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import typestate.TypestateDomainValue;
@@ -118,7 +118,7 @@ public class ClassSpecification {
 			}
 
 			@Override
-			public IInfoflowCFG icfg() {
+			public IExtendedICFG icfg() {
 				return cryptoScanner.icfg();
 			}
 

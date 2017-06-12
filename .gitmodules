@@ -13,3 +13,9 @@
 [submodule "soot"]
 	path = soot
 	url = https://github.com/johspaeth/soot.git
+[submodule "soot-infoflow-android"]
+	path = soot-infoflow-android
+	url = https://github.com/johspaeth/soot-infoflow-android.git
+[submodule "soot-infoflow"]
+	path = soot-infoflow
+	url = https://github.com/johspaeth/soot-infoflow.git

@@ -11,6 +11,7 @@ import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
+import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.rules.StateMachineGraph;
@@ -24,7 +25,6 @@ import soot.Local;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateDomainValue;
 
@@ -111,7 +111,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		public void solve() {
 			AliasFinder boomerang = new AliasFinder(new BoomerangOptions() {
 				@Override
-				public IInfoflowCFG icfg() {
+				public IExtendedICFG icfg() {
 					return CryptoTypestateAnaylsisProblem.this.icfg();
 				}
 				

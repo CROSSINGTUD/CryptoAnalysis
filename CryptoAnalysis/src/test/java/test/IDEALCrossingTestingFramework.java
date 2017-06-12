@@ -9,6 +9,8 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.cfg.ExtendedICFG;
+import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
@@ -26,8 +28,6 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.infoflow.solver.cfg.InfoflowCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
@@ -35,7 +35,7 @@ import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
-	protected IInfoflowCFG icfg;
+	protected IExtendedICFG icfg;
 	protected long analysisTime;
 	private  IDebugger<TypestateDomainValue<StateNode>>  debugger;
 	protected TestingResultReporter<StateNode> testingResultReporter;
@@ -56,7 +56,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			}
 
 			@Override
-			public IInfoflowCFG icfg() {
+			public IExtendedICFG icfg() {
 				return icfg;
 			}
 
@@ -78,7 +78,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new InfoflowCFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
 				

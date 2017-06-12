@@ -8,17 +8,18 @@ public class Executor {
 	public static void main(String... args) {
 		String classpath = System.getProperty("java.class.path");
 		String javaHome = System.getProperty("java.home");
+		int i = 0;
 		File[] listFiles = new File("D:\\CROSSING\\android-apps").listFiles();
 		for (File file : listFiles) {
 			System.out.println(file);
-			if (file.getName().endsWith(".apk")) {
-				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java", "-cp",
-						classpath, Main.class.getName(), file.getAbsolutePath(), "D:\\android-sdk\\platforms" };
+			if (file.getName().endsWith(".apk") || file.getName().endsWith(".APK")) {
+				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java","-Xmx4g", "-cp",
+						classpath, PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), "D:\\android-sdk\\platforms" };
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {
 					ProcessBuilder pb = new ProcessBuilder(command);
-					pb.redirectOutput(new File("out_" + new File("analysis").getName() + ".txt"));
-					pb.redirectError(new File("err_" + new File("analysis").getName() + ".txt"));
+					pb.redirectOutput(new File("target/reports/out_crypto-analysis-"+file.getName() + ".txt"));
+					pb.redirectError(new File("target/reports/err_crypto-analysis-" +  file.getName() + ".txt"));
 					Process proc = pb.start();
 					proc.waitFor();
 				} catch (IOException ex) {
@@ -29,6 +30,10 @@ public class Executor {
 					ex.printStackTrace();
 				}
 			}
+			break;
+////			i++;
+//			if(i > 10)
+//				break;
 		}
 	}
 
