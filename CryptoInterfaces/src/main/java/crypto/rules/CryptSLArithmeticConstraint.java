@@ -16,7 +16,27 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 		operator = op;
 	}
 	
-	
+	/**
+	 * @return the operator
+	 */
+	public ArithOp getOperator() {
+		return operator;
+	}
+
+	/**
+	 * @return the left
+	 */
+	public String getLeft() {
+		return left;
+	}
+
+	/**
+	 * @return the right
+	 */
+	public String getRight() {
+		return right;
+	}
+
 	public String toString() {
 		return left + " " + operator + " " + right;
 	}

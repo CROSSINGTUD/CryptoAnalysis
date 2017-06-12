@@ -12,6 +12,7 @@
     <module>ideal</module>
     <module>IDEViz</module>
     <module>Boomerang</module>
+    <module>../CryptoAnalysis/CryptoInterfaces</module>
   </modules>
   <build>
     <plugins>

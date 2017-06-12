@@ -8,7 +8,7 @@ public class CryptSLRule implements java.io.Serializable {
 
 	private final String className;
 	
-	private List<String> forbiddenMethods;
+	private List<CryptSLForbiddenMethod> forbiddenMethods;
 	
 	private StateMachineGraph usagePattern;
 	
@@ -16,7 +16,7 @@ public class CryptSLRule implements java.io.Serializable {
 	
 	private List<CryptSLPredicate> predicates;
 	
-	public CryptSLRule(String _className, List<String> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
+	public CryptSLRule(String _className, List<CryptSLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
 		className = _className;
 		forbiddenMethods = _forbiddenMethods;
 		usagePattern = _usagePattern;
@@ -35,7 +35,7 @@ public class CryptSLRule implements java.io.Serializable {
 	/**
 	 * @return the forbiddenMethods
 	 */
-	public List<String> getForbiddenMethods() {
+	public List<CryptSLForbiddenMethod> getForbiddenMethods() {
 		return forbiddenMethods;
 	}
 	
@@ -66,7 +66,8 @@ public class CryptSLRule implements java.io.Serializable {
 		outputSB.append(this.className);
 		
 		outputSB.append("\nforbiddenMethods:");
-		for (String forbMethSig : this.forbiddenMethods) {
+		for (CryptSLForbiddenMethod forbMethSig : this.forbiddenMethods) {
+			
 			outputSB.append(forbMethSig);
 			outputSB.append(",");
 		}

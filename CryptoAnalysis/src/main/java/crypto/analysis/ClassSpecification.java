@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.crypto.spec.PBEKeySpec;
 
 import boomerang.accessgraph.AccessGraph;
+import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -127,7 +128,7 @@ public class ClassSpecification {
 		return cryptSLRule.toString();
 	}
 	public void checkForForbiddenMethods() {
-		List<String> forbiddenMethods = cryptSLRule.getForbiddenMethods();
+		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
 		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		ReachableMethods rm = Scene.v().getReachableMethods();
