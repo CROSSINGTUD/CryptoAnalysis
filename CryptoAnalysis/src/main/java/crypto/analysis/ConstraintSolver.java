@@ -48,6 +48,7 @@ public class ConstraintSolver {
 //			default:
 //				return 0;
 //		}
+		return 0;
 	}
 	
 	private int extractValueAsInt(String exp, Multimap<CallSiteWithParamIndex, Value> actualValues) {
