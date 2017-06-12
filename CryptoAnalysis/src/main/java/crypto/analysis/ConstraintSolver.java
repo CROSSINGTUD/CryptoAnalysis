@@ -38,16 +38,16 @@ public class ConstraintSolver {
 	}
 	
 	private int evaluate(CryptSLArithmeticConstraint arith, Multimap<CallSiteWithParamIndex, Value> actualValues) {
-		int left = extractValueAsInt(arith.getLeft(), actualValues);
-		int right = extractValueAsInt(arith.getRight(), actualValues);
-		switch (arith.getOperator()) {
-			case n:
-				return left - right;
-			case p:
-				return left + right;
-			default:
-				return 0;
-		}
+//		int left = extractValueAsInt(arith.getLeft(), actualValues);
+//		int right = extractValueAsInt(arith.getRight(), actualValues);
+//		switch (arith.getOperator()) {
+//			case n:
+//				return left - right;
+//			case p:
+//				return left + right;
+//			default:
+//				return 0;
+//		}
 	}
 	
 	private int extractValueAsInt(String exp, Multimap<CallSiteWithParamIndex, Value> actualValues) {

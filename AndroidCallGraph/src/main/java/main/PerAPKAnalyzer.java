@@ -14,13 +14,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table.Cell;
 import com.google.common.io.Files;
 
-import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -35,25 +32,16 @@ import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
-import soot.jimple.InvokeStmt;
 import soot.jimple.infoflow.android.TestApps.Test;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.util.queue.QueueReader;
-import test.Assertion;
-import test.ComparableResult;
-import test.ExtractedValueAssertion;
-import test.IDEALCrossingTestingFramework;
-import test.UsagePatternTestingFramework;
-import test.assertions.CallToForbiddenMethodAssertion;
-import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
 
 public class PerAPKAnalyzer {
