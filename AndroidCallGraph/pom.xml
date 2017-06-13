@@ -53,11 +53,6 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>heros</groupId>
-			<artifactId>heros-ideal</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>soot</groupId>
 			<artifactId>soot</artifactId>
 			<version>trunk</version>
