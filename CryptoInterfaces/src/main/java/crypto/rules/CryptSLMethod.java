@@ -58,10 +58,11 @@ public class CryptSLMethod implements Serializable{
 			stmntBuilder.append(par.getValue());
 			stmntBuilder.append(" ");
 			stmntBuilder.append(par.getKey());
-			stmntBuilder.append(" (");
-			stmntBuilder.append(backward.get(parameters.indexOf(par)));
-			
-			stmntBuilder.append("),");
+			if (backward != null) {
+				stmntBuilder.append(" (");
+				stmntBuilder.append(backward.get(parameters.indexOf(par)));
+				stmntBuilder.append("),");
+			}
 		}
 		
 		stmntBuilder.append(");");
