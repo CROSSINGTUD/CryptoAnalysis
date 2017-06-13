@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -22,6 +23,7 @@ import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
+import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.rules.CryptSLRule;
@@ -52,6 +54,8 @@ public class PerAPKAnalyzer {
 	private static IDebugger<TypestateDomainValue<StateNode>> debugger;
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;
+	private static CogniCryptCLIReporter reporter;
+	private static File apkFile;
 	public final static String RESOURCE_PATH = "../CryptoAnalysis/src/test/resources/";
 
 	private enum MethodType {
@@ -70,33 +74,34 @@ public class PerAPKAnalyzer {
 	}
 
 	public static IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-		if(debugger == null)
+		if (debugger == null)
 			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
 	}
+
 	public static void main(String... args) throws InterruptedException, IOException {
 		readInRelevantCalls();
-		File file = new File(args[0]);
-		//TODO create dir if necessary.
-		ideVizFile = new File("target/IDEViz/ide-viz-"+file.getName());
+		apkFile = new File(args[0]);
+		// TODO create dir if necessary.
+		ideVizFile = new File("target/IDEViz/ide-viz-" + apkFile.getName());
 		Test.main(new String[] { args[0], args[1], "--notaintanalysis" });
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
 		fout = new FileWriter("Report.txt", true);
 
 		try {
-			log(0, "Analyzing " + file.getName());
+			log(0, "Analyzing " + apkFile.getName());
 			Set<SootMethod> visited = Sets.newHashSet();
 			while (listener.hasNext()) {
 				MethodOrMethodContext next = listener.next();
-				analyzeMethod(next.method(), MethodType.Application, file);
+				analyzeMethod(next.method(), MethodType.Application);
 				visited.add(next.method());
 			}
 			log(1, "Call graph reachable methods: " + visited.size());
 			for (SootClass c : Scene.v().getClasses()) {
 				for (SootMethod m : c.getMethods()) {
 					if (visited.add(m))
-						analyzeMethod(m, MethodType.Library, file);
+						analyzeMethod(m, MethodType.Library);
 				}
 			}
 			log(1, "APK file reachable methods: " + visited.size());
@@ -112,22 +117,19 @@ public class PerAPKAnalyzer {
 
 	protected static List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();
-		rules.add(CryptSLRuleReader
-				.readFromFile(new File(RESOURCE_PATH + "Cipher.cryptslbin")));
-		rules.add(CryptSLRuleReader
-				.readFromFile(new File(RESOURCE_PATH + "KeyGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader
-				.readFromFile(new File(RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "Cipher.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyGenerator.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
 		// rules.add(CryptSLRuleReader.readFromFile(new
 		// File(IDEALCrossingTestingFramework.RESOURCE_PATH +
 		// "MessageDigest.cryptslbin")));
-		rules.add(CryptSLRuleReader
-				.readFromFile(new File(RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 		return rules;
 	}
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
+		reporter = new CogniCryptCLIReporter();
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 			@Override
@@ -138,24 +140,7 @@ public class PerAPKAnalyzer {
 			@Override
 			public CryptSLAnalysisListener analysisListener() {
 				// TODO Auto-generated method stub
-				return new CryptSLAnalysisListener() {
-					
-					@Override
-					public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-						System.out.println("Seed  finished" + seed);
-					}
-					
-					@Override
-					public void collectedValues(AnalysisSeedWithSpecification seed,
-							Multimap<CallSiteWithParamIndex, Value> collectedValues) {
-						System.out.println("Collected values" + collectedValues + "  " + seed);
-					}
-					
-					@Override
-					public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
-						System.out.println("Call to Forbidden method " + classSpecification + " call " + callSite);
-					}
-				};
+				return reporter;
 			}
 
 			@Override
@@ -165,6 +150,61 @@ public class PerAPKAnalyzer {
 
 		};
 		scanner.scan();
+		detailedOutput();
+		summarizedOutput();
+	}
+
+	private static void summarizedOutput() {
+		try {
+			File file = new File(getSummaryFile());
+			boolean fileExisted = true;
+			if (!file.exists()) {
+				fileExisted = false;
+			}
+			FileWriter fileWriter = new FileWriter(file, true);
+			if (!fileExisted) {
+				List<String> line = Lists.newLinkedList();
+				line.add("apk_name");
+				line.add("analysisSeeds");
+				line.add("forbiddenMethodErrors");
+				line.add("typestateErrorTimeouts(seed)");
+				line.add("typestateError(seed)");
+				line.add("typestateError(unit)");
+				fileWriter.write(Joiner.on(",").join(line) + "\n");
+			}
+			List<String> line = Lists.newLinkedList();
+			line.add(apkFile.getName());
+			line.add(Integer.toString(reporter.getAnalysisSeeds().size()));
+			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
+			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
+			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
+			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
+			fileWriter.write(Joiner.on(",").join(line) + "\n");
+			fileWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static String getSummaryFile() {
+		String property = System.getProperty("SummaryFile");
+		if (property != null)
+			return property;
+		return "summary-report.csv";
+	}
+
+	private static void detailedOutput() {
+		File file = new File("target/reports/cognicrypt/"+apkFile.getName());
+		file.getParentFile().mkdirs();
+		try {
+			FileWriter fileWriter = new FileWriter(file);
+			fileWriter.write(reporter.toString());
+			fileWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void log(int i, String string) throws IOException {
@@ -175,28 +215,28 @@ public class PerAPKAnalyzer {
 		fout.write(s + string + " \n");
 	}
 
-	private static void analyzeMethod(SootMethod method, MethodType mType, File file) throws IOException {
+	private static void analyzeMethod(SootMethod method, MethodType mType) throws IOException {
 		if (!method.hasActiveBody())
 			return;
 		for (Unit u : method.getActiveBody().getUnits()) {
-//			if (u instanceof InvokeStmt) {
-				for (String relevantCall : relevantCalls)
-					if (u.toString().contains(relevantCall)) {
-						log(2, mType + "\t Class: " + method.getDeclaringClass() + "  "
-								+ method.getDeclaringClass().isApplicationClass() + "\t Method: " + method.getName()
-								+ "\t Unit " + u);
-						File parentFile = file.getParentFile();
-						File dir = new File(parentFile.getAbsolutePath() + File.separator + mType);
-						if (!dir.exists()) {
-							System.out.println("Created dir " + dir.getAbsolutePath());
-							dir.mkdir();
-						}
-						File copyToFile = new File(dir.getAbsolutePath() + File.separator + file.getName());
-						Files.copy(file, copyToFile);
-						if (mType == MethodType.Application)
-							runCryptoScanner = true;
+			// if (u instanceof InvokeStmt) {
+			for (String relevantCall : relevantCalls)
+				if (u.toString().contains(relevantCall)) {
+					log(2, mType + "\t Class: " + method.getDeclaringClass() + "  "
+							+ method.getDeclaringClass().isApplicationClass() + "\t Method: " + method.getName()
+							+ "\t Unit " + u);
+					File parentFile = apkFile.getParentFile();
+					File dir = new File(parentFile.getAbsolutePath() + File.separator + mType);
+					if (!dir.exists()) {
+						System.out.println("Created dir " + dir.getAbsolutePath());
+						dir.mkdir();
 					}
-//			}
+					File copyToFile = new File(dir.getAbsolutePath() + File.separator + apkFile.getName());
+					Files.copy(apkFile, copyToFile);
+					if (mType == MethodType.Application)
+						runCryptoScanner = true;
+				}
+			// }
 		}
 	}
 }

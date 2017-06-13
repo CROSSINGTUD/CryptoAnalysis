@@ -73,7 +73,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 					@Override
 					public CryptSLAnalysisListener analysisListener() {
-						// TODO Auto-generated method stub
 						return new CryptSLAnalysisListener(){
 							@Override
 							public void onSeedFinished(IFactAtStatement seed,
@@ -123,6 +122,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void discoveredSeed(AnalysisSeedWithSpecification curr) {
+								
+							}
+
+							@Override
+							public void onSeedTimeout(IFactAtStatement seed) {
+								// TODO Auto-generated method stub
 								
 							}
 						};

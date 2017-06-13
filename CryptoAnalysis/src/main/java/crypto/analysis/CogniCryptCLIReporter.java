@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -21,6 +22,7 @@ import typestate.TypestateDomainValue;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	Set<AnalysisSeedWithSpecification> analysisSeeds = Sets.newHashSet();
+	Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
 	Multimap<AnalysisSeedWithSpecification,Unit> reportedTypestateErros = HashMultimap.create();
 	Multimap<ClassSpecification,Unit> callToForbiddenMethod = HashMultimap.create();
 	
@@ -64,5 +66,40 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void discoveredSeed(AnalysisSeedWithSpecification curr) {
 		analysisSeeds.add(curr);
+	}
+
+	public Multimap<AnalysisSeedWithSpecification, Unit> getTypestateErrors() {
+		return reportedTypestateErros;
+	}
+	public Multimap<ClassSpecification, Unit> getCallToForbiddenMethod() {
+		return callToForbiddenMethod;
+	}
+	public Set<AnalysisSeedWithSpecification> getAnalysisSeeds() {
+		return analysisSeeds;
+	}
+
+	@Override
+	public void onSeedTimeout(IFactAtStatement seed) {
+		typestateTimeouts.add(seed);
+	}
+	
+	public Set<IFactAtStatement> getTypestateTimeouts() {
+		return typestateTimeouts;
+	}
+	
+	@Override
+	public String toString() {
+		String s = "================SEEDS=======================\n";
+		s += Joiner.on("\n").join(analysisSeeds);
+		s += "================CALL TO FORBIDDEN METHODS==================\n";
+		s += Joiner.on("\n").join(callToForbiddenMethod.entries());
+
+		s += "================REPORTED TYPESTATE ERRORS==================\n";
+		s += Joiner.on("\n").join(reportedTypestateErros.entries());
+
+		s += "================Timeouts: ==================\n";
+		s += Joiner.on("\n").join(typestateTimeouts);
+
+		return s;
 	}
 }

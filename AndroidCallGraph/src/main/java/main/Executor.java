@@ -20,8 +20,8 @@ public class Executor {
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {
 					ProcessBuilder pb = new ProcessBuilder(command);
-					pb.redirectOutput(new File("target/reports/out_crypto-analysis-"+file.getName() + ".txt"));
-					pb.redirectError(new File("target/reports/err_crypto-analysis-" +  file.getName() + ".txt"));
+					pb.redirectOutput(new File("target/reports/"+file.getName() + "-out.txt"));
+					pb.redirectError(new File("target/reports/" +  file.getName() + "-err.txt"));
 					Process proc = pb.start();
 					proc.waitFor();
 				} catch (IOException ex) {
