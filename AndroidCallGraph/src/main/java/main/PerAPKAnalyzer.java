@@ -30,6 +30,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
@@ -140,7 +141,7 @@ public class PerAPKAnalyzer {
 				return new CryptSLAnalysisListener() {
 					
 					@Override
-					public void onSeedFinished(FactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+					public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 						System.out.println("Seed  finished" + seed);
 					}
 					

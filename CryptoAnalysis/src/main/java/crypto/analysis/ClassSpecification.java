@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -63,9 +64,6 @@ public class ClassSpecification {
 	}
 
 	public void checkForForbiddenMethods() {
-		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
-		System.out.println(forbiddenMethods);
-		//TODO Iterate over ICFG and report on usage of forbidden method.
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
@@ -94,9 +92,11 @@ public class ClassSpecification {
 
 	private boolean isForbiddenMethod(SootMethod method) {
 		// TODO replace by real specification once available.
-		List<String> forbiddenMethods = cryptSLRule.getForbiddenMethods();
-		for(String m : forbiddenMethods){
-			Set<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m);
+		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
+//		System.out.println(forbiddenMethods);
+		//TODO Iterate over ICFG and report on usage of forbidden method.
+		for(CryptSLForbiddenMethod m : forbiddenMethods){
+			Collection<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m.getMethod());
 			if(matchingMatched.contains(method))
 				return true;
 		}

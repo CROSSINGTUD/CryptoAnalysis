@@ -8,11 +8,14 @@ import com.google.common.collect.Multimap;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import ideal.Analysis;
 import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.Unit;
 import soot.Value;
+import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IFactAtStatement{
@@ -21,6 +24,7 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement{
 	private final AnalysisSeedWithSpecification parent;
 	private CryptoScanner cryptoScanner;
 	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
+	private Analysis<TypestateDomainValue<StateNode>> analysis;
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
@@ -67,13 +71,18 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement{
 		return "AnalysisSeedWithSpecification [factAtStmt=" + factAtStmt + ", spec=" + spec + "]";
 	}
 	public void execute() {
-		spec.createTypestateAnalysis().analysisForSeed(this);
+		getOrCreateAnalysis().analysisForSeed(this);
 		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
 		checkConstraintSystem();
 		//TODO only execute when typestate and constraint solving did not fail.
 		ensuresPredicate();
 	}
 
+	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis() {
+		if(analysis == null)
+			analysis = spec.createTypestateAnalysis();
+		return analysis;
+	}
 	private void ensuresPredicate() {
 		//TODO match to appropriate predicates. 
 		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){

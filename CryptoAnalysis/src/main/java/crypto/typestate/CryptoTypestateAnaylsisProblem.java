@@ -19,7 +19,6 @@ import crypto.rules.StateNode;
 import heros.EdgeFunction;
 import heros.utilities.DefaultValueMap;
 import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
@@ -74,6 +73,11 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.values()){
 			q.solve();
 		}
+	}
+	
+	@Override
+	public void onStartWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		getOrCreateTypestateChangeFunction().injectQueryForSeed(seed.getStmt());
 	}
 	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt,final int index,final AccessGraph d1) {
 		Value parameter = stmt.getInvokeExpr().getArg(index);

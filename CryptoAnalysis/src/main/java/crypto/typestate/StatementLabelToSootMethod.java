@@ -26,12 +26,16 @@ public class StatementLabelToSootMethod {
 		return descriptorToSootMethod.getOrCreate(label);
 	}
 	private Collection<SootMethod> _convert(CryptSLMethod label) {
-		String methodName = label.getMethodName();
-		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
 		Set<SootMethod> res = Sets.newHashSet();
+		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
-		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
+		if(!Scene.v().containsClass(declaringClass))
+			return res;
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
+		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
+		if(methodNameWithoutDeclaringClass.equals(sootClass.getShortName()))
+			methodNameWithoutDeclaringClass = "<init>";
+		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
 		for (SootMethod m : sootClass.getMethods()) {
 			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams)
 				res.add(m);
@@ -39,12 +43,6 @@ public class StatementLabelToSootMethod {
 		return res;
 	}
 	private String getMethodNameWithoutDeclaringClass(String desc) {
-		try{
-			if(Scene.v().containsClass(desc))
-				return "<init>";
-		} catch(RuntimeException e){
-			
-		}
 		return desc.substring(desc.lastIndexOf(".") +1);
 	}
 

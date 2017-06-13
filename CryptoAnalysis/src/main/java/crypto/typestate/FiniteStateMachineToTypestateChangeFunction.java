@@ -72,6 +72,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		}
 		return res;
 	}
+
+	public void injectQueryForSeed(Unit u){
+        injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),u,null);
+	}
 	
 	private void injectQueryAtCallSite(List<CryptSLMethod> list, Unit callSite, AccessGraph context) {
 		for(CryptSLMethod matchingDescriptor : list){
@@ -92,7 +96,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 							if(!param.getKey().equals("_")){
 								soot.Type parameterType = method.getParameterType(index - 1);
 								if(parameterType.toString().equals(param.getValue())){
-									analysisProblem.addQueryAtCallsite(param.getValue(), stmt, index - 1, context);
+									analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index - 1, context);
 								}
 							}
 						}
@@ -119,7 +123,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
 		}
-		injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),unit,null);
 		return out;
 	}
 
