@@ -52,12 +52,12 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			outTransitions.putAll(t.from(), convert(t.getLabel()));
 		}
 		
-		//All transitions that are not in the state machie 
+		//All transitions that are not in the state machine 
 		for(StateNode s : outTransitions.keySet()){
 			Collection<SootMethod> remaining = getAllMatchedMethods();
 			Collection<SootMethod> outs = outTransitions.get(s);
 			remaining.removeAll(outs);
-			this.addTransition(new MatcherTransition<StateNode>(s, remaining, Parameter.This, new ErrorStateNode(), Type.OnCallToReturn));
+			this.addTransition(new MatcherTransition<StateNode>(s, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
 	}
 

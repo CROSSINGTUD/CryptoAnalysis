@@ -4,8 +4,15 @@ import crypto.rules.StateNode;
 
 public class ErrorStateNode extends StateNode {
 
-	public ErrorStateNode() {
+	private static ErrorStateNode instance;
+
+	private ErrorStateNode() {
 		super("ERROR");
 	}
-
+	
+	public static ErrorStateNode v(){
+		if(instance == null)
+			instance = new ErrorStateNode();
+		return instance;
+	}
 }

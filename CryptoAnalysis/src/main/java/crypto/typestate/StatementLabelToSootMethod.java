@@ -2,6 +2,7 @@ package crypto.typestate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -37,10 +38,22 @@ public class StatementLabelToSootMethod {
 			methodNameWithoutDeclaringClass = "<init>";
 		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
 		for (SootMethod m : sootClass.getMethods()) {
-			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams)
-				res.add(m);
+			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams){
+				if(parametersMatch(label.getParameters(), m.getParameterTypes()))
+					res.add(m);
+			}
 		}
 		return res;
+	}
+	private boolean parametersMatch(List<Entry<String, String>> parameters, List<Type> parameterTypes) {
+		int i = 1;
+		for(Type t : parameterTypes){
+			if(!t.toString().equals(parameters.get(i).getValue())){
+				return false;
+			}
+			i++;
+		}
+		return true;
 	}
 	private String getMethodNameWithoutDeclaringClass(String desc) {
 		return desc.substring(desc.lastIndexOf(".") +1);
@@ -66,38 +79,5 @@ public class StatementLabelToSootMethod {
 		if(instance == null)
 			instance = new StatementLabelToSootMethod();
 		return instance;
-	}
-	public Set<SootMethod> convert(String label) {
-		String removedParameters = label.substring(0,label.indexOf("("));
-		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(removedParameters);
-		Set<SootMethod> res = Sets.newHashSet();
-		String declaringClass = getDeclaringClass(removedParameters);
-		String[] params = getParameters(label);
-		SootClass sootClass = Scene.v().getSootClass(declaringClass);
-		for(SootMethod m : sootClass.getMethods()){
-			if(m.getName().equals(methodNameWithoutDeclaringClass)){
-				if(m.getParameterCount() == params.length){
-					boolean paramTypesMatch = true;
-					int i = 0;
-					for(Type t : m.getParameterTypes()){
-						if(!paramsTypeMatch(t, params[i])){
-							paramTypesMatch = false;
-							break;
-						}
-						i++;
-					}
-					if(paramTypesMatch)
-						res.add(m);
-				}
-			}
-		}
-		return res;
-	}
-	private boolean paramsTypeMatch(Type t, String string) {
-		return t.toString().equals(string);
-	}
-	private String[] getParameters(String label) {	
-		String substring = label.substring(label.indexOf("(")+1, label.indexOf(")"));
-		return substring.split(",");
 	}
 }
