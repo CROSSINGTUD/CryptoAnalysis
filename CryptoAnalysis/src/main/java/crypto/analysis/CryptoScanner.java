@@ -51,6 +51,7 @@ public abstract class CryptoScanner {
 			AnalysisSeedWithSpecification curr = worklist.poll();
 			if(!visited.add(curr))
 				continue;
+			analysisListener().discoveredSeed(curr);
 			this.curr = curr;
 			curr.execute();
 		}
@@ -64,7 +65,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for(IFactAtStatement seed : spec.getInitialSeeds()){
-				worklist.add(new AnalysisSeedWithSpecification(this, seed, spec));
+				addToWorkList(new AnalysisSeedWithSpecification(this, seed, spec));
 			}
 		}
 	}
@@ -93,7 +94,7 @@ public abstract class CryptoScanner {
 							@Override
 							public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 								for(Pair<Unit, AccessGraph> p : res.keySet()){
-									worklist.add(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()), specification, curr));
+									addToWorkList(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()), specification, curr));
 								}
 							}
 						});
@@ -103,6 +104,11 @@ public abstract class CryptoScanner {
 			
 		}
 	}
+
+	protected void addToWorkList(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
+		worklist.add(analysisSeedWithSpecification);
+	}
+
 
 	public IDebugger<TypestateDomainValue<StateNode>> debugger() {
 		return new NullDebugger<>();

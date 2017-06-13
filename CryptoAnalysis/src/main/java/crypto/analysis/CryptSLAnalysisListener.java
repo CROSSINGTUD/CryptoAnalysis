@@ -16,4 +16,7 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 
 	void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite);
 
+	void discoveredSeed(AnalysisSeedWithSpecification curr);
+
+	
 }
