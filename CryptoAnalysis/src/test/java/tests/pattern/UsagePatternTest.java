@@ -44,14 +44,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.assertNotErrorState(keygen);
-		Assertions.failedConstraint(keygen);
+		Assertions.violatedConstraint(keygen);
 		
 		Cipher cCipher = Cipher.getInstance("AES");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
-		Assertions.failedConstraint(cCipher);
+		Assertions.violatedConstraint(cCipher);
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
-		Assertions.failedConstraint(cCipher);
+		Assertions.violatedConstraint(cCipher);
 	}
 
 }

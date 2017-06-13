@@ -19,4 +19,5 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	void discoveredSeed(AnalysisSeedWithSpecification curr);
 
 	
+	void violateConstraint(ClassSpecification spec, Unit callSite);
 }
