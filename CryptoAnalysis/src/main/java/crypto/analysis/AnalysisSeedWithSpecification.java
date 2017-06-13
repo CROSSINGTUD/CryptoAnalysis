@@ -6,25 +6,28 @@ import java.util.List;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.Multimap;
 
+import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
+import soot.Unit;
 import soot.Value;
 import typestate.interfaces.ISLConstraint;
 
-public class AnalysisSeedWithSpecification {
-	private final FactAtStatement factAtStmt;
+public class AnalysisSeedWithSpecification implements IFactAtStatement{
+	private final IFactAtStatement factAtStmt;
 	private final ClassSpecification spec;
 	private final AnalysisSeedWithSpecification parent;
 	private CryptoScanner cryptoScanner;
 	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, FactAtStatement factAtStmt, ClassSpecification spec){
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
 		this.spec = spec;
 		this.parent = null;
 	}
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, FactAtStatement factAtStmt, ClassSpecification spec, AnalysisSeedWithSpecification parent){
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec, AnalysisSeedWithSpecification parent){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
 		this.spec = spec;
@@ -64,7 +67,7 @@ public class AnalysisSeedWithSpecification {
 		return "AnalysisSeedWithSpecification [factAtStmt=" + factAtStmt + ", spec=" + spec + "]";
 	}
 	public void execute() {
-		spec.createTypestateAnalysis().analysisForSeed(factAtStmt);
+		spec.createTypestateAnalysis().analysisForSeed(this);
 		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
 		checkConstraintSystem();
 		//TODO only execute when typestate and constraint solving did not fail.
@@ -94,5 +97,13 @@ public class AnalysisSeedWithSpecification {
 
 	public LinkedList<EnsuredCryptSLPredicate> getEnsuredPredicates(){
 		return Lists.newLinkedList(ensuredPredicates);
+	}
+	@Override
+	public AccessGraph getFact() {
+		return factAtStmt.getFact();
+	}
+	@Override
+	public Unit getStmt() {
+		return factAtStmt.getStmt();
 	}
 }

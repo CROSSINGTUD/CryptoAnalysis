@@ -26,6 +26,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
@@ -73,7 +74,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						// TODO Auto-generated method stub
 						return new CryptSLAnalysisListener(){
 							@Override
-							public void onSeedFinished(FactAtStatement seed,
+							public void onSeedFinished(IFactAtStatement seed,
 									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 								for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
 									for(Assertion e : expectedResults){

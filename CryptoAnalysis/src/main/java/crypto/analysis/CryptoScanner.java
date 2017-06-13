@@ -16,6 +16,7 @@ import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import heros.solver.Pair;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.Local;
@@ -62,7 +63,7 @@ public abstract class CryptoScanner {
 			if(!spec.isRootNode())
 				continue;
 
-			for(FactAtStatement seed : spec.getInitialSeeds()){
+			for(IFactAtStatement seed : spec.getInitialSeeds()){
 				worklist.add(new AnalysisSeedWithSpecification(this, seed, spec));
 			}
 		}

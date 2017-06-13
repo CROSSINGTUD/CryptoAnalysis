@@ -20,6 +20,7 @@ import heros.EdgeFunction;
 import heros.utilities.DefaultValueMap;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
 import soot.Unit;
@@ -69,7 +70,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		};
 	};
 	@Override
-	public void onFinishWithSeed(FactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.values()){
 			q.solve();
 		}

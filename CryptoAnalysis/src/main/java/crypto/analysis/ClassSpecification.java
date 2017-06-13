@@ -16,6 +16,7 @@ import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import crypto.typestate.StatementLabelToSootMethod;
 import ideal.Analysis;
 import ideal.FactAtStatement;
+import ideal.IFactAtStatement;
 import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
@@ -47,7 +48,7 @@ public class ClassSpecification {
 		return true;
 	}
 
-	public Set<FactAtStatement> getInitialSeeds() {
+	public Set<IFactAtStatement> getInitialSeeds() {
 		return createTypestateAnalysis().computeSeeds();
 	}
 
