@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
@@ -37,6 +39,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	
 	private CryptoTypestateAnaylsisProblem analysisProblem;
 	private StateMachineGraph stateMachineGraph;
+	private Multimap<StateNode, SootMethod> outTransitions = HashMultimap.create();
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
@@ -46,6 +49,15 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
 			this.addTransition(new LabeledMatcherTransition(t.from(), t.getLabel(),
 					Parameter.This, t.to(), Type.OnCallToReturn));
+			outTransitions.putAll(t.from(), convert(t.getLabel()));
+		}
+		
+		//All transitions that are not in the state machie 
+		for(StateNode s : outTransitions.keySet()){
+			Collection<SootMethod> remaining = getAllMatchedMethods();
+			Collection<SootMethod> outs = outTransitions.get(s);
+			remaining.removeAll(outs);
+			this.addTransition(new MatcherTransition<StateNode>(s, remaining, Parameter.This, new ErrorStateNode(), Type.OnCallToReturn));
 		}
 	}
 

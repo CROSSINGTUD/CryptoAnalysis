@@ -113,4 +113,13 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		
 		Assertions.assertState(c, -1);	
 	}
+
+	@Test
+	public void testCipher11() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		Cipher c = Cipher.getInstance("AES");
+		if(staticallyUnknown())
+			c.init(1, new SecretKeySpec(null, "AES"));
+		c.doFinal(null);
+		Assertions.assertState(c, -1);	
+	}
 }
