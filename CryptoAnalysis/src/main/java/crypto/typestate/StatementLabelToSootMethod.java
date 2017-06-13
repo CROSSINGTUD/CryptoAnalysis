@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import crypto.rules.StatementLabel;
+import crypto.rules.CryptSLMethod;
 import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import soot.SootClass;
@@ -15,17 +15,17 @@ import soot.Type;
 
 public class StatementLabelToSootMethod {
 	private static StatementLabelToSootMethod instance;
-	private DefaultValueMap<StatementLabel, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<StatementLabel, Collection<SootMethod>>() {
+	private DefaultValueMap<CryptSLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CryptSLMethod, Collection<SootMethod>>() {
 		@Override
-		protected Collection<SootMethod> createItem(StatementLabel key) {
+		protected Collection<SootMethod> createItem(CryptSLMethod key) {
 			return _convert(key);
 		}
 	};
 	
-	public Collection<SootMethod> convert(StatementLabel label){
+	public Collection<SootMethod> convert(CryptSLMethod label){
 		return descriptorToSootMethod.getOrCreate(label);
 	}
-	private Collection<SootMethod> _convert(StatementLabel label) {
+	private Collection<SootMethod> _convert(CryptSLMethod label) {
 		String methodName = label.getMethodName();
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
 		Set<SootMethod> res = Sets.newHashSet();
@@ -48,9 +48,9 @@ public class StatementLabelToSootMethod {
 		return desc.substring(desc.lastIndexOf(".") +1);
 	}
 
-	public Collection<SootMethod> convert(List<StatementLabel> list) {
+	public Collection<SootMethod> convert(List<CryptSLMethod> list) {
 		Set<SootMethod> res = Sets.newHashSet();
-		for(StatementLabel l : list)
+		for(CryptSLMethod l : list)
 			res.addAll(_convert(l));
 		return res;
 	}

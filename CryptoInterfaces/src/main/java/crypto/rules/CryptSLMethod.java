@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 
-public class StatementLabel implements Serializable{
+public class CryptSLMethod implements Serializable{
 	
 	private String methodName;
 	private List<Entry<String, String>> parameters; 
 	private List<Boolean> backward;
 	
-	public StatementLabel(String methName, List<Entry<String, String>> pars, List<Boolean> backw) {
+	public CryptSLMethod(String methName, List<Entry<String, String>> pars, List<Boolean> backw) {
 		methodName = methName;
 		parameters = pars;
 		backward = backw;
@@ -58,7 +58,11 @@ public class StatementLabel implements Serializable{
 			stmntBuilder.append(par.getValue());
 			stmntBuilder.append(" ");
 			stmntBuilder.append(par.getKey());
-			stmntBuilder.append(",");
+			if (backward != null) {
+				stmntBuilder.append(" (");
+				stmntBuilder.append(backward.get(parameters.indexOf(par)));
+				stmntBuilder.append("),");
+			}
 		}
 		
 		stmntBuilder.append(");");

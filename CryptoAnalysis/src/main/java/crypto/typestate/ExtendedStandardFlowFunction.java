@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
-import crypto.rules.StatementLabel;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.TransitionEdge;
 import heros.FlowFunction;
 import ideal.PerSeedAnalysisContext;
@@ -32,7 +32,7 @@ public class ExtendedStandardFlowFunction extends StandardFlowFunctions<Typestat
 
 	private void extractFlows(CryptSLRule rule) {
 		for (TransitionEdge transEdge : rule.getUsagePattern().getAllTransitions()) {
-			for (StatementLabel label : transEdge.getLabel()) {
+			for (CryptSLMethod label : transEdge.getLabel()) {
 				int index = 0;
 				List<Boolean> backward = label.getBackward();
 				for (Boolean trackBackward : backward) {

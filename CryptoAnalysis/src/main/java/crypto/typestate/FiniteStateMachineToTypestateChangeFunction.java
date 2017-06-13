@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.rules.StatementLabel;
+import crypto.rules.CryptSLMethod;
 import heros.utilities.DefaultValueMap;
 import soot.Local;
 import soot.Scene;
@@ -49,14 +49,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		}
 	}
 
-	private Collection<SootMethod> convert(List<StatementLabel> label) {
+	private Collection<SootMethod> convert(List<CryptSLMethod> label) {
 		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
 		allMatchedMethods.addAll(converted);
 		return converted;
 	}
 
 
-	private Collection<SootMethod> convert(StatementLabel label) {
+	private Collection<SootMethod> convert(CryptSLMethod label) {
 		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
 		allMatchedMethods.addAll(converted);
 		return converted;
@@ -73,8 +73,8 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		return res;
 	}
 	
-	private void injectQueryAtCallSite(List<StatementLabel> list, Unit callSite, AccessGraph context) {
-		for(StatementLabel matchingDescriptor : list){
+	private void injectQueryAtCallSite(List<CryptSLMethod> list, Unit callSite, AccessGraph context) {
+		for(CryptSLMethod matchingDescriptor : list){
 			for(SootMethod m : convert(matchingDescriptor)){
 				if (!(callSite instanceof Stmt))
 					continue;
@@ -137,9 +137,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	
 	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
 
-		private final List<StatementLabel> label;
+		private final List<CryptSLMethod> label;
 
-		public LabeledMatcherTransition(StateNode from, List<StatementLabel> label,
+		public LabeledMatcherTransition(StateNode from, List<CryptSLMethod> label,
 				Parameter param, StateNode to,
 				Type type) {
 			super(from,convert(label), param, to, type);
