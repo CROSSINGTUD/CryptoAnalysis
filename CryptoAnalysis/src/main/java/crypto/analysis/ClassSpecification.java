@@ -95,11 +95,11 @@ public class ClassSpecification {
 	private boolean isForbiddenMethod(SootMethod method) {
 		// TODO replace by real specification once available.
 		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
-		for(String m : forbiddenMethods){
-			Set<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m);
-			if(matchingMatched.contains(method))
-				return true;
-		}
+//		for(String m : forbiddenMethods){
+//			Set<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m);
+//			if(matchingMatched.contains(method))
+//				return true;
+//		}
 		return false;
 	}
 

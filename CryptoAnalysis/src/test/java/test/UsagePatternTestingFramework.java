@@ -41,9 +41,11 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
+import test.assertions.ConstraintViolationAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
@@ -106,6 +108,17 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										expectedResults.reported(callSite);
 									}
 								}
+							}
+
+							@Override
+							public void violateConstraint(ClassSpecification spec, Unit callSite) {
+								for (Assertion e : expectedResults) {
+									if (e instanceof ConstraintViolationAssertion) {
+										((ConstraintViolationAssertion) e).reported(callSite);
+										
+									}
+								}
+								
 							}
 						};
 					}
@@ -191,6 +204,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				Local queryVar = (Local) param;
 				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
 				queries.add(new NotInErrorStateAssertion(stmt, val));
+			}
+			
+			if (invocationName.startsWith("violatedConstraint")) {
+				queries.add(new ConstraintViolationAssertion(stmt));
 			}
 			
 

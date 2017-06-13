@@ -21,7 +21,7 @@ public class Assertions {
 		
 	}
 	
-	public static void failedConstraint(Object o) {
+	public static void violatedConstraint(Object o) {
 		
 	}
 	

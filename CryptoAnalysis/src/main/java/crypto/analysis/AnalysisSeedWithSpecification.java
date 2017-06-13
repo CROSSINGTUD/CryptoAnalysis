@@ -1,21 +1,24 @@
 package crypto.analysis;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.Unit;
 import soot.Value;
 import typestate.interfaces.ISLConstraint;
 
-public class AnalysisSeedWithSpecification implements IFactAtStatement{
+public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPredicate{
 	private final IFactAtStatement factAtStmt;
 	private final ClassSpecification spec;
 	private final AnalysisSeedWithSpecification parent;
@@ -76,22 +79,43 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement{
 
 	private void ensuresPredicate() {
 		//TODO match to appropriate predicates. 
+		Multimap<CallSiteWithParamIndex, Value> collectedValues = spec.getAnalysisProblem().getCollectedValues();
+		Multimap<String, String> parametersToValues = HashMultimap.create();
 		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){
-			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, spec.getAnalysisProblem().getCollectedValues()));
+			for(Entry<CallSiteWithParamIndex, Value> e : collectedValues.entries()){
+				if(predicate.getParameters().contains(e.getKey().getVarName())){
+					parametersToValues.put(e.getKey().getVarName(), e.getValue().toString());
+				}
+			}
+			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, parametersToValues));
 		}
 	}
 	private void checkConstraintSystem() {
 		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
-		ConstraintSolver solver = new ConstraintSolver(this);
+		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
+		ConstraintSolver solver = new ConstraintSolver(this.parent);
 		for (ISLConstraint cons : spec.getRule().getConstraints()) {
-			if (!solver.evaluate(cons, actualValues)) {
+			if (!solver.evaluate(cons, stringValues)) {
 				// report error
 			}
 		}
 	}
 
 	
-	public AnalysisSeedWithSpecification getParent(){
+	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Value> actualValues) {
+		Multimap<String, String> varVal = HashMultimap.create();
+		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
+				Collection<Value> collection = actualValues.get(callSite);
+				List<String> values = new ArrayList<String>();
+				for (Value val: collection) {
+					values.add(val.toString());
+				}
+				varVal.putAll(callSite.getVarName(), values);
+		}
+			
+		return null;
+	}
+	public ParentPredicate getParent(){
 		return parent;
 	}
 

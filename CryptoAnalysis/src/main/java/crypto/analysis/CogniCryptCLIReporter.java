@@ -56,5 +56,10 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Unit stmt){
 		
 	}
+	@Override
+	public void violateConstraint(ClassSpecification spec, Unit callSite) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

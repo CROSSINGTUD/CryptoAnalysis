@@ -16,4 +16,5 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 
 	void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite);
 
+	void violateConstraint(ClassSpecification spec, Unit callSite);
 }
