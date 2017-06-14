@@ -37,14 +37,9 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		});
-		Integer failed = 0;
-		for(ISLConstraint cons : getCryptSLFile().getConstraints()) {
-			if (!cs.evaluate(cons, values)) {
-				failed++;
-			}
-		}
-		assertEquals(failed, (Integer)0);
+		}, getCryptSLFile().getConstraints(), values);
+		
+		assertEquals((Integer)cs.evaluateRelConstraints(), (Integer)0);
 	}
 	
 	@Test
@@ -58,14 +53,8 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		});
-		Integer failed = 0;
-		for(ISLConstraint cons : getCryptSLFile().getConstraints()) {
-			if (!cs.evaluate(cons, values)) {
-				failed++;
-			}
-		}
-		assertEquals(failed, (Integer)1);
+		}, getCryptSLFile().getConstraints(), values);
+		assertEquals((Integer)cs.evaluateRelConstraints(), (Integer)1);
 	}
 
 	

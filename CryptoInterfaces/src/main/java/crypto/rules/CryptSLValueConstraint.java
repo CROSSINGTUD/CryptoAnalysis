@@ -5,17 +5,17 @@ import java.util.List;
 
 public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Serializable {
 	
-	String varName;
+	CryptSLObject var;
 	List<String> valueRange;
 	
-	public CryptSLValueConstraint(String name, String value) { 
-		varName = name;
+	public CryptSLValueConstraint(CryptSLObject name, String value) { 
+		var = name;
 		valueRange = new ArrayList<String>();
 		valueRange.add(value);
 	}
 	
-	public CryptSLValueConstraint(String name, List<String> values) {
-		varName = name;
+	public CryptSLValueConstraint(CryptSLObject name, List<String> values) {
+		var = name;
 		valueRange = values;
 	}
 	
@@ -23,8 +23,16 @@ public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Se
 	 * @return the varName
 	 */
 	public String getVarName() {
-		return varName;
+		return var.getVarName();
 	}
+	
+	/**
+	 * @return the varName
+	 */
+	public CryptSLObject getVar() {
+		return var;
+	}
+	
 	
 	/**
 	 * @return the valueRange
@@ -36,13 +44,20 @@ public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Se
 	public String toString() {
 		StringBuilder vCSB = new StringBuilder();
 		vCSB.append("VC:");
-		vCSB.append(varName);
+		vCSB.append(var);
 		vCSB.append(" - ");
 		for (String value : valueRange) {
 			vCSB.append(value);
 			vCSB.append(",");
 		}
 		return vCSB.toString();
+	}
+
+	@Override
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<String>();
+		varNames.add(var.getVarName());
+		return varNames;
 	}
 	
 }

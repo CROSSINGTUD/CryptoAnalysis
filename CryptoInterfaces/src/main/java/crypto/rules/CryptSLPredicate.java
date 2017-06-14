@@ -1,5 +1,6 @@
 package crypto.rules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
@@ -48,11 +49,21 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 			predSB.append(parameter);
 			predSB.append(",");
 		}
-		
 		predSB.append(")");
 		
 		
 		return predSB.toString();
+	}
+
+	@Override
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<String>();
+		for (String varName : parameters) {
+			if (!("_".equals(varName) || "this".equals(varName))) {
+				varNames.add(varName);
+			}
+		}
+		return varNames;
 	}
 	
 }

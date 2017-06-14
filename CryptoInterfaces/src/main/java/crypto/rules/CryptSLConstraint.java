@@ -1,6 +1,7 @@
 package crypto.rules;
 
 import java.io.Serializable;
+import java.util.List;
 
 import typestate.interfaces.ISLConstraint;
 
@@ -40,7 +41,6 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 		return right;
 	}
 
-
 	public String toString() {
 		StringBuilder constraintSB = new StringBuilder();
 		constraintSB.append(left.toString());
@@ -48,7 +48,12 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 		constraintSB.append(right.toString());
 		return constraintSB.toString();
 	}
-	
-	
+
+	@Override
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = left.getInvolvedVarNames();
+		varNames.addAll(right.getInvolvedVarNames());
+		return varNames;
+	}
 
 }
