@@ -175,6 +175,36 @@ public class CipherTest{
 		ResultPrinter.evaluateResults("CipherTest6", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 2);
 	}
 	
-
+	@Test
+	public void testCipher7() {
+		Multimap<String, String> values = HashMultimap.create();
+		//macced predicate for plaintext
+		values.put("transformation", "AES/CBC/PKCS5Padding");
+		values.put("encmode", "1");
+		ConstraintSolver cs = new ConstraintSolver(new ParentPredicate() {
+			
+			@Override
+			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
+				List<EnsuredCryptSLPredicate> ensuredPredList = new ArrayList<EnsuredCryptSLPredicate>();
+				ArrayList<ICryptSLPredicateParameter> variablesKey = new ArrayList<ICryptSLPredicateParameter>();
+				variablesKey.add(new CryptSLObject("key"));
+				variablesKey.add(new CryptSLObject("alg"));
+				CryptSLPredicate keygenPred = new CryptSLPredicate("generatedKey", variablesKey, false);
+				
+				ArrayList<ICryptSLPredicateParameter> variablesMAC = new ArrayList<ICryptSLPredicateParameter>();
+				variablesMAC.add(new CryptSLObject("plaintext"));
+				variablesMAC.add(new CryptSLObject("_"));
+				CryptSLPredicate macPred = new CryptSLPredicate("macced", variablesMAC, false);
+				
+				Multimap<String, String> collectedValues = HashMultimap.create();
+				collectedValues.put("alg", "AES");
+				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
+				ensuredPredList.add(new EnsuredCryptSLPredicate(macPred, collectedValues));
+				return ensuredPredList;
+			}
+		}, getCryptSLFile().getConstraints(), values);
+		
+		ResultPrinter.evaluateResults("CipherTest7", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
+	}
 	
 }
