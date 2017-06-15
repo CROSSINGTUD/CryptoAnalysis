@@ -3,6 +3,8 @@ package crypto.rules;
 import java.util.ArrayList;
 import java.util.List;
 
+import typestate.interfaces.ICryptSLPredicateParameter;
+
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
 	private String predName;
@@ -76,7 +78,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 				skipFirst = false;
 				continue;
 			}
-			if (!("_".equals(var) || "this".equals(var))) {
+			if (!("_".equals(var.getName()) || "this".equals(var.getName()))) {
 				varNames.add(var.getName());
 			}
 		}

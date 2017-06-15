@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 
+import typestate.interfaces.ICryptSLPredicateParameter;
+
 public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	
 	private String methodName;

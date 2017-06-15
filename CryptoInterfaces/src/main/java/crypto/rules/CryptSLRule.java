@@ -1,6 +1,7 @@
 package crypto.rules;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import typestate.interfaces.ISLConstraint;
 
@@ -8,16 +9,19 @@ public class CryptSLRule implements java.io.Serializable {
 
 	private final String className;
 	
-	private List<CryptSLForbiddenMethod> forbiddenMethods;
+	private final List<Entry<String, String>> objects;  
 	
-	private StateMachineGraph usagePattern;
+	private final List<CryptSLForbiddenMethod> forbiddenMethods;
 	
-	private List<ISLConstraint> constraints;
+	private final StateMachineGraph usagePattern;
 	
-	private List<CryptSLPredicate> predicates;
+	private final List<ISLConstraint> constraints;
 	
-	public CryptSLRule(String _className, List<CryptSLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
+	private final List<CryptSLPredicate> predicates;
+	
+	public CryptSLRule(String _className, List<Entry<String, String>> defObjects, List<CryptSLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
 		className = _className;
+		objects = defObjects;
 		forbiddenMethods = _forbiddenMethods;
 		usagePattern = _usagePattern;
 		constraints = _constraints;
@@ -32,6 +36,14 @@ public class CryptSLRule implements java.io.Serializable {
 		return className;
 	}
 
+	
+	/**
+	 * @return the objects
+	 */
+	public List<Entry<String, String>> getObjects() {
+		return objects;
+	}
+	
 	/**
 	 * @return the forbiddenMethods
 	 */

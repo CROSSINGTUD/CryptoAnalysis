@@ -92,7 +92,7 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	private void checkConstraintSystem() {
 		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
 		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
-		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule().getConstraints(), stringValues);
+		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule(), stringValues);
 		solver.evaluateRelConstraints();
 	}
 

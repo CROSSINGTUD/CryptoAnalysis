@@ -16,8 +16,8 @@ import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
-import crypto.rules.ICryptSLPredicateParameter;
 import test.IDEALCrossingTestingFramework;
+import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CipherTest{
 
@@ -44,7 +44,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest1", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 0);
 	}
@@ -69,7 +69,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest2", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 2);
 	}
@@ -94,7 +94,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest3", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}
@@ -120,7 +120,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest4", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}
@@ -145,7 +145,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest5", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}
@@ -170,7 +170,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(keygenPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest6", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 2);
 	}
@@ -202,7 +202,7 @@ public class CipherTest{
 				ensuredPredList.add(new EnsuredCryptSLPredicate(macPred, collectedValues));
 				return ensuredPredList;
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("CipherTest7", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}

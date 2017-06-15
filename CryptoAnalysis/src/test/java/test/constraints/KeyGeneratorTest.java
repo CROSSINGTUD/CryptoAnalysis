@@ -34,7 +34,7 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		
 		ResultPrinter.evaluateResults("KeyGenerator1", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 0);
 	}
@@ -50,7 +50,7 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		}, getCryptSLFile().getConstraints(), values);
+		}, getCryptSLFile(), values);
 		ResultPrinter.evaluateResults("KeyGenerator2", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}
 

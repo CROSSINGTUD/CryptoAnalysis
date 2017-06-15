@@ -2,6 +2,8 @@ package crypto.rules;
 
 import java.io.Serializable;
 
+import typestate.interfaces.ICryptSLPredicateParameter;
+
 public class CryptSLObject implements Serializable, ICryptSLPredicateParameter {
 
 	private String varName;

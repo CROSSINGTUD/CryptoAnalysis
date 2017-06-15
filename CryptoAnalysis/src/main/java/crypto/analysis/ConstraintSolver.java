@@ -1,9 +1,11 @@
 package crypto.analysis;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Multimap;
 
@@ -13,31 +15,54 @@ import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLConstraint.LogOps;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import typestate.interfaces.ISLConstraint;
 
 public class ConstraintSolver {
 
-	ParentPredicate seed = null;
-	List<ISLConstraint> allConstraints;
-	List<ISLConstraint> relConstraints;
-	Multimap<String, String> parsAndVals;
-	
-	public ConstraintSolver(ParentPredicate analysisSeedWithSpecification, List<ISLConstraint> constraints, Multimap<String, String> parsAndValues) {
+	private final ParentPredicate seed;
+	private final List<ISLConstraint> allConstraints;
+	private final List<ISLConstraint> relConstraints;
+	private final Multimap<String, String> parsAndVals;
+	private List<Entry<String, String>> objects;
+	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer"); 
+	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
+
+	public ConstraintSolver(ParentPredicate analysisSeedWithSpecification, CryptSLRule rule, Multimap<String, String> parsAndValues) {
 		seed = analysisSeedWithSpecification;
 		parsAndVals = parsAndValues;
-		allConstraints  = constraints;
+		allConstraints = rule.getConstraints();
+		objects = rule.getObjects();
 		relConstraints = new ArrayList<ISLConstraint>();
-		for (ISLConstraint cons : constraints) {
+		for (ISLConstraint cons : allConstraints) {
 			List<String> involvedVarNames = cons.getInvolvedVarNames();
 			involvedVarNames.removeAll(parsAndValues.keySet());
-			if (involvedVarNames.isEmpty()) {
+			
+			if (involvedVarNames.isEmpty() || noNonTrackedTypes(involvedVarNames)) {
 				relConstraints.add(cons);
 			}
 		}
 	}
-	
+
+	private boolean noNonTrackedTypes(List<String> involvedVarNames) {
+		for (String varName : involvedVarNames) {
+			if (!isOfNonTrackableType(varName)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isOfNonTrackableType(String varName) {
+		for (Entry<String, String> object : objects) {
+			if (object.getValue().equals(varName) && trackedTypes.contains(object.getKey())) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public int evaluateRelConstraints() {
 		int fail = 0;
@@ -49,8 +74,7 @@ public class ConstraintSolver {
 		}
 		return fail;
 	}
-	
-	
+
 	private boolean evaluate(CryptSLComparisonConstraint comp) {
 		int left = evaluate(comp.getLeft());
 		int right = evaluate(comp.getRight());
@@ -69,7 +93,7 @@ public class ConstraintSolver {
 				return false;
 		}
 	}
-	
+
 	private int evaluate(CryptSLArithmeticConstraint arith) {
 		int left = extractValueAsInt(arith.getLeft());
 		int right = extractValueAsInt(arith.getRight());
@@ -82,7 +106,7 @@ public class ConstraintSolver {
 				return 0;
 		}
 	}
-	
+
 	private int extractValueAsInt(String exp) {
 		int ret = -1;
 		try {
@@ -94,7 +118,7 @@ public class ConstraintSolver {
 			String valueAsString = getVerifiedValue(extractValueAsString(exp));
 			// and cast it to Integer
 			try {
-			ret = Integer.parseInt(valueAsString);
+				ret = Integer.parseInt(valueAsString);
 			} catch (NumberFormatException ex1) {
 				//If that does not work either, I'm out of ideas ...
 				throw new RuntimeException();
@@ -104,16 +128,16 @@ public class ConstraintSolver {
 		return ret;
 	}
 
-	public boolean evaluate(CryptSLValueConstraint valueCons) {
+	private boolean evaluate(CryptSLValueConstraint valueCons) {
 		if (parsAndVals == null || parsAndVals.isEmpty()) {
 			return false;
 		}
 		CryptSLObject var = valueCons.getVar();
-		String val = getValFromVar(var); 
+		String val = getValFromVar(var);
 		if (val.isEmpty()) {
 			return false;
 		} else {
-			return valueCons.getValueRange().contains(val);	
+			return valueCons.getValueRange().contains(val);
 		}
 	}
 
@@ -152,7 +176,6 @@ public class ConstraintSolver {
 		return val;
 	}
 
-
 	private Collection<String> extractValueAsString(String varName) {
 		//Magic that retrieves the value of $varName from $actualValues
 		//This is most likely wrong.
@@ -164,9 +187,9 @@ public class ConstraintSolver {
 		return null;
 	}
 
-	public boolean evaluate(CryptSLConstraint cons) {
+	private boolean evaluate(CryptSLConstraint cons) {
 		boolean left = evaluate(cons.getLeft());
-		
+
 		LogOps ops = cons.getOperator();
 		if (ops.equals(LogOps.implies)) {
 			if (!left) {
@@ -175,10 +198,10 @@ public class ConstraintSolver {
 				return evaluate(cons.getRight());
 			}
 		}
-		
+
 		boolean right = evaluate(cons.getRight());
 		if (ops.equals(LogOps.and)) {
-			return left && right; 
+			return left && right;
 		} else if (ops.equals(LogOps.or)) {
 			return left || right;
 		} else if (ops.equals(LogOps.eq)) {
@@ -187,17 +210,23 @@ public class ConstraintSolver {
 		return false;
 	}
 
-	public boolean evaluate(CryptSLPredicate pred) {
+	private boolean evaluate(CryptSLPredicate pred) {
+		String predName = pred.getPredName();
+		if (predefinedPreds.contains(predName)) {
+			return handlePredefinedNames(pred);
+		} 
+		
 		boolean requiredPredicatesExist = true;
-		for (EnsuredCryptSLPredicate enspred :  seed.getEnsuredPredicates()) {
+		for (EnsuredCryptSLPredicate enspred : seed.getEnsuredPredicates()) {
 			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
 			if (ensuredPredicate.equals(pred)) {
 				for (int i = 0; i < pred.getParameters().size(); i++) {
-					if (pred.getInvolvedVarNames().contains(pred.getParameters().get(i).getName())) {
-						
+					String var = pred.getParameters().get(i).getName();
+					if (pred.getInvolvedVarNames().contains(var)) {
+
 						Collection<String> actVals = enspred.getParametersToValues().get(enspred.getPredicate().getParameters().get(i).getName());
-						Collection<String> expVals = parsAndVals.get(pred.getParameters().get(i).getName());
-						
+						Collection<String> expVals = parsAndVals.get(var);
+
 						String splitter = "";
 						int index = -1;
 						if (pred.getParameters().get(i) instanceof CryptSLObject) {
@@ -207,26 +236,36 @@ public class ConstraintSolver {
 								index = obj.getSplitter().getIndex();
 							}
 						}
-						
+
 						for (String foundVal : expVals) {
 							foundVal = foundVal.split(splitter)[index];
 							requiredPredicatesExist &= actVals.contains(foundVal);
 						}
+					} 
+					else if (isOfNonTrackableType(var)) {
+						requiredPredicatesExist &= true;
+					} else {
+						requiredPredicatesExist &= false;
 					}
 				}
+			} else {
+				requiredPredicatesExist &= false;
 			}
 		}
-		return requiredPredicatesExist;
+		return pred.isNegated() != requiredPredicatesExist;
 	}
-	
 
-	public Boolean evaluate(ISLConstraint cons) {
+	private boolean handlePredefinedNames(CryptSLPredicate pred) {
+		return true;
+	}
+
+	private Boolean evaluate(ISLConstraint cons) {
 		if (cons instanceof CryptSLComparisonConstraint) {
 			return evaluate((CryptSLComparisonConstraint) cons);
 		} else if (cons instanceof CryptSLValueConstraint) {
-			return evaluate((CryptSLValueConstraint)cons);
+			return evaluate((CryptSLValueConstraint) cons);
 		} else if (cons instanceof CryptSLPredicate) {
-			return evaluate((CryptSLPredicate)cons);
+			return evaluate((CryptSLPredicate) cons);
 		} else if (cons instanceof CryptSLConstraint) {
 			return evaluate((CryptSLConstraint) cons);
 		}
@@ -239,8 +278,7 @@ public class ConstraintSolver {
 	public List<ISLConstraint> getAllConstraints() {
 		return allConstraints;
 	}
-	
-	
+
 	/**
 	 * @return the relConstraints
 	 */
