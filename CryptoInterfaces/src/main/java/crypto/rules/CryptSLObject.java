@@ -2,7 +2,7 @@ package crypto.rules;
 
 import java.io.Serializable;
 
-public class CryptSLObject implements Serializable {
+public class CryptSLObject implements Serializable, ICryptSLPredicateParameter {
 
 	private String varName;
 	private CryptSLSplitter splitter;
@@ -33,6 +33,11 @@ public class CryptSLObject implements Serializable {
 	
 	public String toString() {
 		return varName + ((splitter != null) ? splitter.toString() : "");
+	}
+
+	@Override
+	public String getName() {
+		return varName;
 	}
 	
 }

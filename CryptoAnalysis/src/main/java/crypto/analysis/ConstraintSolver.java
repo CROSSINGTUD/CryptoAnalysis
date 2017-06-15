@@ -11,6 +11,7 @@ import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLConstraint.LogOps;
+import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
@@ -37,6 +38,7 @@ public class ConstraintSolver {
 		}
 	}
 	
+
 	public int evaluateRelConstraints() {
 		int fail = 0;
 		for (ISLConstraint con : relConstraints) {
@@ -106,23 +108,34 @@ public class ConstraintSolver {
 		if (parsAndVals == null || parsAndVals.isEmpty()) {
 			return false;
 		}
-		String val = getVerifiedValue(extractValueAsString(valueCons.getVarName()));
-		CryptSLSplitter splitter = valueCons.getVar().getSplitter();
+		CryptSLObject var = valueCons.getVar();
+		String val = getValFromVar(var); 
+		if (val.isEmpty()) {
+			return false;
+		} else {
+			return valueCons.getValueRange().contains(val);	
+		}
+	}
+
+	private String getValFromVar(CryptSLObject var) {
+		String val = getVerifiedValue(extractValueAsString(var.getVarName()));
+		CryptSLSplitter splitter = var.getSplitter();
 		if (splitter != null) {
 			int ind = splitter.getIndex();
 			String splitElement = splitter.getSplitter();
 			if (ind > 0) {
 				String[] splits = val.split(splitElement);
 				if (splits.length > ind) {
-					val = splits[ind];
+					return splits[ind];
 				} else {
-					return false;
+					return "";
 				}
 			} else {
-				val = val.split(splitElement)[ind];
+				return val.split(splitElement)[ind];
 			}
+		} else {
+			return val;
 		}
-		return valueCons.getValueRange().contains(val);	
 	}
 
 	private String getVerifiedValue(Collection<String> actualValue) {
@@ -175,18 +188,35 @@ public class ConstraintSolver {
 	}
 
 	public boolean evaluate(CryptSLPredicate pred) {
+		boolean requiredPredicatesExist = true;
 		for (EnsuredCryptSLPredicate enspred :  seed.getEnsuredPredicates()) {
 			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
 			if (ensuredPredicate.equals(pred)) {
-				for (String predParameter: pred.getParameters()) {
-					String val = getVerifiedValue(extractValueAsString(predParameter));
-					if (enspred.getParametersToValues().get(predParameter).contains(val)) {
-						return true;
+				for (int i = 0; i < pred.getParameters().size(); i++) {
+					if (pred.getInvolvedVarNames().contains(pred.getParameters().get(i).getName())) {
+						
+						Collection<String> actVals = enspred.getParametersToValues().get(enspred.getPredicate().getParameters().get(i).getName());
+						Collection<String> expVals = parsAndVals.get(pred.getParameters().get(i).getName());
+						
+						String splitter = "";
+						int index = -1;
+						if (pred.getParameters().get(i) instanceof CryptSLObject) {
+							CryptSLObject obj = (CryptSLObject) pred.getParameters().get(i);
+							if (obj.getSplitter() != null) {
+								splitter = obj.getSplitter().getSplitter();
+								index = obj.getSplitter().getIndex();
+							}
+						}
+						
+						for (String foundVal : expVals) {
+							foundVal = foundVal.split(splitter)[index];
+							requiredPredicatesExist &= actVals.contains(foundVal);
+						}
 					}
 				}
 			}
 		}
-		return false;
+		return requiredPredicatesExist;
 	}
 	
 
@@ -203,4 +233,18 @@ public class ConstraintSolver {
 		return false;
 	}
 
+	/**
+	 * @return the allConstraints
+	 */
+	public List<ISLConstraint> getAllConstraints() {
+		return allConstraints;
+	}
+	
+	
+	/**
+	 * @return the relConstraints
+	 */
+	public List<ISLConstraint> getRelConstraints() {
+		return relConstraints;
+	}
 }

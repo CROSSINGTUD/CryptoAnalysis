@@ -6,15 +6,27 @@ import java.util.List;
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
 	private String predName;
-	private List<String> parameters;
-	private Boolean negated;
+	private List<ICryptSLPredicateParameter> parameters;
+	private boolean negated;
 	
-	public CryptSLPredicate(String name, List<String> variables, Boolean not) {
+	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
 		predName = name;
 		parameters = variables;
 		negated = not;
 	}
-	
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || !(obj instanceof CryptSLPredicate)) {
+			return false;
+		}
+		CryptSLPredicate other = (CryptSLPredicate) obj;
+		return other.getPredName().equals(this.predName);// && (new HashSet<String>(other.getParameters())).equals(new HashSet<String>(this.getParameters()));
+	}
+
 	/**
 	 * @return the predName
 	 */
@@ -25,7 +37,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	/**
 	 * @return the parameters
 	 */
-	public List<String> getParameters() {
+	public List<ICryptSLPredicateParameter> getParameters() {
 		return parameters;
 	}
 
@@ -45,7 +57,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		predSB.append(predName);
 		predSB.append("(");
 		
-		for (String parameter : parameters) {
+		for (ICryptSLPredicateParameter parameter : parameters) {
 			predSB.append(parameter);
 			predSB.append(",");
 		}
@@ -58,9 +70,14 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	@Override
 	public List<String> getInvolvedVarNames() {
 		List<String> varNames = new ArrayList<String>();
-		for (String varName : parameters) {
-			if (!("_".equals(varName) || "this".equals(varName))) {
-				varNames.add(varName);
+		boolean skipFirst = true;
+		for (ICryptSLPredicateParameter var : parameters) {
+			if (skipFirst) {
+				skipFirst = false;
+				continue;
+			}
+			if (!("_".equals(var) || "this".equals(var))) {
+				varNames.add(var.getName());
 			}
 		}
 		return varNames;
