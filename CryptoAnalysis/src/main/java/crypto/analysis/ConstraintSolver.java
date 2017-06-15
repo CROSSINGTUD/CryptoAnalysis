@@ -18,6 +18,7 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
+import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
 public class ConstraintSolver {
@@ -256,7 +257,32 @@ public class ConstraintSolver {
 	}
 
 	private boolean handlePredefinedNames(CryptSLPredicate pred) {
-		return true;
+		List<ICryptSLPredicateParameter> parameters = pred.getParameters();
+		switch (pred.getPredName()) {
+			case "callTo" : 
+				List<ICryptSLPredicateParameter> predMethods = parameters;
+				for (ICryptSLPredicateParameter predMethod : predMethods) {
+					//check whether predMethod is in foundMethods, which type-state analysis has to figure out
+					//((CryptSLMethod) predMethod);
+				}
+				return true;
+			case "noCallTo" : 
+				List<ICryptSLPredicateParameter> predForbiddenMethods = parameters;
+				for (ICryptSLPredicateParameter predForbMethod : predForbiddenMethods) {
+					//check whether predForbMethod is in foundForbMethods, which forbidden-methods analysis has to figure out
+					//((CryptSLMethod) predForbMethod);
+				}
+				return true;
+			case "neverTypeOf" : 
+				//pred looks as follows: neverTypeOf($varName, $type)
+				// -> first parameter is always the variable
+				// -> second parameter is always the type
+				String varName = ((CryptSLObject)parameters.get(0)).getVarName();
+				//String type = parameters.get(1);
+				return true;
+			default:
+				return true; //should be changed to false once implementation for the other cases works.
+		}
 	}
 
 	private Boolean evaluate(ISLConstraint cons) {
