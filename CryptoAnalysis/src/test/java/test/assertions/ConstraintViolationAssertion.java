@@ -2,7 +2,6 @@ package test.assertions;
 
 import soot.Unit;
 import test.Assertion;
-import typestate.interfaces.ISLConstraint;
 
 public class ConstraintViolationAssertion implements Assertion {
 	

@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -20,7 +19,6 @@ import ideal.Analysis;
 import ideal.ResultReporter;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -33,7 +31,6 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
-import typestate.interfaces.ISLConstraint;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
 	protected IExtendedICFG icfg;

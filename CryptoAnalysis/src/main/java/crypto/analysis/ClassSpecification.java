@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import javax.crypto.spec.PBEKeySpec;
-
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLForbiddenMethod;
@@ -17,7 +15,6 @@ import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import crypto.typestate.StatementLabelToSootMethod;
 import ideal.Analysis;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;

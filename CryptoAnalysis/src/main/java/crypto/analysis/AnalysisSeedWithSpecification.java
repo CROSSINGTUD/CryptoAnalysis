@@ -14,12 +14,10 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.Analysis;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.Unit;
 import soot.Value;
 import typestate.TypestateDomainValue;
-import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPredicate{
 	private final IFactAtStatement factAtStmt;

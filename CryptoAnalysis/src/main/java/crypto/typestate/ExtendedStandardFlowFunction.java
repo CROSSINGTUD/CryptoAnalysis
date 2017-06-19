@@ -6,9 +6,9 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
-import crypto.rules.CryptSLMethod;
 import crypto.rules.TransitionEdge;
 import heros.FlowFunction;
 import ideal.PerSeedAnalysisContext;

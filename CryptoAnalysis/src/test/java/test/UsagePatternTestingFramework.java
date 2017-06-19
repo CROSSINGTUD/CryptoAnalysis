@@ -25,7 +25,6 @@ import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
@@ -45,7 +44,6 @@ import test.assertions.ConstraintViolationAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
-import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
