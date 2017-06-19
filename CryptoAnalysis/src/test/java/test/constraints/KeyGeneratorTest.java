@@ -1,7 +1,5 @@
 package test.constraints;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -18,7 +16,6 @@ import crypto.analysis.ParentPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import test.IDEALCrossingTestingFramework;
-import typestate.interfaces.ISLConstraint;
 
 public class KeyGeneratorTest {
 
@@ -37,14 +34,9 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		});
-		Integer failed = 0;
-		for(ISLConstraint cons : getCryptSLFile().getConstraints()) {
-			if (!cs.evaluate(cons, values)) {
-				failed++;
-			}
-		}
-		assertEquals(failed, (Integer)0);
+		}, getCryptSLFile(), values);
+		
+		ResultPrinter.evaluateResults("KeyGenerator1", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 0);
 	}
 	
 	@Test
@@ -58,14 +50,8 @@ public class KeyGeneratorTest {
 			public List<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 				return Lists.newLinkedList();
 			}
-		});
-		Integer failed = 0;
-		for(ISLConstraint cons : getCryptSLFile().getConstraints()) {
-			if (!cs.evaluate(cons, values)) {
-				failed++;
-			}
-		}
-		assertEquals(failed, (Integer)1);
+		}, getCryptSLFile(), values);
+		ResultPrinter.evaluateResults("KeyGenerator2", cs.getAllConstraints().size(), cs.getRelConstraints().size(), cs.evaluateRelConstraints(), 1);
 	}
 
 	

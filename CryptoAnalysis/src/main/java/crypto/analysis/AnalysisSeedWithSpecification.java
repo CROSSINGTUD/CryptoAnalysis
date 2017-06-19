@@ -2,7 +2,6 @@ package crypto.analysis;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -103,12 +102,8 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	private void checkConstraintSystem() {
 		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
 		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
-		ConstraintSolver solver = new ConstraintSolver(this.parent);
-		for (ISLConstraint cons : spec.getRule().getConstraints()) {
-			if (!solver.evaluate(cons, stringValues)) {
-				// report error
-			}
-		}
+		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule(), stringValues);
+		solver.evaluateRelConstraints();
 	}
 
 	
@@ -129,8 +124,8 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 		return parent;
 	}
 
-	public LinkedList<EnsuredCryptSLPredicate> getEnsuredPredicates(){
-		return Lists.newLinkedList(ensuredPredicates);
+	public List<EnsuredCryptSLPredicate> getEnsuredPredicates(){
+		return Lists.newArrayList(ensuredPredicates);
 	}
 	@Override
 	public AccessGraph getFact() {

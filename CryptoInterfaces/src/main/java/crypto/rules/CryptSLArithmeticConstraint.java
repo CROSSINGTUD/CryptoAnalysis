@@ -1,5 +1,8 @@
 package crypto.rules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -40,5 +43,25 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	public String toString() {
 		return left + " " + operator + " " + right;
 	}
+
+	@Override
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<String>();
+		try {
+			Integer.parseInt(left);
+		} catch (NumberFormatException ex) {
+			varNames.add(left);
+		}
+		
+		try {
+			Integer.parseInt(right);
+		} catch (NumberFormatException ex) {
+			varNames.add(right);
+		}
+		
+		return varNames;
+	}
+	
+
 
 }
