@@ -195,7 +195,7 @@ public class PerAPKAnalyzer {
 	}
 
 	private static void detailedOutput() {
-		File file = new File("target/reports/cognicrypt/"+apkFile.getName());
+		File file = new File("target/reports/cognicrypt/"+apkFile.getName().replace(".apk", ".txt"));
 		file.getParentFile().mkdirs();
 		try {
 			FileWriter fileWriter = new FileWriter(file);
