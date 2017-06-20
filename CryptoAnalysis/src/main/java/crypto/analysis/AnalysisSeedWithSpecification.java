@@ -15,26 +15,30 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.Analysis;
 import ideal.IFactAtStatement;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import typestate.TypestateDomainValue;
 
 public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPredicate{
 	private final IFactAtStatement factAtStmt;
+	private final SootMethod method;
 	private final ClassSpecification spec;
 	private final AnalysisSeedWithSpecification parent;
 	private CryptoScanner cryptoScanner;
 	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec){
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
+		this.method = method;
 		this.spec = spec;
 		this.parent = null;
 	}
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec, AnalysisSeedWithSpecification parent){
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt,SootMethod method, ClassSpecification spec, AnalysisSeedWithSpecification parent){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
+		this.method = method;
 		this.spec = spec;
 		this.parent = parent;
 	}
@@ -69,7 +73,7 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	}
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithSpecification [factAtStmt=" + factAtStmt + ", spec=" + spec + "]";
+		return "AnalysisSeed [" + factAtStmt + "�"+method+" with spec " + spec.getRule().getClassName() + "]";
 	}
 	public void execute() {
 		getOrCreateAnalysis().analysisForSeed(this);

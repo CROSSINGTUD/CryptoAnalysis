@@ -129,7 +129,7 @@ public class PerAPKAnalyzer {
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-		reporter = new CogniCryptCLIReporter();
+		reporter = new CogniCryptCLIReporter(icfg);
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 			@Override

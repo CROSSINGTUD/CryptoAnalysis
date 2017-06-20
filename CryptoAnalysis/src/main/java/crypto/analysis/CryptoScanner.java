@@ -65,7 +65,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for(IFactAtStatement seed : spec.getInitialSeeds()){
-				addToWorkList(new AnalysisSeedWithSpecification(this, seed, spec));
+				addToWorkList(new AnalysisSeedWithSpecification(this, seed, icfg().getMethodOf(seed.getStmt()),spec));
 			}
 		}
 	}
@@ -94,7 +94,7 @@ public abstract class CryptoScanner {
 							@Override
 							public void solved(AdditionalBoomerangQuery q, AliasResults res) {
 								for(Pair<Unit, AccessGraph> p : res.keySet()){
-									addToWorkList(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()), specification, curr));
+									addToWorkList(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()),  icfg().getMethodOf(p.getO2().getSourceStmt()),specification, curr));
 								}
 							}
 						});

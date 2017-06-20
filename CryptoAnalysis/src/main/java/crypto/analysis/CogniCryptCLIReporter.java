@@ -8,11 +8,15 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.util.StmtWithMethod;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ErrorStateNode;
+import heros.EdgeFunction;
+import heros.InterproceduralCFG;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
@@ -23,8 +27,12 @@ import typestate.TypestateDomainValue;
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	Set<AnalysisSeedWithSpecification> analysisSeeds = Sets.newHashSet();
 	Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
-	Multimap<AnalysisSeedWithSpecification,Unit> reportedTypestateErros = HashMultimap.create();
-	Multimap<ClassSpecification,Unit> callToForbiddenMethod = HashMultimap.create();
+	Multimap<AnalysisSeedWithSpecification,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
+	Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
+	private InterproceduralCFG<Unit, SootMethod> icfg;
+	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
+		this.icfg = icfg;
+	}
 	
 	@Override
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
@@ -35,11 +43,24 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 				Map<AccessGraph, TypestateDomainValue<StateNode>> resultsAt = solver.resultsAt(u);
 				for(Entry<AccessGraph, TypestateDomainValue<StateNode>> e : resultsAt.entrySet()){
 					if(e.getValue().getStates().contains(ErrorStateNode.v()) && seed instanceof AnalysisSeedWithSpecification){
-						typestateErrorAt((AnalysisSeedWithSpecification)seed, u);
+						typestateErrorAt((AnalysisSeedWithSpecification)seed, createStmtWithMethodFor(u));
 					}
 				}
 			}
 		}
+		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
+		for(Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()){
+			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
+			for(StateNode n : resultAt.getStates()){
+				if(!n.getAccepting()){
+					typestateErrorAt((AnalysisSeedWithSpecification) seed, createStmtWithMethodFor(c.getKey()));
+				}
+			}
+		}
+	}
+	
+	private StmtWithMethod createStmtWithMethodFor(Unit u){
+		return new StmtWithMethod(u,icfg.getMethodOf(u));
 	}
 
 	@Override
@@ -51,10 +72,10 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
-		callToForbiddenMethod.put(classSpecification, callSite);
+		callToForbiddenMethod.put(classSpecification, createStmtWithMethodFor(callSite));
 	}
 	
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Unit stmt){
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt){
 		reportedTypestateErros.put(classSpecification, stmt);
 	}
 	@Override
@@ -68,10 +89,10 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		analysisSeeds.add(curr);
 	}
 
-	public Multimap<AnalysisSeedWithSpecification, Unit> getTypestateErrors() {
+	public Multimap<AnalysisSeedWithSpecification, StmtWithMethod> getTypestateErrors() {
 		return reportedTypestateErros;
 	}
-	public Multimap<ClassSpecification, Unit> getCallToForbiddenMethod() {
+	public Multimap<ClassSpecification, StmtWithMethod> getCallToForbiddenMethod() {
 		return callToForbiddenMethod;
 	}
 	public Set<AnalysisSeedWithSpecification> getAnalysisSeeds() {
