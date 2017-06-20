@@ -87,7 +87,7 @@ public abstract class CryptoScanner {
 				for(final ClassSpecification specification :specifications){
 					if(classSpecification.equals(specification))
 						continue;
-					if(specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getAllMatchedMethods().contains(method)){
+					if(specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getEdgeLabelMethods().contains(method)){
 						CryptoTypestateAnaylsisProblem problem = classSpecification.getAnalysisProblem();
 						AdditionalBoomerangQuery query = problem.new AdditionalBoomerangQuery(d1, callSite, new AccessGraph((Local) base, base.getType()));
 						classSpecification.getAnalysisProblem().addAdditionalBoomerangQuery(query,new CryptoTypestateAnaylsisProblem.QueryListener() {

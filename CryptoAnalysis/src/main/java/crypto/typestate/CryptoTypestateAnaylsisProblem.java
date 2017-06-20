@@ -1,8 +1,11 @@
 package crypto.typestate;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
+import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -22,6 +25,7 @@ import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
@@ -32,6 +36,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private Multimap<CallSiteWithParamIndex,Value> collectedValues = HashMultimap.create(); 
+	private Set<SootMethod> invokedMethodsOnInstance = Sets.newHashSet();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
@@ -194,8 +199,15 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	}
 
 	public void log(String string) {
-		System.out.println(string);
+//		System.out.println(string);
 	}
 
+	public Collection<SootMethod> getInvokedMethodOnInstance(){
+		return invokedMethodsOnInstance;
+	}
+
+	public void methodInvokedOnInstance(SootMethod method) {
+		invokedMethodsOnInstance.add(method);
+	}
 
 }

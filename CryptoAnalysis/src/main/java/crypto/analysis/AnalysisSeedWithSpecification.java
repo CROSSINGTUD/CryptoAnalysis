@@ -77,6 +77,8 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	}
 	public void execute() {
 		getOrCreateAnalysis().analysisForSeed(this);
+		//TODO Stefan: All method that are invoked on an object can be retrieved like this:
+		spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
 		checkConstraintSystem();
 		//TODO only execute when typestate and constraint solving did not fail.

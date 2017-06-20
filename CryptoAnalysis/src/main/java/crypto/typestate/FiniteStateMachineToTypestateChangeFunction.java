@@ -32,7 +32,8 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 
 	private StateNode initialState;
 	private Collection<SootMethod> initialTransitonLabel;
-	private Collection<SootMethod> allMatchedMethods = Sets.newHashSet();
+	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
+	private Collection<SootMethod> methodsInvokedOnInstance = Sets.newHashSet();
 	
 	private CryptoTypestateAnaylsisProblem analysisProblem;
 	private StateMachineGraph stateMachineGraph;
@@ -51,7 +52,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		
 		//All transitions that are not in the state machine 
 		for(StateNode s : outTransitions.keySet()){
-			Collection<SootMethod> remaining = getAllMatchedMethods();
+			Collection<SootMethod> remaining = getEdgeLabelMethods();
 			Collection<SootMethod> outs = outTransitions.get(s);
 			remaining.removeAll(outs);
 			this.addTransition(new MatcherTransition<StateNode>(s, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
@@ -60,14 +61,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 
 	private Collection<SootMethod> convert(List<CryptSLMethod> label) {
 		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
-		allMatchedMethods.addAll(converted);
+		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
 
 
 	private Collection<SootMethod> convert(CryptSLMethod label) {
 		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
-		allMatchedMethods.addAll(converted);
+		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
 	@Override
@@ -78,6 +79,16 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			if (!(t instanceof LabeledMatcherTransition))
 				continue;
 			injectQueryAtCallSite(((LabeledMatcherTransition)t).label,callSite, d1);
+		}		
+		if(callSite instanceof Stmt){
+			Stmt stmt = (Stmt) callSite;
+			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
+				SootMethod method = stmt.getInvokeExpr().getMethod();
+				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
+				if(e.getBase().equals(d2.getBase())){
+					analysisProblem.methodInvokedOnInstance(method);
+				}
+			}
 		}
 		return res;
 	}
@@ -143,8 +154,12 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	}
 
 	
-	public Collection<SootMethod> getAllMatchedMethods(){
-		return Sets.newHashSet(allMatchedMethods);
+	public Collection<SootMethod> getEdgeLabelMethods(){
+		return Sets.newHashSet(edgeLabelMethods);
+	}
+
+	public Collection<SootMethod> getAllMethodsInvokedOnInstance(){
+		return Sets.newHashSet(methodsInvokedOnInstance);
 	}
 	
 	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
