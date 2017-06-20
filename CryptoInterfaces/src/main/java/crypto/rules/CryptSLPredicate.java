@@ -7,15 +7,25 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
-	private String predName;
-	private List<ICryptSLPredicateParameter> parameters;
-	private boolean negated;
+	private final String predName;
+	private final List<ICryptSLPredicateParameter> parameters;
+	private final boolean negated;
+	private final List<CryptSLMethod> conditionalMethods;
 	
 	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
 		predName = name;
 		parameters = variables;
 		negated = not;
+		conditionalMethods = new ArrayList<CryptSLMethod>();
 	}
+	
+	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not, List<CryptSLMethod> label) {
+		predName = name;
+		parameters = variables;
+		negated = not;
+		conditionalMethods = label;
+	}
+	
 
 	@Override
 	public boolean equals(Object obj) {
@@ -48,6 +58,13 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	 */
 	public Boolean isNegated() {
 		return negated;
+	}
+	
+	/**
+	 * @return the conditionalMethods
+	 */
+	public List<CryptSLMethod> getConditionalMethods() {
+		return conditionalMethods;
 	}
 	
 	public String toString() {
