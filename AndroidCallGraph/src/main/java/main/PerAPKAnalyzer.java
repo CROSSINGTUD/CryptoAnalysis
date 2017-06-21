@@ -57,6 +57,7 @@ public class PerAPKAnalyzer {
 	private static CogniCryptCLIReporter reporter;
 	private static File apkFile;
 	public final static String RESOURCE_PATH = "../CryptoAnalysis/src/test/resources/";
+	private static final String CSV_SEPARATOR = ";";
 
 	private enum MethodType {
 		Application, Library
@@ -83,7 +84,7 @@ public class PerAPKAnalyzer {
 		readInRelevantCalls();
 		apkFile = new File(args[0]);
 		// TODO create dir if necessary.
-		ideVizFile = new File("target/IDEViz/ide-viz-" + apkFile.getName());
+		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
 		Test.main(new String[] { args[0], args[1], "--notaintanalysis" });
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -139,7 +140,6 @@ public class PerAPKAnalyzer {
 
 			@Override
 			public CryptSLAnalysisListener analysisListener() {
-				// TODO Auto-generated method stub
 				return reporter;
 			}
 
@@ -170,7 +170,7 @@ public class PerAPKAnalyzer {
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
 				line.add("typestateError(unit)");
-				fileWriter.write(Joiner.on(",").join(line) + "\n");
+				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
 			line.add(apkFile.getName());
@@ -179,10 +179,9 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
-			fileWriter.write(Joiner.on(",").join(line) + "\n");
+			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -202,7 +201,6 @@ public class PerAPKAnalyzer {
 			fileWriter.write(reporter.toString());
 			fileWriter.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -219,7 +217,6 @@ public class PerAPKAnalyzer {
 		if (!method.hasActiveBody())
 			return;
 		for (Unit u : method.getActiveBody().getUnits()) {
-			// if (u instanceof InvokeStmt) {
 			for (String relevantCall : relevantCalls)
 				if (u.toString().contains(relevantCall)) {
 					log(2, mType + "\t Class: " + method.getDeclaringClass() + "  "
@@ -236,7 +233,6 @@ public class PerAPKAnalyzer {
 					if (mType == MethodType.Application)
 						runCryptoScanner = true;
 				}
-			// }
 		}
 	}
 }
