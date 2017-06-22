@@ -8,17 +8,21 @@ import java.util.Map.Entry;
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.Analysis;
+import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPredicate{
 	private final IFactAtStatement factAtStmt;
@@ -28,6 +32,9 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	private CryptoScanner cryptoScanner;
 	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
+	private Multimap<String, String> parametersToValues = HashMultimap.create();
+
+	
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec){
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
@@ -77,37 +84,78 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	}
 	public void execute() {
 		getOrCreateAnalysis().analysisForSeed(this);
+		
 		//TODO Stefan: All method that are invoked on an object can be retrieved like this:
 		spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
+		parametersToValues = convertToStringMultiMap(spec.getAnalysisProblem().getCollectedValues());
 		checkConstraintSystem();
 		//TODO only execute when typestate and constraint solving did not fail.
-		ensuresPredicate();
+//		ensuresPredicate();
 	}
 
+	public void onSeedFinished(IFactAtStatement seed,
+			AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
+			Unit curStmt = c.getRowKey();
+			List<EnsuredCryptSLPredicate> curEnsPreds = new ArrayList<EnsuredCryptSLPredicate>();
+			for(StateNode stateNode : c.getValue().getStates()){
+				final CryptSLRule rule = spec.getRule();
+				for (CryptSLPredicate predToBeEnsured : rule.getPredicates()) {
+					List<StateNode> conditions = predToBeEnsured.getConditionalMethods();
+					if (conditions.isEmpty()) {
+						if (stateNode.getAccepting()) {
+							//// add pred
+							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
+						}
+					} else {
+						if (conditions.contains(stateNode)) {
+							//// add pred
+							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit curStmt, List<ISLConstraint> constraints) {
+		if (predToBeEnsured.isNegated()) {
+			for (EnsuredCryptSLPredicate ensPred : cryptoScanner.getExistingPredicates(curStmt, this)) {
+				if (ensPred.getPredicate().equals(predToBeEnsured)) {
+					cryptoScanner.deleteNewPred(curStmt, this, ensPred);
+				}
+			}
+		} else {
+			if (checkConstraintSystem()) {
+				cryptoScanner.addNewPred(curStmt, this, new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+			}
+		}
+	}
 	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis() {
 		if(analysis == null)
 			analysis = spec.createTypestateAnalysis();
 		return analysis;
 	}
-	private void ensuresPredicate() {
-		//TODO match to appropriate predicates. 
-		Multimap<CallSiteWithParamIndex, Value> collectedValues = spec.getAnalysisProblem().getCollectedValues();
-		Multimap<String, String> parametersToValues = HashMultimap.create();
-		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){
-			for(Entry<CallSiteWithParamIndex, Value> e : collectedValues.entries()){
-				if(predicate.getParameters().contains(e.getKey().getVarName())){
-					parametersToValues.put(e.getKey().getVarName(), e.getValue().toString());
-				}
-			}
-			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, parametersToValues));
-		}
-	}
-	private void checkConstraintSystem() {
+//	private void ensuresPredicate() {
+//		//TODO match to appropriate predicates. 
+//		Multimap<CallSiteWithParamIndex, Value> collectedValues = spec.getAnalysisProblem().getCollectedValues();
+//		Multimap<String, String> parametersToValues = HashMultimap.create();
+//		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){
+//			for(Entry<CallSiteWithParamIndex, Value> e : collectedValues.entries()){
+//				if(predicate.getParameters().contains(e.getKey().getVarName())){
+//					parametersToValues.put(e.getKey().getVarName(), e.getValue().toString());
+//				}
+//			}
+//			
+//			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, this));
+//		}
+//	}
+	private boolean checkConstraintSystem() {
 		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
 		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
 		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule(), stringValues);
-		solver.evaluateRelConstraints();
+		return 0 == solver.evaluateRelConstraints();
 	}
 
 	
@@ -130,6 +178,13 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 
 	public List<EnsuredCryptSLPredicate> getEnsuredPredicates(){
 		return Lists.newArrayList(ensuredPredicates);
+	}
+	
+	/**
+	 * @return the parametersToValues
+	 */
+	public Multimap<String, String> getParametersToValues() {
+		return parametersToValues;
 	}
 	@Override
 	public AccessGraph getFact() {

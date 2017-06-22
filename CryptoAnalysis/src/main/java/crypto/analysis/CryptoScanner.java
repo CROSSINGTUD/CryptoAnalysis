@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 
 import boomerang.AliasResults;
 import boomerang.accessgraph.AccessGraph;
@@ -33,6 +35,20 @@ public abstract class CryptoScanner {
 	private final LinkedList<AnalysisSeedWithSpecification> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private AnalysisSeedWithSpecification curr;
+	private Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
+	
+	/**
+	 * @return the existingPredicates
+	 */
+	public Set<EnsuredCryptSLPredicate> getExistingPredicates(Unit stmt, AnalysisSeedWithSpecification seed) {
+		Set<EnsuredCryptSLPredicate> set = existingPredicates.get(stmt,seed);
+		if(set == null){
+			set = Sets.newHashSet();
+			existingPredicates.put(stmt, seed, set);
+		}
+		return set;
+	}
+
 
 	public CryptoScanner(List<CryptSLRule> specs){
 		for (CryptSLRule rule : specs) {
@@ -44,6 +60,20 @@ public abstract class CryptoScanner {
 	public abstract IExtendedICFG icfg();
 	public abstract CryptSLAnalysisListener analysisListener();
 
+	public boolean addNewPred(Unit stmt, AnalysisSeedWithSpecification seed, EnsuredCryptSLPredicate ensPred) {
+		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
+		boolean added = set.add(ensPred);
+		assert existingPredicates.get(stmt,seed).contains(ensPred); 
+		return added;
+	}
+	
+	public boolean deleteNewPred(Unit stmt, AnalysisSeedWithSpecification seed, EnsuredCryptSLPredicate ensPred) {
+		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
+		boolean deleted = set.remove(ensPred);
+		assert !existingPredicates.get(stmt,seed).contains(ensPred); 
+		return deleted;
+	}
+	
 	public void scan(){
 		initialize();
 		Set<AnalysisSeedWithSpecification> visited = Sets.newHashSet();

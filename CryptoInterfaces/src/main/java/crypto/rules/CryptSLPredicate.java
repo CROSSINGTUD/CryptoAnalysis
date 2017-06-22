@@ -10,20 +10,20 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	private final String predName;
 	private final List<ICryptSLPredicateParameter> parameters;
 	private final boolean negated;
-	private final List<CryptSLMethod> conditionalMethods;
+	private final List<StateNode> conditionalNodes;
 	
 	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
 		predName = name;
 		parameters = variables;
 		negated = not;
-		conditionalMethods = new ArrayList<CryptSLMethod>();
+		conditionalNodes = new ArrayList<StateNode>();
 	}
 	
-	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not, List<CryptSLMethod> label) {
+	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not, List<StateNode> label) {
 		predName = name;
 		parameters = variables;
 		negated = not;
-		conditionalMethods = label;
+		conditionalNodes = label;
 	}
 	
 
@@ -63,8 +63,8 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	/**
 	 * @return the conditionalMethods
 	 */
-	public List<CryptSLMethod> getConditionalMethods() {
-		return conditionalMethods;
+	public List<StateNode> getConditionalMethods() {
+		return conditionalNodes;
 	}
 	
 	public String toString() {

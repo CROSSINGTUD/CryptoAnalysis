@@ -1,5 +1,6 @@
 package tests.pattern;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -7,6 +8,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -86,6 +88,34 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
 		Assertions.violatedConstraint(cCipher);
+	}
+	
+	@Test
+	public void UsagePatternTest5() throws GeneralSecurityException {
+		final byte[] msgAsArray = "Message".getBytes();
+
+		KeyGenerator keygenEnc = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygenEnc.init(128);
+		Assertions.extValue(0);
+		SecretKey keyEnc = keygenEnc.generateKey();
+		Assertions.assertNotErrorState(keygenEnc);
+		
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
+		Assertions.extValue(0);
+		cCipher.doFinal(msgAsArray);
+		Assertions.assertNotErrorState(cCipher);
+		
+		KeyGenerator keygenMac = KeyGenerator.getInstance("HmacSHA256");
+		SecretKey keyMac = keygenMac.generateKey();
+		
+		final Mac hMacSHA256 = Mac.getInstance("HmacSHA256");
+		Assertions.extValue(0);
+		hMacSHA256.init(keyMac);
+		hMacSHA256.doFinal(msgAsArray);
+		Assertions.assertNotErrorState(hMacSHA256);
 	}
 
 }

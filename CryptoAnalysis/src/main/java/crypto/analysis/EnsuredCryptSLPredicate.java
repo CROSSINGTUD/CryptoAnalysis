@@ -4,23 +4,25 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLPredicate;
+import ideal.IFactAtStatement;
 
 public class EnsuredCryptSLPredicate {
 
-	private CryptSLPredicate predicate;
+	private final CryptSLPredicate predicate;
 	private Multimap<String, String> parametersToValues = HashMultimap.create();
 
-	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<String, String> collectedValues) {
+	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<String, String> analysisSeedWithSpecification) {
 		this.predicate = predicate;
-		parametersToValues = collectedValues;
+		parametersToValues = analysisSeedWithSpecification;
 	}
 	
 	public CryptSLPredicate getPredicate(){
 		return predicate;
 	}
+	
 
 	public Multimap<String, String> getParametersToValues() {
-		return  HashMultimap.create(parametersToValues);
+		return  parametersToValues;
 	}
-	
+	//encrypted(byte[] ciphertext, byte[] plaintext, String alg("AES"))
 }

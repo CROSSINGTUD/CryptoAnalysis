@@ -1,6 +1,5 @@
 package crypto.rules;
 
-
 public class StateNode implements java.io.Serializable {
 
 	/**
@@ -16,7 +15,7 @@ public class StateNode implements java.io.Serializable {
 	public StateNode(String _name) {
 		name = _name;
 	}
-
+	
 	public StateNode(String _name, Boolean _init) {
 		this(_name);
 		init = _init;
