@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLPredicate;
-import ideal.IFactAtStatement;
 
 public class EnsuredCryptSLPredicate {
 
@@ -24,5 +23,9 @@ public class EnsuredCryptSLPredicate {
 	public Multimap<String, String> getParametersToValues() {
 		return  parametersToValues;
 	}
-	//encrypted(byte[] ciphertext, byte[] plaintext, String alg("AES"))
+	
+	public String toString() {
+		return "ENS ->" + predicate.getPredName() + " on " + predicate.getInvolvedVarNames().get(0); 
+	}
+
 }
