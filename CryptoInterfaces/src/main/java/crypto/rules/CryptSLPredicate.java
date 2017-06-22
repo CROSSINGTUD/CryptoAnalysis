@@ -1,7 +1,9 @@
 package crypto.rules;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import typestate.interfaces.ICryptSLPredicateParameter;
 
@@ -10,23 +12,14 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	private final String predName;
 	private final List<ICryptSLPredicateParameter> parameters;
 	private final boolean negated;
-	private final List<StateNode> conditionalNodes;
+	
 	
 	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
 		predName = name;
 		parameters = variables;
 		negated = not;
-		conditionalNodes = new ArrayList<StateNode>();
 	}
 	
-	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not, List<StateNode> label) {
-		predName = name;
-		parameters = variables;
-		negated = not;
-		conditionalNodes = label;
-	}
-	
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -60,12 +53,6 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		return negated;
 	}
 	
-	/**
-	 * @return the conditionalMethods
-	 */
-	public List<StateNode> getConditionalMethods() {
-		return conditionalNodes;
-	}
 	
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
