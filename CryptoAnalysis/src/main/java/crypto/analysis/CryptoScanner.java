@@ -85,6 +85,11 @@ public abstract class CryptoScanner {
 			this.curr = curr;
 			curr.execute();
 		}
+		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
+		if(debugger instanceof CryptoVizDebugger){
+			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
+			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
+		}
 		debugger().afterAnalysis();
 	}
 

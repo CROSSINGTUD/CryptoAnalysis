@@ -15,6 +15,7 @@ import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import crypto.typestate.StatementLabelToSootMethod;
 import ideal.Analysis;
+import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
@@ -57,7 +58,7 @@ public class ClassSpecification {
 
 	@Override
 	public String toString() {
-		return cryptSLRule.toString();
+		return cryptSLRule.getClassName().toString();
 	}
 
 	public void checkForForbiddenMethods() {
@@ -99,12 +100,23 @@ public class ClassSpecification {
 		}
 		return false;
 	}
+	private Analysis<TypestateDomainValue<StateNode>> createTypestateAnalysis() {
+		return createTypestateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+			@Override
+			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+			}
 
-	public Analysis<TypestateDomainValue<StateNode>> createTypestateAnalysis() {
+			@Override
+			public void onSeedTimeout(IFactAtStatement seed) {
+			}
+		});
+	}
+
+	public Analysis<TypestateDomainValue<StateNode>> createTypestateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		this.problem = new CryptoTypestateAnaylsisProblem() {
 			@Override
 			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return cryptoScanner.analysisListener();
+				return resultReporter;
 			}
 
 			@Override

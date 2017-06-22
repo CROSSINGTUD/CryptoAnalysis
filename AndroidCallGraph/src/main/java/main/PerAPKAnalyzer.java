@@ -16,31 +16,23 @@ import java.util.Set;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.ClassSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.CryptoVizDebugger;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import crypto.typestate.CallSiteWithParamIndex;
-import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
-import ideal.IFactAtStatement;
-import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
-import soot.Value;
 import soot.jimple.infoflow.android.TestApps.Test;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
@@ -76,7 +68,7 @@ public class PerAPKAnalyzer {
 
 	public static IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
 		if (debugger == null)
-			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new CryptoVizDebugger(ideVizFile, icfg);
 		return debugger;
 	}
 

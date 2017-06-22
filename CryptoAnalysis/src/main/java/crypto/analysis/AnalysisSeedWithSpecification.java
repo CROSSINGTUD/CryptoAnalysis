@@ -3,7 +3,6 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
@@ -18,6 +17,7 @@ import crypto.typestate.CallSiteWithParamIndex;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
+import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -80,10 +80,21 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	}
 	@Override
 	public String toString() {
-		return "AnalysisSeed [" + factAtStmt + "�"+method+" with spec " + spec.getRule().getClassName() + "]";
+		return "AnalysisSeed [" + factAtStmt + " in "+method+" with spec " + spec.getRule().getClassName() + "]";
 	}
 	public void execute() {
-		getOrCreateAnalysis().analysisForSeed(this);
+		getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+
+			@Override
+			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				cryptoScanner.analysisListener().onSeedFinished(seed, solver);
+				AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
+			}
+
+			@Override
+			public void onSeedTimeout(IFactAtStatement seed) {
+			}
+		}).analysisForSeed(this);
 		
 		//TODO Stefan: All method that are invoked on an object can be retrieved like this:
 		spec.getAnalysisProblem().getInvokedMethodOnInstance();
@@ -132,25 +143,11 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 			}
 		}
 	}
-	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis() {
+	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		if(analysis == null)
-			analysis = spec.createTypestateAnalysis();
+			analysis = spec.createTypestateAnalysis(resultReporter);
 		return analysis;
 	}
-//	private void ensuresPredicate() {
-//		//TODO match to appropriate predicates. 
-//		Multimap<CallSiteWithParamIndex, Value> collectedValues = spec.getAnalysisProblem().getCollectedValues();
-//		Multimap<String, String> parametersToValues = HashMultimap.create();
-//		for(CryptSLPredicate predicate : spec.getRule().getPredicates()){
-//			for(Entry<CallSiteWithParamIndex, Value> e : collectedValues.entries()){
-//				if(predicate.getParameters().contains(e.getKey().getVarName())){
-//					parametersToValues.put(e.getKey().getVarName(), e.getValue().toString());
-//				}
-//			}
-//			
-//			ensuredPredicates.add(new EnsuredCryptSLPredicate(predicate, this));
-//		}
-//	}
 	private boolean checkConstraintSystem() {
 		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
 		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
