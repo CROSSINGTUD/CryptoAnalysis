@@ -45,7 +45,8 @@ public class HasConstraintAssertion implements Assertion {
 	}
 
 	public void reported(IFactAtStatement seed, EnsuredCryptSLPredicate pred) {
-		satisfied = true;
+		if(allocations.contains(seed))
+			satisfied = true;
 	}
 
 }
