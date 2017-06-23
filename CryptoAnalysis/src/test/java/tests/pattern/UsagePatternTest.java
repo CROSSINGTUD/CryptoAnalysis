@@ -147,7 +147,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	@Test
 	public void UsagePatternTest7() throws GeneralSecurityException   {
 		SecureRandom rand = SecureRandom.getInstanceStrong();
-		Assertions.assertNotErrorState(KeyRand);
+		Assertions.assertNotErrorState(rand);
 		
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
