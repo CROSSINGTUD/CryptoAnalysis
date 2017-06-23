@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class CryptSLSplitter implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int index = 0;
 	private String split = "";
 	

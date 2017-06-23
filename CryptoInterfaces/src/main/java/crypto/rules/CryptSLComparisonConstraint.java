@@ -4,6 +4,11 @@ import java.util.List;
 
 public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.io.Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public enum CompOp { l, g, le, ge, eq}
 	
 	private CompOp operator;

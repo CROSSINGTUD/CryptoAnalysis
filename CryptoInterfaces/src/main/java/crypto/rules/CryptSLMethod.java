@@ -8,6 +8,7 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	
+	private static final long serialVersionUID = 1L;
 	private String methodName;
 	private List<Entry<String, String>> parameters; 
 	private List<Boolean> backward;

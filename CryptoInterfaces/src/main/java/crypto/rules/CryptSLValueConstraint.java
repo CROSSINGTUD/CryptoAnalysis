@@ -5,6 +5,10 @@ import java.util.List;
 
 public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	CryptSLObject var;
 	List<String> valueRange;
 	

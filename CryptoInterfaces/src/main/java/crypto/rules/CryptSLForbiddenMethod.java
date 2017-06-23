@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class CryptSLForbiddenMethod implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private CryptSLMethod meth;
 	private Boolean silent;// = false;
 	

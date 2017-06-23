@@ -7,6 +7,11 @@ import typestate.interfaces.ISLConstraint;
 
 public class CryptSLConstraint implements ISLConstraint, Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public enum LogOps { and , or , implies , eq}
 	
 	private LogOps operator;

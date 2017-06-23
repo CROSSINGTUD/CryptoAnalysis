@@ -6,6 +6,10 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLObject implements Serializable, ICryptSLPredicateParameter {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String varName;
 	private CryptSLSplitter splitter;
 	

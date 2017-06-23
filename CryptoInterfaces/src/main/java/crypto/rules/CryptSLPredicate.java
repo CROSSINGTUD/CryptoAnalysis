@@ -9,6 +9,10 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final String predName;
 	private final List<ICryptSLPredicateParameter> parameters;
 	private final boolean negated;

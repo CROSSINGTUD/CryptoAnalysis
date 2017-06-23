@@ -7,6 +7,11 @@ import typestate.interfaces.ISLConstraint;
 
 public class CryptSLRule implements java.io.Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private final String className;
 	
 	private final List<Entry<String, String>> objects;  
@@ -27,6 +32,17 @@ public class CryptSLRule implements java.io.Serializable {
 		constraints = _constraints;
 		predicates = _predicates;
 		System.out.println(this);
+	}
+	
+	
+	public boolean isRootSpec() {
+		
+		for (ISLConstraint con : constraints) {
+			if (con instanceof CryptSLPredicate) {
+				return false;
+			}
+		}
+		return false;
 	}
 	
 	/**
