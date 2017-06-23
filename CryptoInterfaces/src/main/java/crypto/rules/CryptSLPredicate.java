@@ -80,12 +80,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	@Override
 	public List<String> getInvolvedVarNames() {
 		List<String> varNames = new ArrayList<String>();
-		boolean skipFirst = true;
 		for (ICryptSLPredicateParameter var : parameters) {
-			if (skipFirst) {
-				skipFirst = false;
-				continue;
-			}
 			if (!("_".equals(var.getName()) || "this".equals(var.getName()))) {
 				varNames.add(var.getName());
 			}

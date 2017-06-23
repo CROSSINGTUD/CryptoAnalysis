@@ -3,6 +3,7 @@ package tests.pattern;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -115,6 +116,52 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		hMacSHA256.init(keyMac);
 		hMacSHA256.doFinal(msgAsArray);
 		Assertions.assertNotErrorState(hMacSHA256);
+	}
+	
+	@Test
+	public void UsagePatternTest6() throws GeneralSecurityException   {
+		SecureRandom KeyRand = SecureRandom.getInstanceStrong();
+		Assertions.assertNotErrorState(KeyRand);
+		
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.assertNotErrorState(keygen);
+		
+		
+		SecureRandom encRand = SecureRandom.getInstanceStrong();
+		Assertions.assertNotErrorState(encRand);
+		
+		Cipher cCipher = Cipher.getInstance("Blowfish");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
+		Assertions.extValue(0);
+		cCipher.doFinal("".getBytes());
+		Assertions.assertNotErrorState(cCipher);
+		Assertions.violatedConstraint(cCipher);
+	}
+	
+	@Test
+	public void UsagePatternTest7() throws GeneralSecurityException   {
+		SecureRandom rand = SecureRandom.getInstanceStrong();
+		Assertions.assertNotErrorState(rand);
+		
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.assertNotErrorState(keygen);
+		
+		Cipher cCipher = Cipher.getInstance("Blowfish");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key, rand);
+		Assertions.extValue(0);
+		cCipher.doFinal("".getBytes());
+		Assertions.assertNotErrorState(cCipher);
+		Assertions.violatedConstraint(cCipher);
 	}
 
 }

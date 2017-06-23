@@ -28,7 +28,7 @@ public class ConstraintSolver {
 	private final List<ISLConstraint> relConstraints;
 	private final Multimap<String, String> parsAndVals;
 	private List<Entry<String, String>> objects;
-	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer"); 
+	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
 	public ConstraintSolver(ParentPredicate analysisSeedWithSpecification, CryptSLRule rule, Multimap<String, String> parsAndValues) {
@@ -40,8 +40,8 @@ public class ConstraintSolver {
 		for (ISLConstraint cons : allConstraints) {
 			List<String> involvedVarNames = cons.getInvolvedVarNames();
 			involvedVarNames.removeAll(parsAndValues.keySet());
-			
-			if (involvedVarNames.isEmpty() || noNonTrackedTypes(involvedVarNames)) {
+
+			if (involvedVarNames.isEmpty()) {
 				relConstraints.add(cons);
 			}
 		}
@@ -219,14 +219,18 @@ public class ConstraintSolver {
 		if(seed == null){
 			return pred.isNegated();
 		}
-		
+
+		boolean neverFound = true;
 		boolean requiredPredicatesExist = !seed.getEnsuredPredicates().isEmpty();
 		for (EnsuredCryptSLPredicate enspred : seed.getEnsuredPredicates()) {
 			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
 			if (ensuredPredicate.equals(pred)) {
+				neverFound = false;
 				for (int i = 0; i < pred.getParameters().size(); i++) {
 					String var = pred.getParameters().get(i).getName();
-					if (pred.getInvolvedVarNames().contains(var)) {
+					if (isOfNonTrackableType(var)) {
+						requiredPredicatesExist &= true;
+					} else if (pred.getInvolvedVarNames().contains(var)) {
 
 						Collection<String> actVals = enspred.getParametersToValues().get(enspred.getPredicate().getParameters().get(i).getName());
 						Collection<String> expVals = parsAndVals.get(var);
@@ -240,47 +244,44 @@ public class ConstraintSolver {
 								index = obj.getSplitter().getIndex();
 							}
 						}
-
 						for (String foundVal : expVals) {
-							foundVal = foundVal.split(splitter)[index];
+							if (index > -1) {
+								foundVal = foundVal.split(splitter)[index];
+							}
 							requiredPredicatesExist &= actVals.contains(foundVal);
 						}
-					} 
-					else if (isOfNonTrackableType(var)) {
-						requiredPredicatesExist &= true;
 					} else {
 						requiredPredicatesExist &= false;
 					}
 				}
-			} else {
-				requiredPredicatesExist &= false;
 			}
 		}
+		requiredPredicatesExist &= !neverFound;
 		return pred.isNegated() != requiredPredicatesExist;
 	}
 
 	private boolean handlePredefinedNames(CryptSLPredicate pred) {
 		List<ICryptSLPredicateParameter> parameters = pred.getParameters();
 		switch (pred.getPredName()) {
-			case "callTo" : 
+			case "callTo":
 				List<ICryptSLPredicateParameter> predMethods = parameters;
 				for (ICryptSLPredicateParameter predMethod : predMethods) {
 					//check whether predMethod is in foundMethods, which type-state analysis has to figure out
 					//((CryptSLMethod) predMethod);
 				}
 				return true;
-			case "noCallTo" : 
+			case "noCallTo":
 				List<ICryptSLPredicateParameter> predForbiddenMethods = parameters;
 				for (ICryptSLPredicateParameter predForbMethod : predForbiddenMethods) {
 					//check whether predForbMethod is in foundForbMethods, which forbidden-methods analysis has to figure out
 					//((CryptSLMethod) predForbMethod);
 				}
 				return true;
-			case "neverTypeOf" : 
+			case "neverTypeOf":
 				//pred looks as follows: neverTypeOf($varName, $type)
 				// -> first parameter is always the variable
 				// -> second parameter is always the type
-				String varName = ((CryptSLObject)parameters.get(0)).getVarName();
+				String varName = ((CryptSLObject) parameters.get(0)).getVarName();
 				//String type = parameters.get(1);
 				return true;
 			default:
