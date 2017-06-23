@@ -91,6 +91,7 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 
 			@Override
 			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				parametersToValues = convertToStringMultiMap(spec.getAnalysisProblem().getCollectedValues());
 				cryptoScanner.analysisListener().onSeedFinished(seed, solver);
 				AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 			}
@@ -103,8 +104,6 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 		//TODO Stefan: All method that are invoked on an object can be retrieved like this:
 		spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		cryptoScanner.analysisListener().collectedValues(this, spec.getAnalysisProblem().getCollectedValues());
-		parametersToValues = convertToStringMultiMap(spec.getAnalysisProblem().getCollectedValues());
-		checkConstraintSystem();
 		//TODO only execute when typestate and constraint solving did not fail.
 //		ensuresPredicate();
 	}

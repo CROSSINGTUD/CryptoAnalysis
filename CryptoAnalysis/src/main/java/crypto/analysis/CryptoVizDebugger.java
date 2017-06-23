@@ -78,7 +78,7 @@ public class CryptoVizDebugger extends IDEVizDebugger<TypestateDomainValue<State
 		
 		@Override
 		public String toString() {
-			return analysisSeedWithSpecification.getStmt() +" " + value;
+			return analysisSeedWithSpecification.getFact().getBase() +" " + value;
 		}
 		
 	}

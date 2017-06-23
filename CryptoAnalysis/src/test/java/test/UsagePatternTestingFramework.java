@@ -237,7 +237,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new ConstraintViolationAssertion(stmt));
 			}
 
-			if(invocationName.startsWith("hasConstraint")){
+			if(invocationName.startsWith("hasEnsuredPredicate")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
 					continue;
