@@ -96,7 +96,4 @@ public class StateNode implements java.io.Serializable {
 		return true;
 	}
 
-
-
-	
 }

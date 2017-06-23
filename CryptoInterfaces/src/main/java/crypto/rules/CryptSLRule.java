@@ -36,13 +36,12 @@ public class CryptSLRule implements java.io.Serializable {
 	
 	
 	public boolean isRootSpec() {
-		
 		for (ISLConstraint con : constraints) {
 			if (con instanceof CryptSLPredicate) {
 				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	/**
