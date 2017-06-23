@@ -10,6 +10,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
+import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
@@ -113,14 +114,15 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 			for(StateNode stateNode : c.getValue().getStates()){
 				final CryptSLRule rule = spec.getRule();
 				for (CryptSLPredicate predToBeEnsured : rule.getPredicates()) {
-					List<StateNode> conditions = predToBeEnsured.getConditionalMethods();
-					if (conditions.isEmpty()) {
-						if (stateNode.getAccepting()) {
+					if(predToBeEnsured instanceof CryptSLCondPredicate){
+						CryptSLCondPredicate cryptSLCondPredicate = (CryptSLCondPredicate) predToBeEnsured;
+						if (cryptSLCondPredicate.getConditionalMethods().contains(stateNode)) {
 							//// add pred
 							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
 						}
-					} else {
-						if (conditions.contains(stateNode)) {
+					}else{
+
+						if (stateNode.getAccepting()) {
 							//// add pred
 							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
 						}
