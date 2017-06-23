@@ -46,11 +46,8 @@ public class StateNode implements java.io.Serializable {
 		StringBuilder nodeSB = new StringBuilder();
 		nodeSB.append("Name: ");
 		nodeSB.append(name);
-		nodeSB.append("( init: ");
-		nodeSB.append(init);
-		nodeSB.append("; accept: ");
-		nodeSB.append(accepting);
-		nodeSB.append(")");
+		if (accepting)
+		nodeSB.append(" (accepting)");
 		return nodeSB.toString();
 	}
 
