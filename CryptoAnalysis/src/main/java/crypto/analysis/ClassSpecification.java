@@ -45,7 +45,7 @@ public class ClassSpecification {
 	}
 
 	public boolean isRootNode() {
-		return true;
+		return cryptSLRule.isRootSpec();
 	}
 
 	public Set<IFactAtStatement> getInitialSeeds() {
