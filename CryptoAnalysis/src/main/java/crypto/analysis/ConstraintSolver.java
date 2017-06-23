@@ -216,8 +216,11 @@ public class ConstraintSolver {
 		if (predefinedPreds.contains(predName)) {
 			return handlePredefinedNames(pred);
 		} 
+		if(seed == null){
+			return pred.isNegated();
+		}
 		
-		boolean requiredPredicatesExist = true;
+		boolean requiredPredicatesExist = !seed.getEnsuredPredicates().isEmpty();
 		for (EnsuredCryptSLPredicate enspred : seed.getEnsuredPredicates()) {
 			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
 			if (ensuredPredicate.equals(pred)) {

@@ -28,8 +28,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.assertNotErrorState(keygen);
-		
-		Cipher cCipher = Cipher.getInstance("AES");
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);

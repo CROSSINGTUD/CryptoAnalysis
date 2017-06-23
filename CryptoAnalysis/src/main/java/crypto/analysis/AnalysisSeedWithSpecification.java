@@ -3,10 +3,12 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
@@ -22,6 +24,7 @@ import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.StringConstant;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
@@ -31,9 +34,9 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 	private final ClassSpecification spec;
 	private final AnalysisSeedWithSpecification parent;
 	private CryptoScanner cryptoScanner;
-	private List<EnsuredCryptSLPredicate> ensuredPredicates = Lists.newLinkedList();
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
 	private Multimap<String, String> parametersToValues = HashMultimap.create();
+	private Unit checkPredicateAtStmt;
 
 	
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec){
@@ -108,31 +111,34 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 
 	public void onSeedFinished(IFactAtStatement seed,
 			AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		Multimap<Unit, StateNode> unitsToStates = HashMultimap.create();
+		//Merge all information (all access graph here point to the seed object) 
 		for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
-			Unit curStmt = c.getRowKey();
-			List<EnsuredCryptSLPredicate> curEnsPreds = new ArrayList<EnsuredCryptSLPredicate>();
-			for(StateNode stateNode : c.getValue().getStates()){
-				final CryptSLRule rule = spec.getRule();
-				for (CryptSLPredicate predToBeEnsured : rule.getPredicates()) {
-					if(predToBeEnsured instanceof CryptSLCondPredicate){
-						CryptSLCondPredicate cryptSLCondPredicate = (CryptSLCondPredicate) predToBeEnsured;
-						if (cryptSLCondPredicate.getConditionalMethods().contains(stateNode)) {
-							//// add pred
-							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
-						}
-					}else{
-
-						if (stateNode.getAccepting()) {
-							//// add pred
-							ensuresPred(predToBeEnsured, curStmt, rule.getConstraints());
-						}
-					}
+			unitsToStates.putAll(c.getRowKey(),c.getValue().getStates());
+		}
+		for(Unit curr : unitsToStates.keySet()){
+			Collection<StateNode> stateAtCurrMinusPred = Sets.newHashSet(unitsToStates.get(curr));
+			for(Unit pred : cryptoScanner.icfg().getPredsOf(curr)){
+				Collection<StateNode> stateAtPred = unitsToStates.get(pred);
+				stateAtCurrMinusPred.removeAll(stateAtPred);
+				for(StateNode newStateAtCurr : stateAtCurrMinusPred){
+					typeStateChangeAtStatement(curr,newStateAtCurr);
+					
 				}
 			}
 		}
 	}
 	
+	private void typeStateChangeAtStatement(Unit curr, StateNode stateNode) {
+		final CryptSLRule rule = spec.getRule();
+		for (CryptSLPredicate predToBeEnsured : rule.getPredicates()) {
+			if(predToBeEnsured instanceof CryptSLCondPredicate && ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode) || stateNode.getAccepting()){
+				ensuresPred(predToBeEnsured, curr, rule.getConstraints());
+			}
+		}
+	}
 	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit curStmt, List<ISLConstraint> constraints) {
+		this.checkPredicateAtStmt = curStmt;
 		if (predToBeEnsured.isNegated()) {
 			for (EnsuredCryptSLPredicate ensPred : cryptoScanner.getExistingPredicates(curStmt, this)) {
 				if (ensPred.getPredicate().equals(predToBeEnsured)) {
@@ -151,9 +157,7 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 		return analysis;
 	}
 	private boolean checkConstraintSystem() {
-		Multimap<CallSiteWithParamIndex, Value> actualValues = spec.getAnalysisProblem().getCollectedValues();
-		Multimap<String, String> stringValues = convertToStringMultiMap(actualValues);
-		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule(), stringValues);
+		ConstraintSolver solver = new ConstraintSolver(this.parent, spec.getRule(), parametersToValues);
 		return 0 == solver.evaluateRelConstraints();
 	}
 
@@ -164,19 +168,25 @@ public class AnalysisSeedWithSpecification implements IFactAtStatement, ParentPr
 				Collection<Value> collection = actualValues.get(callSite);
 				List<String> values = new ArrayList<String>();
 				for (Value val: collection) {
-					values.add(val.toString());
+					if(val instanceof StringConstant){
+						StringConstant stringConstant = (StringConstant) val;
+						values.add(stringConstant.value);
+					}
+					else{
+						values.add(val.toString());
+					}
 				}
 				varVal.putAll(callSite.getVarName(), values);
 		}
 			
-		return null;
+		return varVal;
 	}
 	public ParentPredicate getParent(){
 		return parent;
 	}
 
-	public List<EnsuredCryptSLPredicate> getEnsuredPredicates(){
-		return Lists.newArrayList(ensuredPredicates);
+	public Set<EnsuredCryptSLPredicate> getEnsuredPredicates(){
+		return cryptoScanner.getExistingPredicates(checkPredicateAtStmt, this);
 	}
 	
 	/**
