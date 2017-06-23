@@ -98,7 +98,6 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				if (!imprecise.isEmpty()) {
 					throw new ImprecisionException("Imprecise results: " + imprecise);
 				}
-				IDEALCrossingTestingFramework.this.removeVizFile();
 			}
 		};
 	}

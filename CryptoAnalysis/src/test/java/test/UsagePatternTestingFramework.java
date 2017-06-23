@@ -20,6 +20,7 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.CryptoVizDebugger;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -52,7 +53,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
 		if(debugger == null)
-			debugger = new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger = new CryptoVizDebugger(ideVizFile, icfg);
 		return debugger;
 	}
 	@Override
@@ -137,6 +138,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 				};
 				scanner.scan();
+				
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
 				for (Assertion r : expectedResults) {
