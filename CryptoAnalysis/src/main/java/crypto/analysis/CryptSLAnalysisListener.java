@@ -1,6 +1,9 @@
 package crypto.analysis;
 
+import java.util.Set;
+
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -20,4 +23,6 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 
 	
 	void violateConstraint(ClassSpecification spec, Unit callSite);
+
+	void ensuredPredicates(Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates);
 }

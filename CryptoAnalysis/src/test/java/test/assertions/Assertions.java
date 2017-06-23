@@ -29,4 +29,8 @@ public class Assertions {
 		
 	}
 
+	public static void hasEnsuredPredicate(Object o) {
+		
+	}
+
 }

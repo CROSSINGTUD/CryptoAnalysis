@@ -28,12 +28,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(keygen);
 		Assertions.assertNotErrorState(keygen);
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(cCipher);
 		Assertions.assertNotErrorState(cCipher);
 	}
 
