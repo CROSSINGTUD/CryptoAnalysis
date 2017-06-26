@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
@@ -122,5 +123,12 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		s += Joiner.on("\n").join(typestateTimeouts);
 
 		return s;
+	}
+
+	@Override
+	public void ensuredPredicates(
+			Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+		// TODO Auto-generated method stub
+		
 	}
 }

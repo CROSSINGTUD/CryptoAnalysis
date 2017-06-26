@@ -25,7 +25,7 @@ public class EnsuredCryptSLPredicate {
 	}
 	
 	public String toString() {
-		return "ENS ->" + predicate.getPredName() + " on " + predicate.getInvolvedVarNames().get(0); 
+		return "Proved " + predicate.getPredName() + " on " + predicate.getInvolvedVarNames().get(0); 
 	}
 
 }

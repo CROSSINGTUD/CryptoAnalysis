@@ -92,6 +92,7 @@ public abstract class CryptoScanner {
 			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
 			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 		}
+		analysisListener().ensuredPredicates(this.existingPredicates);
 		debugger().afterAnalysis();
 	}
 

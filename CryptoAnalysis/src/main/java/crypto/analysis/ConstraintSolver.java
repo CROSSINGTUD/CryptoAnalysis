@@ -190,24 +190,30 @@ public class ConstraintSolver {
 
 	private boolean evaluate(CryptSLConstraint cons) {
 		boolean left = evaluate(cons.getLeft());
-
 		LogOps ops = cons.getOperator();
+
 		if (ops.equals(LogOps.implies)) {
 			if (!left) {
 				return true;
 			} else {
 				return evaluate(cons.getRight());
 			}
-		}
-
-		boolean right = evaluate(cons.getRight());
-		if (ops.equals(LogOps.and)) {
-			return left && right;
 		} else if (ops.equals(LogOps.or)) {
-			return left || right;
+			if (left) {
+				return true;
+			} else {
+				return evaluate(cons.getRight());
+			}
+		} else if (ops.equals(LogOps.and)) {
+			if (!left) {
+				return false;
+			} else {
+				return evaluate(cons.getRight());
+			}
 		} else if (ops.equals(LogOps.eq)) {
-			return left == right;
+			return left == evaluate(cons.getRight());
 		}
+		
 		return false;
 	}
 

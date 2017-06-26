@@ -11,6 +11,7 @@ import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
@@ -21,6 +22,7 @@ import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
+import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -42,6 +44,7 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintViolationAssertion;
+import test.assertions.HasConstraintAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -84,6 +87,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 											if(resultAt != null)
 												expectedResults.computedResults(resultAt);
 										}
+										if(e instanceof HasConstraintAssertion){
+											HasConstraintAssertion assertion = (HasConstraintAssertion) e;
+											if(assertion.getAccessGraph().equals(c.getColumnKey())){
+												assertion.addObject(seed);	
+											}
+										}
 									}
 								}
 							}
@@ -110,13 +119,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void violateConstraint(ClassSpecification spec, Unit callSite) {
-								for (Assertion e : expectedResults) {
-									if (e instanceof ConstraintViolationAssertion) {
-										((ConstraintViolationAssertion) e).reported(callSite);
-										
-									}
-								}
-								
 							}
 
 							@Override
@@ -126,8 +128,23 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void onSeedTimeout(IFactAtStatement seed) {
-								// TODO Auto-generated method stub
-								
+							}
+
+							@Override
+							public void ensuredPredicates(
+									Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+								for(Cell<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
+									for(Assertion e : expectedResults){
+										if(e instanceof HasConstraintAssertion){
+											HasConstraintAssertion assertion = (HasConstraintAssertion) e;
+											if(assertion.getStmt().equals(c.getRowKey())){
+												for(EnsuredCryptSLPredicate pred : c.getValue()){
+													assertion.reported(c.getColumnKey(),pred);
+												}	
+											}
+										}
+									}
+								}
 							}
 						};
 					}
@@ -218,6 +235,15 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			
 			if (invocationName.startsWith("violatedConstraint")) {
 				queries.add(new ConstraintViolationAssertion(stmt));
+			}
+
+			if(invocationName.startsWith("hasEnsuredPredicate")){
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof Local))
+					continue;
+				Local queryVar = (Local) param;
+				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				queries.add(new HasConstraintAssertion(stmt, val));
 			}
 			
 
