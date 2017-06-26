@@ -33,6 +33,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(cCipher);
@@ -122,12 +123,12 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	
 	@Test
 	public void UsagePatternTest6() throws GeneralSecurityException   {
-		SecureRandom KeyRand = SecureRandom.getInstanceStrong();
-		Assertions.assertNotErrorState(KeyRand);
+		SecureRandom keyRand = SecureRandom.getInstanceStrong();
+		Assertions.assertNotErrorState(keyRand);
 		
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
-		keygen.init(128);
+		keygen.init(128, keyRand);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.assertNotErrorState(keygen);
