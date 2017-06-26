@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
+
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -110,33 +112,46 @@ public abstract class CryptoScanner {
 	public List<ClassSpecification> getClassSpecifictions() {
 		return specifications;
 	}
-	public void onCallToReturnFlow(ClassSpecification classSpecification, AccessGraph d1, Unit callSite, AccessGraph d2) {
-		if(callSite instanceof Stmt && ((Stmt) callSite).containsInvokeExpr()){
+
+	public void onCallToReturnFlow(ClassSpecification classSpecification, AccessGraph d1, Unit callSite,
+			AccessGraph d2) {
+		if (callSite instanceof Stmt && ((Stmt) callSite).containsInvokeExpr()) {
 			InvokeExpr ivexpr = ((Stmt) callSite).getInvokeExpr();
-			if(ivexpr instanceof InstanceInvokeExpr){
+			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
 				SootMethod method = iie.getMethod();
 				Value base = iie.getBase();
-				
-
-				for(final ClassSpecification specification :specifications){
-					if(classSpecification.equals(specification))
-						continue;
-					if(specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getEdgeLabelMethods().contains(method)){
-						CryptoTypestateAnaylsisProblem problem = classSpecification.getAnalysisProblem();
-						AdditionalBoomerangQuery query = problem.new AdditionalBoomerangQuery(d1, callSite, new AccessGraph((Local) base, base.getType()));
-						classSpecification.getAnalysisProblem().addAdditionalBoomerangQuery(query,new CryptoTypestateAnaylsisProblem.QueryListener() {
-							@Override
-							public void solved(AdditionalBoomerangQuery q, AliasResults res) {
-								for(Pair<Unit, AccessGraph> p : res.keySet()){
-									addToWorkList(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()),  icfg().getMethodOf(p.getO2().getSourceStmt()),specification, curr));
-								}
-							}
-						});
+				boolean paramMatch = false;
+				for (Value arg : iie.getArgs()) {
+					if (d2.getBase() != null && d2.getBase().equals(arg))
+						paramMatch = true;
+				}
+				if (paramMatch) {
+					for (final ClassSpecification specification : specifications) {
+						if (classSpecification.equals(specification))
+							continue;
+						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction()
+								.getEdgeLabelMethods().contains(method)) {
+							CryptoTypestateAnaylsisProblem problem = classSpecification.getAnalysisProblem();
+							AdditionalBoomerangQuery query = problem.new AdditionalBoomerangQuery(d1, callSite,
+									new AccessGraph((Local) base, base.getType()));
+							classSpecification.getAnalysisProblem().addAdditionalBoomerangQuery(query,
+									new CryptoTypestateAnaylsisProblem.QueryListener() {
+										@Override
+										public void solved(AdditionalBoomerangQuery q, AliasResults res) {
+											for (Pair<Unit, AccessGraph> p : res.keySet()) {
+												addToWorkList(new AnalysisSeedWithSpecification(CryptoScanner.this,
+														new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()),
+														icfg().getMethodOf(p.getO2().getSourceStmt()), specification,
+														curr));
+											}
+										}
+									});
+						}
 					}
 				}
 			}
-			
+
 		}
 	}
 
