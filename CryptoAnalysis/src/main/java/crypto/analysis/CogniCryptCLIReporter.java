@@ -26,9 +26,9 @@ import soot.Value;
 import typestate.TypestateDomainValue;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
-	Set<AnalysisSeedWithSpecification> analysisSeeds = Sets.newHashSet();
+	Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
 	Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
-	Multimap<AnalysisSeedWithSpecification,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
+	Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
 	Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
 	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
@@ -86,17 +86,17 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 
 	@Override
-	public void discoveredSeed(AnalysisSeedWithSpecification curr) {
+	public void discoveredSeed(IAnalysisSeed curr) {
 		analysisSeeds.add(curr);
 	}
 
-	public Multimap<AnalysisSeedWithSpecification, StmtWithMethod> getTypestateErrors() {
+	public Multimap<IAnalysisSeed, StmtWithMethod> getTypestateErrors() {
 		return reportedTypestateErros;
 	}
 	public Multimap<ClassSpecification, StmtWithMethod> getCallToForbiddenMethod() {
 		return callToForbiddenMethod;
 	}
-	public Set<AnalysisSeedWithSpecification> getAnalysisSeeds() {
+	public Set<IAnalysisSeed> getAnalysisSeeds() {
 		return analysisSeeds;
 	}
 
@@ -127,7 +127,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void ensuredPredicates(
-			Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+			Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
 		// TODO Auto-generated method stub
 		
 	}

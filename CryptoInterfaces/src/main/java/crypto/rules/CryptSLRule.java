@@ -1,5 +1,6 @@
 package crypto.rules;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -86,7 +87,19 @@ public class CryptSLRule implements java.io.Serializable {
 	public List<CryptSLPredicate> getPredicates() {
 		return predicates;
 	}
-
+	/**
+	 * @return the constraints
+	 */
+	public List<CryptSLPredicate> getRequiredPredicates() {
+		List<CryptSLPredicate> requires = new LinkedList<CryptSLPredicate>();
+		for (ISLConstraint con : constraints) {
+			if (con instanceof CryptSLPredicate) {
+				requires.add((CryptSLPredicate) con);
+			}
+		}
+		return requires;
+	}
+	
 	public String toString() {
 		StringBuilder outputSB = new StringBuilder();
 		

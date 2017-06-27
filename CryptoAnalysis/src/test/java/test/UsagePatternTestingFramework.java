@@ -23,6 +23,7 @@ import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -90,7 +91,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										if(e instanceof HasConstraintAssertion){
 											HasConstraintAssertion assertion = (HasConstraintAssertion) e;
 											if(assertion.getAccessGraph().equals(c.getColumnKey())){
-												assertion.addObject(seed);	
+												assertion.addObject(c.getColumnKey());	
 											}
 										}
 									}
@@ -122,7 +123,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void discoveredSeed(AnalysisSeedWithSpecification curr) {
+							public void discoveredSeed(IAnalysisSeed curr) {
 								
 							}
 
@@ -132,8 +133,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void ensuredPredicates(
-									Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates) {
-								for(Cell<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
+									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasConstraintAssertion){
 											HasConstraintAssertion assertion = (HasConstraintAssertion) e;

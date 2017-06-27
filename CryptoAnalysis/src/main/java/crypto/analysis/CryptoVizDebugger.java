@@ -6,6 +6,7 @@ import java.util.Set;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import crypto.rules.StateNode;
 import ideal.debug.IDEVizDebugger;
@@ -20,8 +21,8 @@ public class CryptoVizDebugger extends IDEVizDebugger<TypestateDomainValue<State
 
 
 	public void addEnsuredPredicates(
-			Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates) {
-		for(Cell<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> c: existingPredicates.cellSet()){
+			Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+		for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c: existingPredicates.cellSet()){
 			if(!c.getValue().isEmpty())
 				this.addInformationAtStmt(c.getRowKey(), new SeedWithEnsuredPreds(c.getColumnKey(), c.getValue()));
 		}
@@ -29,10 +30,10 @@ public class CryptoVizDebugger extends IDEVizDebugger<TypestateDomainValue<State
 
 	private class SeedWithEnsuredPreds{
 
-		private AnalysisSeedWithSpecification analysisSeedWithSpecification;
+		private AccessGraph analysisSeedWithSpecification;
 		private Set<EnsuredCryptSLPredicate> value;
 
-		public SeedWithEnsuredPreds(AnalysisSeedWithSpecification analysisSeedWithSpecification, Set<EnsuredCryptSLPredicate> value) {
+		public SeedWithEnsuredPreds(AccessGraph analysisSeedWithSpecification, Set<EnsuredCryptSLPredicate> value) {
 			this.analysisSeedWithSpecification = analysisSeedWithSpecification;
 			this.value = value;
 		}
@@ -78,7 +79,7 @@ public class CryptoVizDebugger extends IDEVizDebugger<TypestateDomainValue<State
 		
 		@Override
 		public String toString() {
-			return analysisSeedWithSpecification.getFact().getBase() +" " + value;
+			return analysisSeedWithSpecification.getBase() +" " + value;
 		}
 		
 	}

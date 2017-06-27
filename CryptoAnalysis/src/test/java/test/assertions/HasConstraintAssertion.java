@@ -14,7 +14,7 @@ public class HasConstraintAssertion implements Assertion {
 
 	private Stmt stmt;
 	private AccessGraph val;
-	private Set<IFactAtStatement> allocations = Sets.newHashSet();
+	private Set<AccessGraph> allocations = Sets.newHashSet();
 	private boolean satisfied;
 
 	public HasConstraintAssertion(Stmt stmt, AccessGraph val) {
@@ -36,7 +36,7 @@ public class HasConstraintAssertion implements Assertion {
 		return false;
 	}
 
-	public void addObject(IFactAtStatement seed) {
+	public void addObject(AccessGraph seed) {
 		allocations.add(seed);
 	}
 
@@ -44,7 +44,7 @@ public class HasConstraintAssertion implements Assertion {
 		return stmt;
 	}
 
-	public void reported(IFactAtStatement seed, EnsuredCryptSLPredicate pred) {
+	public void reported(AccessGraph seed, EnsuredCryptSLPredicate pred) {
 		if(allocations.contains(seed))
 			satisfied = true;
 	}

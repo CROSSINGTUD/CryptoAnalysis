@@ -23,7 +23,6 @@ import typestate.interfaces.ISLConstraint;
 
 public class ConstraintSolver {
 
-	private final ParentPredicate seed;
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
 	private final Multimap<String, String> parsAndVals;
@@ -31,8 +30,7 @@ public class ConstraintSolver {
 	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
-	public ConstraintSolver(ParentPredicate analysisSeedWithSpecification, CryptSLRule rule, Multimap<String, String> parsAndValues) {
-		seed = analysisSeedWithSpecification;
+	public ConstraintSolver(CryptSLRule rule, Multimap<String, String> parsAndValues) {
 		parsAndVals = parsAndValues;
 		allConstraints = rule.getConstraints();
 		objects = rule.getObjects();
@@ -222,48 +220,46 @@ public class ConstraintSolver {
 		if (predefinedPreds.contains(predName)) {
 			return handlePredefinedNames(pred);
 		} 
-		if(seed == null){
-			return pred.isNegated();
-		}
-
-		boolean neverFound = true;
-		boolean requiredPredicatesExist = !seed.getEnsuredPredicates().isEmpty();
-		for (EnsuredCryptSLPredicate enspred : seed.getEnsuredPredicates()) {
-			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
-			if (ensuredPredicate.equals(pred)) {
-				neverFound = false;
-				for (int i = 0; i < pred.getParameters().size(); i++) {
-					String var = pred.getParameters().get(i).getName();
-					if (isOfNonTrackableType(var)) {
-						requiredPredicatesExist &= true;
-					} else if (pred.getInvolvedVarNames().contains(var)) {
-
-						Collection<String> actVals = enspred.getParametersToValues().get(enspred.getPredicate().getParameters().get(i).getName());
-						Collection<String> expVals = parsAndVals.get(var);
-
-						String splitter = "";
-						int index = -1;
-						if (pred.getParameters().get(i) instanceof CryptSLObject) {
-							CryptSLObject obj = (CryptSLObject) pred.getParameters().get(i);
-							if (obj.getSplitter() != null) {
-								splitter = obj.getSplitter().getSplitter();
-								index = obj.getSplitter().getIndex();
-							}
-						}
-						for (String foundVal : expVals) {
-							if (index > -1) {
-								foundVal = foundVal.split(splitter)[index];
-							}
-							requiredPredicatesExist &= actVals.contains(foundVal);
-						}
-					} else {
-						requiredPredicatesExist &= false;
-					}
-				}
-			}
-		}
-		requiredPredicatesExist &= !neverFound;
-		return pred.isNegated() != requiredPredicatesExist;
+		return pred.isNegated();
+//
+//		boolean neverFound = true;
+//		boolean requiredPredicatesExist = !seed.getEnsuredPredicates().isEmpty();
+//		for (EnsuredCryptSLPredicate enspred : seed.getEnsuredPredicates()) {
+//			CryptSLPredicate ensuredPredicate = enspred.getPredicate();
+//			if (ensuredPredicate.equals(pred)) {
+//				neverFound = false;
+//				for (int i = 0; i < pred.getParameters().size(); i++) {
+//					String var = pred.getParameters().get(i).getName();
+//					if (isOfNonTrackableType(var)) {
+//						requiredPredicatesExist &= true;
+//					} else if (pred.getInvolvedVarNames().contains(var)) {
+//
+//						Collection<String> actVals = enspred.getParametersToValues().get(enspred.getPredicate().getParameters().get(i).getName());
+//						Collection<String> expVals = parsAndVals.get(var);
+//
+//						String splitter = "";
+//						int index = -1;
+//						if (pred.getParameters().get(i) instanceof CryptSLObject) {
+//							CryptSLObject obj = (CryptSLObject) pred.getParameters().get(i);
+//							if (obj.getSplitter() != null) {
+//								splitter = obj.getSplitter().getSplitter();
+//								index = obj.getSplitter().getIndex();
+//							}
+//						}
+//						for (String foundVal : expVals) {
+//							if (index > -1) {
+//								foundVal = foundVal.split(splitter)[index];
+//							}
+//							requiredPredicatesExist &= actVals.contains(foundVal);
+//						}
+//					} else {
+//						requiredPredicatesExist &= false;
+//					}
+//				}
+//			}
+//		}
+//		requiredPredicatesExist &= !neverFound;
+//		return pred.isNegated() != requiredPredicatesExist;
 	}
 
 	private boolean handlePredefinedNames(CryptSLPredicate pred) {

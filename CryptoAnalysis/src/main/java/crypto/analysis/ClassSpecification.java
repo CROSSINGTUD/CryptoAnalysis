@@ -41,7 +41,47 @@ public class ClassSpecification {
 	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
 		this.cryptSLRule = rule;
 		this.cryptoScanner = cScanner;
-		createTypestateAnalysis();
+		this.problem = new CryptoTypestateAnaylsisProblem() {
+			@Override
+			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
+				return new ResultReporter<TypestateDomainValue<StateNode>>() {
+					@Override
+					public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+					}
+
+					@Override
+					public void onSeedTimeout(IFactAtStatement seed) {
+					}
+				};
+			}
+
+			@Override
+			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
+				return new FiniteStateMachineToTypestateChangeFunction(this);
+			}
+
+			@Override
+			public IExtendedICFG icfg() {
+				return cryptoScanner.icfg();
+			}
+
+			@Override
+			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+				return cryptoScanner.debugger();
+			}
+
+			@Override
+			public StateMachineGraph getStateMachine() {
+				return cryptSLRule.getUsagePattern();
+			}
+
+			@Override
+			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
+					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
+				return new ExtendedStandardFlowFunction(context, cryptSLRule);
+			}
+
+		};
 	}
 
 	public boolean isRootNode() {
@@ -49,7 +89,7 @@ public class ClassSpecification {
 	}
 
 	public Set<IFactAtStatement> getInitialSeeds() {
-		return createTypestateAnalysis().computeSeeds();
+		return new Analysis<TypestateDomainValue<StateNode>>(problem).computeSeeds();
 	}
 
 	public CryptoTypestateAnaylsisProblem getAnalysisProblem() {
@@ -100,61 +140,7 @@ public class ClassSpecification {
 		}
 		return false;
 	}
-	private Analysis<TypestateDomainValue<StateNode>> createTypestateAnalysis() {
-		return createTypestateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
-			@Override
-			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-			}
 
-			@Override
-			public void onSeedTimeout(IFactAtStatement seed) {
-			}
-		});
-	}
-
-	public Analysis<TypestateDomainValue<StateNode>> createTypestateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
-		this.problem = new CryptoTypestateAnaylsisProblem() {
-			@Override
-			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return resultReporter;
-			}
-
-			@Override
-			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-				return new FiniteStateMachineToTypestateChangeFunction(this) {
-					@Override
-					public Set<Transition<StateNode>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite,
-							AccessGraph d2, Unit returnSite, AccessGraph d3) {
-						cryptoScanner.onCallToReturnFlow(ClassSpecification.this, d1, callSite, d2);
-						return super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
-					}
-				};
-			}
-
-			@Override
-			public IExtendedICFG icfg() {
-				return cryptoScanner.icfg();
-			}
-
-			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return cryptoScanner.debugger();
-			}
-
-			@Override
-			public StateMachineGraph getStateMachine() {
-				return cryptSLRule.getUsagePattern();
-			}
-
-			@Override
-			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
-					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
-				return new ExtendedStandardFlowFunction(context, cryptSLRule);
-			}
-
-		};
-		return new Analysis<TypestateDomainValue<StateNode>>(problem);
-	}
 
 	public CryptSLRule getRule() {
 		return cryptSLRule;

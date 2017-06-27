@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
+import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.ResultReporter;
@@ -19,10 +20,10 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 
 	void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite);
 
-	void discoveredSeed(AnalysisSeedWithSpecification curr);
+	void discoveredSeed(IAnalysisSeed curr);
 
 	
 	void violateConstraint(ClassSpecification spec, Unit callSite);
 
-	void ensuredPredicates(Table<Unit, AnalysisSeedWithSpecification, Set<EnsuredCryptSLPredicate>> existingPredicates);
+	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates);
 }
