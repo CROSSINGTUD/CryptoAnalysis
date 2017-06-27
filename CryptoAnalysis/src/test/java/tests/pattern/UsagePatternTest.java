@@ -1,17 +1,15 @@
 package tests.pattern;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
@@ -22,7 +20,7 @@ import test.assertions.Assertions;
 public class UsagePatternTest extends UsagePatternTestingFramework{
 
 	@Test
-	public void UsagePatternTest1() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public void UsagePatternTest1() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128);
@@ -41,7 +39,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	}
 
 	@Test
-	public void UsagePatternTest2() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public void UsagePatternTest2() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(129);
@@ -59,7 +57,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	}
 
 	@Test
-	public void UsagePatternTest3() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public void UsagePatternTest3() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128);
@@ -76,7 +74,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 
 
 	@Test
-	public void UsagePatternTest4() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public void UsagePatternTest4() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128);
@@ -165,6 +163,39 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
 		Assertions.violatedConstraint(cCipher);
+	}
+	
+	public void UsagePattern8() throws GeneralSecurityException, IOException {
+		final byte[] salt = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(salt);
+
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p','a','s','s','w','o','r','d'}, salt, 65000, 128);
+		Assertions.extValue(0);
+		Assertions.extValue(2);
+		Assertions.extValue(3);
+		Assertions.assertNotErrorState(pbekeyspec);
+		
+		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		Assertions.extValue(0);
+		
+		final Cipher c = Cipher.getInstance("AES/GCM/PKCS5Padding");
+		Assertions.extValue(0);
+		
+		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
+		Assertions.assertNotErrorState(secFac);
+		
+		byte[] keyMaterial = tmpKey.getEncoded();
+		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
+		Assertions.extValue(1);
+		
+		c.init(Cipher.ENCRYPT_MODE, actKey);
+		Assertions.extValue(0);
+		Assertions.assertNotErrorState(actKey);
+		
+		c.doFinal("TESTPLAIN".getBytes("UTF-8"));
+		c.getIV();
+		
+		Assertions.assertNotErrorState(c);
 	}
 
 }
