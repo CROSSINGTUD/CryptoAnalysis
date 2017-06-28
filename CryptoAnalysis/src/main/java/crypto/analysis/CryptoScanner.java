@@ -19,9 +19,6 @@ import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.QueryListener;
 import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
 import ideal.FactAtStatement;
@@ -41,7 +38,6 @@ public abstract class CryptoScanner {
 	
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
-	private IAnalysisSeed curr;
 	private Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
 	private DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate>() {
 		@Override
@@ -82,9 +78,9 @@ public abstract class CryptoScanner {
 		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(stmt,seed).contains(ensPred); 
-		if(added)
+		if(added){
 			onPredicateAdded(stmt, seed, ensPred);
-
+		}
 
 		return added;
 	}
@@ -103,8 +99,6 @@ public abstract class CryptoScanner {
 				}
 				if (paramMatch) {
 					for (final ClassSpecification specification : specifications) {
-//						if (classSpecification.equals(specification))
-//							continue;
 						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction()
 								.getEdgeLabelMethods().contains(method)) {
 							AliasFinder boomerang = new AliasFinder(new BoomerangOptions() {
@@ -145,11 +139,9 @@ public abstract class CryptoScanner {
 	
 	public void scan(){
 		initialize();
-		Set<IAnalysisSeed> visited = Sets.newHashSet();
 		while(!worklist.isEmpty()){
 			IAnalysisSeed curr = worklist.poll();
 			analysisListener().discoveredSeed(curr);
-			this.curr = curr;
 			curr.execute();
 			if(!curr.isSolved())
 				worklist.add(curr);
@@ -181,46 +173,6 @@ public abstract class CryptoScanner {
 		return specifications;
 	}
 
-	public void onCallToReturnFlow(IAnalysisSeed seed, AccessGraph d1, Unit callSite,
-			AccessGraph d2) {
-//		if (callSite instanceof Stmt && ((Stmt) callSite).containsInvokeExpr()) {
-//			InvokeExpr ivexpr = ((Stmt) callSite).getInvokeExpr();
-//			if (ivexpr instanceof InstanceInvokeExpr) {
-//				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
-//				SootMethod method = iie.getMethod();
-//				Value base = iie.getBase();
-//				boolean paramMatch = false;
-//				for (Value arg : iie.getArgs()) {
-//					if (d2.getBase() != null && d2.getBase().equals(arg))
-//						paramMatch = true;
-//				}
-//				if (paramMatch) {
-//					for (final ClassSpecification specification : specifications) {
-////						if (classSpecification.equals(specification))
-////							continue;
-//						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction()
-//								.getEdgeLabelMethods().contains(method)) {
-//							CryptoTypestateAnaylsisProblem problem = seed.getAnalysisProblem();
-//							AdditionalBoomerangQuery query = problem.new AdditionalBoomerangQuery(d1, callSite,
-//									new AccessGraph((Local) base, base.getType()));
-//							problem.addAdditionalBoomerangQuery(query,
-//									new CryptoTypestateAnaylsisProblem.QueryListener() {
-//										@Override
-//										public void solved(AdditionalBoomerangQuery q, AliasResults res) {
-//											for (Pair<Unit, AccessGraph> p : res.keySet()) {
-//												AnalysisSeedWithSpecification seed = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this,
-//														new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()),
-//														icfg().getMethodOf(p.getO2().getSourceStmt()), specification));
-//											}
-//										}
-//									});
-//						}
-//					}
-//				}
-//			}
-//
-//		}
-	}
 
 	protected void addToWorkList(IAnalysisSeed analysisSeedWithSpecification) {
 		worklist.add(analysisSeedWithSpecification);

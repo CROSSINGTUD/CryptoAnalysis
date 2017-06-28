@@ -62,10 +62,6 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 		return delegate.getStmt();
 	}
 
-	@Override
-	public Collection<EnsuredCryptSLPredicate> getEnsuredPredicates() {
-		return null;
-	}
 
 	@Override
 	public void execute() {
@@ -105,14 +101,7 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 
 			@Override
 			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-				return new FiniteStateMachineToTypestateChangeFunction(this){
-                    @Override
-                    public Set<Transition<StateNode>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite,
-                            AccessGraph d2, Unit returnSite, AccessGraph d3) {
-                        cryptoScanner.onCallToReturnFlow(AnalysisSeedWithEnsuredPredicate.this, d1, callSite, d2);
-                        return super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
-                    }
-				};
+				return new FiniteStateMachineToTypestateChangeFunction(this);
 			}
 
 			@Override
@@ -151,5 +140,10 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 	@Override
 	public boolean isSolved() {
 		return analyzed;
+	}
+	
+	@Override
+	public String toString() {
+		return "AnalysisSeedWithEnsuredPredicate:" + getStmt() +" " + ensuredPredicates; 
 	}
 }

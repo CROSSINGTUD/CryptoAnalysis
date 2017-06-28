@@ -3,7 +3,7 @@ package crypto.analysis;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.IFactAtStatement;
 
-public interface IAnalysisSeed extends IFactAtStatement,  ParentPredicate{
+public interface IAnalysisSeed extends IFactAtStatement{
 
 	void execute();
 
