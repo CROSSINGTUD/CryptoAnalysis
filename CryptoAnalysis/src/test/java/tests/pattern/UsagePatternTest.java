@@ -26,15 +26,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Assertions.hasEnsuredPredicate(keygen);
+		Assertions.hasEnsuredPredicate(key);
 		Assertions.assertNotErrorState(keygen);
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
-		Assertions.hasEnsuredPredicate(cCipher);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
 		Assertions.assertNotErrorState(cCipher);
 	}
 
@@ -46,13 +46,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.assertNotErrorState(keygen);
-		Assertions.violatedConstraint(keygen);
+		Assertions.notHasEnsuredPredicate(key);
 		
 		Cipher cCipher = Cipher.getInstance("AES");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.violatedConstraint(cCipher);
 	}
 
@@ -69,7 +70,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.doFinal("".getBytes());
 		Assertions.assertErrorState(cCipher);
-		
 	}
 
 
@@ -165,6 +165,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.violatedConstraint(cCipher);
 	}
 	
+
+	@Test
 	public void UsagePattern8() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
@@ -173,7 +175,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.assertNotErrorState(pbekeyspec);
+		Assertions.assertErrorState(pbekeyspec);
 		
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);

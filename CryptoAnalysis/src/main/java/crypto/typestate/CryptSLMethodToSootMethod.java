@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import crypto.rules.CryptSLMethod;
@@ -14,14 +16,23 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
 
-public class StatementLabelToSootMethod {
-	private static StatementLabelToSootMethod instance;
+public class CryptSLMethodToSootMethod {
+	private static CryptSLMethodToSootMethod instance;
 	private DefaultValueMap<CryptSLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CryptSLMethod, Collection<SootMethod>>() {
 		@Override
 		protected Collection<SootMethod> createItem(CryptSLMethod key) {
-			return _convert(key);
+			Collection<SootMethod> res = _convert(key);
+			for(SootMethod m : res){
+				sootMethodToDescriptor.put(m, key);
+			}
+			return res;
 		}
 	};
+	private Multimap<SootMethod, CryptSLMethod> sootMethodToDescriptor = HashMultimap.create();
+	
+	public Collection<CryptSLMethod> convert(SootMethod m){
+		return sootMethodToDescriptor.get(m);
+	}
 	
 	public Collection<SootMethod> convert(CryptSLMethod label){
 		return descriptorToSootMethod.getOrCreate(label);
@@ -75,9 +86,9 @@ public class StatementLabelToSootMethod {
 		}
 		return label.substring(0, label.lastIndexOf("."));
 	}
-	public static StatementLabelToSootMethod v() {
+	public static CryptSLMethodToSootMethod v() {
 		if(instance == null)
-			instance = new StatementLabelToSootMethod();
+			instance = new CryptSLMethodToSootMethod();
 		return instance;
 	}
 }

@@ -37,7 +37,7 @@ public class ExtendedStandardFlowFunction extends StandardFlowFunctions<Typestat
 				List<Boolean> backward = label.getBackward();
 				for (Boolean trackBackward : backward) {
 					if (!trackBackward) {
-						for(SootMethod callee : StatementLabelToSootMethod.v().convert(label)){
+						for(SootMethod callee : CryptSLMethodToSootMethod.v().convert(label)){
 							additionalFlows.add(new FlowAtCallsite(callee, index - 1));
 						}
 					}

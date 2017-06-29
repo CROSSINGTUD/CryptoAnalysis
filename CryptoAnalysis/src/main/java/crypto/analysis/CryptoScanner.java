@@ -51,6 +51,15 @@ public abstract class CryptoScanner {
 			return new AnalysisSeedWithSpecification(CryptoScanner.this,new FactAtStatement(key.getStmt(), key.getFact()),icfg().getMethodOf(key.getStmt()), key.getSpec());
 		}
 	};
+	
+	
+
+	public abstract IExtendedICFG icfg();
+	public abstract CryptSLAnalysisListener analysisListener();
+	public abstract boolean isCommandLineMode();
+	
+	
+	
 	/**
 	 * @return the existingPredicates
 	 */
@@ -70,10 +79,6 @@ public abstract class CryptoScanner {
 		}		
 	}
 	
-	
-	public abstract IExtendedICFG icfg();
-	public abstract CryptSLAnalysisListener analysisListener();
-
 	public boolean addNewPred(Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
 		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
 		boolean added = set.add(ensPred);
@@ -117,7 +122,7 @@ public abstract class CryptoScanner {
 							AliasResults res = boomerang.findAliasAtStmt(baseAccessGraph, stmt, new AllCallersRequester());
 							for (Pair<Unit, AccessGraph> p : res.keySet()) {
 								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this,
-										new FactAtStatement(p.getO2().getSourceStmt(), p.getO2()),
+										new FactAtStatement(p.getO2().getSourceStmt(), p.getO2().deriveWithoutAllocationSite()),
 										icfg().getMethodOf(p.getO2().getSourceStmt()), specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
@@ -158,7 +163,7 @@ public abstract class CryptoScanner {
 	private void initialize() {
 		for(ClassSpecification spec : getClassSpecifictions()){
 			spec.checkForForbiddenMethods();
-			if(!spec.isRootNode())
+			if(!isCommandLineMode() && !spec.isLeafRule())
 				continue;
 
 			for(IFactAtStatement seed : spec.getInitialSeeds()){

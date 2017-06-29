@@ -19,11 +19,13 @@ import com.google.common.collect.Table.Cell;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLCondPredicate;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
@@ -40,6 +42,8 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.Transition;
@@ -127,8 +131,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
 			solved = true;
 		}
-		// TODO only execute when typestate and constraint solving did not fail.
-		// ensuresPredicate();
 	}
 
 	
@@ -168,7 +170,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 	}
 
-	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit curStmt, StateNode stateNode) {
+	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit currStmt, StateNode stateNode) {
 		if (predToBeEnsured.isNegated()) {
 			// for (EnsuredCryptSLPredicate ensPred :
 			// cryptoScanner.getExistingPredicates(curStmt, this)) {
@@ -178,7 +180,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			// }
 		} else {
 			if (checkConstraintSystem()) {
-				System.out.println(predToBeEnsured + " valid " + curStmt);
+				System.out.println("ensurePredicate here " + currStmt + stateNode + predToBeEnsured);
 				if (predToBeEnsured.getParameters().get(0).getName().equals("this")) {
 					for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
 						// TODO check for any reachable state that don't kill
@@ -189,15 +191,34 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 						}
 					}
 				} else {
-					if (curStmt instanceof AssignStmt) {
-						AssignStmt as = (AssignStmt) curStmt;
-						Value leftOp = as.getLeftOp();
-						AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
-						for (Unit succ : cryptoScanner.icfg().getSuccsOf(as)) {
-							AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
-									.getOrCreateSeed(new FactAtStatement(succ, accessGraph));
-							seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
-						}
+					if (currStmt instanceof Stmt && ((Stmt) currStmt).containsInvokeExpr()) {
+						 InvokeExpr ie = ((Stmt) currStmt).getInvokeExpr();
+						 SootMethod invokedMethod = ie.getMethod();
+						 Collection<CryptSLMethod> convert = CryptSLMethodToSootMethod.v().convert(invokedMethod);
+						 int i = 0;
+						 for(CryptSLMethod cryptSLMethod : convert){
+							 for(Entry<String, String> p : cryptSLMethod.getParameters()){
+								 if(p.getKey().equals(predToBeEnsured.getParameters().get(0).getName())){
+									 if(i == 0){
+										 if(currStmt instanceof AssignStmt){
+											AssignStmt as = (AssignStmt) currStmt;
+											Value leftOp = as.getLeftOp();
+											AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
+											AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
+													.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+											seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+										 }
+									 } else{
+										Value param = ie.getArg(i-1);
+										AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
+										AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
+												.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+										seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+									 }
+								 }
+								 i++;
+							 }
+						 }
 					}
 				}
 			}
@@ -262,17 +283,20 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 		Set<CryptSLPredicate> remainingPredicates = Sets.newHashSet(requiredPredicates);
 		for (CryptSLPredicate pred : requiredPredicates) {
-			for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-				if (ensPred.getPredicate().equals(pred)) {
-					remainingPredicates.remove(pred);
+			if(pred.isNegated()){
+				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
+					if(ensPred.equals(pred))
+						return false;
+				}
+				remainingPredicates.remove(pred);
+			} else{
+				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
+					if(ensPred.getPredicate().equals(pred)){
+						//TODO Stefan: #13 Re-implement full predicate check
+						remainingPredicates.remove(pred);
+					}
 				}
 			}
-		}
-		Iterator<CryptSLPredicate> iterator = remainingPredicates.iterator();
-		while(iterator.hasNext()){
-			CryptSLPredicate next = iterator.next();
-			if(next.isNegated())
-				iterator.remove();
 		}
 		return remainingPredicates.isEmpty();
 	}

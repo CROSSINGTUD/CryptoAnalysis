@@ -13,7 +13,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import crypto.typestate.StatementLabelToSootMethod;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
@@ -84,8 +84,8 @@ public class ClassSpecification {
 		};
 	}
 
-	public boolean isRootNode() {
-		return cryptSLRule.isRootSpec();
+	public boolean isLeafRule() {
+		return cryptSLRule.isLeafRule();
 	}
 
 	public Set<IFactAtStatement> getInitialSeeds() {
@@ -134,7 +134,7 @@ public class ClassSpecification {
 //		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		for(CryptSLForbiddenMethod m : forbiddenMethods){
-			Collection<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m.getMethod());
+			Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
 			if(matchingMatched.contains(method))
 				return true;
 		}

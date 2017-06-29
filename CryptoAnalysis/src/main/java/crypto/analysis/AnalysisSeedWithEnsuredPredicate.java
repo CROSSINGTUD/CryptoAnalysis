@@ -117,7 +117,12 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 			@Override
 			public StateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
-				StateNode s = new StateNode("0", true, true);
+				StateNode s = new StateNode("0", true, true){
+					@Override
+					public String toString() {
+						return "";
+					}
+				};
 				m.addNode(s);
 				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
 				return m;
