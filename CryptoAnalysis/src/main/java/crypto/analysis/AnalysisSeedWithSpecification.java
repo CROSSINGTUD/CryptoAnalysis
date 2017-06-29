@@ -3,8 +3,6 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,22 +19,18 @@ import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
 import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
-import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
-import ideal.flowfunctions.StandardFlowFunctions;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -46,14 +40,12 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import typestate.TypestateDomainValue;
-import typestate.finiteautomata.Transition;
 import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private final IFactAtStatement factAtStmt;
 	private final SootMethod method;
 	private final ClassSpecification spec;
-	private final IAnalysisSeed parent;
 	private CryptoScanner cryptoScanner;
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
 	private Multimap<String, String> parametersToValues = HashMultimap.create();
@@ -69,7 +61,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		this.factAtStmt = factAtStmt;
 		this.method = method;
 		this.spec = spec;
-		this.parent = null;
 	}
 
 	@Override
@@ -110,7 +101,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	public void execute() {
 		if (!solved) {
-			System.out.println(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 				@Override
 				public void onSeedFinished(IFactAtStatement seed,
@@ -253,13 +243,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				public StateMachineGraph getStateMachine() {
 					return spec.getRule().getUsagePattern();
 				}
-
-				@Override
-				public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
-						PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
-					return new ExtendedStandardFlowFunction(context, spec.getRule());
-				}
-
 			};
 			analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);
 		}

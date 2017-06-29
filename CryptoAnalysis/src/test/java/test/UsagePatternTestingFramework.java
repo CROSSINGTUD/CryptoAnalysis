@@ -67,7 +67,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
-//				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 					
 					@Override
@@ -191,6 +190,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "SecretKeyFactory.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 //		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 		return rules;

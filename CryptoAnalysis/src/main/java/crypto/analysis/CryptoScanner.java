@@ -19,6 +19,7 @@ import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
 import ideal.FactAtStatement;
@@ -74,6 +75,7 @@ public abstract class CryptoScanner {
 
 
 	public CryptoScanner(List<CryptSLRule> specs){
+		CryptSLMethodToSootMethod.reset();
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}		

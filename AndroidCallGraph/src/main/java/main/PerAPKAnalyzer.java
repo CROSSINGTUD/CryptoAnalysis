@@ -140,6 +140,11 @@ public class PerAPKAnalyzer {
 				return getDebugger();
 			}
 
+			@Override
+			public boolean isCommandLineMode() {
+				return true;
+			}
+
 		};
 		scanner.scan();
 		detailedOutput();

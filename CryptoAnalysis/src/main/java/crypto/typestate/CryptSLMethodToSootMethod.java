@@ -91,4 +91,7 @@ public class CryptSLMethodToSootMethod {
 			instance = new CryptSLMethodToSootMethod();
 		return instance;
 	}
+	public static void reset() {
+		instance = null;
+	}
 }

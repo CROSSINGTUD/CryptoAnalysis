@@ -1,16 +1,12 @@
 package crypto.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
@@ -18,30 +14,20 @@ import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import heros.EdgeFunction;
-import heros.edgefunc.EdgeIdentity;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
-import ideal.DefaultIDEALAnalysisDefinition;
 import ideal.IFactAtStatement;
-import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
-import ideal.edgefunction.AnalysisEdgeFunctions;
-import ideal.flowfunctions.StandardFlowFunctions;
 import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
-import typestate.finiteautomata.Transition;
 
 public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 
 	private IFactAtStatement delegate;
 	private CryptoScanner cryptoScanner;
-	private Object val;
 	private boolean analyzed;
 	private Multimap<Unit, AccessGraph> analysisResults = HashMultimap.create();
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
@@ -85,7 +71,7 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 	protected void ensurePredicates(EnsuredCryptSLPredicate pred) {
 		if(analysisResults == null)
 			return;
-		System.out.println(analysisResults);
+
 		for(Entry<Unit, AccessGraph> c : analysisResults.entries()){
 			cryptoScanner.addNewPred(c.getKey(), c.getValue(), pred);
 		}
