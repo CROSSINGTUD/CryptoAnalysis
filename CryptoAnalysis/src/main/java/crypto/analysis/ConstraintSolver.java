@@ -13,11 +13,14 @@ import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLConstraint.LogOps;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
+import soot.SootMethod;
+import soot.Type;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
@@ -25,15 +28,17 @@ public class ConstraintSolver {
 
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
+	private final Collection<SootMethod> collectedCalls;
 	private final Multimap<String, String> parsAndVals;
 	private List<Entry<String, String>> objects;
 	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
-	public ConstraintSolver(CryptSLRule rule, Multimap<String, String> parsAndValues) {
+	public ConstraintSolver(ClassSpecification spec, Multimap<String, String> parsAndValues) {
 		parsAndVals = parsAndValues;
-		allConstraints = rule.getConstraints();
-		objects = rule.getObjects();
+		allConstraints = spec.getRule().getConstraints();
+		objects = spec.getRule().getObjects();
+		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 			List<String> involvedVarNames = cons.getInvolvedVarNames();
@@ -269,14 +274,43 @@ public class ConstraintSolver {
 				List<ICryptSLPredicateParameter> predMethods = parameters;
 				for (ICryptSLPredicateParameter predMethod : predMethods) {
 					//check whether predMethod is in foundMethods, which type-state analysis has to figure out
-					//((CryptSLMethod) predMethod);
+					CryptSLMethod reqMethod = (CryptSLMethod) predMethod;
+					for (SootMethod foundCall : collectedCalls) {
+						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
+							boolean foundInThisRound = true;
+							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
+								if (!foundCall.getParameterTypes().get(i).equals(reqMethod.getParameters().get(i))) {
+									foundInThisRound = false;
+									break;
+								}
+							}
+							if (foundInThisRound) {
+								return true;
+							}
+						}
+					}
 				}
-				return true;
+				return false;
 			case "noCallTo":
 				List<ICryptSLPredicateParameter> predForbiddenMethods = parameters;
 				for (ICryptSLPredicateParameter predForbMethod : predForbiddenMethods) {
 					//check whether predForbMethod is in foundForbMethods, which forbidden-methods analysis has to figure out
-					//((CryptSLMethod) predForbMethod);
+					CryptSLMethod reqMethod = ((CryptSLMethod) predForbMethod);
+					
+					for (SootMethod foundCall : collectedCalls) {
+						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
+							boolean foundInThisRound = true;
+							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
+								if (!foundCall.getParameterTypes().get(i).equals(reqMethod.getParameters().get(i))) {
+									foundInThisRound = false;
+									break;
+								}
+							}
+							if (foundInThisRound) {
+								return false;
+							}
+						}
+					}
 				}
 				return true;
 			case "neverTypeOf":
@@ -284,7 +318,7 @@ public class ConstraintSolver {
 				// -> first parameter is always the variable
 				// -> second parameter is always the type
 				String varName = ((CryptSLObject) parameters.get(0)).getVarName();
-				//String type = parameters.get(1);
+				//String type = parameters.get(0);
 				return true;
 			default:
 				return true; //should be changed to false once implementation for the other cases works.

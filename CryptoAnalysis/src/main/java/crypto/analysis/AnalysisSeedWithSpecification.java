@@ -250,7 +250,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
-		ConstraintSolver solver = new ConstraintSolver(spec.getRule(), parametersToValues);
+		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues);
 		List<ISLConstraint> relConstraints = solver.getRelConstraints();
 		if(!checkPredicates(relConstraints))
 			return false;
