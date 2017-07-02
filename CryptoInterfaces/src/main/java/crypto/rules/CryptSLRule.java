@@ -36,7 +36,7 @@ public class CryptSLRule implements java.io.Serializable {
 	}
 	
 	
-	public boolean isRootSpec() {
+	public boolean isLeafRule() {
 		for (ISLConstraint con : constraints) {
 			if (con instanceof CryptSLPredicate) {
 				return false;
@@ -121,10 +121,12 @@ public class CryptSLRule implements java.io.Serializable {
 			outputSB.append(",");
 		}
 
-		outputSB.append("\nPredicates:");
-		for (CryptSLPredicate predicate : this.predicates) {
-			outputSB.append(predicate);
-			outputSB.append(",");
+		if (this.predicates != null) {
+			outputSB.append("\nPredicates:");
+			for (CryptSLPredicate predicate : this.predicates) {
+				outputSB.append(predicate);
+				outputSB.append(",");
+			}
 		}
 		
 		return outputSB.toString();

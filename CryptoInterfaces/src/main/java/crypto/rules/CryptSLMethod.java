@@ -9,14 +9,16 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	
 	private static final long serialVersionUID = 1L;
-	private String methodName;
-	private List<Entry<String, String>> parameters; 
-	private List<Boolean> backward;
+	private final String methodName;
+	private final Entry<String, String> retObject;
+	private final List<Entry<String, String>> parameters; 
+	private final List<Boolean> backward;
 	
-	public CryptSLMethod(String methName, List<Entry<String, String>> pars, List<Boolean> backw) {
+	public CryptSLMethod(String methName, List<Entry<String, String>> pars, List<Boolean> backw, Entry<String, String> returnObject) {
 		methodName = methName;
 		parameters = pars;
 		backward = backw;
+		retObject = returnObject;
 	}
 
 	/**
@@ -48,29 +50,26 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	public String getName() {
 		StringBuilder stmntBuilder = new StringBuilder();
 		
-		String returnValue = parameters.get(0).getKey();
+		String returnValue = retObject.getKey();
 		if (!"_".equals(returnValue)) {
 			stmntBuilder.append(returnValue);
 			stmntBuilder.append(" = ");
 		}
 		
-		stmntBuilder.append(this.methodName);
+		final int afterClassNamePos = this.methodName.lastIndexOf(".");
+		
+		stmntBuilder.append(this.methodName.substring(afterClassNamePos + 1));
 		stmntBuilder.append("(");
 		
-		Boolean skipFirst = true;
+		
 		for (Entry<String, String> par: parameters) {
-			if (skipFirst) {
-				skipFirst = false;
-				continue;
-			}
-			stmntBuilder.append(par.getValue());
 			stmntBuilder.append(" ");
 			stmntBuilder.append(par.getKey());
-			if (backward != null) {
-				stmntBuilder.append(" (");
-				stmntBuilder.append(backward.get(parameters.indexOf(par)));
-				stmntBuilder.append("),");
-			}
+//			if (backward != null && backward.size() == parameters.size()) {
+//				stmntBuilder.append(" (");
+//				stmntBuilder.append(backward.get(parameters.indexOf(par)));
+//				stmntBuilder.append("),");
+//			}
 		}
 		
 		stmntBuilder.append(");");

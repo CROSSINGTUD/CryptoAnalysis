@@ -1,27 +1,23 @@
 package crypto.rules;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	private final ICryptSLPredicateParameter baseObject;
 	private final String predName;
 	private final List<ICryptSLPredicateParameter> parameters;
 	private final boolean negated;
 	
-	
-	public CryptSLPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
-		predName = name;
-		parameters = variables;
-		negated = not;
+	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
+		this.baseObject = baseObject;
+		this.predName = name;
+		this.parameters = variables;
+		this.negated = not;
 	}
 	
 	@Override
@@ -34,6 +30,14 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		}
 		CryptSLPredicate other = (CryptSLPredicate) obj;
 		return other.getPredName().equals(this.predName);// && (new HashSet<String>(other.getParameters())).equals(new HashSet<String>(this.getParameters()));
+	}
+
+	
+	/**
+	 * @return the baseObject
+	 */
+	public ICryptSLPredicateParameter getBaseObject() {
+		return baseObject;
 	}
 
 	/**
@@ -56,7 +60,6 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	public Boolean isNegated() {
 		return negated;
 	}
-	
 	
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
