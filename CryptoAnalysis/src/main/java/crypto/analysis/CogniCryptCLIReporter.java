@@ -9,14 +9,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ErrorStateNode;
-import heros.EdgeFunction;
 import heros.InterproceduralCFG;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
