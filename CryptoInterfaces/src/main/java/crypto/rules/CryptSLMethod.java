@@ -49,7 +49,6 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	@Override
 	public String getName() {
 		StringBuilder stmntBuilder = new StringBuilder();
-		
 		String returnValue = retObject.getKey();
 		if (!"_".equals(returnValue)) {
 			stmntBuilder.append(returnValue);
@@ -100,4 +99,5 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 		CryptSLMethod other = (CryptSLMethod) obj;
 		return this.getMethodName().equals(other.getMethodName()) && parameters.equals(other.parameters);
 	}
+
 }

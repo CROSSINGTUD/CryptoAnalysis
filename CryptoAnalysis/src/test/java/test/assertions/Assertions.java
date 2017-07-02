@@ -33,4 +33,8 @@ public class Assertions {
 		
 	}
 
+	public static void notHasEnsuredPredicate(Object o){
+		
+	}
+
 }

@@ -45,7 +45,8 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintViolationAssertion;
-import test.assertions.HasConstraintAssertion;
+import test.assertions.HasEnsuredPredicateAssertion;
+import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -66,7 +67,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
-//				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 					
 					@Override
@@ -83,16 +83,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof ComparableResult){
-											ComparableResult expectedResults = (ComparableResult) e;
+											ComparableResult<StateNode> expectedResults = (ComparableResult) e;
 											TypestateDomainValue<StateNode> resultAt = solver.resultAt(expectedResults.getStmt(), expectedResults.getAccessGraph());
 											if(resultAt != null)
 												expectedResults.computedResults(resultAt);
-										}
-										if(e instanceof HasConstraintAssertion){
-											HasConstraintAssertion assertion = (HasConstraintAssertion) e;
-											if(assertion.getAccessGraph().equals(c.getColumnKey())){
-												assertion.addObject(c.getColumnKey());	
-											}
 										}
 									}
 								}
@@ -136,8 +130,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
 								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
-										if(e instanceof HasConstraintAssertion){
-											HasConstraintAssertion assertion = (HasConstraintAssertion) e;
+										if(e instanceof HasEnsuredPredicateAssertion){
+											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
+											if(assertion.getStmt().equals(c.getRowKey())){
+												for(EnsuredCryptSLPredicate pred : c.getValue()){
+													assertion.reported(c.getColumnKey(),pred);
+												}	
+											}
+										}
+										if(e instanceof NotHasEnsuredPredicateAssertion){
+											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
 											if(assertion.getStmt().equals(c.getRowKey())){
 												for(EnsuredCryptSLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
@@ -152,6 +154,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					@Override
 					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
 						return UsagePatternTestingFramework.this.getDebugger();
+					}
+
+					@Override
+					public boolean isCommandLineMode() {
+						return true;
 					}
 
 				};
@@ -183,6 +190,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "SecretKeyFactory.cryptslbin")));
+		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 //		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
 		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
 		return rules;
@@ -234,9 +243,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new NotInErrorStateAssertion(stmt, val));
 			}
 			
-			if (invocationName.startsWith("violatedConstraint")) {
-				queries.add(new ConstraintViolationAssertion(stmt));
-			}
+//			if (invocationName.startsWith("violatedConstraint")) {
+//				queries.add(new ConstraintViolationAssertion(stmt));
+//			}
 
 			if(invocationName.startsWith("hasEnsuredPredicate")){
 				Value param = invokeExpr.getArg(0);
@@ -244,10 +253,18 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				Local queryVar = (Local) param;
 				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
-				queries.add(new HasConstraintAssertion(stmt, val));
+				queries.add(new HasEnsuredPredicateAssertion(stmt, val));
 			}
 			
-
+			if(invocationName.startsWith("notHasEnsuredPredicate")){
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof Local))
+					continue;
+				Local queryVar = (Local) param;
+				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				queries.add(new NotHasEnsuredPredicateAssertion(stmt, val));
+			}
+			
 			if(invocationName.startsWith("assertErrorState")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))

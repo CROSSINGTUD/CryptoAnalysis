@@ -60,14 +60,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	}
 
 	private Collection<SootMethod> convert(List<CryptSLMethod> label) {
-		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
+		Collection<SootMethod> converted = CryptSLMethodToSootMethod.v().convert(label);
 		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
 
 
 	private Collection<SootMethod> convert(CryptSLMethod label) {
-		Collection<SootMethod> converted = StatementLabelToSootMethod.v().convert(label);
+		Collection<SootMethod> converted = CryptSLMethodToSootMethod.v().convert(label);
 		edgeLabelMethods.addAll(converted);
 		return converted;
 	}

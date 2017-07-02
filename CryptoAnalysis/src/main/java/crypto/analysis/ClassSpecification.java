@@ -4,23 +4,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.ExtendedStandardFlowFunction;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import crypto.typestate.StatementLabelToSootMethod;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
-import ideal.PerSeedAnalysisContext;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
-import ideal.flowfunctions.StandardFlowFunctions;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -31,7 +27,6 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import typestate.TypestateDomainValue;
-import typestate.finiteautomata.Transition;
 
 public class ClassSpecification {
 	private CryptoTypestateAnaylsisProblem problem;
@@ -74,18 +69,11 @@ public class ClassSpecification {
 			public StateMachineGraph getStateMachine() {
 				return cryptSLRule.getUsagePattern();
 			}
-
-			@Override
-			public StandardFlowFunctions<TypestateDomainValue<StateNode>> flowFunctions(
-					PerSeedAnalysisContext<TypestateDomainValue<StateNode>> context) {
-				return new ExtendedStandardFlowFunction(context, cryptSLRule);
-			}
-
 		};
 	}
 
-	public boolean isRootNode() {
-		return cryptSLRule.isRootSpec();
+	public boolean isLeafRule() {
+		return cryptSLRule.isLeafRule();
 	}
 
 	public Set<IFactAtStatement> getInitialSeeds() {
@@ -134,7 +122,7 @@ public class ClassSpecification {
 //		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		for(CryptSLForbiddenMethod m : forbiddenMethods){
-			Collection<SootMethod> matchingMatched = StatementLabelToSootMethod.v().convert(m.getMethod());
+			Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
 			if(matchingMatched.contains(method))
 				return true;
 		}
