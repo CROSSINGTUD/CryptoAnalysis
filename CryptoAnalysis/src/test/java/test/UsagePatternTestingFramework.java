@@ -44,7 +44,6 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
-import test.assertions.ConstraintViolationAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;

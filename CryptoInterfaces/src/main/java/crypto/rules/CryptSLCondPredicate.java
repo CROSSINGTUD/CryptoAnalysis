@@ -13,8 +13,8 @@ public class CryptSLCondPredicate extends CryptSLPredicate {
 	private static final long serialVersionUID = 1L;
 	private final Set<StateNode> conditionalNodes;
 	
-	public CryptSLCondPredicate(String name, List<ICryptSLPredicateParameter> variables, Boolean not, Set<StateNode> label) {
-		super(name, variables, not);
+	public CryptSLCondPredicate(ICryptSLPredicateParameter baseObj, String name, List<ICryptSLPredicateParameter> variables, Boolean not, Set<StateNode> label) {
+		super(baseObj, name, variables, not);
 		conditionalNodes = label;
 	}
 	

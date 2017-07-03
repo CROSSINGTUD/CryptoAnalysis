@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
+import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -216,7 +218,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(
-			ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
+			final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		if (analysis == null) {
 			problem = new CryptoTypestateAnaylsisProblem() {
 				@Override
@@ -250,7 +252,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
-		ConstraintSolver solver = new ConstraintSolver(spec.getRule(), parametersToValues);
+		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues);
 		List<ISLConstraint> relConstraints = solver.getRelConstraints();
 		if(!checkPredicates(relConstraints))
 			return false;
@@ -276,6 +278,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
 					if(ensPred.getPredicate().equals(pred)){
 						//TODO Stefan: #13 Re-implement full predicate check
+						doPredsMatch(pred, ensPred);
 						remainingPredicates.remove(pred);
 					}
 				}
@@ -284,6 +287,50 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		return remainingPredicates.isEmpty();
 	}
 
+	private boolean doPredsMatch(CryptSLPredicate pred, EnsuredCryptSLPredicate ensPred) {
+		boolean requiredPredicatesExist = false;
+		for (int i = 0; i < pred.getParameters().size(); i++) {
+			String var = pred.getParameters().get(i).getName();
+			if (isOfNonTrackableType(var)) {
+				requiredPredicatesExist &= true;
+			} else if (pred.getInvolvedVarNames().contains(var)) {
+
+				Collection<String> actVals = ensPred.getParametersToValues().get(ensPred.getPredicate().getParameters().get(i).getName());
+				Collection<String> expVals = parametersToValues.get(var);
+
+				String splitter = "";
+				int index = -1;
+				if (pred.getParameters().get(i) instanceof CryptSLObject) {
+					CryptSLObject obj = (CryptSLObject) pred.getParameters().get(i);
+					if (obj.getSplitter() != null) {
+						splitter = obj.getSplitter().getSplitter();
+						index = obj.getSplitter().getIndex();
+					}
+				}
+				for (String foundVal : expVals) {
+					if (index > -1) {
+						foundVal = foundVal.split(splitter)[index];
+					}
+					requiredPredicatesExist &= actVals.contains(foundVal);
+				}
+			} else {
+				requiredPredicatesExist &= false;
+			}
+		}
+		return pred.isNegated() != requiredPredicatesExist;
+	}
+
+	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
+	
+	private boolean isOfNonTrackableType(String varName) {
+		for (Entry<String, String> object : spec.getRule().getObjects()) {
+			if (object.getValue().equals(varName) && trackedTypes.contains(object.getKey())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Value> actualValues) {
 		Multimap<String, String> varVal = HashMultimap.create();
 		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
