@@ -2,7 +2,10 @@ package crypto.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import typestate.interfaces.FiniteStateMachine;
 
@@ -83,6 +86,28 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 
 	public Collection<TransitionEdge> getAllTransitions() {
 		return getEdges();
+	}
+
+	public StateMachineGraph simplify() {
+		//TODO #15 Can be removed once 
+		TransitionEdge initialTrans = getInitialTransition();
+		StateNode intialState = initialTrans.from();
+		Set<TransitionEdge> merge = new HashSet<>();
+		merge.add(initialTrans);
+		for(TransitionEdge t : getEdges()){
+			if(!t.equals(initialTrans)){
+				if(t.from().equals(intialState) && t.to().equals(initialTrans.to())){
+					merge.add(t);
+				}
+			}
+		}
+		List<CryptSLMethod> mergedMethods = new LinkedList<>();
+		edges.removeAll(merge);
+		for(TransitionEdge e: merge){
+			mergedMethods.addAll(e.getLabel());
+		}
+		edges.add(0, new TransitionEdge(mergedMethods, intialState, initialTrans.to()));
+		return this;
 	}
 	
 }

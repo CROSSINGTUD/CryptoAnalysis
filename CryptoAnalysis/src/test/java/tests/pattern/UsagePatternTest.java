@@ -12,6 +12,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -54,7 +55,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
-		Assertions.violatedConstraint(cCipher);
 	}
 
 	@Test
@@ -68,8 +68,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES");
 		cCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(new byte[18], "AES"));
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
-		Assertions.assertErrorState(cCipher);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.assertNotErrorState(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 
 
@@ -86,9 +87,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
+		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
-		Assertions.violatedConstraint(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 	
 	@Test
@@ -106,8 +107,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
 		Assertions.extValue(0);
-		cCipher.doFinal(msgAsArray);
+		byte[] encText = cCipher.doFinal(msgAsArray);
 		Assertions.assertNotErrorState(cCipher);
+		Assertions.hasEnsuredPredicate(encText);
 		
 		KeyGenerator keygenMac = KeyGenerator.getInstance("HmacSHA256");
 		SecretKey keyMac = keygenMac.generateKey();
@@ -139,9 +141,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
+		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
-		Assertions.violatedConstraint(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 	
 	@Test
@@ -160,9 +162,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, rand);
 		Assertions.extValue(0);
-		cCipher.doFinal("".getBytes());
+		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.assertNotErrorState(cCipher);
-		Assertions.violatedConstraint(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 	
 
@@ -194,10 +196,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		Assertions.assertNotErrorState(actKey);
 		
-		c.doFinal("TESTPLAIN".getBytes("UTF-8"));
+		byte[] encText = c.doFinal("TESTPLAIN".getBytes("UTF-8"));
 		c.getIV();
 		
 		Assertions.assertNotErrorState(c);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 
 }

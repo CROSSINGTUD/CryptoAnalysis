@@ -54,10 +54,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			this.changeFunction = createTypestateChangeFunction();
 		return this.changeFunction;
 	}
-	public StateMachineGraph getStateMachineGraph(){
-		return getStateMachine(); 
-	}
-	
+
 	public abstract StateMachineGraph getStateMachine(); 
 	public NonIdentityEdgeFlowHandler<typestate.TypestateDomainValue<StateNode>> nonIdentityEdgeFlowHandler() {
 		return new NonIdentityEdgeFlowHandler<TypestateDomainValue<StateNode>>() {

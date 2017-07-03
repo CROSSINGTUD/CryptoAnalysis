@@ -41,8 +41,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
-		stateMachineGraph = analysisProblem.getStateMachineGraph();
+		stateMachineGraph = analysisProblem.getStateMachine().simplify();
 		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
+		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
 		initialState = stateMachineGraph.getInitialTransition().to();
 		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
 			this.addTransition(new LabeledMatcherTransition(t.from(), t.getLabel(),
