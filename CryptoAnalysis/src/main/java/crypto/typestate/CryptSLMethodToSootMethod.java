@@ -47,7 +47,7 @@ public class CryptSLMethodToSootMethod {
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
 		if(methodNameWithoutDeclaringClass.equals(sootClass.getShortName()))
 			methodNameWithoutDeclaringClass = "<init>";
-		int noOfParams = label.getParameters().size() - 1; //-1 because List of Parameters contains placeholder for return value.
+		int noOfParams = label.getParameters().size(); //-1 because List of Parameters contains placeholder for return value.
 		for (SootMethod m : sootClass.getMethods()) {
 			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams){
 				if(parametersMatch(label.getParameters(), m.getParameterTypes()))
@@ -57,7 +57,7 @@ public class CryptSLMethodToSootMethod {
 		return res;
 	}
 	private boolean parametersMatch(List<Entry<String, String>> parameters, List<Type> parameterTypes) {
-		int i = 1;
+		int i = 0;
 		for(Type t : parameterTypes){
 			if(!t.toString().equals(parameters.get(i).getValue())){
 				return false;

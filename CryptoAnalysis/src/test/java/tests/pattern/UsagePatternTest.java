@@ -117,8 +117,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		final Mac hMacSHA256 = Mac.getInstance("HmacSHA256");
 		Assertions.extValue(0);
 		hMacSHA256.init(keyMac);
-		hMacSHA256.doFinal(msgAsArray);
+		byte[] macced = hMacSHA256.doFinal(msgAsArray);
 		Assertions.assertNotErrorState(hMacSHA256);
+		Assertions.notHasEnsuredPredicate(macced);
 	}
 	
 	@Test

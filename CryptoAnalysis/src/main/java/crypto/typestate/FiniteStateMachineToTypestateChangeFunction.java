@@ -41,7 +41,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
-		stateMachineGraph = analysisProblem.getStateMachine().simplify();
+		stateMachineGraph = analysisProblem.getStateMachine();
 		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
 		initialState = stateMachineGraph.getInitialTransition().to();
@@ -50,7 +50,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					Parameter.This, t.to(), Type.OnCallToReturn));
 			outTransitions.putAll(t.from(), convert(t.getLabel()));
 		}
-		
 		//All transitions that are not in the state machine 
 		for(StateNode s : outTransitions.keySet()){
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
@@ -111,14 +110,11 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					continue;
 				{
 					int index = 0;
-					List<Boolean> backward = matchingDescriptor.getBackward();
 					for(Entry<String, String> param : matchingDescriptor.getParameters()){
-						if( index > 0 && backward.get(index) ){
-							if(!param.getKey().equals("_")){
-								soot.Type parameterType = method.getParameterType(index - 1);
-								if(parameterType.toString().equals(param.getValue())){
-									analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index - 1, context);
-								}
+						if(!param.getKey().equals("_")){
+							soot.Type parameterType = method.getParameterType(index);
+							if(parameterType.toString().equals(param.getValue())){
+								analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index, context);
 							}
 						}
 						index++;

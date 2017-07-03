@@ -88,6 +88,8 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 				varNames.add(var.getName());
 			}
 		}
+		if(getBaseObject() != null)
+			varNames.add(getBaseObject().getName());
 		return varNames;
 	}
 	

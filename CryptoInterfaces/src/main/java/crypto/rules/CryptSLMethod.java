@@ -42,6 +42,10 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 		return backward;
 	}
 	
+	
+	public Entry<String, String> getRetObject() {
+		return retObject;
+	}
 	public String toString() {
 		return getName();
 	}
