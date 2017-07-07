@@ -135,6 +135,11 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 	
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate:" + getStmt() +" " + ensuredPredicates; 
+		return "AnalysisSeedWithEnsuredPredicate:"+getFact()+"@" + getStmt() +" " + ensuredPredicates; 
+	}
+
+	@Override
+	public boolean contradictsNegations() {
+		return false;
 	}
 }

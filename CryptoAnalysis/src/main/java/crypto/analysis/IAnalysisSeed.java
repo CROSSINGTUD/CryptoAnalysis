@@ -10,4 +10,6 @@ public interface IAnalysisSeed extends IFactAtStatement{
 	CryptoTypestateAnaylsisProblem getAnalysisProblem();
 
 	boolean isSolved();
+
+	boolean contradictsNegations();
 }

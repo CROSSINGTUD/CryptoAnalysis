@@ -9,7 +9,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 
 	private Stmt stmt;
 	private AccessGraph val;
-	private boolean satisfied = true;
+	private boolean imprecise = false;
 
 	public NotHasEnsuredPredicateAssertion(Stmt stmt, AccessGraph val) {
 		this.stmt = stmt;
@@ -22,12 +22,12 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 
 	@Override
 	public boolean isSatisfied() {
-		return satisfied;
+		return true;
 	}
 
 	@Override
 	public boolean isImprecise() {
-		return false;
+		return imprecise;
 	}
 
 
@@ -36,12 +36,13 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 	}
 
 	public void reported(AccessGraph seed, EnsuredCryptSLPredicate pred) {
-		if(seed.equals(val))
-			satisfied = false;
+		if(seed.equals(val)){
+			imprecise = true;
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "Did not expecte a predicate for "+ val +" @ " + stmt;  
+		return "Did not expect a predicate for "+ val +" @ " + stmt;  
 	}
 }

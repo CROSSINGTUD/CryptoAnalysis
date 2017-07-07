@@ -153,6 +153,15 @@ public abstract class CryptoScanner {
 			if(!curr.isSolved())
 				worklist.add(curr);
 		}
+		
+		for(IAnalysisSeed seed : seeds){
+			if(seed.contradictsNegations()){
+				System.out.println("CONTRADICTION FOUND");
+			}
+		}
+		
+		System.out.println(Joiner.on("\n").join(existingPredicates.cellSet()));
+		
 		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
 		if(debugger instanceof CryptoVizDebugger){
 			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;

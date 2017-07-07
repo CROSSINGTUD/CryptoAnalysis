@@ -171,13 +171,16 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			// }
 		} else {
 			if (checkConstraintSystem()) {
-				if (predToBeEnsured.getBaseObject().getName().equals("this")) {
-					for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
-						// TODO check for any reachable state that don't kill
-						// predicates.
-						if (e.getValue().getStates().contains(stateNode)) {
-							cryptoScanner.addNewPred(e.getRowKey(), e.getColumnKey(),
-									new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+
+				for(ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()){
+					if (predicateParam.getName().equals("this")) {
+						for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
+							// TODO check for any reachable state that don't kill
+							// predicates.
+							if (e.getValue().getStates().contains(stateNode)) {
+								cryptoScanner.addNewPred(e.getRowKey(), e.getColumnKey(),
+										new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+							}
 						}
 					}
 				}
@@ -273,7 +276,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		for (CryptSLPredicate pred : requiredPredicates) {
 			if (pred.isNegated()) {
 				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-					if (ensPred.equals(pred))
+					if (ensPred.getPredicate().equals(pred))
 						return false;
 				}
 				remainingPredicates.remove(pred);
@@ -392,5 +395,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			for (Entry<Unit, StateNode> e : typeStateChange.entries())
 				onAddedTypestateChange(e.getKey(), e.getValue());
 		}
+	}
+
+	@Override
+	public boolean contradictsNegations() {
+		return false;
 	}
 }
