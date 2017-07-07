@@ -19,20 +19,37 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		this.parameters = variables;
 		this.negated = not;
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((predName == null) ? 0 : predName.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null || !(obj instanceof CryptSLPredicate)) {
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof CryptSLPredicate)) {
 			return false;
 		}
 		CryptSLPredicate other = (CryptSLPredicate) obj;
-		return other.getPredName().equals(this.predName);// && (new HashSet<String>(other.getParameters())).equals(new HashSet<String>(this.getParameters()));
+		if (predName == null) {
+			if (other.predName != null) {
+				return false;
+			}
+		} else if (!predName.equals(other.predName)) {
+			return false;
+		}
+		return true;
 	}
 
-	
 	/**
 	 * @return the baseObject
 	 */
@@ -93,4 +110,11 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		return varNames;
 	}
 	
+	public CryptSLPredicate setNegated(boolean negated){
+		if (negated == this.negated) {
+			return this;
+		} else {
+			return new CryptSLPredicate(baseObject, predName, parameters, negated);
+		}
+	}
 }

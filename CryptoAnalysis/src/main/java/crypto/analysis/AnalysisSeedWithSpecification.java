@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashBasedTable;
@@ -21,6 +22,7 @@ import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -118,10 +120,13 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				}
 			}).analysisForSeed(this);
 
-			// TODO Stefan: All method that are invoked on an object can be
-			// retrieved like this:
-			problem.getInvokedMethodOnInstance();
 			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
+			final CryptSLRule rule = spec.getRule();
+			for (ISLConstraint cons : rule.getConstraints()) {
+				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
+				}
+			}
 			solved = true;
 		}
 	}
@@ -170,7 +175,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			// }
 			// }
 		} else {
-			if (checkConstraintSystem()) {
+			if (checkConstraintSystem(currStmt)) {
 
 				for(ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()){
 					if (predicateParam.getName().equals("this")) {
@@ -200,6 +205,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 										.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
 								seed.addEnsuredPredicate(
 										new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+								
 							}
 						}
 						int i = 0;
@@ -257,15 +263,15 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		return analysis;
 	}
 
-	private boolean checkConstraintSystem() {
+	private boolean checkConstraintSystem(Unit currStmt) {
 		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues);
 		List<ISLConstraint> relConstraints = solver.getRelConstraints();
-		if (!checkPredicates(relConstraints))
+		if (!checkPredicates(relConstraints, currStmt))
 			return false;
 		return 0 == solver.evaluateRelConstraints();
 	}
 
-	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
+	private boolean checkPredicates(List<ISLConstraint> relConstraints, Unit currStmt) {
 		List<CryptSLPredicate> requiredPredicates = Lists.newLinkedList();
 		for (ISLConstraint con : relConstraints) {
 			if (con instanceof CryptSLPredicate) {

@@ -1,13 +1,18 @@
 package crypto.analysis;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
@@ -17,6 +22,7 @@ import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -40,6 +46,8 @@ public abstract class CryptoScanner {
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
+	Set<Entry<CryptSLPredicate,CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
+	
 	private DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate>() {
 		@Override
 		protected AnalysisSeedWithEnsuredPredicate createItem(IFactAtStatement key) {
@@ -153,12 +161,7 @@ public abstract class CryptoScanner {
 			if(!curr.isSolved())
 				worklist.add(curr);
 		}
-		
-		for(IAnalysisSeed seed : seeds){
-			if(seed.contradictsNegations()){
-				System.out.println("CONTRADICTION FOUND");
-			}
-		}
+
 		
 		System.out.println(Joiner.on("\n").join(existingPredicates.cellSet()));
 		
@@ -167,10 +170,26 @@ public abstract class CryptoScanner {
 			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
 			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 		}
+		checkForContradictions();
 		analysisListener().ensuredPredicates(this.existingPredicates);
 		debugger().afterAnalysis();
 	}
 
+	private void checkForContradictions() {
+		for (Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.cellSet()) {
+			Set<CryptSLPredicate> preds = new HashSet<CryptSLPredicate>();
+			for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
+				preds.add(exPred.getPredicate());
+			}
+			
+			for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
+				if (preds.contains(disPair.getKey()) && preds.contains(disPair.getValue())) {
+					throw new RuntimeException("Violation:" + disPair.getKey().getPredName() + " and " + disPair.getValue().getPredName() + " on object " + exPredCell.getColumnKey() + " at statement " + exPredCell.getRowKey());
+				}
+			}
+		}
+		
+	}
 	private void initialize() {
 		for(ClassSpecification spec : getClassSpecifictions()){
 			spec.checkForForbiddenMethods();
@@ -218,5 +237,9 @@ public abstract class CryptoScanner {
 		if(addToWorklist)
 			addToWorkList(seed);
 		return seed;
+	}
+	
+	public void addDisallowedPredicatePair(CryptSLPredicate cryptSLPredicate, CryptSLPredicate cons) {
+		disallowedPredPairs.add(new SimpleEntry<CryptSLPredicate, CryptSLPredicate>(cryptSLPredicate, cons));
 	}
 }
