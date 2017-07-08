@@ -201,7 +201,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		c.getIV();
 		
 		Assertions.assertNotErrorState(c);
-		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.hasEnsuredPredicate(encText);
 	}
 
 }

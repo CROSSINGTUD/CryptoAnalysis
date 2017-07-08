@@ -161,10 +161,6 @@ public abstract class CryptoScanner {
 			if(!curr.isSolved())
 				worklist.add(curr);
 		}
-
-		
-		System.out.println(Joiner.on("\n").join(existingPredicates.cellSet()));
-		
 		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
 		if(debugger instanceof CryptoVizDebugger){
 			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;

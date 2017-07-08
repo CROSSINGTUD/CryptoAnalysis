@@ -21,76 +21,88 @@ public class CryptSLMethodToSootMethod {
 	private DefaultValueMap<CryptSLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CryptSLMethod, Collection<SootMethod>>() {
 		@Override
 		protected Collection<SootMethod> createItem(CryptSLMethod key) {
-			Collection<SootMethod> res = _convert(key);
-			for(SootMethod m : res){
+			Collection<SootMethod> res = Sets.newHashSet();
+			try{
+				res = _convert(key);
+			} catch(Exception e){
+				System.err.println("Failed to convert method "  + key);
+			}
+			for (SootMethod m : res) {
 				sootMethodToDescriptor.put(m, key);
 			}
 			return res;
 		}
 	};
 	private Multimap<SootMethod, CryptSLMethod> sootMethodToDescriptor = HashMultimap.create();
-	
-	public Collection<CryptSLMethod> convert(SootMethod m){
+
+	public Collection<CryptSLMethod> convert(SootMethod m) {
 		return sootMethodToDescriptor.get(m);
 	}
-	
-	public Collection<SootMethod> convert(CryptSLMethod label){
+
+	public Collection<SootMethod> convert(CryptSLMethod label) {
 		return descriptorToSootMethod.getOrCreate(label);
 	}
+
 	private Collection<SootMethod> _convert(CryptSLMethod label) {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
-		if(!Scene.v().containsClass(declaringClass))
+		if (!Scene.v().containsClass(declaringClass))
 			return res;
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
-		if(methodNameWithoutDeclaringClass.equals(sootClass.getShortName()))
+		if (methodNameWithoutDeclaringClass.equals(sootClass.getShortName()))
 			methodNameWithoutDeclaringClass = "<init>";
-		int noOfParams = label.getParameters().size(); //-1 because List of Parameters contains placeholder for return value.
+		int noOfParams = label.getParameters().size(); 
 		for (SootMethod m : sootClass.getMethods()) {
-			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams){
-				if(parametersMatch(label.getParameters(), m.getParameterTypes()))
+			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams) {
+				if (parametersMatch(label.getParameters(), m.getParameterTypes()))
 					res.add(m);
 			}
 		}
 		return res;
 	}
+
 	private boolean parametersMatch(List<Entry<String, String>> parameters, List<Type> parameterTypes) {
 		int i = 0;
-		for(Type t : parameterTypes){
-			if(!t.toString().equals(parameters.get(i).getValue())){
+		for (Type t : parameterTypes) {
+			if (parameters.get(i).getValue().equals("AnyType"))
+				continue;
+			if (!t.toString().equals(parameters.get(i).getValue())) {
 				return false;
 			}
 			i++;
 		}
 		return true;
 	}
+
 	private String getMethodNameWithoutDeclaringClass(String desc) {
-		return desc.substring(desc.lastIndexOf(".") +1);
+		return desc.substring(desc.lastIndexOf(".") + 1);
 	}
 
 	public Collection<SootMethod> convert(List<CryptSLMethod> list) {
 		Set<SootMethod> res = Sets.newHashSet();
-		for(CryptSLMethod l : list)
-			res.addAll(_convert(l));
+		for (CryptSLMethod l : list)
+			res.addAll(convert(l));
 		return res;
 	}
-	
+
 	private String getDeclaringClass(String label) {
-		try{
-			if(Scene.v().containsClass(label))
+		try {
+			if (Scene.v().containsClass(label))
 				return label;
-		} catch(RuntimeException e){
-			
+		} catch (RuntimeException e) {
+
 		}
 		return label.substring(0, label.lastIndexOf("."));
 	}
+
 	public static CryptSLMethodToSootMethod v() {
-		if(instance == null)
+		if (instance == null)
 			instance = new CryptSLMethodToSootMethod();
 		return instance;
 	}
+
 	public static void reset() {
 		instance = null;
 	}

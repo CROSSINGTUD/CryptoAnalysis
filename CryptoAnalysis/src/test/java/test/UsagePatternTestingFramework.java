@@ -28,6 +28,7 @@ import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptSLToSootMethodConversionException;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
@@ -44,8 +45,11 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
+import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
+import test.assertions.InErrorStateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
+import test.assertions.NotInErrorStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -187,21 +191,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();    
 
-//		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
-//		for (File file : listFiles) {
-//			if (file.getName().endsWith(".cryptslbin")) {
-//				System.out.println(file.getName());
-//				rules.add(CryptSLRuleReader.readFromFile(file));
-//			}
-//		}
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Cipher.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "SecretKeyFactory.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "SecureRandom.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "Mac.cryptslbin")));
-//		rules.add(CryptSLRuleReader.readFromFile(new File(IDEALCrossingTestingFramework.RESOURCE_PATH + "MessageDigest.cryptslbin")));
+		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptslbin")) {
+				System.out.println(file.getName());
+				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
 		return rules;
 	}
 	private Set<Assertion> extractBenchmarkMethods(SootMethod sootTestMethod) {
