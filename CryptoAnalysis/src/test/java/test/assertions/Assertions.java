@@ -13,11 +13,11 @@ public class Assertions {
 		
 	}
 	
-	public static void assertErrorState(Object o) {
+	public static void mustNotBeInAcceptingState(Object o) {
 		
 	}
 	
-	public static void assertNotErrorState(Object o) {
+	public static void mustBeInAcceptingState(Object o) {
 		
 	}
 	

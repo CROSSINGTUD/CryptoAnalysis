@@ -101,9 +101,9 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 	public void testCipher9() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher c = Cipher.getInstance("AES");
 		c.update(null);
-		c.doFinal(null);
-		
 		Assertions.assertState(c, -1);
+		c.doFinal(null);
+		//The object is will have an empty state because it was in an error state earlier.
 	}
 
 	@Test

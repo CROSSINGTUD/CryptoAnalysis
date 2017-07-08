@@ -11,9 +11,11 @@ import com.google.common.collect.Lists;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.Analysis;
 import ideal.ResultReporter;
@@ -103,6 +105,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected void executeAnalysis() {
+		CryptSLMethodToSootMethod.reset();
 		IDEALCrossingTestingFramework.this.createAnalysis().run();
 	}
 

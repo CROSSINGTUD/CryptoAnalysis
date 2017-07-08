@@ -7,19 +7,20 @@ import test.Assertion;
 import test.ComparableResult;
 import typestate.TypestateDomainValue;
 
-public class InErrorStateAssertion implements Assertion, ComparableResult<StateNode> {
+public class InAcceptingStateAssertion implements Assertion, ComparableResult<StateNode> {
 
 	private Unit unit;
 	private AccessGraph accessGraph;
 	private boolean satisfied;
 
-	public InErrorStateAssertion(Unit unit, AccessGraph accessGraph) {
+	public InAcceptingStateAssertion(Unit unit, AccessGraph accessGraph) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 	}
 
 	public void computedResults(TypestateDomainValue<StateNode> results) {
-		satisfied |= results.getStates().isEmpty();
+		for(StateNode n : results.getStates())
+			satisfied |= n.getAccepting();
 	}
 
 	public Unit getStmt() {

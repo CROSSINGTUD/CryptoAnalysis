@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -14,6 +15,7 @@ import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -51,11 +53,13 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			outTransitions.putAll(t.from(), convert(t.getLabel()));
 		}
 		//All transitions that are not in the state machine 
-		for(StateNode s : outTransitions.keySet()){
+		for(TransitionEdge t :  stateMachineGraph.getAllTransitions()){
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
-			Collection<SootMethod> outs = outTransitions.get(s);
+			Collection<SootMethod> outs =  outTransitions.get(t.from());
+			if(outs == null)
+				outs = Sets.newHashSet();
 			remaining.removeAll(outs);
-			this.addTransition(new MatcherTransition<StateNode>(s, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
+			this.addTransition(new MatcherTransition<StateNode>(t.from(), remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
 	}
 

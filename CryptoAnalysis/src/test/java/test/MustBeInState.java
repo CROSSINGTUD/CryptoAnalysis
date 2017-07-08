@@ -2,6 +2,7 @@ package test;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.StateNode;
+import crypto.typestate.ErrorStateNode;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
@@ -20,13 +21,8 @@ public class MustBeInState implements Assertion, ComparableResult<StateNode> {
 	}
 
 	public void computedResults(TypestateDomainValue<StateNode> results) {
-		if(state.toString().equals("-1")){
-			satisfied = true;
-			imprecise = results.getStates().size() > 0;
-			return;
-		}
 		for (StateNode s : results.getStates()) {
-			if (state.toString().equals(s.getName().toString())) {
+			if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.getName().toString())) {
 				satisfied |= true;
 				imprecise = results.getStates().size() > 1;
 			} 

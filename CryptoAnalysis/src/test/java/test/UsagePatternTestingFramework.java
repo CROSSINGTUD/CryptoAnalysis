@@ -28,7 +28,6 @@ import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptSLToSootMethodConversionException;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
@@ -47,9 +46,9 @@ import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.InErrorStateAssertion;
+import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
-import test.assertions.NotInErrorStateAssertion;
+import test.assertions.InAcceptingStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -238,13 +237,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new CallToForbiddenMethodAssertion(pred));
 			}
-			if(invocationName.startsWith("assertNotErrorState")){
+			if(invocationName.startsWith("mustBeInAcceptingState")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
 				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
-				queries.add(new NotInErrorStateAssertion(stmt, val));
+				queries.add(new InAcceptingStateAssertion(stmt, val));
 			}
 			
 //			if (invocationName.startsWith("violatedConstraint")) {
@@ -269,13 +268,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new NotHasEnsuredPredicateAssertion(stmt, val));
 			}
 			
-			if(invocationName.startsWith("assertErrorState")){
+			if(invocationName.startsWith("mustNotBeInAcceptingState")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
 				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
-				queries.add(new InErrorStateAssertion(stmt, val));
+				queries.add(new NotInAcceptingStateAssertion(stmt, val));
 			}
 		}
 	}
