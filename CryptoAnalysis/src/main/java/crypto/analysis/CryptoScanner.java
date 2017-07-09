@@ -193,7 +193,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for(IFactAtStatement seed : spec.getInitialSeeds()){
-				addToWorkList(new AnalysisSeedWithSpecification(this, seed, icfg().getMethodOf(seed.getStmt()),spec));
+				addToWorkList(getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, icfg().getMethodOf(seed.getStmt()),spec)));
 			}
 		}
 	}

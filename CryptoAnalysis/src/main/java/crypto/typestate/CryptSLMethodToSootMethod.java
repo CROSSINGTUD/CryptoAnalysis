@@ -46,7 +46,12 @@ public class CryptSLMethodToSootMethod {
 	private Collection<SootMethod> _convert(CryptSLMethod label) {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
+		if(methodName.equals("java.util.Random.nextBytes")){
+			methodName = "java.security.SecureRandom.nextBytes";
+			System.err.println(this.getClass() +" Warning: This must be fixed once the rule is specified correctly!" );
+		}
 		String declaringClass = getDeclaringClass(methodName);
+		
 		if (!Scene.v().containsClass(declaringClass))
 			return res;
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);

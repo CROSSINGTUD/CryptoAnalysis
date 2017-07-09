@@ -6,22 +6,26 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.base.Joiner;
+import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLMethod;
+import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import soot.Local;
+import soot.RefType;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import typestate.TypestateDomainValue;
 import typestate.finiteautomata.MatcherStateMachine;
@@ -40,6 +44,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	private CryptoTypestateAnaylsisProblem analysisProblem;
 	private StateMachineGraph stateMachineGraph;
 	private Multimap<StateNode, SootMethod> outTransitions = HashMultimap.create();
+	private Collection<RefType> analyzedType = Sets.newHashSet();
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
 		this.analysisProblem = analysisProblem;
@@ -52,6 +57,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					Parameter.This, t.to(), Type.OnCallToReturn));
 			outTransitions.putAll(t.from(), convert(t.getLabel()));
 		}
+		if(startAtConstructor()){
+			List<SootMethod> label = Lists.newLinkedList();
+			for(SootMethod m : initialTransitonLabel)
+				if(m.isConstructor())
+					label.add(m);
+			this.addTransition(new MatcherTransition(initialState, label, Parameter.This, initialState, Type.OnCallToReturn));
+			outTransitions.putAll(initialState, label);
+		}
 		//All transitions that are not in the state machine 
 		for(TransitionEdge t :  stateMachineGraph.getAllTransitions()){
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
@@ -61,6 +74,16 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			remaining.removeAll(outs);
 			this.addTransition(new MatcherTransition<StateNode>(t.from(), remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
+		
+	}
+
+	private boolean startAtConstructor() {
+		for(SootMethod m : initialTransitonLabel){
+			if(m.isConstructor()){
+				analyzedType.add(m.getDeclaringClass().getType());
+			}
+		}
+		return !analyzedType.isEmpty();
 	}
 
 	private Collection<SootMethod> convert(List<CryptSLMethod> label) {
@@ -131,11 +154,23 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	@Override
 	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
 		Set<AccessGraph> out = new HashSet<>();
+		if(startAtConstructor()){
+			if(unit instanceof AssignStmt){
+				AssignStmt as = (AssignStmt) unit;
+				if(as.getRightOp() instanceof NewExpr){
+					NewExpr newExpr = (NewExpr) as.getRightOp();
+					if(analyzedType.contains(newExpr.getType())){
+						AssignStmt stmt = (AssignStmt) unit;
+						out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+					}
+				}
+			}
+		}
 		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
 			return out;
 		InvokeExpr invokeExpr = ((Stmt) unit).getInvokeExpr();
 		SootMethod calledMethod = invokeExpr.getMethod();
-		if (!initialTransitonLabel.contains(calledMethod))
+		if (!initialTransitonLabel.contains(calledMethod) || calledMethod.isConstructor())
 			return out;
 		if (calledMethod.isStatic()) {
 			AssignStmt stmt = (AssignStmt) unit;
