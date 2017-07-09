@@ -18,8 +18,8 @@ public class ExtractedValueAssertion implements Assertion {
 		this.index = index;
 	}
 	
-	public void computedValues(Multimap<CallSiteWithParamIndex, Value> collectedValues){
-		for(Entry<CallSiteWithParamIndex, Value> e: collectedValues.entries()){
+	public void computedValues(Multimap<CallSiteWithParamIndex, Unit> collectedValues){
+		for(Entry<CallSiteWithParamIndex, Unit> e: collectedValues.entries()){
 			if(e.getKey().getStmt().equals(stmt) && e.getKey().getIndex() == index)
 				satisfied = true;
 		}

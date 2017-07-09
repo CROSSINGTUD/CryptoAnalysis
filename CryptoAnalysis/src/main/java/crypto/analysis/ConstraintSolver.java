@@ -17,7 +17,9 @@ import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
+import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
+import soot.Unit;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
@@ -29,14 +31,14 @@ public class ConstraintSolver {
 	private final Multimap<String, String> parsAndVals;
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
-	public ConstraintSolver(ClassSpecification spec, Multimap<String, String> parsAndValues) {
-		parsAndVals = parsAndValues;
+	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues) {
+		parsAndVals = parametersToValues;
 		allConstraints = spec.getRule().getConstraints();
 		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 			List<String> involvedVarNames = cons.getInvolvedVarNames();
-			involvedVarNames.removeAll(parsAndValues.keySet());
+			involvedVarNames.removeAll(parametersToValues.keySet());
 
 			if (involvedVarNames.isEmpty()) {
 				relConstraints.add(cons);
