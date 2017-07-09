@@ -122,4 +122,12 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.doFinal(null);
 		Assertions.assertState(c, -1);	
 	}
+
+	@Test
+	public void testCipher12Aliasing() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		Cipher c = Cipher.getInstance("AES");
+		Cipher e = c;
+		c.doFinal(null);
+		Assertions.assertState(e, -1);
+	}
 }
