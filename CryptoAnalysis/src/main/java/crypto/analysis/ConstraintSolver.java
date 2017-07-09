@@ -3,6 +3,7 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class ConstraintSolver {
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
 	private final Collection<SootMethod> collectedCalls;
-	private final Multimap<String, String> parsAndVals;
+	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
 	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues) {
@@ -158,15 +159,15 @@ public class ConstraintSolver {
 		return val;
 	}
 
-	private Collection<String> extractValueAsString(String varName) {
+	private Collection<Unit> extractValueAsString(String varName) {
 		//Magic that retrieves the value of $varName from $actualValues
 		//This is most likely wrong.
-		for (String cs : parsAndVals.keySet()) {
-			if (cs.equals(varName)) {
+		for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
+			if (cs.getVarName().equals(varName)) {
 				return parsAndVals.get(cs);
 			}
 		}
-		return null;
+		return Collections.emptySet();
 	}
 
 	private boolean evaluate(CryptSLConstraint cons) {
