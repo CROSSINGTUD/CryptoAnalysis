@@ -291,11 +291,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private boolean doPredsMatch(CryptSLPredicate pred, EnsuredCryptSLPredicate ensPred) {
-		boolean requiredPredicatesExist = false;
+		boolean requiredPredicatesExist = true;
 		for (int i = 0; i < pred.getParameters().size(); i++) {
 			String var = pred.getParameters().get(i).getName();
 			if (isOfNonTrackableType(var)) {
-				requiredPredicatesExist &= true;
+				continue;
 			} else if (pred.getInvolvedVarNames().contains(var)) {
 
 				Collection<String> actVals = ensPred.getParametersToValues()
@@ -315,10 +315,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					if (index > -1) {
 						foundVal = foundVal.split(splitter)[index];
 					}
-					requiredPredicatesExist &= actVals.contains(foundVal);
+					requiredPredicatesExist &= !actVals.contains(foundVal);
 				}
 			} else {
-				requiredPredicatesExist &= false;
+				requiredPredicatesExist = false;
 			}
 		}
 		return pred.isNegated() != requiredPredicatesExist;

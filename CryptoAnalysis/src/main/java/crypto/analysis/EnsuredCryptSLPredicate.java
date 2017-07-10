@@ -4,15 +4,17 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLPredicate;
+import crypto.typestate.CallSiteWithParamIndex;
+import soot.Value;
 
 public class EnsuredCryptSLPredicate {
 
 	private final CryptSLPredicate predicate;
 	private Multimap<String, String> parametersToValues = HashMultimap.create();
 
-	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<String, String> analysisSeedWithSpecification) {
+	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<String, String> parametersToCollectedValues) {
 		this.predicate = predicate;
-		parametersToValues = analysisSeedWithSpecification;
+		parametersToValues = parametersToCollectedValues;
 	}
 	
 	public CryptSLPredicate getPredicate(){
