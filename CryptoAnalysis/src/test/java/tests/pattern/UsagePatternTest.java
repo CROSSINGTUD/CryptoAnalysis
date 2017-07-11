@@ -215,4 +215,26 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(pbekeyspec);
 	}
 
+	@Test
+	public void UsagePatternTest10() throws GeneralSecurityException {
+		String aesString = "AES";
+		KeyGenerator keygen = KeyGenerator.getInstance(aesString);
+		Assertions.extValue(0);
+		int keySize = 128;
+		int a = keySize;
+		keygen.init(a);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
+
 }

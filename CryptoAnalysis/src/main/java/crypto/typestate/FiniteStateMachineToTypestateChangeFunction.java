@@ -173,8 +173,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		if (!initialTransitonLabel.contains(calledMethod) || calledMethod.isConstructor())
 			return out;
 		if (calledMethod.isStatic()) {
-			AssignStmt stmt = (AssignStmt) unit;
-			out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+			if(unit instanceof AssignStmt){
+				AssignStmt stmt = (AssignStmt) unit;
+				out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
 			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
