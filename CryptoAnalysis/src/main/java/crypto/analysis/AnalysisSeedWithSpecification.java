@@ -159,10 +159,14 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	private void onAddedTypestateChange(Unit curr, StateNode stateNode) {
 		for (CryptSLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
+			if(predToBeEnsured.isNegated()){
+				continue;
+			}
+
 			if (predToBeEnsured instanceof CryptSLCondPredicate
 					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
-					|| stateNode.getAccepting()) {
-				ensuresPred(predToBeEnsured, curr, stateNode);
+					|| (!(predToBeEnsured instanceof CryptSLCondPredicate) && stateNode.getAccepting())) {
+					ensuresPred(predToBeEnsured, curr, stateNode);
 			}
 		}
 	}
