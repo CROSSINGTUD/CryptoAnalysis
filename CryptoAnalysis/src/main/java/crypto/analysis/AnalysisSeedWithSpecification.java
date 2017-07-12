@@ -319,7 +319,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					if (index > -1) {
 						foundVal = foundVal.split(splitter)[index];
 					}
-					requiredPredicatesExist &= !actVals.contains(foundVal);
+					requiredPredicatesExist &= actVals.contains(foundVal);
 				}
 			} else {
 				requiredPredicatesExist = false;
