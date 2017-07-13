@@ -177,6 +177,7 @@ public class PerAPKAnalyzer {
 				line.add("typestateError(unit)");
 				line.add("expectedPredicates");
 				line.add("missingPredicates");
+				line.add("constraintViolations");
 				line.add("callgraphTime(ms)");
 				line.add("totalTime(ms)");
 				line.add("typestateTime(ms)");
@@ -193,6 +194,7 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
 			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(reporter.getMissingPredicates().rowKeySet().size()));
+			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
 			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));

@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Multimap;
@@ -24,7 +25,6 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite);
 
 	void discoveredSeed(IAnalysisSeed curr);
-
 	
 	void violateConstraint(ClassSpecification spec, Unit callSite);
 
@@ -37,4 +37,6 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q);
 
 	void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q);
+
+	void predicateContradiction(Unit stmt, AccessGraph key,	Entry<CryptSLPredicate, CryptSLPredicate> disPair);
 }

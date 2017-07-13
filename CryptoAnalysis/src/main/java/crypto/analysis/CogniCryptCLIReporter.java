@@ -22,6 +22,7 @@ import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import crypto.typestate.ErrorStateNode;
 import heros.InterproceduralCFG;
 import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
 import soot.Unit;
@@ -36,6 +37,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private InterproceduralCFG<Unit, SootMethod> icfg;
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates = HashBasedTable.create();
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
+	private Multimap<IFactAtStatement, Entry<CryptSLPredicate,CryptSLPredicate>> predicateContradictions = HashMultimap.create();
 	private Stopwatch taintWatch = Stopwatch.createUnstarted();
 	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
 	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
@@ -129,6 +131,9 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		s += "================REPORTED MISSING PREDICATES==================\n";
 		s += Joiner.on("\n").join(missingPredicates.cellSet());
 
+		s += "================REPORTED PREDICATE CONTRADICTION ==================\n";
+		s += Joiner.on("\n").join(predicateContradictions.entries());
+		
 		s += "================Timeouts: ==================\n";
 		s += Joiner.on("\n").join(typestateTimeouts);
 
@@ -147,6 +152,11 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getMissingPredicates() {
 		return this.missingPredicates;
+	}
+	
+
+	public Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
+		return this.predicateContradictions;
 	}
 
 	@Override
@@ -187,6 +197,11 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	
 	public long getTypestateAnalysisTime(TimeUnit desiredUnit){
 		return typestateWatch.elapsed(desiredUnit);
+	}
+
+	@Override
+	public void predicateContradiction(Unit stmt, AccessGraph accessGraph, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+		predicateContradictions.put(new FactAtStatement(stmt,accessGraph), disPair);
 	}
 
 	

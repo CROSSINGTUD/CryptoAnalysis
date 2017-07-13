@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
@@ -178,6 +179,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
 								// TODO Auto-generated method stub
 								
+							}
+
+							@Override
+							public void predicateContradiction(Unit stmt, AccessGraph key,
+									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+								throw new RuntimeException("IMPLEMENTE predicate contradicition" + stmt + key);
 							}
 
 						};
