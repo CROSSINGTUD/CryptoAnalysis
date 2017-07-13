@@ -180,7 +180,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 		if (checkConstraintSystem()) {
 			for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
-				if (predicateParam.getName().equals("this")) {
+				if (predicateParam.getName().equals("this") || predToBeEnsured.toString().equals("P:keySpec(_,_,)")) {
 					for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
 						// TODO check for any reachable state that don't kill
 						// predicates.
