@@ -162,6 +162,9 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			if(predToBeEnsured.isNegated()){
 				continue;
 			}
+			if(spec.getRule().getClassName().equals("SecretKey")){
+				ensuresPred(predToBeEnsured, curr, stateNode);
+			}
 
 			if (predToBeEnsured instanceof CryptSLCondPredicate
 					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
