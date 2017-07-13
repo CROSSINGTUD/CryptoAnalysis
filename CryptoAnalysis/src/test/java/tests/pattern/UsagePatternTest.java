@@ -189,6 +189,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
 		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(actKey);
 		
 		c.init(Cipher.ENCRYPT_MODE, actKey);
 		Assertions.extValue(0);
@@ -199,6 +200,29 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		
 		Assertions.mustBeInAcceptingState(c);
 		Assertions.hasEnsuredPredicate(encText);
+	}
+	
+	@Test
+	public void UsagePattern8a() throws GeneralSecurityException, IOException {
+		final byte[] salt = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(salt);
+
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p'}, salt, 65000, 128);
+		Assertions.extValue(0);
+		Assertions.extValue(2);
+		Assertions.extValue(3);
+		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		
+		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		Assertions.extValue(0);
+		
+		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
+		Assertions.mustBeInAcceptingState(secFac);
+		
+		byte[] keyMaterial = tmpKey.getEncoded();
+		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
+		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(actKey);
 	}
 	@Test
 	public void UsagePattern9() throws GeneralSecurityException, IOException {
@@ -281,4 +305,22 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
+	@Test
+	public void UsagePatternTest13() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(1);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.notHasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
 }
