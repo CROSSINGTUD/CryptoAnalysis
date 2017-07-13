@@ -17,6 +17,8 @@ import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
+import crypto.analysis.CryptSLAnalysisListener;
+import crypto.analysis.CryptoScanner;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import heros.EdgeFunction;
@@ -72,8 +74,15 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	};
 	@Override
 	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		CryptSLAnalysisListener listener = analysisListener();
 		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.values()){
+			if(listener != null){
+				listener.boomerangQueryStarted(seed,q);
+			}
 			q.solve();
+			if(listener != null){
+				listener.boomerangQueryFinished(seed,q);
+			}
 		}
 	}
 	
@@ -205,6 +214,10 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 
 	public void methodInvokedOnInstance(SootMethod method) {
 		invokedMethodsOnInstance.add(method);
+	}
+	
+	public CryptSLAnalysisListener analysisListener(){
+		return null;
 	}
 
 }

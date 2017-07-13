@@ -105,6 +105,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	public void execute() {
 		if (!solved) {
+			cryptoScanner.analysisListener().seedStarted(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 				@Override
 				public void onSeedFinished(IFactAtStatement seed,
@@ -118,7 +119,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				public void onSeedTimeout(IFactAtStatement seed) {
 				}
 			}).analysisForSeed(this);
-
+			cryptoScanner.analysisListener().seedFinished(this);
 			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
 			final CryptSLRule rule = spec.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
@@ -247,7 +248,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
 					return resultReporter;
 				}
-
 				@Override
 				public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
 					return new FiniteStateMachineToTypestateChangeFunction(this);
@@ -266,6 +266,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				@Override
 				public StateMachineGraph getStateMachine() {
 					return spec.getRule().getUsagePattern();
+				}
+				@Override
+				public CryptSLAnalysisListener analysisListener() {
+					return cryptoScanner.analysisListener();
 				}
 			};
 			analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);

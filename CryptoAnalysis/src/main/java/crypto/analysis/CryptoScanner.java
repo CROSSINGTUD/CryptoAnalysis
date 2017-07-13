@@ -175,7 +175,7 @@ public abstract class CryptoScanner {
 			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 		}
 		checkForContradictions();
-		analysisListener().ensuredPredicates(this.existingPredicates, computeMissingPredicates());
+		analysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased,computeMissingPredicates());
 //		System.out.println(Joiner.on("\n").join(existingPredicatesObjectBased.cellSet()));
 //		System.out.println("EXPECTED");
 //		System.out.println(Joiner.on("\n").join(expectedPredicateObjectBased.cellSet()));

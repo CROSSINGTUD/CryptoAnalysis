@@ -3,8 +3,10 @@ package crypto.analysis;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -16,6 +18,7 @@ import boomerang.util.StmtWithMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import crypto.typestate.ErrorStateNode;
 import heros.InterproceduralCFG;
 import ideal.AnalysisSolver;
@@ -32,6 +35,11 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates = HashBasedTable.create();
+	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
+	private Stopwatch taintWatch = Stopwatch.createUnstarted();
+	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
+	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
+	
 	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
 		this.icfg = icfg;
 	}
@@ -128,13 +136,58 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 
 	@Override
-	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
+	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
 			Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+		this.expectedPredicates = expectedPredicates;
 		this.missingPredicates = missingPredicates;
 	}
 
+	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getExpectedPredicates() {
+		return this.expectedPredicates;
+	}
 	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getMissingPredicates() {
 		return this.missingPredicates;
 	}
 
+	@Override
+	public void seedFinished(IAnalysisSeed seed) {
+		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
+			taintWatch.start();
+		} else{
+			typestateWatch.start();
+		}
+	}
+
+	@Override
+	public void seedStarted(IAnalysisSeed seed) {
+		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
+			taintWatch.start();
+		} else{
+			typestateWatch.start();
+		}
+	}
+
+	@Override
+	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+		boomerangWatch.start();
+	}
+
+	@Override
+	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+		boomerangWatch.stop();
+	}
+	
+	public long getBoomerangTime(TimeUnit desiredUnit){
+		return boomerangWatch.elapsed(desiredUnit);
+	}
+	
+	public long getTaintAnalysisTime(TimeUnit desiredUnit){
+		return taintWatch.elapsed(desiredUnit);
+	}
+	
+	public long getTypestateAnalysisTime(TimeUnit desiredUnit){
+		return typestateWatch.elapsed(desiredUnit);
+	}
+
+	
 }

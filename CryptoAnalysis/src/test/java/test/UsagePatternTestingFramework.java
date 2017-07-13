@@ -29,6 +29,7 @@ import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
@@ -131,6 +132,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void ensuredPredicates(
 									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
+									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
 									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
@@ -152,6 +154,30 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										}
 									}
 								}
+							}
+
+							@Override
+							public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+								// TODO Auto-generated method stub
+								
 							}
 
 						};
