@@ -4,8 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLPredicate;
-import crypto.typestate.CallSiteWithParamIndex;
-import soot.Value;
 
 public class EnsuredCryptSLPredicate {
 

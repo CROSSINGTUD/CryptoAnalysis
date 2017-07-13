@@ -110,13 +110,13 @@ public class PerAPKAnalyzer {
 
 	protected static List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "Cipher.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
-		// rules.add(CryptSLRuleReader.readFromFile(new
-		// File(IDEALCrossingTestingFramework.RESOURCE_PATH +
-		// "MessageDigest.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
+
+		File[] listFiles = new File(RESOURCE_PATH).listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
 		return rules;
 	}
 
@@ -167,6 +167,7 @@ public class PerAPKAnalyzer {
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
 				line.add("typestateError(unit)");
+				line.add("missingPredicates");
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
@@ -176,6 +177,7 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
+			line.add(Integer.toString(reporter.getMissingPredicates().cellSet().size()));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {

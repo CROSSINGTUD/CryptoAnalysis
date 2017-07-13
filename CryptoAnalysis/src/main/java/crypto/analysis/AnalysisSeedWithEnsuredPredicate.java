@@ -73,7 +73,7 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 			return;
 
 		for(Entry<Unit, AccessGraph> c : analysisResults.entries()){
-			cryptoScanner.addNewPred(c.getKey(), c.getValue(), pred);
+			cryptoScanner.addNewPred(this,c.getKey(), c.getValue(), pred);
 		}
 	}
 

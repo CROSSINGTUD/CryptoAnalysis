@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import ideal.ResultReporter;
@@ -25,5 +26,5 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	
 	void violateConstraint(ClassSpecification spec, Unit callSite);
 
-	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates);
+	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
 }

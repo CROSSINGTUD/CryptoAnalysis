@@ -24,6 +24,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -46,9 +47,9 @@ import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.NotInAcceptingStateAssertion;
-import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
+import test.assertions.NotHasEnsuredPredicateAssertion;
+import test.assertions.NotInAcceptingStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -129,7 +130,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void ensuredPredicates(
-									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
+									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
@@ -151,6 +153,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									}
 								}
 							}
+
 						};
 					}
 					@Override

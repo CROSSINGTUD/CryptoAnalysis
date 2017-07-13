@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -12,6 +13,7 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ErrorStateNode;
@@ -24,11 +26,12 @@ import soot.Value;
 import typestate.TypestateDomainValue;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
-	Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
-	Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
-	Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
-	Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
+	private Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
+	private Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
+	private Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
+	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
+	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates = HashBasedTable.create();
 	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
 		this.icfg = icfg;
 	}
@@ -65,7 +68,6 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
 			Multimap<CallSiteWithParamIndex, Value> collectedValues) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -79,7 +81,6 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 	@Override
 	public void violateConstraint(ClassSpecification spec, Unit callSite) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -117,6 +118,9 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		s += "================REPORTED TYPESTATE ERRORS==================\n";
 		s += Joiner.on("\n").join(reportedTypestateErros.entries());
 
+		s += "================REPORTED MISSING PREDICATES==================\n";
+		s += Joiner.on("\n").join(missingPredicates.cellSet());
+
 		s += "================Timeouts: ==================\n";
 		s += Joiner.on("\n").join(typestateTimeouts);
 
@@ -124,9 +128,13 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 
 	@Override
-	public void ensuredPredicates(
-			Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
-		// TODO Auto-generated method stub
-		
+	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
+			Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+		this.missingPredicates = missingPredicates;
 	}
+
+	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getMissingPredicates() {
+		return this.missingPredicates;
+	}
+
 }
