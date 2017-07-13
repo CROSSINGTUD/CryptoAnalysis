@@ -203,19 +203,22 @@ public abstract class CryptoScanner {
 	}
 
 	private void checkForContradictions() {
-		for (Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.cellSet()) {
-			Set<CryptSLPredicate> preds = new HashSet<CryptSLPredicate>();
-			for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
-				preds.add(exPred.getPredicate());
-			}
+		for (Unit generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
+			for(Entry<AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()){
+				Set<CryptSLPredicate> preds = new HashSet<CryptSLPredicate>();
+				for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
+					preds.add(exPred.getPredicate());
+				}
 
-			for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
-				if (preds.contains(disPair.getKey()) && preds.contains(disPair.getValue())) {
-					throw new RuntimeException("Violation:" + disPair.getKey().getPredName() + " and "
-							+ disPair.getValue().getPredName() + " on object " + exPredCell.getColumnKey()
-							+ " at statement " + exPredCell.getRowKey());
+				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
+					if (preds.contains(disPair.getKey()) && preds.contains(disPair.getValue())) {
+						throw new RuntimeException("Violation:" + disPair.getKey().getPredName() + " and "
+								+ disPair.getValue().getPredName() + " on object " + exPredCell.getKey()
+								+ " at statement " +generatingPredicateStmt);
+					}
 				}
 			}
+			
 		}
 
 	}
