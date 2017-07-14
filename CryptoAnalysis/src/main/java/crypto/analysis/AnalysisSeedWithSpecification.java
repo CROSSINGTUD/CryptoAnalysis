@@ -162,9 +162,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			if(predToBeEnsured.isNegated()){
 				continue;
 			}
-			if(spec.getRule().getClassName().equals("SecretKey")){
-				ensuresPred(predToBeEnsured, curr, stateNode);
-			}
 
 			if (predToBeEnsured instanceof CryptSLCondPredicate
 					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
@@ -181,7 +178,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		boolean satisfiesConstraintSytem = checkConstraintSystem();
 				
 		for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
-			if (predicateParam.getName().equals("this") || predToBeEnsured.toString().equals("P:keySpec(_,_,)") || predToBeEnsured.toString().equals("P:generatedKey(_,alg,)")) {
+			if (predicateParam.getName().equals("this")) {
 				expectPredicateWhenThisObjectIsInState(stateNode,currStmt,predToBeEnsured,satisfiesConstraintSytem);
 			}
 		}
