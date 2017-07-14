@@ -34,11 +34,15 @@ import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
+import soot.IntType;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.ValueBox;
 import soot.jimple.AssignStmt;
+import soot.jimple.Constant;
+import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
@@ -317,10 +321,21 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			if (isOfNonTrackableType(var)) {
 				continue;
 			} else if (pred.getInvolvedVarNames().contains(var)) {
-
+				
 				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
-				Collection<String> actVals = Collections.EMPTY_LIST;//ensPred.getParametersToValues().get(parameterI);
-				Collection<String> expVals = Collections.EMPTY_LIST; //parametersToValues.get(var);
+				Collection<String> actVals = null;
+				Collection<String> expVals = null;
+				
+				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
+					if (cswpi.getVarName().equals(parameterI)) {
+						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
+					}
+				}
+				for (CallSiteWithParamIndex cswpi : parametersToValues.keySet()) {
+					if (cswpi.getVarName().equals(var)) {
+						expVals = retrieveValueFromUnit(cswpi, parametersToValues.get(cswpi));
+					}
+				}
 
 				String splitter = "";
 				int index = -1;
@@ -344,6 +359,47 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		return pred.isNegated() != requiredPredicatesExist;
 	}
 
+	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Unit> collection) {
+		Collection<String> values = new ArrayList<String>();
+		for (Unit u : collection) {
+			if (cswpi.getStmt().equals(u)) {
+				if (u instanceof AssignStmt) {
+					values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
+				} else {
+					values.add(retrieveConstantFromValue(u.getUseBoxes().get(cswpi.getIndex()).getValue()));
+				}
+			} else if (u instanceof AssignStmt) {
+				final Value rightSide = ((AssignStmt) u).getRightOp();
+				if (rightSide instanceof Constant) {
+					values.add(retrieveConstantFromValue(rightSide));
+				} else {
+					final List<ValueBox> useBoxes = rightSide.getUseBoxes();
+					
+//					varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
+				}
+			}	
+//			if (u instanceof AssignStmt) {
+//				final List<ValueBox> useBoxes = ((AssignStmt) u).getRightOp().getUseBoxes();
+//				if (!(useBoxes.size() <= cswpi.getIndex())) {
+//					values.add(retrieveConstantFromValue(useBoxes.get(cswpi.getIndex()).getValue()));
+//				} 
+//			} else 	if (cswpi.getStmt().equals(u)) {
+//				values.add(retrieveConstantFromValue(cswpi.getStmt().getUseBoxes().get(cswpi.getIndex()).getValue()));
+//			}
+		}
+		return values;
+	}
+
+	private String retrieveConstantFromValue(Value val) {
+		if (val instanceof StringConstant) {
+			return ((StringConstant) val).value;
+		} else if (val instanceof IntConstant || val.getType() instanceof IntType){
+			return val.toString();
+		} else {
+			return "";
+		}
+	}
+	
 	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 
 	private boolean isOfNonTrackableType(String varName) {

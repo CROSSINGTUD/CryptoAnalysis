@@ -26,6 +26,7 @@ import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
 import soot.jimple.AssignStmt;
+import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.StringConstant;
 import typestate.interfaces.ICryptSLPredicateParameter;
@@ -47,7 +48,9 @@ public class ConstraintSolver {
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 			List<String> involvedVarNames = cons.getInvolvedVarNames();
-			involvedVarNames.removeAll(parametersToValues.keySet());
+			for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
+				involvedVarNames.remove(cwpi.getVarName());
+			}
 
 			if (involvedVarNames.isEmpty()) {
 				relConstraints.add(cons);
@@ -60,16 +63,22 @@ public class ConstraintSolver {
 		Multimap<String, String> varVal = HashMultimap.create();
 		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
 			for (Unit u : actualValues.get(callSite)) {
-				if (u instanceof AssignStmt) {
-					final List<ValueBox> useBoxes = ((AssignStmt) u).getRightOp().getUseBoxes();
-					if (useBoxes.size() <= callSite.getIndex()) {
-						varVal.put(callSite.getVarName(), "");
+				if (callSite.getStmt().equals(u)) {
+					if (u instanceof AssignStmt) {
+						varVal.put(callSite.getVarName(), retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(callSite.getIndex()).getValue()));
 					} else {
-						varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
+						varVal.put(callSite.getVarName(),retrieveConstantFromValue(callSite.getStmt().getUseBoxes().get(callSite.getIndex()).getValue()));
 					}
-				} else 	if (callSite.getStmt().equals(u)) {
-					varVal.put(callSite.getVarName(),retrieveConstantFromValue(callSite.getStmt().getUseBoxes().get(callSite.getIndex()).getValue()));
-				}
+				} else if (u instanceof AssignStmt) {
+					final Value rightSide = ((AssignStmt) u).getRightOp();
+					if (rightSide instanceof Constant) {
+						varVal.put(callSite.getVarName(), retrieveConstantFromValue(rightSide));
+					} else {
+						final List<ValueBox> useBoxes = rightSide.getUseBoxes();
+						
+//						varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
+					}
+				}	
 			}
 		}
 		return varVal;
