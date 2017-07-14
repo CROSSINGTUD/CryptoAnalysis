@@ -82,7 +82,7 @@ public class PerAPKAnalyzer {
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
-		Test.main(new String[] { args[0], args[1], "--notaintanalysis" });
+		Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
 		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
