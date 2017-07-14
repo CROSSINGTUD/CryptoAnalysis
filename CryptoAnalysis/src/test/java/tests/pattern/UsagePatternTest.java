@@ -1,7 +1,9 @@
 package tests.pattern;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -12,7 +14,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -323,4 +324,50 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
+	
+	@Test
+	public void UsagePatternTest14() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+	}
+	
+	@Test
+	public void UsagePatternTest15() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.notHasEnsuredPredicate(input);
+		Assertions.notHasEnsuredPredicate(output);
+		Assertions.violatedConstraint(md);
+	}
+	
+	@Test
+	public void UsagePatternTest16() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		md.update(input);
+		Assertions.mustNotBeInAcceptingState(md);
+		Assertions.notHasEnsuredPredicate(input);
+	}
+	
+	@Test
+	public void UsagePatternTest17() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		md.reset();
+		Assertions.mustNotBeInAcceptingState(md);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+	}
+	
 }
