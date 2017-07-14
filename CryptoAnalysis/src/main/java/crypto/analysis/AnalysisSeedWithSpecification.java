@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashBasedTable;
@@ -106,6 +105,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	public void execute() {
 		if (!solved) {
+			cryptoScanner.analysisListener().seedStarted(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 
 				@Override
@@ -118,12 +118,13 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {}
 			}).analysisForSeed(this);
-
+			cryptoScanner.analysisListener().seedFinished(this);
 			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
 			final CryptSLRule rule = spec.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
 				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
+					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0),
+							((CryptSLPredicate) cons).setNegated(false));
 				}
 			}
 			solved = true;
@@ -157,9 +158,14 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	private void onAddedTypestateChange(Unit curr, StateNode stateNode) {
 		for (CryptSLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
-			if (predToBeEnsured instanceof CryptSLCondPredicate && ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode) || stateNode
-				.getAccepting()) {
-				ensuresPred(predToBeEnsured, curr, stateNode);
+			if(predToBeEnsured.isNegated()){
+				continue;
+			}
+
+			if (predToBeEnsured instanceof CryptSLCondPredicate
+					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
+					|| (!(predToBeEnsured instanceof CryptSLCondPredicate) && stateNode.getAccepting())) {
+					ensuresPred(predToBeEnsured, curr, stateNode);
 			}
 		}
 	}
@@ -168,51 +174,67 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		if (predToBeEnsured.isNegated()) {
 			return;
 		}
-		if (checkConstraintSystem()) {
-			for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
-				if (predicateParam.getName().equals("this")) {
-					for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
-						// TODO check for any reachable state that don't kill
-						// predicates.
-						if (e.getValue().getStates().contains(stateNode)) {
-							cryptoScanner.addNewPred(e.getRowKey(), e.getColumnKey(), new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
-						}
-					}
-				}
+		boolean satisfiesConstraintSytem = checkConstraintSystem();
+				
+		for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
+			if (predicateParam.getName().equals("this")) {
+				expectPredicateWhenThisObjectIsInState(stateNode,currStmt,predToBeEnsured,satisfiesConstraintSytem);
 			}
-			if (currStmt instanceof Stmt && ((Stmt) currStmt).containsInvokeExpr()) {
-				InvokeExpr ie = ((Stmt) currStmt).getInvokeExpr();
-				SootMethod invokedMethod = ie.getMethod();
-				Collection<CryptSLMethod> convert = CryptSLMethodToSootMethod.v().convert(invokedMethod);
+		}
+		if (currStmt instanceof Stmt && ((Stmt) currStmt).containsInvokeExpr()) {
+			InvokeExpr ie = ((Stmt) currStmt).getInvokeExpr();
+			SootMethod invokedMethod = ie.getMethod();
+			Collection<CryptSLMethod> convert = CryptSLMethodToSootMethod.v().convert(invokedMethod);
 
-				for (CryptSLMethod cryptSLMethod : convert) {
-					Entry<String, String> retObject = cryptSLMethod.getRetObject();
-					if (!retObject.getKey().equals("_")) {
-						if (currStmt instanceof AssignStmt) {
-							AssignStmt as = (AssignStmt) currStmt;
-							Value leftOp = as.getLeftOp();
-							AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
-							AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
-							seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
-
-						}
-					}
-					int i = 0;
-					for (Entry<String, String> p : cryptSLMethod.getParameters()) {
-						for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
-							if (p.getKey().equals(predicateParam.getName())) {
-								Value param = ie.getArg(i);
-								if (param instanceof Local) {
-									AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
-									AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
-									seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
-								}
+			for (CryptSLMethod cryptSLMethod : convert) {
+				Entry<String, String> retObject = cryptSLMethod.getRetObject();
+				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt) {
+					AssignStmt as = (AssignStmt) currStmt;
+					Value leftOp = as.getLeftOp();
+					AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
+					expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph,satisfiesConstraintSytem);
+				}
+				int i = 0;
+				for (Entry<String, String> p : cryptSLMethod.getParameters()) {
+					for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
+						if (p.getKey().equals(predicateParam.getName())) {
+							Value param = ie.getArg(i);
+							if (param instanceof Local) {
+								AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
+								expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph,satisfiesConstraintSytem);
 							}
 						}
-						i++;
 					}
+					i++;
 				}
 
+			}
+
+		}
+	}
+
+	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt,
+			AccessGraph accessGraph, boolean satisfiesConstraintSytem) {
+			AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
+					.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+			cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
+		if(satisfiesConstraintSytem){
+			seed.addEnsuredPredicate(
+					new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+		}
+	}
+
+	private void expectPredicateWhenThisObjectIsInState(StateNode stateNode, Unit currStmt, CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
+		cryptoScanner.expectPredicate(this,currStmt,predToBeEnsured);
+		
+		if(!satisfiesConstraintSytem)
+			return;
+		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
+			// TODO check for any reachable state that don't kill
+			// predicates.
+			if (e.getValue().getStates().contains(stateNode)) {
+				cryptoScanner.addNewPred(this,e.getRowKey(), e.getColumnKey(),
+						new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 			}
 		}
 	}
@@ -225,7 +247,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
 					return resultReporter;
 				}
-
 				@Override
 				public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
 					return new FiniteStateMachineToTypestateChangeFunction(this);
@@ -244,6 +265,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				@Override
 				public StateMachineGraph getStateMachine() {
 					return spec.getRule().getUsagePattern();
+				}
+				@Override
+				public CryptSLAnalysisListener analysisListener() {
+					return cryptoScanner.analysisListener();
 				}
 			};
 			analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);
@@ -286,11 +311,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private boolean doPredsMatch(CryptSLPredicate pred, EnsuredCryptSLPredicate ensPred) {
-		boolean requiredPredicatesExist = false;
+		boolean requiredPredicatesExist = true;
 		for (int i = 0; i < pred.getParameters().size(); i++) {
 			String var = pred.getParameters().get(i).getName();
 			if (isOfNonTrackableType(var)) {
-				requiredPredicatesExist &= true;
+				continue;
 			} else if (pred.getInvolvedVarNames().contains(var)) {
 
 				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
@@ -313,7 +338,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					requiredPredicatesExist &= actVals.contains(foundVal);
 				}
 			} else {
-				requiredPredicatesExist &= false;
+				requiredPredicatesExist = false;
 			}
 		}
 		return pred.isNegated() != requiredPredicatesExist;

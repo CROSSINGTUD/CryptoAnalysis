@@ -3,8 +3,11 @@ package crypto.analysis;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -12,11 +15,14 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import crypto.typestate.ErrorStateNode;
 import heros.InterproceduralCFG;
 import ideal.AnalysisSolver;
+import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
 import soot.Unit;
@@ -24,11 +30,18 @@ import soot.Value;
 import typestate.TypestateDomainValue;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
-	Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
-	Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
-	Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
-	Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
+	private Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
+	private Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
+	private Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
+	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
+	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates = HashBasedTable.create();
+	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
+	private Multimap<IFactAtStatement, Entry<CryptSLPredicate,CryptSLPredicate>> predicateContradictions = HashMultimap.create();
+	private Stopwatch taintWatch = Stopwatch.createUnstarted();
+	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
+	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
+	
 	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
 		this.icfg = icfg;
 	}
@@ -50,6 +63,9 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
 		for(Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()){
 			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
+			if(resultAt == null){
+				continue;
+			}
 			for(StateNode n : resultAt.getStates()){
 				if(!n.getAccepting()){
 					typestateErrorAt((AnalysisSeedWithSpecification) seed, createStmtWithMethodFor(c.getKey()));
@@ -65,8 +81,6 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
 			Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -79,7 +93,6 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 	@Override
 	public void violateConstraint(ClassSpecification spec, Unit callSite) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -117,6 +130,12 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		s += "================REPORTED TYPESTATE ERRORS==================\n";
 		s += Joiner.on("\n").join(reportedTypestateErros.entries());
 
+		s += "================REPORTED MISSING PREDICATES==================\n";
+		s += Joiner.on("\n").join(missingPredicates.cellSet());
+
+		s += "================REPORTED PREDICATE CONTRADICTION ==================\n";
+		s += Joiner.on("\n").join(predicateContradictions.entries());
+		
 		s += "================Timeouts: ==================\n";
 		s += Joiner.on("\n").join(typestateTimeouts);
 
@@ -124,9 +143,68 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	}
 
 	@Override
-	public void ensuredPredicates(
-			Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
-		// TODO Auto-generated method stub
-		
+	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
+			Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+		this.expectedPredicates = expectedPredicates;
+		this.missingPredicates = missingPredicates;
 	}
+
+	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getExpectedPredicates() {
+		return this.expectedPredicates;
+	}
+	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getMissingPredicates() {
+		return this.missingPredicates;
+	}
+	
+
+	public Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
+		return this.predicateContradictions;
+	}
+
+	@Override
+	public void seedFinished(IAnalysisSeed seed) {
+		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
+			taintWatch.stop();
+		} else{
+			typestateWatch.stop();
+		}
+	}
+
+	@Override
+	public void seedStarted(IAnalysisSeed seed) {
+		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
+			taintWatch.start();
+		} else{
+			typestateWatch.start();
+		}
+	}
+
+	@Override
+	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+		boomerangWatch.start();
+	}
+
+	@Override
+	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+		boomerangWatch.stop();
+	}
+	
+	public long getBoomerangTime(TimeUnit desiredUnit){
+		return boomerangWatch.elapsed(desiredUnit);
+	}
+	
+	public long getTaintAnalysisTime(TimeUnit desiredUnit){
+		return taintWatch.elapsed(desiredUnit);
+	}
+	
+	public long getTypestateAnalysisTime(TimeUnit desiredUnit){
+		return typestateWatch.elapsed(desiredUnit);
+	}
+
+	@Override
+	public void predicateContradiction(Unit stmt, AccessGraph accessGraph, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+		predicateContradictions.put(new FactAtStatement(stmt,accessGraph), disPair);
+	}
+
+	
 }

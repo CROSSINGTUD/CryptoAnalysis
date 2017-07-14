@@ -47,6 +47,7 @@ public class CryptSLMethodToSootMethod {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
+		
 		if (!Scene.v().containsClass(declaringClass))
 			return res;
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
@@ -24,10 +25,12 @@ import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.debug.IDEVizDebugger;
@@ -46,9 +49,9 @@ import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.NotInAcceptingStateAssertion;
-import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
+import test.assertions.NotHasEnsuredPredicateAssertion;
+import test.assertions.NotInAcceptingStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
@@ -129,7 +132,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void ensuredPredicates(
-									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
+									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
+									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
@@ -151,6 +156,37 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									}
 								}
 							}
+
+							@Override
+							public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void predicateContradiction(Unit stmt, AccessGraph key,
+									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+								throw new RuntimeException("IMPLEMENTE predicate contradicition" + stmt + key);
+							}
+
 						};
 					}
 					@Override

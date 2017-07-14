@@ -1,8 +1,0 @@
-digraph F { 
-pre_init[shape = rarrow]
-2[shape = doublecircle]
-pre_init -> 0 [label="javax.crypto.KeyGenerator.getInstan"];
-0 -> 1 [label="javax.crypto.KeyGenerator.init(int)"];
-1 -> 2 [label="javax.crypto.KeyGenerator.generateK"];
-0 -> 2 [label="javax.crypto.KeyGenerator.generateK"];
-}

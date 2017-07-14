@@ -12,9 +12,11 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -48,6 +50,8 @@ public class PerAPKAnalyzer {
 	private static File ideVizFile;
 	private static CogniCryptCLIReporter reporter;
 	private static File apkFile;
+	private static long analysisTime;
+	private static long callGraphTime;
 	public final static String RESOURCE_PATH = "../CryptoAnalysis/src/test/resources/";
 	private static final String CSV_SEPARATOR = ";";
 
@@ -77,7 +81,9 @@ public class PerAPKAnalyzer {
 		apkFile = new File(args[0]);
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
-		Test.main(new String[] { args[0], args[1], "--notaintanalysis" });
+		Stopwatch callGraphWatch = Stopwatch.createStarted();
+		Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
+		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
 		fout = new FileWriter("Report.txt", true);
@@ -110,13 +116,13 @@ public class PerAPKAnalyzer {
 
 	protected static List<CryptSLRule> getRules() {
 		LinkedList<CryptSLRule> rules = Lists.newLinkedList();
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "Cipher.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyGenerator.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "KeyPairGenerator.cryptslbin")));
-		// rules.add(CryptSLRuleReader.readFromFile(new
-		// File(IDEALCrossingTestingFramework.RESOURCE_PATH +
-		// "MessageDigest.cryptslbin")));
-		rules.add(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + "PBEKeySpec.cryptslbin")));
+
+		File[] listFiles = new File(RESOURCE_PATH).listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
 		return rules;
 	}
 
@@ -146,7 +152,9 @@ public class PerAPKAnalyzer {
 			}
 
 		};
+		Stopwatch watch = Stopwatch.createStarted();
 		scanner.scan();
+		analysisTime = watch.elapsed(TimeUnit.MILLISECONDS);
 		detailedOutput();
 		summarizedOutput();
 	}
@@ -167,6 +175,14 @@ public class PerAPKAnalyzer {
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
 				line.add("typestateError(unit)");
+				line.add("expectedPredicates");
+				line.add("missingPredicates");
+				line.add("constraintViolations");
+				line.add("callgraphTime(ms)");
+				line.add("totalTime(ms)");
+				line.add("typestateTime(ms)");
+				line.add("taintTime(ms)");
+				line.add("boomerangTime(ms)");
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
@@ -176,6 +192,14 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
+			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
+			line.add(Integer.toString(reporter.getMissingPredicates().rowKeySet().size()));
+			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
+			line.add(Long.toString(callGraphTime));
+			line.add(Long.toString(analysisTime));
+			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {

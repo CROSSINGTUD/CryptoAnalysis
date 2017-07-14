@@ -52,6 +52,7 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 	@Override
 	public void execute() {
 		if(!analyzed){
+			cryptoScanner.analysisListener().seedStarted(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 				@Override
 				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
@@ -62,8 +63,10 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {
+					
 				}
 			}).analysisForSeed(this);
+			cryptoScanner.analysisListener().seedFinished(this);
 			analyzed = true;
 		}
 	}
@@ -73,7 +76,7 @@ public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
 			return;
 
 		for(Entry<Unit, AccessGraph> c : analysisResults.entries()){
-			cryptoScanner.addNewPred(c.getKey(), c.getValue(), pred);
+			cryptoScanner.addNewPred(this,c.getKey(), c.getValue(), pred);
 		}
 	}
 
