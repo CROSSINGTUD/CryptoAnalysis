@@ -12,7 +12,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -171,11 +170,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p','a','s','s','w','o','r','d'}, salt, 65000, 128);
+		String pwd = "password";
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(pwd.toCharArray(), salt, 65000, 128);
+		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+//		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);

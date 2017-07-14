@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLArithmeticConstraint;
@@ -19,8 +20,14 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CallSiteWithParamIndex;
+import soot.IntType;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.ValueBox;
+import soot.jimple.AssignStmt;
+import soot.jimple.IntConstant;
+import soot.jimple.StringConstant;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
@@ -30,6 +37,7 @@ public class ConstraintSolver {
 	private final List<ISLConstraint> relConstraints;
 	private final Collection<SootMethod> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
+	private final Multimap<String, String> parsAndValsAsString;
 	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
 	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues) {
@@ -45,8 +53,38 @@ public class ConstraintSolver {
 				relConstraints.add(cons);
 			}
 		}
+		parsAndValsAsString = convertToStringMultiMap(parametersToValues);
 	}
 	
+	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Unit> actualValues) {
+		Multimap<String, String> varVal = HashMultimap.create();
+		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
+			for (Unit u : actualValues.get(callSite)) {
+				if (u instanceof AssignStmt) {
+					final List<ValueBox> useBoxes = ((AssignStmt) u).getRightOp().getUseBoxes();
+					if (useBoxes.size() <= callSite.getIndex()) {
+						varVal.put(callSite.getVarName(), "");
+					} else {
+						varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
+					}
+				} else 	if (callSite.getStmt().equals(u)) {
+					varVal.put(callSite.getVarName(),retrieveConstantFromValue(callSite.getStmt().getUseBoxes().get(callSite.getIndex()).getValue()));
+				}
+			}
+		}
+		return varVal;
+}
+	
+	private String retrieveConstantFromValue(Value val) {
+		if (val instanceof StringConstant) {
+			return ((StringConstant) val).value;
+		} else if (val instanceof IntConstant || val.getType() instanceof IntType){
+			return val.toString();
+		} else {
+			return "";
+		}
+	}
+
 	public int evaluateRelConstraints() {
 		int fail = 0;
 		for (ISLConstraint con : relConstraints) {
@@ -112,7 +150,7 @@ public class ConstraintSolver {
 	}
 
 	private boolean evaluate(CryptSLValueConstraint valueCons) {
-		if (parsAndVals == null || parsAndVals.isEmpty()) {
+		if (parsAndValsAsString == null || parsAndValsAsString.isEmpty()) {
 			return false;
 		}
 		CryptSLObject var = valueCons.getVar();
@@ -159,12 +197,12 @@ public class ConstraintSolver {
 		return val;
 	}
 
-	private Collection<Unit> extractValueAsString(String varName) {
+	private Collection<String> extractValueAsString(String varName) {
 		//Magic that retrieves the value of $varName from $actualValues
 		//This is most likely wrong.
-		for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
-			if (cs.getVarName().equals(varName)) {
-				return parsAndVals.get(cs);
+		for (String foundVarName : parsAndValsAsString.keySet()) {
+			if (foundVarName.equals(varName)) {
+				return parsAndValsAsString.get(varName);
 			}
 		}
 		return Collections.emptySet();
@@ -259,7 +297,21 @@ public class ConstraintSolver {
 				// -> second parameter is always the type
 				String varName = ((CryptSLObject) parameters.get(0)).getVarName();
 				//String type = parameters.get(0);
-				return true;
+				for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
+					if (cs.getVarName().equals(varName)) {
+						Collection<Unit> vals = parsAndVals.get(cs);
+						for (Unit stmt : vals) {
+							if (stmt instanceof AssignStmt) {
+								((AssignStmt) stmt).getRightOp().getUseBoxes();
+							} else {
+								stmt.getUseBoxes();
+							}
+							
+						}
+					}
+				}
+				
+				return false;
 			default:
 				return true; //should be changed to false once implementation for the other cases works.
 		}

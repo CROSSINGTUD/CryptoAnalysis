@@ -48,6 +48,7 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IAnalysisSeed {
+
 	private final IFactAtStatement factAtStmt;
 	private final SootMethod method;
 	private final ClassSpecification spec;
@@ -60,8 +61,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method,
-			ClassSpecification spec) {
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec) {
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
 		this.method = method;
@@ -107,25 +107,23 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	public void execute() {
 		if (!solved) {
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+
 				@Override
-				public void onSeedFinished(IFactAtStatement seed,
-						AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 					parametersToValues = problem.getCollectedValues();
 					cryptoScanner.analysisListener().onSeedFinished(seed, solver);
 					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 				}
 
 				@Override
-				public void onSeedTimeout(IFactAtStatement seed) {
-				}
+				public void onSeedTimeout(IFactAtStatement seed) {}
 			}).analysisForSeed(this);
 
 			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
 			final CryptSLRule rule = spec.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
 				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0),
-							((CryptSLPredicate) cons).setNegated(false));
+					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
 				}
 			}
 			solved = true;
@@ -159,9 +157,8 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	private void onAddedTypestateChange(Unit curr, StateNode stateNode) {
 		for (CryptSLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
-			if (predToBeEnsured instanceof CryptSLCondPredicate
-					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
-					|| stateNode.getAccepting()) {
+			if (predToBeEnsured instanceof CryptSLCondPredicate && ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode) || stateNode
+				.getAccepting()) {
 				ensuresPred(predToBeEnsured, curr, stateNode);
 			}
 		}
@@ -178,8 +175,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 						// TODO check for any reachable state that don't kill
 						// predicates.
 						if (e.getValue().getStates().contains(stateNode)) {
-							cryptoScanner.addNewPred(e.getRowKey(), e.getColumnKey(),
-									new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+							cryptoScanner.addNewPred(e.getRowKey(), e.getColumnKey(), new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 						}
 					}
 				}
@@ -196,8 +192,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 							AssignStmt as = (AssignStmt) currStmt;
 							Value leftOp = as.getLeftOp();
 							AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
-							AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
-									.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+							AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
 							seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 
 						}
@@ -207,11 +202,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 						for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
 							if (p.getKey().equals(predicateParam.getName())) {
 								Value param = ie.getArg(i);
-								AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
-								AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
-										.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
-								seed.addEnsuredPredicate(
-										new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+								if (param instanceof Local) {
+									AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
+									AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+									seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+								}
 							}
 						}
 						i++;
@@ -222,10 +217,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 	}
 
-	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(
-			final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
+	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		if (analysis == null) {
 			problem = new CryptoTypestateAnaylsisProblem() {
+
 				@Override
 				public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
 					return resultReporter;
@@ -298,9 +293,9 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				requiredPredicatesExist &= true;
 			} else if (pred.getInvolvedVarNames().contains(var)) {
 
-				Collection<String> actVals = ensPred.getParametersToValues()
-						.get(ensPred.getPredicate().getParameters().get(i).getName());
-				Collection<String> expVals = parametersToValues.get(var);
+				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
+				Collection<String> actVals = Collections.EMPTY_LIST;//ensPred.getParametersToValues().get(parameterI);
+				Collection<String> expVals = Collections.EMPTY_LIST; //parametersToValues.get(var);
 
 				String splitter = "";
 				int index = -1;
@@ -334,7 +329,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 		return true;
 	}
-
 
 	public Set<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 		return Collections.emptySet();
