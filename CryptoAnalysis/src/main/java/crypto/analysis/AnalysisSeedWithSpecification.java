@@ -291,7 +291,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
 		List<CryptSLPredicate> requiredPredicates = Lists.newLinkedList();
 		for (ISLConstraint con : relConstraints) {
-			if (con instanceof CryptSLPredicate) {
+			if (con instanceof CryptSLPredicate && !ConstraintSolver.predefinedPreds.contains(((CryptSLPredicate) con).getPredName())) {
 				requiredPredicates.add((CryptSLPredicate) con);
 			}
 		}
