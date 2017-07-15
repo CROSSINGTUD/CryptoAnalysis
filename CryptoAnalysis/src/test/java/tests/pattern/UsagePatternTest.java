@@ -172,12 +172,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		String pwd = "password";
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(pwd.toCharArray(), salt, 65000, 128);
-		Assertions.violatedConstraint(pbekeyspec);
+		char[] falsePwd = "password".toCharArray();
+		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
+//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
+		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
+		Assertions.hasEnsuredPredicate(pbekeyspec);
 //		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");

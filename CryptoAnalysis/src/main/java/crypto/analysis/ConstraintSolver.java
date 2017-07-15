@@ -39,7 +39,7 @@ public class ConstraintSolver {
 	private final Collection<SootMethod> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
 	private final Multimap<String, String> parsAndValsAsString;
-	private final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
+	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
 
 	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues) {
 		parsAndVals = parametersToValues;
@@ -305,15 +305,18 @@ public class ConstraintSolver {
 				// -> first parameter is always the variable
 				// -> second parameter is always the type
 				String varName = ((CryptSLObject) parameters.get(0)).getVarName();
-				//String type = parameters.get(0);
 				for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
 					if (cs.getVarName().equals(varName)) {
 						Collection<Unit> vals = parsAndVals.get(cs);
 						for (Unit stmt : vals) {
 							if (stmt instanceof AssignStmt) {
-								((AssignStmt) stmt).getRightOp().getUseBoxes();
+								Value rightAss = ((AssignStmt) stmt).getRightOp();
+								String type = parameters.get(1).getName();
+								//Todo: baseObjectType does not get the correct value
+								String baseObjectType = type;
+								return type.equals(baseObjectType);
 							} else {
-								stmt.getUseBoxes();
+								return true;
 							}
 							
 						}
