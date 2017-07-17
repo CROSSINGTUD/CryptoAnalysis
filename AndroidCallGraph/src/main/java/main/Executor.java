@@ -15,7 +15,7 @@ public class Executor {
 		for (File file : listFiles) {
 			System.out.println(file);
 			if (file.getName().endsWith(".apk") || file.getName().endsWith(".APK")) {
-				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java","-Xmx4g", "-cp",
+				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java","-Xmx4g","-Xss16m", "-cp",
 						classpath, PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), "D:\\android-sdk\\platforms" };
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {

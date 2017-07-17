@@ -117,6 +117,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {
+                    cryptoScanner.analysisListener().onSeedTimeout(seed);
 				}
 			}).analysisForSeed(this);
 			cryptoScanner.analysisListener().seedFinished(this);
@@ -200,8 +201,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
 						if (p.getKey().equals(predicateParam.getName())) {
 							Value param = ie.getArg(i);
-							AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
-							expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph,satisfiesConstraintSytem);
+							if(param instanceof Local){
+								AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
+								expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph,satisfiesConstraintSytem);
+							}
 						}
 					}
 					i++;

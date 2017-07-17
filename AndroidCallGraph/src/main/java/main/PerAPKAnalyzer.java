@@ -29,7 +29,9 @@ import crypto.analysis.CryptoVizDebugger;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
+import heros.solver.IDEDebugger;
 import ideal.debug.IDebugger;
+import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootClass;
@@ -45,7 +47,8 @@ public class PerAPKAnalyzer {
 	private static List<String> relevantCalls = Lists.newLinkedList();
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
-	private static IDebugger<TypestateDomainValue<StateNode>> debugger;
+	private static boolean VISUALIZATION = false;
+	private static IDebugger<TypestateDomainValue<StateNode>> debugger =(VISUALIZATION ? null : new NullDebugger());
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;
 	private static CogniCryptCLIReporter reporter;
@@ -82,7 +85,7 @@ public class PerAPKAnalyzer {
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
-		Test.main(new String[] { args[0], args[1], "--notaintanalysis" });
+		Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
 		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();

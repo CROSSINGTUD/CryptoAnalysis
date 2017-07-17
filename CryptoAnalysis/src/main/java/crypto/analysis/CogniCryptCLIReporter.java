@@ -53,6 +53,8 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 				continue;
 			for(Unit u : m.getActiveBody().getUnits()){
 				Map<AccessGraph, TypestateDomainValue<StateNode>> resultsAt = solver.resultsAt(u);
+				if(resultsAt == null)
+					continue;
 				for(Entry<AccessGraph, TypestateDomainValue<StateNode>> e : resultsAt.entrySet()){
 					if(e.getValue().getStates().contains(ErrorStateNode.v()) && seed instanceof AnalysisSeedWithSpecification){
 						typestateErrorAt((AnalysisSeedWithSpecification)seed, createStmtWithMethodFor(u));
@@ -63,6 +65,9 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
 		for(Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()){
 			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
+			if(resultAt == null)
+				continue;
+			
 			for(StateNode n : resultAt.getStates()){
 				if(!n.getAccepting()){
 					typestateErrorAt((AnalysisSeedWithSpecification) seed, createStmtWithMethodFor(c.getKey()));
@@ -162,9 +167,9 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void seedFinished(IAnalysisSeed seed) {
 		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
-			taintWatch.start();
+			taintWatch.stop();
 		} else{
-			typestateWatch.start();
+			typestateWatch.stop();
 		}
 	}
 
