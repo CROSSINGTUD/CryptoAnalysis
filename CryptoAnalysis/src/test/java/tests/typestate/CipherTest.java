@@ -1,19 +1,23 @@
 package tests.typestate;
 
 import java.io.File;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
+import tests.pattern.UsagePatternTest.Encrypter;
 
 public class CipherTest extends IDEALCrossingTestingFramework{
 
@@ -129,5 +133,29 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		Cipher e = c;
 		c.doFinal(null);
 		Assertions.assertState(e, -1);
+	}
+	
+	@Test
+	public void testCipher13Aliasing() throws GeneralSecurityException{
+			Encrypter enc = new Encrypter();
+			Assertions.assertState(enc.cipher, 1);
+	}
+	
+	
+	public static class Encrypter{
+		Cipher cipher;
+		public Encrypter() throws GeneralSecurityException{
+			KeyGenerator keygen = KeyGenerator.getInstance("AES");
+			keygen.init(128);
+			SecretKey key = keygen.generateKey();
+			this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			this.cipher.init(Cipher.ENCRYPT_MODE, key);
+			Assertions.assertState(this.cipher, 1);
+		}
+		public byte[] encrypt(String plainText) throws GeneralSecurityException{
+			byte[] encText = this.cipher.doFinal(plainText.getBytes());
+			Assertions.hasEnsuredPredicate(encText);
+			return encText;
+		}
 	}
 }

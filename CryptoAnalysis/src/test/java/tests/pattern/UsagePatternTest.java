@@ -327,6 +327,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		}
 		public byte[] encrypt(String plainText) throws GeneralSecurityException{
 			byte[] encText = this.cipher.doFinal(plainText.getBytes());
+			Assertions.hasEnsuredPredicate(encText);
 			return encText;
 		}
 	}
@@ -462,9 +463,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		md = MessageDigest.getInstance("MD5");
 		output = md.digest(input2);
 		Assertions.mustBeInAcceptingState(md);
-		Assertions.mustNotBeInAcceptingState(md); // THIS SHOULD FAIL; BUT DOESN'T.
 		Assertions.notHasEnsuredPredicate(input2);
-		Assertions.hasEnsuredPredicate(output);
+		Assertions.notHasEnsuredPredicate(output);
 	}
 	
 }
