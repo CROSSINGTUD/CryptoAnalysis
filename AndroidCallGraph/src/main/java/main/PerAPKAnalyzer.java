@@ -110,6 +110,13 @@ public class PerAPKAnalyzer {
 			if (runCryptoScanner) {
 				runCryptoAnalysis();
 			}
+			String folder = apkFile.getParent();
+			String analyzedFolder = folder+ File.separator + "analyzed";
+			File dir = new File(analyzedFolder);
+			if(!dir.exists()){
+				dir.mkdir();
+			}
+			Files.move(apkFile, new File(dir.getAbsolutePath()+File.separator+apkFile.getName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
