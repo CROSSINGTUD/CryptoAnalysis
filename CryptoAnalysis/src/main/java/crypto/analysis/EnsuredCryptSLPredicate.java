@@ -1,18 +1,19 @@
 package crypto.analysis;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import crypto.rules.CryptSLPredicate;
+import crypto.typestate.CallSiteWithParamIndex;
+import soot.Unit;
 
 public class EnsuredCryptSLPredicate {
 
 	private final CryptSLPredicate predicate;
-	private Multimap<String, String> parametersToValues = HashMultimap.create();
+	private final Multimap<CallSiteWithParamIndex, Unit> parametersToValues;
 
-	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<String, String> parametersToCollectedValues) {
+	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<CallSiteWithParamIndex, Unit> parametersToValues2) {
 		this.predicate = predicate;
-		parametersToValues = parametersToCollectedValues;
+		parametersToValues = parametersToValues2;
 	}
 	
 	public CryptSLPredicate getPredicate(){
@@ -20,7 +21,7 @@ public class EnsuredCryptSLPredicate {
 	}
 	
 
-	public Multimap<String, String> getParametersToValues() {
+	public Multimap<CallSiteWithParamIndex, Unit> getParametersToValues() {
 		return  parametersToValues;
 	}
 	

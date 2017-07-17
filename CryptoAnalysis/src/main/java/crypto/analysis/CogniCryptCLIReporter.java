@@ -82,8 +82,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
-			Multimap<CallSiteWithParamIndex, Value> collectedValues) {
-		
+			Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
 	}
 
 	@Override

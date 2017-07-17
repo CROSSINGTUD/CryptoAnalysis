@@ -34,11 +34,15 @@ import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
+import soot.IntType;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.ValueBox;
 import soot.jimple.AssignStmt;
+import soot.jimple.Constant;
+import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
@@ -47,20 +51,20 @@ import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification implements IAnalysisSeed {
+
 	private final IFactAtStatement factAtStmt;
 	private final SootMethod method;
 	private final ClassSpecification spec;
 	private CryptoScanner cryptoScanner;
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
-	private Multimap<String, String> parametersToValues = HashMultimap.create();
+	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private CryptoTypestateAnaylsisProblem problem;
 	private HashBasedTable<Unit, AccessGraph, TypestateDomainValue<StateNode>> results;
 	private boolean solved;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method,
-			ClassSpecification spec) {
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec) {
 		this.cryptoScanner = cryptoScanner;
 		this.factAtStmt = factAtStmt;
 		this.method = method;
@@ -107,10 +111,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		if (!solved) {
 			cryptoScanner.analysisListener().seedStarted(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+
 				@Override
-				public void onSeedFinished(IFactAtStatement seed,
-						AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					parametersToValues = convertToStringMultiMap(problem.getCollectedValues());
+				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+					parametersToValues = problem.getCollectedValues();
 					cryptoScanner.analysisListener().onSeedFinished(seed, solver);
 					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 				}
@@ -201,7 +205,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
 						if (p.getKey().equals(predicateParam.getName())) {
 							Value param = ie.getArg(i);
-							if(param instanceof Local){
+							if (param instanceof Local) {
 								AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
 								expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph,satisfiesConstraintSytem);
 							}
@@ -209,6 +213,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 					}
 					i++;
 				}
+
 			}
 
 		}
@@ -240,10 +245,10 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		}
 	}
 
-	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(
-			final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
+	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		if (analysis == null) {
 			problem = new CryptoTypestateAnaylsisProblem() {
+
 				@Override
 				public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
 					return resultReporter;
@@ -288,7 +293,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
 		List<CryptSLPredicate> requiredPredicates = Lists.newLinkedList();
 		for (ISLConstraint con : relConstraints) {
-			if (con instanceof CryptSLPredicate) {
+			if (con instanceof CryptSLPredicate && !ConstraintSolver.predefinedPreds.contains(((CryptSLPredicate) con).getPredName())) {
 				requiredPredicates.add((CryptSLPredicate) con);
 			}
 		}
@@ -318,10 +323,21 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			if (isOfNonTrackableType(var)) {
 				continue;
 			} else if (pred.getInvolvedVarNames().contains(var)) {
-
-				Collection<String> actVals = ensPred.getParametersToValues()
-						.get(ensPred.getPredicate().getParameters().get(i).getName());
-				Collection<String> expVals = parametersToValues.get(var);
+				
+				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
+				Collection<String> actVals = null;
+				Collection<String> expVals = null;
+				
+				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
+					if (cswpi.getVarName().equals(parameterI)) {
+						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
+					}
+				}
+				for (CallSiteWithParamIndex cswpi : parametersToValues.keySet()) {
+					if (cswpi.getVarName().equals(var)) {
+						expVals = retrieveValueFromUnit(cswpi, parametersToValues.get(cswpi));
+					}
+				}
 
 				String splitter = "";
 				int index = -1;
@@ -345,6 +361,47 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		return pred.isNegated() != requiredPredicatesExist;
 	}
 
+	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Unit> collection) {
+		Collection<String> values = new ArrayList<String>();
+		for (Unit u : collection) {
+			if (cswpi.getStmt().equals(u)) {
+				if (u instanceof AssignStmt) {
+					values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
+				} else {
+					values.add(retrieveConstantFromValue(u.getUseBoxes().get(cswpi.getIndex()).getValue()));
+				}
+			} else if (u instanceof AssignStmt) {
+				final Value rightSide = ((AssignStmt) u).getRightOp();
+				if (rightSide instanceof Constant) {
+					values.add(retrieveConstantFromValue(rightSide));
+				} else {
+					final List<ValueBox> useBoxes = rightSide.getUseBoxes();
+					
+//					varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
+				}
+			}	
+//			if (u instanceof AssignStmt) {
+//				final List<ValueBox> useBoxes = ((AssignStmt) u).getRightOp().getUseBoxes();
+//				if (!(useBoxes.size() <= cswpi.getIndex())) {
+//					values.add(retrieveConstantFromValue(useBoxes.get(cswpi.getIndex()).getValue()));
+//				} 
+//			} else 	if (cswpi.getStmt().equals(u)) {
+//				values.add(retrieveConstantFromValue(cswpi.getStmt().getUseBoxes().get(cswpi.getIndex()).getValue()));
+//			}
+		}
+		return values;
+	}
+
+	private String retrieveConstantFromValue(Value val) {
+		if (val instanceof StringConstant) {
+			return ((StringConstant) val).value;
+		} else if (val instanceof IntConstant || val.getType() instanceof IntType){
+			return val.toString();
+		} else {
+			return "";
+		}
+	}
+	
 	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 
 	private boolean isOfNonTrackableType(String varName) {
@@ -356,34 +413,8 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		return true;
 	}
 
-	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Value> actualValues) {
-		Multimap<String, String> varVal = HashMultimap.create();
-		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
-			Collection<Value> collection = actualValues.get(callSite);
-			List<String> values = new ArrayList<String>();
-			for (Value val : collection) {
-				if (val instanceof StringConstant) {
-					StringConstant stringConstant = (StringConstant) val;
-					values.add(stringConstant.value);
-				} else {
-					values.add(val.toString());
-				}
-			}
-			varVal.putAll(callSite.getVarName(), values);
-		}
-
-		return varVal;
-	}
-
 	public Set<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 		return Collections.emptySet();
-	}
-
-	/**
-	 * @return the parametersToValues
-	 */
-	public Multimap<String, String> getParametersToValues() {
-		return parametersToValues;
 	}
 
 	@Override

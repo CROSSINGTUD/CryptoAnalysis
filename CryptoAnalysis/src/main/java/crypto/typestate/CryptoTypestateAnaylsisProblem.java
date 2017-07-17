@@ -22,6 +22,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import heros.EdgeFunction;
+import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
@@ -37,7 +38,7 @@ import typestate.TypestateDomainValue;
 public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisProblem<StateNode> {
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
-	private Multimap<CallSiteWithParamIndex,Value> collectedValues = HashMultimap.create(); 
+	private Multimap<CallSiteWithParamIndex,Unit> collectedValues = HashMultimap.create(); 
 	private Set<SootMethod> invokedMethodsOnInstance = Sets.newHashSet();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
@@ -93,15 +94,16 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt,final int index,final AccessGraph d1) {
 		Value parameter = stmt.getInvokeExpr().getArg(index);
 		if(!(parameter instanceof Local)){
-			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, varNameInSpecification), parameter);
+			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, varNameInSpecification), stmt);
 			return;
 		}
 		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(d1, stmt,new AccessGraph((Local) parameter, parameter.getType())));
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, AliasResults res) {
-				for(Value v : res.getValues()){
-					collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, varNameInSpecification), v);
+				for(Pair<Unit, AccessGraph> v : res.keySet()){
+					if(v.getO2().hasAllocationSite())
+						collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, varNameInSpecification), v.getO2().getSourceStmt());
 				}
 			}
 		});
@@ -200,7 +202,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		public void solved(AdditionalBoomerangQuery q, AliasResults res);
 	}
 	
-	public Multimap<CallSiteWithParamIndex, Value> getCollectedValues(){
+	public Multimap<CallSiteWithParamIndex, Unit> getCollectedValues(){
 		return collectedValues;
 	}
 

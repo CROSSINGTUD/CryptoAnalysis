@@ -100,10 +100,14 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	@Override
 	public List<String> getInvolvedVarNames() {
 		List<String> varNames = new ArrayList<String>();
+		if (predName.equals("neverTypeOf")) {
+			varNames.add(parameters.get(0).getName());
+		} else {
 		for (ICryptSLPredicateParameter var : parameters) {
 			if (!("_".equals(var.getName()) || "this".equals(var.getName()))) {
 				varNames.add(var.getName());
 			}
+		}
 		}
 		if(getBaseObject() != null)
 			varNames.add(getBaseObject().getName());
