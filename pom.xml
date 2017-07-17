@@ -16,6 +16,7 @@
     <module>soot-infoflow</module>
     <module>soot-infoflow-android</module>
     <module>CryptoInterfaces</module>
+    <module>soot</module>
   </modules>
   <build>
     <plugins>
