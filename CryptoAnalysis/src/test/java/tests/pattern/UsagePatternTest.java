@@ -414,4 +414,57 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(output);
 	}
 	
+	@Test
+	public void UsagePatternTest18() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+		output = null;
+		Assertions.notHasEnsuredPredicate(output);
+		md.reset();
+		output = md.digest(input);
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+	}
+	
+	@Test
+	public void UsagePatternTest19() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input2 = "input2".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+		md.reset();
+		md.update(input2);
+		Assertions.mustNotBeInAcceptingState(md);
+		Assertions.notHasEnsuredPredicate(input2);
+		Assertions.hasEnsuredPredicate(output);
+	}
+	
+	@Test
+	public void UsagePatternTest20() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input2 = "input2".getBytes("UTF-8");
+		byte[] output = md.digest(input);
+		Assertions.hasEnsuredPredicate(input);
+		Assertions.hasEnsuredPredicate(output);
+		Assertions.mustBeInAcceptingState(md);
+		
+		
+		md = MessageDigest.getInstance("MD5");
+		output = md.digest(input2);
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.mustNotBeInAcceptingState(md); // THIS SHOULD FAIL; BUT DOESN'T.
+		Assertions.notHasEnsuredPredicate(input2);
+		Assertions.hasEnsuredPredicate(output);
+	}
+	
 }
