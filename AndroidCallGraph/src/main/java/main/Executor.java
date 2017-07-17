@@ -20,6 +20,9 @@ public class Executor {
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {
 					ProcessBuilder pb = new ProcessBuilder(command);
+					File reportsDir = new File("target/reports/");
+					if(!reportsDir.exists())
+						reportsDir.mkdirs();
 					pb.redirectOutput(new File("target/reports/"+file.getName() + "-out.txt"));
 					pb.redirectError(new File("target/reports/" +  file.getName() + "-err.txt"));
 					Process proc = pb.start();

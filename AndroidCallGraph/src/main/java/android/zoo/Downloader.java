@@ -94,7 +94,7 @@ public class Downloader {
 	}
 
 	private static boolean isApkOfInterest(AndroidZooEntry entry) {
-		return (entry.dex_date.startsWith("2016") || entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
+		return (entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
 	}
 
 	public static String getAndroidZooAPIKey() {
