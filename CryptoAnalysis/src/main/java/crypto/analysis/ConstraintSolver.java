@@ -311,10 +311,11 @@ public class ConstraintSolver {
 						for (Unit stmt : vals) {
 							if (stmt instanceof AssignStmt) {
 								Value rightAss = ((AssignStmt) stmt).getRightOp();
-								String type = parameters.get(1).getName();
+								return !rightAss.getType().getEscapedName().equals(parameters.get(1).getName());
+//								String type = parameters.get(1).getName();
 								//Todo: baseObjectType does not get the correct value
-								String baseObjectType = type;
-								return type.equals(baseObjectType);
+//								String baseObjectType = type;
+//								return type.equals(baseObjectType);
 							} else {
 								return true;
 							}
