@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -20,16 +21,21 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
+import boomerang.AliasFinder;
+import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
 import heros.solver.IDEDebugger;
+import ideal.Analysis;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
@@ -55,6 +61,7 @@ public class PerAPKAnalyzer {
 	private static File apkFile;
 	private static long analysisTime;
 	private static long callGraphTime;
+	private static int reachableMethodsCount;
 	public final static String RESOURCE_PATH = "../CryptoAnalysis/src/test/resources/";
 	private static final String CSV_SEPARATOR = ";";
 
@@ -99,6 +106,7 @@ public class PerAPKAnalyzer {
 				analyzeMethod(next.method(), MethodType.Application);
 				visited.add(next.method());
 			}
+			reachableMethodsCount = visited.size();
 			log(1, "Call graph reachable methods: " + visited.size());
 			for (SootClass c : Scene.v().getClasses()) {
 				for (SootMethod m : c.getMethods()) {
@@ -116,7 +124,8 @@ public class PerAPKAnalyzer {
 			if(!dir.exists()){
 				dir.mkdir();
 			}
-			Files.move(apkFile, new File(dir.getAbsolutePath()+File.separator+apkFile.getName()));
+			File moveTo = new File(dir.getAbsolutePath()+File.separator+apkFile.getName());
+			Files.move(apkFile, moveTo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -184,15 +193,20 @@ public class PerAPKAnalyzer {
 				line.add("forbiddenMethodErrors");
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
+				addRuleHeader("typestateError_",line);
 				line.add("typestateError(unit)");
 				line.add("expectedPredicates");
 				line.add("missingPredicates");
+				addRuleHeader("missingPredicates_",line);
 				line.add("constraintViolations");
 				line.add("callgraphTime(ms)");
 				line.add("totalTime(ms)");
 				line.add("typestateTime(ms)");
 				line.add("taintTime(ms)");
 				line.add("boomerangTime(ms)");
+				line.add("visitedMethods");
+				line.add("allMethods");
+				line.add("max_accesspath");
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
@@ -201,20 +215,86 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
 			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
+			addTypestateDetails(line);
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
 			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(reporter.getMissingPredicates().rowKeySet().size()));
+			addMissingPredicatesDetails(line);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
 			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
+			Set<SootMethod> allVisited = Sets.newHashSet();
+			allVisited.addAll(AliasFinder.VISITED_METHODS);
+			allVisited.addAll(Analysis.VISITED_METHODS);
+			line.add(Integer.toString(allVisited.size()));
+			line.add(Integer.toString(reachableMethodsCount));
+			line.add(Integer.toString(AccessGraph.MAX_FIELD_COUNT));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static void addMissingPredicatesDetails(List<String> line) {
+		HashMap<String,Integer> classToInteger = new HashMap<>();
+		for (IAnalysisSeed seed : reporter.getMissingPredicates().columnKeySet()) {
+			if(seed instanceof AnalysisSeedWithSpecification){
+				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
+				String className = seedWithSpec.getSpec().getRule().getClassName();
+				Integer i = classToInteger.get(className);
+				if(i == null || i ==0){
+					i = 1;
+				} else{
+					i++;
+				}
+				classToInteger.put(className, i);
+			}
+		}
+		List<CryptSLRule> rules = getRules();
+		for(CryptSLRule r : rules){
+			Integer i = classToInteger.get(r.getClassName());
+			if(i == null){
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
+	}
+
+	private static void addTypestateDetails(List<String> line) {
+		HashMap<String,Integer> classToInteger = new HashMap<>();
+		for (IAnalysisSeed seed : reporter.getTypestateErrors().keySet()) {
+			if(seed instanceof AnalysisSeedWithSpecification){
+				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
+				String className = seedWithSpec.getSpec().getRule().getClassName();
+				Integer i = classToInteger.get(className);
+				if(i == null || i ==0){
+					i = 1;
+				} else{
+					i++;
+				}
+				classToInteger.put(className, i);
+			}
+		}
+		List<CryptSLRule> rules = getRules();
+		for(CryptSLRule r : rules){
+			Integer i = classToInteger.get(r.getClassName());
+			if(i == null){
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
+	}
+
+	private static void addRuleHeader(String string, List<String> line) {
+		List<CryptSLRule> rules = getRules();
+		for(CryptSLRule r : rules){
+			line.add(string+r.getClassName());
+		}
+		
 	}
 
 	private static String getSummaryFile() {
