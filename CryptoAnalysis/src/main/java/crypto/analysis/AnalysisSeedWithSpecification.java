@@ -36,7 +36,9 @@ import ideal.ResultReporter;
 import ideal.debug.IDebugger;
 import soot.IntType;
 import soot.Local;
+import soot.RefType;
 import soot.SootMethod;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.ValueBox;
@@ -221,9 +223,22 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt,
 			AccessGraph accessGraph, boolean satisfiesConstraintSytem) {
-			AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
+		boolean matched = false;
+		for(ClassSpecification spec : cryptoScanner.getClassSpecifictions()){
+			Type baseType = accessGraph.getBaseType();
+			if(baseType instanceof RefType) {
+				RefType refType = (RefType) baseType;
+				if(spec.getRule().getClassName().equals(refType.getSootClass().getShortName())){
+					cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), cryptoScanner.icfg().getMethodOf(currStmt), spec));
+					matched = true;
+				}
+			}
+		}
+		if(matched)
+			return;
+		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
 					.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
-			cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
+		cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
 		if(satisfiesConstraintSytem){
 			seed.addEnsuredPredicate(
 					new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));

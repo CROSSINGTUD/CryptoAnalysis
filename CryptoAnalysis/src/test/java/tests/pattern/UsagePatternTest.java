@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -13,6 +14,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
 
@@ -466,5 +468,17 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.notHasEnsuredPredicate(output);
 	}
-	
+	@Test
+	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException{
+		KeyGenerator c = KeyGenerator.getInstance("AES");
+		SecretKey key = c.generateKey();
+		Assertions.mustBeInAcceptingState(key);
+		byte[] enc = key.getEncoded();
+		Assertions.mustBeInAcceptingState(key);
+		enc = key.getEncoded();
+
+		Assertions.mustBeInAcceptingState(key);
+		key.destroy();
+		Assertions.mustBeInAcceptingState(key);
+	}
 }

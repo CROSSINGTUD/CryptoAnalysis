@@ -53,7 +53,7 @@ public class PerAPKAnalyzer {
 	private static List<String> relevantCalls = Lists.newLinkedList();
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
-	private static boolean VISUALIZATION = false;
+	private static boolean VISUALIZATION = true;
 	private static IDebugger<TypestateDomainValue<StateNode>> debugger =(VISUALIZATION ? null : new NullDebugger());
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;

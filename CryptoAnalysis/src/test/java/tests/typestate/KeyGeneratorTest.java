@@ -49,17 +49,4 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 		c.generateKey();
 		Assertions.assertState(c, 2);
 	}
-	
-	@Test
-	public void testKeyGenerator5() throws NoSuchAlgorithmException, DestroyFailedException {
-		KeyGenerator c = KeyGenerator.getInstance("AES");
-		SecretKey key = c.generateKey();
-		Assertions.assertState(c, 2);
-		byte[] enc = key.getEncoded();
-		Assertions.assertState(key, 0);
-		key.destroy();
-		Assertions.assertState(key, 1);
-	}
-	
-	
 }
