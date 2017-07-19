@@ -65,6 +65,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private boolean solved;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
+	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec) {
 		this.cryptoScanner = cryptoScanner;
@@ -146,6 +147,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), c.getValue().getStates());
+
+			for(EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates){
+				//TODO only maintain indirectly ensured predicate as long as they are not killed by the rule
+				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+			}
 		}
 		for (Unit curr : unitToStates.keySet()) {
 			Collection<StateNode> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
@@ -170,10 +176,8 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				continue;
 			}
 
-			if (predToBeEnsured instanceof CryptSLCondPredicate
-					&& ((CryptSLCondPredicate) predToBeEnsured).getConditionalMethods().contains(stateNode)
-					|| (!(predToBeEnsured instanceof CryptSLCondPredicate) && stateNode.getAccepting())) {
-					ensuresPred(predToBeEnsured, curr, stateNode);
+			if (isPredicateGeneratingState(predToBeEnsured, stateNode)) {
+				ensuresPred(predToBeEnsured, curr, stateNode);
 			}
 		}
 	}
@@ -229,8 +233,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			if(baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
 				if(spec.getRule().getClassName().equals(refType.getSootClass().getShortName())){
-					cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), cryptoScanner.icfg().getMethodOf(currStmt), spec));
+					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), cryptoScanner.icfg().getMethodOf(currStmt), spec));
 					matched = true;
+					if(satisfiesConstraintSytem)
+						seed.addEnsuredPredicateFromOtherRule(
+							new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 				}
 			}
 		}
@@ -242,6 +249,17 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 		if(satisfiesConstraintSytem){
 			seed.addEnsuredPredicate(
 					new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+		}
+	}
+
+	private void addEnsuredPredicateFromOtherRule(EnsuredCryptSLPredicate ensuredCryptSLPredicate) {
+		indirectlyEnsuredPredicates.add(ensuredCryptSLPredicate);
+		if(results == null)
+			return;
+		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
+			for(EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates){
+				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+			}
 		}
 	}
 
@@ -461,6 +479,12 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			for (Entry<Unit, StateNode> e : typeStateChange.entries())
 				onAddedTypestateChange(e.getKey(), e.getValue());
 		}
+	}
+
+	private boolean isPredicateGeneratingState(CryptSLPredicate ensPred, StateNode stateNode) {
+		return ensPred instanceof CryptSLCondPredicate
+				&& ((CryptSLCondPredicate) ensPred).getConditionalMethods().contains(stateNode)
+				|| (!(ensPred instanceof CryptSLCondPredicate) && stateNode.getAccepting());
 	}
 
 	@Override
