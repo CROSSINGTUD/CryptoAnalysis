@@ -4,6 +4,8 @@ import java.io.File;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
 
@@ -45,7 +47,19 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 	public void testKeyGenerator4() throws NoSuchAlgorithmException {
 		KeyGenerator c = KeyGenerator.getInstance("AES");
 		c.generateKey();
-		//TODO fails because init is missing. Shouldn't we test for -1? I.e. KeyGenerator is in an error state.
 		Assertions.assertState(c, 2);
 	}
+	
+	@Test
+	public void testKeyGenerator5() throws NoSuchAlgorithmException, DestroyFailedException {
+		KeyGenerator c = KeyGenerator.getInstance("AES");
+		SecretKey key = c.generateKey();
+		Assertions.assertState(c, 2);
+		byte[] enc = key.getEncoded();
+		Assertions.assertState(key, 0);
+		key.destroy();
+		Assertions.assertState(key, 1);
+	}
+	
+	
 }
