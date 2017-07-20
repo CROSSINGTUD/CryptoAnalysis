@@ -224,7 +224,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		};
 	}
 	protected List<CryptSLRule> getRules() {
-		LinkedList<CryptSLRule> rules = Lists.newLinkedList();    
+		List<CryptSLRule> rules = Lists.newArrayList();    
 
 		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
 		for (File file : listFiles) {

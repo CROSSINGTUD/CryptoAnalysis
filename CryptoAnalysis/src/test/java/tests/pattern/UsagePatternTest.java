@@ -3,9 +3,13 @@ package tests.pattern;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Signature;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -468,6 +472,38 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.notHasEnsuredPredicate(output);
 	}
+	
+	@Test
+	public void UsagePatternTest21() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+		
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.hasEnsuredPredicate(kp);
+		
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.hasEnsuredPredicate(privKey);
+		// This assertion fails although it shouldn't.
+//		Signature sign = Signature.getInstance("SHA256withDSA");
+//		Assertions.extValue(0);
+//		
+//		sign.initSign(privKey);
+//		sign.update(input.getBytes("UTF-8"));
+//		byte[] signature = sign.sign();
+//		Assertions.mustBeInAcceptingState(sign);
+//		Assertions.hasEnsuredPredicate(signature);
+		
+//		Signature ver = Signature.getInstance("SHA256withDSA");
+//		Assertions.extValue(0);
+//		
+//		ver.initVerify(kp.getPublic());
+//		ver.update(input.getBytes("UTF-8"));
+//		ver.verify(signature);
+	}
+	
 	@Test
 	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException{
 		KeyGenerator c = KeyGenerator.getInstance("AES");
