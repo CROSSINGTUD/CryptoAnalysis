@@ -199,7 +199,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 			for (CryptSLMethod cryptSLMethod : convert) {
 				Entry<String, String> retObject = cryptSLMethod.getRetObject();
-				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt) {
+				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(),retObject.getKey())) {
 					AssignStmt as = (AssignStmt) currStmt;
 					Value leftOp = as.getLeftOp();
 					AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
@@ -207,13 +207,11 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				}
 				int i = 0;
 				for (Entry<String, String> p : cryptSLMethod.getParameters()) {
-					for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
-						if (p.getKey().equals(predicateParam.getName())) {
-							Value param = ie.getArg(i);
-							if (param instanceof Local) {
-								AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
-								expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph, satisfiesConstraintSytem);
-							}
+					if(predicateParameterEquals(predToBeEnsured.getParameters(),p.getKey())){
+						Value param = ie.getArg(i);
+						if (param instanceof Local) {
+							AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
+							expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph, satisfiesConstraintSytem);
 						}
 					}
 					i++;
@@ -222,6 +220,15 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 			}
 
 		}
+	}
+
+	private boolean predicateParameterEquals(List<ICryptSLPredicateParameter> parameters, String key) {
+		for (ICryptSLPredicateParameter predicateParam :parameters) {
+			if (key.equals(predicateParam.getName())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt, AccessGraph accessGraph, boolean satisfiesConstraintSytem) {
