@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -92,7 +94,17 @@ public class PerAPKAnalyzer {
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
-		Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
+
+		try{
+			Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
+		}catch(Exception e){
+			PrintWriter writer = new PrintWriter(new FileOutputStream(
+				    new File("CallGraphGenerationExceptions.txt"), 
+				    true));
+			writer.format("FlowDroid call graph generation crashed on {}", apkFile);
+			e.printStackTrace(writer);
+			return;
+		}
 		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -116,7 +128,15 @@ public class PerAPKAnalyzer {
 			}
 			log(1, "APK file reachable methods: " + visited.size());
 			if (runCryptoScanner) {
-				runCryptoAnalysis();
+				try{
+					runCryptoAnalysis();
+				} catch(Exception e){
+					PrintWriter writer = new PrintWriter(new FileOutputStream(
+						    new File("CryptoAnalysisExceptions.txt"), 
+						    true));
+					writer.format("CryptoAnalysis crashed on {}", apkFile);
+					e.printStackTrace(writer);
+				}
 			}
 			String folder = apkFile.getParent();
 			String analyzedFolder = folder+ File.separator + "analyzed";
