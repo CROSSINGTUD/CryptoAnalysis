@@ -130,7 +130,7 @@ public abstract class CryptoScanner {
 
 								@Override
 								public AllocationSiteHandlers allocationSiteHandlers() {
-									return new PrimitiveTypeAndReferenceType();
+									return new PrimitiveTypeAndReferenceForCryptoType();
 								}
 							});
 							boomerang.startQuery();

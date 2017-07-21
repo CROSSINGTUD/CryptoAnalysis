@@ -19,6 +19,7 @@ import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.PrimitiveTypeAndReferenceForCryptoType;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import heros.EdgeFunction;
@@ -135,7 +136,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 				
 				@Override
 				public AllocationSiteHandlers allocationSiteHandlers() {
-					return new PrimitiveTypeAndReferenceType();
+					return new PrimitiveTypeAndReferenceForCryptoType();
 				}				
 			});
 			boomerang.startQuery();
