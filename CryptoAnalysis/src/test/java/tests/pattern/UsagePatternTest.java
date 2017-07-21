@@ -512,26 +512,26 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.mustBeInAcceptingState(kp);
 		Assertions.hasEnsuredPredicate(privKey);
-//		Signature sign = Signature.getInstance("SHA256withDSA");
-//		Assertions.extValue(0);
+		Signature sign = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
 		
-//		sign.initSign(privKey);
-//		sign.update(input.getBytes("UTF-8"));
-//		byte[] signature = sign.sign();
-//		Assertions.mustBeInAcceptingState(sign);
-//		Assertions.hasEnsuredPredicate(signature);
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.hasEnsuredPredicate(signature);
 		
 		final PublicKey pubKey = kp.getPublic();
 		Assertions.mustBeInAcceptingState(kp);
 		Assertions.hasEnsuredPredicate(pubKey);
 
-//		Signature ver = Signature.getInstance("SHA256withDSA");
-//		Assertions.extValue(0);
+		Signature ver = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
 //		
-//		ver.initVerify(pubKey);
-//		ver.update(input.getBytes("UTF-8"));
-//		ver.verify(signature);
-//		Assertions.mustBeInAcceptingState(ver);
+		ver.initVerify(pubKey);
+		ver.update(input.getBytes("UTF-8"));
+		ver.verify(signature);
+		Assertions.mustBeInAcceptingState(ver);
 	}
 	
 	
