@@ -8,6 +8,7 @@ import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 
@@ -486,23 +487,53 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.hasEnsuredPredicate(privKey);
-		// This assertion fails although it shouldn't.
+		Signature sign = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
+		
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.hasEnsuredPredicate(signature);
+
+	}
+	
+	@Test
+	public void UsagePatternTest22() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+		
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.hasEnsuredPredicate(kp);
+		
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.mustBeInAcceptingState(kp);
+		Assertions.hasEnsuredPredicate(privKey);
 //		Signature sign = Signature.getInstance("SHA256withDSA");
 //		Assertions.extValue(0);
-//		
+		
 //		sign.initSign(privKey);
 //		sign.update(input.getBytes("UTF-8"));
 //		byte[] signature = sign.sign();
 //		Assertions.mustBeInAcceptingState(sign);
 //		Assertions.hasEnsuredPredicate(signature);
 		
+		final PublicKey pubKey = kp.getPublic();
+		Assertions.mustBeInAcceptingState(kp);
+		Assertions.hasEnsuredPredicate(pubKey);
+
 //		Signature ver = Signature.getInstance("SHA256withDSA");
 //		Assertions.extValue(0);
 //		
-//		ver.initVerify(kp.getPublic());
+//		ver.initVerify(pubKey);
 //		ver.update(input.getBytes("UTF-8"));
 //		ver.verify(signature);
+//		Assertions.mustBeInAcceptingState(ver);
 	}
+	
 	
 	@Test
 	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException{
