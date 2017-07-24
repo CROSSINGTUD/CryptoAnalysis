@@ -548,4 +548,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		key.destroy();
 		Assertions.mustBeInAcceptingState(key);
 	}
+	
+	@Test
+	public void messageDigest() throws NoSuchAlgorithmException, DestroyFailedException{
+		while(true){
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			md.update(new byte[]{});
+			md.update(new byte[]{});
+			byte[] digest = md.digest();
+			Assertions.hasEnsuredPredicate(digest);
+		}
+	}
 }
