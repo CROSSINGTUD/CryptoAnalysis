@@ -83,8 +83,12 @@ public class PerAPKAnalyzer {
 	}
 
 	public static IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-		if (debugger == null)
+		if (debugger == null){
+			if(!ideVizFile.getParentFile().exists()){
+				ideVizFile.getParentFile().mkdirs();
+			}
 			debugger = new CryptoVizDebugger(ideVizFile, icfg);
+		}
 		return debugger;
 	}
 

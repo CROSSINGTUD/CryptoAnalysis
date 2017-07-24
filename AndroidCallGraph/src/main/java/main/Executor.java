@@ -19,7 +19,7 @@ public class Executor {
 		for (File file : listFiles) {
 			System.out.println(file);
 			if (file.getName().endsWith(".apk") || file.getName().endsWith(".APK")) {
-				String[] command = new String[] { "sudo",javaHome + File.separator + "bin" + File.separator + "java","-Xmx8g","-Xss16m", "-cp",
+				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java","-Xmx8g","-Xss16m", "-cp",
 					classpath, PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), args[0]};
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {
