@@ -55,6 +55,7 @@ import test.assertions.NotInAcceptingStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
@@ -159,25 +160,21 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
-								// TODO Auto-generated method stub
 								
 							}
 
@@ -185,6 +182,17 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							public void predicateContradiction(Unit stmt, AccessGraph key,
 									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 								throw new RuntimeException("IMPLEMENTE predicate contradicition" + stmt + key);
+							}
+
+							@Override
+							public void missingPredicates(AnalysisSeedWithSpecification seed,
+									Set<CryptSLPredicate> missingPredicates) {
+							}
+
+							@Override
+							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
+									ISLConstraint con) {
+								
 							}
 
 						};

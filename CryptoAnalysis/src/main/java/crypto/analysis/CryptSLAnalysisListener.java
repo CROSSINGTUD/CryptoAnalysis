@@ -15,6 +15,7 @@ import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.Unit;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainValue<StateNode>> {
 
@@ -38,4 +39,8 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q);
 
 	void predicateContradiction(Unit stmt, AccessGraph key,	Entry<CryptSLPredicate, CryptSLPredicate> disPair);
+
+	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
+
+	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con);
 }

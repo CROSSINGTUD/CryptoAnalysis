@@ -175,10 +175,11 @@ public abstract class CryptoScanner {
 			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 		}
 		checkForContradictions();
+		for(AnalysisSeedWithSpecification seed : seedsWithSpec.keySet()){
+			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
+			analysisListener().missingPredicates(seed, missingPredicates);
+		}
 		analysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased,computeMissingPredicates());
-//		System.out.println(Joiner.on("\n").join(existingPredicatesObjectBased.cellSet()));
-//		System.out.println("EXPECTED");
-//		System.out.println(Joiner.on("\n").join(expectedPredicateObjectBased.cellSet()));
 		debugger().afterAnalysis();
 	}
 

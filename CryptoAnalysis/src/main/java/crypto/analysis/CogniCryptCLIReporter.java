@@ -28,6 +28,7 @@ import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
@@ -35,7 +36,8 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
 	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
-	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates = HashBasedTable.create();
+	private Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
+	private Multimap<AnalysisSeedWithSpecification, ISLConstraint> missingInternalConstraints = HashMultimap.create();
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
 	private Multimap<IFactAtStatement, Entry<CryptSLPredicate,CryptSLPredicate>> predicateContradictions = HashMultimap.create();
 	private Stopwatch taintWatch = Stopwatch.createUnstarted();
@@ -126,19 +128,22 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public String toString() {
 		String s = "================SEEDS=======================\n";
 		s += Joiner.on("\n").join(analysisSeeds);
-		s += "================CALL TO FORBIDDEN METHODS==================\n";
+		s += "\n\n================CALL TO FORBIDDEN METHODS==================\n";
 		s += Joiner.on("\n").join(callToForbiddenMethod.entries());
 
-		s += "================REPORTED TYPESTATE ERRORS==================\n";
+		s += "\n\n================REPORTED TYPESTATE ERRORS==================\n";
 		s += Joiner.on("\n").join(reportedTypestateErros.entries());
 
-		s += "================REPORTED MISSING PREDICATES==================\n";
-		s += Joiner.on("\n").join(missingPredicates.cellSet());
+		s += "\n\n================REPORTED MISSING PREDICATES==================\n";
+		s += Joiner.on("\n").join(missingPredicatesObjectBased.asMap().entrySet());
 
-		s += "================REPORTED PREDICATE CONTRADICTION ==================\n";
+		s += "\n\n================REPORTED VIOLATED INTERNAL CONSTRAINTS ==================\n";
+		s += Joiner.on("\n").join(missingInternalConstraints.asMap().entrySet());
+		
+		s += "\n\n================REPORTED PREDICATE CONTRADICTION ==================\n";
 		s += Joiner.on("\n").join(predicateContradictions.entries());
 		
-		s += "================Timeouts: ==================\n";
+		s += "\n\n================Timeouts: ==================\n";
 		s += Joiner.on("\n").join(typestateTimeouts);
 
 		return s;
@@ -147,17 +152,18 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
 			Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-		this.expectedPredicates = expectedPredicates;
-		this.missingPredicates = missingPredicates;
 	}
 
 	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getExpectedPredicates() {
 		return this.expectedPredicates;
 	}
-	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getMissingPredicates() {
-		return this.missingPredicates;
+	public Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> getMissingPredicates() {
+		return this.missingPredicatesObjectBased;
 	}
-	
+
+	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getMissingInternalConstraints() {
+		return this.missingInternalConstraints;
+	}
 
 	public Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
 		return this.predicateContradictions;
@@ -208,5 +214,14 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		predicateContradictions.put(new FactAtStatement(stmt,accessGraph), disPair);
 	}
 
-	
+	@Override
+	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {
+		missingPredicatesObjectBased.putAll(seed, missingPredicates);
+	}
+
+	@Override
+	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con) {
+		missingInternalConstraints.put(analysisSeedWithSpecification, con);
+	}
+
 }

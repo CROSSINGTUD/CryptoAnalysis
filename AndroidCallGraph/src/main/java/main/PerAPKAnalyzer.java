@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
 import boomerang.AliasFinder;
@@ -33,10 +35,10 @@ import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import heros.solver.IDEDebugger;
 import ideal.Analysis;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
@@ -50,6 +52,7 @@ import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.util.queue.QueueReader;
 import typestate.TypestateDomainValue;
+import typestate.interfaces.ISLConstraint;
 
 public class PerAPKAnalyzer {
 	private static List<String> relevantCalls = Lists.newLinkedList();
@@ -219,15 +222,19 @@ public class PerAPKAnalyzer {
 				line.add("typestateError(seed)");
 				addRuleHeader("typestateError_",line);
 				line.add("typestateError(unit)");
-				line.add("expectedPredicates");
+//				line.add("expectedPredicates");
 				line.add("missingPredicates");
 				addRuleHeader("missingPredicates_",line);
-				line.add("constraintViolations");
+				line.add("internalConstraintViolations");
+				addRuleHeader("internalConstraintViolations_",line);
+				line.add("negationContradictions");
 				line.add("callgraphTime(ms)");
 				line.add("totalTime(ms)");
 				line.add("typestateTime(ms)");
+				line.add("typestateTime/NoBoomerang(ms)");
 				line.add("taintTime(ms)");
 				line.add("boomerangTime(ms)");
+				line.add("constraint(ms)");
 				line.add("visitedMethods");
 				line.add("allMethods");
 				line.add("max_accesspath");
@@ -241,15 +248,19 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
 			addTypestateDetails(line);
 			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
-			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
-			line.add(Integer.toString(reporter.getMissingPredicates().rowKeySet().size()));
+//			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
+			line.add(Integer.toString(reporter.getMissingPredicates().entries().size()));
 			addMissingPredicatesDetails(line);
+			line.add(Integer.toString(reporter.getMissingInternalConstraints().entries().size()));
+			addMissingInternalConstraintDetails(line);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
 			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)-reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(analysisTime-reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS) - reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
 			Set<SootMethod> allVisited = Sets.newHashSet();
 			allVisited.addAll(AliasFinder.VISITED_METHODS);
 			allVisited.addAll(Analysis.VISITED_METHODS);
@@ -263,20 +274,49 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	private static void addMissingPredicatesDetails(List<String> line) {
+	private static void addMissingInternalConstraintDetails(List<String> line) {
 		HashMap<String,Integer> classToInteger = new HashMap<>();
-		for (IAnalysisSeed seed : reporter.getMissingPredicates().columnKeySet()) {
-			if(seed instanceof AnalysisSeedWithSpecification){
-				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
-				String className = seedWithSpec.getSpec().getRule().getClassName();
-				Integer i = classToInteger.get(className);
-				if(i == null || i ==0){
-					i = 1;
-				} else{
-					i++;
-				}
-				classToInteger.put(className, i);
+		 Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getMissingInternalConstraints();
+		for (AnalysisSeedWithSpecification seed :map.keySet()) {
+			Collection<ISLConstraint> col = map.get(seed);
+			if(col == null)
+				continue;
+			int size = col.size();
+			String className = seed.getSpec().getRule().getClassName();
+			Integer i = classToInteger.get(className);
+			if(i == null || i ==0){
+				i = size;
+			} else{
+				i += size;
 			}
+			classToInteger.put(className, i);
+		}
+		List<CryptSLRule> rules = getRules();
+		for(CryptSLRule r : rules){
+			Integer i = classToInteger.get(r.getClassName());
+			if(i == null){
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
+	}
+
+	private static void addMissingPredicatesDetails(List<String> line) {
+		HashMap<String,Integer> classToInteger = new HashMap<>(); 
+		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
+		for (AnalysisSeedWithSpecification seed :map.keySet()) {
+			Collection<CryptSLPredicate> col = map.get(seed);
+			if(col == null)
+				continue;
+			int size = col.size();
+			String className = seed.getSpec().getRule().getClassName();
+			Integer i = classToInteger.get(className);
+			if(i == null || i == 0){
+				i = size;
+			} else{
+				i+= size;
+			}
+			classToInteger.put(className, i);
 		}
 		List<CryptSLRule> rules = getRules();
 		for(CryptSLRule r : rules){
@@ -295,7 +335,7 @@ public class PerAPKAnalyzer {
 				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
 				String className = seedWithSpec.getSpec().getRule().getClassName();
 				Integer i = classToInteger.get(className);
-				if(i == null || i ==0){
+				if(i == null || i == 0){
 					i = 1;
 				} else{
 					i++;

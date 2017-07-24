@@ -40,8 +40,9 @@ public class ConstraintSolver {
 	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
 	private final Multimap<String, String> parsAndValsAsString;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
+	private final ConstaintReporter reporter;
 
-	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues) {
+	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues, ConstaintReporter reporter) {
 		parsAndVals = parametersToValues;
 		allConstraints = spec.getRule().getConstraints();
 		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
@@ -57,6 +58,7 @@ public class ConstraintSolver {
 			}
 		}
 		parsAndValsAsString = convertToStringMultiMap(parametersToValues);
+		this.reporter = reporter;
 	}
 	
 	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Unit> actualValues) {
@@ -100,6 +102,7 @@ public class ConstraintSolver {
 			if (!evaluate(con)) {
 				System.out.println(con);
 				fail++;
+				reporter.constraintViolated(con);
 			}
 		}
 		return fail;

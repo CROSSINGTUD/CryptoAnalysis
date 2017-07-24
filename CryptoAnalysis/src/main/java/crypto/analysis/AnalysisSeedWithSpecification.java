@@ -66,6 +66,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
+	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec) {
 		this.cryptoScanner = cryptoScanner;
@@ -320,7 +321,12 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
-		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues);
+		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues, new ConstaintReporter() {
+			@Override
+			public void constraintViolated(ISLConstraint con) {
+				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
+			}
+		});
 		List<ISLConstraint> relConstraints = solver.getRelConstraints();
 		if (!checkPredicates(relConstraints))
 			return false;
@@ -350,6 +356,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				}
 			}
 		}
+		this.missingPredicates  = remainingPredicates;
 		return remainingPredicates.isEmpty();
 	}
 
@@ -493,5 +500,9 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	@Override
 	public boolean contradictsNegations() {
 		return false;
+	}
+	
+	public Set<CryptSLPredicate> getMissingPredicates() {
+		return missingPredicates;
 	}
 }
