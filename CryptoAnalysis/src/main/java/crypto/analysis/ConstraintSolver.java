@@ -108,6 +108,10 @@ public class ConstraintSolver {
 	private boolean evaluate(CryptSLComparisonConstraint comp) {
 		int left = evaluate(comp.getLeft());
 		int right = evaluate(comp.getRight());
+		if (left == Integer.MIN_VALUE || right == Integer.MIN_VALUE) {
+			//TODO: This is a workaround for ~the time being.
+			return true;
+		}
 		switch (comp.getOperator()) {
 			case eq:
 				return left == right;
@@ -127,6 +131,9 @@ public class ConstraintSolver {
 	private int evaluate(CryptSLArithmeticConstraint arith) {
 		int left = extractValueAsInt(arith.getLeft());
 		int right = extractValueAsInt(arith.getRight());
+		if (left == Integer.MIN_VALUE || right == Integer.MIN_VALUE) {
+			return Integer.MIN_VALUE;
+		}
 		switch (arith.getOperator()) {
 			case n:
 				return left - right;
@@ -145,7 +152,11 @@ public class ConstraintSolver {
 		} catch (NumberFormatException ex) {
 			//2. If not, it's a variable name.
 			//Get value of variable left from map
-			String valueAsString = getVerifiedValue(extractValueAsString(exp));
+			final Collection<String> valueCollection = extractValueAsString(exp);
+			if (valueCollection.isEmpty()) {
+				return Integer.MIN_VALUE;
+			}
+			String valueAsString = getVerifiedValue(valueCollection);
 			// and cast it to Integer
 			try {
 				ret = Integer.parseInt(valueAsString);
