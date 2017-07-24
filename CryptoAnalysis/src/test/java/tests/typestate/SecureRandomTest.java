@@ -36,4 +36,9 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 		sr.nextBytes(salt);
 		Assertions.assertState(sr, 2);
 	}
+	@Test
+	public void testSecureRandom3() throws NoSuchAlgorithmException {
+		SecureRandom sr = new SecureRandom();
+		Assertions.assertState(sr, 0);
+	}
 }
