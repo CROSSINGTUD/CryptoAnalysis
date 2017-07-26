@@ -468,6 +468,32 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	}
 	
 	@Test
+	public void UsagePatternTest16b() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final byte[] input = "input".getBytes("UTF-8");
+		md.update(input);
+		byte[] digest = md.digest();
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.hasEnsuredPredicate(digest);
+		Assertions.hasEnsuredPredicate(input);
+	}
+	
+	@Test
+	public void UsagePatternTest16c() throws GeneralSecurityException, UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		Assertions.extValue(0);
+		final String[] input = {"input1", "input2", "input3", "input4"};
+		int i = 0;
+		while (i < input.length) {
+			md.update(input[i].getBytes("UTF-8"));			
+		}
+		byte[] digest = md.digest();
+		Assertions.mustBeInAcceptingState(md);
+		Assertions.hasEnsuredPredicate(digest);
+	}
+	
+	@Test
 	public void UsagePatternTest17() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
