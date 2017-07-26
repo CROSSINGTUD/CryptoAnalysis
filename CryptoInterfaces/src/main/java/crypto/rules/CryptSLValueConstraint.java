@@ -1,7 +1,9 @@
 package crypto.rules;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Serializable {
 	
@@ -58,8 +60,8 @@ public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Se
 	}
 
 	@Override
-	public List<String> getInvolvedVarNames() {
-		List<String> varNames = new ArrayList<String>();
+	public Set<String> getInvolvedVarNames() {
+		Set<String> varNames = new HashSet<String>();
 		varNames.add(var.getVarName());
 		return varNames;
 	}

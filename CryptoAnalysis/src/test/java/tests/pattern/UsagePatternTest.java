@@ -46,6 +46,44 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
+	
+	@Test
+	public void UsagePatternTestMissingMode() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
+	
+	@Test
+	public void UsagePatternTestWrongPadding() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/NoPadding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
 
 	@Test
 	public void UsagePatternTest2() throws GeneralSecurityException {
@@ -57,12 +95,31 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(keygen);
 		Assertions.notHasEnsuredPredicate(key);
 		
-		Cipher cCipher = Cipher.getInstance("AES");
+		Cipher cCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
+	}
+	
+	@Test
+	public void UsagePatternTestImplictPadding() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
 	@Test

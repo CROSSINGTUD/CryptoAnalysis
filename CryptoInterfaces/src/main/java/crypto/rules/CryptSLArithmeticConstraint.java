@@ -1,7 +1,9 @@
 package crypto.rules;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
 
@@ -45,8 +47,8 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	}
 
 	@Override
-	public List<String> getInvolvedVarNames() {
-		List<String> varNames = new ArrayList<String>();
+	public Set<String> getInvolvedVarNames() {
+		Set<String> varNames = new HashSet<String>();
 		try {
 			Integer.parseInt(left);
 		} catch (NumberFormatException ex) {

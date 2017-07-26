@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -48,7 +49,7 @@ public class ConstraintSolver {
 		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
-			List<String> involvedVarNames = cons.getInvolvedVarNames();
+			Set<String> involvedVarNames = cons.getInvolvedVarNames();
 			for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
@@ -178,11 +179,7 @@ public class ConstraintSolver {
 		}
 		CryptSLObject var = valueCons.getVar();
 		String val = getValFromVar(var);
-		if (val.isEmpty()) {
-			return false;
-		} else {
-			return valueCons.getValueRange().contains(val);
-		}
+		return valueCons.getValueRange().contains(val);
 	}
 
 	private String getValFromVar(CryptSLObject var) {
