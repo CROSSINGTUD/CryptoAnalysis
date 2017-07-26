@@ -198,16 +198,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
 		
-		
 		SecureRandom encRand = SecureRandom.getInstanceStrong();
 		
-		Cipher cCipher = Cipher.getInstance("Blowfish");
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
-		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.hasEnsuredPredicate(encText);
 	}
 	
 	@Test
@@ -224,6 +223,28 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("Blowfish");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, rand);
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.mustBeInAcceptingState(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
+	}
+	
+	@Test
+	public void UsagePatternTest7b() throws GeneralSecurityException   {
+		SecureRandom encRand = SecureRandom.getInstanceStrong();
+
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128, null);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.mustBeInAcceptingState(keygen);
+		Assertions.notHasEnsuredPredicate(key);
+		
+		
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
@@ -476,7 +497,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] digest = md.digest();
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(digest);
-		Assertions.hasEnsuredPredicate(input);
 	}
 	
 	@Test
