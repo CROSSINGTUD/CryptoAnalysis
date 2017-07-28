@@ -64,6 +64,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
+	private ConstraintSolver constraintSolver;
+	private boolean internalConstraintSatisfied;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec) {
 		super(cryptoScanner,factAtStmt);
@@ -132,12 +134,20 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 			}
 			solved = true;
+
 		}
 	}
 
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		// Merge all information (all access graph here point to the seed
 		// object)
+		constraintSolver = new ConstraintSolver(spec, parametersToValues, new ConstaintReporter() {
+			@Override
+			public void constraintViolated(ISLConstraint con) {
+				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
+			}
+		});
+		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		results = solver.results();
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
@@ -316,16 +326,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
-		ConstraintSolver solver = new ConstraintSolver(spec, parametersToValues, new ConstaintReporter() {
-			@Override
-			public void constraintViolated(ISLConstraint con) {
-				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
-			}
-		});
-		List<ISLConstraint> relConstraints = solver.getRelConstraints();
+		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
 		if (!checkPredicates(relConstraints))
 			return false;
-		return 0 == solver.evaluateRelConstraints();
+		return internalConstraintSatisfied;
 	}
 
 	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
@@ -450,10 +454,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 		return true;
-	}
-
-	public Set<EnsuredCryptSLPredicate> getEnsuredPredicates() {
-		return Collections.emptySet();
 	}
 
 	@Override
