@@ -1,15 +1,39 @@
 package crypto.analysis;
 
+import boomerang.accessgraph.AccessGraph;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import ideal.IFactAtStatement;
+import soot.SootMethod;
+import soot.Unit;
 
-public interface IAnalysisSeed extends IFactAtStatement{
+public abstract class IAnalysisSeed implements IFactAtStatement{
 
-	void execute();
+	final protected CryptoScanner cryptoScanner;
+	final protected IFactAtStatement factAtStmt;
 
-	CryptoTypestateAnaylsisProblem getAnalysisProblem();
+	public IAnalysisSeed(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt){
+		this.cryptoScanner = cryptoScanner;
+		this.factAtStmt = factAtStmt;
+	}
+	abstract void execute();
 
-	boolean isSolved();
+	abstract CryptoTypestateAnaylsisProblem getAnalysisProblem();
 
-	boolean contradictsNegations();
+	abstract boolean isSolved();
+
+	abstract boolean contradictsNegations();
+	
+	public SootMethod getMethod(){
+		return cryptoScanner.icfg().getMethodOf(getStmt());
+	}
+	
+	@Override
+	public AccessGraph getFact() {
+		return factAtStmt.getFact();
+	}
+	
+	@Override
+	public Unit getStmt() {
+		return factAtStmt.getStmt();
+	}
 }

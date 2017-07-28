@@ -137,14 +137,16 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		s += "\n\n================REPORTED MISSING PREDICATES==================\n";
 		s += Joiner.on("\n").join(missingPredicatesObjectBased.asMap().entrySet());
 
-		s += "\n\n================REPORTED VIOLATED INTERNAL CONSTRAINTS ==================\n";
+		s += "\n\n================REPORTED VIOLATED INTERNAL CONSTRAINTS==================\n";
 		s += Joiner.on("\n").join(missingInternalConstraints.asMap().entrySet());
 		
 		s += "\n\n================REPORTED PREDICATE CONTRADICTION ==================\n";
 		s += Joiner.on("\n").join(predicateContradictions.entries());
 		
-		s += "\n\n================Timeouts: ==================\n";
+		s += "\n\n================TIMEOUTS==================\n";
 		s += Joiner.on("\n").join(typestateTimeouts);
+		s += "\n\n================MAXIMAL ACCESS GRAPH==================\n";
+		s += "Length: " + AccessGraph.MAX_FIELD_COUNT + " Instance: "+ AccessGraph.MAX_ACCESS_GRAPH;
 
 		return s;
 	}

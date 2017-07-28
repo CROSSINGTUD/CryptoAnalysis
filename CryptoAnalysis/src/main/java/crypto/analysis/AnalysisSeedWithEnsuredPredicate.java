@@ -24,30 +24,16 @@ import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
-public class AnalysisSeedWithEnsuredPredicate implements IAnalysisSeed{
+public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private IFactAtStatement delegate;
-	private CryptoScanner cryptoScanner;
 	private boolean analyzed;
 	private Multimap<Unit, AccessGraph> analysisResults = HashMultimap.create();
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private CryptoTypestateAnaylsisProblem problem;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, IFactAtStatement delegate, SootMethod methodOf) {
-		this.cryptoScanner = cryptoScanner;
-		this.delegate = delegate;
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, IFactAtStatement delegate) {
+		super(cryptoScanner,delegate);
 	}
-
-	@Override
-	public AccessGraph getFact() {
-		return delegate.getFact();
-	}
-
-	@Override
-	public Unit getStmt() {
-		return delegate.getStmt();
-	}
-
 
 	@Override
 	public void execute() {

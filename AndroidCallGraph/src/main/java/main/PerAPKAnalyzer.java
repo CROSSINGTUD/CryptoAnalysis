@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
@@ -69,6 +70,7 @@ public class PerAPKAnalyzer {
 	private static int reachableMethodsCount;
 	public final static String RESOURCE_PATH = "../CryptoAnalysis/src/test/resources/";
 	private static final String CSV_SEPARATOR = ";";
+	private static Set<PackageFilter> filters = Sets.newHashSet();
 
 	private enum MethodType {
 		Application, Library
@@ -202,12 +204,72 @@ public class PerAPKAnalyzer {
 		scanner.scan();
 		analysisTime = watch.elapsed(TimeUnit.MILLISECONDS);
 		detailedOutput();
-		summarizedOutput();
+		Predicate<IAnalysisSeed> containsAndroid = new Predicate<IAnalysisSeed>() {
+			@Override
+			public boolean test(IAnalysisSeed input) {
+				if(input == null)
+					return false;
+				System.err.println(input);
+				System.out.println(icfg.getMethodOf(input.getStmt()));
+				return icfg.getMethodOf(input.getStmt()).getDeclaringClass().toString().contains("com.google.android");
+			}
+		};
+		
+		summarizedOutput(new PackageFilter("com.google.android"));
+		summarizedOutput(new PackageFilter("com.google.firebase"));
+		summarizedOutput(new PackageFilter("com.unity3d"));
+		summarizedOutput(new Predicate<IAnalysisSeed>() {
+
+			@Override
+			public boolean test(IAnalysisSeed t) {
+				for(PackageFilter f : filters)
+					if(f.test(t))
+						return false;
+				return true;
+			}
+			@Override
+			public String toString() {
+				return "Complement";
+			}
+		});
+		summarizedOutput(new Predicate<IAnalysisSeed>() {
+
+			@Override
+			public boolean test(IAnalysisSeed t) {
+				return true;
+			}
+			@Override
+			public String toString() {
+				return "AllSeeds";
+			}
+		});
+	}
+	
+	private static class PackageFilter implements Predicate<IAnalysisSeed>{
+		private String filterString;
+		public PackageFilter(String filterString){
+			this.filterString = filterString;
+			filters.add(this);
+		}
+		@Override
+		public boolean test(IAnalysisSeed t) {
+			return icfg.getMethodOf(t.getStmt()).getDeclaringClass().toString().contains(filterString);
+		}
+		@Override
+		public String toString() {
+			return filterString;
+		}
 	}
 
-	private static void summarizedOutput() {
+	private static String getSummaryFile() {
+		String property = System.getProperty("SummaryFile");
+		if (property != null)
+			return property;
+		return "summary-report";
+	}
+	private static void summarizedOutput( Predicate<IAnalysisSeed> filter) {
 		try {
-			File file = new File(getSummaryFile());
+			File file = new File(getSummaryFile()+filter.toString()+".csv");
 			boolean fileExisted = true;
 			if (!file.exists()) {
 				fileExisted = false;
@@ -242,18 +304,20 @@ public class PerAPKAnalyzer {
 			}
 			List<String> line = Lists.newLinkedList();
 			line.add(apkFile.getName());
-			line.add(Integer.toString(reporter.getAnalysisSeeds().size()));
+			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(),filter).size()));
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
-			line.add(Integer.toString(reporter.getTypestateErrors().keySet().size()));
-			addTypestateDetails(line);
-			line.add(Integer.toString(reporter.getTypestateErrors().entries().size()));
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
+			addTypestateDetails(line,filter);
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
 //			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
-			line.add(Integer.toString(reporter.getMissingPredicates().entries().size()));
-			addMissingPredicatesDetails(line);
-			line.add(Integer.toString(reporter.getMissingInternalConstraints().entries().size()));
-			addMissingInternalConstraintDetails(line);
+			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(),filter).size()));
+			addMissingPredicatesDetails(line,filter);
+			line.add(Integer.toString(subset(reporter.getMissingInternalConstraints().keySet(),filter).size()));
+			addMissingInternalConstraintDetails(line,filter);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
+			
+			//Time reporting starts here
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
 			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));
@@ -274,12 +338,22 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	private static void addMissingInternalConstraintDetails(List<String> line) {
+	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
+		Set<IAnalysisSeed> filtered = Sets.newHashSet();
+		for(IAnalysisSeed s : analysisSeeds)
+			if(filter.test(s))
+				filtered.add(s);
+		return filtered;
+	}
+
+	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String,Integer> classToInteger = new HashMap<>();
 		 Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getMissingInternalConstraints();
 		for (AnalysisSeedWithSpecification seed :map.keySet()) {
 			Collection<ISLConstraint> col = map.get(seed);
 			if(col == null)
+				continue;
+			if(!filter.test(seed))
 				continue;
 			int size = col.size();
 			String className = seed.getSpec().getRule().getClassName();
@@ -301,12 +375,14 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	private static void addMissingPredicatesDetails(List<String> line) {
+	private static void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String,Integer> classToInteger = new HashMap<>(); 
 		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
 		for (AnalysisSeedWithSpecification seed :map.keySet()) {
 			Collection<CryptSLPredicate> col = map.get(seed);
 			if(col == null)
+				continue;
+			if(!filter.test(seed))
 				continue;
 			int size = col.size();
 			String className = seed.getSpec().getRule().getClassName();
@@ -328,10 +404,12 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	private static void addTypestateDetails(List<String> line) {
+	private static void addTypestateDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String,Integer> classToInteger = new HashMap<>();
 		for (IAnalysisSeed seed : reporter.getTypestateErrors().keySet()) {
 			if(seed instanceof AnalysisSeedWithSpecification){
+				if(!filter.test(seed))
+					continue;
 				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
 				String className = seedWithSpec.getSpec().getRule().getClassName();
 				Integer i = classToInteger.get(className);
@@ -361,12 +439,6 @@ public class PerAPKAnalyzer {
 		
 	}
 
-	private static String getSummaryFile() {
-		String property = System.getProperty("SummaryFile");
-		if (property != null)
-			return property;
-		return "summary-report.csv";
-	}
 
 	private static void detailedOutput() {
 		File file = new File("target/reports/cognicrypt/"+apkFile.getName().replace(".apk", ".txt"));

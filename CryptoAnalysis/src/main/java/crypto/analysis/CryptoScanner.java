@@ -53,14 +53,14 @@ public abstract class CryptoScanner {
 	private DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate>() {
 		@Override
 		protected AnalysisSeedWithEnsuredPredicate createItem(IFactAtStatement key) {
-			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key, icfg().getMethodOf(key.getStmt()));
+			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
 		}
 	};
 	private DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification> seedsWithSpec = new DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification>() {
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
 			return new AnalysisSeedWithSpecification(CryptoScanner.this,
-					new FactAtStatement(key.getStmt(), key.getFact()), icfg().getMethodOf(key.getStmt()),
+					new FactAtStatement(key.getStmt(), key.getFact()),
 					key.getSpec());
 		}
 	};
@@ -141,8 +141,7 @@ public abstract class CryptoScanner {
 								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(
 										new AnalysisSeedWithSpecification(CryptoScanner.this,
 												new FactAtStatement(p.getO2().getSourceStmt(),
-														p.getO2().deriveWithoutAllocationSite()),
-												icfg().getMethodOf(p.getO2().getSourceStmt()), specification));
+														p.getO2().deriveWithoutAllocationSite()),specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}
@@ -230,7 +229,7 @@ public abstract class CryptoScanner {
 
 			for (IFactAtStatement seed : spec.getInitialSeeds()) {
 				addToWorkList(getOrCreateSeedWithSpec(
-						new AnalysisSeedWithSpecification(this, seed, icfg().getMethodOf(seed.getStmt()), spec)));
+						new AnalysisSeedWithSpecification(this, seed, spec)));
 			}
 		}
 	}

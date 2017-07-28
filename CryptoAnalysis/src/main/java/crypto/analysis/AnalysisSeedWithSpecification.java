@@ -52,12 +52,9 @@ import typestate.TypestateDomainValue;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
-public class AnalysisSeedWithSpecification implements IAnalysisSeed {
+public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
-	private final IFactAtStatement factAtStmt;
-	private final SootMethod method;
 	private final ClassSpecification spec;
-	private CryptoScanner cryptoScanner;
 	private Analysis<TypestateDomainValue<StateNode>> analysis;
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private CryptoTypestateAnaylsisProblem problem;
@@ -68,10 +65,8 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, SootMethod method, ClassSpecification spec) {
-		this.cryptoScanner = cryptoScanner;
-		this.factAtStmt = factAtStmt;
-		this.method = method;
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec) {
+		super(cryptoScanner,factAtStmt);
 		this.spec = spec;
 	}
 
@@ -108,7 +103,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	@Override
 	public String toString() {
-		return "AnalysisSeed [" + factAtStmt + " in " + method + " with spec " + spec.getRule().getClassName() + "]";
+		return "AnalysisSeed [" + factAtStmt + " in " + getMethod() + " with spec " + spec.getRule().getClassName() + "]";
 	}
 
 	public void execute() {
@@ -240,7 +235,7 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 				RefType refType = (RefType) baseType;
 				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
-						new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), cryptoScanner.icfg().getMethodOf(currStmt), spec));
+						new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), spec));
 					matched = true;
 					if (satisfiesConstraintSytem)
 						seed.addEnsuredPredicateFromOtherRule(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
@@ -459,16 +454,6 @@ public class AnalysisSeedWithSpecification implements IAnalysisSeed {
 
 	public Set<EnsuredCryptSLPredicate> getEnsuredPredicates() {
 		return Collections.emptySet();
-	}
-
-	@Override
-	public AccessGraph getFact() {
-		return factAtStmt.getFact();
-	}
-
-	@Override
-	public Unit getStmt() {
-		return factAtStmt.getStmt();
 	}
 
 	@Override
