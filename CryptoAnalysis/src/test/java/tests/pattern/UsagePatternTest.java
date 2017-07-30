@@ -17,6 +17,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
@@ -46,6 +47,67 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
+	
+	@Test
+	public void UsagePatternTestIVCor() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		
+		SecureRandom sr = SecureRandom.getInstanceStrong();
+		Assertions.hasEnsuredPredicate(sr);
+		
+		byte[] ivbytes = new byte[12];
+		sr.nextBytes(ivbytes);
+		Assertions.hasEnsuredPredicate(ivbytes);
+		
+		IvParameterSpec iv = new IvParameterSpec(ivbytes);
+		Assertions.mustBeInAcceptingState(iv);
+		Assertions.hasEnsuredPredicate(iv);
+		
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
+	
+	@Test
+	public void UsagePatternTestIVInCor() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		
+		byte[] ivbytes = new byte[12];
+		Assertions.notHasEnsuredPredicate(ivbytes);
+		
+		IvParameterSpec iv = new IvParameterSpec(ivbytes);
+		Assertions.mustBeInAcceptingState(iv);
+		Assertions.notHasEnsuredPredicate(iv);
+		
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
+	
 	
 	@Test
 	public void UsagePatternTestMissingMode() throws GeneralSecurityException {
