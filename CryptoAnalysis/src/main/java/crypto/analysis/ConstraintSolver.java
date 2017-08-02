@@ -52,11 +52,12 @@ public class ConstraintSolver {
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
 			for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
 				involvedVarNames.remove(cwpi.getVarName());
+				if (involvedVarNames.isEmpty()) {
+					relConstraints.add(cons);
+					break;
+				}
 			}
 
-			if (involvedVarNames.isEmpty()) {
-				relConstraints.add(cons);
-			}
 		}
 		parsAndValsAsString = convertToStringMultiMap(parametersToValues);
 		this.reporter = reporter;
@@ -341,7 +342,7 @@ public class ConstraintSolver {
 		}
 	}
 
-	private Boolean evaluate(ISLConstraint cons) {
+	public Boolean evaluate(ISLConstraint cons) {
 		if (cons instanceof CryptSLComparisonConstraint) {
 			return evaluate((CryptSLComparisonConstraint) cons);
 		} else if (cons instanceof CryptSLValueConstraint) {

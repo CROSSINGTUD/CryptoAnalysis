@@ -333,7 +333,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
-		List<CryptSLPredicate> requiredPredicates = Lists.newLinkedList();
+		List<CryptSLPredicate> requiredPredicates = Lists.newArrayList();
 		for (ISLConstraint con : relConstraints) {
 			if (con instanceof CryptSLPredicate && !ConstraintSolver.predefinedPreds.contains(((CryptSLPredicate) con).getPredName())) {
 				requiredPredicates.add((CryptSLPredicate) con);
@@ -355,6 +355,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 			}
 		}
+		for (CryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
+			final ISLConstraint conditional = rem.getConstraint();
+			if (conditional != null) {
+				if (!constraintSolver.evaluate(conditional)) {
+					remainingPredicates.remove(rem);
+				}
+			}
+		}
+		
 		this.missingPredicates  = remainingPredicates;
 		return remainingPredicates.isEmpty();
 	}

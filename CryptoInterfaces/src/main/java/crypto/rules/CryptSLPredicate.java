@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import typestate.interfaces.ICryptSLPredicateParameter;
+import typestate.interfaces.ISLConstraint;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
@@ -13,18 +14,27 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	private final String predName;
 	private final List<ICryptSLPredicateParameter> parameters;
 	private final boolean negated;
+	private final ISLConstraint optConstraint;
 	
 	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
+		this(baseObject, name, variables, not, null);
+	}
+	
+	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not, ISLConstraint constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
 		this.parameters = variables;
 		this.negated = not;
+		this.optConstraint = constraint;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (negated ? 1231 : 1237);
+		result = prime * result + ((optConstraint == null) ? 0 : optConstraint.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		result = prime * result + ((predName == null) ? 0 : predName.hashCode());
 		return result;
 	}
@@ -63,6 +73,13 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	 */
 	public String getPredName() {
 		return predName;
+	}
+	
+	/**
+	 * @return the optConstraint
+	 */
+	public ISLConstraint getConstraint() {
+		return optConstraint;
 	}
 
 	/**
