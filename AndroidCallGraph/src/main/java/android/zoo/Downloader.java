@@ -30,7 +30,7 @@ public class Downloader {
 					continue;
 				}
 				handleLine(ln);
-				if (downloadedApps > 200)
+				if (downloadedApps > Integer.parseInt(args[0]))
 					break;
 //				System.out.println(downloadedApps);
 			}

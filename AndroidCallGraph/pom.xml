@@ -32,8 +32,8 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>

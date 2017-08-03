@@ -12,15 +12,13 @@ import android.zoo.Downloader;
 
 public class Executor {
 	public static void main(String... args) {
-		String classpath = System.getProperty("java.class.path");
 		String javaHome = System.getProperty("java.home");
-		int i = 0;
 		File[] listFiles = Downloader.DOWNLOAD_DIRECTORY.listFiles();
 		for (File file : listFiles) {
 			System.out.println(file);
 			if (file.getName().endsWith(".apk") || file.getName().endsWith(".APK")) {
 				String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java","-Xmx8g","-Xss16m", "-cp",
-					classpath, PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), args[0]};
+					args[0], PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), args[1]};
 				System.out.println("Running command: " + Arrays.toString(command));
 				try {
 					ProcessBuilder pb = new ProcessBuilder(command);
@@ -31,7 +29,7 @@ public class Executor {
 					pb.redirectError(new File("target/reports/" +  file.getName() + "-err.txt"));
 					Process proc = pb.start();
 
-					boolean finished = proc.waitFor(Integer.parseInt(args[1]), TimeUnit.MINUTES);
+					boolean finished = proc.waitFor(Integer.parseInt(args[2]), TimeUnit.MINUTES);
 					if (!finished) {
 						proc.destroy();
 						proc.waitFor(); // wait for the process to terminate
@@ -53,10 +51,6 @@ public class Executor {
 					ex.printStackTrace();
 				}
 			}
-//			break;
-////			i++;
-//			if(i > 10)
-//				break;
 		}
 	}
 
