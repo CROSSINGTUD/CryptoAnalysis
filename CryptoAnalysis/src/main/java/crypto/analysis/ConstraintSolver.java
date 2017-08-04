@@ -25,7 +25,6 @@ import soot.IntType;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
-import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
@@ -41,6 +40,7 @@ public class ConstraintSolver {
 	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
 	private final Multimap<String, String> parsAndValsAsString;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
+	private final static String INV = "%%INVALID%%";
 	private final ConstaintReporter reporter;
 
 	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues, ConstaintReporter reporter) {
@@ -78,9 +78,7 @@ public class ConstraintSolver {
 					if (rightSide instanceof Constant) {
 						varVal.put(callSite.getVarName(), retrieveConstantFromValue(rightSide));
 					} else {
-						final List<ValueBox> useBoxes = rightSide.getUseBoxes();
 						
-//						varVal.put(callSite.getVarName(), retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
 					}
 				}	
 			}
@@ -161,6 +159,9 @@ public class ConstraintSolver {
 				return Integer.MIN_VALUE;
 			}
 			String valueAsString = getVerifiedValue(valueCollection);
+			if (valueAsString.equals(INV)) {
+				return Integer.MIN_VALUE;
+			}
 			// and cast it to Integer
 			try {
 				ret = Integer.parseInt(valueAsString);
@@ -179,11 +180,18 @@ public class ConstraintSolver {
 		}
 		CryptSLObject var = valueCons.getVar();
 		String val = getValFromVar(var);
-		return valueCons.getValueRange().contains(val);
+		return !val.equals(INV) && valueCons.getValueRange().contains(val);
 	}
 
 	private String getValFromVar(CryptSLObject var) {
-		String val = getVerifiedValue(extractValueAsString(var.getVarName()));
+		final Collection<String> valueCollection = extractValueAsString(var.getVarName());
+		if (valueCollection.isEmpty()) {
+			return INV;
+		}
+		String val = getVerifiedValue(valueCollection);
+		if (val.equals(INV)) {
+			return val;
+		}
 		CryptSLSplitter splitter = var.getSplitter();
 		if (splitter != null) {
 			int ind = splitter.getIndex();
@@ -204,6 +212,9 @@ public class ConstraintSolver {
 	}
 
 	private String getVerifiedValue(Collection<String> actualValue) {
+//		if (actualValue.isEmpty()) {
+//			return INV;
+//		}
 		Iterator<String> valueIterator = actualValue.iterator();
 		String val = null;
 		val = valueIterator.next();
