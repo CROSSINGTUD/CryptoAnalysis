@@ -112,6 +112,7 @@ public class PerAPKAnalyzer {
 				    true));
 			writer.format("FlowDroid call graph generation crashed on {}", apkFile);
 			e.printStackTrace(writer);
+			writer.close();
 			return;
 		}
 		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
@@ -145,10 +146,11 @@ public class PerAPKAnalyzer {
 						    true));
 					writer.format("CryptoAnalysis crashed on {}", apkFile);
 					e.printStackTrace(writer);
+					writer.close();
 				}
-			}
+			} 
 			String folder = apkFile.getParent();
-			String analyzedFolder = folder+ File.separator + "analyzed";
+			String analyzedFolder = folder+ File.separator + "analyzed" + (runCryptoScanner ? "" : "-no-crypto");
 			File dir = new File(analyzedFolder);
 			if(!dir.exists()){
 				dir.mkdir();
@@ -204,17 +206,6 @@ public class PerAPKAnalyzer {
 		scanner.scan();
 		analysisTime = watch.elapsed(TimeUnit.MILLISECONDS);
 		detailedOutput();
-		Predicate<IAnalysisSeed> containsAndroid = new Predicate<IAnalysisSeed>() {
-			@Override
-			public boolean test(IAnalysisSeed input) {
-				if(input == null)
-					return false;
-				System.err.println(input);
-				System.out.println(icfg.getMethodOf(input.getStmt()));
-				return icfg.getMethodOf(input.getStmt()).getDeclaringClass().toString().contains("com.google.android");
-			}
-		};
-		
 		summarizedOutput(new PackageFilter("com.google.android"));
 		summarizedOutput(new PackageFilter("com.google.firebase"));
 		summarizedOutput(new PackageFilter("com.unity3d"));
@@ -469,14 +460,6 @@ public class PerAPKAnalyzer {
 					log(2, mType + "\t Class: " + method.getDeclaringClass() + "  "
 							+ method.getDeclaringClass().isApplicationClass() + "\t Method: " + method.getName()
 							+ "\t Unit " + u);
-					File parentFile = apkFile.getParentFile();
-					File dir = new File(parentFile.getAbsolutePath() + File.separator + mType);
-					if (!dir.exists()) {
-						System.out.println("Created dir " + dir.getAbsolutePath());
-						dir.mkdir();
-					}
-					File copyToFile = new File(dir.getAbsolutePath() + File.separator + apkFile.getName());
-					Files.copy(apkFile, copyToFile);
 					if (mType == MethodType.Application)
 						runCryptoScanner = true;
 				}
