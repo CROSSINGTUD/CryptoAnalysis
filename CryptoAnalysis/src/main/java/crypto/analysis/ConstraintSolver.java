@@ -102,7 +102,6 @@ public class ConstraintSolver {
 		int fail = 0;
 		for (ISLConstraint con : relConstraints) {
 			if (!evaluate(con)) {
-				System.out.println(con);
 				fail++;
 				reporter.constraintViolated(con);
 			}

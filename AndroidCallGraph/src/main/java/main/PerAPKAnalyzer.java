@@ -110,7 +110,7 @@ public class PerAPKAnalyzer {
 			PrintWriter writer = new PrintWriter(new FileOutputStream(
 				    new File("CallGraphGenerationExceptions.txt"), 
 				    true));
-			writer.format("FlowDroid call graph generation crashed on {}", apkFile);
+			writer.format("FlowDroid call graph generation crashed on %s", apkFile);
 			e.printStackTrace(writer);
 			writer.close();
 			return;
@@ -144,7 +144,7 @@ public class PerAPKAnalyzer {
 					PrintWriter writer = new PrintWriter(new FileOutputStream(
 						    new File("CryptoAnalysisExceptions.txt"), 
 						    true));
-					writer.format("CryptoAnalysis crashed on {}", apkFile);
+					writer.format("CryptoAnalysis crashed on %s", apkFile);
 					e.printStackTrace(writer);
 					writer.close();
 				}

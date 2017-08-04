@@ -134,7 +134,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	
 	@Override
 	public String toString() {
-		String s = "Report for File: " + analyzedFile; 
+		String s = (analyzedFile != null ? "Report for File: " + analyzedFile : ""); 
 		s += "\n================SEEDS=======================\n";
 		s+= "The following objects were analyzed: \n";
 		s+= String.format("%s\t %s\t %s\n","Method","Statement","Variable");
