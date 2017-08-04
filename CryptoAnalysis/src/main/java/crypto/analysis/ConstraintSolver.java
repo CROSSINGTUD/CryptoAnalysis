@@ -63,7 +63,7 @@ public class ConstraintSolver {
 		this.reporter = reporter;
 	}
 	
-	private Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Unit> actualValues) {
+	public static Multimap<String, String> convertToStringMultiMap(Multimap<CallSiteWithParamIndex, Unit> actualValues) {
 		Multimap<String, String> varVal = HashMultimap.create();
 		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
 			for (Unit u : actualValues.get(callSite)) {
@@ -88,7 +88,7 @@ public class ConstraintSolver {
 		return varVal;
 }
 	
-	private String retrieveConstantFromValue(Value val) {
+	private static String retrieveConstantFromValue(Value val) {
 		if (val instanceof StringConstant) {
 			return ((StringConstant) val).value;
 		} else if (val instanceof IntConstant || val.getType() instanceof IntType){

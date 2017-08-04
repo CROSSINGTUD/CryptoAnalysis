@@ -178,7 +178,7 @@ public class PerAPKAnalyzer {
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-		reporter = new CogniCryptCLIReporter(icfg);
+		reporter = new CogniCryptCLIReporter(icfg,apkFile);
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 			@Override
@@ -304,7 +304,7 @@ public class PerAPKAnalyzer {
 //			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(),filter).size()));
 			addMissingPredicatesDetails(line,filter);
-			line.add(Integer.toString(subset(reporter.getMissingInternalConstraints().keySet(),filter).size()));
+			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(),filter).size()));
 			addMissingInternalConstraintDetails(line,filter);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
 			
@@ -339,7 +339,7 @@ public class PerAPKAnalyzer {
 
 	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String,Integer> classToInteger = new HashMap<>();
-		 Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getMissingInternalConstraints();
+		 Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
 		for (AnalysisSeedWithSpecification seed :map.keySet()) {
 			Collection<ISLConstraint> col = map.get(seed);
 			if(col == null)

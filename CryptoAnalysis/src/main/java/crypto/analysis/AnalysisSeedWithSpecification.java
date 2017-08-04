@@ -364,7 +364,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 		
-		this.missingPredicates  = remainingPredicates;
+		this.missingPredicates  = Sets.newHashSet(remainingPredicates);
 		return remainingPredicates.isEmpty();
 	}
 
@@ -498,5 +498,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	
 	public Set<CryptSLPredicate> getMissingPredicates() {
 		return missingPredicates;
+	}
+	
+	public Multimap<CallSiteWithParamIndex, Unit> getExtractedValues(){
+		return parametersToValues;
 	}
 }

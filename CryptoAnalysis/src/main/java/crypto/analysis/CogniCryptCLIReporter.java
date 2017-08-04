@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,7 +27,6 @@ import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
 import soot.Unit;
-import soot.Value;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
@@ -37,15 +37,17 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
 	private Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
-	private Multimap<AnalysisSeedWithSpecification, ISLConstraint> missingInternalConstraints = HashMultimap.create();
+	private Multimap<AnalysisSeedWithSpecification, ISLConstraint> internalConstraintViolations = HashMultimap.create();
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
 	private Multimap<IFactAtStatement, Entry<CryptSLPredicate,CryptSLPredicate>> predicateContradictions = HashMultimap.create();
 	private Stopwatch taintWatch = Stopwatch.createUnstarted();
 	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
 	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
+	private File analyzedFile;
 	
-	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg) {
+	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg, File analyzedFile) {
 		this.icfg = icfg;
+		this.analyzedFile = analyzedFile;
 	}
 	
 	@Override
@@ -124,30 +126,108 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		return typestateTimeouts;
 	}
 	
+	private String object(IFactAtStatement seed){
+		if(seed == null)
+			return "";
+		return String.format("%s\t %s\t %s",icfg.getMethodOf(seed.getStmt()), seed.getStmt(),seed.getFact());
+	}
+	
 	@Override
 	public String toString() {
-		String s = "================SEEDS=======================\n";
-		s += Joiner.on("\n").join(analysisSeeds);
+		String s = "Report for File: " + analyzedFile; 
+		s += "\n================SEEDS=======================\n";
+		s+= "The following objects were analyzed: \n";
+		s+= String.format("%s\t %s\t %s\n","Method","Statement","Variable");
+		for(IAnalysisSeed seed : analysisSeeds){
+			s += object(seed)+"\n";
+		}
 		s += "\n\n================CALL TO FORBIDDEN METHODS==================\n";
-		s += Joiner.on("\n").join(callToForbiddenMethod.entries());
-
+		if(reportedTypestateErros.isEmpty()){
+			s += "No Calls to Forbidden Methods\n";
+		} else {
+			s += "The following methods are forbidden/deprecated and shall not be invoked\n";
+			for(ClassSpecification spec : callToForbiddenMethod.keySet()){
+				s += "\tViolations of specification for type " + spec.getRule().getClassName() +" \n";
+				for(StmtWithMethod m : callToForbiddenMethod.get(spec)){
+					s+= "\t\tMethod " + m.getMethod()+ " calls "+ m.getStmt() + "\n";  
+				}
+			}	
+		}
 		s += "\n\n================REPORTED TYPESTATE ERRORS==================\n";
-		s += Joiner.on("\n").join(reportedTypestateErros.entries());
-
+		if(reportedTypestateErros.isEmpty())
+			s += "No Typestate Errors found\n";
+		else{
+			s += "The following objects are not used according to the ORDER specification of the rules \n";
+			for(IAnalysisSeed seed: reportedTypestateErros.keySet()){
+				if(seed instanceof AnalysisSeedWithSpecification){
+					AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
+					s += "\tSpecification type " + seedWithSpec.getSpec().getRule().getClassName() +"\n\t Object: \n";
+					s+="\t\t" + object(seed)+"\n";
+					for(StmtWithMethod stmtsWithMethod : reportedTypestateErros.get(seedWithSpec))
+						s+= "\t\t\t " +stmtsWithMethod.getStmt() + " in method " + stmtsWithMethod.getMethod() +" \n";
+				}
+			}
+		}
 		s += "\n\n================REPORTED MISSING PREDICATES==================\n";
-		s += Joiner.on("\n").join(missingPredicatesObjectBased.asMap().entrySet());
-
+		if(missingPredicatesObjectBased.isEmpty())
+			s += "No Missing Predicates found\n";
+		else{	
+			s += "The following REQUIRED PREDICATES are missing \n";
+			for(AnalysisSeedWithSpecification seed: missingPredicatesObjectBased.keySet()){
+				s += "\tSpecification type " + seed.getSpec().getRule().getClassName() +"\n\t Object: \n";
+				s+="\t\t" + object(seed)+"\n";
+				s += "\t\t expects the following predicates: \n";
+				for(CryptSLPredicate pred : missingPredicatesObjectBased.get(seed)){
+					s += "\t\t\t"+pred+"\n";
+				}
+			}
+		}
 		s += "\n\n================REPORTED VIOLATED INTERNAL CONSTRAINTS==================\n";
-		s += Joiner.on("\n").join(missingInternalConstraints.asMap().entrySet());
+		if(internalConstraintViolations.isEmpty())
+			s += "No Internal Constraint Violation found\n";
+		else{
+			s += "The following CONSTRAINTS are violated \n";
+			for(AnalysisSeedWithSpecification seed: internalConstraintViolations.keySet()){
+				s += "\tSpecification type " + seed.getSpec().getRule().getClassName() +"\n\t Object: \n";
+				s+="\t\t" + object(seed)+"\n";
+				s += "\t\t the analysis extracted the following statements that create the values \n";
+				for(Entry<CallSiteWithParamIndex, Unit> e : seed.getExtractedValues().entries()){
+					s += "\t\t\t"+e.getKey().getVarName() +" => "+ e.getValue() +"\n";
+				}
+				s += "\t\t that is mapped to the following value assignment \n";
+				for(Entry<String, String> e : ConstraintSolver.convertToStringMultiMap(seed.getExtractedValues()).entries()){
+					s += "\t\t\t"+e.getKey() +" => "+ e.getValue() +" \n";
+				}
+				s += "\t\t and contradicts following constraints(s) \n";
+				for(ISLConstraint constraint :internalConstraintViolations.get(seed)){
+					s+= "\t\t\t"+constraint +"\n";
+				}
+			}
+		}
 		
 		s += "\n\n================REPORTED PREDICATE CONTRADICTION ==================\n";
-		s += Joiner.on("\n").join(predicateContradictions.entries());
-		
+		if(predicateContradictions.isEmpty())
+			s += "No two predicates contradict\n";
+		else{
+			s += "The following object(s) holds two predicates that contradict \n";
+			for(IFactAtStatement seed: predicateContradictions.keySet()){
+				s += "\t Object " +object(seed) +"\n\t the two predicates contradict\n";
+				for(Entry<CryptSLPredicate, CryptSLPredicate> contradiction : predicateContradictions.get(seed)){
+					s += "\t\t" + contradiction.getKey() +" and " +contradiction.getValue() + "\n";
+				}
+			}
+		}
 		s += "\n\n================TIMEOUTS==================\n";
-		s += Joiner.on("\n").join(typestateTimeouts);
+		if(typestateTimeouts.isEmpty())
+			s += "No Seeds timed out\n";
+		else{
+			s += "The analysis for the following seed object(s) timed out (Budget: 30 seconds) \n";
+			for(IFactAtStatement seed: typestateTimeouts){
+				s+="\t" + object(seed)+"\n";
+			}
+		}
 		s += "\n\n================MAXIMAL ACCESS GRAPH==================\n";
 		s += "Length: " + AccessGraph.MAX_FIELD_COUNT + " Instance: "+ AccessGraph.MAX_ACCESS_GRAPH;
-
 		return s;
 	}
 
@@ -163,8 +243,8 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		return this.missingPredicatesObjectBased;
 	}
 
-	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getMissingInternalConstraints() {
-		return this.missingInternalConstraints;
+	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getInternalConstraintsViolations() {
+		return this.internalConstraintViolations;
 	}
 
 	public Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
@@ -223,7 +303,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con) {
-		missingInternalConstraints.put(analysisSeedWithSpecification, con);
+		internalConstraintViolations.put(analysisSeedWithSpecification, con);
 	}
 
 }
