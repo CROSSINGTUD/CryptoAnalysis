@@ -49,6 +49,29 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	}
 	
 	@Test
+	public void UsagePatternTest1a() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		int mode = Cipher.ENCRYPT_MODE;
+		if (Math.random() % 2 == 0) {
+			mode = Cipher.DECRYPT_MODE;
+		}
+		cCipher.init(mode, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+	}
+	
+	@Test
 	public void UsagePatternTestIVCor() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
@@ -653,6 +676,34 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.hasEnsuredPredicate(privKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
+		
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.hasEnsuredPredicate(signature);
+
+	}
+	
+	@Test
+	public void UsagePatternTest21a() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+		
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.hasEnsuredPredicate(kp);
+		
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.hasEnsuredPredicate(privKey);
+		String algorithm = "SHA256withDSA";
+		if (Math.random() % 2 == 0) {
+			algorithm = "SHA256withECDSA";
+		}
+		Signature sign = Signature.getInstance(algorithm);
 		Assertions.extValue(0);
 		
 		sign.initSign(privKey);

@@ -179,36 +179,43 @@ public class ConstraintSolver {
 			return false;
 		}
 		CryptSLObject var = valueCons.getVar();
-		String val = getValFromVar(var);
-		return !val.equals(INV) && valueCons.getValueRange().contains(val);
+		final List<String> vals = getValFromVar(var);
+		if (vals.isEmpty()) {
+			return false;
+		}
+		boolean ret = true;
+		for (String val : vals) {
+			ret &= !val.equals(INV) && valueCons.getValueRange().contains(val);
+		}
+		return ret;
 	}
 
-	private String getValFromVar(CryptSLObject var) {
+	private List<String> getValFromVar(CryptSLObject var) {
 		final Collection<String> valueCollection = extractValueAsString(var.getVarName());
+		List<String> vals = new ArrayList<String>();
 		if (valueCollection.isEmpty()) {
-			return INV;
+			return vals;
 		}
-		String val = getVerifiedValue(valueCollection);
-		if (val.equals(INV)) {
-			return val;
-		}
-		CryptSLSplitter splitter = var.getSplitter();
-		if (splitter != null) {
-			int ind = splitter.getIndex();
-			String splitElement = splitter.getSplitter();
-			if (ind > 0) {
-				String[] splits = val.split(splitElement);
-				if (splits.length > ind) {
-					return splits[ind];
+		for (String val : valueCollection) {
+			CryptSLSplitter splitter = var.getSplitter();
+			if (splitter != null) {
+				int ind = splitter.getIndex();
+				String splitElement = splitter.getSplitter();
+				if (ind > 0) {
+					String[] splits = val.split(splitElement);
+					if (splits.length > ind) {
+						vals.add(splits[ind]);
+					} else {
+						vals.add("");
+					}
 				} else {
-					return "";
+					vals.add(val.split(splitElement)[ind]);
 				}
 			} else {
-				return val.split(splitElement)[ind];
+				vals.add(val);
 			}
-		} else {
-			return val;
 		}
+		return vals;
 	}
 
 	private String getVerifiedValue(Collection<String> actualValue) {
