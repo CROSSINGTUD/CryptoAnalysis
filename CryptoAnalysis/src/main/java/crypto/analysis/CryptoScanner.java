@@ -204,19 +204,20 @@ public abstract class CryptoScanner {
 
 	private void checkForContradictions() {
 		for (Unit generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
-			for(Entry<AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()){
-				Set<CryptSLPredicate> preds = new HashSet<CryptSLPredicate>();
+			for (Entry<AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates
+					.row(generatingPredicateStmt).entrySet()) {
+				Set<String> preds = new HashSet<String>();
 				for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
-					preds.add(exPred.getPredicate());
+					preds.add(exPred.getPredicate().getPredName());
 				}
-
 				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
-					if (preds.contains(disPair.getKey()) && preds.contains(disPair.getValue())) {
-						analysisListener().predicateContradiction(generatingPredicateStmt, exPredCell.getKey(), disPair);
+					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
+						analysisListener().predicateContradiction(generatingPredicateStmt, exPredCell.getKey(),
+								disPair);
 					}
 				}
 			}
-			
+
 		}
 
 	}
