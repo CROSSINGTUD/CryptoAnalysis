@@ -174,7 +174,7 @@ public abstract class CryptoScanner {
 			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 		}
 		checkForContradictions();
-		for(AnalysisSeedWithSpecification seed : seedsWithSpec.keySet()){
+		for(AnalysisSeedWithSpecification seed : seedsWithSpec.values()){
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
 			analysisListener().missingPredicates(seed, missingPredicates);
 		}
