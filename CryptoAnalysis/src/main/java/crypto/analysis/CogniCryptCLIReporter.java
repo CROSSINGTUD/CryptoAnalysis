@@ -136,10 +136,17 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public String toString() {
 		String s = (analyzedFile != null ? "Report for File: " + analyzedFile : ""); 
 		s += "\n================SEEDS=======================\n";
-		s+= "The following objects were analyzed: \n";
+		s+= "The following objects were analyzed with specifications: \n";
 		s+= String.format("%s\t %s\t %s\n","Method","Statement","Variable");
 		for(IAnalysisSeed seed : analysisSeeds){
-			s += object(seed)+"\n";
+			if(seed instanceof AnalysisSeedWithSpecification)
+				s += object(seed)+"\n";
+		}
+		s+= "The following objects were analyzed without specifications: \n";
+		s+= String.format("%s\t %s\t %s\n","Method","Statement","Variable");
+		for(IAnalysisSeed seed : analysisSeeds){
+			if(seed instanceof AnalysisSeedWithEnsuredPredicate)
+				s += object(seed)+"\n";
 		}
 		s += "\n\n================CALL TO FORBIDDEN METHODS==================\n";
 		if(reportedTypestateErros.isEmpty()){

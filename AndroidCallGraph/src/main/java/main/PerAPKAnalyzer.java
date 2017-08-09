@@ -101,7 +101,7 @@ public class PerAPKAnalyzer {
 		readInRelevantCalls();
 		apkFile = new File(args[0]);
 		// TODO create dir if necessary.
-		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".txt"));
+		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".viz"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
 
 		try{
