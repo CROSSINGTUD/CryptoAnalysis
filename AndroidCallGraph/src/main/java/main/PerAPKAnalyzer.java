@@ -206,9 +206,10 @@ public class PerAPKAnalyzer {
 		scanner.scan();
 		analysisTime = watch.elapsed(TimeUnit.MILLISECONDS);
 		detailedOutput();
-		summarizedOutput(new PackageFilter("com.google.android"));
-		summarizedOutput(new PackageFilter("com.google.firebase"));
-		summarizedOutput(new PackageFilter("com.unity3d"));
+		summarizedOutput(new PackageFilter("com.google."));
+		summarizedOutput(new PackageFilter("com.unity3d."));
+		summarizedOutput(new PackageFilter("com.facebook.ads."));
+		summarizedOutput(new PackageFilter("com.android."));
 		summarizedOutput(new Predicate<IAnalysisSeed>() {
 
 			@Override
