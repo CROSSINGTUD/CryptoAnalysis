@@ -214,6 +214,21 @@ public class PerAPKAnalyzer {
 
 			@Override
 			public boolean test(IAnalysisSeed t) {
+				return t.toString().contains("Cipher.getInstance");
+			}
+			
+			@Override
+			public String toString() {
+				return "Cipher";
+			}
+		
+		});
+		
+		
+		summarizedOutput(new Predicate<IAnalysisSeed>() {
+
+			@Override
+			public boolean test(IAnalysisSeed t) {
 				for(PackageFilter f : filters)
 					if(f.test(t))
 						return false;
