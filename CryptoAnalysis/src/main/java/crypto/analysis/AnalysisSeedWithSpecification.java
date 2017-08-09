@@ -122,7 +122,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {
-					cryptoScanner.analysisListener().onSeedTimeout(seed);
+					cryptoScanner.analysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
 				}
 			}).analysisForSeed(this);
 			cryptoScanner.analysisListener().seedFinished(this);
@@ -147,6 +147,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
 			}
 		});
+		cryptoScanner.analysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		results = solver.results();
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
@@ -503,4 +504,5 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public Multimap<CallSiteWithParamIndex, Unit> getExtractedValues(){
 		return parametersToValues;
 	}
+	
 }

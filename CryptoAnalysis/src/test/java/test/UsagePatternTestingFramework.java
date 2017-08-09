@@ -1,6 +1,7 @@
 package test;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -192,6 +193,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 									ISLConstraint con) {
+								
+							}
+
+							@Override
+							public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
+									Collection<ISLConstraint> relConstraints) {
 								
 							}
 

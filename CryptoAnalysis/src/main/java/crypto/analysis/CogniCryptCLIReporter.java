@@ -1,12 +1,12 @@
 package crypto.analysis;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
@@ -32,9 +32,10 @@ import typestate.interfaces.ISLConstraint;
 
 public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
-	private Set<IFactAtStatement> typestateTimeouts = Sets.newHashSet();
+	private Set<IAnalysisSeed> typestateTimeouts = Sets.newHashSet();
 	private Multimap<IAnalysisSeed,StmtWithMethod> reportedTypestateErros = HashMultimap.create();
 	private Multimap<ClassSpecification,StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
+	private Multimap<AnalysisSeedWithSpecification,ISLConstraint> checkedConstraints = HashMultimap.create();
 	private InterproceduralCFG<Unit, SootMethod> icfg;
 	private Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
 	private Multimap<AnalysisSeedWithSpecification, ISLConstraint> internalConstraintViolations = HashMultimap.create();
@@ -43,6 +44,10 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Stopwatch taintWatch = Stopwatch.createUnstarted();
 	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
 	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
+	private Multimap<IAnalysisSeed, Long> seedToTypestateAnalysisTime = HashMultimap.create();
+	private Multimap<IAnalysisSeed, Long> seedToTaintAnalysisTime = HashMultimap.create();
+	private Multimap<IAnalysisSeed, Long> seedToBoomerangAnalysisTime = HashMultimap.create();
+	
 	private File analyzedFile;
 	
 	public CogniCryptCLIReporter(InterproceduralCFG<Unit, SootMethod> icfg, File analyzedFile) {
@@ -119,10 +124,12 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void onSeedTimeout(IFactAtStatement seed) {
-		typestateTimeouts.add(seed);
+		if(seed instanceof IAnalysisSeed){
+			typestateTimeouts.add((IAnalysisSeed) seed);
+		}
 	}
 	
-	public Set<IFactAtStatement> getTypestateTimeouts() {
+	public Set<IAnalysisSeed> getTypestateTimeouts() {
 		return typestateTimeouts;
 	}
 	
@@ -262,16 +269,22 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public void seedFinished(IAnalysisSeed seed) {
 		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
 			taintWatch.stop();
+			seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
 		} else{
 			typestateWatch.stop();
+			seedToTypestateAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
+			seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
 		}
 	}
 
 	@Override
 	public void seedStarted(IAnalysisSeed seed) {
+		boomerangWatch.reset();
 		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
+			taintWatch.reset();
 			taintWatch.start();
 		} else{
+			typestateWatch.reset();
 			typestateWatch.start();
 		}
 	}
@@ -286,16 +299,16 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 		boomerangWatch.stop();
 	}
 	
-	public long getBoomerangTime(TimeUnit desiredUnit){
-		return boomerangWatch.elapsed(desiredUnit);
+	public Multimap<IAnalysisSeed, Long> getBoomerangTime(){
+		return seedToBoomerangAnalysisTime;
 	}
 	
-	public long getTaintAnalysisTime(TimeUnit desiredUnit){
-		return taintWatch.elapsed(desiredUnit);
+	public Multimap<IAnalysisSeed, Long> getTaintAnalysisTime(){
+		return seedToTaintAnalysisTime;
 	}
 	
-	public long getTypestateAnalysisTime(TimeUnit desiredUnit){
-		return typestateWatch.elapsed(desiredUnit);
+	public Multimap<IAnalysisSeed, Long> getTypestateAnalysisTime(){
+		return seedToTypestateAnalysisTime;
 	}
 
 	@Override
@@ -311,6 +324,16 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con) {
 		internalConstraintViolations.put(analysisSeedWithSpecification, con);
+	}
+
+	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getCheckedConstraints() {
+		return checkedConstraints;
+	}
+
+	@Override
+	public void checkedConstraints(AnalysisSeedWithSpecification seed,
+			Collection<ISLConstraint> cons) {
+		checkedConstraints.putAll(seed, cons);
 	}
 
 }

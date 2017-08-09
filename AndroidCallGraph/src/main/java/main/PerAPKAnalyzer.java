@@ -278,6 +278,7 @@ public class PerAPKAnalyzer {
 //				line.add("expectedPredicates");
 				line.add("missingPredicates");
 				addRuleHeader("missingPredicates_",line);
+				line.add("checkedConstraints");
 				line.add("internalConstraintViolations");
 				addRuleHeader("internalConstraintViolations_",line);
 				line.add("negationContradictions");
@@ -297,13 +298,14 @@ public class PerAPKAnalyzer {
 			line.add(apkFile.getName());
 			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(),filter).size()));
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
-			line.add(Integer.toString(reporter.getTypestateTimeouts().size()));
+			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(),filter).size()));
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
 			addTypestateDetails(line,filter);
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
 //			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(),filter).size()));
 			addMissingPredicatesDetails(line,filter);
+			line.add(Integer.toString(subset(reporter.getCheckedConstraints().keySet(),filter).size()));
 			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(),filter).size()));
 			addMissingInternalConstraintDetails(line,filter);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
@@ -311,11 +313,11 @@ public class PerAPKAnalyzer {
 			//Time reporting starts here
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
-			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)));
-			line.add(Long.toString(reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS)-reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
-			line.add(Long.toString(reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
-			line.add(Long.toString(reporter.getBoomerangTime(TimeUnit.MILLISECONDS)));
-			line.add(Long.toString(analysisTime-reporter.getTypestateAnalysisTime(TimeUnit.MILLISECONDS) - reporter.getTaintAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(),filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(),filter)-computeTime(reporter.getBoomerangTime(),filter)));
+			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(),filter)));
+			line.add(Long.toString(computeTime(reporter.getBoomerangTime(),filter)));
+			line.add(Long.toString(analysisTime-computeTime(reporter.getTypestateAnalysisTime(),filter) - computeTime(reporter.getTaintAnalysisTime(),filter)));
 			Set<SootMethod> allVisited = Sets.newHashSet();
 			allVisited.addAll(AliasFinder.VISITED_METHODS);
 			allVisited.addAll(Analysis.VISITED_METHODS);
@@ -327,6 +329,17 @@ public class PerAPKAnalyzer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
+		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
+		long val = 0; 
+		for(IAnalysisSeed s : sub){
+			Collection<Long> collection = map.get(s);
+			for(Long v : collection)
+				val+=v;
+		}
+		return val;
 	}
 
 	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {

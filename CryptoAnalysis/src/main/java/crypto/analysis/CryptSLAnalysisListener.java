@@ -1,5 +1,7 @@
 package crypto.analysis;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -43,4 +45,7 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
 
 	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con);
+
+	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
+			Collection<ISLConstraint> relConstraints);
 }

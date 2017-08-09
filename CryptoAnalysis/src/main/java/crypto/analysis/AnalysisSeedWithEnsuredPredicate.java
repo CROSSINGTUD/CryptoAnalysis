@@ -49,7 +49,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {
-					
+					cryptoScanner.analysisListener().seedFinished(AnalysisSeedWithEnsuredPredicate.this);
 				}
 			}).analysisForSeed(this);
 			cryptoScanner.analysisListener().seedFinished(this);
