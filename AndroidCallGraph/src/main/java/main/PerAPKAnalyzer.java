@@ -214,7 +214,7 @@ public class PerAPKAnalyzer {
 
 			@Override
 			public boolean test(IAnalysisSeed t) {
-				return t.toString().contains("Cipher.getInstance");
+				return t.toString().contains("Cipher");
 			}
 			
 			@Override
