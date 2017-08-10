@@ -272,7 +272,7 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 			seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
 		} else{
 			typestateWatch.stop();
-			seedToTypestateAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
+			seedToTypestateAnalysisTime.put(seed, typestateWatch.elapsed(TimeUnit.MILLISECONDS));
 			seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
 		}
 	}
