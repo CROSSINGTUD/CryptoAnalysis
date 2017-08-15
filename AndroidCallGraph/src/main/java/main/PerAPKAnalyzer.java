@@ -496,10 +496,14 @@ public class PerAPKAnalyzer {
 			if (!stmt.containsInvokeExpr())
 				continue;
 			InvokeExpr invokeExpr = stmt.getInvokeExpr();
-
+			if(invokeExpr == null)
+				continue;
+			SootMethod calledMethod = invokeExpr.getMethod();
+			if(calledMethod == null)
+				continue;
 			for (String relevantCall : relevantCalls) {
-				if (invokeExpr.getMethod().toString().contains(relevantCall)) {
-						runCryptoScanner = true;
+				if (calledMethod.toString().contains(relevantCall)) {
+					runCryptoScanner = true;
 				}
 			}
 		}
