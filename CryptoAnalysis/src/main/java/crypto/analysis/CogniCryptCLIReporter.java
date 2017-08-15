@@ -268,12 +268,16 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void seedFinished(IAnalysisSeed seed) {
 		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
-			taintWatch.stop();
-			seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
+			if(taintWatch.isRunning()){
+				taintWatch.stop();
+				seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
+			}
 		} else{
-			typestateWatch.stop();
-			seedToTypestateAnalysisTime.put(seed, typestateWatch.elapsed(TimeUnit.MILLISECONDS));
-			seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
+			if(typestateWatch.isRunning()){
+				typestateWatch.stop();
+				seedToTypestateAnalysisTime.put(seed, typestateWatch.elapsed(TimeUnit.MILLISECONDS));
+				seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
+			}
 		}
 	}
 
@@ -296,7 +300,8 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 
 	@Override
 	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
-		boomerangWatch.stop();
+		if(boomerangWatch.isRunning())
+			boomerangWatch.stop();
 	}
 	
 	public Multimap<IAnalysisSeed, Long> getBoomerangTime(){
