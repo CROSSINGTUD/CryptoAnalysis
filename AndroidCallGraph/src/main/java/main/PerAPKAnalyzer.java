@@ -74,10 +74,6 @@ public class PerAPKAnalyzer {
 	private static final String CSV_SEPARATOR = ";";
 	private static Set<PackageFilter> filters = Sets.newHashSet();
 
-	private enum MethodType {
-		Application, Library
-	}
-
 	private static void readInRelevantCalls() throws FileNotFoundException, IOException {
 		String line;
 		try (InputStream fis = new FileInputStream("RelevantCalls.txt");
@@ -134,17 +130,11 @@ public class PerAPKAnalyzer {
 			Set<SootMethod> visited = Sets.newHashSet();
 			while (listener.hasNext()) {
 				MethodOrMethodContext next = listener.next();
-				analyzeMethod(next.method(), MethodType.Application);
+				analyzeMethod(next.method());
 				visited.add(next.method());
 			}
 			reachableMethodsCount = visited.size();
 			log(1, "Call graph reachable methods: " + visited.size());
-			for (SootClass c : Scene.v().getClasses()) {
-				for (SootMethod m : c.getMethods()) {
-					if (visited.add(m))
-						analyzeMethod(m, MethodType.Library);
-				}
-			}
 			log(1, "APK file reachable methods: " + visited.size());
 			if (runCryptoScanner) {
 				try {
@@ -495,7 +485,7 @@ public class PerAPKAnalyzer {
 		fout.write(s + string + " \n");
 	}
 
-	private static void analyzeMethod(SootMethod method, MethodType mType) throws IOException {
+	private static void analyzeMethod(SootMethod method) throws IOException {
 		if (!method.hasActiveBody())
 			return;
 		for (Unit u : method.getActiveBody().getUnits()) {
@@ -509,7 +499,6 @@ public class PerAPKAnalyzer {
 
 			for (String relevantCall : relevantCalls) {
 				if (invokeExpr.getMethod().toString().contains(relevantCall)) {
-					if (mType == MethodType.Application)
 						runCryptoScanner = true;
 				}
 			}
