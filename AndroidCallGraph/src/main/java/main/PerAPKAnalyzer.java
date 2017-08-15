@@ -113,6 +113,14 @@ public class PerAPKAnalyzer {
 			writer.format("FlowDroid call graph generation crashed on %s", apkFile);
 			e.printStackTrace(writer);
 			writer.close();
+			String folder = apkFile.getParent();
+			String analyzedFolder = folder+ File.separator + "flowdroid-crashed";
+			File dir = new File(analyzedFolder);
+			if(!dir.exists()){
+				dir.mkdir();
+			}
+			File moveTo = new File(dir.getAbsolutePath()+File.separator+apkFile.getName());
+			Files.move(apkFile, moveTo);
 			return;
 		}
 		callGraphTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
