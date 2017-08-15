@@ -48,6 +48,8 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
 import soot.jimple.infoflow.android.TestApps.Test;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
@@ -60,7 +62,7 @@ public class PerAPKAnalyzer {
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
 	private static boolean VISUALIZATION = true;
-	private static IDebugger<TypestateDomainValue<StateNode>> debugger =(VISUALIZATION ? null : new NullDebugger());
+	private static IDebugger<TypestateDomainValue<StateNode>> debugger = (VISUALIZATION ? null : new NullDebugger());
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;
 	private static CogniCryptCLIReporter reporter;
@@ -88,8 +90,8 @@ public class PerAPKAnalyzer {
 	}
 
 	public static IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-		if (debugger == null){
-			if(!ideVizFile.getParentFile().exists()){
+		if (debugger == null) {
+			if (!ideVizFile.getParentFile().exists()) {
 				ideVizFile.getParentFile().mkdirs();
 			}
 			debugger = new CryptoVizDebugger(ideVizFile, icfg);
@@ -104,22 +106,21 @@ public class PerAPKAnalyzer {
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".viz"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
 
-		try{
-			Test.main(new String[] { args[0], args[1], "--notaintanalysis","--callbackanalyzer","FAST" });
-		}catch(Exception e){
-			PrintWriter writer = new PrintWriter(new FileOutputStream(
-				    new File("CallGraphGenerationExceptions.txt"), 
-				    true));
+		try {
+			Test.main(new String[] { args[0], args[1], "--notaintanalysis", "--callbackanalyzer", "FAST" });
+		} catch (Exception e) {
+			PrintWriter writer = new PrintWriter(
+					new FileOutputStream(new File("CallGraphGenerationExceptions.txt"), true));
 			writer.format("FlowDroid call graph generation crashed on %s", apkFile);
 			e.printStackTrace(writer);
 			writer.close();
 			String folder = apkFile.getParent();
-			String analyzedFolder = folder+ File.separator + "flowdroid-crashed";
+			String analyzedFolder = folder + File.separator + "flowdroid-crashed";
 			File dir = new File(analyzedFolder);
-			if(!dir.exists()){
+			if (!dir.exists()) {
 				dir.mkdir();
 			}
-			File moveTo = new File(dir.getAbsolutePath()+File.separator+apkFile.getName());
+			File moveTo = new File(dir.getAbsolutePath() + File.separator + apkFile.getName());
 			Files.move(apkFile, moveTo);
 			return;
 		}
@@ -146,24 +147,23 @@ public class PerAPKAnalyzer {
 			}
 			log(1, "APK file reachable methods: " + visited.size());
 			if (runCryptoScanner) {
-				try{
+				try {
 					runCryptoAnalysis();
-				} catch(Exception e){
-					PrintWriter writer = new PrintWriter(new FileOutputStream(
-						    new File("CryptoAnalysisExceptions.txt"), 
-						    true));
+				} catch (Exception e) {
+					PrintWriter writer = new PrintWriter(
+							new FileOutputStream(new File("CryptoAnalysisExceptions.txt"), true));
 					writer.format("CryptoAnalysis crashed on %s", apkFile);
 					e.printStackTrace(writer);
 					writer.close();
 				}
-			} 
+			}
 			String folder = apkFile.getParent();
-			String analyzedFolder = folder+ File.separator + "analyzed" + (runCryptoScanner ? "" : "-no-crypto");
+			String analyzedFolder = folder + File.separator + "analyzed" + (runCryptoScanner ? "" : "-no-crypto");
 			File dir = new File(analyzedFolder);
-			if(!dir.exists()){
+			if (!dir.exists()) {
 				dir.mkdir();
 			}
-			File moveTo = new File(dir.getAbsolutePath()+File.separator+apkFile.getName());
+			File moveTo = new File(dir.getAbsolutePath() + File.separator + apkFile.getName());
 			Files.move(apkFile, moveTo);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -186,7 +186,7 @@ public class PerAPKAnalyzer {
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-		reporter = new CogniCryptCLIReporter(icfg,apkFile);
+		reporter = new CogniCryptCLIReporter(icfg, apkFile);
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 			@Override
@@ -224,24 +224,24 @@ public class PerAPKAnalyzer {
 			public boolean test(IAnalysisSeed t) {
 				return t.toString().contains("Cipher");
 			}
-			
+
 			@Override
 			public String toString() {
 				return "Cipher";
 			}
-		
+
 		});
-		
-		
+
 		summarizedOutput(new Predicate<IAnalysisSeed>() {
 
 			@Override
 			public boolean test(IAnalysisSeed t) {
-				for(PackageFilter f : filters)
-					if(f.test(t))
+				for (PackageFilter f : filters)
+					if (f.test(t))
 						return false;
 				return true;
 			}
+
 			@Override
 			public String toString() {
 				return "Complement";
@@ -253,23 +253,27 @@ public class PerAPKAnalyzer {
 			public boolean test(IAnalysisSeed t) {
 				return true;
 			}
+
 			@Override
 			public String toString() {
 				return "AllSeeds";
 			}
 		});
 	}
-	
-	private static class PackageFilter implements Predicate<IAnalysisSeed>{
+
+	private static class PackageFilter implements Predicate<IAnalysisSeed> {
 		private String filterString;
-		public PackageFilter(String filterString){
+
+		public PackageFilter(String filterString) {
 			this.filterString = filterString;
 			filters.add(this);
 		}
+
 		@Override
 		public boolean test(IAnalysisSeed t) {
 			return icfg.getMethodOf(t.getStmt()).getDeclaringClass().toString().contains(filterString);
 		}
+
 		@Override
 		public String toString() {
 			return filterString;
@@ -282,9 +286,10 @@ public class PerAPKAnalyzer {
 			return property;
 		return "summary-report";
 	}
-	private static void summarizedOutput( Predicate<IAnalysisSeed> filter) {
+
+	private static void summarizedOutput(Predicate<IAnalysisSeed> filter) {
 		try {
-			File file = new File(getSummaryFile()+filter.toString()+".csv");
+			File file = new File(getSummaryFile() + filter.toString() + ".csv");
 			boolean fileExisted = true;
 			if (!file.exists()) {
 				fileExisted = false;
@@ -297,14 +302,14 @@ public class PerAPKAnalyzer {
 				line.add("forbiddenMethodErrors");
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
-				addRuleHeader("typestateError_",line);
+				addRuleHeader("typestateError_", line);
 				line.add("typestateError(unit)");
-//				line.add("expectedPredicates");
+				// line.add("expectedPredicates");
 				line.add("missingPredicates");
-				addRuleHeader("missingPredicates_",line);
+				addRuleHeader("missingPredicates_", line);
 				line.add("checkedConstraints");
 				line.add("internalConstraintViolations");
-				addRuleHeader("internalConstraintViolations_",line);
+				addRuleHeader("internalConstraintViolations_", line);
 				line.add("negationContradictions");
 				line.add("callgraphTime(ms)");
 				line.add("totalTime(ms)");
@@ -320,28 +325,30 @@ public class PerAPKAnalyzer {
 			}
 			List<String> line = Lists.newLinkedList();
 			line.add(apkFile.getName());
-			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(),filter).size()));
+			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(), filter).size()));
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
-			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(),filter).size()));
-			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
-			addTypestateDetails(line,filter);
-			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(),filter).size()));
-//			line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
-			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(),filter).size()));
-			addMissingPredicatesDetails(line,filter);
-			line.add(Integer.toString(subset(reporter.getCheckedConstraints().keySet(),filter).size()));
-			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(),filter).size()));
-			addMissingInternalConstraintDetails(line,filter);
+			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+			addTypestateDetails(line, filter);
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
+			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
+			addMissingPredicatesDetails(line, filter);
+			line.add(Integer.toString(subset(reporter.getCheckedConstraints().keySet(), filter).size()));
+			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(), filter).size()));
+			addMissingInternalConstraintDetails(line, filter);
 			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
-			
-			//Time reporting starts here
+
+			// Time reporting starts here
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(analysisTime));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(),filter)));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(),filter)-computeTime(reporter.getBoomerangTime(),filter)));
-			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(),filter)));
-			line.add(Long.toString(computeTime(reporter.getBoomerangTime(),filter)));
-			line.add(Long.toString(analysisTime-computeTime(reporter.getTypestateAnalysisTime(),filter) - computeTime(reporter.getTaintAnalysisTime(),filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)
+					- computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(analysisTime - computeTime(reporter.getTypestateAnalysisTime(), filter)
+					- computeTime(reporter.getTaintAnalysisTime(), filter)));
 			Set<SootMethod> allVisited = Sets.newHashSet();
 			allVisited.addAll(AliasFinder.VISITED_METHODS);
 			allVisited.addAll(Analysis.VISITED_METHODS);
@@ -357,46 +364,47 @@ public class PerAPKAnalyzer {
 
 	private static long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
 		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
-		long val = 0; 
-		for(IAnalysisSeed s : sub){
+		long val = 0;
+		for (IAnalysisSeed s : sub) {
 			Collection<Long> collection = map.get(s);
-			for(Long v : collection)
-				val+=v;
+			for (Long v : collection)
+				val += v;
 		}
 		return val;
 	}
 
-	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
+	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds,
+			Predicate<IAnalysisSeed> filter) {
 		Set<IAnalysisSeed> filtered = Sets.newHashSet();
-		for(IAnalysisSeed s : analysisSeeds)
-			if(filter.test(s))
+		for (IAnalysisSeed s : analysisSeeds)
+			if (filter.test(s))
 				filtered.add(s);
 		return filtered;
 	}
 
 	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
-		HashMap<String,Integer> classToInteger = new HashMap<>();
-		 Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
-		for (AnalysisSeedWithSpecification seed :map.keySet()) {
+		HashMap<String, Integer> classToInteger = new HashMap<>();
+		Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
+		for (AnalysisSeedWithSpecification seed : map.keySet()) {
 			Collection<ISLConstraint> col = map.get(seed);
-			if(col == null)
+			if (col == null)
 				continue;
-			if(!filter.test(seed))
+			if (!filter.test(seed))
 				continue;
 			int size = col.size();
 			String className = seed.getSpec().getRule().getClassName();
 			Integer i = classToInteger.get(className);
-			if(i == null || i ==0){
+			if (i == null || i == 0) {
 				i = size;
-			} else{
+			} else {
 				i += size;
 			}
 			classToInteger.put(className, i);
 		}
 		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules){
+		for (CryptSLRule r : rules) {
 			Integer i = classToInteger.get(r.getClassName());
-			if(i == null){
+			if (i == null) {
 				i = 0;
 			}
 			line.add(Integer.toString(i));
@@ -404,28 +412,28 @@ public class PerAPKAnalyzer {
 	}
 
 	private static void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
-		HashMap<String,Integer> classToInteger = new HashMap<>(); 
+		HashMap<String, Integer> classToInteger = new HashMap<>();
 		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
-		for (AnalysisSeedWithSpecification seed :map.keySet()) {
+		for (AnalysisSeedWithSpecification seed : map.keySet()) {
 			Collection<CryptSLPredicate> col = map.get(seed);
-			if(col == null)
+			if (col == null)
 				continue;
-			if(!filter.test(seed))
+			if (!filter.test(seed))
 				continue;
 			int size = col.size();
 			String className = seed.getSpec().getRule().getClassName();
 			Integer i = classToInteger.get(className);
-			if(i == null || i == 0){
+			if (i == null || i == 0) {
 				i = size;
-			} else{
-				i+= size;
+			} else {
+				i += size;
 			}
 			classToInteger.put(className, i);
 		}
 		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules){
+		for (CryptSLRule r : rules) {
 			Integer i = classToInteger.get(r.getClassName());
-			if(i == null){
+			if (i == null) {
 				i = 0;
 			}
 			line.add(Integer.toString(i));
@@ -433,26 +441,26 @@ public class PerAPKAnalyzer {
 	}
 
 	private static void addTypestateDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
-		HashMap<String,Integer> classToInteger = new HashMap<>();
+		HashMap<String, Integer> classToInteger = new HashMap<>();
 		for (IAnalysisSeed seed : reporter.getTypestateErrors().keySet()) {
-			if(seed instanceof AnalysisSeedWithSpecification){
-				if(!filter.test(seed))
+			if (seed instanceof AnalysisSeedWithSpecification) {
+				if (!filter.test(seed))
 					continue;
 				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
 				String className = seedWithSpec.getSpec().getRule().getClassName();
 				Integer i = classToInteger.get(className);
-				if(i == null || i == 0){
+				if (i == null || i == 0) {
 					i = 1;
-				} else{
+				} else {
 					i++;
 				}
 				classToInteger.put(className, i);
 			}
 		}
 		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules){
+		for (CryptSLRule r : rules) {
 			Integer i = classToInteger.get(r.getClassName());
-			if(i == null){
+			if (i == null) {
 				i = 0;
 			}
 			line.add(Integer.toString(i));
@@ -461,15 +469,14 @@ public class PerAPKAnalyzer {
 
 	private static void addRuleHeader(String string, List<String> line) {
 		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules){
-			line.add(string+r.getClassName());
+		for (CryptSLRule r : rules) {
+			line.add(string + r.getClassName());
 		}
-		
+
 	}
 
-
 	private static void detailedOutput() {
-		File file = new File("target/reports/cognicrypt/"+apkFile.getName().replace(".apk", ".txt"));
+		File file = new File("target/reports/cognicrypt/" + apkFile.getName().replace(".apk", ".txt"));
 		file.getParentFile().mkdirs();
 		try {
 			FileWriter fileWriter = new FileWriter(file);
@@ -492,14 +499,20 @@ public class PerAPKAnalyzer {
 		if (!method.hasActiveBody())
 			return;
 		for (Unit u : method.getActiveBody().getUnits()) {
-			for (String relevantCall : relevantCalls)
-				if (u.toString().contains(relevantCall)) {
-					log(2, mType + "\t Class: " + method.getDeclaringClass() + "  "
-							+ method.getDeclaringClass().isApplicationClass() + "\t Method: " + method.getName()
-							+ "\t Unit " + u);
+			if (!(u instanceof Stmt))
+				continue;
+
+			Stmt stmt = (Stmt) u;
+			if (!stmt.containsInvokeExpr())
+				continue;
+			InvokeExpr invokeExpr = stmt.getInvokeExpr();
+
+			for (String relevantCall : relevantCalls) {
+				if (invokeExpr.getMethod().toString().contains(relevantCall)) {
 					if (mType == MethodType.Application)
 						runCryptoScanner = true;
 				}
+			}
 		}
 	}
 }
