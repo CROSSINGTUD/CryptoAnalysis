@@ -122,9 +122,11 @@ public class ClassSpecification {
 //		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		for(CryptSLForbiddenMethod m : forbiddenMethods){
-			Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
-			if(matchingMatched.contains(method))
-				return true;
+			if(!m.getSilent()){
+				Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
+				if(matchingMatched.contains(method))
+					return true;
+			}
 		}
 		return false;
 	}
