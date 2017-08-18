@@ -122,7 +122,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 			varNames.add(parameters.get(0).getName());
 		} else {
 		for (ICryptSLPredicateParameter var : parameters) {
-			if (!("_".equals(var.getName()) || "this".equals(var.getName()))) {
+			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CryptSLMethod)) {
 				varNames.add(var.getName());
 			}
 		}

@@ -49,6 +49,26 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 	}
 	
 	@Test
+	public void UsagePatternTest1SilentForbiddenMethod() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.DECRYPT_MODE, key);
+		Assertions.extValue(0);
+		Assertions.callToForbiddenMethod();
+		
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.mustBeInAcceptingState(cCipher);
+		Assertions.notHasEnsuredPredicate(cCipher);
+	}
+	
+	@Test
 	public void UsagePatternTest1a() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
@@ -69,6 +89,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
+		
 	}
 	
 	@Test
@@ -336,7 +357,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(encText);
 	}
 	
-
+	@Test
+	public void UsagePatternForbMeth() throws GeneralSecurityException, IOException {
+		char[] falsePwd = "password".toCharArray();
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
+		Assertions.callToForbiddenMethod();
+	}
+	
 	@Test
 	public void UsagePattern8() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];

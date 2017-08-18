@@ -28,15 +28,17 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
+import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
 public class ConstraintSolver {
 
+	private final ClassSpecification classSpec;
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
-	private final Collection<SootMethod> collectedCalls;
+	private final Collection<Unit> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, Unit> parsAndVals;
 	private final Multimap<String, String> parsAndValsAsString;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
@@ -44,6 +46,7 @@ public class ConstraintSolver {
 	private final ConstaintReporter reporter;
 
 	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues, ConstaintReporter reporter) {
+		classSpec = spec;
 		parsAndVals = parametersToValues;
 		allConstraints = spec.getRule().getConstraints();
 		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
@@ -125,6 +128,8 @@ public class ConstraintSolver {
 				return left < right;
 			case le:
 				return left <= right;
+			case neq: 
+				return left != right;
 			default:
 				return false;
 		}
@@ -291,11 +296,12 @@ public class ConstraintSolver {
 				for (ICryptSLPredicateParameter predMethod : predMethods) {
 					//check whether predMethod is in foundMethods, which type-state analysis has to figure out
 					CryptSLMethod reqMethod = (CryptSLMethod) predMethod;
-					for (SootMethod foundCall : collectedCalls) {
+					for (Unit unit : collectedCalls) {
+						SootMethod foundCall = ((Stmt)unit).getInvokeExpr().getMethod();
 						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
 							boolean foundInThisRound = true;
 							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
-								if (!foundCall.getParameterTypes().get(i).equals(reqMethod.getParameters().get(i))) {
+								if (!foundCall.getParameterTypes().get(i).getEscapedName().equals(reqMethod.getParameters().get(i).getValue())) {
 									foundInThisRound = false;
 									break;
 								}
@@ -308,12 +314,16 @@ public class ConstraintSolver {
 				}
 				return false;
 			case "noCallTo":
+				if (collectedCalls.isEmpty()) {
+					return true;
+				}
 				List<ICryptSLPredicateParameter> predForbiddenMethods = parameters;
 				for (ICryptSLPredicateParameter predForbMethod : predForbiddenMethods) {
 					//check whether predForbMethod is in foundForbMethods, which forbidden-methods analysis has to figure out
 					CryptSLMethod reqMethod = ((CryptSLMethod) predForbMethod);
 					
-					for (SootMethod foundCall : collectedCalls) {
+					for (Unit unit : collectedCalls) {
+						SootMethod foundCall = ((Stmt)unit).getInvokeExpr().getMethod();
 						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
 							boolean foundInThisRound = true;
 							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
@@ -323,6 +333,7 @@ public class ConstraintSolver {
 								}
 							}
 							if (foundInThisRound) {
+								reporter.callToForbiddenMethod(classSpec, unit);
 								return false;
 							}
 						}

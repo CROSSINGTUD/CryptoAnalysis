@@ -3,7 +3,6 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -145,6 +144,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			@Override
 			public void constraintViolated(ISLConstraint con) {
 				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
+			}
+
+			@Override
+			public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
+				cryptoScanner.analysisListener().callToForbiddenMethod(classSpecification, callSite);
 			}
 		});
 		cryptoScanner.analysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());

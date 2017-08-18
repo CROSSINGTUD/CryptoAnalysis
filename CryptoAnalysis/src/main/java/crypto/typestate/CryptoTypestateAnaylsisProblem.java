@@ -13,12 +13,10 @@ import boomerang.AliasFinder;
 import boomerang.AliasResults;
 import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
-import boomerang.allocationsitehandler.PrimitiveTypeAndReferenceType;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.analysis.CryptSLAnalysisListener;
-import crypto.analysis.CryptoScanner;
 import crypto.analysis.PrimitiveTypeAndReferenceForCryptoType;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -29,7 +27,6 @@ import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
-import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
@@ -40,7 +37,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private Multimap<CallSiteWithParamIndex,Unit> collectedValues = HashMultimap.create(); 
-	private Set<SootMethod> invokedMethodsOnInstance = Sets.newHashSet();
+	private Set<Unit> invokedMethodsOnInstance = Sets.newHashSet();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
@@ -211,11 +208,11 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 //		System.out.println(string);
 	}
 
-	public Collection<SootMethod> getInvokedMethodOnInstance(){
+	public Collection<Unit> getInvokedMethodOnInstance(){
 		return invokedMethodsOnInstance;
 	}
 
-	public void methodInvokedOnInstance(SootMethod method) {
+	public void methodInvokedOnInstance(Unit method) {
 		invokedMethodsOnInstance.add(method);
 	}
 	

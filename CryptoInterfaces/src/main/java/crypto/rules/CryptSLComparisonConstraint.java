@@ -10,7 +10,7 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public enum CompOp { l, g, le, ge, eq}
+	public enum CompOp { l, g, le, ge, eq, neq}
 	
 	private CompOp operator;
 	

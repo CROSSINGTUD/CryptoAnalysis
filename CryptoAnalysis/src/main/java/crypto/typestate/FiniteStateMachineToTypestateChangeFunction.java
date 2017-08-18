@@ -13,13 +13,11 @@ import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
 import crypto.rules.CryptSLMethod;
-import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import soot.Local;
 import soot.RefType;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
@@ -110,10 +108,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		if(callSite instanceof Stmt){
 			Stmt stmt = (Stmt) callSite;
 			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
-				SootMethod method = stmt.getInvokeExpr().getMethod();
 				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
 				if(e.getBase().equals(d2.getBase())){
-					analysisProblem.methodInvokedOnInstance(method);
+					analysisProblem.methodInvokedOnInstance(stmt);
 				}
 			}
 		}
