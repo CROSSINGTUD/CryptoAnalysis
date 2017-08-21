@@ -61,7 +61,7 @@ public class PerAPKAnalyzer {
 	private static List<String> relevantCalls = Lists.newLinkedList();
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
-	private static boolean VISUALIZATION = true;
+	private static boolean VISUALIZATION = false;
 	private static IDebugger<TypestateDomainValue<StateNode>> debugger = (VISUALIZATION ? null : new NullDebugger());
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;
@@ -98,6 +98,7 @@ public class PerAPKAnalyzer {
 	public static void main(String... args) throws InterruptedException, IOException {
 		readInRelevantCalls();
 		apkFile = new File(args[0]);
+		VISUALIZATION = Boolean.parseBoolean(args[2]);
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".viz"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();
