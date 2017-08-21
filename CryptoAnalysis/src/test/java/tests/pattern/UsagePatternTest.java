@@ -79,20 +79,24 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey key = keygen.generateKey();
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
+		
+		byte[] iv = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(iv);
+		IvParameterSpec spec = new IvParameterSpec(iv);
+		
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
-		int mode = Cipher.ENCRYPT_MODE;
+		int mode = 1;
 		if (Math.random() % 2 == 0) {
-			mode = Cipher.DECRYPT_MODE;
+			mode = 2;
 		}
-		cCipher.init(mode, key);
+		cCipher.init(mode, key, spec);
 		
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
-		
 	}
 	
 	@Test
