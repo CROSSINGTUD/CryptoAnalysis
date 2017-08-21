@@ -160,6 +160,7 @@ public abstract class CryptoScanner {
 	}
 
 	public void scan() {
+		analysisListener().beforeAnalysis();
 		initialize();
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
@@ -179,6 +180,7 @@ public abstract class CryptoScanner {
 			analysisListener().missingPredicates(seed, missingPredicates);
 		}
 		analysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased,computeMissingPredicates());
+		analysisListener().afterAnalysis();
 		debugger().afterAnalysis();
 	}
 

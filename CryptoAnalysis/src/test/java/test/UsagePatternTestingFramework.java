@@ -202,6 +202,46 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								
 							}
 
+							@Override
+							public void beforeAnalysis() {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void afterAnalysis() {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void beforeConstraintCheck(
+									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void afterConstraintCheck(
+									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void beforePredicateCheck(
+									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void afterPredicateCheck(
+									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
+								// TODO Auto-generated method stub
+								
+							}
+
 						};
 					}
 					@Override

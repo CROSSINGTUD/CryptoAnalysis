@@ -44,9 +44,14 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	private Stopwatch taintWatch = Stopwatch.createUnstarted();
 	private Stopwatch typestateWatch = Stopwatch.createUnstarted();
 	private Stopwatch boomerangWatch = Stopwatch.createUnstarted();
+	private Stopwatch constraintWatch = Stopwatch.createUnstarted();
+	private Stopwatch predicateWatch = Stopwatch.createUnstarted();
+	private Stopwatch totalAnalysisTime = Stopwatch.createUnstarted();
 	private Multimap<IAnalysisSeed, Long> seedToTypestateAnalysisTime = HashMultimap.create();
 	private Multimap<IAnalysisSeed, Long> seedToTaintAnalysisTime = HashMultimap.create();
 	private Multimap<IAnalysisSeed, Long> seedToBoomerangAnalysisTime = HashMultimap.create();
+	private Multimap<IAnalysisSeed, Long> seedToConstraintTime = HashMultimap.create();
+	private Multimap<IAnalysisSeed, Long> seedToPredicateTime = HashMultimap.create();
 	
 	private File analyzedFile;
 	
@@ -284,6 +289,8 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	@Override
 	public void seedStarted(IAnalysisSeed seed) {
 		boomerangWatch.reset();
+		constraintWatch.reset();
+		predicateWatch.reset();
 		if(seed instanceof AnalysisSeedWithEnsuredPredicate){
 			taintWatch.reset();
 			taintWatch.start();
@@ -315,7 +322,13 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public Multimap<IAnalysisSeed, Long> getTypestateAnalysisTime(){
 		return seedToTypestateAnalysisTime;
 	}
-
+	
+	public Multimap<IAnalysisSeed, Long> getConstraintSolvingTime(){
+		return seedToConstraintTime;
+	}
+	public Multimap<IAnalysisSeed, Long> getPredicateSolvingTime(){
+		return seedToPredicateTime;
+	}
 	@Override
 	public void predicateContradiction(Unit stmt, AccessGraph accessGraph, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 		predicateContradictions.put(new FactAtStatement(stmt,accessGraph), disPair);
@@ -339,6 +352,45 @@ public class CogniCryptCLIReporter implements CryptSLAnalysisListener{
 	public void checkedConstraints(AnalysisSeedWithSpecification seed,
 			Collection<ISLConstraint> cons) {
 		checkedConstraints.putAll(seed, cons);
+	}
+
+	@Override
+	public void beforeAnalysis() {
+		totalAnalysisTime.start();
+	}
+
+	@Override
+	public void afterAnalysis() {
+		if(totalAnalysisTime.isRunning())
+			totalAnalysisTime.stop();
+	}
+
+	public long getTotalAnalysisTime(TimeUnit unit){
+		return totalAnalysisTime.elapsed(unit);
+	}
+	
+	@Override
+	public void beforeConstraintCheck(AnalysisSeedWithSpecification seed) {
+		constraintWatch.start();
+	}
+
+	@Override
+	public void afterConstraintCheck(AnalysisSeedWithSpecification seed) {
+		if(constraintWatch.isRunning())
+			constraintWatch.stop();
+		seedToConstraintTime.put(seed, constraintWatch.elapsed(TimeUnit.MILLISECONDS));
+	}
+
+	@Override
+	public void beforePredicateCheck(AnalysisSeedWithSpecification seed) {
+		predicateWatch.start();
+	}
+
+	@Override
+	public void afterPredicateCheck(AnalysisSeedWithSpecification seed) {
+		if(predicateWatch.isRunning())
+			predicateWatch.stop();
+		seedToPredicateTime.put(seed, predicateWatch.elapsed(TimeUnit.MILLISECONDS));
 	}
 
 }

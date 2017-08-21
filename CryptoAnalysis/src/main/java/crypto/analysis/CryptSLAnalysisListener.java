@@ -48,4 +48,16 @@ public interface CryptSLAnalysisListener extends ResultReporter<TypestateDomainV
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 			Collection<ISLConstraint> relConstraints);
+
+	void beforeAnalysis();
+
+	void afterAnalysis();
+
+	void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
+
+	void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
+
+	void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
+
+	void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
 }

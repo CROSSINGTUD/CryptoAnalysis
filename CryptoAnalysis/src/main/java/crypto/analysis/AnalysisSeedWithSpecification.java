@@ -140,6 +140,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		// Merge all information (all access graph here point to the seed
 		// object)
+		cryptoScanner.analysisListener().beforeConstraintCheck(this);
 		constraintSolver = new ConstraintSolver(spec, parametersToValues, new ConstaintReporter() {
 			@Override
 			public void constraintViolated(ISLConstraint con) {
@@ -153,6 +154,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		});
 		cryptoScanner.analysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
+		cryptoScanner.analysisListener().afterConstraintCheck(this);
 		results = solver.results();
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
@@ -331,8 +333,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
+		cryptoScanner.analysisListener().beforePredicateCheck(this);
 		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
-		if (!checkPredicates(relConstraints))
+		boolean checkPredicates = checkPredicates(relConstraints);
+		cryptoScanner.analysisListener().afterPredicateCheck(this);
+		if (!checkPredicates)
 			return false;
 		return internalConstraintSatisfied;
 	}

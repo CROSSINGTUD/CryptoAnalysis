@@ -308,6 +308,7 @@ public class PerAPKAnalyzer {
 				line.add("taintTime(ms)");
 				line.add("boomerangTime(ms)");
 				line.add("constraint(ms)");
+				line.add("predicate(ms)");
 				line.add("visitedMethods");
 				line.add("allMethods");
 				line.add("max_accesspath");
@@ -331,14 +332,14 @@ public class PerAPKAnalyzer {
 
 			// Time reporting starts here
 			line.add(Long.toString(callGraphTime));
-			line.add(Long.toString(analysisTime));
+			line.add(Long.toString(reporter.getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)
 					- computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
-			line.add(Long.toString(analysisTime - computeTime(reporter.getTypestateAnalysisTime(), filter)
-					- computeTime(reporter.getTaintAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
 			Set<SootMethod> allVisited = Sets.newHashSet();
 			allVisited.addAll(AliasFinder.VISITED_METHODS);
 			allVisited.addAll(Analysis.VISITED_METHODS);
