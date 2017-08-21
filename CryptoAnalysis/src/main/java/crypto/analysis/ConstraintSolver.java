@@ -232,11 +232,7 @@ public class ConstraintSolver {
 		String val = null;
 		val = valueIterator.next();
 		if (actualValue.size() > 1) {
-			while (valueIterator.hasNext()) {
-				if (!val.equals(valueIterator.next())) {
-					return "";
-				}
-			}
+			return INV;
 		}
 		return val;
 	}

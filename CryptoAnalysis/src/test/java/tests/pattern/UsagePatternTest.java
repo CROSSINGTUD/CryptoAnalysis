@@ -46,6 +46,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
 	}
 	
 	@Test
@@ -66,6 +67,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(cCipher);
+		cCipher.getIV();
 	}
 	
 	@Test
@@ -89,6 +91,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
 		
 	}
 	
@@ -122,6 +125,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
 	}
 	
 	@Test
@@ -226,6 +230,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
 	}
 
 	@Test
@@ -279,6 +284,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal(msgAsArray);
+		cCipher.getIV();
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.hasEnsuredPredicate(encText);
 		
@@ -313,6 +319,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.hasEnsuredPredicate(encText);
+		cCipher.getIV();
 	}
 	
 	@Test
@@ -496,9 +503,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
+		cCipher.getIV();
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
@@ -521,6 +528,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 			SecretKey key = keygen.generateKey();
 			this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			this.cipher.init(Cipher.ENCRYPT_MODE, key);
+			this.cipher.getIV();
 		}
 		public byte[] encrypt(String plainText) throws GeneralSecurityException{
 			byte[] encText = this.cipher.doFinal(plainText.getBytes());
