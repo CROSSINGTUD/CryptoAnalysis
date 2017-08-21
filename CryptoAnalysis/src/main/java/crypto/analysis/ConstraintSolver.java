@@ -21,6 +21,7 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CallSiteWithParamIndex;
+import crypto.typestate.CryptSLMethodToSootMethod;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Unit;
@@ -45,11 +46,11 @@ public class ConstraintSolver {
 	private final static String INV = "%%INVALID%%";
 	private final ConstaintReporter reporter;
 
-	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues, ConstaintReporter reporter) {
+	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Unit> parametersToValues, Collection<Unit> collectedCalls, ConstaintReporter reporter) {
 		classSpec = spec;
 		parsAndVals = parametersToValues;
+		this.collectedCalls = collectedCalls;
 		allConstraints = spec.getRule().getConstraints();
-		collectedCalls = spec.getAnalysisProblem().getInvokedMethodOnInstance();
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
@@ -297,18 +298,12 @@ public class ConstraintSolver {
 					//check whether predMethod is in foundMethods, which type-state analysis has to figure out
 					CryptSLMethod reqMethod = (CryptSLMethod) predMethod;
 					for (Unit unit : collectedCalls) {
+						if(!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
+							continue;
 						SootMethod foundCall = ((Stmt)unit).getInvokeExpr().getMethod();
-						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
-							boolean foundInThisRound = true;
-							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
-								if (!foundCall.getParameterTypes().get(i).getEscapedName().equals(reqMethod.getParameters().get(i).getValue())) {
-									foundInThisRound = false;
-									break;
-								}
-							}
-							if (foundInThisRound) {
-								return true;
-							}
+						Collection<SootMethod> convert = CryptSLMethodToSootMethod.v().convert(reqMethod);
+						if(convert.contains(foundCall)){
+							return true;
 						}
 					}
 				}
@@ -323,19 +318,13 @@ public class ConstraintSolver {
 					CryptSLMethod reqMethod = ((CryptSLMethod) predForbMethod);
 					
 					for (Unit unit : collectedCalls) {
+						if(!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
+							continue;
 						SootMethod foundCall = ((Stmt)unit).getInvokeExpr().getMethod();
-						if (foundCall.getName().equals(reqMethod.getMethodName()) && foundCall.getParameterCount() ==  reqMethod.getParameters().size()) {
-							boolean foundInThisRound = true;
-							for (int i = 0; i <= foundCall.getParameterCount(); i++) {
-								if (!foundCall.getParameterTypes().get(i).equals(reqMethod.getParameters().get(i))) {
-									foundInThisRound = false;
-									break;
-								}
-							}
-							if (foundInThisRound) {
-								reporter.callToForbiddenMethod(classSpec, unit);
-								return false;
-							}
+						Collection<SootMethod> convert = CryptSLMethodToSootMethod.v().convert(reqMethod);
+						if(convert.contains(foundCall)){
+							reporter.callToForbiddenMethod(classSpec, unit);
+							return false;
 						}
 					}
 				}

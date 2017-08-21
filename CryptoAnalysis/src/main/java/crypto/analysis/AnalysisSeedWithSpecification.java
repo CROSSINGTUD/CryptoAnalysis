@@ -65,6 +65,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
+	protected Collection<Unit> allCallsOnObject = Sets.newHashSet();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec) {
 		super(cryptoScanner,factAtStmt);
@@ -115,6 +116,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				@Override
 				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 					parametersToValues = problem.getCollectedValues();
+					allCallsOnObject = problem.getInvokedMethodOnInstance();
 					cryptoScanner.analysisListener().onSeedFinished(seed, solver);
 					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 				}
@@ -141,7 +143,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.analysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(spec, parametersToValues, new ConstaintReporter() {
+		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, new ConstaintReporter() {
 			@Override
 			public void constraintViolated(ISLConstraint con) {
 				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
