@@ -289,7 +289,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
 			// TODO check for any reachable state that don't kill
 			// predicates.
-			if (e.getValue().getStates().contains(stateNode)) {
+			if (e.getValue().contains(stateNode)) {
 				cryptoScanner.addNewPred(this, e.getRowKey(), e.getColumnKey(), new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 			}
 		}

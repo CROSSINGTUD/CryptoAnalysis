@@ -74,7 +74,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	@Override
 	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		CryptSLAnalysisListener listener = analysisListener();
-		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.values()){
+		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()){
 			if(listener != null){
 				listener.boomerangQueryStarted(seed,q);
 			}
@@ -134,7 +134,11 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 				@Override
 				public AllocationSiteHandlers allocationSiteHandlers() {
 					return new PrimitiveTypeAndReferenceForCryptoType();
-				}				
+				}		
+				@Override
+				public long getTimeBudget() {
+					return TimeUnit.SECONDS.toMillis(2);
+				}
 			});
 			boomerang.startQuery();
 			log("Solving query "+ accessGraph + " @ " + stmt);
