@@ -15,7 +15,6 @@ import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
-import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
@@ -35,8 +34,6 @@ public interface ICrySLResultsListener extends ResultReporter<TypestateDomainVal
 	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit);
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
-
-	
 	
 	void onSeedTimeout(IFactAtStatement seed);
 	

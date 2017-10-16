@@ -4,8 +4,6 @@ import java.io.File;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
 

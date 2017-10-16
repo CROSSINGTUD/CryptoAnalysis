@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.Unit;
-import soot.Value;
 import test.Assertion;
 
 public class ExtractedValueAssertion implements Assertion {

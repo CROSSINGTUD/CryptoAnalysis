@@ -20,7 +20,6 @@ import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
-import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 
