@@ -3,6 +3,7 @@ package crypto.typestate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
@@ -16,7 +17,7 @@ import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
-import crypto.analysis.CryptSLAnalysisListener;
+import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.PrimitiveTypeAndReferenceForCryptoType;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -73,14 +74,14 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	};
 	@Override
 	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-		CryptSLAnalysisListener listener = analysisListener();
+		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()){
-			if(listener != null){
-				listener.boomerangQueryStarted(seed,q);
+			if(reports != null){
+				reports.boomerangQueryStarted(seed,q);
 			}
 			q.solve();
-			if(listener != null){
-				listener.boomerangQueryFinished(seed,q);
+			if(reports != null){
+				reports.boomerangQueryFinished(seed,q);
 			}
 		}
 	}
@@ -220,7 +221,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		invokedMethodsOnInstance.add(method);
 	}
 	
-	public CryptSLAnalysisListener analysisListener(){
+	public CrySLAnalysisResultsAggregator analysisListener(){
 		return null;
 	}
 

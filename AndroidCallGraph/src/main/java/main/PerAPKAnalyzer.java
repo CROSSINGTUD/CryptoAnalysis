@@ -32,7 +32,7 @@ import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
-import crypto.analysis.CryptSLAnalysisListener;
+import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.IAnalysisSeed;
@@ -45,7 +45,6 @@ import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.InvokeExpr;
@@ -58,6 +57,7 @@ import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
 public class PerAPKAnalyzer {
+
 	private static List<String> relevantCalls = Lists.newLinkedList();
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
@@ -65,7 +65,7 @@ public class PerAPKAnalyzer {
 	private static IDebugger<TypestateDomainValue<StateNode>> debugger = (VISUALIZATION ? null : new NullDebugger());
 	private static ExtendedICFG icfg;
 	private static File ideVizFile;
-	private static CogniCryptCLIReporter reporter;
+	private static CrySLAnalysisResultsAggregator reporter;
 	private static File apkFile;
 	private static long analysisTime;
 	private static long callGraphTime;
@@ -76,9 +76,9 @@ public class PerAPKAnalyzer {
 
 	private static void readInRelevantCalls() throws FileNotFoundException, IOException {
 		String line;
-		try (InputStream fis = new FileInputStream("RelevantCalls.txt");
-				InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
-				BufferedReader br = new BufferedReader(isr);) {
+		try (
+			InputStream fis = new FileInputStream("RelevantCalls.txt"); InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+			BufferedReader br = new BufferedReader(isr);) {
 			while ((line = br.readLine()) != null) {
 				relevantCalls.add(line);
 			}
@@ -106,8 +106,7 @@ public class PerAPKAnalyzer {
 		try {
 			Test.main(new String[] { args[0], args[1], "--notaintanalysis", "--callbackanalyzer", "FAST" });
 		} catch (Exception e) {
-			PrintWriter writer = new PrintWriter(
-					new FileOutputStream(new File("CallGraphGenerationExceptions.txt"), true));
+			PrintWriter writer = new PrintWriter(new FileOutputStream(new File("CallGraphGenerationExceptions.txt"), true));
 			writer.format("FlowDroid call graph generation crashed on %s", apkFile);
 			e.printStackTrace(writer);
 			writer.close();
@@ -141,8 +140,7 @@ public class PerAPKAnalyzer {
 				try {
 					runCryptoAnalysis();
 				} catch (Exception e) {
-					PrintWriter writer = new PrintWriter(
-							new FileOutputStream(new File("CryptoAnalysisExceptions.txt"), true));
+					PrintWriter writer = new PrintWriter(new FileOutputStream(new File("CryptoAnalysisExceptions.txt"), true));
 					writer.format("CryptoAnalysis crashed on %s", apkFile);
 					e.printStackTrace(writer);
 					writer.close();
@@ -177,7 +175,8 @@ public class PerAPKAnalyzer {
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-		reporter = new CogniCryptCLIReporter(icfg, apkFile);
+		reporter = new CrySLAnalysisResultsAggregator(icfg, apkFile);
+		reporter.addReportListener(new CogniCryptCLIReporter());
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 			@Override
@@ -186,7 +185,7 @@ public class PerAPKAnalyzer {
 			}
 
 			@Override
-			public CryptSLAnalysisListener analysisListener() {
+			public CrySLAnalysisResultsAggregator getAnalysisListener() {
 				return reporter;
 			}
 
@@ -253,6 +252,7 @@ public class PerAPKAnalyzer {
 	}
 
 	private static class PackageFilter implements Predicate<IAnalysisSeed> {
+
 		private String filterString;
 
 		public PackageFilter(String filterString) {
@@ -335,8 +335,7 @@ public class PerAPKAnalyzer {
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(reporter.getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)
-					- computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter) - computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
@@ -365,8 +364,7 @@ public class PerAPKAnalyzer {
 		return val;
 	}
 
-	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds,
-			Predicate<IAnalysisSeed> filter) {
+	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
 		Set<IAnalysisSeed> filtered = Sets.newHashSet();
 		for (IAnalysisSeed s : analysisSeeds)
 			if (filter.test(s))
@@ -498,10 +496,10 @@ public class PerAPKAnalyzer {
 			if (!stmt.containsInvokeExpr())
 				continue;
 			InvokeExpr invokeExpr = stmt.getInvokeExpr();
-			if(invokeExpr == null)
+			if (invokeExpr == null)
 				continue;
 			SootMethod calledMethod = invokeExpr.getMethod();
-			if(calledMethod == null)
+			if (calledMethod == null)
 				continue;
 			for (String relevantCall : relevantCalls) {
 				if (calledMethod.toString().contains(relevantCall)) {

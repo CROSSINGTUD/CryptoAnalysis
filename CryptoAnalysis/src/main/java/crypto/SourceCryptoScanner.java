@@ -11,8 +11,9 @@ import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.preanalysis.PreparationTransformer;
 import crypto.analysis.CogniCryptCLIReporter;
-import crypto.analysis.CryptSLAnalysisListener;
+import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.ICrySLResultsListener;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
@@ -32,7 +33,7 @@ import typestate.TypestateDomainValue;
 
 public class SourceCryptoScanner {
 	public static String RESOURCE_PATH = "rules";
-	private static CogniCryptCLIReporter reporter;
+	private static CrySLAnalysisResultsAggregator reporter;
 	private static ExtendedICFG icfg;
 
 	public static void main(String... args) {
@@ -43,6 +44,12 @@ public class SourceCryptoScanner {
 		
 	}
 
+	public static void runAnalysis(String cp, String mainClass, String resPath, ICrySLResultsListener listener) {
+		initializeSootWithEntryPoint(cp, mainClass);
+		RESOURCE_PATH = resPath;
+		
+	}
+	
 	private static void analyse() {
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
@@ -57,7 +64,8 @@ public class SourceCryptoScanner {
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-				reporter = new CogniCryptCLIReporter(icfg, null);
+				reporter = new CrySLAnalysisResultsAggregator(icfg, null);
+				reporter.addReportListener(new CogniCryptCLIReporter());
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 					@Override
@@ -66,7 +74,7 @@ public class SourceCryptoScanner {
 					}
 
 					@Override
-					public CryptSLAnalysisListener analysisListener() {
+					public CrySLAnalysisResultsAggregator getAnalysisListener() {
 						return reporter;
 					}
 

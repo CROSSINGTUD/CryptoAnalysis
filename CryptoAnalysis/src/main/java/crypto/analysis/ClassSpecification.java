@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
+import boomerang.util.StmtWithMethod;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
@@ -111,7 +112,7 @@ public class ClassSpecification {
 				InvokeExpr invokeExpr = stmt.getInvokeExpr();
 				SootMethod method = invokeExpr.getMethod();
 				if (isForbiddenMethod(method))
-					cryptoScanner.analysisListener().callToForbiddenMethod(this, u);
+					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new StmtWithMethod(u, cryptoScanner.icfg().getMethodOf(u)));
 			}
 		}
 	}

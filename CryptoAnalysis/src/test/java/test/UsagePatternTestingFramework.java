@@ -19,9 +19,11 @@ import com.google.common.collect.Table.Cell;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.util.StmtWithMethod;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
-import crypto.analysis.CryptSLAnalysisListener;
+import crypto.analysis.CrySLAnalysisListener;
+import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
@@ -82,8 +84,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public CryptSLAnalysisListener analysisListener() {
-						return new CryptSLAnalysisListener(){
+					public CrySLAnalysisResultsAggregator getAnalysisListener() {
+						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
 							public void onSeedFinished(IFactAtStatement seed,
 									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
@@ -110,17 +112,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
+							public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite) {
 								for(Assertion e : expectedResults){
 									if(e instanceof CallToForbiddenMethodAssertion){
 										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
-										expectedResults.reported(callSite);
+										expectedResults.reported(callSite.getStmt());
 									}
 								}
-							}
-
-							@Override
-							public void violateConstraint(ClassSpecification spec, Unit callSite) {
 							}
 
 							@Override
@@ -180,7 +178,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void predicateContradiction(Unit stmt, AccessGraph key,
+							public void predicateContradiction(StmtWithMethod stmt, AccessGraph key,
 									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 								throw new RuntimeException("IMPLEMENTE predicate contradicition" + stmt + key);
 							}
@@ -192,7 +190,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-									ISLConstraint con) {
+									ISLConstraint con, StmtWithMethod unit) {
 								
 							}
 
@@ -204,45 +202,49 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void beforeAnalysis() {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void afterAnalysis() {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void beforeConstraintCheck(
 									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void afterConstraintCheck(
 									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void beforePredicateCheck(
 									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
 								
 							}
 
 							@Override
 							public void afterPredicateCheck(
 									AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								// TODO Auto-generated method stub
+								
+							}
+
+						
+
+							@Override
+							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
 								
 							}
 
 						};
+						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(icfg, ideVizFile);
+						reporters.addReportListener(cryslListener);
+						return reporters;
 					}
 					@Override
 					public IDebugger<TypestateDomainValue<StateNode>> debugger() {

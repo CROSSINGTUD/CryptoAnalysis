@@ -17,14 +17,14 @@ import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
-import tests.pattern.UsagePatternTest.Encrypter;
 
-public class CipherTest extends IDEALCrossingTestingFramework{
+public class CipherTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
 		return new File("Cipher.cryptslbin");
 	}
+
 	@Test
 	public void testCipher1() throws NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");
@@ -35,7 +35,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 	public void testCipher2() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");
 		c.init(1, new SecretKeySpec(null, "AES"));
-		
+
 		Assertions.assertState(c, 1);
 	}
 
@@ -44,7 +44,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		Cipher c = Cipher.getInstance("AES");
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
-		
+
 		Assertions.assertState(c, 2);
 	}
 
@@ -55,7 +55,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.doFinal(null);
 		c.doFinal(null);
 		c.doFinal(null);
-		
+
 		Assertions.assertState(c, 2);
 	}
 
@@ -65,7 +65,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.update(null);
 		c.doFinal(null);
-		
+
 		Assertions.assertState(c, 2);
 	}
 
@@ -74,7 +74,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		Cipher c = Cipher.getInstance("AES");
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.update(null);
-		
+
 		Assertions.assertState(c, 3);
 	}
 
@@ -85,7 +85,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.update(null);
 		c.doFinal(null);
 		c.init(2, new SecretKeySpec(null, "AES"));
-		
+
 		Assertions.assertState(c, -1);
 	}
 
@@ -97,7 +97,7 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c = Cipher.getInstance("AES");
 		c.init(2, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
-		
+
 		Assertions.assertState(c, 2);
 	}
 
@@ -114,17 +114,17 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 	public void testCipher10() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher c = Cipher.getInstance("AES");
 		c.doFinal(null);
-		
-		Assertions.assertState(c, -1);	
+
+		Assertions.assertState(c, -1);
 	}
 
 	@Test
 	public void testCipher11() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher c = Cipher.getInstance("AES");
-		if(staticallyUnknown())
+		if (staticallyUnknown())
 			c.init(1, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
-		Assertions.assertState(c, -1);	
+		Assertions.assertState(c, -1);
 	}
 
 	@Test
@@ -134,17 +134,18 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 		c.doFinal(null);
 		Assertions.assertState(e, -1);
 	}
-	
+
 	@Test
-	public void testCipher13Aliasing() throws GeneralSecurityException{
-			Encrypter enc = new Encrypter();
-			Assertions.assertState(enc.cipher, 1);
+	public void testCipher13Aliasing() throws GeneralSecurityException {
+		Encrypter enc = new Encrypter();
+		Assertions.assertState(enc.cipher, 1);
 	}
-	
-	
-	public static class Encrypter{
+
+	public static class Encrypter {
+
 		Cipher cipher;
-		public Encrypter() throws GeneralSecurityException{
+
+		public Encrypter() throws GeneralSecurityException {
 			KeyGenerator keygen = KeyGenerator.getInstance("AES");
 			keygen.init(128);
 			SecretKey key = keygen.generateKey();
@@ -152,7 +153,8 @@ public class CipherTest extends IDEALCrossingTestingFramework{
 			this.cipher.init(Cipher.ENCRYPT_MODE, key);
 			Assertions.assertState(this.cipher, 1);
 		}
-		public byte[] encrypt(String plainText) throws GeneralSecurityException{
+
+		public byte[] encrypt(String plainText) throws GeneralSecurityException {
 			byte[] encText = this.cipher.doFinal(plainText.getBytes());
 			Assertions.hasEnsuredPredicate(encText);
 			return encText;

@@ -16,6 +16,7 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.util.StmtWithMethod;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
@@ -110,24 +111,24 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		if (!solved) {
-			cryptoScanner.analysisListener().seedStarted(this);
+			cryptoScanner.getAnalysisListener().seedStarted(this);
 			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 
 				@Override
 				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 					parametersToValues = problem.getCollectedValues();
 					allCallsOnObject = problem.getInvokedMethodOnInstance();
-					cryptoScanner.analysisListener().onSeedFinished(seed, solver);
+					cryptoScanner.getAnalysisListener().onSeedFinished(seed, solver);
 					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 				}
 
 				@Override
 				public void onSeedTimeout(IFactAtStatement seed) {
-					cryptoScanner.analysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
+					cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
 				}
 			}).analysisForSeed(this);
-			cryptoScanner.analysisListener().seedFinished(this);
-			cryptoScanner.analysisListener().collectedValues(this, problem.getCollectedValues());
+			cryptoScanner.getAnalysisListener().seedFinished(this);
+			cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
 			final CryptSLRule rule = spec.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
 				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
@@ -142,21 +143,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		// Merge all information (all access graph here point to the seed
 		// object)
-		cryptoScanner.analysisListener().beforeConstraintCheck(this);
+		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
 		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, new ConstaintReporter() {
 			@Override
 			public void constraintViolated(ISLConstraint con) {
-				cryptoScanner.analysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con);
+				cryptoScanner.getAnalysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con, null);
 			}
 
 			@Override
 			public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
-				cryptoScanner.analysisListener().callToForbiddenMethod(classSpecification, callSite);
+				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, new StmtWithMethod(callSite, cryptoScanner.icfg().getMethodOf(callSite)));
 			}
 		});
-		cryptoScanner.analysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
+		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
-		cryptoScanner.analysisListener().afterConstraintCheck(this);
+		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
 		results = solver.results();
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
@@ -325,8 +326,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 
 				@Override
-				public CryptSLAnalysisListener analysisListener() {
-					return cryptoScanner.analysisListener();
+				public CrySLAnalysisResultsAggregator analysisListener() {
+					return cryptoScanner.getAnalysisListener();
 				}
 			};
 			analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);
@@ -335,10 +336,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean checkConstraintSystem() {
-		cryptoScanner.analysisListener().beforePredicateCheck(this);
+		cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
 		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
 		boolean checkPredicates = checkPredicates(relConstraints);
-		cryptoScanner.analysisListener().afterPredicateCheck(this);
+		cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
 		if (!checkPredicates)
 			return false;
 		return internalConstraintSatisfied;
