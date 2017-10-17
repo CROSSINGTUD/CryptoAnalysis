@@ -23,6 +23,8 @@ public interface ICrySLResultsListener extends ResultReporter<TypestateDomainVal
 
 	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
 	
+	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
+	
 	void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite);
 	
 	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);

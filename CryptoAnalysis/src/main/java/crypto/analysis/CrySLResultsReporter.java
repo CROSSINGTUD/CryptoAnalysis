@@ -160,7 +160,12 @@ public class CrySLResultsReporter  {
 	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorAt(classSpecification, stmt);
-			
+		}
+	}
+	
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+		for (CrySLAnalysisListener listen : listeners) {
+			listen.typestateErrorEndOfLifeCycle(classSpecification, stmt);
 		}
 	}
 	
