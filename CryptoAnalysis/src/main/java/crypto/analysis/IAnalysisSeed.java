@@ -36,4 +36,28 @@ public abstract class IAnalysisSeed implements IFactAtStatement{
 	public Unit getStmt() {
 		return factAtStmt.getStmt();
 	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((factAtStmt == null) ? 0 : factAtStmt.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IAnalysisSeed other = (IAnalysisSeed) obj;
+		if (factAtStmt == null) {
+			if (other.factAtStmt != null)
+				return false;
+		} else if (!factAtStmt.equals(other.factAtStmt))
+			return false;
+		return true;
+	}
+	
 }
