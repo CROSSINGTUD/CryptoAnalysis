@@ -241,6 +241,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								
 							}
 
+							@Override
+							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
+									StmtWithMethod stmt) {
+								// TODO Auto-generated method stub
+								
+							}
+
 						};
 						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(icfg, ideVizFile);
 						reporters.addReportListener(cryslListener);
