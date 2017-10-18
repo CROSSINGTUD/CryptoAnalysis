@@ -25,10 +25,10 @@ import typestate.TypestateDomainValue;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private boolean analyzed;
 	private Multimap<Unit, AccessGraph> analysisResults = HashMultimap.create();
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private CryptoTypestateAnaylsisProblem problem;
+	private boolean analyzed;
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, IFactAtStatement delegate) {
 		super(cryptoScanner,delegate);
@@ -36,24 +36,22 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	@Override
 	public void execute() {
-		if(!analyzed){
-			cryptoScanner.getAnalysisListener().seedStarted(this);
-			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
-				@Override
-				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					analysisResults = solver.getResultsAtStatement();
-					for(EnsuredCryptSLPredicate pred : ensuredPredicates)
-						ensurePredicates(pred);
-				}
+		cryptoScanner.getAnalysisListener().seedStarted(this);
+		getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+			@Override
+			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				analysisResults = solver.getResultsAtStatement();
+				for(EnsuredCryptSLPredicate pred : ensuredPredicates)
+					ensurePredicates(pred);
+			}
 
-				@Override
-				public void onSeedTimeout(IFactAtStatement seed) {
-					cryptoScanner.getAnalysisListener().seedFinished(AnalysisSeedWithEnsuredPredicate.this);
-				}
-			}).analysisForSeed(this);
-			cryptoScanner.getAnalysisListener().seedFinished(this);
-			analyzed = true;
-		}
+			@Override
+			public void onSeedTimeout(IFactAtStatement seed) {
+				cryptoScanner.getAnalysisListener().seedFinished(AnalysisSeedWithEnsuredPredicate.this);
+			}
+		}).analysisForSeed(this);
+		cryptoScanner.getAnalysisListener().seedFinished(this);
+		analyzed = true;
 	}
 
 	protected void ensurePredicates(EnsuredCryptSLPredicate pred) {
@@ -116,11 +114,6 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		return problem;
 	}
 
-	@Override
-	public boolean isSolved() {
-		return analyzed;
-	}
-	
 	@Override
 	public String toString() {
 		return "AnalysisSeedWithEnsuredPredicate:"+getFact()+"@" + getStmt() +" " + ensuredPredicates; 

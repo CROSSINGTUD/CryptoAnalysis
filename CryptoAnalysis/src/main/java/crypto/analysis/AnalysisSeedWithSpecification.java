@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -61,7 +60,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private CryptoTypestateAnaylsisProblem problem;
 	private HashBasedTable<Unit, AccessGraph, TypestateDomainValue<StateNode>> results;
-	private boolean solved;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
@@ -82,33 +80,29 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	public void execute() {
-		if (!solved) {
-			cryptoScanner.getAnalysisListener().seedStarted(this);
-			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+		cryptoScanner.getAnalysisListener().seedStarted(this);
+		getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 
-				@Override
-				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					parametersToValues = problem.getCollectedValues();
-					allCallsOnObject = problem.getInvokedMethodOnInstance();
-					cryptoScanner.getAnalysisListener().onSeedFinished(seed, solver);
-					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
-				}
-
-				@Override
-				public void onSeedTimeout(IFactAtStatement seed) {
-					cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
-				}
-			}).analysisForSeed(this);
-			cryptoScanner.getAnalysisListener().seedFinished(this);
-			cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
-			final CryptSLRule rule = spec.getRule();
-			for (ISLConstraint cons : rule.getConstraints()) {
-				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
-				}
+			@Override
+			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				parametersToValues = problem.getCollectedValues();
+				allCallsOnObject = problem.getInvokedMethodOnInstance();
+				cryptoScanner.getAnalysisListener().onSeedFinished(seed, solver);
+				AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 			}
-			solved = true;
 
+			@Override
+			public void onSeedTimeout(IFactAtStatement seed) {
+				cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
+			}
+		}).analysisForSeed(this);
+		cryptoScanner.getAnalysisListener().seedFinished(this);
+		cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
+		final CryptSLRule rule = spec.getRule();
+		for (ISLConstraint cons : rule.getConstraints()) {
+			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+				cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
+			}
 		}
 	}
 
@@ -487,11 +481,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	@Override
 	public CryptoTypestateAnaylsisProblem getAnalysisProblem() {
 		return problem;
-	}
-
-	@Override
-	public boolean isSolved() {
-		return solved;
 	}
 
 	public ClassSpecification getSpec() {

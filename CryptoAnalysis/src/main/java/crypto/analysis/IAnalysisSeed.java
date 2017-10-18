@@ -19,8 +19,6 @@ public abstract class IAnalysisSeed implements IFactAtStatement{
 
 	abstract CryptoTypestateAnaylsisProblem getAnalysisProblem();
 
-	abstract boolean isSolved();
-
 	abstract boolean contradictsNegations();
 	
 	public SootMethod getMethod(){

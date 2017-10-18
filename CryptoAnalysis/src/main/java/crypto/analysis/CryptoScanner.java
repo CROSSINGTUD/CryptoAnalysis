@@ -165,8 +165,6 @@ public abstract class CryptoScanner {
 			IAnalysisSeed curr = worklist.poll();
 			getAnalysisListener().discoveredSeed(curr);
 			curr.execute();
-			if (!curr.isSolved())
-				worklist.add(curr);
 		}
 		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
 		if (debugger instanceof CryptoVizDebugger) {
