@@ -15,6 +15,7 @@ import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
+import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
@@ -89,9 +90,10 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 
 	}
 
-	@Override
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
 
+	@Override
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt,
+			Collection<SootMethod> expectedCalls) {
 	}
 
 	@Override

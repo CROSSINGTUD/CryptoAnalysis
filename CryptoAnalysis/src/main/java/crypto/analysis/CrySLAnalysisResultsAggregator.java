@@ -65,32 +65,6 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 	
 	@Override
 	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-		for (SootMethod m : solver.getVisitedMethods()) {
-			if (!m.hasActiveBody())
-				continue;
-			for (Unit u : m.getActiveBody().getUnits()) {
-				Map<AccessGraph, TypestateDomainValue<StateNode>> resultsAt = solver.resultsAt(u);
-				if (resultsAt == null)
-					continue;
-				for (Entry<AccessGraph, TypestateDomainValue<StateNode>> e : resultsAt.entrySet()) {
-					if (e.getValue().getStates().contains(ErrorStateNode.v()) && seed instanceof AnalysisSeedWithSpecification) {
-						typestateErrorAt((AnalysisSeedWithSpecification) seed, createStmtWithMethodFor(u));
-					}
-				}
-			}
-		}
-		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
-		for (Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()) {
-			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
-			if (resultAt == null)
-				continue;
-
-			for (StateNode n : resultAt.getStates()) {
-				if (!n.getAccepting()) {
-					typestateErrorAt((AnalysisSeedWithSpecification) seed, createStmtWithMethodFor(c.getKey()));
-				}
-			}
-		}
 		crr.onSeedFinished(seed, solver);
 	}
 
@@ -181,7 +155,11 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getCheckedConstraints() {
 		return checkedConstraints;
 	}
-
+	
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+		crr.typestateErrorEndOfLifeCycle(classSpecification, stmt);
+	}
+	
 	public void checkedConstraints(AnalysisSeedWithSpecification seed, Collection<ISLConstraint> cons) {
 		checkedConstraints.putAll(seed, cons);
 		crr.checkedConstraints(seed, cons);
@@ -223,9 +201,9 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 		crr.afterPredicateCheck(seed);
 	}
 
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Set<SootMethod> expectedMethodCalls) {
 		reportedTypestateErros.put(classSpecification, stmt);
-		crr.typestateErrorAt(classSpecification, stmt);
+		crr.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 	}
 
 	public Multimap<IAnalysisSeed, StmtWithMethod> getTypestateErrors() {

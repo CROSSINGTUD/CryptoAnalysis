@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
+import crypto.typestate.ErrorStateNode;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
@@ -132,12 +134,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), c.getValue().getStates());
-
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				//TODO only maintain indirectly ensured predicate as long as they are not killed by the rule
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
+		
+		computeTypestateErrorUnits(unitToStates);
+		computeTypestateErrorsForEndOfObjectLifeTime(solver);
+	}
+
+	private void computeTypestateErrorUnits(Multimap<Unit, StateNode> unitToStates) {
 		for (Unit curr : unitToStates.keySet()) {
 			Collection<StateNode> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
 			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr)) {
@@ -145,6 +152,35 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (StateNode newStateAtCurr : stateAtCurrMinusPred) {
 					typeStateChangeAtStatement(pred, newStateAtCurr);
+					if(newStateAtCurr.equals(ErrorStateNode.v())){
+						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
+						cryptoScanner.getAnalysisListener().typestateErrorAt(this, new StmtWithMethod(pred, cryptoScanner.icfg().getMethodOf(pred)), expectedMethodCalls);
+					}
+				}
+			}
+		}
+	}
+
+
+	private Set<SootMethod> expectedMethodsCallsFor(Collection<StateNode> stateAtPred) {
+		Set<SootMethod> res = Sets.newHashSet();
+		for(StateNode s : stateAtPred){
+			res.addAll(problem.getOrCreateTypestateChangeFunction().getEdgesOutOf(s));
+		}
+		return res;
+	}
+
+
+	private void computeTypestateErrorsForEndOfObjectLifeTime(AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
+		for (Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()) {
+			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
+			if (resultAt == null)
+				continue;
+
+			for (StateNode n : resultAt.getStates()) {
+				if (!n.getAccepting()) {
+					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, new StmtWithMethod(c.getKey(),cryptoScanner.icfg().getMethodOf(c.getKey())));
 				}
 			}
 		}

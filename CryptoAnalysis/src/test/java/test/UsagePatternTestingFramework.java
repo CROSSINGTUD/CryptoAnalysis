@@ -237,15 +237,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						
 
 							@Override
-							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedCalls) {
 								
 							}
 
 							@Override
 							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
 									StmtWithMethod stmt) {
-								// TODO Auto-generated method stub
-								
 							}
 
 						};

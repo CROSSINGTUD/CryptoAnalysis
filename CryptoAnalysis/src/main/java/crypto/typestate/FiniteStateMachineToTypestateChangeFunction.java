@@ -197,6 +197,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		return Sets.newHashSet(methodsInvokedOnInstance);
 	}
 	
+	public Collection<SootMethod> getEdgesOutOf(StateNode n){
+		return outTransitions.get(n);
+	}
+	
 	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
 
 		private final List<CryptSLMethod> label;
