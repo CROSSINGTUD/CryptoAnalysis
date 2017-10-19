@@ -27,6 +27,7 @@ import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.CryptoTypestateAnaylsisProblem;
+import crypto.typestate.ErrorStateNode;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import ideal.Analysis;
 import ideal.AnalysisSolver;
@@ -59,7 +60,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private CryptoTypestateAnaylsisProblem problem;
 	private HashBasedTable<Unit, AccessGraph, TypestateDomainValue<StateNode>> results;
-	private boolean solved;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
@@ -73,36 +73,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		this.spec = spec;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((spec == null) ? 0 : spec.hashCode());
-		result = prime * result + ((factAtStmt == null) ? 0 : factAtStmt.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AnalysisSeedWithSpecification other = (AnalysisSeedWithSpecification) obj;
-		if (spec == null) {
-			if (other.spec != null)
-				return false;
-		} else if (!spec.equals(other.spec))
-			return false;
-		if (factAtStmt == null) {
-			if (other.factAtStmt != null)
-				return false;
-		} else if (!factAtStmt.equals(other.factAtStmt))
-			return false;
-		return true;
-	}
 
 	@Override
 	public String toString() {
@@ -110,33 +80,29 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	public void execute() {
-		if (!solved) {
-			cryptoScanner.getAnalysisListener().seedStarted(this);
-			getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
+		cryptoScanner.getAnalysisListener().seedStarted(this);
+		getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
 
-				@Override
-				public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					parametersToValues = problem.getCollectedValues();
-					allCallsOnObject = problem.getInvokedMethodOnInstance();
-					cryptoScanner.getAnalysisListener().onSeedFinished(seed, solver);
-					AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
-				}
-
-				@Override
-				public void onSeedTimeout(IFactAtStatement seed) {
-					cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
-				}
-			}).analysisForSeed(this);
-			cryptoScanner.getAnalysisListener().seedFinished(this);
-			cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
-			final CryptSLRule rule = spec.getRule();
-			for (ISLConstraint cons : rule.getConstraints()) {
-				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-					cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
-				}
+			@Override
+			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+				parametersToValues = problem.getCollectedValues();
+				allCallsOnObject = problem.getInvokedMethodOnInstance();
+				cryptoScanner.getAnalysisListener().onSeedFinished(seed, solver);
+				AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 			}
-			solved = true;
 
+			@Override
+			public void onSeedTimeout(IFactAtStatement seed) {
+				cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
+			}
+		}).analysisForSeed(this);
+		cryptoScanner.getAnalysisListener().seedFinished(this);
+		cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
+		final CryptSLRule rule = spec.getRule();
+		for (ISLConstraint cons : rule.getConstraints()) {
+			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+				cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false));
+			}
 		}
 	}
 
@@ -162,12 +128,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), c.getValue().getStates());
-
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				//TODO only maintain indirectly ensured predicate as long as they are not killed by the rule
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
+		
+		computeTypestateErrorUnits(unitToStates);
+		computeTypestateErrorsForEndOfObjectLifeTime(solver);
+	}
+
+	private void computeTypestateErrorUnits(Multimap<Unit, StateNode> unitToStates) {
 		for (Unit curr : unitToStates.keySet()) {
 			Collection<StateNode> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
 			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr)) {
@@ -175,6 +146,35 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (StateNode newStateAtCurr : stateAtCurrMinusPred) {
 					typeStateChangeAtStatement(pred, newStateAtCurr);
+					if(newStateAtCurr.equals(ErrorStateNode.v())){
+						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
+						cryptoScanner.getAnalysisListener().typestateErrorAt(this, new StmtWithMethod(pred, cryptoScanner.icfg().getMethodOf(pred)), expectedMethodCalls);
+					}
+				}
+			}
+		}
+	}
+
+
+	private Set<SootMethod> expectedMethodsCallsFor(Collection<StateNode> stateAtPred) {
+		Set<SootMethod> res = Sets.newHashSet();
+		for(StateNode s : stateAtPred){
+			res.addAll(problem.getOrCreateTypestateChangeFunction().getEdgesOutOf(s));
+		}
+		return res;
+	}
+
+
+	private void computeTypestateErrorsForEndOfObjectLifeTime(AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+		Multimap<Unit, AccessGraph> endPathOfPropagation = solver.getEndPathOfPropagation();
+		for (Entry<Unit, AccessGraph> c : endPathOfPropagation.entries()) {
+			TypestateDomainValue<StateNode> resultAt = solver.resultAt(c.getKey(), c.getValue());
+			if (resultAt == null)
+				continue;
+
+			for (StateNode n : resultAt.getStates()) {
+				if (!n.getAccepting()) {
+					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, new StmtWithMethod(c.getKey(),cryptoScanner.icfg().getMethodOf(c.getKey())));
 				}
 			}
 		}
@@ -483,11 +483,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return problem;
 	}
 
-	@Override
-	public boolean isSolved() {
-		return solved;
-	}
-
 	public ClassSpecification getSpec() {
 		return spec;
 	}
@@ -515,6 +510,33 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	
 	public Multimap<CallSiteWithParamIndex, Unit> getExtractedValues(){
 		return parametersToValues;
+	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((spec == null) ? 0 : spec.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AnalysisSeedWithSpecification other = (AnalysisSeedWithSpecification) obj;
+		if (spec == null) {
+			if (other.spec != null)
+				return false;
+		} else if (!spec.equals(other.spec))
+			return false;
+		return true;
 	}
 	
 }

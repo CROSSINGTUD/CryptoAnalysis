@@ -41,6 +41,14 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 		Assertions.assertState(c, 2);
 	}
 
+
+	@Test
+	public void testKeyGenerator3a() throws NoSuchAlgorithmException {
+		KeyGenerator c = KeyGenerator.getInstance("AES");
+		c.generateKey();
+		c.init(128);
+		Assertions.assertState(c, -1);
+	}
 	@Test
 	public void testKeyGenerator4() throws NoSuchAlgorithmException {
 		KeyGenerator c = KeyGenerator.getInstance("AES");

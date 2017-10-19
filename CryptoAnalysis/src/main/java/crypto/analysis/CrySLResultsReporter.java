@@ -17,6 +17,7 @@ import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
+import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
@@ -157,9 +158,9 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedMethodCalls) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.typestateErrorAt(classSpecification, stmt);
+			listen.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 		}
 	}
 	

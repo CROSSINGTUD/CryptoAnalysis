@@ -138,4 +138,29 @@ public class ClassSpecification {
 		return cryptSLRule;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cryptSLRule == null) ? 0 : cryptSLRule.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ClassSpecification other = (ClassSpecification) obj;
+		if (cryptSLRule == null) {
+			if (other.cryptSLRule != null)
+				return false;
+		} else if (!cryptSLRule.equals(other.cryptSLRule))
+			return false;
+		return true;
+	}
+
 }

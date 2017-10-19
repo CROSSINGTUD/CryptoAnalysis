@@ -15,13 +15,14 @@ import crypto.typestate.CallSiteWithParamIndex;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
+import soot.SootMethod;
 import soot.Unit;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
 public interface ICrySLResultsListener extends ResultReporter<TypestateDomainValue<StateNode>> {
 
-	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
+	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedCalls);
 	
 	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
 	

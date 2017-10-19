@@ -64,15 +64,14 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 			outTransitions.putAll(initialState, label);
 		}
 		//All transitions that are not in the state machine 
-		for(TransitionEdge t :  stateMachineGraph.getAllTransitions()){
+		for(StateNode t :  stateMachineGraph.getNodes()){
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
-			Collection<SootMethod> outs =  outTransitions.get(t.from());
+			Collection<SootMethod> outs =  outTransitions.get(t);
 			if(outs == null)
 				outs = Sets.newHashSet();
 			remaining.removeAll(outs);
-			this.addTransition(new MatcherTransition<StateNode>(t.from(), remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
+			this.addTransition(new MatcherTransition<StateNode>(t, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
-		
 	}
 
 	private boolean startAtConstructor() {
@@ -195,6 +194,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 
 	public Collection<SootMethod> getAllMethodsInvokedOnInstance(){
 		return Sets.newHashSet(methodsInvokedOnInstance);
+	}
+	
+	public Collection<SootMethod> getEdgesOutOf(StateNode n){
+		return outTransitions.get(n);
 	}
 	
 	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
