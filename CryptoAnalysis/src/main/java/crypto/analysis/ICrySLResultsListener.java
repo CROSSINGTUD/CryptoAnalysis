@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -9,6 +10,7 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -26,7 +28,7 @@ public interface ICrySLResultsListener extends ResultReporter<TypestateDomainVal
 	
 	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
 	
-	void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite);
+	void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives);
 	
 	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
 

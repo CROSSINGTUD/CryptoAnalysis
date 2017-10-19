@@ -2,6 +2,7 @@ package crypto.analysis;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import boomerang.cfg.IExtendedICFG;
@@ -111,13 +112,15 @@ public class ClassSpecification {
 					continue;
 				InvokeExpr invokeExpr = stmt.getInvokeExpr();
 				SootMethod method = invokeExpr.getMethod();
-				if (isForbiddenMethod(method))
-					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new StmtWithMethod(u, cryptoScanner.icfg().getMethodOf(u)));
+				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
+				if (forbiddenMethod.isPresent()){
+					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new StmtWithMethod(u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
+				}
 			}
 		}
 	}
 
-	private boolean isForbiddenMethod(SootMethod method) {
+	private Optional<CryptSLForbiddenMethod> isForbiddenMethod(SootMethod method) {
 		// TODO replace by real specification once available.
 		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
 //		System.out.println(forbiddenMethods);
@@ -126,11 +129,11 @@ public class ClassSpecification {
 			if(!m.getSilent()){
 				Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
 				if(matchingMatched.contains(method))
-					return true;
+					return Optional.of(m);
 				
 			}
 		}
-		return false;
+		return Optional.empty();
 	}
 
 

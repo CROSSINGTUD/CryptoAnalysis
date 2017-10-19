@@ -2,6 +2,7 @@ package crypto.analysis;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,6 +17,7 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -80,9 +82,9 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 		crr.collectedValues(seed, collectedValues);
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite) {
+	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
 		callToForbiddenMethod.put(classSpecification, callSite);
-		crr.callToForbiddenMethod(classSpecification, callSite);
+		crr.callToForbiddenMethod(classSpecification, callSite,alternatives);
 	}
 
 	public void discoveredSeed(IAnalysisSeed curr) {

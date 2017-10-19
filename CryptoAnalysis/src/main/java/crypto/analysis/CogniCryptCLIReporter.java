@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -9,6 +10,7 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -26,7 +28,7 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {}
 
 	@Override
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite) {}
+	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {}
 
 	@Override
 	public void discoveredSeed(IAnalysisSeed curr) {}

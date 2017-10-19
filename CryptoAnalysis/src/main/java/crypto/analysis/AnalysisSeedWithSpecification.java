@@ -118,7 +118,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			@Override
 			public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
-				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, new StmtWithMethod(callSite, cryptoScanner.icfg().getMethodOf(callSite)));
+				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, new StmtWithMethod(callSite, cryptoScanner.icfg().getMethodOf(callSite)), Lists.newLinkedList());
 			}
 		});
 		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());

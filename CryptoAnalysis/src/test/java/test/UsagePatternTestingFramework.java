@@ -28,6 +28,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
@@ -112,7 +113,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite) {
+							public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
 								for(Assertion e : expectedResults){
 									if(e instanceof CallToForbiddenMethodAssertion){
 										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;

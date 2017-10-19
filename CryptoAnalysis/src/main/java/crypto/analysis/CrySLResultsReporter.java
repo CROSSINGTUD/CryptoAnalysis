@@ -11,6 +11,7 @@ import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.util.StmtWithMethod;
+import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -44,9 +45,9 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite) {
+	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.callToForbiddenMethod(classSpecification, callSite);
+			listen.callToForbiddenMethod(classSpecification, callSite, alternatives);
 		}
 	}
 
