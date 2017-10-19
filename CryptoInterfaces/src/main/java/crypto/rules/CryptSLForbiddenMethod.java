@@ -34,7 +34,18 @@ public class CryptSLForbiddenMethod implements Serializable{
 	}
 	
 	public String toString() {
-		return meth.toString() + "( silent: " + silent + ")";
+		final StringBuilder forbMethod = new StringBuilder();
+		forbMethod.append(meth.toString());
+		forbMethod.append("( silent: " + silent + ")");
+		if (!alternate.isEmpty()) {
+			forbMethod.append(" Alternatives: ");
+		}
+		
+		for (CryptSLMethod meth : alternate) {
+			forbMethod.append(meth.toString());
+		}
+		
+		return forbMethod.toString();
 	}
 	
 }
