@@ -278,4 +278,8 @@ public abstract class CryptoScanner {
 			expectedPredicateObjectBased.put(succ, object, set);
 		}
 	}
+	
+	public StmtWithMethod getMethodFromUnit(Unit unit) {
+		return new StmtWithMethod(unit, icfg().getMethodOf(unit));
+	}
 }

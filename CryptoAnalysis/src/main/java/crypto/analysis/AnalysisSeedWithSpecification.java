@@ -144,10 +144,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, new ConstaintReporter() {
+		constraintSolver = new ConstraintSolver(cryptoScanner, spec, parametersToValues, allCallsOnObject, new ConstraintReporter() {
 			@Override
-			public void constraintViolated(ISLConstraint con) {
-				cryptoScanner.getAnalysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con, null);
+			public void constraintViolated(ISLConstraint con, StmtWithMethod unit) {
+				cryptoScanner.getAnalysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con, unit);
 			}
 
 			@Override
@@ -371,7 +371,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (CryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
 			final ISLConstraint conditional = rem.getConstraint();
 			if (conditional != null) {
-				if (!constraintSolver.evaluate(conditional)) {
+				if (constraintSolver.evaluate(conditional) != null) {
 					remainingPredicates.remove(rem);
 				}
 			}

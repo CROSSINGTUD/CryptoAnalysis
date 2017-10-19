@@ -127,6 +127,7 @@ public class ClassSpecification {
 				Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
 				if(matchingMatched.contains(method))
 					return true;
+				
 			}
 		}
 		return false;
