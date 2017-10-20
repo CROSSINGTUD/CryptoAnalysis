@@ -15,11 +15,11 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final List<StateNode> nodes;
+	private final Set<StateNode> nodes;
 	private final List<TransitionEdge> edges;
 
 	public StateMachineGraph() {
-		nodes = new ArrayList<StateNode>();
+		nodes = new HashSet<StateNode>();
 		edges = new ArrayList<TransitionEdge>();
 	}
 
@@ -60,7 +60,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 
 	
-	public List<StateNode> getNodes() {
+	public Set<StateNode> getNodes() {
 		return nodes;
 	}
 
