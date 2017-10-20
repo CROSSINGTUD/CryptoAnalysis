@@ -32,9 +32,6 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (negated ? 1231 : 1237);
-		result = prime * result + ((optConstraint == null) ? 0 : optConstraint.hashCode());
-		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		result = prime * result + ((predName == null) ? 0 : predName.hashCode());
 		return result;
 	}
