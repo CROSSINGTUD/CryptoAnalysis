@@ -19,3 +19,6 @@
 [submodule "soot-infoflow"]
 	path = soot-infoflow
 	url = https://github.com/johspaeth/soot-infoflow.git
+[submodule "WPDS"]
+	path = WPDS
+	url = https://github.com/johspaeth/WPDS.git

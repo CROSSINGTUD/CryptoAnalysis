@@ -38,6 +38,7 @@ import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
@@ -65,7 +66,7 @@ public abstract class CryptoScanner {
 		}
 	};
 
-	public abstract IExtendedICFG icfg();
+	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
 
 	public CrySLAnalysisResultsAggregator getAnalysisListener() {
 		return resultsAggregator;

@@ -19,6 +19,7 @@ import com.google.common.collect.Table.Cell;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.debugger.IDEVizDebugger;
 import boomerang.util.StmtWithMethod;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -37,7 +38,6 @@ import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
 import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
-import ideal.debug.IDEVizDebugger;
 import ideal.debug.IDebugger;
 import soot.Body;
 import soot.Local;
@@ -48,6 +48,7 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
@@ -63,7 +64,7 @@ import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
-	protected ExtendedICFG icfg;
+	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
 	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
 
 	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
@@ -75,12 +76,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new JimpleBasedInterproceduralCFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 					
 					@Override
-					public IExtendedICFG icfg() {
+					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 						return icfg;
 					}
 

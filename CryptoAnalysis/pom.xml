@@ -37,44 +37,36 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>boomerang</artifactId>
+			<artifactId>boomerangPDS</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>boomerang</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>IDEViz</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>heros</groupId>
 			<artifactId>heros</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
 			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>ideal</groupId>
-			<artifactId>ideal</artifactId>
+			<groupId>de.fraunhofer.iem</groupId>
+			<artifactId>idealPDS</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>ideal</groupId>
-			<artifactId>ideal</artifactId>
+			<groupId>de.fraunhofer.iem</groupId>
+			<artifactId>testCore</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-
-			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
