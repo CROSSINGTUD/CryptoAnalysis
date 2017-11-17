@@ -12,10 +12,17 @@ import com.google.common.collect.Multimap;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
+import boomerang.WeightedBoomerang;
 import boomerang.BoomerangOptions;
+import boomerang.DefaultBoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.PrimitiveTypeAndReferenceForCryptoType;
@@ -28,13 +35,18 @@ import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.WeightFunctions;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import typestate.TypestateAnalysisProblem;
 import typestate.TypestateDomainValue;
 
-public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisProblem<StateNode> {
+public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<TransitionFunction> {
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private Multimap<CallSiteWithParamIndex,Unit> collectedValues = HashMultimap.create(); 
@@ -99,10 +111,9 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(d1, stmt,new AccessGraph((Local) parameter, parameter.getType())));
 		query.addListener(new QueryListener() {
 			@Override
-			public void solved(AdditionalBoomerangQuery q, AliasResults res) {
-				for(Pair<Unit, AccessGraph> v : res.keySet()){
-					if(v.getO2().hasAllocationSite())
-						collectedValues.put(new CallSiteWithParamIndex(stmt, q.accessGraph,index, varNameInSpecification), v.getO2().getSourceStmt());
+			public void solved(AdditionalBoomerangQuery q, Set<Node<Statement,Val>> res) {
+				for(Node<Statement, Val> v : res){
+					collectedValues.put(new CallSiteWithParamIndex(stmt, v.fact(),index, varNameInSpecification), v.stmt().getUnit().get());
 				}
 			}
 		});
@@ -115,39 +126,25 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 	
 	public class AdditionalBoomerangQuery {
 		protected boolean solved;
-		protected final Unit stmt;
-		private final AccessGraph accessGraph;
-		private final AccessGraph context;
+		private final BackwardQuery query;
 		private List<QueryListener> listeners = Lists.newLinkedList();
-		private AliasResults res;
-		public AdditionalBoomerangQuery(AccessGraph context, Unit stmt, AccessGraph ag){
-			this.context = context;
-			this.stmt = stmt;
-			this.accessGraph = ag;
+		private Set<Node<Statement,Val>> res;
+		public AdditionalBoomerangQuery(Unit stmt, Val val){
 		}
 		public void solve() {
-			AliasFinder boomerang = new AliasFinder(new BoomerangOptions() {
+			Boomerang boomerang = new Boomerang(){
 				@Override
-				public IExtendedICFG icfg() {
+				public BiDiInterproceduralCFG<Unit,SootMethod> icfg() {
 					return CryptoTypestateAnaylsisProblem.this.icfg();
 				}
-				
-				@Override
-				public AllocationSiteHandlers allocationSiteHandlers() {
-					return new PrimitiveTypeAndReferenceForCryptoType();
-				}		
-				@Override
-				public long getTimeBudget() {
-					return TimeUnit.SECONDS.toMillis(2);
-				}
-			});
-			boomerang.startQuery();
-			log("Solving query "+ accessGraph + " @ " + stmt);
-			res = boomerang.findAliasAtStmt(accessGraph, stmt, new AllCallersRequester());
+			};
+			boomerang.solve(query);
+			boomerang.getResults();
+//			log("Solving query "+ accessGraph + " @ " + stmt);
+			res = boomerang.getResults();
 			for(QueryListener l : Lists.newLinkedList(listeners)){
 				l.solved(this, res);
 			}
-			log("Solved query "+ accessGraph + " @ " + stmt + " with "+  res);
 			solved = true;
 		}
 		
@@ -158,51 +155,13 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 			}
 			listeners.add(q);
 		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((accessGraph == null) ? 0 : accessGraph.hashCode());
-			result = prime * result + ((context == null) ? 0 : context.hashCode());
-			result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			AdditionalBoomerangQuery other = (AdditionalBoomerangQuery) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
-			if (accessGraph == null) {
-				if (other.accessGraph != null)
-					return false;
-			} else if (!accessGraph.equals(other.accessGraph))
-				return false;
-			if (context == null) {
-				if (other.context != null)
-					return false;
-			} else if (!context.equals(other.context))
-				return false;
-			if (stmt == null) {
-				if (other.stmt != null)
-					return false;
-			} else if (!stmt.equals(other.stmt))
-				return false;
-			return true;
-		}
 		private CryptoTypestateAnaylsisProblem getOuterType() {
 			return CryptoTypestateAnaylsisProblem.this;
 		}
 	}
 	
 	public static interface QueryListener{
-		public void solved(AdditionalBoomerangQuery q, AliasResults res);
+		public void solved(AdditionalBoomerangQuery q, Set<Node<Statement,Val>> res);
 	}
 	
 	public Multimap<CallSiteWithParamIndex, Unit> getCollectedValues(){
@@ -221,8 +180,4 @@ public abstract class CryptoTypestateAnaylsisProblem extends TypestateAnalysisPr
 		invokedMethodsOnInstance.add(method);
 	}
 	
-	public CrySLAnalysisResultsAggregator analysisListener(){
-		return null;
-	}
-
 }

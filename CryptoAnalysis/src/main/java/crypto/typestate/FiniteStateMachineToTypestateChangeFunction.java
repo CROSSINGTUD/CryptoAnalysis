@@ -12,6 +12,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
+import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -25,23 +26,23 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
-import typestate.TypestateDomainValue;
-import typestate.finiteautomata.MatcherStateMachine;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
+import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
+import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
-public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMachine<StateNode> {
+public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
 
-	private StateNode initialState;
+	private State initialState;
 	private Collection<SootMethod> initialTransitonLabel;
 	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
 	private Collection<SootMethod> methodsInvokedOnInstance = Sets.newHashSet();
 	
 	private CryptoTypestateAnaylsisProblem analysisProblem;
 	private StateMachineGraph stateMachineGraph;
-	private Multimap<StateNode, SootMethod> outTransitions = HashMultimap.create();
+	private Multimap<State, SootMethod> outTransitions = HashMultimap.create();
 	private Collection<RefType> analyzedType = Sets.newHashSet();
 
 	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
@@ -49,11 +50,13 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		stateMachineGraph = analysisProblem.getStateMachine();
 		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
-		initialState = stateMachineGraph.getInitialTransition().to();
-		for (final typestate.interfaces.Transition<StateNode> t : stateMachineGraph.getAllTransitions()) {
-			this.addTransition(new LabeledMatcherTransition(t.from(), t.getLabel(),
-					Parameter.This, t.to(), Type.OnCallToReturn));
-			outTransitions.putAll(t.from(), convert(t.getLabel()));
+		initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
+		for (final TransitionEdge t : stateMachineGraph.getAllTransitions()) {
+			WrappedState from = new WrappedState(t.from());
+			WrappedState to = new WrappedState(t.to());
+			this.addTransition(new LabeledMatcherTransition(from, t.getLabel(),
+					Parameter.This, to, Type.OnCallToReturn));
+			outTransitions.putAll(from, convert(t.getLabel()));
 		}
 		if(startAtConstructor()){
 			List<SootMethod> label = Lists.newLinkedList();
@@ -65,12 +68,13 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		}
 		//All transitions that are not in the state machine 
 		for(StateNode t :  stateMachineGraph.getNodes()){
+			State wrapped = new WrappedState(t);
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
-			Collection<SootMethod> outs =  outTransitions.get(t);
+			Collection<SootMethod> outs =  outTransitions.get(wrapped);
 			if(outs == null)
 				outs = Sets.newHashSet();
 			remaining.removeAll(outs);
-			this.addTransition(new MatcherTransition<StateNode>(t, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
+			this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
 	}
 
@@ -96,10 +100,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		return converted;
 	}
 	@Override
-	public Set<Transition<StateNode>> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
+	public Set<Transition> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
 			Unit returnSite, AccessGraph d3) {
-		Set<Transition<StateNode>> res = super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
-		for (Transition<StateNode> t : res) {
+		Set<Transition> res = super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
+		for (Transition t : res) {
 			if (!(t instanceof LabeledMatcherTransition))
 				continue;
 			injectQueryAtCallSite(((LabeledMatcherTransition)t).label,callSite, d1);
@@ -117,10 +121,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	}
 
 	public void injectQueryForSeed(Unit u){
-        injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),u,null);
+        injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),u);
 	}
 	
-	private void injectQueryAtCallSite(List<CryptSLMethod> list, Unit callSite, AccessGraph context) {
+	private void injectQueryAtCallSite(List<CryptSLMethod> list, Unit callSite) {
 		for(CryptSLMethod matchingDescriptor : list){
 			for(SootMethod m : convert(matchingDescriptor)){
 				if (!(callSite instanceof Stmt))
@@ -137,7 +141,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 						if(!param.getKey().equals("_")){
 							soot.Type parameterType = method.getParameterType(index);
 							if(parameterType.toString().equals(param.getValue())){
-								analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index, context);
+								analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index);
 							}
 						}
 						index++;
@@ -148,8 +152,8 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 	}
 
 	@Override
-	public Collection<AccessGraph> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
-		Set<AccessGraph> out = new HashSet<>();
+	public Collection<Val> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
+		Set<Val> out = new HashSet<>();
 		if(startAtConstructor()){
 			if(unit instanceof AssignStmt){
 				AssignStmt as = (AssignStmt) unit;
@@ -157,7 +161,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 					NewExpr newExpr = (NewExpr) as.getRightOp();
 					if(analyzedType.contains(newExpr.getType())){
 						AssignStmt stmt = (AssignStmt) unit;
-						out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+						out.add(new Val(stmt.getLeftOp(), method));
 					}
 				}
 			}
@@ -171,20 +175,13 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		if (calledMethod.isStatic()) {
 			if(unit instanceof AssignStmt){
 				AssignStmt stmt = (AssignStmt) unit;
-				out.add(new AccessGraph((Local) stmt.getLeftOp(), stmt.getLeftOp().getType()));
+				out.add(new Val(stmt.getLeftOp(), method));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-			out.add(new AccessGraph((Local)  iie.getBase(), iie.getBase().getType()));
+			out.add(new Val(iie.getBase(), method));
 		}
 		return out;
-	}
-
-	
-
-	@Override
-	public TypestateDomainValue<StateNode> getBottomElement() {
-		return new TypestateDomainValue<StateNode>(initialState);
 	}
 
 	
@@ -196,18 +193,65 @@ public class FiniteStateMachineToTypestateChangeFunction extends MatcherStateMac
 		return Sets.newHashSet(methodsInvokedOnInstance);
 	}
 	
-	public Collection<SootMethod> getEdgesOutOf(StateNode n){
+	public Collection<SootMethod> getEdgesOutOf(State n){
 		return outTransitions.get(n);
 	}
 	
-	private class LabeledMatcherTransition extends MatcherTransition<StateNode>{
+	private class LabeledMatcherTransition extends MatcherTransition{
 
 		private final List<CryptSLMethod> label;
 
-		public LabeledMatcherTransition(StateNode from, List<CryptSLMethod> label,
-				Parameter param, StateNode to,
+		public LabeledMatcherTransition(State from, List<CryptSLMethod> label,
+				Parameter param, State to,
 				Type type) {
 			super(from,convert(label), param, to, type);
 			this.label = label;
 		}}
+	
+	private class WrappedState implements State{
+		private StateNode delegate;
+
+		WrappedState(StateNode delegate){
+			this.delegate = delegate;
+		}
+		@Override
+		public boolean isErrorState() {
+			return delegate.isErrorState();
+		}
+
+		@Override
+		public boolean isInitialState() {
+			return  delegate.isInitialState();
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((delegate == null) ? 0 : delegate.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			WrappedState other = (WrappedState) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (delegate == null) {
+				if (other.delegate != null)
+					return false;
+			} else if (!delegate.equals(other.delegate))
+				return false;
+			return true;
+		}
+		private FiniteStateMachineToTypestateChangeFunction getOuterType() {
+			return FiniteStateMachineToTypestateChangeFunction.this;
+		}
+		
+	}
 }
