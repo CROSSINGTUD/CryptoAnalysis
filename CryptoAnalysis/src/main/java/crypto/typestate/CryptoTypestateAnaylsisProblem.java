@@ -3,48 +3,32 @@ package crypto.typestate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import boomerang.AliasFinder;
-import boomerang.AliasResults;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.Query;
 import boomerang.WeightedBoomerang;
-import boomerang.BoomerangOptions;
-import boomerang.DefaultBoomerangOptions;
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.context.AllCallersRequester;
-import boomerang.debugger.Debugger;
+import boomerang.jimple.Field;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
-import crypto.analysis.PrimitiveTypeAndReferenceForCryptoType;
 import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import heros.EdgeFunction;
-import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.NonIdentityEdgeFlowHandler;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.OneWeightFunctions;
 import sync.pds.solver.WeightFunctions;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import typestate.TypestateAnalysisProblem;
-import typestate.TypestateDomainValue;
 
 public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<TransitionFunction> {
 
@@ -57,63 +41,65 @@ public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<T
 			return key;
 		}
 	};
-	
-	@Override
-	public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-		return new FiniteStateMachineToTypestateChangeFunction(this);
-	}
 
 	public FiniteStateMachineToTypestateChangeFunction getOrCreateTypestateChangeFunction(){
 		if(this.changeFunction == null)
-			this.changeFunction = createTypestateChangeFunction();
+			this.changeFunction = new FiniteStateMachineToTypestateChangeFunction(this);
 		return this.changeFunction;
+	}
+	
+	@Override
+	protected WeightFunctions<Statement, Val, Statement, TransitionFunction> getForwardCallWeights() {
+		return getOrCreateTypestateChangeFunction();
+	}
+	
+	@Override
+	protected WeightFunctions<Statement, Val, Statement, TransitionFunction> getBackwardCallWeights() {
+		return new OneWeightFunctions<Statement, Val, Statement, TransitionFunction>(TransitionFunction.zero(),TransitionFunction.one());
+	}
+	
+	@Override
+	protected WeightFunctions<Statement, Val, Field, TransitionFunction> getForwardFieldWeights() {
+		return new OneWeightFunctions<Statement, Val, Field, TransitionFunction>(TransitionFunction.zero(),TransitionFunction.one());
+	}
+	
+	@Override
+	protected WeightFunctions<Statement, Val, Field, TransitionFunction> getBackwardFieldWeights() {
+		return new OneWeightFunctions<Statement, Val, Field, TransitionFunction>(TransitionFunction.zero(),TransitionFunction.one());
 	}
 
 	public abstract StateMachineGraph getStateMachine(); 
-	public NonIdentityEdgeFlowHandler<typestate.TypestateDomainValue<StateNode>> nonIdentityEdgeFlowHandler() {
-		return new NonIdentityEdgeFlowHandler<TypestateDomainValue<StateNode>>() {
-
-			@Override
-			public void onCallToReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite,
-					AccessGraph d1, EdgeFunction<TypestateDomainValue<StateNode>> func) {
-			}
-
-			@Override
-			public void onReturnFlow(AccessGraph d2, Unit callSite, AccessGraph d3, Unit returnSite, AccessGraph d1,
-					EdgeFunction<TypestateDomainValue<StateNode>> func) {
-			}
-		};
-	};
+	
 	@Override
-	public void onFinishWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void solve(Query query) {
+		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.asNode().stmt().getUnit().get());
+		super.solve(query);
 		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for(AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()){
 			if(reports != null){
-				reports.boomerangQueryStarted(seed,q);
+				reports.boomerangQueryStarted(query.asNode(),q);
 			}
 			q.solve();
 			if(reports != null){
-				reports.boomerangQueryFinished(seed,q);
+				reports.boomerangQueryFinished(query.asNode(),q);
 			}
 		}
 	}
 	
-	@Override
-	public void onStartWithSeed(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-		getOrCreateTypestateChangeFunction().injectQueryForSeed(seed.getStmt());
-	}
-	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt,final int index,final AccessGraph d1) {
+	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt,final int index) {
 		Value parameter = stmt.getInvokeExpr().getArg(index);
+		SootMethod method = CryptoTypestateAnaylsisProblem.this.icfg().getMethodOf(stmt);
+		Statement s = new Statement(stmt,method);
 		if(!(parameter instanceof Local)){
-			collectedValues.put(new CallSiteWithParamIndex(stmt, d1,index, varNameInSpecification), stmt);
+			collectedValues.put(new CallSiteWithParamIndex(s,new Val(parameter,method), index, varNameInSpecification), stmt);
 			return;
 		}
-		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(d1, stmt,new AccessGraph((Local) parameter, parameter.getType())));
+		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(s,new Val((Local) parameter, method)));
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, Set<Node<Statement,Val>> res) {
 				for(Node<Statement, Val> v : res){
-					collectedValues.put(new CallSiteWithParamIndex(stmt, v.fact(),index, varNameInSpecification), v.stmt().getUnit().get());
+					collectedValues.put(new CallSiteWithParamIndex(s, v.fact(),index, varNameInSpecification), v.stmt().getUnit().get());
 				}
 			}
 		});
@@ -124,13 +110,13 @@ public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<T
 		query.addListener(listener);
 	}
 	
-	public class AdditionalBoomerangQuery {
+	public class AdditionalBoomerangQuery extends BackwardQuery{
+		public AdditionalBoomerangQuery(Statement stmt, Val variable) {
+			super(stmt, variable);
+		}
 		protected boolean solved;
-		private final BackwardQuery query;
 		private List<QueryListener> listeners = Lists.newLinkedList();
 		private Set<Node<Statement,Val>> res;
-		public AdditionalBoomerangQuery(Unit stmt, Val val){
-		}
 		public void solve() {
 			Boomerang boomerang = new Boomerang(){
 				@Override
@@ -138,7 +124,7 @@ public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<T
 					return CryptoTypestateAnaylsisProblem.this.icfg();
 				}
 			};
-			boomerang.solve(query);
+			boomerang.solve(this);
 			boomerang.getResults();
 //			log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults();
@@ -179,5 +165,8 @@ public abstract class CryptoTypestateAnaylsisProblem extends WeightedBoomerang<T
 	public void methodInvokedOnInstance(Unit method) {
 		invokedMethodsOnInstance.add(method);
 	}
+
+	public abstract CrySLAnalysisResultsAggregator analysisListener();
+	
 	
 }

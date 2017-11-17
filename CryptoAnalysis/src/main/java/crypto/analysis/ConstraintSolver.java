@@ -14,7 +14,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
-import boomerang.util.StmtWithMethod;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLConstraint;
@@ -76,11 +76,12 @@ public class ConstraintSolver {
 		Multimap<String, String> varVal = HashMultimap.create();
 		for (CallSiteWithParamIndex callSite : actualValues.keySet()) {
 			for (Unit u : actualValues.get(callSite)) {
-				if (callSite.getStmt().equals(u)) {
+				Stmt cs = callSite.stmt().getUnit().get();
+				if (cs.equals(u)) {
 					if (u instanceof AssignStmt) {
 						varVal.put(callSite.getVarName(), retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(callSite.getIndex()).getValue()));
 					} else {
-						varVal.put(callSite.getVarName(), retrieveConstantFromValue(callSite.getStmt().getUseBoxes().get(callSite.getIndex()).getValue()));
+						varVal.put(callSite.getVarName(), retrieveConstantFromValue(cs.getUseBoxes().get(callSite.getIndex()).getValue()));
 					}
 				} else if (u instanceof AssignStmt) {
 					final Value rightSide = ((AssignStmt) u).getRightOp();
@@ -295,7 +296,7 @@ public class ConstraintSolver {
 		for (CallSiteWithParamIndex callSite : parsAndVals.keySet()) {
 			for (Unit u : parsAndVals.get(callSite)) {
 				if (callSite.getVarName().equals(varName)) {
-					final Unit curStmt = callSite.getStmt();
+					final Unit curStmt = callSite.stmt().getUnit().get();
 					stmtWithMethod = cryptoScanner.getMethodFromUnit(u);
 					if (curStmt.equals(u)) {
 						if (u instanceof AssignStmt) {

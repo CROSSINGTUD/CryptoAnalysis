@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -14,8 +15,13 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.Query;
+import boomerang.WeightedBoomerang;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import boomerang.util.StmtWithMethod;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
@@ -49,6 +55,9 @@ import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
@@ -56,10 +65,10 @@ import typestate.interfaces.ISLConstraint;
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private final ClassSpecification spec;
-	private Analysis<TypestateDomainValue<StateNode>> analysis;
+	private CryptoTypestateAnaylsisProblem analysis;
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private CryptoTypestateAnaylsisProblem problem;
-	private HashBasedTable<Unit, AccessGraph, TypestateDomainValue<StateNode>> results;
+	private HashBasedTable<Unit, Val, TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
@@ -68,15 +77,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Collection<Unit> allCallsOnObject = Sets.newHashSet();
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt, ClassSpecification spec) {
-		super(cryptoScanner,factAtStmt);
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Node<Statement,Val> factAtStmt, ClassSpecification spec) {
+		super(cryptoScanner,factAtStmt.stmt(),factAtStmt.fact());
 		this.spec = spec;
 	}
 
 
 	@Override
 	public String toString() {
-		return "AnalysisSeed [" + factAtStmt + " in " + getMethod() + " with spec " + spec.getRule().getClassName() + "]";
+		return "AnalysisSeed [" + super.toString() + " with spec " + spec.getRule().getClassName() + "]";
 	}
 
 	public void execute() {
@@ -91,10 +100,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				AnalysisSeedWithSpecification.this.onSeedFinished(seed, solver);
 			}
 
-			@Override
-			public void onSeedTimeout(IFactAtStatement seed) {
-				cryptoScanner.getAnalysisListener().onSeedTimeout(AnalysisSeedWithSpecification.this);
-			}
 		}).analysisForSeed(this);
 		cryptoScanner.getAnalysisListener().seedFinished(this);
 		cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
@@ -106,7 +111,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(Node<Statement,Val> seed, WeightedBoomerang<TransitionFunction> solver) {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
@@ -124,7 +129,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		results = solver.results();
+		results = transform(solver.getResults());
 		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
 		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), c.getValue().getStates());
@@ -137,6 +142,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		computeTypestateErrorUnits(unitToStates);
 		computeTypestateErrorsForEndOfObjectLifeTime(solver);
 	}
+
+	private HashBasedTable<Unit, Val, TransitionFunction> transform(
+			Map<Node<Statement, Val>, TransitionFunction> in) {
+
+		HashBasedTable<Unit, Val, TransitionFunction> out = HashBasedTable.create();
+		for(Entry<Node<Statement, Val>, TransitionFunction> e : in.entrySet()){
+			out.put(e.getKey().stmt().getUnit().get(), e.getKey().fact(), e.getValue());
+		}
+		return out;
+	}
+
 
 	private void computeTypestateErrorUnits(Multimap<Unit, StateNode> unitToStates) {
 		for (Unit curr : unitToStates.keySet()) {
@@ -218,16 +234,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(),retObject.getKey())) {
 					AssignStmt as = (AssignStmt) currStmt;
 					Value leftOp = as.getLeftOp();
-					AccessGraph accessGraph = new AccessGraph((Local) leftOp, leftOp.getType());
-					expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph, satisfiesConstraintSytem);
+					Val val = new Val(leftOp, cryptoScanner.icfg().getMethodOf(currStmt));
+					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 				}
 				int i = 0;
 				for (Entry<String, String> p : cryptSLMethod.getParameters()) {
 					if(predicateParameterEquals(predToBeEnsured.getParameters(),p.getKey())){
 						Value param = ie.getArg(i);
 						if (param instanceof Local) {
-							AccessGraph accessGraph = new AccessGraph((Local) param, param.getType());
-							expectPredicateOnOtherObject(predToBeEnsured, currStmt, accessGraph, satisfiesConstraintSytem);
+							Val val = new Val(param, cryptoScanner.icfg().getMethodOf(currStmt));
+							expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 						}
 					}
 					i++;
@@ -247,7 +263,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return false;
 	}
 
-	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt, AccessGraph accessGraph, boolean satisfiesConstraintSytem) {
+	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt, Val accessGraph, boolean satisfiesConstraintSytem) {
 		boolean matched = false;
 		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
 			Type baseType = accessGraph.getBaseType();
@@ -255,7 +271,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				RefType refType = (RefType) baseType;
 				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
-						new AnalysisSeedWithSpecification(cryptoScanner, new FactAtStatement(currStmt, accessGraph), spec));
+						new AnalysisSeedWithSpecification(cryptoScanner, new Node<Statement,Val>(currStmt, accessGraph), spec));
 					matched = true;
 					if (satisfiesConstraintSytem)
 						seed.addEnsuredPredicateFromOtherRule(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
@@ -264,7 +280,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		if (matched)
 			return;
-		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new FactAtStatement(currStmt, accessGraph));
+		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<Statement,Val>(currStmt, accessGraph));
 		cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
@@ -296,30 +312,20 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
+	private WeightedBoomerang<TransitionFunction> getOrCreateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
 		if (analysis == null) {
-			problem = new CryptoTypestateAnaylsisProblem() {
-
+			analysis = new CryptoTypestateAnaylsisProblem() {
+				
 				@Override
-				public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-					return resultReporter;
-				}
-
-				@Override
-				public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-					return new FiniteStateMachineToTypestateChangeFunction(this);
-				}
-
-				@Override
-				public IExtendedICFG icfg() {
+				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 					return cryptoScanner.icfg();
 				}
-
+				
 				@Override
-				public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-					return cryptoScanner.debugger();
+				public Debugger<TransitionFunction> createDebugger() {
+					return new Debugger<>();
 				}
-
+				
 				@Override
 				public StateMachineGraph getStateMachine() {
 					return spec.getRule().getUsagePattern();
@@ -330,7 +336,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					return cryptoScanner.getAnalysisListener();
 				}
 			};
-			analysis = new Analysis<TypestateDomainValue<StateNode>>(problem);
 		}
 		return analysis;
 	}
@@ -429,7 +434,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Unit> collection) {
 		Collection<String> values = new ArrayList<String>();
 		for (Unit u : collection) {
-			if (cswpi.getStmt().equals(u)) {
+			if (cswpi.stmt().getUnit().get().equals(u)) {
 				if (u instanceof AssignStmt) {
 					values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
 				} else {

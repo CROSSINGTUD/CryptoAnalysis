@@ -10,6 +10,8 @@ import com.google.common.collect.Sets;
 
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
@@ -21,6 +23,7 @@ import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import ideal.debug.IDebugger;
 import soot.Unit;
+import sync.pds.solver.nodes.Node;
 import typestate.TypestateDomainValue;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
@@ -30,8 +33,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	private CryptoTypestateAnaylsisProblem problem;
 	private boolean analyzed;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, IFactAtStatement delegate) {
-		super(cryptoScanner,delegate);
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<Statement,Val> delegate) {
+		super(cryptoScanner,delegate.stmt(),delegate.fact());
 	}
 
 	@Override

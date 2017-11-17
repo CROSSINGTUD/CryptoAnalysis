@@ -19,18 +19,20 @@ import boomerang.BoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import boomerang.pointsofindirection.AllocationSiteHandlers;
-import boomerang.util.StmtWithMethod;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import heros.fieldsens.Debugger.NullDebugger;
+import heros.fieldsens.structs.FactAtStatement;
 import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -39,6 +41,7 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
 import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
@@ -51,10 +54,10 @@ public abstract class CryptoScanner {
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
 	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator(icfg(), null);
 
-	private DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(IFactAtStatement key) {
+		protected AnalysisSeedWithEnsuredPredicate createItem(Node<Statement,Val> key) {
 			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
 		}
 	};
@@ -62,7 +65,7 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(key.getStmt(), key.getFact()), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, new Node<Statement,Val>(key.stmt(), key.fact()), key.getSpec());
 		}
 	};
 

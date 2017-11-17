@@ -11,13 +11,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.accessgraph.AccessGraph;
+import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import soot.Local;
 import soot.RefType;
 import soot.SootMethod;
 import soot.Unit;
@@ -26,11 +25,13 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
+import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;
 import typestate.finiteautomata.State;
-import typestate.finiteautomata.Transition;
 import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
@@ -99,27 +100,28 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
+
 	@Override
-	public Set<Transition> getCallToReturnTransitionsFor(AccessGraph d1, Unit callSite, AccessGraph d2,
-			Unit returnSite, AccessGraph d3) {
-		Set<Transition> res = super.getCallToReturnTransitionsFor(d1, callSite, d2, returnSite, d3);
-		for (Transition t : res) {
-			if (!(t instanceof LabeledMatcherTransition))
-				continue;
-			injectQueryAtCallSite(((LabeledMatcherTransition)t).label,callSite, d1);
-		}		
-		if(callSite instanceof Stmt){
-			Stmt stmt = (Stmt) callSite;
-			if(stmt.containsInvokeExpr() && stmt.getInvokeExpr() instanceof InstanceInvokeExpr){
-				InstanceInvokeExpr e = (InstanceInvokeExpr)stmt.getInvokeExpr();
-				if(e.getBase().equals(d2.getBase())){
-					analysisProblem.methodInvokedOnInstance(stmt);
+	public TransitionFunction normal(Node<Statement, Val> curr, Node<Statement, Val> succ) {
+		TransitionFunction val = super.normal(curr, succ);
+		if(curr.stmt().getUnit().get() instanceof Stmt){
+			Stmt callSite = (Stmt) curr.stmt().getUnit().get();
+			if(callSite.containsInvokeExpr()){
+				for (ITransition t : val.values()) {
+					if (!(t instanceof LabeledMatcherTransition))
+						continue;
+					injectQueryAtCallSite(((LabeledMatcherTransition)t).label,callSite);
+				}		
+				if(callSite.getInvokeExpr() instanceof InstanceInvokeExpr){
+					InstanceInvokeExpr e = (InstanceInvokeExpr)callSite.getInvokeExpr();
+					if(e.getBase().equals(curr.fact().value())){
+						analysisProblem.methodInvokedOnInstance(callSite);
+					}
 				}
 			}
 		}
-		return res;
+		return val;
 	}
-
 	public void injectQueryForSeed(Unit u){
         injectQueryAtCallSite(stateMachineGraph.getInitialTransition().getLabel(),u);
 	}

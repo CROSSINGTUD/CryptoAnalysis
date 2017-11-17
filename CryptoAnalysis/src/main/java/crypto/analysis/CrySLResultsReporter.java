@@ -10,7 +10,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
@@ -20,6 +22,7 @@ import ideal.AnalysisSolver;
 import ideal.IFactAtStatement;
 import soot.SootMethod;
 import soot.Unit;
+import sync.pds.solver.nodes.Node;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
@@ -135,25 +138,25 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryStarted(seed, q);
 		}
 	}
 
-	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryFinished(seed, q);
 		}
 	}	
 	
-	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(Node<Statement,Val> seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedFinished(seed, solver);
 		}
 	}
 	
-	public void onSeedTimeout(IFactAtStatement seed) {
+	public void onSeedTimeout(Node<Statement,Val> seed) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedTimeout(seed);
 		}

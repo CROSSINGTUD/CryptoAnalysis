@@ -3,7 +3,6 @@ package crypto.analysis;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -16,20 +15,22 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import crypto.typestate.ErrorStateNode;
 import heros.InterproceduralCFG;
+import heros.fieldsens.structs.FactAtStatement;
 import ideal.AnalysisSolver;
-import ideal.FactAtStatement;
 import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
+import sync.pds.solver.nodes.Node;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
@@ -46,7 +47,7 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 	protected Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, ISLConstraint> internalConstraintViolations = HashMultimap.create();
 	protected Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates = HashBasedTable.create();
-	protected Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> predicateContradictions = HashMultimap.create();
+	protected Multimap<Node<Statement,Val>, Entry<CryptSLPredicate, CryptSLPredicate>> predicateContradictions = HashMultimap.create();
 	protected Stopwatch taintWatch = Stopwatch.createUnstarted();
 	protected Stopwatch typestateWatch = Stopwatch.createUnstarted();
 	protected Stopwatch boomerangWatch = Stopwatch.createUnstarted();
@@ -66,12 +67,12 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 	}
 	
 	@Override
-	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(Node<Statement,Val> seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
 		crr.onSeedFinished(seed, solver);
 	}
 
 	@Override
-	public void onSeedTimeout(IFactAtStatement seed) {
+	public void onSeedTimeout(Node<Statement,Val> seed) {
 		if (seed instanceof IAnalysisSeed) {
 			typestateTimeouts.add((IAnalysisSeed) seed);
 		}
@@ -127,12 +128,12 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 		crr.seedStarted(seed);
 	}
 
-	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
 		boomerangWatch.start();
 		crr.boomerangQueryStarted(seed, q);
 	}
 
-	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
 		if (boomerangWatch.isRunning()) {
 			boomerangWatch.stop();
 		}

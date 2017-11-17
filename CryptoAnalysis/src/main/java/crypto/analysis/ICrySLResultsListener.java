@@ -9,7 +9,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
@@ -19,6 +21,7 @@ import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
+import sync.pds.solver.nodes.Node;
 import typestate.TypestateDomainValue;
 import typestate.interfaces.ISLConstraint;
 
@@ -40,9 +43,9 @@ public interface ICrySLResultsListener extends ResultReporter<TypestateDomainVal
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
 	
-	void onSeedTimeout(IFactAtStatement seed);
+	void onSeedTimeout(Node<Statement,Val> seed);
 	
-	void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver);
+	void onSeedFinished(Node<Statement,Val> seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver);
 	
 	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues);
 
