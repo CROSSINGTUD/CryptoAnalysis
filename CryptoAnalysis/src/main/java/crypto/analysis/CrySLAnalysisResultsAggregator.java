@@ -14,7 +14,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
+import boomerang.Query;
+import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -22,19 +23,18 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
+import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import heros.InterproceduralCFG;
 import heros.fieldsens.structs.FactAtStatement;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
 import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
-public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateDomainValue<StateNode>>{
+public class CrySLAnalysisResultsAggregator{
 
 	private File analyzedFile;
 	private InterproceduralCFG<Unit, SootMethod> icfg;
@@ -67,7 +67,7 @@ public class CrySLAnalysisResultsAggregator implements ResultReporter<TypestateD
 	}
 	
 	@Override
-	public void onSeedFinished(Node<Statement,Val> seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(Query seed, ExtendedIDEALAnaylsis solver) {
 		crr.onSeedFinished(seed, solver);
 	}
 

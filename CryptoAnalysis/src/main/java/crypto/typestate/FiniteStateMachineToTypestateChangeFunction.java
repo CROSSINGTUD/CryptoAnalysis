@@ -17,6 +17,7 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
+import ideal.IDEALAnalysisDefinition;
 import soot.RefType;
 import soot.SootMethod;
 import soot.Unit;
@@ -41,17 +42,17 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
 	private Collection<SootMethod> methodsInvokedOnInstance = Sets.newHashSet();
 	
-	private CryptoTypestateAnaylsisProblem analysisProblem;
-	private StateMachineGraph stateMachineGraph;
+	private final StateMachineGraph stateMachineGraph;
 	private Multimap<State, SootMethod> outTransitions = HashMultimap.create();
 	private Collection<RefType> analyzedType = Sets.newHashSet();
+	private ExtendedIDEALAnaylsis solver;
 
-	public FiniteStateMachineToTypestateChangeFunction(CryptoTypestateAnaylsisProblem analysisProblem) {
-		this.analysisProblem = analysisProblem;
-		stateMachineGraph = analysisProblem.getStateMachine();
-		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
+	public FiniteStateMachineToTypestateChangeFunction(StateMachineGraph fsm, ExtendedIDEALAnaylsis solver) {
+		this.stateMachineGraph = fsm;
+		this.solver = solver;
+		this.initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
-		initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
+		this.initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
 		for (final TransitionEdge t : stateMachineGraph.getAllTransitions()) {
 			WrappedState from = new WrappedState(t.from());
 			WrappedState to = new WrappedState(t.to());
@@ -65,13 +66,13 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				if(m.isConstructor())
 					label.add(m);
 			this.addTransition(new MatcherTransition(initialState, label, Parameter.This, initialState, Type.OnCallToReturn));
-			outTransitions.putAll(initialState, label);
+			this.outTransitions.putAll(initialState, label);
 		}
 		//All transitions that are not in the state machine 
-		for(StateNode t :  stateMachineGraph.getNodes()){
+		for(StateNode t :  this.stateMachineGraph.getNodes()){
 			State wrapped = new WrappedState(t);
 			Collection<SootMethod> remaining = getEdgeLabelMethods();
-			Collection<SootMethod> outs =  outTransitions.get(wrapped);
+			Collection<SootMethod> outs =  this.outTransitions.get(wrapped);
 			if(outs == null)
 				outs = Sets.newHashSet();
 			remaining.removeAll(outs);
@@ -115,7 +116,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				if(callSite.getInvokeExpr() instanceof InstanceInvokeExpr){
 					InstanceInvokeExpr e = (InstanceInvokeExpr)callSite.getInvokeExpr();
 					if(e.getBase().equals(curr.fact().value())){
-						analysisProblem.methodInvokedOnInstance(callSite);
+						solver.methodInvokedOnInstance(callSite);
 					}
 				}
 			}
@@ -143,7 +144,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 						if(!param.getKey().equals("_")){
 							soot.Type parameterType = method.getParameterType(index);
 							if(parameterType.toString().equals(param.getValue())){
-								analysisProblem.addQueryAtCallsite(param.getKey(), stmt, index);
+								solver.addQueryAtCallsite(param.getKey(), stmt, index);
 							}
 						}
 						index++;
@@ -221,6 +222,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 			return delegate.isErrorState();
 		}
 
+		@Override
+		public boolean isAccepting() {
+			return delegate.getAccepting();
+		}
 		@Override
 		public boolean isInitialState() {
 			return  delegate.isInitialState();

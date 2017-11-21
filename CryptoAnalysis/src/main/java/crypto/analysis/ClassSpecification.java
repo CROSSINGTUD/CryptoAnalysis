@@ -5,20 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import boomerang.cfg.IExtendedICFG;
-import boomerang.util.StmtWithMethod;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import ideal.Analysis;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.ResultReporter;
-import ideal.debug.IDebugger;
+import crypto.typestate.ExtendedIDEALAnaylsis;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -27,49 +21,32 @@ import soot.Unit;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.util.queue.QueueReader;
-import typestate.TypestateDomainValue;
+import sync.pds.solver.nodes.Node;
 
 public class ClassSpecification {
-	private CryptoTypestateAnaylsisProblem problem;
+	private ExtendedIDEALAnaylsis solver;
 	private CryptSLRule cryptSLRule;
 	private final CryptoScanner cryptoScanner;
 
 	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
 		this.cryptSLRule = rule;
 		this.cryptoScanner = cScanner;
-		this.problem = new CryptoTypestateAnaylsisProblem() {
-			@Override
-			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return new ResultReporter<TypestateDomainValue<StateNode>>() {
-					@Override
-					public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					}
-
-					@Override
-					public void onSeedTimeout(IFactAtStatement seed) {
-					}
-				};
-			}
-
-			@Override
-			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-				return new FiniteStateMachineToTypestateChangeFunction(this);
-			}
-
-			@Override
-			public IExtendedICFG icfg() {
-				return cryptoScanner.icfg();
-			}
-
-			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return cryptoScanner.debugger();
-			}
-
+		this.solver = new ExtendedIDEALAnaylsis() {
 			@Override
 			public StateMachineGraph getStateMachine() {
 				return cryptSLRule.getUsagePattern();
+			}
+
+			@Override
+			public CrySLAnalysisResultsAggregator analysisListener() {
+				return null;
+			}
+
+			@Override
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return cryptoScanner.icfg();
 			}
 		};
 	}
@@ -78,12 +55,8 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Set<IFactAtStatement> getInitialSeeds() {
-		return new Analysis<TypestateDomainValue<StateNode>>(problem).computeSeeds();
-	}
-
-	public CryptoTypestateAnaylsisProblem getAnalysisProblem() {
-		return problem;
+	public Set<Node<Statement,Val>> getInitialSeeds() {
+		return solver.computeInitialSeeds();
 	}
 
 	@Override

@@ -15,7 +15,10 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.AliasFinder;
 import boomerang.AliasResults;
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
 import boomerang.BoomerangOptions;
+import boomerang.DefaultBoomerangOptions;
 import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.IExtendedICFG;
 import boomerang.context.AllCallersRequester;
@@ -48,7 +51,7 @@ public abstract class CryptoScanner {
 
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
-	private Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
+	private Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
 	private Table<Unit, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
@@ -65,7 +68,7 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, new Node<Statement,Val>(key.stmt(), key.fact()), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.asNode(), key.getSpec());
 		}
 	};
 
@@ -80,7 +83,7 @@ public abstract class CryptoScanner {
 	/**
 	 * @return the existingPredicates
 	 */
-	public Set<EnsuredCryptSLPredicate> getExistingPredicates(Unit stmt, AccessGraph seed) {
+	public Set<EnsuredCryptSLPredicate> getExistingPredicates(Unit stmt, Val seed) {
 		Set<EnsuredCryptSLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
 			set = Sets.newHashSet();
@@ -96,7 +99,7 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
+	public boolean addNewPred(IAnalysisSeed seedObj, Unit stmt, Val seed, EnsuredCryptSLPredicate ensPred) {
 		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(stmt, seed).contains(ensPred);
@@ -112,7 +115,7 @@ public abstract class CryptoScanner {
 		return added;
 	}
 
-	private void onPredicateAdded(Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
+	private void onPredicateAdded(Unit stmt, Val seed, EnsuredCryptSLPredicate ensPred) {
 		if (stmt instanceof Stmt && ((Stmt) stmt).containsInvokeExpr()) {
 			InvokeExpr ivexpr = ((Stmt) stmt).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
@@ -121,30 +124,30 @@ public abstract class CryptoScanner {
 				Value base = iie.getBase();
 				boolean paramMatch = false;
 				for (Value arg : iie.getArgs()) {
-					if (seed.getBase() != null && seed.getBase().equals(arg))
+					if (seed.value() != null && seed.value().equals(arg))
 						paramMatch = true;
 				}
 				if (paramMatch) {
 					for (final ClassSpecification specification : specifications) {
 						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getEdgeLabelMethods().contains(method)) {
-							AliasFinder boomerang = new AliasFinder(new BoomerangOptions() {
-
+							Boomerang boomerang = new Boomerang(new DefaultBoomerangOptions() {
+								//TODO
+//								@Override
+//								public AllocationSiteHandlers allocationSiteHandlers() {
+//									return new PrimitiveTypeAndReferenceForCryptoType();
+//								}
+							}){
 								@Override
-								public IExtendedICFG icfg() {
+								public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 									return CryptoScanner.this.icfg();
 								}
-
-								@Override
-								public AllocationSiteHandlers allocationSiteHandlers() {
-									return new PrimitiveTypeAndReferenceForCryptoType();
-								}
-							});
-							boomerang.startQuery();
-							AccessGraph baseAccessGraph = new AccessGraph((Local) base, base.getType());
-							AliasResults res = boomerang.findAliasAtStmt(baseAccessGraph, stmt, new AllCallersRequester());
-							for (Pair<Unit, AccessGraph> p : res.keySet()) {
-								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p
-									.getO2().getSourceStmt(), p.getO2().deriveWithoutAllocationSite()), specification));
+							};
+							Val val = new Val(base, method);
+							BackwardQuery backwardQuery = new BackwardQuery(new Statement((Stmt) stmt, method), val);
+							boomerang.solve(backwardQuery);
+							Set<Node<Statement, Val>> results = boomerang.getResults(backwardQuery);
+							for (Node<Statement, Val> p : results) {
+								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p, specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}
@@ -155,7 +158,7 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	public boolean deleteNewPred(Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
+	public boolean deleteNewPred(Unit stmt, Val seed, EnsuredCryptSLPredicate ensPred) {
 		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
 		boolean deleted = set.remove(ensPred);
 		assert !existingPredicates.get(stmt, seed).contains(ensPred);
@@ -247,7 +250,7 @@ public abstract class CryptoScanner {
 		return new NullDebugger<>();
 	}
 
-	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(FactAtStatement factAtStatement) {
+	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<Statement,Val> factAtStatement) {
 		boolean addToWorklist = false;
 		if (!seedsWithoutSpec.containsKey(factAtStatement))
 			addToWorklist = true;

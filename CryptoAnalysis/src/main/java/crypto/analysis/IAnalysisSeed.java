@@ -1,12 +1,12 @@
 package crypto.analysis;
 
+import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
+import crypto.typestate.ExtendedIDEALAnaylsis;
 import soot.SootMethod;
-import sync.pds.solver.nodes.Node;
 
-public abstract class IAnalysisSeed extends Node<Statement,Val>{
+public abstract class IAnalysisSeed extends ForwardQuery{
 
 	protected final CryptoScanner cryptoScanner;
 
@@ -16,12 +16,10 @@ public abstract class IAnalysisSeed extends Node<Statement,Val>{
 	}
 	abstract void execute();
 
-	abstract CryptoTypestateAnaylsisProblem getAnalysisProblem();
-
 	abstract boolean contradictsNegations();
 	
 	public SootMethod getMethod(){
-		return stmt.getMethod();
+		return stmt().getMethod();
 	}
 	
 }

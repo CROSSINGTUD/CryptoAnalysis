@@ -24,4 +24,9 @@ public class ErrorStateNode implements State {
 	public boolean isInitialState() {
 		return false;
 	}
+
+	@Override
+	public boolean isAccepting() {
+		return false;
+	}
 }
