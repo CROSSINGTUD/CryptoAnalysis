@@ -1,33 +1,34 @@
 package test;
 
-import boomerang.accessgraph.AccessGraph;
-import crypto.rules.StateNode;
+import boomerang.jimple.Val;
 import crypto.typestate.ErrorStateNode;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
+import typestate.finiteautomata.State;
 
-public class MustBeInState implements Assertion, ComparableResult<StateNode> {
+public class MustBeInState implements Assertion, ComparableResult<TransitionFunction,Val> {
 
 	private Unit unit;
-	private AccessGraph accessGraph;
+	private Val accessGraph;
 	private String state;
 	private boolean satisfied;
 	private boolean imprecise;
 
-	MustBeInState(Unit unit, AccessGraph accessGraph, String state) {
+	MustBeInState(Unit unit, Val accessGraph, String state) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;
 	}
 
-	public void computedResults(TypestateDomainValue<StateNode> results) {
-		for (StateNode s : results.getStates()) {
-			if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.getName().toString())) {
+	public void computedResults(TransitionFunction results) {
+		for (State s : results.getStates()) {
+			if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.toString())) {
 				satisfied |= true;
 				imprecise = results.getStates().size() > 1;
 			} 
 		}
 	}
+
 
 	public Unit getStmt() {
 		return unit;
@@ -43,11 +44,12 @@ public class MustBeInState implements Assertion, ComparableResult<StateNode> {
 		return imprecise;
 	}
 
-	public AccessGraph getAccessGraph() {
+	public Val getVal() {
 		return accessGraph;
 	}
 	@Override
 	public String toString() {
-		return "["+getAccessGraph() + "@" + getStmt() + " must be in state "+ state+"]";
+		return "["+getVal() + "@" + getStmt() + " must be in state "+ state+"]";
 	}
+
 }

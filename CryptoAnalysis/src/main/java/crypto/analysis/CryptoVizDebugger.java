@@ -21,8 +21,8 @@ public class CryptoVizDebugger extends IDEVizDebugger<TypestateDomainValue<State
 
 
 	public void addEnsuredPredicates(
-			Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates) {
-		for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c: existingPredicates.cellSet()){
+			Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates) {
+		for(Cell<Unit, Val, Set<EnsuredCryptSLPredicate>> c: existingPredicates.cellSet()){
 			if(!c.getValue().isEmpty())
 				this.addInformationAtStmt(c.getRowKey(), new SeedWithEnsuredPreds(c.getColumnKey(), c.getValue()));
 		}

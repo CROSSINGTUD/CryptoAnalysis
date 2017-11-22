@@ -31,7 +31,7 @@ public interface ICrySLResultsListener {
 	
 	void ensuredPredicates(Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
 
-	void predicateContradiction(StmtWithMethod stmt, Val key, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
+	void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
 
 	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
 
@@ -41,7 +41,7 @@ public interface ICrySLResultsListener {
 	
 	void onSeedTimeout(Node<Statement,Val> seed);
 	
-	void onSeedFinished(Node<Statement,Val> seed, WeightedBoomerang<TransitionFunction> solver);
+	void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver);
 	
 	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues);
 

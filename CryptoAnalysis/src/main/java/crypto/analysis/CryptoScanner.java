@@ -13,30 +13,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.AliasFinder;
-import boomerang.AliasResults;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
-import boomerang.BoomerangOptions;
 import boomerang.DefaultBoomerangOptions;
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.context.AllCallersRequester;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import boomerang.pointsofindirection.AllocationSiteHandlers;
 import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
-import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import heros.fieldsens.Debugger.NullDebugger;
-import heros.fieldsens.structs.FactAtStatement;
-import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
-import ideal.IFactAtStatement;
-import ideal.debug.IDebugger;
-import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -45,7 +31,6 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
-import typestate.TypestateDomainValue;
 
 public abstract class CryptoScanner {
 
@@ -129,7 +114,7 @@ public abstract class CryptoScanner {
 				}
 				if (paramMatch) {
 					for (final ClassSpecification specification : specifications) {
-						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getEdgeLabelMethods().contains(method)) {
+						if (specification.getInvolvedMethods().contains(method)) {
 							Boomerang boomerang = new Boomerang(new DefaultBoomerangOptions() {
 								//TODO
 //								@Override
@@ -173,11 +158,11 @@ public abstract class CryptoScanner {
 			getAnalysisListener().discoveredSeed(curr);
 			curr.execute();
 		}
-		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
-		if (debugger instanceof CryptoVizDebugger) {
-			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
-			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
-		}
+//		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
+//		if (debugger instanceof CryptoVizDebugger) {
+//			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
+//			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
+//		}
 		checkForContradictions();
 		for (AnalysisSeedWithSpecification seed : seedsWithSpec.values()) {
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
@@ -185,7 +170,7 @@ public abstract class CryptoScanner {
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 		getAnalysisListener().afterAnalysis();
-		debugger().afterAnalysis();
+//		debugger().afterAnalysis();
 	}
 
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> computeMissingPredicates() {
@@ -210,14 +195,14 @@ public abstract class CryptoScanner {
 
 	private void checkForContradictions() {
 		for (Unit generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
-			for (Entry<AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
+			for (Entry<Val, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
 					preds.add(exPred.getPredicate().getPredName());
 				}
 				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						getAnalysisListener().predicateContradiction(new StmtWithMethod(generatingPredicateStmt, icfg().getMethodOf(generatingPredicateStmt)), exPredCell.getKey(), disPair);
+						getAnalysisListener().predicateContradiction(new Node<Statement,Val>(new Statement((Stmt)generatingPredicateStmt, icfg().getMethodOf(generatingPredicateStmt)), exPredCell.getKey()), disPair);
 					}
 				}
 			}
@@ -232,7 +217,7 @@ public abstract class CryptoScanner {
 			if (!isCommandLineMode() && !spec.isLeafRule())
 				continue;
 
-			for (IFactAtStatement seed : spec.getInitialSeeds()) {
+			for (Node<Statement, Val> seed : spec.getInitialSeeds()) {
 				addToWorkList(getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec)));
 			}
 		}
@@ -244,10 +229,6 @@ public abstract class CryptoScanner {
 
 	protected void addToWorkList(IAnalysisSeed analysisSeedWithSpecification) {
 		worklist.add(analysisSeedWithSpecification);
-	}
-
-	public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-		return new NullDebugger<>();
 	}
 
 	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<Statement,Val> factAtStatement) {

@@ -66,17 +66,8 @@ public class CrySLAnalysisResultsAggregator{
 		this.analyzedFile = analyzedFile;
 	}
 	
-	@Override
-	public void onSeedFinished(Query seed, ExtendedIDEALAnaylsis solver) {
+	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
 		crr.onSeedFinished(seed, solver);
-	}
-
-	@Override
-	public void onSeedTimeout(Node<Statement,Val> seed) {
-		if (seed instanceof IAnalysisSeed) {
-			typestateTimeouts.add((IAnalysisSeed) seed);
-		}
-		crr.onSeedTimeout(seed);
 	}
 
 	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
@@ -140,9 +131,9 @@ public class CrySLAnalysisResultsAggregator{
 		crr.boomerangQueryFinished(seed, q);
 	}
 
-	public void predicateContradiction(StmtWithMethod stmt, AccessGraph accessGraph, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-		predicateContradictions.put(new FactAtStatement(stmt.getStmt(), accessGraph), disPair);
-		crr.predicateContradiction(stmt, accessGraph, disPair);
+	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+		predicateContradictions.put(node, disPair);
+		crr.predicateContradiction(node, disPair);
 	}
 
 	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {
@@ -237,7 +228,7 @@ public class CrySLAnalysisResultsAggregator{
 		return this.internalConstraintViolations;
 	}
 
-	public Multimap<IFactAtStatement, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
+	public Multimap<Node<Statement,Val>, Entry<CryptSLPredicate, CryptSLPredicate>> getPredicateContradictions() {
 		return this.predicateContradictions;
 	}
 
@@ -273,10 +264,10 @@ public class CrySLAnalysisResultsAggregator{
 		crr.removeReportListener(reporter);
 	}
 
-	private String object(IFactAtStatement seed) {
+	private String object(Node<Statement,Val> seed) {
 		if (seed == null)
 			return "";
-		return String.format("%s\t %s\t %s", icfg.getMethodOf(seed.getStmt()), seed.getStmt(), seed.getFact());
+		return String.format("%s\t %s\t %s", seed.stmt().getMethod(), seed.stmt(), seed.fact());
 	}
 
 	@Override
@@ -287,13 +278,13 @@ public class CrySLAnalysisResultsAggregator{
 		s += String.format("%s\t %s\t %s\n", "Method", "Statement", "Variable");
 		for (IAnalysisSeed seed : analysisSeeds) {
 			if (seed instanceof AnalysisSeedWithSpecification)
-				s += object(seed) + "\n";
+				s += object(seed.asNode()) + "\n";
 		}
 		s += "The following objects were analyzed without specifications: \n";
 		s += String.format("%s\t %s\t %s\n", "Method", "Statement", "Variable");
 		for (IAnalysisSeed seed : analysisSeeds) {
 			if (seed instanceof AnalysisSeedWithEnsuredPredicate)
-				s += object(seed) + "\n";
+				s += object(seed.asNode()) + "\n";
 		}
 		s += "\n\n================CALL TO FORBIDDEN METHODS==================\n";
 		if (reportedTypestateErros.isEmpty()) {
@@ -316,7 +307,7 @@ public class CrySLAnalysisResultsAggregator{
 				if (seed instanceof AnalysisSeedWithSpecification) {
 					AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
 					s += "\tSpecification type " + seedWithSpec.getSpec().getRule().getClassName() + "\n\t Object: \n";
-					s += "\t\t" + object(seed) + "\n";
+					s += "\t\t" + object(seed.asNode()) + "\n";
 					for (StmtWithMethod stmtsWithMethod : reportedTypestateErros.get(seedWithSpec))
 						s += "\t\t\t " + stmtsWithMethod.getStmt() + " in method " + stmtsWithMethod.getMethod() + " \n";
 				}
@@ -329,7 +320,7 @@ public class CrySLAnalysisResultsAggregator{
 			s += "The following REQUIRED PREDICATES are missing \n";
 			for (AnalysisSeedWithSpecification seed : missingPredicatesObjectBased.keySet()) {
 				s += "\tSpecification type " + seed.getSpec().getRule().getClassName() + "\n\t Object: \n";
-				s += "\t\t" + object(seed) + "\n";
+				s += "\t\t" + object(seed.asNode()) + "\n";
 				s += "\t\t expects the following predicates: \n";
 				for (CryptSLPredicate pred : missingPredicatesObjectBased.get(seed)) {
 					s += "\t\t\t" + pred + "\n";
@@ -343,7 +334,7 @@ public class CrySLAnalysisResultsAggregator{
 			s += "The following CONSTRAINTS are violated \n";
 			for (AnalysisSeedWithSpecification seed : internalConstraintViolations.keySet()) {
 				s += "\tSpecification type " + seed.getSpec().getRule().getClassName() + "\n\t Object: \n";
-				s += "\t\t" + object(seed) + "\n";
+				s += "\t\t" + object(seed.asNode()) + "\n";
 				s += "\t\t the analysis extracted the following statements that create the values \n";
 				for (Entry<CallSiteWithParamIndex, Unit> e : seed.getExtractedValues().entries()) {
 					s += "\t\t\t" + e.getKey().getVarName() + " => " + e.getValue() + "\n";
@@ -364,28 +355,26 @@ public class CrySLAnalysisResultsAggregator{
 			s += "No two predicates contradict\n";
 		else {
 			s += "The following object(s) holds two predicates that contradict \n";
-			for (IFactAtStatement seed : predicateContradictions.keySet()) {
+			for (Node<Statement, Val> seed : predicateContradictions.keySet()) {
 				s += "\t Object " + object(seed) + "\n\t the two predicates contradict\n";
 				for (Entry<CryptSLPredicate, CryptSLPredicate> contradiction : predicateContradictions.get(seed)) {
 					s += "\t\t" + contradiction.getKey() + " and " + contradiction.getValue() + "\n";
 				}
 			}
 		}
-		s += "\n\n================TIMEOUTS==================\n";
-		if (typestateTimeouts.isEmpty())
-			s += "No Seeds timed out\n";
-		else {
-			s += "The analysis for the following seed object(s) timed out (Budget: 30 seconds) \n";
-			for (IFactAtStatement seed : typestateTimeouts) {
-				s += "\t" + object(seed) + "\n";
-			}
-		}
-		s += "\n\n================MAXIMAL ACCESS GRAPH==================\n";
-		s += "Length: " + AccessGraph.MAX_FIELD_COUNT + " Instance: " + AccessGraph.MAX_ACCESS_GRAPH;
+//		s += "\n\n================TIMEOUTS==================\n";
+//		if (typestateTimeouts.isEmpty())
+//			s += "No Seeds timed out\n";
+//		else {
+//			s += "The analysis for the following seed object(s) timed out (Budget: 30 seconds) \n";
+//			for (IFactAtStatement seed : typestateTimeouts) {
+//				s += "\t" + object(seed) + "\n";
+//			}
+//		}
 		return s;
 	}
 
-	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 		crr.ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
 	}
 

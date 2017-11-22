@@ -9,7 +9,7 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
+import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -17,13 +17,11 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
 public class CrySLResultsReporter  {
@@ -60,15 +58,15 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
 		}
 	}
 
-	public void predicateContradiction(StmtWithMethod stmt, AccessGraph key, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.predicateContradiction(stmt, key, disPair);
+			listen.predicateContradiction(node, disPair);
 		}
 	}
 
@@ -150,7 +148,7 @@ public class CrySLResultsReporter  {
 		}
 	}	
 	
-	public void onSeedFinished(Node<Statement,Val> seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedFinished(seed, solver);
 		}

@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,14 +27,14 @@ import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 
 public class ClassSpecification {
-	private ExtendedIDEALAnaylsis solver;
+	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
 	private CryptSLRule cryptSLRule;
 	private final CryptoScanner cryptoScanner;
 
 	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
 		this.cryptSLRule = rule;
 		this.cryptoScanner = cScanner;
-		this.solver = new ExtendedIDEALAnaylsis() {
+		this.extendedIdealAnalysis = new ExtendedIDEALAnaylsis() {
 			@Override
 			public StateMachineGraph getStateMachine() {
 				return cryptSLRule.getUsagePattern();
@@ -56,7 +57,7 @@ public class ClassSpecification {
 	}
 
 	public Set<Node<Statement,Val>> getInitialSeeds() {
-		return solver.computeInitialSeeds();
+		return extendedIdealAnalysis.computeInitialSeeds();
 	}
 
 	@Override
@@ -137,6 +138,10 @@ public class ClassSpecification {
 		} else if (!cryptSLRule.equals(other.cryptSLRule))
 			return false;
 		return true;
+	}
+
+	public Collection<SootMethod> getInvolvedMethods() {
+		return extendedIdealAnalysis.getOrCreateTypestateChangeFunction().getInvolvedMethods();
 	}
 
 }

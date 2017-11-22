@@ -16,8 +16,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
-import boomerang.accessgraph.AccessGraph;
-import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -27,15 +25,10 @@ import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
-import ideal.IDEALAnalysis;
-import ideal.IDEALAnalysisDefinition;
-import ideal.ResultReporter;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -51,11 +44,10 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
-import sync.pds.solver.WeightFunctions;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import typestate.TypestateDomainValue;
 import typestate.finiteautomata.ITransition;
+import typestate.finiteautomata.State;
 import typestate.interfaces.ICryptSLPredicateParameter;
 import typestate.interfaces.ISLConstraint;
 
@@ -66,7 +58,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
 	private HashBasedTable<Unit, Val, TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
-	private Multimap<Unit, StateNode> typeStateChange = HashMultimap.create();
+	private Multimap<Unit, State> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
@@ -102,13 +94,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		analysis.run(this.asNode(), resultReporter);
+		WeightedBoomerang<TransitionFunction> solver = analysis.run(this.asNode());
 		parametersToValues = analysis.getCollectedValues();
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver);
-		AnalysisSeedWithSpecification.this.onSeedFinished(this, solver);
+		onSeedFinished(solver);
 		cryptoScanner.getAnalysisListener().seedFinished(this);
-		cryptoScanner.getAnalysisListener().collectedValues(this, problem.getCollectedValues());
+		cryptoScanner.getAnalysisListener().collectedValues(this, analysis.getCollectedValues());
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {
 			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
@@ -117,7 +109,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	public void onSeedFinished(Node<Statement,Val> seed, ExtendedIDEALAnaylsis solver) {
+	public void onSeedFinished(WeightedBoomerang<TransitionFunction> solver) {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
@@ -136,9 +128,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
 		results = transform(analysis.getResults());
-		Multimap<Unit, StateNode> unitToStates = HashMultimap.create();
+		Multimap<Unit, State> unitToStates = HashMultimap.create();
 		for (Cell<Unit, Val, TransitionFunction> c : results.cellSet()) {
-			unitToStates.putAll(c.getRowKey(), c.getValue().getStates());
+			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				//TODO only maintain indirectly ensured predicate as long as they are not killed by the rule
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
@@ -148,6 +140,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		computeTypestateErrorUnits(unitToStates);
 		computeTypestateErrorsForEndOfObjectLifeTime(solver);
 	}
+
 
 	private HashBasedTable<Unit, Val, TransitionFunction> transform(
 			Map<Node<Statement, Val>, TransitionFunction> in) {
@@ -160,13 +153,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 
-	private void computeTypestateErrorUnits(Multimap<Unit, StateNode> unitToStates) {
+	private void computeTypestateErrorUnits(Multimap<Unit, State> unitToStates) {
 		for (Unit curr : unitToStates.keySet()) {
-			Collection<StateNode> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
+			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
 			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr)) {
-				Collection<StateNode> stateAtPred = unitToStates.get(pred);
+				Collection<State> stateAtPred = unitToStates.get(pred);
 				stateAtCurrMinusPred.removeAll(stateAtPred);
-				for (StateNode newStateAtCurr : stateAtCurrMinusPred) {
+				for (State newStateAtCurr : stateAtCurrMinusPred) {
 					typeStateChangeAtStatement(pred, newStateAtCurr);
 					if(newStateAtCurr.equals(ErrorStateNode.v())){
 						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
@@ -178,16 +171,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 
-	private Set<SootMethod> expectedMethodsCallsFor(Collection<StateNode> stateAtPred) {
+	private Set<SootMethod> expectedMethodsCallsFor(Collection<State> stateAtPred) {
 		Set<SootMethod> res = Sets.newHashSet();
-		for(StateNode s : stateAtPred){
-			res.addAll(problem.getOrCreateTypestateChangeFunction().getEdgesOutOf(s));
+		for(State s : stateAtPred){
+			res.addAll(analysis.getOrCreateTypestateChangeFunction().getEdgesOutOf(s));
 		}
 		return res;
 	}
 
 
-	private void computeTypestateErrorsForEndOfObjectLifeTime(ExtendedIDEALAnaylsis solver) {
+	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {
 		Map<Node<Statement, Val>, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
 		for (Entry<Node<Statement, Val>, TransitionFunction> c : endPathOfPropagation.entrySet()) {
 			for (ITransition n : c.getValue().values()) {
@@ -200,12 +193,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void typeStateChangeAtStatement(Unit curr, StateNode stateNode) {
+	private void typeStateChangeAtStatement(Unit curr, State stateNode) {
 		typeStateChange.put(curr, stateNode);
 		onAddedTypestateChange(curr, stateNode);
 	}
 
-	private void onAddedTypestateChange(Unit curr, StateNode stateNode) {
+	private void onAddedTypestateChange(Unit curr, State stateNode) {
 		for (CryptSLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
 			if (predToBeEnsured.isNegated()) {
 				continue;
@@ -217,7 +210,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit currStmt, StateNode stateNode) {
+	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit currStmt, State stateNode) {
 		if (predToBeEnsured.isNegated()) {
 			return;
 		}
@@ -298,25 +291,44 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		indirectlyEnsuredPredicates.add(ensuredCryptSLPredicate);
 		if (results == null)
 			return;
-		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> c : results.cellSet()) {
+		for (Cell<Unit, Val, TransitionFunction> c : results.cellSet()) {
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
 	}
 
-	private void expectPredicateWhenThisObjectIsInState(StateNode stateNode, Unit currStmt, CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
+	private void expectPredicateWhenThisObjectIsInState(State stateNode, Unit currStmt, CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
 		cryptoScanner.expectPredicate(this, currStmt, predToBeEnsured);
 
 		if (!satisfiesConstraintSytem)
 			return;
-		for (Cell<Unit, AccessGraph, TypestateDomainValue<StateNode>> e : results.cellSet()) {
+		for (Cell<Unit, Val, TransitionFunction> e : results.cellSet()) {
 			// TODO check for any reachable state that don't kill
 			// predicates.
-			if (e.getValue().contains(stateNode)) {
+			if (containsTargetState(e.getValue(),stateNode)) {
 				cryptoScanner.addNewPred(this, e.getRowKey(), e.getColumnKey(), new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 			}
 		}
+	}
+
+
+	private boolean containsTargetState(TransitionFunction value, State stateNode) {
+		//TODO we still need to implement PhaseII of IDE in IDEAL
+		for(ITransition t : value.values()){
+			if(t.to().equals(stateNode))
+				return true;
+		}
+		return false;
+	}
+
+	private Iterable<? extends State> getTargetStates(TransitionFunction value) {
+		//TODO we still need to implement PhaseII of IDE in IDEAL
+		Set<State> res = Sets.newHashSet();
+		for(ITransition t : value.values()){
+			res.add(t.to());
+		}
+		return res;
 	}
 
 
@@ -469,14 +481,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void addEnsuredPredicate(EnsuredCryptSLPredicate ensPred) {
 		if (ensuredPredicates.add(ensPred)) {
-			for (Entry<Unit, StateNode> e : typeStateChange.entries())
+			for (Entry<Unit, State> e : typeStateChange.entries())
 				onAddedTypestateChange(e.getKey(), e.getValue());
 		}
 	}
 
-	private boolean isPredicateGeneratingState(CryptSLPredicate ensPred, StateNode stateNode) {
+	private boolean isPredicateGeneratingState(CryptSLPredicate ensPred, State stateNode) {
 		return ensPred instanceof CryptSLCondPredicate && ((CryptSLCondPredicate) ensPred).getConditionalMethods()
-			.contains(stateNode) || (!(ensPred instanceof CryptSLCondPredicate) && stateNode.getAccepting());
+			.contains(stateNode) || (!(ensPred instanceof CryptSLCondPredicate) && stateNode.isAccepting());
 	}
 
 	@Override

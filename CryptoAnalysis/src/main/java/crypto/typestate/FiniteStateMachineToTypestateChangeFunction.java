@@ -71,7 +71,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		//All transitions that are not in the state machine 
 		for(StateNode t :  this.stateMachineGraph.getNodes()){
 			State wrapped = new WrappedState(t);
-			Collection<SootMethod> remaining = getEdgeLabelMethods();
+			Collection<SootMethod> remaining = getInvolvedMethods();
 			Collection<SootMethod> outs =  this.outTransitions.get(wrapped);
 			if(outs == null)
 				outs = Sets.newHashSet();
@@ -188,7 +188,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	}
 
 	
-	public Collection<SootMethod> getEdgeLabelMethods(){
+	public Collection<SootMethod> getInvolvedMethods(){
 		return Sets.newHashSet(edgeLabelMethods);
 	}
 

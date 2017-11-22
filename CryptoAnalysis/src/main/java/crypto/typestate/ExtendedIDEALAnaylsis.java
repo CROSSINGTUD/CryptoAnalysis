@@ -12,17 +12,15 @@ import com.google.common.collect.Multimap;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.rules.StateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
-import ideal.PerSeedAnalysisContext;
-import ideal.ResultReporter;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -45,23 +43,18 @@ public abstract class ExtendedIDEALAnaylsis {
 		}
 	};
 	private final IDEALAnalysis<TransitionFunction> analysis;
-	private PerSeedAnalysisContext<TransitionFunction> seedAnalysis;
+	private WeightedBoomerang<TransitionFunction> solver;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
 			public Collection<Val> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
-				return null;
+				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt, calledMethod);
 			}
 
 			@Override
 			public WeightFunctions<Statement, Val, Statement, TransitionFunction> weightFunctions() {
 				return getOrCreateTypestateChangeFunction();
-			}
-
-			@Override
-			public ResultReporter<TransitionFunction> resultReporter() {
-				return null;
 			}
 
 			@Override
@@ -104,10 +97,10 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract StateMachineGraph getStateMachine();
 
-	public void run(Node<Statement, Val> query, final ResultReporter<TransitionFunction> resultReporter) {
+	public WeightedBoomerang<TransitionFunction> run(Node<Statement, Val> query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt().getUnit().get());
 
-		seedAnalysis = analysis.run(query);
+		solver = analysis.run(query);
 		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
 			if (reports != null) {
@@ -118,6 +111,7 @@ public abstract class ExtendedIDEALAnaylsis {
 				reports.boomerangQueryFinished(query, q);
 			}
 		}
+		return solver;
 	}
 
 
@@ -210,17 +204,16 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLAnalysisResultsAggregator analysisListener();
 
-	public Map<Node<Statement, Val>, TransitionFunction> getObjectDestructingStatements(
-			AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		return null;
-	}
-
 	public Set<Node<Statement, Val>> computeInitialSeeds() {
 		return analysis.computeSeeds();
 	}
 
 	public Map<Node<Statement, Val>, TransitionFunction> getResults() {
-		return seedAnalysis.getResults();
+		return solver.getResults();
+	}
+
+	public Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> run() {
+		return analysis.run();
 	}
 
 }

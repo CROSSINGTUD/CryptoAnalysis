@@ -8,18 +8,19 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.WeightedBoomerang;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
 public class CogniCryptCLIReporter extends CrySLAnalysisListener {
@@ -34,7 +35,7 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	public void discoveredSeed(IAnalysisSeed curr) {}
 
 	@Override
-	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {}
+	public void ensuredPredicates(Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {}
 
 	@Override
 	public void seedFinished(IAnalysisSeed seed) {
@@ -47,13 +48,13 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {}
+	public void boomerangQueryStarted(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {}
 
 	@Override
-	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {}
+	public void boomerangQueryFinished(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {}
 
 	@Override
-	public void predicateContradiction(StmtWithMethod stmt, AccessGraph accessGraph, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {}
+	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {}
 
 	@Override
 	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {}
@@ -83,12 +84,12 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	public void afterPredicateCheck(AnalysisSeedWithSpecification seed) {}
 
 	@Override
-	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
 
 	}
 
 	@Override
-	public void onSeedTimeout(IFactAtStatement seed) {
+	public void onSeedTimeout(Node<Statement,Val> seed) {
 
 	}
 

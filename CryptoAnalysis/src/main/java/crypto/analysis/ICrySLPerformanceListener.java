@@ -2,7 +2,7 @@ package crypto.analysis;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import sync.pds.solver.nodes.Node;
 
 public interface ICrySLPerformanceListener {
