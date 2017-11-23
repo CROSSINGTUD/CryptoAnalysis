@@ -34,7 +34,9 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 	@Test
 	public void testCipher2() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");
+		int x = 1;
 		c.init(1, new SecretKeySpec(null, "AES"));
+		int y = 1;
 
 		Assertions.assertState(c, 1);
 	}

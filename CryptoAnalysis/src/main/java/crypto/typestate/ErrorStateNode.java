@@ -29,4 +29,9 @@ public class ErrorStateNode implements State {
 	public boolean isAccepting() {
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return "ERR";
+	}
 }

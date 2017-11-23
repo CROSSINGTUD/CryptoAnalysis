@@ -3,16 +3,15 @@ package test;
 import boomerang.jimple.Val;
 import crypto.typestate.ErrorStateNode;
 import soot.Unit;
-import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
 
-public class MustBeInState implements Assertion, ComparableResult<TransitionFunction,Val> {
+public class MustBeInState implements Assertion, ComparableResult<State,Val> {
 
 	private Unit unit;
 	private Val accessGraph;
 	private String state;
 	private boolean satisfied;
-	private boolean imprecise;
+	private int imprecise;
 
 	MustBeInState(Unit unit, Val accessGraph, String state) {
 		this.unit = unit;
@@ -20,13 +19,11 @@ public class MustBeInState implements Assertion, ComparableResult<TransitionFunc
 		this.state = state;
 	}
 
-	public void computedResults(TransitionFunction results) {
-		for (State s : results.getStates()) {
-			if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.toString())) {
-				satisfied |= true;
-				imprecise = results.getStates().size() > 1;
-			} 
-		}
+	public void computedResults(State s) {
+		if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.toString())) {
+			satisfied |= true;
+			imprecise++;
+		} 
 	}
 
 
@@ -41,7 +38,7 @@ public class MustBeInState implements Assertion, ComparableResult<TransitionFunc
 
 	@Override
 	public boolean isImprecise() {
-		return imprecise;
+		return imprecise > 1;
 	}
 
 	public Val getVal() {

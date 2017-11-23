@@ -74,7 +74,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				TestingResultReporter<TransitionFunction> testingResultReporter = new TestingResultReporter<>(expectedResults);
+				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
 				Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(Node<Statement, Val> seed : seedToSolvers.keySet()){
 					for(Query q : seedToSolvers.get(seed).getSolvers().keySet()){

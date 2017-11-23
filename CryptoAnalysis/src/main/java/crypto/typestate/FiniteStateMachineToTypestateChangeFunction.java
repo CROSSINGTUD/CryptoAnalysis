@@ -37,7 +37,6 @@ import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
 
-	private State initialState;
 	private Collection<SootMethod> initialTransitonLabel;
 	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
 	private Collection<SootMethod> methodsInvokedOnInstance = Sets.newHashSet();
@@ -52,7 +51,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		this.solver = solver;
 		this.initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
-		this.initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
+		WrappedState initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
 		for (final TransitionEdge t : stateMachineGraph.getAllTransitions()) {
 			WrappedState from = new WrappedState(t.from());
 			WrappedState to = new WrappedState(t.to());
@@ -212,10 +211,12 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		}}
 	
 	private class WrappedState implements State{
-		private StateNode delegate;
+		private final StateNode delegate;
+		private final boolean initialState;
 
 		WrappedState(StateNode delegate){
 			this.delegate = delegate;
+			this.initialState = stateMachineGraph.getInitialTransition().to().equals(delegate);
 		}
 		@Override
 		public boolean isErrorState() {
@@ -228,13 +229,12 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		}
 		@Override
 		public boolean isInitialState() {
-			return  delegate.isInitialState();
+			return initialState;
 		}
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((delegate == null) ? 0 : delegate.hashCode());
 			return result;
 		}
@@ -247,8 +247,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 			if (getClass() != obj.getClass())
 				return false;
 			WrappedState other = (WrappedState) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
 			if (delegate == null) {
 				if (other.delegate != null)
 					return false;
@@ -256,9 +254,10 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				return false;
 			return true;
 		}
-		private FiniteStateMachineToTypestateChangeFunction getOuterType() {
-			return FiniteStateMachineToTypestateChangeFunction.this;
-		}
 		
+		@Override
+		public String toString() {
+			return delegate.getName().toString();
+		}
 	}
 }
