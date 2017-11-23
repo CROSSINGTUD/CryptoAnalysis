@@ -219,7 +219,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for (Node<Statement, Val> seed : spec.getInitialSeeds()) {
-				addToWorkList(getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec)));
+				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
 			}
 		}
 	}
