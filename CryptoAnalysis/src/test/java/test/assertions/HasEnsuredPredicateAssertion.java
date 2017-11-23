@@ -1,6 +1,6 @@
 package test.assertions;
 
-import boomerang.accessgraph.AccessGraph;
+import boomerang.jimple.Val;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import soot.jimple.Stmt;
 import test.Assertion;
@@ -8,15 +8,15 @@ import test.Assertion;
 public class HasEnsuredPredicateAssertion implements Assertion {
 
 	private Stmt stmt;
-	private AccessGraph val;
+	private Val val;
 	private boolean satisfied;
 
-	public HasEnsuredPredicateAssertion(Stmt stmt, AccessGraph val) {
+	public HasEnsuredPredicateAssertion(Stmt stmt,  Val val) {
 		this.stmt = stmt;
 		this.val = val;
 	}
 	
-	public AccessGraph getAccessGraph() {
+	public Val getAccessGraph() {
 		return val;
 	}
 
@@ -35,7 +35,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 		return stmt;
 	}
 
-	public void reported(AccessGraph seed, EnsuredCryptSLPredicate pred) {
+	public void reported(Val seed, EnsuredCryptSLPredicate pred) {
 		if(seed.equals(val))
 			satisfied = true;
 	}

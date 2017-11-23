@@ -31,6 +31,7 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
+import wpds.impl.Weight.NoWeight;
 
 public abstract class CryptoScanner {
 
@@ -130,9 +131,9 @@ public abstract class CryptoScanner {
 							Val val = new Val(base, method);
 							BackwardQuery backwardQuery = new BackwardQuery(new Statement((Stmt) stmt, method), val);
 							boomerang.solve(backwardQuery);
-							Set<Node<Statement, Val>> results = boomerang.getResults(backwardQuery);
-							for (Node<Statement, Val> p : results) {
-								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p, specification));
+							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
+							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
+								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, new Node<Statement,Val>(p.getRowKey(),p.getColumnKey()), specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}

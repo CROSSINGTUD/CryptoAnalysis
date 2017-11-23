@@ -1,8 +1,10 @@
-package test;
+package test.assertions;
 
 import boomerang.jimple.Val;
 import crypto.typestate.ErrorStateNode;
 import soot.Unit;
+import test.Assertion;
+import test.ComparableResult;
 import typestate.finiteautomata.State;
 
 public class MustBeInState implements Assertion, ComparableResult<State,Val> {
@@ -13,7 +15,7 @@ public class MustBeInState implements Assertion, ComparableResult<State,Val> {
 	private boolean satisfied;
 	private int imprecise;
 
-	MustBeInState(Unit unit, Val accessGraph, String state) {
+	public MustBeInState(Unit unit, Val accessGraph, String state) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;

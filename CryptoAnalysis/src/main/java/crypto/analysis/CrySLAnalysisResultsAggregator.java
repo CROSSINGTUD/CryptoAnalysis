@@ -21,13 +21,9 @@ import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import heros.InterproceduralCFG;
-import heros.fieldsens.structs.FactAtStatement;
-import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;
@@ -119,12 +115,12 @@ public class CrySLAnalysisResultsAggregator{
 		crr.seedStarted(seed);
 	}
 
-	public void boomerangQueryStarted(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
 		boomerangWatch.start();
 		crr.boomerangQueryStarted(seed, q);
 	}
 
-	public void boomerangQueryFinished(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
 		if (boomerangWatch.isRunning()) {
 			boomerangWatch.stop();
 		}

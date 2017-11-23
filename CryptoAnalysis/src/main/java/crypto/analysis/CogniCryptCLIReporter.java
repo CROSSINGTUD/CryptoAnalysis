@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
+import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -48,10 +49,10 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void boomerangQueryStarted(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {}
+	public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {}
 
 	@Override
-	public void boomerangQueryFinished(Node<Statement,Val> seed, AdditionalBoomerangQuery q) {}
+	public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {}
 
 	@Override
 	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {}

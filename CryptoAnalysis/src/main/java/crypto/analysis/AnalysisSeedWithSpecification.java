@@ -13,6 +13,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
@@ -94,7 +95,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		WeightedBoomerang<TransitionFunction> solver = analysis.run(this.asNode());
+		WeightedBoomerang<TransitionFunction> solver = analysis.run(this);
 		parametersToValues = analysis.getCollectedValues();
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver);
@@ -143,11 +144,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 
 	private HashBasedTable<Unit, Val, TransitionFunction> transform(
-			Map<Node<Statement, Val>, TransitionFunction> in) {
+			Table<Statement, Val, TransitionFunction> table) {
 
 		HashBasedTable<Unit, Val, TransitionFunction> out = HashBasedTable.create();
-		for(Entry<Node<Statement, Val>, TransitionFunction> e : in.entrySet()){
-			out.put(e.getKey().stmt().getUnit().get(), e.getKey().fact(), e.getValue());
+		for(Cell<Statement, Val, TransitionFunction> e : table.cellSet()){
+			out.put(e.getRowKey().getUnit().get(), e.getColumnKey(), e.getValue());
 		}
 		return out;
 	}
@@ -181,12 +182,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {
-		Map<Node<Statement, Val>, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
-		for (Entry<Node<Statement, Val>, TransitionFunction> c : endPathOfPropagation.entrySet()) {
+		Table<Statement, Val, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
+		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
 			for (ITransition n : c.getValue().values()) {
 				if (!n.to().isAccepting()) {
-					Node<Statement, Val> key = c.getKey();
-					Statement s = key.stmt();
+					Statement s = c.getRowKey();
 					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, new StmtWithMethod(s.getUnit().get(), s.getMethod()));
 				}
 			}

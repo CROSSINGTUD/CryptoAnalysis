@@ -9,9 +9,12 @@ import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
@@ -30,6 +33,7 @@ import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.WeightFunctions;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
+import wpds.impl.Weight.NoWeight;
 
 public abstract class ExtendedIDEALAnaylsis {
 
@@ -97,7 +101,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract StateMachineGraph getStateMachine();
 
-	public WeightedBoomerang<TransitionFunction> run(Node<Statement, Val> query) {
+	public WeightedBoomerang<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt().getUnit().get());
 
 		solver = analysis.run(query);
@@ -128,10 +132,10 @@ public abstract class ExtendedIDEALAnaylsis {
 				.getOrCreate(new AdditionalBoomerangQuery(s, new Val((Local) parameter, method)));
 		query.addListener(new QueryListener() {
 			@Override
-			public void solved(AdditionalBoomerangQuery q, Set<Node<Statement, Val>> res) {
-				for (Node<Statement, Val> v : res) {
-					collectedValues.put(new CallSiteWithParamIndex(s, v.fact(), index, varNameInSpecification),
-							v.stmt().getUnit().get());
+			public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res) {
+				for (Cell<Statement, Val, NoWeight> v : res.cellSet()) {
+					collectedValues.put(new CallSiteWithParamIndex(s, v.getColumnKey(), index, varNameInSpecification),
+							v.getRowKey().getUnit().get());
 				}
 			}
 		});
@@ -151,7 +155,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 		protected boolean solved;
 		private List<QueryListener> listeners = Lists.newLinkedList();
-		private Set<Node<Statement, Val>> res;
+		private Table<Statement, Val, NoWeight> res;
 
 		public void solve() {
 			Boomerang boomerang = new Boomerang() {
@@ -183,7 +187,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 	public static interface QueryListener {
-		public void solved(AdditionalBoomerangQuery q, Set<Node<Statement, Val>> res);
+		public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res);
 	}
 
 	public Multimap<CallSiteWithParamIndex, Unit> getCollectedValues() {
@@ -208,7 +212,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		return analysis.computeSeeds();
 	}
 
-	public Map<Node<Statement, Val>, TransitionFunction> getResults() {
+	public Table<Statement, Val, TransitionFunction> getResults() {
 		return solver.getResults();
 	}
 

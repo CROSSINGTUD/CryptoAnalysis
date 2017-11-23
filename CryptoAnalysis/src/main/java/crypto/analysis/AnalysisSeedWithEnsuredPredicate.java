@@ -5,8 +5,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -22,7 +25,7 @@ import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private Map<Node<Statement, Val>, TransitionFunction> analysisResults = Maps.newHashMap();
+	private Table<Statement, Val, TransitionFunction> analysisResults = HashBasedTable.create();
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
@@ -35,7 +38,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
-		solver.run(this.asNode());
+		solver.run(this);
 		analysisResults = solver.getResults();
 		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
@@ -47,8 +50,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		if(analysisResults == null)
 			return;
 
-		for(Entry<Node<Statement, Val>, TransitionFunction> c : analysisResults.entrySet()){
-			cryptoScanner.addNewPred(this,c.getKey().stmt().getUnit().get(), c.getKey().fact(), pred);
+		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.cellSet()){
+			cryptoScanner.addNewPred(this,c.getRowKey().getUnit().get(), c.getColumnKey(), pred);
 		}
 	}
 
