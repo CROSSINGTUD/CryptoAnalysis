@@ -128,7 +128,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		results = transform(analysis.getResults());
+		results = transform(analysis.getResults(this));
 		Multimap<Unit, State> unitToStates = HashMultimap.create();
 		for (Cell<Unit, Val, TransitionFunction> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));

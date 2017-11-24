@@ -14,12 +14,16 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.DefaultBoomerangOptions;
+import boomerang.IntAndStringBoomerangOptions;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.StateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
@@ -28,6 +32,7 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.WeightFunctions;
@@ -158,13 +163,14 @@ public abstract class ExtendedIDEALAnaylsis {
 		private Table<Statement, Val, NoWeight> res;
 
 		public void solve() {
-			Boomerang boomerang = new Boomerang() {
+			Boomerang boomerang = new Boomerang(new IntAndStringBoomerangOptions()) {
 				@Override
 				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 					return ExtendedIDEALAnaylsis.this.icfg();
 				}
 			};
 			boomerang.solve(this);
+			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults(this);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
@@ -212,8 +218,8 @@ public abstract class ExtendedIDEALAnaylsis {
 		return analysis.computeSeeds();
 	}
 
-	public Table<Statement, Val, TransitionFunction> getResults() {
-		return solver.getResults();
+	public Table<Statement, Val, TransitionFunction> getResults(IAnalysisSeed seed) {
+		return solver.getResults(seed);
 	}
 
 	public Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> run() {

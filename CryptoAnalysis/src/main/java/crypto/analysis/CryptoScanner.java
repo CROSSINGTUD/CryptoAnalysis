@@ -107,6 +107,7 @@ public abstract class CryptoScanner {
 			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
 				SootMethod method = iie.getMethod();
+				SootMethod callerMethod = icfg().getMethodOf(stmt);
 				Value base = iie.getBase();
 				boolean paramMatch = false;
 				for (Value arg : iie.getArgs()) {
@@ -128,8 +129,8 @@ public abstract class CryptoScanner {
 									return CryptoScanner.this.icfg();
 								}
 							};
-							Val val = new Val(base, method);
-							BackwardQuery backwardQuery = new BackwardQuery(new Statement((Stmt) stmt, method), val);
+							Val val = new Val(base, callerMethod);
+							BackwardQuery backwardQuery = new BackwardQuery(new Statement((Stmt) stmt, callerMethod), val);
 							boomerang.solve(backwardQuery);
 							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
 							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
@@ -154,6 +155,7 @@ public abstract class CryptoScanner {
 	public void scan() {
 		getAnalysisListener().beforeAnalysis();
 		initialize();
+		System.out.println("Discovered "+worklist.size() + " analysis seeds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			getAnalysisListener().discoveredSeed(curr);
@@ -236,6 +238,7 @@ public abstract class CryptoScanner {
 		boolean addToWorklist = false;
 		if (!seedsWithoutSpec.containsKey(factAtStatement))
 			addToWorklist = true;
+
 		AnalysisSeedWithEnsuredPredicate seed = seedsWithoutSpec.getOrCreate(factAtStatement);
 		if (addToWorklist)
 			addToWorkList(seed);

@@ -39,7 +39,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
 		solver.run(this);
-		analysisResults = solver.getResults();
+		analysisResults = solver.getResults(this);
 		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
 		cryptoScanner.getAnalysisListener().seedFinished(this);
@@ -94,7 +94,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate:"+this +" " + ensuredPredicates; 
+		return "AnalysisSeedWithEnsuredPredicate:";//;+this +" " + ensuredPredicates; 
 	}
 
 	@Override

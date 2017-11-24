@@ -15,7 +15,6 @@ import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
