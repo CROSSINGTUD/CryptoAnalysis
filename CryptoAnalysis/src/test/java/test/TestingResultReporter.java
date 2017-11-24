@@ -39,13 +39,8 @@ public class TestingResultReporter{
 				for(Entry<Transition<Statement, INode<Val>>, TransitionFunction> s : seedSolver.getTransitionsToFinalWeights().entrySet()){
 					Transition<Statement, INode<Val>> t = s.getKey();
 					TransitionFunction w = s.getValue();
-					System.out.println(t.getStart().fact());
-					System.out.println(expectedResults.getVal());
-					System.out.println(t.getStart().fact().equals(expectedResults.getVal()));
-					System.out.println();
 					if((t.getStart() instanceof GeneratedState)  || !t.getStart().fact().equals(expectedResults.getVal()))
 						continue;
-					System.out.println(t +" " +w);
 					if(t.getLabel().getUnit().isPresent()){
 						if(t.getLabel().getUnit().get().equals(e.getKey())){
 							for(ITransition trans : w.values()){

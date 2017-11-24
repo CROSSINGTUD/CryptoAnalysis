@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -56,7 +57,7 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Set<Node<Statement,Val>> getInitialSeeds() {
+	public Set<Node<Statement,AllocVal>> getInitialSeeds() {
 		return extendedIdealAnalysis.computeInitialSeeds();
 	}
 

@@ -155,8 +155,8 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	}
 
 	@Override
-	public Collection<Val> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
-		Set<Val> out = new HashSet<>();
+	public Collection<AllocVal> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
+		Set<AllocVal> out = new HashSet<>();
 		if(startAtConstructor()){
 			if(unit instanceof AssignStmt){
 				AssignStmt as = (AssignStmt) unit;
@@ -182,7 +182,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-			out.add(new Val(iie.getBase(), method));
+			out.add(new AllocVal(iie.getBase(), method,iie));
 		}
 		return out;
 	}

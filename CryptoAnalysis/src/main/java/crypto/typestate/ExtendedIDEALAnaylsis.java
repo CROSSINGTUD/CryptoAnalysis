@@ -19,6 +19,7 @@ import boomerang.IntAndStringBoomerangOptions;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -57,7 +58,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
-			public Collection<Val> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
+			public Collection<AllocVal> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
 				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt, calledMethod);
 			}
 
@@ -214,7 +215,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLAnalysisResultsAggregator analysisListener();
 
-	public Set<Node<Statement, Val>> computeInitialSeeds() {
+	public Set<Node<Statement, AllocVal>> computeInitialSeeds() {
 		return analysis.computeSeeds();
 	}
 
@@ -222,7 +223,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		return solver.getResults(seed);
 	}
 
-	public Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> run() {
+	public Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> run() {
 		return analysis.run();
 	}
 

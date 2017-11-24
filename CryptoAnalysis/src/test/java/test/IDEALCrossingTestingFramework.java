@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
@@ -76,8 +77,8 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
-				Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
-				for(Node<Statement, Val> seed : seedToSolvers.keySet()){
+				Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
+				for(Node<Statement, AllocVal> seed : seedToSolvers.keySet()){
 					for(Query q : seedToSolvers.get(seed).getSolvers().keySet()){
 						System.out.println(q.asNode() + "  \n" + seed);
 						if(q.asNode().equals(seed)){
@@ -106,7 +107,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> executeAnalysis() {
+	protected Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();
