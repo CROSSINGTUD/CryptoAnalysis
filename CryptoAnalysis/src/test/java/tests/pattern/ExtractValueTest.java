@@ -1,8 +1,10 @@
 package tests.pattern;
 
 import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
@@ -17,6 +19,12 @@ public class ExtractValueTest  extends UsagePatternTestingFramework{
 		keygen.init(0);
 	}	
 	
+	@Test
+	public void charArrayExtractionTest(){
+		char[] v = new char[] {'p'};
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(v, null, 65000, 128);
+		Assertions.extValue(0);
+	} 
 	@Test
 	public void testIntraproceduralStringFlow() throws GeneralSecurityException {
 		String aes = "AES";

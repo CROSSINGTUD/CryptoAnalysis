@@ -1,9 +1,9 @@
 package crypto.analysis;
 
 import boomerang.ForwardQuery;
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.typestate.ExtendedIDEALAnaylsis;
 import soot.SootMethod;
 
 public abstract class IAnalysisSeed extends ForwardQuery{

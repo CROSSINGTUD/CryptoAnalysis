@@ -17,6 +17,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -66,8 +67,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Collection<Unit> allCallsOnObject = Sets.newHashSet();
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Node<Statement,Val> factAtStmt, ClassSpecification spec) {
-		super(cryptoScanner,factAtStmt.stmt(),factAtStmt.fact());
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val, ClassSpecification spec) {
+		super(cryptoScanner,stmt,val);
 		this.spec = spec;
 		analysis = new ExtendedIDEALAnaylsis(){
 
@@ -271,7 +272,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				RefType refType = (RefType) baseType;
 				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
-						new AnalysisSeedWithSpecification(cryptoScanner, new Node<Statement,Val>(new Statement((Stmt)currStmt,cryptoScanner.icfg().getMethodOf(currStmt)), accessGraph), spec));
+						new AnalysisSeedWithSpecification(cryptoScanner, new Statement((Stmt)currStmt,cryptoScanner.icfg().getMethodOf(currStmt)), accessGraph, spec));
 					matched = true;
 					if (satisfiesConstraintSytem)
 						seed.addEnsuredPredicateFromOtherRule(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));

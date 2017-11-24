@@ -94,7 +94,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate:";//;+this +" " + ensuredPredicates; 
+		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
 	}
 
 	@Override

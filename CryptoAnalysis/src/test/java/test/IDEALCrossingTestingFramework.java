@@ -79,6 +79,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				Map<Node<Statement, Val>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(Node<Statement, Val> seed : seedToSolvers.keySet()){
 					for(Query q : seedToSolvers.get(seed).getSolvers().keySet()){
+						System.out.println(q.asNode() + "  \n" + seed);
 						if(q.asNode().equals(seed)){
 							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getSolvers().getOrCreate(q));
 						}

@@ -454,7 +454,22 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(c);
 		Assertions.hasEnsuredPredicate(encText);
 	}
-	
+	@Test
+	public void UsagePattern8c() throws GeneralSecurityException, IOException {
+		final byte[] salt = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(salt);
+
+		Assertions.hasEnsuredPredicate(salt);
+		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
+//		Assertions.violatedConstraint(pbekeyspec);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.extValue(2);
+		Assertions.extValue(3);
+		Assertions.hasEnsuredPredicate(pbekeyspec);
+		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+	}
 	@Test
 	public void UsagePattern8b() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];

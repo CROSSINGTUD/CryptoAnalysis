@@ -54,7 +54,7 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.asNode(), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(),key.var(), key.getSpec());
 		}
 	};
 
@@ -134,7 +134,7 @@ public abstract class CryptoScanner {
 							boomerang.solve(backwardQuery);
 							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
 							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
-								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, new Node<Statement,Val>(p.getRowKey(),p.getColumnKey()), specification));
+								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.getRowKey(),p.getColumnKey(), specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}
@@ -221,7 +221,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for (Node<Statement, Val> seed : spec.getInitialSeeds()) {
-				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
+				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.fact(), spec));
 			}
 		}
 	}

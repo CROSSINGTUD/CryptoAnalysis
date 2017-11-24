@@ -11,6 +11,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
@@ -163,7 +164,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 					NewExpr newExpr = (NewExpr) as.getRightOp();
 					if(analyzedType.contains(newExpr.getType())){
 						AssignStmt stmt = (AssignStmt) unit;
-						out.add(new Val(stmt.getLeftOp(), method));
+						out.add(new AllocVal(stmt.getLeftOp(), method, as.getRightOp()));
 					}
 				}
 			}
@@ -177,7 +178,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		if (calledMethod.isStatic()) {
 			if(unit instanceof AssignStmt){
 				AssignStmt stmt = (AssignStmt) unit;
-				out.add(new Val(stmt.getLeftOp(), method));
+				out.add(new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp()));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
