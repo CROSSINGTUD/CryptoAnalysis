@@ -40,7 +40,14 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 		Assertions.assertState(c, 1);
 	}
+	@Test
+	public void testCipher2a() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+		Cipher c = Cipher.getInstance("AES");
+		c.init(1, new SecretKeySpec(null, "AES"));
+		Cipher b = c;
 
+		Assertions.assertState(b, 1);
+	}
 	@Test
 	public void testCipher3() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher c = Cipher.getInstance("AES");

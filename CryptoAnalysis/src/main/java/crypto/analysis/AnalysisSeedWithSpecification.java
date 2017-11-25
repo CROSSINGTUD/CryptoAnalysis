@@ -25,11 +25,13 @@ import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
+import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
+import crypto.typestate.WrappedState;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -487,9 +489,19 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean isPredicateGeneratingState(CryptSLPredicate ensPred, State stateNode) {
-		return ensPred instanceof CryptSLCondPredicate && ((CryptSLCondPredicate) ensPred).getConditionalMethods()
-			.contains(stateNode) || (!(ensPred instanceof CryptSLCondPredicate) && stateNode.isAccepting());
+		return ensPred instanceof CryptSLCondPredicate && isConditionalState(((CryptSLCondPredicate) ensPred).getConditionalMethods()
+			,stateNode) || (!(ensPred instanceof CryptSLCondPredicate) && stateNode.isAccepting());
 	}
+
+	private boolean isConditionalState(Set<StateNode> conditionalMethods, State state) {
+		for(StateNode s : conditionalMethods){
+			if(state.equals(new WrappedState(s))){
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public boolean contradictsNegations() {

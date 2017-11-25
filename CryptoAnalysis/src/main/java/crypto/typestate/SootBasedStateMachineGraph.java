@@ -38,10 +38,10 @@ public class SootBasedStateMachineGraph {
 	public SootBasedStateMachineGraph(StateMachineGraph fsm) {
 		this.stateMachineGraph = fsm;
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
-		initialState = new WrappedState(stateMachineGraph.getInitialTransition().to());
+		initialState = wrappedState(stateMachineGraph.getInitialTransition().to());
 		for (final TransitionEdge t : stateMachineGraph.getAllTransitions()) {
-			WrappedState from = new WrappedState(t.from());
-			WrappedState to = new WrappedState(t.to());
+			WrappedState from = wrappedState(t.from());
+			WrappedState to = wrappedState(t.to());
 			LabeledMatcherTransition trans = new LabeledMatcherTransition(from, t.getLabel(),
 					Parameter.This, to, Type.OnCallToReturn);
 			this.addTransition(trans);
@@ -65,7 +65,7 @@ public class SootBasedStateMachineGraph {
 		}
 		//All transitions that are not in the state machine 
 		for(StateNode t :  this.stateMachineGraph.getNodes()){
-			State wrapped = new WrappedState(t);
+			State wrapped = wrappedState(t);
 			Collection<SootMethod> remaining = getInvolvedMethods();
 			Collection<SootMethod> outs =  this.outTransitions.get(wrapped);
 			if(outs == null)
@@ -74,6 +74,13 @@ public class SootBasedStateMachineGraph {
 			this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
 		}
 	}
+
+	
+
+	private WrappedState wrappedState(StateNode t) {
+		return new WrappedState(t, stateMachineGraph.getInitialTransition().from().equals(t));
+	}
+
 
 
 	public Collection<SootMethod> getEdgesOutOf(State n){
@@ -98,56 +105,7 @@ public class SootBasedStateMachineGraph {
 	}
 	
 	
-	private class WrappedState implements State{
-		private final StateNode delegate;
-		private final boolean initialState;
-
-		WrappedState(StateNode delegate){
-			this.delegate = delegate;
-			this.initialState = stateMachineGraph.getInitialTransition().from().equals(delegate);
-		}
-		@Override
-		public boolean isErrorState() {
-			return delegate.isErrorState();
-		}
-
-		@Override
-		public boolean isAccepting() {
-			return delegate.getAccepting();
-		}
-		@Override
-		public boolean isInitialState() {
-			return initialState;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((delegate == null) ? 0 : delegate.hashCode());
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			WrappedState other = (WrappedState) obj;
-			if (delegate == null) {
-				if (other.delegate != null)
-					return false;
-			} else if (!delegate.equals(other.delegate))
-				return false;
-			return true;
-		}
-		
-		@Override
-		public String toString() {
-			return delegate.getName().toString();
-		}
-	}
+	
 
 	public TransitionFunction getInitialWeight() {
 		return new TransitionFunction(initialTransiton);
