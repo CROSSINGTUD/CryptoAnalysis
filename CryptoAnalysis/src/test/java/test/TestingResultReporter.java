@@ -54,8 +54,6 @@ public class TestingResultReporter{
 			}
 		}
 		
-//		System.out.println( seedSolver.getTransitionsToFinalWeights());
-//      System.out.println(Joiner.on("\n").join(seedSolver.getNodesToWeights().entrySet()));
       WeightedPAutomaton<Statement, INode<Val>, TransitionFunction> aut = new WeightedPAutomaton<Statement, INode<Val>, TransitionFunction>(null) {
           @Override
           public INode<Val> createState(INode<Val> d, Statement loc) {
@@ -89,7 +87,7 @@ public class TestingResultReporter{
           aut.addWeightForTransition(t, w);
       }
       
-//      System.out.println(aut.toDotString());
+      System.out.println(aut.toDotString());
 	}
 
 

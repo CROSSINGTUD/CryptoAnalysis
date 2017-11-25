@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.AllocVal;
@@ -18,6 +20,7 @@ import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateMachineGraph;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -52,8 +55,8 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			}
 			
 			@Override
-			public StateMachineGraph getStateMachine() {
-				return CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern();
+			public SootBasedStateMachineGraph getStateMachine() {
+				return new SootBasedStateMachineGraph(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern());
 			}
 			
 			@Override
@@ -80,7 +83,6 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(Node<Statement, AllocVal> seed : seedToSolvers.keySet()){
 					for(Query q : seedToSolvers.get(seed).getSolvers().keySet()){
-						System.out.println(q.asNode() + "  \n" + seed);
 						if(q.asNode().equals(seed)){
 							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getSolvers().getOrCreate(q));
 						}

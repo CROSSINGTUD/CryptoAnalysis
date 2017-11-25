@@ -1,20 +1,20 @@
 package crypto.analysis;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateMachineGraph;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
+import heros.utilities.DefaultValueMap;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -31,14 +31,16 @@ public class ClassSpecification {
 	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
 	private CryptSLRule cryptSLRule;
 	private final CryptoScanner cryptoScanner;
+	private final SootBasedStateMachineGraph fsm;
 
 	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
 		this.cryptSLRule = rule;
 		this.cryptoScanner = cScanner;
+		this.fsm = new SootBasedStateMachineGraph(rule.getUsagePattern());
 		this.extendedIdealAnalysis = new ExtendedIDEALAnaylsis() {
 			@Override
-			public StateMachineGraph getStateMachine() {
-				return cryptSLRule.getUsagePattern();
+			public SootBasedStateMachineGraph getStateMachine() {
+				return fsm;
 			}
 
 			@Override
@@ -142,7 +144,11 @@ public class ClassSpecification {
 	}
 
 	public Collection<SootMethod> getInvolvedMethods() {
-		return extendedIdealAnalysis.getOrCreateTypestateChangeFunction().getInvolvedMethods();
+		return fsm.getInvolvedMethods();
+	}
+	
+	public SootBasedStateMachineGraph getFSM(){
+		return fsm;
 	}
 
 }

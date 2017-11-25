@@ -1,12 +1,9 @@
 package crypto.analysis;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
@@ -17,6 +14,7 @@ import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -31,7 +29,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	private boolean analyzed;
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<Statement,Val> delegate) {
-		super(cryptoScanner,delegate.stmt(),delegate.fact());
+		super(cryptoScanner,delegate.stmt(),delegate.fact(), TransitionFunction.one());
 	}
 
 	@Override
@@ -65,7 +63,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			}
 			
 			@Override
-			public StateMachineGraph getStateMachine() {
+			public SootBasedStateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
 				StateNode s = new StateNode("0", true, true){
 					@Override
@@ -75,7 +73,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 				};
 				m.addNode(s);
 				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
-				return m;
+				return new SootBasedStateMachineGraph(m);
 			}
 			
 			@Override

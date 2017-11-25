@@ -5,3 +5,5 @@ target/
 AndroidZooAPKs.csv
 AndroidZooAPIKey.txt
 AndroidZooApps/
+*.iml
+.idea/

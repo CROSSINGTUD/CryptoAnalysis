@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -17,7 +16,6 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
-import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -31,6 +29,7 @@ import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -68,13 +67,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	protected Collection<Unit> allCallsOnObject = Sets.newHashSet();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val, ClassSpecification spec) {
-		super(cryptoScanner,stmt,val);
+		super(cryptoScanner,stmt,val,spec.getFSM().getInitialWeight());
 		this.spec = spec;
 		analysis = new ExtendedIDEALAnaylsis(){
 
 			@Override
-			public StateMachineGraph getStateMachine() {
-				return spec.getRule().getUsagePattern();
+			public SootBasedStateMachineGraph getStateMachine() {
+				return spec.getFSM();
 			}
 
 			@Override
@@ -176,7 +175,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<SootMethod> expectedMethodsCallsFor(Collection<State> stateAtPred) {
 		Set<SootMethod> res = Sets.newHashSet();
 		for(State s : stateAtPred){
-			res.addAll(analysis.getOrCreateTypestateChangeFunction().getEdgesOutOf(s));
+			res.addAll(spec.getFSM().getEdgesOutOf(s));
 		}
 		return res;
 	}

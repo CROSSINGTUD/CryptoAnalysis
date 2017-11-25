@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.WeightedForwardQuery;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -23,6 +24,7 @@ import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import soot.SootMethod;
 import soot.Unit;
@@ -32,6 +34,7 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import wpds.impl.Weight.NoWeight;
 
 public abstract class CryptoScanner {
@@ -43,6 +46,7 @@ public abstract class CryptoScanner {
 	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
 	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator(icfg(), null);
+	
 
 	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {
 
@@ -222,7 +226,7 @@ public abstract class CryptoScanner {
 				continue;
 
 			for (Node<Statement, AllocVal> seed : spec.getInitialSeeds()) {
-				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.fact(), spec));
+				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.fact(),spec));
 			}
 		}
 	}

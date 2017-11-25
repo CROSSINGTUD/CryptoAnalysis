@@ -5,19 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.*;
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
-import boomerang.DefaultBoomerangOptions;
-import boomerang.IntAndStringBoomerangOptions;
-import boomerang.Query;
-import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -39,6 +35,7 @@ import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.WeightFunctions;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
+import wpds.impl.Transition;
 import wpds.impl.Weight.NoWeight;
 
 public abstract class ExtendedIDEALAnaylsis {
@@ -99,13 +96,13 @@ public abstract class ExtendedIDEALAnaylsis {
 		});
 	}
 
-	public FiniteStateMachineToTypestateChangeFunction getOrCreateTypestateChangeFunction() {
+	private FiniteStateMachineToTypestateChangeFunction getOrCreateTypestateChangeFunction() {
 		if (this.changeFunction == null)
 			this.changeFunction = new FiniteStateMachineToTypestateChangeFunction(getStateMachine(), this);
 		return this.changeFunction;
 	}
 
-	public abstract StateMachineGraph getStateMachine();
+	public abstract SootBasedStateMachineGraph getStateMachine();
 
 	public WeightedBoomerang<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt().getUnit().get());
@@ -223,8 +220,12 @@ public abstract class ExtendedIDEALAnaylsis {
 		return solver.getResults(seed);
 	}
 
-	public Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> run() {
-		return analysis.run();
+	public Map<Node<Statement,AllocVal>, WeightedBoomerang<TransitionFunction>> run() {
+		Map<Node<Statement,AllocVal>, WeightedBoomerang<TransitionFunction>> seedToSolver = Maps.newHashMap();
+		for (Node<Statement, AllocVal> seed : computeInitialSeeds()) {
+			seedToSolver.put(seed, run(new WeightedForwardQuery<>(seed.stmt(),seed.fact(),getStateMachine().getInitialWeight())));
+		}
+		return seedToSolver;
 	}
 
 }
