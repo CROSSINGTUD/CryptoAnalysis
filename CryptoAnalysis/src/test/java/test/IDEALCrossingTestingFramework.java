@@ -7,17 +7,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
-import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
+import boomerang.debugger.Debugger;
+import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.rules.CryptSLRuleReader;
-import crypto.rules.StateMachineGraph;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
@@ -40,7 +39,7 @@ import typestate.TransitionFunction;
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
 	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
-//	private  IDebugger<TypestateDomainValue<StateNode>>  debugger;
+	private  Debugger<TransitionFunction>  debugger;
 //	protected TestingResultReporter<StateNode> testingResultReporter;
 	public final static String RESOURCE_PATH = "src/test/resources/";
 	
@@ -61,17 +60,21 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			
 			@Override
 			public CrySLAnalysisResultsAggregator analysisListener() {
-				// TODO Auto-generated method stub
 				return null;
+			}
+			
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return getDebugger();
 			}
 		};
 	}
 
-//	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-//		if(debugger == null)
-//			debugger =  new IDEVizDebugger<>(ideVizFile, icfg);
-//		return debugger;
-//	}
+	protected Debugger<TransitionFunction> getDebugger() {
+		if(debugger == null)
+			debugger =  new IDEVizDebugger<>(ideVizFile, icfg);
+		return debugger;
+	}
 
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {

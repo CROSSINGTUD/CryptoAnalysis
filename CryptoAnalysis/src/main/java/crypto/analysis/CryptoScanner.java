@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import boomerang.WeightedForwardQuery;
+import boomerang.debugger.Debugger;
+
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -276,5 +278,9 @@ public abstract class CryptoScanner {
 	
 	public StmtWithMethod getMethodFromUnit(Unit unit) {
 		return new StmtWithMethod(unit, icfg().getMethodOf(unit));
+	}
+
+	public Debugger<TransitionFunction> debugger() {
+		return new Debugger<>();
 	}
 }

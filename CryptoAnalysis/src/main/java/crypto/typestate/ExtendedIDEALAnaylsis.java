@@ -70,18 +70,8 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public boolean enableAliasing() {
-				return true;
-			}
-
-			@Override
 			public long analysisBudgetInSeconds() {
 				return 0;
-			}
-
-			@Override
-			public boolean enableNullPointOfAlias() {
-				return true;
 			}
 
 			@Override
@@ -91,7 +81,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 			@Override
 			public Debugger<TransitionFunction> debugger() {
-				return new Debugger<>();
+				return ExtendedIDEALAnaylsis.this.debugger();
 			}
 		});
 	}
@@ -145,6 +135,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 	protected abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
+	protected abstract Debugger<TransitionFunction> debugger();
 
 	public void addAdditionalBoomerangQuery(AdditionalBoomerangQuery q, QueryListener listener) {
 		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(q);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import crypto.analysis.util.StmtWithMethod;
@@ -26,6 +27,7 @@ import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 
 public class ClassSpecification {
 	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
@@ -51,6 +53,11 @@ public class ClassSpecification {
 			@Override
 			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
+			}
+
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return cryptoScanner.debugger();
 			}
 		};
 	}

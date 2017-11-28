@@ -16,6 +16,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
+import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -83,6 +84,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				return cryptoScanner.icfg();
 			}
 
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return cryptoScanner.debugger();
+			}
+			
 			@Override
 			public CrySLAnalysisResultsAggregator analysisListener() {
 				return null;
@@ -316,15 +322,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 
 	private boolean containsTargetState(TransitionFunction value, State stateNode) {
-		//TODO we still need to implement PhaseII of IDE in IDEAL
-		for(ITransition t : value.values()){
-			if(t.to().equals(stateNode))
-				return true;
-		}
-		return false;
+		return getTargetStates(value).contains(stateNode);
 	}
 
-	private Iterable<? extends State> getTargetStates(TransitionFunction value) {
+	private Collection<? extends State> getTargetStates(TransitionFunction value) {
 		//TODO we still need to implement PhaseII of IDE in IDEAL
 		Set<State> res = Sets.newHashSet();
 		for(ITransition t : value.values()){

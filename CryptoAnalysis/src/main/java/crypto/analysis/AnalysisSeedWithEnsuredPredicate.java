@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.StateMachineGraph;
@@ -79,6 +80,12 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			@Override
 			public CrySLAnalysisResultsAggregator analysisListener() {
 				return null;
+			}
+			
+
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return cryptoScanner.debugger();
 			}
 		};
 		return problem;
