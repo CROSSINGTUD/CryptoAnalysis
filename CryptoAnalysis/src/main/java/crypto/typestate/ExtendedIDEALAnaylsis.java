@@ -8,6 +8,7 @@ import java.util.Set;
 import boomerang.*;
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -29,6 +30,7 @@ import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.AssignStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -152,16 +154,31 @@ public abstract class ExtendedIDEALAnaylsis {
 		private Table<Statement, Val, NoWeight> res;
 
 		public void solve() {
-			Boomerang boomerang = new Boomerang(new IntAndStringBoomerangOptions()) {
+			Boomerang boomerang = new Boomerang(new IntAndStringBoomerangOptions(){
+				@Override
+				public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
+						BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
+					if(stmt.containsInvokeExpr() && stmt instanceof AssignStmt){
+						AssignStmt as = (AssignStmt) stmt;
+						if(as.getLeftOp().equals(fact.value())){
+							if(icfg.getCalleesOfCallAt(stmt).isEmpty())
+								return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+						}
+					}
+					return super.getAllocationVal(m, stmt, fact, icfg);
+				}
+			}) {
 				@Override
 				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 					return ExtendedIDEALAnaylsis.this.icfg();
 				}
 			};
 			boomerang.solve(this);
+			System.err.println("this" + this);
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults(this);
+			System.out.println(res);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
 			}

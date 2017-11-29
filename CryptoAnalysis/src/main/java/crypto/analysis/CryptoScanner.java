@@ -11,6 +11,7 @@ import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -28,9 +29,11 @@ import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
+import jasmin.sym;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
@@ -125,11 +128,18 @@ public abstract class CryptoScanner {
 					for (final ClassSpecification specification : specifications) {
 						if (specification.getInvolvedMethods().contains(method)) {
 							Boomerang boomerang = new Boomerang(new DefaultBoomerangOptions() {
-								//TODO
-//								@Override
-//								public AllocationSiteHandlers allocationSiteHandlers() {
-//									return new PrimitiveTypeAndReferenceForCryptoType();
-//								}
+								@Override
+								public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
+										BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
+									if(stmt.containsInvokeExpr() && stmt instanceof AssignStmt){
+										AssignStmt as = (AssignStmt) stmt;
+										if(as.getLeftOp().equals(fact.value())){
+											if(icfg.getCalleesOfCallAt(stmt).isEmpty())
+												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+										}
+									}
+									return super.getAllocationVal(m, stmt, fact, icfg);
+								}
 							}){
 								@Override
 								public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {

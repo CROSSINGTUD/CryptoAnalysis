@@ -1,6 +1,3 @@
-[submodule "IDEViz"]
-	path = IDEViz
-	url = https://github.com/johspaeth/IDEViz.git
 [submodule "WPDS"]
 	path = WPDS
 	url = https://github.com/johspaeth/WPDS.git
