@@ -59,7 +59,7 @@ public class SourceCryptoScanner {
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				icfg = new JimpleBasedInterproceduralCFG(false);
-				reporter = new CrySLAnalysisResultsAggregator(icfg, null);
+				reporter = new CrySLAnalysisResultsAggregator(null);
 				reporter.addReportListener(new CogniCryptCLIReporter());
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 

@@ -45,7 +45,7 @@ public abstract class CryptoScanner {
 	private Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
 	private Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
-	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator(icfg(), null);
+	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator( null);
 	
 
 	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {

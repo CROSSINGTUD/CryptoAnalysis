@@ -22,7 +22,6 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
-import heros.InterproceduralCFG;
 import soot.SootMethod;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;
@@ -32,7 +31,6 @@ import typestate.interfaces.ISLConstraint;
 public class CrySLAnalysisResultsAggregator{
 
 	private File analyzedFile;
-	private InterproceduralCFG<Unit, SootMethod> icfg;
 	
 	protected Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
 	protected Set<IAnalysisSeed> typestateTimeouts = Sets.newHashSet();
@@ -56,8 +54,7 @@ public class CrySLAnalysisResultsAggregator{
 	protected Multimap<IAnalysisSeed, Long> seedToPredicateTime = HashMultimap.create();
 	protected CrySLResultsReporter crr = new CrySLResultsReporter();
 	
-	public CrySLAnalysisResultsAggregator(InterproceduralCFG<Unit, SootMethod> icfg, File analyzedFile) {
-		this.icfg = icfg;
+	public CrySLAnalysisResultsAggregator(File analyzedFile) {
 		this.analyzedFile = analyzedFile;
 	}
 	

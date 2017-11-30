@@ -26,21 +26,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
-import boomerang.AliasFinder;
-import boomerang.accessgraph.AccessGraph;
 import boomerang.cfg.ExtendedICFG;
 import boomerang.cfg.IExtendedICFG;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import ideal.Analysis;
 import ideal.debug.IDebugger;
 import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
@@ -90,7 +86,7 @@ public class PerAPKAnalyzer {
 			if (!ideVizFile.getParentFile().exists()) {
 				ideVizFile.getParentFile().mkdirs();
 			}
-			debugger = new CryptoVizDebugger(ideVizFile, icfg);
+//			debugger = new CryptoVizDebugger(ideVizFile, icfg);
 		}
 		return debugger;
 	}
@@ -189,10 +185,10 @@ public class PerAPKAnalyzer {
 				return reporter;
 			}
 
-			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return getDebugger();
-			}
+//			@Override
+//			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+//				return getDebugger();
+//			}
 
 			@Override
 			public boolean isCommandLineMode() {
@@ -341,11 +337,11 @@ public class PerAPKAnalyzer {
 			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
 			Set<SootMethod> allVisited = Sets.newHashSet();
-			allVisited.addAll(AliasFinder.VISITED_METHODS);
-			allVisited.addAll(Analysis.VISITED_METHODS);
+//			allVisited.addAll(AliasFinder.VISITED_METHODS);
+//			allVisited.addAll(Analysis.VISITED_METHODS);
 			line.add(Integer.toString(allVisited.size()));
 			line.add(Integer.toString(reachableMethodsCount));
-			line.add(Integer.toString(AccessGraph.MAX_FIELD_COUNT));
+//			line.add(Integer.toString(AccessGraph.MAX_FIELD_COUNT));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {

@@ -238,7 +238,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							
 
 						};
-						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(icfg, ideVizFile);
+						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(ideVizFile);
 						reporters.addReportListener(cryslListener);
 						return reporters;
 					}

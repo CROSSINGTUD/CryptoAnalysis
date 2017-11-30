@@ -7,39 +7,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-import boomerang.cfg.ExtendedICFG;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.preanalysis.PreparationTransformer;
 import crypto.analysis.CogniCryptCLIReporter;
-import crypto.analysis.CryptSLAnalysisListener;
 import crypto.analysis.CryptoScanner;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
+import heros.fieldsens.Debugger.NullDebugger;
 import soot.G;
-import soot.MethodOrMethodContext;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
-import soot.SootClass;
-import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
-import soot.util.queue.QueueReader;
-import typestate.TypestateDomainValue;
 
 public class DerbyScanner {
 	public static String RESOURCE_PATH = "D:\\CROSSING\\CryptoAnalysis\\CryptoAnalysis\\build\\rules";
 	private static String BENCHMARK_FOLDER = "D:\\CROSSING\\benchmark\\Derby\\db-derby-10.13.1.1-bin\\lib";
 	private static CogniCryptCLIReporter reporter;
-	private static ExtendedICFG icfg;
+	private static JimpleBasedInterproceduralCFG icfg;
 
 	public static void main(String... args) {
 		initializeSootWithEntryPoint(getJarFiles(BENCHMARK_FOLDER));
@@ -54,7 +43,7 @@ public class DerbyScanner {
     }
 	
 	private static void analyse() {
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		PackManager.v().runPacks();
@@ -65,25 +54,15 @@ public class DerbyScanner {
 			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-				reporter = new CogniCryptCLIReporter(icfg, null);
+				icfg = new JimpleBasedInterproceduralCFG(false);
+				reporter = new CogniCryptCLIReporter();
 				System.out.println("Soot Classes: "+ Scene.v().getClasses().size());
 				System.out.println("Reachable Methods: "+ Scene.v().getReachableMethods().size());
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 					@Override
-					public IExtendedICFG icfg() {
+					public JimpleBasedInterproceduralCFG icfg() {
 						return icfg;
-					}
-
-					@Override
-					public CryptSLAnalysisListener analysisListener() {
-						return reporter;
-					}
-
-					@Override
-					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-						return new NullDebugger<>();
 					}
 
 					@Override
