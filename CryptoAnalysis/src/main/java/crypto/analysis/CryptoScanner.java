@@ -136,6 +136,10 @@ public abstract class CryptoScanner {
 										if(as.getLeftOp().equals(fact.value())){
 											if(icfg.getCalleesOfCallAt(stmt).isEmpty())
 												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+											//TODO replace by check if stmt is a seed of specification
+											if(stmt.toString().contains("getInstance")){
+												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+											}
 										}
 									}
 									return super.getAllocationVal(m, stmt, fact, icfg);

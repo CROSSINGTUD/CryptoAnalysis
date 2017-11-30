@@ -174,11 +174,9 @@ public abstract class ExtendedIDEALAnaylsis {
 				}
 			};
 			boomerang.solve(this);
-			System.err.println("this" + this);
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults(this);
-			System.out.println(res);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
 			}
