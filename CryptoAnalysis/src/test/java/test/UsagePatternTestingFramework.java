@@ -27,7 +27,6 @@ import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -93,7 +92,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void collectedValues(AnalysisSeedWithSpecification seed,
-									Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
+									Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
 								for(Assertion a: expectedResults){
 									if(a instanceof ExtractedValueAssertion){
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
@@ -102,11 +101,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
+							public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 								for(Assertion e : expectedResults){
 									if(e instanceof CallToForbiddenMethodAssertion){
 										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
-										expectedResults.reported(callSite.getStmt());
+										expectedResults.reported(callSite.getUnit().get());
 									}
 								}
 							}
@@ -175,7 +174,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-									ISLConstraint con, StmtWithMethod unit) {
+									ISLConstraint con, Statement unit) {
 								
 							}
 
@@ -223,11 +222,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
-									StmtWithMethod stmt) {
+									Statement stmt) {
 							}
 
 							@Override
-							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedCalls) {
+							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls) {
 								
 							}
 

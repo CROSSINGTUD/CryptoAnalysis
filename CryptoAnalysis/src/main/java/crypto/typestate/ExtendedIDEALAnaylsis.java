@@ -43,8 +43,8 @@ import wpds.impl.Weight.NoWeight;
 public abstract class ExtendedIDEALAnaylsis {
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
-	private Multimap<CallSiteWithParamIndex, Unit> collectedValues = HashMultimap.create();
-	private Set<Unit> invokedMethodsOnInstance = Sets.newHashSet();
+	private Multimap<CallSiteWithParamIndex, Statement> collectedValues = HashMultimap.create();
+	private Set<Statement> invokedMethodsOnInstance = Sets.newHashSet();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
@@ -97,7 +97,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	public abstract SootBasedStateMachineGraph getStateMachine();
 
 	public WeightedBoomerang<TransitionFunction> run(Query query) {
-		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt().getUnit().get());
+		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
 		solver = analysis.run(query);
 		CrySLAnalysisResultsAggregator reports = analysisListener();
@@ -114,23 +114,23 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 
-	public void addQueryAtCallsite(final String varNameInSpecification, final Stmt stmt, final int index) {
-		Value parameter = stmt.getInvokeExpr().getArg(index);
-		SootMethod method = icfg().getMethodOf(stmt);
-		Statement s = new Statement(stmt, method);
+	public void addQueryAtCallsite(final String varNameInSpecification, final Statement stmt, final int index) {
+		if(!stmt.isCallsite())
+			return;
+		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
 		if (!(parameter instanceof Local)) {
 			collectedValues.put(
-					new CallSiteWithParamIndex(s, new Val(parameter, method), index, varNameInSpecification), stmt);
+					new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification), stmt);
 			return;
 		}
 		AdditionalBoomerangQuery query = additionalBoomerangQuery
-				.getOrCreate(new AdditionalBoomerangQuery(s, new Val((Local) parameter, method)));
+				.getOrCreate(new AdditionalBoomerangQuery(stmt, new Val((Local) parameter, stmt.getMethod())));
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res) {
 				for (Cell<Statement, Val, NoWeight> v : res.cellSet()) {
-					collectedValues.put(new CallSiteWithParamIndex(s, v.getColumnKey(), index, varNameInSpecification),
-							v.getRowKey().getUnit().get());
+					collectedValues.put(new CallSiteWithParamIndex(stmt, v.getColumnKey(), index, varNameInSpecification),
+							v.getRowKey());
 				}
 			}
 		});
@@ -200,7 +200,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res);
 	}
 
-	public Multimap<CallSiteWithParamIndex, Unit> getCollectedValues() {
+	public Multimap<CallSiteWithParamIndex, Statement> getCollectedValues() {
 		return collectedValues;
 	}
 
@@ -208,11 +208,11 @@ public abstract class ExtendedIDEALAnaylsis {
 		// System.out.println(string);
 	}
 
-	public Collection<Unit> getInvokedMethodOnInstance() {
+	public Collection<Statement> getInvokedMethodOnInstance() {
 		return invokedMethodsOnInstance;
 	}
 
-	public void methodInvokedOnInstance(Unit method) {
+	public void methodInvokedOnInstance(Statement method) {
 		invokedMethodsOnInstance.add(method);
 	}
 

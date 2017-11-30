@@ -18,7 +18,6 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -37,8 +36,8 @@ public class CrySLAnalysisResultsAggregator{
 	
 	protected Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
 	protected Set<IAnalysisSeed> typestateTimeouts = Sets.newHashSet();
-	protected Multimap<IAnalysisSeed, StmtWithMethod> reportedTypestateErros = HashMultimap.create();
-	protected Multimap<ClassSpecification, StmtWithMethod> callToForbiddenMethod = HashMultimap.create();
+	protected Multimap<IAnalysisSeed, Statement> reportedTypestateErros = HashMultimap.create();
+	protected Multimap<ClassSpecification, Statement> callToForbiddenMethod = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, ISLConstraint> checkedConstraints = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, ISLConstraint> internalConstraintViolations = HashMultimap.create();
@@ -66,11 +65,11 @@ public class CrySLAnalysisResultsAggregator{
 		crr.onSeedFinished(seed, solver);
 	}
 
-	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
+	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
 		crr.collectedValues(seed, collectedValues);
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
+	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 		callToForbiddenMethod.put(classSpecification, callSite);
 		crr.callToForbiddenMethod(classSpecification, callSite,alternatives);
 	}
@@ -78,10 +77,6 @@ public class CrySLAnalysisResultsAggregator{
 	public void discoveredSeed(IAnalysisSeed curr) {
 		analysisSeeds.add(curr);
 		crr.discoveredSeed(curr);
-	}
-
-	protected StmtWithMethod createStmtWithMethodFor(Unit u) {
-		return new StmtWithMethod(u, icfg.getMethodOf(u));
 	}
 
 	public void seedFinished(IAnalysisSeed seed) {
@@ -137,7 +132,7 @@ public class CrySLAnalysisResultsAggregator{
 		crr.missingPredicates(seed, missingPredicates);
 	}
 
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit) {
+	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {
 		internalConstraintViolations.put(analysisSeedWithSpecification, con);
 		crr.constraintViolation(analysisSeedWithSpecification, con, unit);
 	}
@@ -146,7 +141,7 @@ public class CrySLAnalysisResultsAggregator{
 		return checkedConstraints;
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
 		crr.typestateErrorEndOfLifeCycle(classSpecification, stmt);
 	}
 	
@@ -191,16 +186,16 @@ public class CrySLAnalysisResultsAggregator{
 		crr.afterPredicateCheck(seed);
 	}
 
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Set<SootMethod> expectedMethodCalls) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Set<SootMethod> expectedMethodCalls) {
 		reportedTypestateErros.put(classSpecification, stmt);
 		crr.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 	}
 
-	public Multimap<IAnalysisSeed, StmtWithMethod> getTypestateErrors() {
+	public Multimap<IAnalysisSeed, Statement> getTypestateErrors() {
 		return reportedTypestateErros;
 	}
 
-	public Multimap<ClassSpecification, StmtWithMethod> getCallToForbiddenMethod() {
+	public Multimap<ClassSpecification, Statement> getCallToForbiddenMethod() {
 		return callToForbiddenMethod;
 	}
 
@@ -289,8 +284,8 @@ public class CrySLAnalysisResultsAggregator{
 			s += "The following methods are forbidden/deprecated and shall not be invoked\n";
 			for (ClassSpecification spec : callToForbiddenMethod.keySet()) {
 				s += "\tViolations of specification for type " + spec.getRule().getClassName() + " \n";
-				for (StmtWithMethod m : callToForbiddenMethod.get(spec)) {
-					s += "\t\tMethod " + m.getMethod() + " calls " + m.getStmt() + "\n";
+				for (Statement m : callToForbiddenMethod.get(spec)) {
+					s += "\t\tMethod " + m.getMethod() + " calls " + m.getUnit().get() + "\n";
 				}
 			}
 		}
@@ -304,8 +299,8 @@ public class CrySLAnalysisResultsAggregator{
 					AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
 					s += "\tSpecification type " + seedWithSpec.getSpec().getRule().getClassName() + "\n\t Object: \n";
 					s += "\t\t" + object(seed.asNode()) + "\n";
-					for (StmtWithMethod stmtsWithMethod : reportedTypestateErros.get(seedWithSpec))
-						s += "\t\t\t " + stmtsWithMethod.getStmt() + " in method " + stmtsWithMethod.getMethod() + " \n";
+					for (Statement stmtsWithMethod : reportedTypestateErros.get(seedWithSpec))
+						s += "\t\t\t " + stmtsWithMethod + " \n";
 				}
 			}
 		}
@@ -332,7 +327,7 @@ public class CrySLAnalysisResultsAggregator{
 				s += "\tSpecification type " + seed.getSpec().getRule().getClassName() + "\n\t Object: \n";
 				s += "\t\t" + object(seed.asNode()) + "\n";
 				s += "\t\t the analysis extracted the following statements that create the values \n";
-				for (Entry<CallSiteWithParamIndex, Unit> e : seed.getExtractedValues().entries()) {
+				for (Entry<CallSiteWithParamIndex, Statement> e : seed.getExtractedValues().entries()) {
 					s += "\t\t\t" + e.getKey().getVarName() + " => " + e.getValue() + "\n";
 				}
 				s += "\t\t that is mapped to the following value assignment \n";

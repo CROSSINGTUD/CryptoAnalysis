@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -20,13 +19,11 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
-import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -60,7 +57,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private final ClassSpecification spec;
 	private ExtendedIDEALAnaylsis analysis;
-	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
+	private Multimap<CallSiteWithParamIndex, Statement> parametersToValues = HashMultimap.create();
 	private Table<Statement, Val, TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
@@ -68,7 +65,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
-	protected Collection<Unit> allCallsOnObject = Sets.newHashSet();
+	protected Collection<Statement> allCallsOnObject = Sets.newHashSet();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val, ClassSpecification spec) {
 		super(cryptoScanner,stmt,val,spec.getFSM().getInitialWeight());
@@ -125,13 +122,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
 		constraintSolver = new ConstraintSolver(cryptoScanner, spec, parametersToValues, allCallsOnObject, new ConstraintReporter() {
 			@Override
-			public void constraintViolated(ISLConstraint con, StmtWithMethod unit) {
+			public void constraintViolated(ISLConstraint con, Statement unit) {
 				cryptoScanner.getAnalysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con, unit);
 			}
 
 			@Override
-			public void callToForbiddenMethod(ClassSpecification classSpecification, Unit callSite) {
-				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, new StmtWithMethod(callSite, cryptoScanner.icfg().getMethodOf(callSite)), Lists.newLinkedList());
+			public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite) {
+				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, callSite, Lists.newLinkedList());
 			}
 		});
 		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
@@ -158,13 +155,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (Statement curr : unitToStates.keySet()) {
 			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
 			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
-				Collection<State> stateAtPred = unitToStates.get(new Statement((Stmt)pred, curr.getMethod()));
+				Statement predStmt = new Statement((Stmt)pred,curr.getMethod());
+				Collection<State> stateAtPred = unitToStates.get(predStmt);
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (State newStateAtCurr : stateAtCurrMinusPred) {
-					typeStateChangeAtStatement(new Statement((Stmt)pred,curr.getMethod()), newStateAtCurr);
+					typeStateChangeAtStatement(predStmt, newStateAtCurr);
 					if(newStateAtCurr.equals(ErrorStateNode.v())){
 						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
-						cryptoScanner.getAnalysisListener().typestateErrorAt(this, new StmtWithMethod(pred, cryptoScanner.icfg().getMethodOf(pred)), expectedMethodCalls);
+						cryptoScanner.getAnalysisListener().typestateErrorAt(this, predStmt, expectedMethodCalls);
 					}
 				}
 			}
@@ -187,7 +185,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			for (ITransition n : c.getValue().values()) {
 				if (!n.to().isAccepting()) {
 					Statement s = c.getRowKey();
-					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, new StmtWithMethod(s.getUnit().get(), s.getMethod()));
+					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, s);
 				}
 			}
 		}
@@ -418,10 +416,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return pred.isNegated() != requiredPredicatesExist;
 	}
 
-	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Unit> collection) {
+	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Statement> collection) {
 		Collection<String> values = new ArrayList<String>();
-		for (Unit u : collection) {
-			if (cswpi.stmt().getUnit().get().equals(u)) {
+		for (Statement stmt : collection) {
+			Unit u = stmt.getUnit().get();
+			if (cswpi.stmt().equals(stmt)) {
 				if (u instanceof AssignStmt) {
 					values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
 				} else {
@@ -505,7 +504,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return missingPredicates;
 	}
 	
-	public Multimap<CallSiteWithParamIndex, Unit> getExtractedValues(){
+	public Multimap<CallSiteWithParamIndex, Statement> getExtractedValues(){
 		return parametersToValues;
 	}
 

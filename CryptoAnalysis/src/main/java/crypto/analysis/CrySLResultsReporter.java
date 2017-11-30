@@ -13,10 +13,8 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
@@ -41,13 +39,13 @@ public class CrySLResultsReporter  {
 		return listeners.remove(listener);
 	}
 
-	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
+	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.collectedValues(seed, collectedValues);
 		}
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
+	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.callToForbiddenMethod(classSpecification, callSite, alternatives);
 		}
@@ -77,7 +75,7 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit) {
+	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.constraintViolation(analysisSeedWithSpecification, con, unit);
 		}
@@ -161,13 +159,13 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedMethodCalls) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedMethodCalls) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 		}
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorEndOfLifeCycle(classSpecification, stmt);
 		}

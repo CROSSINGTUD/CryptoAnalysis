@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Multimap;
 
+import boomerang.jimple.Statement;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.Unit;
 import test.Assertion;
@@ -17,8 +18,8 @@ public class ExtractedValueAssertion implements Assertion {
 		this.index = index;
 	}
 	
-	public void computedValues(Multimap<CallSiteWithParamIndex, Unit> collectedValues){
-		for(Entry<CallSiteWithParamIndex, Unit> e: collectedValues.entries()){
+	public void computedValues(Multimap<CallSiteWithParamIndex, Statement> collectedValues){
+		for(Entry<CallSiteWithParamIndex, Statement> e: collectedValues.entries()){
 			if(e.getKey().stmt().getUnit().get().equals(stmt) && e.getKey().getIndex() == index)
 				satisfied = true;
 		}

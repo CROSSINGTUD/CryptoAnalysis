@@ -12,7 +12,6 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -26,10 +25,10 @@ import typestate.interfaces.ISLConstraint;
 public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 
 	@Override
-	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {}
+	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues) {}
 
 	@Override
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {}
+	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {}
 
 	@Override
 	public void discoveredSeed(IAnalysisSeed curr) {}
@@ -60,7 +59,7 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {}
 
 	@Override
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit) {}
+	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {}
 
 	@Override
 	public void checkedConstraints(AnalysisSeedWithSpecification seed, Collection<ISLConstraint> cons) {}
@@ -95,12 +94,12 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 
 
 	@Override
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt,
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt,
 			Collection<SootMethod> expectedCalls) {
 	}
 
 	@Override
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
 		
 	}
 

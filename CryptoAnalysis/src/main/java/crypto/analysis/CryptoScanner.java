@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import boomerang.WeightedForwardQuery;
-import boomerang.debugger.Debugger;
-
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
@@ -20,16 +17,14 @@ import com.google.common.collect.Table.Cell;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
+import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
-import jasmin.sym;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -290,10 +285,6 @@ public abstract class CryptoScanner {
 		}
 	}
 	
-	public StmtWithMethod getMethodFromUnit(Unit unit) {
-		return new StmtWithMethod(unit, icfg().getMethodOf(unit));
-	}
-
 	public Debugger<TransitionFunction> debugger() {
 		return new Debugger<>();
 	}

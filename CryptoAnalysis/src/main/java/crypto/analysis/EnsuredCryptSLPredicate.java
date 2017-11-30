@@ -2,6 +2,7 @@ package crypto.analysis;
 
 import com.google.common.collect.Multimap;
 
+import boomerang.jimple.Statement;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.Unit;
@@ -9,9 +10,9 @@ import soot.Unit;
 public class EnsuredCryptSLPredicate {
 
 	private final CryptSLPredicate predicate;
-	private final Multimap<CallSiteWithParamIndex, Unit> parametersToValues;
+	private final Multimap<CallSiteWithParamIndex, Statement> parametersToValues;
 
-	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<CallSiteWithParamIndex, Unit> parametersToValues2) {
+	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<CallSiteWithParamIndex, Statement> parametersToValues2) {
 		this.predicate = predicate;
 		parametersToValues = parametersToValues2;
 	}
@@ -21,7 +22,7 @@ public class EnsuredCryptSLPredicate {
 	}
 	
 
-	public Multimap<CallSiteWithParamIndex, Unit> getParametersToValues() {
+	public Multimap<CallSiteWithParamIndex, Statement> getParametersToValues() {
 		return  parametersToValues;
 	}
 	

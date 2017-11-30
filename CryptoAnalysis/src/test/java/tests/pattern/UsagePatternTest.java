@@ -564,15 +564,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.notHasEnsuredPredicate(key);
-		Assertions.mustBeInAcceptingState(keygen);
-		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		Assertions.extValue(0);
-		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
-		Assertions.extValue(0);
-		byte[] encText = cCipher.doFinal("".getBytes());
-		Assertions.notHasEnsuredPredicate(encText);
-		Assertions.mustBeInAcceptingState(cCipher);
+//		Assertions.mustBeInAcceptingState(keygen);
+//		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+//		Assertions.extValue(0);
+//		cCipher.init(Cipher.ENCRYPT_MODE, key);
+//		
+//		Assertions.extValue(0);
+//		byte[] encText = cCipher.doFinal("".getBytes());
+//		Assertions.notHasEnsuredPredicate(encText);
+//		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
 	@Test

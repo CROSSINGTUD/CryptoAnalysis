@@ -8,14 +8,11 @@ import java.util.Set;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
-import crypto.analysis.util.StmtWithMethod;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
-import crypto.rules.StateMachineGraph;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
-import heros.utilities.DefaultValueMap;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -98,7 +95,7 @@ public class ClassSpecification {
 				SootMethod method = invokeExpr.getMethod();
 				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new StmtWithMethod(u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
+					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
 				}
 			}
 		}
