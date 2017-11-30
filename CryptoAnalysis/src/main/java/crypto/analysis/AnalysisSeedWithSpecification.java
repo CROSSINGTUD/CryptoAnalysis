@@ -61,9 +61,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private final ClassSpecification spec;
 	private ExtendedIDEALAnaylsis analysis;
 	private Multimap<CallSiteWithParamIndex, Unit> parametersToValues = HashMultimap.create();
-	private HashBasedTable<Unit, Val, TransitionFunction> results;
+	private Table<Statement, Val, TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
-	private Multimap<Unit, State> typeStateChange = HashMultimap.create();
+	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
@@ -137,9 +137,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().checkedConstraints(this,constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		results = transform(analysis.getResults(this));
-		Multimap<Unit, State> unitToStates = HashMultimap.create();
-		for (Cell<Unit, Val, TransitionFunction> c : results.cellSet()) {
+		results = analysis.getResults(this);
+		Multimap<Statement, State> unitToStates = HashMultimap.create();
+		for (Cell<Statement, Val, TransitionFunction> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				//TODO only maintain indirectly ensured predicate as long as they are not killed by the rule
@@ -152,25 +152,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 
-	private HashBasedTable<Unit, Val, TransitionFunction> transform(
-			Table<Statement, Val, TransitionFunction> table) {
-
-		HashBasedTable<Unit, Val, TransitionFunction> out = HashBasedTable.create();
-		for(Cell<Statement, Val, TransitionFunction> e : table.cellSet()){
-			out.put(e.getRowKey().getUnit().get(), e.getColumnKey(), e.getValue());
-		}
-		return out;
-	}
 
 
-	private void computeTypestateErrorUnits(Multimap<Unit, State> unitToStates) {
-		for (Unit curr : unitToStates.keySet()) {
+	private void computeTypestateErrorUnits(Multimap<Statement, State> unitToStates) {
+		for (Statement curr : unitToStates.keySet()) {
 			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
-			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr)) {
-				Collection<State> stateAtPred = unitToStates.get(pred);
+			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
+				Collection<State> stateAtPred = unitToStates.get(new Statement((Stmt)pred, curr.getMethod()));
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (State newStateAtCurr : stateAtCurrMinusPred) {
-					typeStateChangeAtStatement(pred, newStateAtCurr);
+					typeStateChangeAtStatement(new Statement((Stmt)pred,curr.getMethod()), newStateAtCurr);
 					if(newStateAtCurr.equals(ErrorStateNode.v())){
 						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
 						cryptoScanner.getAnalysisListener().typestateErrorAt(this, new StmtWithMethod(pred, cryptoScanner.icfg().getMethodOf(pred)), expectedMethodCalls);
@@ -202,12 +193,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void typeStateChangeAtStatement(Unit curr, State stateNode) {
+	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
 		typeStateChange.put(curr, stateNode);
 		onAddedTypestateChange(curr, stateNode);
 	}
 
-	private void onAddedTypestateChange(Unit curr, State stateNode) {
+	private void onAddedTypestateChange(Statement curr, State stateNode) {
 		for (CryptSLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
 			if (predToBeEnsured.isNegated()) {
 				continue;
@@ -219,7 +210,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void ensuresPred(CryptSLPredicate predToBeEnsured, Unit currStmt, State stateNode) {
+	private void ensuresPred(CryptSLPredicate predToBeEnsured, Statement currStmt, State stateNode) {
 		if (predToBeEnsured.isNegated()) {
 			return;
 		}
@@ -230,17 +221,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				expectPredicateWhenThisObjectIsInState(stateNode, currStmt, predToBeEnsured, satisfiesConstraintSytem);
 			}
 		}
-		if (currStmt instanceof Stmt && ((Stmt) currStmt).containsInvokeExpr()) {
-			InvokeExpr ie = ((Stmt) currStmt).getInvokeExpr();
+		if (currStmt.isCallsite()) {
+			InvokeExpr ie = ((Stmt) currStmt.getUnit().get()).getInvokeExpr();
 			SootMethod invokedMethod = ie.getMethod();
 			Collection<CryptSLMethod> convert = CryptSLMethodToSootMethod.v().convert(invokedMethod);
 
 			for (CryptSLMethod cryptSLMethod : convert) {
 				Entry<String, String> retObject = cryptSLMethod.getRetObject();
-				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(),retObject.getKey())) {
-					AssignStmt as = (AssignStmt) currStmt;
+				if (!retObject.getKey().equals("_") && currStmt.getUnit().get() instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(),retObject.getKey())) {
+					AssignStmt as = (AssignStmt) currStmt.getUnit().get();
 					Value leftOp = as.getLeftOp();
-					AllocVal val = new AllocVal(leftOp, cryptoScanner.icfg().getMethodOf(currStmt), as.getRightOp());
+					AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), as.getRightOp());
 					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 				}
 				int i = 0;
@@ -248,7 +239,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					if(predicateParameterEquals(predToBeEnsured.getParameters(),p.getKey())){
 						Value param = ie.getArg(i);
 						if (param instanceof Local) {
-							Val val = new Val(param, cryptoScanner.icfg().getMethodOf(currStmt));
+							Val val = new Val(param, currStmt.getMethod());
 							expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 						}
 					}
@@ -269,7 +260,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return false;
 	}
 
-	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Unit currStmt, Val accessGraph, boolean satisfiesConstraintSytem) {
+	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Statement currStmt, Val accessGraph, boolean satisfiesConstraintSytem) {
 		boolean matched = false;
 		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
 			if(accessGraph.value() == null){
@@ -280,7 +271,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				RefType refType = (RefType) baseType;
 				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
-						new AnalysisSeedWithSpecification(cryptoScanner, new Statement((Stmt)currStmt,cryptoScanner.icfg().getMethodOf(currStmt)), accessGraph, spec));
+						new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 					matched = true;
 					if (satisfiesConstraintSytem)
 						seed.addEnsuredPredicateFromOtherRule(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
@@ -289,7 +280,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		if (matched)
 			return;
-		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<Statement,Val>(new Statement((Stmt)currStmt,cryptoScanner.icfg().getMethodOf(currStmt)), accessGraph));
+		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<Statement,Val>(currStmt,accessGraph));
 		cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
@@ -300,19 +291,19 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		indirectlyEnsuredPredicates.add(ensuredCryptSLPredicate);
 		if (results == null)
 			return;
-		for (Cell<Unit, Val, TransitionFunction> c : results.cellSet()) {
+		for (Cell<Statement, Val, TransitionFunction> c : results.cellSet()) {
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
 	}
 
-	private void expectPredicateWhenThisObjectIsInState(State stateNode, Unit currStmt, CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
+	private void expectPredicateWhenThisObjectIsInState(State stateNode, Statement currStmt, CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
 		cryptoScanner.expectPredicate(this, currStmt, predToBeEnsured);
 
 		if (!satisfiesConstraintSytem)
 			return;
-		for (Cell<Unit, Val, TransitionFunction> e : results.cellSet()) {
+		for (Cell<Statement, Val, TransitionFunction> e : results.cellSet()) {
 			// TODO check for any reachable state that don't kill
 			// predicates.
 			if (containsTargetState(e.getValue(),stateNode)) {
@@ -485,7 +476,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void addEnsuredPredicate(EnsuredCryptSLPredicate ensPred) {
 		if (ensuredPredicates.add(ensPred)) {
-			for (Entry<Unit, State> e : typeStateChange.entries())
+			for (Entry<Statement, State> e : typeStateChange.entries())
 				onAddedTypestateChange(e.getKey(), e.getValue());
 		}
 	}

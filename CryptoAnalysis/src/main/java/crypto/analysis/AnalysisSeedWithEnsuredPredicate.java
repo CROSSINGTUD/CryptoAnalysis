@@ -50,7 +50,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			return;
 
 		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.cellSet()){
-			cryptoScanner.addNewPred(this,c.getRowKey().getUnit().get(), c.getColumnKey(), pred);
+			cryptoScanner.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
 		}
 	}
 

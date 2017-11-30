@@ -117,14 +117,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void ensuredPredicates(Table<Unit, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-								for(Cell<Unit, Val, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
+							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
+									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
+									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+								for(Cell<Statement, Val, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
 											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
+											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
 												for(EnsuredCryptSLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	
@@ -132,7 +132,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										}
 										if(e instanceof NotHasEnsuredPredicateAssertion){
 											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
+											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
 												for(EnsuredCryptSLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	

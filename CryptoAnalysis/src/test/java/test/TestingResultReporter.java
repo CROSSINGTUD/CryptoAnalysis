@@ -53,41 +53,6 @@ public class TestingResultReporter{
 				}
 			}
 		}
-		
-      WeightedPAutomaton<Statement, INode<Val>, TransitionFunction> aut = new WeightedPAutomaton<Statement, INode<Val>, TransitionFunction>(null) {
-          @Override
-          public INode<Val> createState(INode<Val> d, Statement loc) {
-              return null;
-          }
-
-          @Override
-          public boolean isGeneratedState(INode<Val> d) {
-              return false;
-          }
-
-          @Override
-          public Statement epsilon() {
-              return seedSolver.getCallAutomaton().epsilon();
-          }
-
-          @Override
-          public TransitionFunction getZero() {
-              return seedSolver.getCallAutomaton().getZero();
-          }
-
-          @Override
-          public TransitionFunction getOne() {
-              return seedSolver.getCallAutomaton().getOne();
-          }
-      };
-      
-      for(Entry<Transition<Statement, INode<Val>>,TransitionFunction> s : seedSolver.getTransitionsToFinalWeights().entrySet()){
-          Transition<Statement, INode<Val>> t = s.getKey();
-          TransitionFunction w = s.getValue();
-          aut.addWeightForTransition(t, w);
-      }
-      
-      System.out.println(aut.toDotString());
 	}
 
 
