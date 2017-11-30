@@ -9,14 +9,10 @@
   <modules>
     <module>AndroidCallGraph</module>
     <module>CryptoAnalysis</module>
-    <module>heros</module>
-    <module>ideal</module>
-    <module>IDEViz</module>
-    <module>Boomerang</module>
     <module>soot-infoflow</module>
     <module>soot-infoflow-android</module>
+    <module>WeightedBoomerang</module>
     <module>CryptoInterfaces</module>
-    <module>soot</module>
   </modules>
   <build>
     <plugins>
