@@ -19,7 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>ideal-crossing</artifactId>
+			<artifactId>CryptoAnalysis</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

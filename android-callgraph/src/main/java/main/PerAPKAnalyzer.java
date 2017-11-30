@@ -171,7 +171,7 @@ public class PerAPKAnalyzer {
 
 	private static void runCryptoAnalysis() {
 		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-		reporter = new CrySLAnalysisResultsAggregator(icfg, apkFile);
+		reporter = new CrySLAnalysisResultsAggregator(apkFile);
 		reporter.addReportListener(new CogniCryptCLIReporter());
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
 
