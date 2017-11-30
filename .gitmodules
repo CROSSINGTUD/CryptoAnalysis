@@ -1,0 +1,3 @@
+[submodule "WeightedBoomerang"]
+	path = WeightedBoomerang
+	url = https://github.com/johspaeth/WPDS.git
