@@ -26,8 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
-import boomerang.cfg.ExtendedICFG;
-import boomerang.cfg.IExtendedICFG;
+import boomerang.debugger.Debugger;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
@@ -37,8 +36,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.rules.StateNode;
-import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -47,9 +44,10 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.android.TestApps.Test;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.util.queue.QueueReader;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
 public class PerAPKAnalyzer {
@@ -58,8 +56,8 @@ public class PerAPKAnalyzer {
 	private static FileWriter fout;
 	private static boolean runCryptoScanner;
 	private static boolean VISUALIZATION = false;
-	private static IDebugger<TypestateDomainValue<StateNode>> debugger = (VISUALIZATION ? null : new NullDebugger());
-	private static ExtendedICFG icfg;
+	private static Debugger<TransitionFunction> debugger = (VISUALIZATION ? null : new Debugger<TransitionFunction>());
+	private static JimpleBasedInterproceduralCFG icfg;
 	private static File ideVizFile;
 	private static CrySLAnalysisResultsAggregator reporter;
 	private static File apkFile;
@@ -81,7 +79,7 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	public static IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
+	public static Debugger<TransitionFunction> getDebugger() {
 		if (debugger == null) {
 			if (!ideVizFile.getParentFile().exists()) {
 				ideVizFile.getParentFile().mkdirs();
@@ -170,15 +168,10 @@ public class PerAPKAnalyzer {
 	}
 
 	private static void runCryptoAnalysis() {
-		icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
+		icfg = new JimpleBasedInterproceduralCFG(false);
 		reporter = new CrySLAnalysisResultsAggregator(apkFile);
 		reporter.addReportListener(new CogniCryptCLIReporter());
 		CryptoScanner scanner = new CryptoScanner(getRules()) {
-
-			@Override
-			public IExtendedICFG icfg() {
-				return icfg;
-			}
 
 			@Override
 			public CrySLAnalysisResultsAggregator getAnalysisListener() {
@@ -193,6 +186,11 @@ public class PerAPKAnalyzer {
 			@Override
 			public boolean isCommandLineMode() {
 				return true;
+			}
+
+			@Override
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return icfg;
 			}
 
 		};
@@ -258,7 +256,7 @@ public class PerAPKAnalyzer {
 
 		@Override
 		public boolean test(IAnalysisSeed t) {
-			return icfg.getMethodOf(t.getStmt()).getDeclaringClass().toString().contains(filterString);
+			return t.getMethod().getDeclaringClass().toString().contains(filterString);
 		}
 
 		@Override
