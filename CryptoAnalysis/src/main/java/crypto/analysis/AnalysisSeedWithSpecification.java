@@ -17,6 +17,7 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.util.StmtWithMethod;
@@ -239,7 +240,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (!retObject.getKey().equals("_") && currStmt instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(),retObject.getKey())) {
 					AssignStmt as = (AssignStmt) currStmt;
 					Value leftOp = as.getLeftOp();
-					Val val = new Val(leftOp, cryptoScanner.icfg().getMethodOf(currStmt));
+					AllocVal val = new AllocVal(leftOp, cryptoScanner.icfg().getMethodOf(currStmt), as.getRightOp());
 					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 				}
 				int i = 0;
