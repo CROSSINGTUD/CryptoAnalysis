@@ -182,6 +182,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		Table<Statement, Val, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
 		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
 			for (ITransition n : c.getValue().values()) {
+				if(n.to() == null)
+					continue;
 				if (!n.to().isAccepting()) {
 					Statement s = c.getRowKey();
 					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, s);
@@ -318,7 +320,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		//TODO we still need to implement PhaseII of IDE in IDEAL
 		Set<State> res = Sets.newHashSet();
 		for(ITransition t : value.values()){
-			res.add(t.to());
+			if(t.to() != null)
+				res.add(t.to());
 		}
 		return res;
 	}
@@ -488,7 +491,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(conditionalMethods == null)
 			return false;
 		for(StateNode s : conditionalMethods){
-			if(state.equals(new WrappedState(s))){
+			if(new WrappedState(s).equals(s)){
 				return true;
 			}
 		}

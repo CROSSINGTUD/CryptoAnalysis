@@ -44,6 +44,9 @@ public class TestingResultReporter{
 					if(t.getLabel().getUnit().isPresent()){
 						if(t.getLabel().getUnit().get().equals(e.getKey())){
 							for(ITransition trans : w.values()){
+								if(trans.from() == null || trans.to() == null)
+									continue;
+									
 								if(trans.from().isInitialState()){
 									expectedResults.computedResults(trans.to());
 								}
