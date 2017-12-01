@@ -26,6 +26,7 @@ import crypto.rules.StateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
+import ideal.IDEALSeedTimeout;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -99,7 +100,12 @@ public abstract class ExtendedIDEALAnaylsis {
 	public WeightedBoomerang<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
-		solver = analysis.run(query);
+		try {
+			solver = analysis.run(query);
+		} catch (IDEALSeedTimeout e){
+			System.err.println(e);
+			solver = (WeightedBoomerang<TransitionFunction>) e.getSolver();
+		}
 		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
 			if (reports != null) {
