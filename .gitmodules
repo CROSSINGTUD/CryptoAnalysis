@@ -1,6 +1,3 @@
-[submodule "WeightedBoomerang"]
-	path = WeightedBoomerang
-	url = https://github.com/johspaeth/WPDS.git
 [submodule "soot-infoflow"]
 	path = soot-infoflow
 	url = https://github.com/johspaeth/soot-infoflow.git
