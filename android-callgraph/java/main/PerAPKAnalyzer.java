@@ -27,6 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
 import boomerang.debugger.Debugger;
+import boomerang.jimple.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
@@ -288,6 +289,8 @@ public class PerAPKAnalyzer {
 				line.add("typestateErrorTimeouts(seed)");
 				line.add("typestateError(seed)");
 				addRuleHeader("typestateError_", line);
+				line.add("typestateErrorEndOfObjectLifetime(seed)");
+				addRuleHeader("typestateErrorEndOfObjectLifetime_", line);
 				line.add("typestateError(unit)");
 				// line.add("expectedPredicates");
 				line.add("missingPredicates");
@@ -315,7 +318,9 @@ public class PerAPKAnalyzer {
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
-			addTypestateDetails(line, filter);
+			addTypestateDetails(line, reporter.getTypestateErrors(),filter);
+			line.add(Integer.toString(subset(reporter.getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
+			addTypestateDetails(line,reporter.getTypestateErrorsEndOfLifecycle(), filter);
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
 			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
@@ -334,12 +339,8 @@ public class PerAPKAnalyzer {
 			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
-			Set<SootMethod> allVisited = Sets.newHashSet();
-//			allVisited.addAll(AliasFinder.VISITED_METHODS);
-//			allVisited.addAll(Analysis.VISITED_METHODS);
-			line.add(Integer.toString(allVisited.size()));
+			line.add(Integer.toString(computeVisitedMethod(reporter.getVisitedMethods(), filter).size()));
 			line.add(Integer.toString(reachableMethodsCount));
-//			line.add(Integer.toString(AccessGraph.MAX_FIELD_COUNT));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {
@@ -357,7 +358,14 @@ public class PerAPKAnalyzer {
 		}
 		return val;
 	}
-
+	private static Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map, Predicate<IAnalysisSeed> filter) {
+		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
+		Set<SootMethod> res = Sets.newHashSet();
+		for (IAnalysisSeed s : sub) {
+			res.addAll(map.get(s));
+		}
+		return res;
+	}
 	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
 		Set<IAnalysisSeed> filtered = Sets.newHashSet();
 		for (IAnalysisSeed s : analysisSeeds)
@@ -424,9 +432,9 @@ public class PerAPKAnalyzer {
 		}
 	}
 
-	private static void addTypestateDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
+	private static void addTypestateDetails(List<String> line,Multimap<IAnalysisSeed, Statement> typestateErrors, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
-		for (IAnalysisSeed seed : reporter.getTypestateErrors().keySet()) {
+		for (IAnalysisSeed seed : typestateErrors.keySet()) {
 			if (seed instanceof AnalysisSeedWithSpecification) {
 				if (!filter.test(seed))
 					continue;

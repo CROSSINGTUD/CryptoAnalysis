@@ -18,7 +18,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
-import soot.Unit;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
@@ -120,12 +119,6 @@ public class CrySLResultsReporter  {
 	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.afterPredicateCheck(analysisSeedWithSpecification);
-		}
-	}
-
-	public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.seedFinished(analysisSeedWithSpecification);
 		}
 	}
 

@@ -35,6 +35,7 @@ public class CrySLAnalysisResultsAggregator{
 	protected Set<IAnalysisSeed> analysisSeeds = Sets.newHashSet();
 	protected Set<IAnalysisSeed> typestateTimeouts = Sets.newHashSet();
 	protected Multimap<IAnalysisSeed, Statement> reportedTypestateErros = HashMultimap.create();
+	protected Multimap<IAnalysisSeed, Statement> reportedTypestateErrosAtEndOfObjectLifecycle = HashMultimap.create();
 	protected Multimap<ClassSpecification, Statement> callToForbiddenMethod = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, ISLConstraint> checkedConstraints = HashMultimap.create();
 	protected Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> missingPredicatesObjectBased = HashMultimap.create();
@@ -53,12 +54,28 @@ public class CrySLAnalysisResultsAggregator{
 	protected Multimap<IAnalysisSeed, Long> seedToConstraintTime = HashMultimap.create();
 	protected Multimap<IAnalysisSeed, Long> seedToPredicateTime = HashMultimap.create();
 	protected CrySLResultsReporter crr = new CrySLResultsReporter();
+	protected Multimap<IAnalysisSeed, SootMethod> seedToAnalyzedMethods = HashMultimap.create();
+	
 	
 	public CrySLAnalysisResultsAggregator(File analyzedFile) {
 		this.analyzedFile = analyzedFile;
 	}
 	
 	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
+		if (seed instanceof AnalysisSeedWithEnsuredPredicate) {
+			if (taintWatch.isRunning()) {
+				taintWatch.stop();
+				seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
+			}
+			
+		} else {
+			if (typestateWatch.isRunning()) {
+				typestateWatch.stop();
+				seedToTypestateAnalysisTime.put(seed, typestateWatch.elapsed(TimeUnit.MILLISECONDS));
+				seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
+			}
+		}
+		seedToAnalyzedMethods.putAll(seed, solver.getStats().getVisitedMethods());
 		crr.onSeedFinished(seed, solver);
 	}
 
@@ -76,22 +93,6 @@ public class CrySLAnalysisResultsAggregator{
 		crr.discoveredSeed(curr);
 	}
 
-	public void seedFinished(IAnalysisSeed seed) {
-		if (seed instanceof AnalysisSeedWithEnsuredPredicate) {
-			if (taintWatch.isRunning()) {
-				taintWatch.stop();
-				seedToTaintAnalysisTime.put(seed, taintWatch.elapsed(TimeUnit.MILLISECONDS));
-			}
-		} else {
-			if (typestateWatch.isRunning()) {
-				typestateWatch.stop();
-				seedToTypestateAnalysisTime.put(seed, typestateWatch.elapsed(TimeUnit.MILLISECONDS));
-				seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
-			}
-		}
-
-		crr.seedFinished(seed);
-	}
 
 	public void seedStarted(IAnalysisSeed seed) {
 		boomerangWatch.reset();
@@ -139,6 +140,7 @@ public class CrySLAnalysisResultsAggregator{
 	}
 	
 	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
+		reportedTypestateErrosAtEndOfObjectLifecycle.put(classSpecification, stmt);
 		crr.typestateErrorEndOfLifeCycle(classSpecification, stmt);
 	}
 	
@@ -192,6 +194,10 @@ public class CrySLAnalysisResultsAggregator{
 		return reportedTypestateErros;
 	}
 
+	public Multimap<IAnalysisSeed, Statement> getTypestateErrorsEndOfLifecycle() {
+		return reportedTypestateErrosAtEndOfObjectLifecycle;
+	}
+	
 	public Multimap<ClassSpecification, Statement> getCallToForbiddenMethod() {
 		return callToForbiddenMethod;
 	}
@@ -204,6 +210,9 @@ public class CrySLAnalysisResultsAggregator{
 		return typestateTimeouts;
 	}
 
+	public Multimap<IAnalysisSeed, SootMethod> getVisitedMethods() {
+		return seedToAnalyzedMethods;
+	}
 	public Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> getExpectedPredicates() {
 		return this.expectedPredicates;
 	}
@@ -297,6 +306,21 @@ public class CrySLAnalysisResultsAggregator{
 					s += "\tSpecification type " + seedWithSpec.getSpec().getRule().getClassName() + "\n\t Object: \n";
 					s += "\t\t" + object(seed.asNode()) + "\n";
 					for (Statement stmtsWithMethod : reportedTypestateErros.get(seedWithSpec))
+						s += "\t\t\t " + stmtsWithMethod + " \n";
+				}
+			}
+		}
+		s += "\n\n================REPORTED TYPESTATE ERRORS AT END OF OBJECT LIFETIME==================\n";
+		if (reportedTypestateErrosAtEndOfObjectLifecycle.isEmpty())
+			s += "No Typestate Errors found\n";
+		else {
+			s += "The following are destroyed when not in accepting state\n";
+			for (IAnalysisSeed seed : reportedTypestateErrosAtEndOfObjectLifecycle.keySet()) {
+				if (seed instanceof AnalysisSeedWithSpecification) {
+					AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
+					s += "\tSpecification type " + seedWithSpec.getSpec().getRule().getClassName() + "\n\t Object: \n";
+					s += "\t\t" + object(seed.asNode()) + "\n";
+					for (Statement stmtsWithMethod : reportedTypestateErrosAtEndOfObjectLifecycle.get(seedWithSpec))
 						s += "\t\t\t " + stmtsWithMethod + " \n";
 				}
 			}

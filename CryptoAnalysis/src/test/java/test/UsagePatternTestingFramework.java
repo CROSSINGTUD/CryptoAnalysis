@@ -142,11 +142,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
 							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
 								
 							}

@@ -54,7 +54,7 @@ public class Executor {
 	private static void startProcess(File file) {
 		String classpath = System.getProperty("java.class.path");
 		String javaHome = System.getProperty("java.home");
-		String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java", "-Xmx8g", "-Xms8g",
+		String[] command = new String[] { javaHome + File.separator + "bin" + File.separator + "java", "-Xmx8g", "-Xms1g",
 				"-Xss64m", "-cp", classpath, PerAPKAnalyzer.class.getName(), file.getAbsolutePath(), platformsDir, visualization };
 		System.out.println("Running command: " + Arrays.toString(command));
 		try {

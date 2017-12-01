@@ -89,7 +89,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			
 			@Override
 			public CrySLAnalysisResultsAggregator analysisListener() {
-				return null;
+				return cryptoScanner.getAnalysisListener();
 			}};
 	}
 
@@ -106,7 +106,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver);
 		onSeedFinished(solver);
-		cryptoScanner.getAnalysisListener().seedFinished(this);
 		cryptoScanner.getAnalysisListener().collectedValues(this, analysis.getCollectedValues());
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {
@@ -486,6 +485,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean isConditionalState(Set<StateNode> conditionalMethods, State state) {
+		if(conditionalMethods == null)
+			return false;
 		for(StateNode s : conditionalMethods){
 			if(state.equals(new WrappedState(s))){
 				return true;

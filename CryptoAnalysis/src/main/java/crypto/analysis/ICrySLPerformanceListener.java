@@ -20,8 +20,6 @@ public interface ICrySLPerformanceListener {
 
 	void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
 	
-	void seedFinished(IAnalysisSeed analysisSeedWithSpecification);
-
 	void seedStarted(IAnalysisSeed analysisSeedWithSpecification);
 
 	void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q);

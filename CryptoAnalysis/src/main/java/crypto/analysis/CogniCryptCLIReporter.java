@@ -37,11 +37,6 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {}
 
 	@Override
-	public void seedFinished(IAnalysisSeed seed) {
-
-	}
-
-	@Override
 	public void seedStarted(IAnalysisSeed seed) {
 
 	}

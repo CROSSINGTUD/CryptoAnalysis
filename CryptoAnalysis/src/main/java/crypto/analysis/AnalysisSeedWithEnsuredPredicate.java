@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -37,11 +38,11 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
-		solver.run(this);
+		WeightedBoomerang<TransitionFunction> s = solver.run(this);
 		analysisResults = solver.getResults(this);
 		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
-		cryptoScanner.getAnalysisListener().seedFinished(this);
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, s);
 		analyzed = true;
 	}
 
@@ -79,7 +80,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			
 			@Override
 			public CrySLAnalysisResultsAggregator analysisListener() {
-				return null;
+				return cryptoScanner.getAnalysisListener();
 			}
 			
 
