@@ -19,26 +19,23 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.StateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
+import ideal.IDEALSeedSolver;
 import ideal.IDEALSeedTimeout;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
-import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.WeightFunctions;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import wpds.impl.Transition;
 import wpds.impl.Weight.NoWeight;
 
 public abstract class ExtendedIDEALAnaylsis {
@@ -53,7 +50,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		}
 	};
 	private final IDEALAnalysis<TransitionFunction> analysis;
-	private WeightedBoomerang<TransitionFunction> solver;
+	private IDEALSeedSolver<TransitionFunction> solver;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -97,14 +94,14 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract SootBasedStateMachineGraph getStateMachine();
 
-	public WeightedBoomerang<TransitionFunction> run(Query query) {
+	public IDEALSeedSolver<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
 		try {
 			solver = analysis.run(query);
 		} catch (IDEALSeedTimeout e){
 			System.err.println(e);
-			solver = (WeightedBoomerang<TransitionFunction>) e.getSolver();
+			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
 		}
 		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
@@ -229,11 +226,11 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 	public Table<Statement, Val, TransitionFunction> getResults(IAnalysisSeed seed) {
-		return solver.getResults(seed);
+		return solver.getPhase2Solver().getResults(seed);
 	}
 
-	public Map<Node<Statement,AllocVal>, WeightedBoomerang<TransitionFunction>> run() {
-		Map<Node<Statement,AllocVal>, WeightedBoomerang<TransitionFunction>> seedToSolver = Maps.newHashMap();
+	public Map<Node<Statement,AllocVal>, IDEALSeedSolver<TransitionFunction>> run() {
+		Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> seedToSolver = Maps.newHashMap();
 		for (Node<Statement, AllocVal> seed : computeInitialSeeds()) {
 			seedToSolver.put(seed, run(new WeightedForwardQuery<>(seed.stmt(),seed.fact(),getStateMachine().getInitialWeight())));
 		}

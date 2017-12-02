@@ -31,6 +31,7 @@ import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
+import ideal.IDEALSeedSolver;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -101,11 +102,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		WeightedBoomerang<TransitionFunction> solver = analysis.run(this);
+		IDEALSeedSolver<TransitionFunction> solver = analysis.run(this);
 		parametersToValues = analysis.getCollectedValues();
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver);
-		onSeedFinished(solver);
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver.getPhase2Solver());
+		onSeedFinished(solver.getPhase2Solver());
 		cryptoScanner.getAnalysisListener().collectedValues(this, analysis.getCollectedValues());
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {

@@ -17,6 +17,7 @@ import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -38,11 +39,11 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
-		WeightedBoomerang<TransitionFunction> s = solver.run(this);
+		IDEALSeedSolver<TransitionFunction> s = solver.run(this);
 		analysisResults = solver.getResults(this);
 		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, s);
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, s.getPhase2Solver());
 		analyzed = true;
 	}
 

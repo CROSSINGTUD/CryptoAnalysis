@@ -20,6 +20,7 @@ import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -83,11 +84,11 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
-				Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> seedToSolvers = executeAnalysis();
+				Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(Node<Statement, AllocVal> seed : seedToSolvers.keySet()){
-					for(Query q : seedToSolvers.get(seed).getSolvers().keySet()){
+					for(Query q : seedToSolvers.get(seed).getPhase2Solver().getSolvers().keySet()){
 						if(q.asNode().equals(seed)){
-							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getSolvers().getOrCreate(q));
+							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getPhase2Solver().getSolvers().getOrCreate(q));
 						}
 					}
 				}
@@ -112,7 +113,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected Map<Node<Statement, AllocVal>, WeightedBoomerang<TransitionFunction>> executeAnalysis() {
+	protected Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();
