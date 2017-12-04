@@ -136,4 +136,9 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 			return new CryptSLPredicate(baseObject, predName, parameters, negated);
 		}
 	}
+
+	@Override
+	public String getName() {
+		return toString();
+	}
 }

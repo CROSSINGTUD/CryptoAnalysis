@@ -65,5 +65,10 @@ public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Se
 		varNames.add(var.getVarName());
 		return varNames;
 	}
+
+	@Override
+	public String getName() {
+		return toString();
+	}
 	
 }

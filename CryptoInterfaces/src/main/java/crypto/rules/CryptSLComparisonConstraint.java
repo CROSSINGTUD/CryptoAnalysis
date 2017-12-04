@@ -1,6 +1,5 @@
 package crypto.rules;
 
-import java.util.List;
 import java.util.Set;
 
 public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.io.Serializable {
@@ -55,6 +54,11 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 		Set<String> varNames = left.getInvolvedVarNames();
 		varNames.addAll(right.getInvolvedVarNames());
 		return varNames;
+	}
+
+	@Override
+	public String getName() {
+		return toString();
 	}
 	
 }
