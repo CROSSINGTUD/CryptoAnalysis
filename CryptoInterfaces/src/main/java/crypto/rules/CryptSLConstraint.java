@@ -61,4 +61,9 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 		return varNames;
 	}
 
+	@Override
+	public String getName() {
+		return toString();
+	}
+
 }

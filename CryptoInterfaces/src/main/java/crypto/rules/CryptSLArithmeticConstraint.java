@@ -1,9 +1,9 @@
 package crypto.rules;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import typestate.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
 
@@ -12,10 +12,10 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	public enum ArithOp { p, n}
 	
 	private ArithOp operator;
-	private String left;
-	private String right;
+	private ICryptSLPredicateParameter  left;
+	private ICryptSLPredicateParameter  right;
 	
-	public CryptSLArithmeticConstraint(String l, String r, ArithOp op) {
+	public CryptSLArithmeticConstraint(ICryptSLPredicateParameter l, ICryptSLPredicateParameter  r, ArithOp op) {
 		left = l;
 		right = r;
 		operator = op;
@@ -31,14 +31,14 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	/**
 	 * @return the left
 	 */
-	public String getLeft() {
+	public ICryptSLPredicateParameter getLeft() {
 		return left;
 	}
 
 	/**
 	 * @return the right
 	 */
-	public String getRight() {
+	public ICryptSLPredicateParameter getRight() {
 		return right;
 	}
 
@@ -49,19 +49,14 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	@Override
 	public Set<String> getInvolvedVarNames() {
 		Set<String> varNames = new HashSet<String>();
-		try {
-			Integer.parseInt(left);
-		} catch (NumberFormatException ex) {
-			varNames.add(left);
-		}
-		
-		try {
-			Integer.parseInt(right);
-		} catch (NumberFormatException ex) {
-			varNames.add(right);
-		}
-		
+		varNames.add(left.getName());
+		varNames.add(right.getName());
 		return varNames;
+	}
+
+	@Override
+	public String getName() {
+		return toString();
 	}
 	
 
