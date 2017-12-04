@@ -195,9 +195,7 @@ public class PerAPKAnalyzer {
 			}
 
 		};
-		Stopwatch watch = Stopwatch.createStarted();
 		scanner.scan();
-		analysisTime = watch.elapsed(TimeUnit.MILLISECONDS);
 		detailedOutput();
 		summarizedOutput(new PackageFilter("com.google."));
 		summarizedOutput(new PackageFilter("com.unity3d."));
