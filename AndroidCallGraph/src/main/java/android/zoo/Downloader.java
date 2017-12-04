@@ -50,9 +50,9 @@ public class Downloader {
 		if (isApkOfInterest(entry)) {
 			createDownloadDir();
 			download(entry);
-			downloadedAppsList.add(entry.pkg_name.substring(entry.pkg_name.indexOf("_")));
+			downloadedAppsList.add(entry.pkg_name);
 			downloadedApps++;
-		} else if (redundant > 0 && downloadedAppsList.contains(entry.pkg_name.substring(entry.pkg_name.indexOf("-")))) {
+		} else if (redundant > 0 && downloadedAppsList.contains(entry.pkg_name)) {
 			redundant--;
 			System.out.println("Entry " + entry.pkg_name + " already downloaded.");
 		}
@@ -102,7 +102,8 @@ public class Downloader {
 	}
 
 	private static boolean isApkOfInterest(AndroidZooEntry entry) {
-		return !downloadedAppsList.contains(entry.pkg_name.substring(entry.pkg_name.indexOf("-"))) && (entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
+		System.out.println(entry.pkg_name);
+		return !downloadedAppsList.contains(entry.pkg_name) && (entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
 	}
 
 	public static String getAndroidZooAPIKey() {
