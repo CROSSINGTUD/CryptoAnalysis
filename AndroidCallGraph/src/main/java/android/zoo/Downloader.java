@@ -11,6 +11,8 @@ import java.net.SocketAddress;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Downloader {
 	public static final File DOWNLOAD_DIRECTORY = new File("AndroidZooApps");
@@ -18,6 +20,8 @@ public class Downloader {
 	private static final String ANDROID_ZOO_API_KEY = "AndroidZooAPIKey.txt";
 	private static final String ANDROID_ZOO_URL = "https://androzoo.uni.lu/api/download?apikey=${APIKEY}&sha256=${SHA256}";
 	private static int downloadedApps = 0;
+	private static int redundant = 250;
+	private final static List<String> downloadedAppsList = new ArrayList<String>(); 
 
 	public static void main(String... args) {
 		try (BufferedReader br = new BufferedReader(new FileReader(ANDROID_ZOO_CSV))) {
@@ -46,7 +50,11 @@ public class Downloader {
 		if (isApkOfInterest(entry)) {
 			createDownloadDir();
 			download(entry);
+			downloadedAppsList.add(entry.pkg_name.substring(entry.pkg_name.indexOf("_")));
 			downloadedApps++;
+		} else if (redundant > 0 && downloadedAppsList.contains(entry.pkg_name.substring(entry.pkg_name.indexOf("-")))) {
+			redundant--;
+			System.out.println("Entry " + entry.pkg_name + " already downloaded.");
 		}
 	}
 
@@ -94,7 +102,7 @@ public class Downloader {
 	}
 
 	private static boolean isApkOfInterest(AndroidZooEntry entry) {
-		return (entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
+		return !downloadedAppsList.contains(entry.pkg_name.substring(entry.pkg_name.indexOf("-"))) && (entry.dex_date.startsWith("2017")) && entry.markets.equals("play.google.com");
 	}
 
 	public static String getAndroidZooAPIKey() {
