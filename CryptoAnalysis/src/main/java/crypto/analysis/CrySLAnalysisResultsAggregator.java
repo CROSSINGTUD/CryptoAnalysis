@@ -390,5 +390,9 @@ public class CrySLAnalysisResultsAggregator{
 		crr.ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
 	}
 
+	public void seedTimedout(IAnalysisSeed query) {
+		typestateTimeouts.add(query);
+	}
+
 
 }

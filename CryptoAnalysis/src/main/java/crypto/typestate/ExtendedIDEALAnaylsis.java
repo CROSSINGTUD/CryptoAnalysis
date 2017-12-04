@@ -55,7 +55,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
-			public Collection<AllocVal> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
+			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
 				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt, calledMethod);
 			}
 
@@ -97,13 +97,16 @@ public abstract class ExtendedIDEALAnaylsis {
 	public IDEALSeedSolver<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
+		CrySLAnalysisResultsAggregator reports = analysisListener();
 		try {
 			solver = analysis.run(query);
 		} catch (IDEALSeedTimeout e){
 			System.err.println(e);
 			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
+			if (reports != null && query instanceof IAnalysisSeed) {
+				reports.seedTimedout((IAnalysisSeed)query);
+			}
 		}
-		CrySLAnalysisResultsAggregator reports = analysisListener();
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
 			if (reports != null) {
 				reports.boomerangQueryStarted(query, q);
@@ -221,7 +224,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLAnalysisResultsAggregator analysisListener();
 
-	public Set<Node<Statement, AllocVal>> computeInitialSeeds() {
+	public Collection<WeightedForwardQuery<TransitionFunction>> computeInitialSeeds() {
 		return analysis.computeSeeds();
 	}
 
@@ -229,10 +232,10 @@ public abstract class ExtendedIDEALAnaylsis {
 		return solver.getPhase2Solver().getResults(seed);
 	}
 
-	public Map<Node<Statement,AllocVal>, IDEALSeedSolver<TransitionFunction>> run() {
-		Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> seedToSolver = Maps.newHashMap();
-		for (Node<Statement, AllocVal> seed : computeInitialSeeds()) {
-			seedToSolver.put(seed, run(new WeightedForwardQuery<>(seed.stmt(),seed.fact(),getStateMachine().getInitialWeight())));
+	public Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> run() {
+		Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolver = Maps.newHashMap();
+		for (WeightedForwardQuery<TransitionFunction> seed : computeInitialSeeds()) {
+			seedToSolver.put(seed, run(seed));
 		}
 		return seedToSolver;
 	}

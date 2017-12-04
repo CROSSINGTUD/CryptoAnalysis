@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -63,7 +64,7 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Set<Node<Statement,AllocVal>> getInitialSeeds() {
+	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds() {
 		return extendedIdealAnalysis.computeInitialSeeds();
 	}
 

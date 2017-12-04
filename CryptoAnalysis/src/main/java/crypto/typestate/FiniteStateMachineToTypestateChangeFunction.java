@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import boomerang.WeightedForwardQuery;
 import com.google.common.collect.Sets;
 
+import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -25,6 +25,7 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.MatcherTransition;
+import typestate.finiteautomata.State;
 import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
@@ -100,8 +101,8 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	}
 
 	@Override
-	public Set<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
-		Set<AllocVal> out = new HashSet<>();
+	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
+		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
 		if(fsm.seedIsConstructor()){
 			if(unit instanceof AssignStmt){
 				AssignStmt as = (AssignStmt) unit;
@@ -109,7 +110,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 					NewExpr newExpr = (NewExpr) as.getRightOp();
 					if(analyzedType.contains(newExpr.getType())){
 						AssignStmt stmt = (AssignStmt) unit;
-						out.add(new AllocVal(stmt.getLeftOp(), method, as.getRightOp()));
+						out.add(createQuery(unit,method,new AllocVal(stmt.getLeftOp(), method, as.getRightOp())));
 					}
 				}
 			}
@@ -123,17 +124,28 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		if (calledMethod.isStatic()) {
 			if(unit instanceof AssignStmt){
 				AssignStmt stmt = (AssignStmt) unit;
-				out.add(new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp()));
+				out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp())));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-			out.add(new AllocVal(iie.getBase(), method,iie));
+			out.add(createQuery(unit,method,new AllocVal(iie.getBase(), method,iie)));
 		}
 		return out;
 	}
 
+	private WeightedForwardQuery<TransitionFunction> createQuery(Unit unit, SootMethod method, AllocVal allocVal) {
+		return new WeightedForwardQuery<TransitionFunction>(new Statement((Stmt)unit,method), allocVal, fsm.getInitialWeight());
+	}
+
+
 	public Collection<SootMethod> getAllMethodsInvokedOnInstance(){
 		return Sets.newHashSet(methodsInvokedOnInstance);
+	}
+
+
+	@Override
+	protected State initialState() {
+		throw new RuntimeException("Should never be called!");
 	}
 	
 	

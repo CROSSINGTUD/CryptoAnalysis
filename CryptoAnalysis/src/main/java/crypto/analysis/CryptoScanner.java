@@ -17,6 +17,7 @@ import com.google.common.collect.Table.Cell;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
+import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -236,8 +237,8 @@ public abstract class CryptoScanner {
 			if (!isCommandLineMode() && !spec.isLeafRule())
 				continue;
 
-			for (Node<Statement, AllocVal> seed : spec.getInitialSeeds()) {
-				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.fact(),spec));
+			for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds()) {
+				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
 			}
 		}
 	}

@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
+import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.AllocVal;
@@ -84,10 +85,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
-				Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> seedToSolvers = executeAnalysis();
-				for(Node<Statement, AllocVal> seed : seedToSolvers.keySet()){
+				Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolvers = executeAnalysis();
+				for(WeightedForwardQuery<TransitionFunction> seed : seedToSolvers.keySet()){
 					for(Query q : seedToSolvers.get(seed).getPhase2Solver().getSolvers().keySet()){
-						if(q.asNode().equals(seed)){
+						if(q.equals(seed)){
 							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getPhase2Solver().getSolvers().getOrCreate(q));
 						}
 					}
@@ -113,7 +114,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected Map<Node<Statement, AllocVal>, IDEALSeedSolver<TransitionFunction>> executeAnalysis() {
+	protected Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();

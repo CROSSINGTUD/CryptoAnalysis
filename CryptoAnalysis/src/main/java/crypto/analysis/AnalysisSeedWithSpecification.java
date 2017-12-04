@@ -492,7 +492,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(conditionalMethods == null)
 			return false;
 		for(StateNode s : conditionalMethods){
-			if(new WrappedState(s).equals(s)){
+			if(new WrappedState(s).equals(state)){
 				return true;
 			}
 		}
