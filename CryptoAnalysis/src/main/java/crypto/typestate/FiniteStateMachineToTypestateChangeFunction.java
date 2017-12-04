@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.WeightedForwardQuery;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.AllocVal;
@@ -24,7 +25,6 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.MatcherTransition;
-import typestate.finiteautomata.State;
 import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
@@ -100,7 +100,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	}
 
 	@Override
-	public Collection<AllocVal> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
+	public Set<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
 		Set<AllocVal> out = new HashSet<>();
 		if(fsm.seedIsConstructor()){
 			if(unit instanceof AssignStmt){
