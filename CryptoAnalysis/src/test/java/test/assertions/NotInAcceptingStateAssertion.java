@@ -1,26 +1,24 @@
 package test.assertions;
 
-import boomerang.accessgraph.AccessGraph;
-import crypto.rules.StateNode;
+import boomerang.jimple.Val;
 import soot.Unit;
 import test.Assertion;
 import test.ComparableResult;
-import typestate.TypestateDomainValue;
+import typestate.finiteautomata.State;
 
-public class NotInAcceptingStateAssertion implements Assertion, ComparableResult<StateNode> {
+public class NotInAcceptingStateAssertion implements Assertion, ComparableResult<State,Val> {
 
 	private Unit unit;
-	private AccessGraph accessGraph;
+	private Val val;
 	private boolean satisfied;
 
-	public NotInAcceptingStateAssertion(Unit unit, AccessGraph accessGraph) {
+	public NotInAcceptingStateAssertion(Unit unit, Val accessGraph) {
 		this.unit = unit;
-		this.accessGraph = accessGraph;
+		this.val = accessGraph;
 	}
 
-	public void computedResults(TypestateDomainValue<StateNode> results) {
-		for(StateNode s : results.getStates())
-			satisfied |= !s.getAccepting();
+	public void computedResults(State s) {
+		satisfied |= !s.isAccepting();
 	}
 
 	public Unit getStmt() {
@@ -37,12 +35,13 @@ public class NotInAcceptingStateAssertion implements Assertion, ComparableResult
 		return false;
 	}
 
-	public AccessGraph getAccessGraph() {
-		return accessGraph;
+	@Override
+	public String toString() {
+		return "[" + getVal() + "@" + getStmt() + " must not be in error state]";
 	}
 
 	@Override
-	public String toString() {
-		return "[" + getAccessGraph() + "@" + getStmt() + " must not be in error state]";
+	public Val getVal() {
+		return val;
 	}
 }

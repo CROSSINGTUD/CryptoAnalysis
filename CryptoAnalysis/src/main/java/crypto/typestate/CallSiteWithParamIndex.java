@@ -1,10 +1,10 @@
 package crypto.typestate;
 
-import boomerang.accessgraph.AccessGraph;
-import ideal.FactAtStatement;
-import soot.jimple.Stmt;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import sync.pds.solver.nodes.Node;
 
-public class CallSiteWithParamIndex extends FactAtStatement{
+public class CallSiteWithParamIndex extends Node<Statement,Val>{
 
 	private String varName;
 	
@@ -17,7 +17,7 @@ public class CallSiteWithParamIndex extends FactAtStatement{
 
 	private int index;
 
-	public CallSiteWithParamIndex(Stmt u, AccessGraph fact, int index, String varName) {
+	public CallSiteWithParamIndex(Statement u, Val fact, int index, String varName) {
 		super(u, fact);
 		this.index = index;
 		this.varName = varName;

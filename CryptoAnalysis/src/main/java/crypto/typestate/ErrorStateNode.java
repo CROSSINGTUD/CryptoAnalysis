@@ -1,18 +1,37 @@
 package crypto.typestate;
 
-import crypto.rules.StateNode;
+import typestate.finiteautomata.State;
 
-public class ErrorStateNode extends StateNode {
+public class ErrorStateNode implements State {
 
 	private static ErrorStateNode instance;
 
 	private ErrorStateNode() {
-		super("ERROR");
 	}
 	
 	public static ErrorStateNode v(){
 		if(instance == null)
 			instance = new ErrorStateNode();
 		return instance;
+	}
+
+	@Override
+	public boolean isErrorState() {
+		return true;
+	}
+
+	@Override
+	public boolean isInitialState() {
+		return false;
+	}
+
+	@Override
+	public boolean isAccepting() {
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "ERR";
 	}
 }

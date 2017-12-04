@@ -1,61 +1,25 @@
 package crypto.analysis;
 
-import boomerang.accessgraph.AccessGraph;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import ideal.IFactAtStatement;
+import boomerang.WeightedForwardQuery;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import soot.SootMethod;
-import soot.Unit;
+import typestate.TransitionFunction;
 
-public abstract class IAnalysisSeed implements IFactAtStatement{
+public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunction> {
 
-	final protected CryptoScanner cryptoScanner;
-	final protected IFactAtStatement factAtStmt;
+	protected final CryptoScanner cryptoScanner;
 
-	public IAnalysisSeed(CryptoScanner cryptoScanner, IFactAtStatement factAtStmt){
-		this.cryptoScanner = cryptoScanner;
-		this.factAtStmt = factAtStmt;
+	public IAnalysisSeed(CryptoScanner scanner, Statement stmt, Val fact, TransitionFunction func){
+		super(stmt,fact, func);
+		this.cryptoScanner = scanner;
 	}
 	abstract void execute();
-
-	abstract CryptoTypestateAnaylsisProblem getAnalysisProblem();
 
 	abstract boolean contradictsNegations();
 	
 	public SootMethod getMethod(){
-		return cryptoScanner.icfg().getMethodOf(getStmt());
-	}
-	
-	@Override
-	public AccessGraph getFact() {
-		return factAtStmt.getFact();
-	}
-	
-	@Override
-	public Unit getStmt() {
-		return factAtStmt.getStmt();
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((factAtStmt == null) ? 0 : factAtStmt.hashCode());
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		IAnalysisSeed other = (IAnalysisSeed) obj;
-		if (factAtStmt == null) {
-			if (other.factAtStmt != null)
-				return false;
-		} else if (!factAtStmt.equals(other.factAtStmt))
-			return false;
-		return true;
+		return stmt().getMethod();
 	}
 	
 }

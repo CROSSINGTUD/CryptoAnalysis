@@ -8,43 +8,41 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.WeightedBoomerang;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.ResultReporter;
 import soot.SootMethod;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
-public interface ICrySLResultsListener extends ResultReporter<TypestateDomainValue<StateNode>> {
+public interface ICrySLResultsListener {
 
-	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedCalls);
+	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls);
 	
-	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt);
+	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt);
 	
-	void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives);
+	void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives);
 	
-	void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
+	void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
 
-	void predicateContradiction(StmtWithMethod stmt, AccessGraph key, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
+	void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
 
 	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
 
-	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit);
+	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit);
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
 	
-	void onSeedTimeout(IFactAtStatement seed);
+	void onSeedTimeout(Node<Statement,Val> seed);
 	
-	void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver);
+	void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver);
 	
-	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues);
+	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues);
 
 	void discoveredSeed(IAnalysisSeed curr);
 

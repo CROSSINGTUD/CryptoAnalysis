@@ -7,18 +7,12 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import boomerang.cfg.ExtendedICFG;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.preanalysis.PreparationTransformer;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.ICrySLResultsListener;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
-import crypto.rules.StateNode;
-import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
@@ -27,14 +21,15 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
+import soot.Unit;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
-import typestate.TypestateDomainValue;
 
 public class SourceCryptoScanner {
 	public static String RESOURCE_PATH = "rules";
 	private static CrySLAnalysisResultsAggregator reporter;
-	private static ExtendedICFG icfg;
+	private static JimpleBasedInterproceduralCFG icfg;
 
 	public static void main(String... args) {
 		initializeSootWithEntryPoint(args[0], args[1]);
@@ -51,7 +46,7 @@ public class SourceCryptoScanner {
 	}
 	
 	private static void analyse() {
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		PackManager.v().getPack("cg").apply();
@@ -63,13 +58,13 @@ public class SourceCryptoScanner {
 			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(false));
-				reporter = new CrySLAnalysisResultsAggregator(icfg, null);
+				icfg = new JimpleBasedInterproceduralCFG(false);
+				reporter = new CrySLAnalysisResultsAggregator(null);
 				reporter.addReportListener(new CogniCryptCLIReporter());
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 					@Override
-					public IExtendedICFG icfg() {
+					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 						return icfg;
 					}
 
@@ -78,10 +73,10 @@ public class SourceCryptoScanner {
 						return reporter;
 					}
 
-					@Override
-					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-						return new NullDebugger<>();
-					}
+//					@Override
+//					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+//						return new NullDebugger<>();
+//					}
 
 					@Override
 					public boolean isCommandLineMode() {

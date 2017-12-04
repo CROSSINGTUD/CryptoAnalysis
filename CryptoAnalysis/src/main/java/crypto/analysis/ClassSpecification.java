@@ -5,20 +5,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import boomerang.cfg.IExtendedICFG;
-import boomerang.util.StmtWithMethod;
+import boomerang.WeightedForwardQuery;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import ideal.Analysis;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.ResultReporter;
-import ideal.debug.IDebugger;
+import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -27,49 +22,40 @@ import soot.Unit;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.util.queue.QueueReader;
-import typestate.TypestateDomainValue;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 
 public class ClassSpecification {
-	private CryptoTypestateAnaylsisProblem problem;
+	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
 	private CryptSLRule cryptSLRule;
 	private final CryptoScanner cryptoScanner;
+	private final SootBasedStateMachineGraph fsm;
 
 	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
 		this.cryptSLRule = rule;
 		this.cryptoScanner = cScanner;
-		this.problem = new CryptoTypestateAnaylsisProblem() {
+		this.fsm = new SootBasedStateMachineGraph(rule.getUsagePattern());
+		this.extendedIdealAnalysis = new ExtendedIDEALAnaylsis() {
 			@Override
-			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return new ResultReporter<TypestateDomainValue<StateNode>>() {
-					@Override
-					public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-					}
-
-					@Override
-					public void onSeedTimeout(IFactAtStatement seed) {
-					}
-				};
+			public SootBasedStateMachineGraph getStateMachine() {
+				return fsm;
 			}
 
 			@Override
-			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-				return new FiniteStateMachineToTypestateChangeFunction(this);
+			public CrySLAnalysisResultsAggregator analysisListener() {
+				return cryptoScanner.getAnalysisListener();
 			}
 
 			@Override
-			public IExtendedICFG icfg() {
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
 			}
 
 			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+			protected Debugger<TransitionFunction> debugger() {
 				return cryptoScanner.debugger();
-			}
-
-			@Override
-			public StateMachineGraph getStateMachine() {
-				return cryptSLRule.getUsagePattern();
 			}
 		};
 	}
@@ -78,12 +64,8 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Set<IFactAtStatement> getInitialSeeds() {
-		return new Analysis<TypestateDomainValue<StateNode>>(problem).computeSeeds();
-	}
-
-	public CryptoTypestateAnaylsisProblem getAnalysisProblem() {
-		return problem;
+	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds() {
+		return extendedIdealAnalysis.computeInitialSeeds();
 	}
 
 	@Override
@@ -114,7 +96,7 @@ public class ClassSpecification {
 				SootMethod method = invokeExpr.getMethod();
 				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new StmtWithMethod(u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
+					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
 				}
 			}
 		}
@@ -164,6 +146,14 @@ public class ClassSpecification {
 		} else if (!cryptSLRule.equals(other.cryptSLRule))
 			return false;
 		return true;
+	}
+
+	public Collection<SootMethod> getInvolvedMethods() {
+		return fsm.getInvolvedMethods();
+	}
+	
+	public SootBasedStateMachineGraph getFSM(){
+		return fsm;
 	}
 
 }

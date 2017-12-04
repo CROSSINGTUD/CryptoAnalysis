@@ -1,56 +1,49 @@
 package crypto.analysis;
 
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.IExtendedICFG;
+import boomerang.WeightedBoomerang;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
-import ideal.Analysis;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.ResultReporter;
-import ideal.debug.IDebugger;
+import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
+import soot.SootMethod;
 import soot.Unit;
-import typestate.TypestateDomainValue;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private Multimap<Unit, AccessGraph> analysisResults = HashMultimap.create();
+	private Table<Statement, Val, TransitionFunction> analysisResults = HashBasedTable.create();
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
-	private CryptoTypestateAnaylsisProblem problem;
+	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, IFactAtStatement delegate) {
-		super(cryptoScanner,delegate);
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<Statement,Val> delegate) {
+		super(cryptoScanner,delegate.stmt(),delegate.fact(), TransitionFunction.one());
 	}
 
 	@Override
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		getOrCreateAnalysis(new ResultReporter<TypestateDomainValue<StateNode>>() {
-			@Override
-			public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-				analysisResults = solver.getResultsAtStatement();
-				for(EnsuredCryptSLPredicate pred : ensuredPredicates)
-					ensurePredicates(pred);
-			}
-
-			@Override
-			public void onSeedTimeout(IFactAtStatement seed) {
-				cryptoScanner.getAnalysisListener().seedFinished(AnalysisSeedWithEnsuredPredicate.this);
-			}
-		}).analysisForSeed(this);
-		cryptoScanner.getAnalysisListener().seedFinished(this);
+		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
+		IDEALSeedSolver<TransitionFunction> s = solver.run(this);
+		analysisResults = solver.getResults(this);
+		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
+			ensurePredicates(pred);
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, s.getPhase2Solver());
 		analyzed = true;
 	}
 
@@ -58,36 +51,22 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		if(analysisResults == null)
 			return;
 
-		for(Entry<Unit, AccessGraph> c : analysisResults.entries()){
-			cryptoScanner.addNewPred(this,c.getKey(), c.getValue(), pred);
+		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.cellSet()){
+			cryptoScanner.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
 		}
 	}
 
 
-	private Analysis<TypestateDomainValue<StateNode>> getOrCreateAnalysis(final ResultReporter<TypestateDomainValue<StateNode>> resultReporter) {
-		problem = new CryptoTypestateAnaylsisProblem() {
+	private ExtendedIDEALAnaylsis getOrCreateAnalysis() {
+		problem = new ExtendedIDEALAnaylsis() {
+			
 			@Override
-			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return resultReporter;
-			}
-
-			@Override
-			public FiniteStateMachineToTypestateChangeFunction createTypestateChangeFunction() {
-				return new FiniteStateMachineToTypestateChangeFunction(this);
-			}
-
-			@Override
-			public IExtendedICFG icfg() {
+			protected BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
 			}
-
+			
 			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return cryptoScanner.debugger();
-			}
-
-			@Override
-			public StateMachineGraph getStateMachine() {
+			public SootBasedStateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
 				StateNode s = new StateNode("0", true, true){
 					@Override
@@ -97,11 +76,21 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 				};
 				m.addNode(s);
 				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
-				return m;
+				return new SootBasedStateMachineGraph(m);
 			}
+			
+			@Override
+			public CrySLAnalysisResultsAggregator analysisListener() {
+				return cryptoScanner.getAnalysisListener();
+			}
+			
 
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return cryptoScanner.debugger();
+			}
 		};
-		return new Analysis<TypestateDomainValue<StateNode>>(problem);
+		return problem;
 	}
 
 	public void addEnsuredPredicate(EnsuredCryptSLPredicate pred) {
@@ -109,14 +98,10 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			ensurePredicates(pred);
 	}
 
-	@Override
-	public CryptoTypestateAnaylsisProblem getAnalysisProblem() {
-		return problem;
-	}
 
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate:"+getFact()+"@" + getStmt() +" " + ensuredPredicates; 
+		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
 	}
 
 	@Override

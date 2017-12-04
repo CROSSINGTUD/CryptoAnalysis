@@ -8,18 +8,20 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.ExtendedICFG;
-import boomerang.cfg.IExtendedICFG;
+import boomerang.Query;
+import boomerang.WeightedBoomerang;
+import boomerang.WeightedForwardQuery;
+import boomerang.debugger.Debugger;
+import boomerang.debugger.IDEVizDebugger;
+import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.rules.CryptSLRuleReader;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.CryptoTypestateAnaylsisProblem;
-import ideal.Analysis;
-import ideal.ResultReporter;
-import ideal.debug.IDEVizDebugger;
-import ideal.debug.IDebugger;
+import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -28,46 +30,49 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
+import test.assertions.MustBeInState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
-	protected IExtendedICFG icfg;
+	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
-	private  IDebugger<TypestateDomainValue<StateNode>>  debugger;
-	protected TestingResultReporter<StateNode> testingResultReporter;
+	private  Debugger<TransitionFunction>  debugger;
+//	protected TestingResultReporter<StateNode> testingResultReporter;
 	public final static String RESOURCE_PATH = "src/test/resources/";
 	
 	protected abstract File getCryptSLFile();
 
-	protected Analysis<TypestateDomainValue<StateNode>> createAnalysis() {
-		return new Analysis<TypestateDomainValue<StateNode>>(new CryptoTypestateAnaylsisProblem() {
-
+	protected ExtendedIDEALAnaylsis createAnalysis() {
+		return new ExtendedIDEALAnaylsis() {
+			
 			@Override
-			public StateMachineGraph getStateMachine() {
-				return CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern();
-			}
-
-			public ResultReporter<TypestateDomainValue<StateNode>> resultReporter() {
-				return IDEALCrossingTestingFramework.this.testingResultReporter;
-			}
-
-			@Override
-			public IExtendedICFG icfg() {
+			protected BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 				return icfg;
 			}
-
+			
 			@Override
-			public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-				return IDEALCrossingTestingFramework.this.getDebugger();
+			public SootBasedStateMachineGraph getStateMachine() {
+				return new SootBasedStateMachineGraph(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern());
 			}
-
-		});
+			
+			@Override
+			public CrySLAnalysisResultsAggregator analysisListener() {
+				return null;
+			}
+			
+			@Override
+			protected Debugger<TransitionFunction> debugger() {
+				return getDebugger();
+			}
+		};
 	}
 
-	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
+	protected Debugger<TransitionFunction> getDebugger() {
 		if(debugger == null)
 			debugger =  new IDEVizDebugger<>(ideVizFile, icfg);
 		return debugger;
@@ -77,11 +82,17 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
-				testingResultReporter = new TestingResultReporter<StateNode>(expectedResults);
-				
-				executeAnalysis();
+				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
+				Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolvers = executeAnalysis();
+				for(WeightedForwardQuery<TransitionFunction> seed : seedToSolvers.keySet()){
+					for(Query q : seedToSolvers.get(seed).getPhase2Solver().getSolvers().keySet()){
+						if(q.equals(seed)){
+							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getPhase2Solver().getSolvers().getOrCreate(q));
+						}
+					}
+				}
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
 				for (Assertion r : expectedResults) {
@@ -103,9 +114,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected void executeAnalysis() {
+	protected Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
-		IDEALCrossingTestingFramework.this.createAnalysis().run();
+		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
+		return analysis.run();
 	}
 
 	private Set<Assertion> parseExpectedQueryResults(SootMethod sootTestMethod) {
@@ -139,7 +151,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				continue;
 			Local queryVar = (Local) param;
 			Value param2 = invokeExpr.getArg(1);
-			AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+			Val val = new Val(queryVar, m);
 			queries.add(new MustBeInState(stmt, val, param2.toString()));
 		}
 	}

@@ -16,29 +16,23 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.ExtendedICFG;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.util.StmtWithMethod;
+import boomerang.Query;
+import boomerang.WeightedBoomerang;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.CryptoVizDebugger;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
-import ideal.debug.IDEVizDebugger;
-import ideal.debug.IDebugger;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -48,7 +42,9 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
@@ -58,29 +54,30 @@ import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
-import typestate.TypestateDomainValue;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
-	protected ExtendedICFG icfg;
-	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
-
-	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-		if(debugger == null)
-			debugger = new CryptoVizDebugger(ideVizFile, icfg);
-		return debugger;
-	}
+	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
+//	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
+//
+//	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
+//		if(debugger == null)
+//			debugger = new CryptoVizDebugger(ideVizFile, icfg);
+//		return debugger;
+//	}
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				icfg = new ExtendedICFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new JimpleBasedInterproceduralCFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
+				final TestingResultReporter resultReporter = new TestingResultReporter(expectedResults);
 				CryptoScanner scanner = new CryptoScanner(getRules()) {
 					
 					@Override
-					public IExtendedICFG icfg() {
+					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 						return icfg;
 					}
 
@@ -88,23 +85,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					public CrySLAnalysisResultsAggregator getAnalysisListener() {
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
-							public void onSeedFinished(IFactAtStatement seed,
-									AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
-								for(Cell<Unit,AccessGraph, TypestateDomainValue<StateNode>>c : solver.results().cellSet()){
-									for(Assertion e : expectedResults){
-										if(e instanceof ComparableResult){
-											ComparableResult<StateNode> expectedResults = (ComparableResult) e;
-											TypestateDomainValue<StateNode> resultAt = solver.resultAt(expectedResults.getStmt(), expectedResults.getAccessGraph());
-											if(resultAt != null)
-												expectedResults.computedResults(resultAt);
-										}
-									}
-								}
+							public void onSeedFinished(IAnalysisSeed seed,
+									WeightedBoomerang<TransitionFunction> solver) {
+								resultReporter.onSeedFinished(seed.asNode(), solver.getSolvers().get(seed));
 							}
 
 							@Override
 							public void collectedValues(AnalysisSeedWithSpecification seed,
-									Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
+									Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
 								for(Assertion a: expectedResults){
 									if(a instanceof ExtractedValueAssertion){
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
@@ -113,11 +101,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
+							public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 								for(Assertion e : expectedResults){
 									if(e instanceof CallToForbiddenMethodAssertion){
 										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
-										expectedResults.reported(callSite.getStmt());
+										expectedResults.reported(callSite.getUnit().get());
 									}
 								}
 							}
@@ -128,19 +116,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void onSeedTimeout(IFactAtStatement seed) {
-							}
-
-							@Override
-							public void ensuredPredicates(
-									Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates,
-									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-									Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-								for(Cell<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
+							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
+									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
+									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+								for(Cell<Statement, Val, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
 											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
+											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
 												for(EnsuredCryptSLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	
@@ -148,7 +131,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										}
 										if(e instanceof NotHasEnsuredPredicateAssertion){
 											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
+											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
 												for(EnsuredCryptSLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	
@@ -159,29 +142,24 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
 							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
 								
 							}
 
 							@Override
-							public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+							public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
 								
 							}
 
 							@Override
-							public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+							public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
 								
 							}
 
 							@Override
-							public void predicateContradiction(StmtWithMethod stmt, AccessGraph key,
+							public void predicateContradiction(Node<Statement, Val> node,
 									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-								throw new RuntimeException("IMPLEMENTE predicate contradicition" + stmt + key);
+								throw new RuntimeException("IMPLEMENTE predicate contradicition" + node);
 							}
 
 							@Override
@@ -191,7 +169,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-									ISLConstraint con, StmtWithMethod unit) {
+									ISLConstraint con, Statement unit) {
 								
 							}
 
@@ -239,23 +217,30 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
-									StmtWithMethod stmt) {
+									Statement stmt) {
 							}
 
 							@Override
-							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedCalls) {
+							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls) {
 								
 							}
 
+							@Override
+							public void onSeedTimeout(Node<Statement, Val> seed) {
+								
+							}
+
+							
+
 						};
-						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(icfg, ideVizFile);
+						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(ideVizFile);
 						reporters.addReportListener(cryslListener);
 						return reporters;
 					}
-					@Override
-					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-						return UsagePatternTestingFramework.this.getDebugger();
-					}
+//					@Override
+//					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
+//						return UsagePatternTestingFramework.this.getDebugger();
+//					}
 
 					@Override
 					public boolean isCommandLineMode() {
@@ -341,7 +326,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
-				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				Val val = new Val(queryVar,m);
 				queries.add(new InAcceptingStateAssertion(stmt, val));
 			}
 			
@@ -354,7 +339,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
-				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				Val val = new Val(queryVar, m);
 				queries.add(new HasEnsuredPredicateAssertion(stmt, val));
 			}
 			
@@ -363,7 +348,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
-				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				Val val = new Val(queryVar, m);
 				queries.add(new NotHasEnsuredPredicateAssertion(stmt, val));
 			}
 			
@@ -372,7 +357,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
-				AccessGraph val = new AccessGraph(queryVar, queryVar.getType());
+				Val val = new Val(queryVar, m);
 				queries.add(new NotInAcceptingStateAssertion(stmt, val));
 			}
 		}

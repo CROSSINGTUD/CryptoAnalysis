@@ -1,7 +1,10 @@
 package crypto.analysis;
 
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import ideal.IFactAtStatement;
+import boomerang.Query;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
+import sync.pds.solver.nodes.Node;
 
 public interface ICrySLPerformanceListener {
 
@@ -17,12 +20,10 @@ public interface ICrySLPerformanceListener {
 
 	void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification);
 	
-	void seedFinished(IAnalysisSeed analysisSeedWithSpecification);
-
 	void seedStarted(IAnalysisSeed analysisSeedWithSpecification);
 
-	void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q);
+	void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q);
 
-	void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q);
+	void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q);
 	
 }

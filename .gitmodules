@@ -1,21 +1,9 @@
-[submodule "heros"]
-	path = heros
-	url = https://github.com/Sable/heros.git
-[submodule "Boomerang"]
-	path = Boomerang
-	url = https://github.com/johspaeth/Boomerang.git
-[submodule "ideal"]
-	path = ideal
-	url = https://github.com/johspaeth/ideal.git
-[submodule "IDEViz"]
-	path = IDEViz
-	url = https://github.com/johspaeth/IDEViz.git
-[submodule "soot"]
-	path = soot
-	url = https://github.com/johspaeth/soot.git
-[submodule "soot-infoflow-android"]
-	path = soot-infoflow-android
-	url = https://github.com/johspaeth/soot-infoflow-android.git
 [submodule "soot-infoflow"]
 	path = soot-infoflow
 	url = https://github.com/johspaeth/soot-infoflow.git
+[submodule "soot-infoflow-android"]
+	path = soot-infoflow-android
+	url = https://github.com/johspaeth/soot-infoflow-android.git
+[submodule "WeightedBoomerang"]
+	path = WeightedBoomerang
+	url = https://github.com/johspaeth/WPDS

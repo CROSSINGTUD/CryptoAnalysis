@@ -9,18 +9,17 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
-import boomerang.accessgraph.AccessGraph;
-import boomerang.util.StmtWithMethod;
+import boomerang.Query;
+import boomerang.WeightedBoomerang;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.StateNode;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.CryptoTypestateAnaylsisProblem.AdditionalBoomerangQuery;
-import ideal.AnalysisSolver;
-import ideal.IFactAtStatement;
+import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
-import soot.Unit;
-import typestate.TypestateDomainValue;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
 
 public class CrySLResultsReporter  {
@@ -39,13 +38,13 @@ public class CrySLResultsReporter  {
 		return listeners.remove(listener);
 	}
 
-	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Unit> collectedValues) {
+	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.collectedValues(seed, collectedValues);
 		}
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, StmtWithMethod callSite, List<CryptSLMethod> alternatives) {
+	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.callToForbiddenMethod(classSpecification, callSite, alternatives);
 		}
@@ -57,15 +56,15 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void ensuredPredicates(Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
 		}
 	}
 
-	public void predicateContradiction(StmtWithMethod stmt, AccessGraph key, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.predicateContradiction(stmt, key, disPair);
+			listen.predicateContradiction(node, disPair);
 		}
 	}
 
@@ -75,7 +74,7 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, StmtWithMethod unit) {
+	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.constraintViolation(analysisSeedWithSpecification, con, unit);
 		}
@@ -123,49 +122,43 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void seedFinished(IAnalysisSeed analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.seedFinished(analysisSeedWithSpecification);
-		}
-	}
-
 	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.seedStarted(analysisSeedWithSpecification);
 		}
 	}
 
-	public void boomerangQueryStarted(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryStarted(seed, q);
 		}
 	}
 
-	public void boomerangQueryFinished(IFactAtStatement seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryFinished(seed, q);
 		}
 	}	
 	
-	public void onSeedFinished(IFactAtStatement seed, AnalysisSolver<TypestateDomainValue<StateNode>> solver) {
+	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedFinished(seed, solver);
 		}
 	}
 	
-	public void onSeedTimeout(IFactAtStatement seed) {
+	public void onSeedTimeout(Node<Statement,Val> seed) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedTimeout(seed);
 		}
 	}
 	
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt, Collection<SootMethod> expectedMethodCalls) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedMethodCalls) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 		}
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, StmtWithMethod stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorEndOfLifeCycle(classSpecification, stmt);
 		}

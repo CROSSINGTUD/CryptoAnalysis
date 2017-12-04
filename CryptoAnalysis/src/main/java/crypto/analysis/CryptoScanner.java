@@ -8,52 +8,51 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.AliasFinder;
-import boomerang.AliasResults;
-import boomerang.BoomerangOptions;
-import boomerang.accessgraph.AccessGraph;
-import boomerang.cfg.IExtendedICFG;
-import boomerang.context.AllCallersRequester;
-import boomerang.pointsofindirection.AllocationSiteHandlers;
-import boomerang.util.StmtWithMethod;
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
+import boomerang.DefaultBoomerangOptions;
+import boomerang.WeightedForwardQuery;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
-import crypto.rules.StateNode;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import heros.solver.Pair;
 import heros.utilities.DefaultValueMap;
-import ideal.FactAtStatement;
-import ideal.IFactAtStatement;
-import ideal.debug.IDebugger;
-import ideal.debug.NullDebugger;
-import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import typestate.TypestateDomainValue;
+import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.nodes.Node;
+import typestate.TransitionFunction;
+import wpds.impl.Weight.NoWeight;
 
 public abstract class CryptoScanner {
 
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
-	private Table<Unit, AccessGraph, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
-	private Table<Unit, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
-	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
+	private Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
+	private Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
+	private Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
-	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator(icfg(), null);
+	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator( null);
+	
 
-	private DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<IFactAtStatement, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(IFactAtStatement key) {
+		protected AnalysisSeedWithEnsuredPredicate createItem(Node<Statement,Val> key) {
 			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
 		}
 	};
@@ -61,11 +60,11 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(key.getStmt(), key.getFact()), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(),key.var(), key.getSpec());
 		}
 	};
 
-	public abstract IExtendedICFG icfg();
+	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
 
 	public CrySLAnalysisResultsAggregator getAnalysisListener() {
 		return resultsAggregator;
@@ -76,7 +75,7 @@ public abstract class CryptoScanner {
 	/**
 	 * @return the existingPredicates
 	 */
-	public Set<EnsuredCryptSLPredicate> getExistingPredicates(Unit stmt, AccessGraph seed) {
+	public Set<EnsuredCryptSLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCryptSLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
 			set = Sets.newHashSet();
@@ -92,55 +91,67 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
-		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
+	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
+		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(statement, seed);
 		boolean added = set.add(ensPred);
-		assert existingPredicates.get(stmt, seed).contains(ensPred);
+		assert existingPredicates.get(statement, seed).contains(ensPred);
 		if (added) {
-			onPredicateAdded(stmt, seed, ensPred);
+			onPredicateAdded(statement, seed, ensPred);
 		}
 
-		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(stmt, seedObj);
+		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
 		if (predsObjBased == null)
 			predsObjBased = Sets.newHashSet();
 		predsObjBased.add(ensPred);
-		existingPredicatesObjectBased.put(stmt, seedObj, predsObjBased);
+		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
 		return added;
 	}
 
-	private void onPredicateAdded(Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
-		if (stmt instanceof Stmt && ((Stmt) stmt).containsInvokeExpr()) {
-			InvokeExpr ivexpr = ((Stmt) stmt).getInvokeExpr();
+	private void onPredicateAdded(Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
+		if (statement.isCallsite()) {
+			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
 				SootMethod method = iie.getMethod();
+				SootMethod callerMethod = statement.getMethod();
 				Value base = iie.getBase();
 				boolean paramMatch = false;
 				for (Value arg : iie.getArgs()) {
-					if (seed.getBase() != null && seed.getBase().equals(arg))
+					if (seed.value() != null && seed.value().equals(arg))
 						paramMatch = true;
 				}
 				if (paramMatch) {
 					for (final ClassSpecification specification : specifications) {
-						if (specification.getAnalysisProblem().getOrCreateTypestateChangeFunction().getEdgeLabelMethods().contains(method)) {
-							AliasFinder boomerang = new AliasFinder(new BoomerangOptions() {
-
+						if (specification.getInvolvedMethods().contains(method)) {
+							Boomerang boomerang = new Boomerang(new DefaultBoomerangOptions() {
 								@Override
-								public IExtendedICFG icfg() {
+								public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
+										BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
+									if(stmt.containsInvokeExpr() && stmt instanceof AssignStmt){
+										AssignStmt as = (AssignStmt) stmt;
+										if(as.getLeftOp().equals(fact.value())){
+											if(icfg.getCalleesOfCallAt(stmt).isEmpty())
+												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+											//TODO replace by check if stmt is a seed of specification
+											if(stmt.toString().contains("getInstance")){
+												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+											}
+										}
+									}
+									return super.getAllocationVal(m, stmt, fact, icfg);
+								}
+							}){
+								@Override
+								public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 									return CryptoScanner.this.icfg();
 								}
-
-								@Override
-								public AllocationSiteHandlers allocationSiteHandlers() {
-									return new PrimitiveTypeAndReferenceForCryptoType();
-								}
-							});
-							boomerang.startQuery();
-							AccessGraph baseAccessGraph = new AccessGraph((Local) base, base.getType());
-							AliasResults res = boomerang.findAliasAtStmt(baseAccessGraph, stmt, new AllCallersRequester());
-							for (Pair<Unit, AccessGraph> p : res.keySet()) {
-								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, new FactAtStatement(p
-									.getO2().getSourceStmt(), p.getO2().deriveWithoutAllocationSite()), specification));
+							};
+							Val val = new Val(base, callerMethod);
+							BackwardQuery backwardQuery = new BackwardQuery(statement, val);
+							boomerang.solve(backwardQuery);
+							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
+							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
+								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.getRowKey(),p.getColumnKey(), specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}
@@ -151,7 +162,7 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	public boolean deleteNewPred(Unit stmt, AccessGraph seed, EnsuredCryptSLPredicate ensPred) {
+	public boolean deleteNewPred(Statement stmt, Val seed, EnsuredCryptSLPredicate ensPred) {
 		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(stmt, seed);
 		boolean deleted = set.remove(ensPred);
 		assert !existingPredicates.get(stmt, seed).contains(ensPred);
@@ -161,16 +172,17 @@ public abstract class CryptoScanner {
 	public void scan() {
 		getAnalysisListener().beforeAnalysis();
 		initialize();
+		System.out.println("Discovered "+worklist.size() + " analysis seeds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			getAnalysisListener().discoveredSeed(curr);
 			curr.execute();
 		}
-		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
-		if (debugger instanceof CryptoVizDebugger) {
-			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
-			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
-		}
+//		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
+//		if (debugger instanceof CryptoVizDebugger) {
+//			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
+//			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
+//		}
 		checkForContradictions();
 		for (AnalysisSeedWithSpecification seed : seedsWithSpec.values()) {
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
@@ -178,12 +190,12 @@ public abstract class CryptoScanner {
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 		getAnalysisListener().afterAnalysis();
-		debugger().afterAnalysis();
+//		debugger().afterAnalysis();
 	}
 
-	private Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> computeMissingPredicates() {
-		Table<Unit, IAnalysisSeed, Set<CryptSLPredicate>> res = HashBasedTable.create();
-		for (Cell<Unit, IAnalysisSeed, Set<CryptSLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
+	private Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> computeMissingPredicates() {
+		Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> res = HashBasedTable.create();
+		for (Cell<Statement, IAnalysisSeed, Set<CryptSLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
 			Set<EnsuredCryptSLPredicate> exPreds = existingPredicatesObjectBased.get(c.getRowKey(), c.getColumnKey());
 			if (c.getValue() == null)
 				continue;
@@ -202,15 +214,15 @@ public abstract class CryptoScanner {
 	}
 
 	private void checkForContradictions() {
-		for (Unit generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
-			for (Entry<AccessGraph, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
+		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
+			for (Entry<Val, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
 					preds.add(exPred.getPredicate().getPredName());
 				}
 				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						getAnalysisListener().predicateContradiction(new StmtWithMethod(generatingPredicateStmt, icfg().getMethodOf(generatingPredicateStmt)), exPredCell.getKey(), disPair);
+						getAnalysisListener().predicateContradiction(new Node<Statement,Val>(generatingPredicateStmt, exPredCell.getKey()), disPair);
 					}
 				}
 			}
@@ -225,8 +237,8 @@ public abstract class CryptoScanner {
 			if (!isCommandLineMode() && !spec.isLeafRule())
 				continue;
 
-			for (IFactAtStatement seed : spec.getInitialSeeds()) {
-				addToWorkList(getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec)));
+			for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds()) {
+				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
 			}
 		}
 	}
@@ -239,14 +251,11 @@ public abstract class CryptoScanner {
 		worklist.add(analysisSeedWithSpecification);
 	}
 
-	public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-		return new NullDebugger<>();
-	}
-
-	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(FactAtStatement factAtStatement) {
+	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<Statement,Val> factAtStatement) {
 		boolean addToWorklist = false;
 		if (!seedsWithoutSpec.containsKey(factAtStatement))
 			addToWorklist = true;
+
 		AnalysisSeedWithEnsuredPredicate seed = seedsWithoutSpec.getOrCreate(factAtStatement);
 		if (addToWorklist)
 			addToWorkList(seed);
@@ -267,17 +276,17 @@ public abstract class CryptoScanner {
 		disallowedPredPairs.add(new SimpleEntry<CryptSLPredicate, CryptSLPredicate>(cryptSLPredicate, cons));
 	}
 
-	public void expectPredicate(IAnalysisSeed object, Unit stmt, CryptSLPredicate predToBeEnsured) {
-		for (Unit succ : icfg().getSuccsOf(stmt)) {
+	public void expectPredicate(IAnalysisSeed object, Statement stmt, CryptSLPredicate predToBeEnsured) {
+		for (Unit succ : icfg().getSuccsOf(stmt.getUnit().get())) {
 			Set<CryptSLPredicate> set = expectedPredicateObjectBased.get(succ, object);
 			if (set == null)
 				set = Sets.newHashSet();
 			set.add(predToBeEnsured);
-			expectedPredicateObjectBased.put(succ, object, set);
+			expectedPredicateObjectBased.put(new Statement((Stmt)succ,stmt.getMethod()), object, set);
 		}
 	}
 	
-	public StmtWithMethod getMethodFromUnit(Unit unit) {
-		return new StmtWithMethod(unit, icfg().getMethodOf(unit));
+	public Debugger<TransitionFunction> debugger() {
+		return new Debugger<>();
 	}
 }
