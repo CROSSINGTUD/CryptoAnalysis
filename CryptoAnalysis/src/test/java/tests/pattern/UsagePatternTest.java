@@ -2,6 +2,8 @@ package tests.pattern;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -11,6 +13,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -47,6 +50,103 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
+	}
+	
+	
+	@Test
+	public void UsagePatternTestInter1() throws GeneralSecurityException {
+		SecretKey key = generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		encrypt(key);
+	}
+	
+	
+	@Test
+	public void UsagePatternTestInter2() throws GeneralSecurityException {
+		SecretKey key = generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		forward(key);
+	}
+
+	private void forward(SecretKey key) throws GeneralSecurityException {
+		SecretKey tmpKey = key;
+		encrypt(tmpKey);
+	}
+	
+	
+	@Test
+	public void UsagePatternTestInter3() throws GeneralSecurityException {
+		SecretKey key = generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		rebuild(key);
+	}
+	
+	private void rebuild(SecretKey key) throws GeneralSecurityException {
+		SecretKey tmpKey = new SecretKeySpec(key.getEncoded(), "AES");
+		encrypt(tmpKey);
+	}
+
+	@Test
+	public void UsagePatternTestInter4() throws GeneralSecurityException {
+		SecretKey key = generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		wrongRebuild(key);
+	}
+	
+	private void wrongRebuild(SecretKey key) throws GeneralSecurityException {
+		SecretKey tmpKey = new SecretKeySpec(key.getEncoded(), "DES");
+		Assertions.hasEnsuredPredicate(tmpKey);
+		encryptWrong(tmpKey);
+	}
+	
+	private void encryptWrong(SecretKey key) throws GeneralSecurityException {
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
+	}
+	
+
+	private void encrypt(SecretKey key) throws GeneralSecurityException {
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.hasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+		cCipher.getIV();
+	}
+
+
+	private SecretKey generateKey() throws NoSuchAlgorithmException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		
+		Assertions.mustBeInAcceptingState(keygen);
+		return key;
+	}
+	
+	
+	@Test
+	public void UsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
+		List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
+		KeyGenerator keygen = KeyGenerator.getInstance(s.get(0));
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.notHasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
 	}
 	
 	@Test
