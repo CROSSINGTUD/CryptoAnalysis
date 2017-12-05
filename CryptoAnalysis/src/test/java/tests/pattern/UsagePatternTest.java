@@ -22,6 +22,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
@@ -473,6 +474,43 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
 		Assertions.callToForbiddenMethod();
+	}
+	
+	@Test
+	public void UsagePatternMinPBEIterations() throws GeneralSecurityException, IOException {
+		final byte[] salt = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(salt);
+
+		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 1000, 128);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.extValue(2);
+		Assertions.extValue(3);
+		Assertions.hasEnsuredPredicate(pbekeyspec);
+		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		
+		pbekeyspec = new PBEKeySpec(corPwd, salt, 999, 128);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.extValue(2);
+		Assertions.extValue(3);
+		Assertions.notHasEnsuredPredicate(pbekeyspec);
+		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		
+		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 1000);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.mustBeInAcceptingState(pbeparspec);
+		Assertions.hasEnsuredPredicate(pbeparspec);
+		
+		
+		pbeparspec = new PBEParameterSpec(salt, 999);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.mustBeInAcceptingState(pbeparspec);
+		Assertions.notHasEnsuredPredicate(pbeparspec);
+		
 	}
 	
 	@Test
