@@ -167,8 +167,8 @@ public class ConstraintSolver {
 	}
 
 	private Map<Integer, Statement> evaluate(CryptSLArithmeticConstraint arith) {
-		Map<Integer, Statement> left = extractValueAsInt(arith.getLeft());
-		Map<Integer, Statement> right = extractValueAsInt(arith.getRight());
+		Map<Integer, Statement> left = extractValueAsInt(arith.getLeft().getName());
+		Map<Integer, Statement> right = extractValueAsInt(arith.getRight().getName());
 		for (Entry<Integer, Statement> rightie : right.entrySet()) {
 			if (rightie.getKey() == Integer.MIN_VALUE) {
 				return left; 
