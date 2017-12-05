@@ -3,14 +3,12 @@ package main;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.beust.jcommander.internal.Sets;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
 import android.zoo.Downloader;
