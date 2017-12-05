@@ -49,8 +49,19 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	@Override
 	public Set<String> getInvolvedVarNames() {
 		Set<String> varNames = new HashSet<String>();
-		varNames.add(left.getName());
-		varNames.add(right.getName());
+		String name = left.getName();
+		try {
+			Integer.parseInt(name);
+		} catch(NumberFormatException ex) {
+			varNames.add(name);
+		}
+		
+		name = right.getName();
+		try {
+			Integer.parseInt(name);
+		} catch(NumberFormatException ex) {
+			varNames.add(name);
+		}
 		return varNames;
 	}
 
