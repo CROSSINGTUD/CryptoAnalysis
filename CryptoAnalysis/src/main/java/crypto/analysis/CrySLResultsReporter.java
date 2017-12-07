@@ -9,6 +9,7 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
+import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -128,13 +129,13 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryStarted(seed, q);
 		}
 	}
 
-	public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.boomerangQueryFinished(seed, q);
 		}

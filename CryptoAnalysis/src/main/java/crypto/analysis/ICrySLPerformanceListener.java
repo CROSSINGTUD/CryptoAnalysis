@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -22,8 +23,8 @@ public interface ICrySLPerformanceListener {
 	
 	void seedStarted(IAnalysisSeed analysisSeedWithSpecification);
 
-	void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q);
+	void boomerangQueryStarted(Query seed, BackwardQuery q);
 
-	void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q);
+	void boomerangQueryFinished(Query seed, BackwardQuery q);
 	
 }

@@ -19,8 +19,10 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.IAnalysisSeed;
+import crypto.boomerang.CogniCryptBoomerangOptions;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
@@ -82,6 +84,10 @@ public abstract class ExtendedIDEALAnaylsis {
 			@Override
 			public Debugger<TransitionFunction> debugger() {
 				return ExtendedIDEALAnaylsis.this.debugger();
+			}
+			@Override
+			public BoomerangOptions boomerangOptions() {
+				return new CogniCryptBoomerangOptions();
 			}
 		});
 	}
@@ -173,13 +179,22 @@ public abstract class ExtendedIDEALAnaylsis {
 					}
 					return super.getAllocationVal(m, stmt, fact, icfg);
 				}
+				@Override
+				public boolean onTheFlyCallGraph() {
+					return false;
+				}
 			}) {
 				@Override
 				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 					return ExtendedIDEALAnaylsis.this.icfg();
 				}
 			};
-			boomerang.solve(this);
+			try{
+				boomerang.solve(this);
+			} catch(BoomerangTimeoutException e){
+				if(analysisListener() != null)
+					analysisListener().boomerangQueryTimeout(this);
+			}
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults(this);
@@ -224,7 +239,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLAnalysisResultsAggregator analysisListener();
 
-	public Collection<WeightedForwardQuery<TransitionFunction>> computeInitialSeeds() {
+	public Collection<Query> computeInitialSeeds() {
 		return analysis.computeSeeds();
 	}
 
@@ -234,8 +249,11 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> run() {
 		Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolver = Maps.newHashMap();
-		for (WeightedForwardQuery<TransitionFunction> seed : computeInitialSeeds()) {
-			seedToSolver.put(seed, run(seed));
+		for (Query s : computeInitialSeeds()) {
+			if(s instanceof WeightedForwardQuery){
+				WeightedForwardQuery seed = (WeightedForwardQuery) s;
+				seedToSolver.put(seed, run((WeightedForwardQuery<TransitionFunction>)seed));
+			}
 		}
 		return seedToSolver;
 	}

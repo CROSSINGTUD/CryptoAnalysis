@@ -16,12 +16,15 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.BoomerangTimeoutException;
 import boomerang.DefaultBoomerangOptions;
+import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -96,7 +99,7 @@ public abstract class CryptoScanner {
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(statement, seed).contains(ensPred);
 		if (added) {
-			onPredicateAdded(statement, seed, ensPred);
+			onPredicateAdded(seedObj, statement, seed, ensPred);
 		}
 
 		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
@@ -107,7 +110,7 @@ public abstract class CryptoScanner {
 		return added;
 	}
 
-	private void onPredicateAdded(Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
+	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
 		if (statement.isCallsite()) {
 			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
@@ -123,7 +126,7 @@ public abstract class CryptoScanner {
 				if (paramMatch) {
 					for (final ClassSpecification specification : specifications) {
 						if (specification.getInvolvedMethods().contains(method)) {
-							Boomerang boomerang = new Boomerang(new DefaultBoomerangOptions() {
+							Boomerang boomerang = new Boomerang(new CogniCryptBoomerangOptions() {
 								@Override
 								public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
 										BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
@@ -148,7 +151,13 @@ public abstract class CryptoScanner {
 							};
 							Val val = new Val(base, callerMethod);
 							BackwardQuery backwardQuery = new BackwardQuery(statement, val);
-							boomerang.solve(backwardQuery);
+							resultsAggregator.boomerangQueryStarted(seedObj, backwardQuery);
+							try{
+								boomerang.solve(backwardQuery);
+							} catch(BoomerangTimeoutException e){
+								resultsAggregator.boomerangQueryTimeout(backwardQuery);
+							}
+							resultsAggregator.boomerangQueryFinished(seedObj, backwardQuery);
 							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
 							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
 								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.getRowKey(),p.getColumnKey(), specification));
@@ -237,7 +246,7 @@ public abstract class CryptoScanner {
 			if (!isCommandLineMode() && !spec.isLeafRule())
 				continue;
 
-			for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds()) {
+			for (Query seed : spec.getInitialSeeds()) {
 				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
 			}
 		}

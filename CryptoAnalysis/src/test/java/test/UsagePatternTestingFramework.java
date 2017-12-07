@@ -16,6 +16,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -147,12 +148,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
+							public void boomerangQueryStarted(Query seed, BackwardQuery q) {
 								
 							}
 
 							@Override
-							public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
+							public void boomerangQueryFinished(Query seed, BackwardQuery q) {
 								
 							}
 

@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
+import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -55,6 +56,8 @@ public class CrySLAnalysisResultsAggregator{
 	protected Multimap<IAnalysisSeed, Long> seedToPredicateTime = HashMultimap.create();
 	protected CrySLResultsReporter crr = new CrySLResultsReporter();
 	protected Multimap<IAnalysisSeed, SootMethod> seedToAnalyzedMethods = HashMultimap.create();
+	private Set<BackwardQuery> boomerangTimeouts = Sets.newHashSet();
+	private Set<BackwardQuery> boomerangQueries = Sets.newHashSet();
 	
 	
 	public CrySLAnalysisResultsAggregator(File analyzedFile) {
@@ -75,7 +78,7 @@ public class CrySLAnalysisResultsAggregator{
 				seedToBoomerangAnalysisTime.put(seed, boomerangWatch.elapsed(TimeUnit.MILLISECONDS));
 			}
 		}
-		seedToAnalyzedMethods.putAll(seed, solver.getStats().getVisitedMethods());
+		seedToAnalyzedMethods.putAll(seed, solver.getStats().getCallVisitedMethods());
 		crr.onSeedFinished(seed, solver);
 	}
 
@@ -108,16 +111,21 @@ public class CrySLAnalysisResultsAggregator{
 		crr.seedStarted(seed);
 	}
 
-	public void boomerangQueryStarted(Query seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
 		boomerangWatch.start();
+		boomerangQueries .add(q);
 		crr.boomerangQueryStarted(seed, q);
 	}
 
-	public void boomerangQueryFinished(Query seed, AdditionalBoomerangQuery q) {
+	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
 		if (boomerangWatch.isRunning()) {
 			boomerangWatch.stop();
 		}
 		crr.boomerangQueryFinished(seed, q);
+	}
+
+	public void boomerangQueryTimeout(BackwardQuery backwardQuery) {
+		boomerangTimeouts.add(backwardQuery);
 	}
 
 	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
@@ -393,6 +401,5 @@ public class CrySLAnalysisResultsAggregator{
 	public void seedTimedout(IAnalysisSeed query) {
 		typestateTimeouts.add(query);
 	}
-
 
 }
