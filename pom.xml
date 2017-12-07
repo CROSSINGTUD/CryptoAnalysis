@@ -13,7 +13,9 @@
     <module>android-callgraph</module>
     <module>soot-infoflow</module>
     <module>soot-infoflow-android</module>
-    
+      <module>cognicrypt-maven-plugin</module>
+      <module>CryptoMisuse</module>
+
   </modules>
   <build>
     <plugins>
