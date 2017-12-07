@@ -65,7 +65,7 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Collection<Query> getInitialSeeds() {
+	public Set<WeightedForwardQuery<TransitionFunction>> getInitialSeeds() {
 		return extendedIdealAnalysis.computeInitialSeeds();
 	}
 
