@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -289,6 +290,8 @@ public class PerAPKAnalyzer {
 				addRuleHeader("typestateError_", line);
 				line.add("typestateErrorEndOfObjectLifetime(seed)");
 				addRuleHeader("typestateErrorEndOfObjectLifetime_", line);
+				line.add("typestateErrorTotal(seed)");
+				addRuleHeader("typestateErrorTotal_", line);
 				line.add("typestateError(unit)");
 				// line.add("expectedPredicates");
 				line.add("missingPredicates");
@@ -319,7 +322,15 @@ public class PerAPKAnalyzer {
 			addTypestateDetails(line, reporter.getTypestateErrors(),filter);
 			line.add(Integer.toString(subset(reporter.getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
 			addTypestateDetails(line,reporter.getTypestateErrorsEndOfLifecycle(), filter);
+			
+			Multimap<IAnalysisSeed, Statement> merged = HashMultimap.create(reporter.getTypestateErrors());
+			merged.putAll(reporter.getTypestateErrorsEndOfLifecycle());
+			
+			line.add(Integer.toString(subset(merged.keySet(), filter).size()));
+			addTypestateDetails(line,merged, filter);
+			
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+						
 			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
 			addMissingPredicatesDetails(line, filter);
