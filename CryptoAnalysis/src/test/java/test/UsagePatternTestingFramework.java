@@ -231,6 +231,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								
 							}
 
+							@Override
+							public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
+								System.out.print(con.getName());
+								System.out.println(" not evaluable.");
+							}
+
 							
 
 						};

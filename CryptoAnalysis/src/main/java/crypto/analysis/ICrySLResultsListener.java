@@ -46,4 +46,5 @@ public interface ICrySLResultsListener {
 
 	void discoveredSeed(IAnalysisSeed curr);
 
+	void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location);
 }

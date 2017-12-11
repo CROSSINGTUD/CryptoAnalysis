@@ -17,7 +17,6 @@ import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -162,6 +161,12 @@ public class CrySLResultsReporter  {
 	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.typestateErrorEndOfLifeCycle(classSpecification, stmt);
+		}
+	}
+	
+	public void unevaluableConstraint(AnalysisSeedWithSpecification classSpecification, ISLConstraint con, Statement stmt) {
+		for (CrySLAnalysisListener listen : listeners) {
+			listen.unevaluableConstraint(classSpecification, con, stmt);
 		}
 	}
 	

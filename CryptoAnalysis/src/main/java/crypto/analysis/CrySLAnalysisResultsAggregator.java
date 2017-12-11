@@ -402,4 +402,8 @@ public class CrySLAnalysisResultsAggregator{
 		typestateTimeouts.add(query);
 	}
 
+	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement statement) {
+		crr.unevaluableConstraint(seed, con, statement);
+	}
+	
 }
