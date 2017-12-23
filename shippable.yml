@@ -7,5 +7,5 @@ env:
 
 build:
   ci:
-   - git checkout --recursive $NIGHTLYBUILD
+   - git checkout $NIGHTLYBUILD
    - mvn clean verify surefire:test --fail-at-end
