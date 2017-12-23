@@ -6,4 +6,4 @@
 	url = https://github.com/johspaeth/soot-infoflow-android.git
 [submodule "WeightedBoomerang"]
 	path = WeightedBoomerang
-	url = git@github.com:CROSSINGTUD/WPDS.git
+	url = https://github.com/CROSSINGTUD/WPDS.git
