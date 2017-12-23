@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
@@ -36,6 +37,7 @@ public class MessageDigestTest  extends IDEALCrossingTestingFramework {
 		md.update(ByteBuffer.allocate(1));
 		Assertions.assertState(md, 2);
 	}
+	@Ignore
 	@Test
 	public void MessageDigestTest4() throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-1");

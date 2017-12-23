@@ -7,4 +7,9 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	public boolean onTheFlyCallGraph() {
 		return false;
 	}
+
+	@Override
+	public boolean arrayFlows() {
+		return true;
+	}
 }
