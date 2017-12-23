@@ -26,6 +26,7 @@ import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -255,6 +256,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
+	@Ignore
 	@Test
 	public void UsagePatternTestWrongOffsetSize() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -390,6 +392,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(encText);
 	}
 
+	@Ignore
 	@Test
 	public void UsagePatternTest5() throws GeneralSecurityException {
 		final byte[] msgAsArray = "Message".getBytes();
