@@ -24,7 +24,7 @@ public interface ICrySLResultsListener {
 
 	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls);
 	
-	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt);
+	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val val, Statement stmt);
 	
 	void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives);
 	

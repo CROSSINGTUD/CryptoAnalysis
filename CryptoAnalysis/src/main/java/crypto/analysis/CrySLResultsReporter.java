@@ -158,9 +158,9 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.typestateErrorEndOfLifeCycle(classSpecification, stmt);
+			listen.typestateErrorEndOfLifeCycle(classSpecification, value, stmt);
 		}
 	}
 	

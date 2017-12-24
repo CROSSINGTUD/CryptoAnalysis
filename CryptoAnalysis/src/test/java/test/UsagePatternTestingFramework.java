@@ -33,7 +33,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -46,13 +45,7 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
-import test.assertions.Assertions;
-import test.assertions.CallToForbiddenMethodAssertion;
-import test.assertions.ExtractedValueAssertion;
-import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.InAcceptingStateAssertion;
-import test.assertions.NotHasEnsuredPredicateAssertion;
-import test.assertions.NotInAcceptingStateAssertion;
+import test.assertions.*;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
@@ -217,8 +210,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						
 
 							@Override
-							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
+							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value,
 									Statement stmt) {
+								for(Assertion a: expectedResults){
+									if(a instanceof MissingTypestateChange){
+										MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
+										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
+											missingTypestateChange.trigger();
+										}
+									}
+								}
 							}
 
 							@Override
@@ -366,6 +367,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				Local queryVar = (Local) param;
 				Val val = new Val(queryVar, m);
 				queries.add(new NotInAcceptingStateAssertion(stmt, val));
+			}
+
+			if(invocationName.startsWith("missingTypestateChange")){
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
+					queries.add(new MissingTypestateChange((Stmt) pred));
 			}
 		}
 	}

@@ -188,7 +188,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					continue;
 				if (!n.to().isAccepting()) {
 					Statement s = c.getRowKey();
-					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, s);
+					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, c.getColumnKey(), s);
 				}
 			}
 		}

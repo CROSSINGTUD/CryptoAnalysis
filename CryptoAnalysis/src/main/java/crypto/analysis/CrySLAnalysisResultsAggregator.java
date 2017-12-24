@@ -147,9 +147,9 @@ public class CrySLAnalysisResultsAggregator{
 		return checkedConstraints;
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt) {
 		reportedTypestateErrosAtEndOfObjectLifecycle.put(classSpecification, stmt);
-		crr.typestateErrorEndOfLifeCycle(classSpecification, stmt);
+		crr.typestateErrorEndOfLifeCycle(classSpecification, value, stmt);
 	}
 	
 	public void checkedConstraints(AnalysisSeedWithSpecification seed, Collection<ISLConstraint> cons) {

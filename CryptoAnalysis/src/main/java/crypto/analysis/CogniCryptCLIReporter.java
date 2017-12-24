@@ -95,7 +95,7 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt) {
 		
 	}
 	@Override
