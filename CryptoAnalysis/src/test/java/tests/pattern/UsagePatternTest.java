@@ -524,7 +524,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(3);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
-
+		pbekeyspec.clearPassword();
 		pbekeyspec = new PBEKeySpec(corPwd, salt, 999, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
@@ -532,6 +532,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(3);
 		Assertions.notHasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		pbekeyspec.clearPassword();
+
 
 		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 1000);
 		Assertions.extValue(0);
@@ -570,6 +572,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
+		pbekeyspec.clearPassword();
 
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
@@ -610,6 +613,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
+		pbekeyspec.clearPassword();
 
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
@@ -642,6 +646,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(3);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		pbekeyspec.clearPassword();
 	}
 
 	@Test
@@ -660,6 +665,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
+		pbekeyspec.clearPassword();
 
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
@@ -800,6 +806,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		md.update(input);
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input);
+		md.digest();
 	}
 
 	@Test
@@ -837,6 +844,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
+		md.digest();
 	}
 
 	@Test
@@ -870,6 +878,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.hasEnsuredPredicate(output);
+		md.digest();
 	}
 
 	@Test

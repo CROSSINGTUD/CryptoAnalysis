@@ -237,6 +237,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 //										}
 									}
 								}
+								if(!matched){
+									throw new RuntimeException("Reports a typestate error that should not be reported");
+								}
 							}
 
 							@Override
