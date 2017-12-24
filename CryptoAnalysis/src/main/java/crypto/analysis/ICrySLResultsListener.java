@@ -13,6 +13,7 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
 import soot.Unit;
@@ -24,7 +25,7 @@ public interface ICrySLResultsListener {
 
 	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls);
 	
-	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val val, Statement stmt);
+	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val val, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled);
 	
 	void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives);
 	

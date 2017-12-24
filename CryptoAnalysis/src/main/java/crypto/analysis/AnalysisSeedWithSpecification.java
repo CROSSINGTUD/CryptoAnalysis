@@ -25,6 +25,7 @@ import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
@@ -182,14 +183,27 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {
 		Table<Statement, Val, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
+		
 		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
+			
+			Set<TransitionEdge> expectedMethodsToBeCalled = Sets.newHashSet();
 			for (ITransition n : c.getValue().values()) {
 				if (n.to() == null)
 					continue;
 				if (!n.to().isAccepting()) {
-					Statement s = c.getRowKey();
-					cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, c.getColumnKey(), s);
+					if(n.to() instanceof WrappedState){
+						WrappedState wrappedState = (WrappedState) n.to();
+						for(TransitionEdge t : spec.getRule().getUsagePattern().getAllTransitions()){
+							if(t.getLeft().equals(wrappedState.delegate())){
+								expectedMethodsToBeCalled.add(t);	
+							}
+						}
+					}
 				}
+			}
+			if(!expectedMethodsToBeCalled.isEmpty()){
+				Statement s = c.getRowKey();
+				cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, c.getColumnKey(), s, expectedMethodsToBeCalled);
 			}
 		}
 	}

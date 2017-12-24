@@ -16,6 +16,7 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
@@ -158,9 +159,9 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.typestateErrorEndOfLifeCycle(classSpecification, value, stmt);
+			listen.typestateErrorEndOfLifeCycle(classSpecification, value, stmt, expectedMethodsToBeCalled);
 		}
 	}
 	

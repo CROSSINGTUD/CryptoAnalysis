@@ -16,6 +16,11 @@ public class WrappedState implements State {
 		this.delegate = delegate;
 		this.initialState = false;
 	}
+	
+	public StateNode delegate(){
+		return delegate;
+	}
+	
 	@Override
 	public boolean isErrorState() {
 		return delegate.isErrorState();
