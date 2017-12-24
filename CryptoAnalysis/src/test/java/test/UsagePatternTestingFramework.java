@@ -55,6 +55,7 @@ import test.assertions.MissingTypestateChange;
 import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
+import test.assertions.PredicateContradiction;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
@@ -162,7 +163,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void predicateContradiction(Node<Statement, Val> node,
 									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-								throw new RuntimeException("IMPLEMENTE predicate contradicition" + node);
+								for(Assertion e : expectedResults){
+									if(e instanceof PredicateContradiction){
+										PredicateContradiction p = (PredicateContradiction) e;
+										p.trigger();
+									}
+								}
 							}
 
 							@Override
@@ -389,6 +395,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				queries.add(new NotInAcceptingStateAssertion(stmt, val));
 			}
 
+			if(invocationName.startsWith("predicateContradiction")){
+				queries.add(new PredicateContradiction());
+			}
 			if(invocationName.startsWith("missingTypestateChange")){
 				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new MissingTypestateChange((Stmt) pred));

@@ -45,4 +45,7 @@ public class Assertions {
 	public static void noMissingTypestateChange() {
 		
 	}
+
+	public static void predicateContradiction() {
+	}
 }

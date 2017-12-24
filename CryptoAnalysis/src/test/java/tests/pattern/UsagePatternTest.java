@@ -407,8 +407,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(encText);
 	}
-
-	@Ignore
+	
 	@Test
 	public void UsagePatternTest5() throws GeneralSecurityException {
 		final byte[] msgAsArray = "Message".getBytes();
@@ -437,7 +436,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		hMacSHA256.init(keyMac);
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
 		Assertions.mustBeInAcceptingState(hMacSHA256);
-		Assertions.notHasEnsuredPredicate(macced);
+		Assertions.hasEnsuredPredicate(macced);
+		Assertions.predicateContradiction();
 	}
 
 	@Test
