@@ -134,6 +134,23 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+
+	public void exceptionFlowTest() {
+		KeyGenerator keygen = null;
+		try {
+			keygen = KeyGenerator.getInstance("AES");
+			Assertions.extValue(0);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.mustBeInAcceptingState(keygen);
+	}
+
+
+	@Test
 	public void UsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
 		List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
 		KeyGenerator keygen = KeyGenerator.getInstance(s.get(0));
@@ -256,7 +273,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
-	@Ignore
 	@Test
 	public void UsagePatternTestWrongOffsetSize() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
