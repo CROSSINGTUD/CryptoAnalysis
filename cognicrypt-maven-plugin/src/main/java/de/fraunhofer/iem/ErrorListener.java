@@ -10,6 +10,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.*;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
@@ -121,4 +122,15 @@ public class ErrorListener extends CrySLAnalysisListener {
     public void discoveredSeed(IAnalysisSeed curr) {
 
     }
+
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val val, Statement stmt,
+			Set<TransitionEdge> expectedMethodsToBeCalled) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
+		// TODO Auto-generated method stub
+		
+	}
 }

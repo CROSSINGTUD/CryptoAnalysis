@@ -42,9 +42,13 @@ public class SourceCryptoScanner {
 	public static void runAnalysis(String cp, String mainClass, String resPath, ICrySLResultsListener listener) {
 		initializeSootWithEntryPoint(cp, mainClass);
 		RESOURCE_PATH = resPath;
-		
+		analyse();
 	}
-	
+	public static void runAnalysisAllReachable(String applicationClasses, String cp, String resPath, ICrySLResultsListener listener) {
+		initializeSootWithEntryPointAllReachable(applicationClasses,cp);
+		RESOURCE_PATH = resPath;
+		analyse();
+	}
 	private static void analyse() {
 //		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
@@ -126,5 +130,19 @@ public class SourceCryptoScanner {
 		List<SootMethod> ePoints = new LinkedList<>();
 		ePoints.add(methodByName);
 		Scene.v().setEntryPoints(ePoints);
+	}
+	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath) {
+		G.v().reset();
+		Options.v().set_whole_program(true);
+		Options.v().setPhaseOption("cg.spark", "on");
+		Options.v().set_output_format(Options.output_format_none);
+		Options.v().set_no_bodies_for_excluded(true);
+		Options.v().set_allow_phantom_refs(true);
+		 Options.v().setPhaseOption("cg", "all-reachable:true");
+
+		Options.v().set_prepend_classpath(true);
+		Options.v().set_soot_classpath(sootClassPath);
+		Options.v().set_process_dir(Lists.newArrayList(applicationClasses));
+		Scene.v().loadNecessaryClasses();
 	}
 }

@@ -21,6 +21,8 @@ import com.google.common.base.Joiner;
 import com.jcabi.aether.Classpath;
 import crypto.SourceCryptoScanner;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -43,6 +45,9 @@ public class MyMojo
     private MavenProject project;
     @Parameter( defaultValue = "${session}", readonly = true )
     private MavenSession session;
+	private Model model;
+	private Build build;
+	private File targetDir;
 
     public void execute()
         throws MojoExecutionException
@@ -56,14 +61,21 @@ public class MyMojo
                 new File(this.session.getLocalRepository().getBasedir()),
                 "compile"
         );
+        
+        this.model = project.getModel();
+		this.build = model.getBuild();
+		this.targetDir = new File(build.getDirectory());
 
         getLog().info( "Do" );
         ErrorListener analysisListener = new ErrorListener(this);
 
 
-        getLog().info( "BEFORE" );
-        SourceCryptoScanner.runAnalysis(Joiner.on(":").join(jars), "crypto.Test", "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/build/rules", analysisListener);
+        getLog().info( "BEFORE" +Joiner.on(":").join(jars));
+        getLog().info( "BEFORE" +targetDir.getAbsolutePath());
+        SourceCryptoScanner.runAnalysisAllReachable(targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources", analysisListener);
         if(analysisListener.hasErrors()){
+            getLog().info( "HASERROR" );
+
             throw new MojoExecutionException("CogniCrypt found a problem!");
         }
         getLog().info( "AFTER" );
