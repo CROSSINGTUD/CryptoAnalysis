@@ -10,11 +10,11 @@ import typestate.interfaces.ISLConstraint;
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private final ICryptSLPredicateParameter baseObject;
-	private final String predName;
-	private final List<ICryptSLPredicateParameter> parameters;
-	private final boolean negated;
-	private final ISLConstraint optConstraint;
+	protected final ICryptSLPredicateParameter baseObject;
+	protected final String predName;
+	protected final List<ICryptSLPredicateParameter> parameters;
+	protected final boolean negated;
+	protected final ISLConstraint optConstraint;
 	
 	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
 		this(baseObject, name, variables, not, null);
@@ -139,6 +139,10 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 
 	@Override
 	public String getName() {
-		return toString();
+		if (parameters.size() == 1) {
+			return parameters.get(0).getName();
+		} else {
+			return "";
+		}
 	}
 }

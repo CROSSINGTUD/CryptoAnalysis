@@ -24,6 +24,7 @@ import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
+import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
@@ -171,24 +172,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		private Table<Statement, Val, NoWeight> res;
 
 		public void solve() {
-			Boomerang boomerang = new Boomerang(new IntAndStringBoomerangOptions(){
-				@Override
-				public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
-						BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
-					if(stmt.containsInvokeExpr() && stmt instanceof AssignStmt){
-						AssignStmt as = (AssignStmt) stmt;
-						if(as.getLeftOp().equals(fact.value())){
-							if(icfg.getCalleesOfCallAt(stmt).isEmpty())
-								return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
-						}
-					}
-					return super.getAllocationVal(m, stmt, fact, icfg);
-				}
-				@Override
-				public boolean onTheFlyCallGraph() {
-					return false;
-				}
-			}) {
+			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
 				@Override
 				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
 					return ExtendedIDEALAnaylsis.this.icfg();

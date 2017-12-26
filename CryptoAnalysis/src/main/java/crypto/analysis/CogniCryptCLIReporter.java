@@ -15,10 +15,9 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
-import soot.Unit;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
@@ -95,8 +94,11 @@ public class CogniCryptCLIReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Statement stmt) {
+	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
 		
+	}
+	@Override
+	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
 	}
 
 }

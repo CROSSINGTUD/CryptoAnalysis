@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
@@ -25,7 +23,6 @@ import soot.jimple.Stmt;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.util.queue.QueueReader;
-import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
 public class ClassSpecification {

@@ -26,12 +26,13 @@ import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class UsagePatternTest extends UsagePatternTestingFramework{
+public class UsagePatternTest extends UsagePatternTestingFramework {
 
 	@Test
 	public void UsagePatternTest1() throws GeneralSecurityException {
@@ -45,23 +46,21 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
 	}
-	
-	
+
 	@Test
 	public void UsagePatternTestInter1() throws GeneralSecurityException {
 		SecretKey key = generateKey();
 		Assertions.hasEnsuredPredicate(key);
 		encrypt(key);
 	}
-	
-	
+
 	@Test
 	public void UsagePatternTestInter2() throws GeneralSecurityException {
 		SecretKey key = generateKey();
@@ -73,15 +72,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey tmpKey = key;
 		encrypt(tmpKey);
 	}
-	
-	
+
 	@Test
 	public void UsagePatternTestInter3() throws GeneralSecurityException {
 		SecretKey key = generateKey();
 		Assertions.hasEnsuredPredicate(key);
 		rebuild(key);
 	}
-	
+
 	private void rebuild(SecretKey key) throws GeneralSecurityException {
 		SecretKey tmpKey = new SecretKeySpec(key.getEncoded(), "AES");
 		encrypt(tmpKey);
@@ -93,31 +91,30 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(key);
 		wrongRebuild(key);
 	}
-	
+
 	private void wrongRebuild(SecretKey key) throws GeneralSecurityException {
 		SecretKey tmpKey = new SecretKeySpec(key.getEncoded(), "DES");
 		Assertions.hasEnsuredPredicate(tmpKey);
 		encryptWrong(tmpKey);
 	}
-	
+
 	private void encryptWrong(SecretKey key) throws GeneralSecurityException {
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
 	}
-	
 
 	private void encrypt(SecretKey key) throws GeneralSecurityException {
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
@@ -125,19 +122,34 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.getIV();
 	}
 
-
 	private SecretKey generateKey() throws NoSuchAlgorithmException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		
+
 		Assertions.mustBeInAcceptingState(keygen);
 		return key;
 	}
-	
-	
+
+	@Test
+
+	public void exceptionFlowTest() {
+		KeyGenerator keygen = null;
+		try {
+			keygen = KeyGenerator.getInstance("AES");
+			Assertions.extValue(0);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.mustBeInAcceptingState(keygen);
+	}
+
+
 	@Test
 	public void UsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
 		List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
@@ -149,7 +161,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
 	}
-	
+
 	@Test
 	public void UsagePatternTest1SilentForbiddenMethod() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -164,13 +176,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.init(Cipher.DECRYPT_MODE, key);
 		Assertions.extValue(0);
 		Assertions.callToForbiddenMethod();
-		
+
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(cCipher);
 		cCipher.getIV();
 	}
-	
+
 	@Test
 	public void UsagePatternTest1a() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -180,11 +192,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey key = keygen.generateKey();
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		byte[] iv = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(iv);
 		IvParameterSpec spec = new IvParameterSpec(iv);
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		int mode = 1;
@@ -192,14 +204,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 			mode = 2;
 		}
 		cCipher.init(mode, key, spec);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
 	}
-	
+
 	@Test
 	public void UsagePatternTestIVCor() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -207,32 +219,32 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		
+
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		SecureRandom sr = SecureRandom.getInstanceStrong();
 		Assertions.hasEnsuredPredicate(sr);
-		
+
 		byte[] ivbytes = new byte[12];
 		sr.nextBytes(ivbytes);
 		Assertions.hasEnsuredPredicate(ivbytes);
-		
+
 		IvParameterSpec iv = new IvParameterSpec(ivbytes);
 		Assertions.mustBeInAcceptingState(iv);
 		Assertions.hasEnsuredPredicate(iv);
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
 	}
-	
+
 	@Test
 	public void UsagePatternTestIVInCor() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -240,28 +252,52 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		
+
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		byte[] ivbytes = new byte[12];
 		Assertions.notHasEnsuredPredicate(ivbytes);
-		
+
 		IvParameterSpec iv = new IvParameterSpec(ivbytes);
 		Assertions.mustBeInAcceptingState(iv);
 		Assertions.notHasEnsuredPredicate(iv);
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
-	
-	
+
+	@Test
+	public void UsagePatternTestWrongOffsetSize() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Assertions.mustBeInAcceptingState(keygen);
+		
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		Assertions.extValue(0);
+		final byte[] bytes = "test".getBytes();
+		byte[] encText = cCipher.doFinal(bytes, 200, bytes.length);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.extValue(2);
+		//TODO: Fails for reasons different from the ones I expected.
+		cCipher.getIV();
+//		Assertions.mustBeInAcceptingState(cCipher);
+//		Assertions.hasEnsuredPredicate(encText);
+	}
+
 	@Test
 	public void UsagePatternTestMissingMode() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -274,13 +310,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
-	
+
 	@Test
 	public void UsagePatternTestWrongPadding() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -293,7 +329,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC/NoPadding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
@@ -309,7 +345,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
 		Assertions.notHasEnsuredPredicate(key);
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
@@ -317,7 +353,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
 	}
-	
+
 	@Test
 	public void UsagePatternTestImplictPadding() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -330,7 +366,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
@@ -354,7 +390,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(encText);
 	}
 
-
 	@Test
 	public void UsagePatternTest4() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -363,7 +398,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		Cipher cCipher = Cipher.getInstance("Blowfish");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
@@ -383,7 +418,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey keyEnc = keygenEnc.generateKey();
 		Assertions.mustBeInAcceptingState(keygenEnc);
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
@@ -392,31 +427,32 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		cCipher.getIV();
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.hasEnsuredPredicate(encText);
-		
+
 		KeyGenerator keygenMac = KeyGenerator.getInstance("HmacSHA256");
 		SecretKey keyMac = keygenMac.generateKey();
-		
+
 		final Mac hMacSHA256 = Mac.getInstance("HmacSHA256");
 		Assertions.extValue(0);
 		hMacSHA256.init(keyMac);
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
 		Assertions.mustBeInAcceptingState(hMacSHA256);
-		Assertions.notHasEnsuredPredicate(macced);
+		Assertions.hasEnsuredPredicate(macced);
+		Assertions.predicateContradiction();
 	}
-	
+
 	@Test
-	public void UsagePatternTest6() throws GeneralSecurityException   {
+	public void UsagePatternTest6() throws GeneralSecurityException {
 		SecureRandom keyRand = SecureRandom.getInstanceStrong();
-		
+
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128, keyRand);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		SecureRandom encRand = SecureRandom.getInstanceStrong();
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
@@ -426,18 +462,18 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(encText);
 		cCipher.getIV();
 	}
-	
+
 	@Test
-	public void UsagePatternTest7() throws GeneralSecurityException   {
+	public void UsagePatternTest7() throws GeneralSecurityException {
 		SecureRandom rand = SecureRandom.getInstanceStrong();
-		
+
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
-		
+
 		Cipher cCipher = Cipher.getInstance("Blowfish");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, rand);
@@ -446,9 +482,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(encText);
 	}
-	
+
 	@Test
-	public void UsagePatternTest7b() throws GeneralSecurityException   {
+	public void UsagePatternTest7b() throws GeneralSecurityException {
 		SecureRandom encRand = SecureRandom.getInstanceStrong();
 
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -458,8 +494,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
 		Assertions.notHasEnsuredPredicate(key);
-		
-		
+
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key, encRand);
@@ -468,20 +503,20 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(encText);
 	}
-	
+
 	@Test
 	public void UsagePatternForbMeth() throws GeneralSecurityException, IOException {
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
 		Assertions.callToForbiddenMethod();
 	}
-	
+
 	@Test
 	public void UsagePatternMinPBEIterations() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
 		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 1000, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
@@ -489,7 +524,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(3);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
-		
+		pbekeyspec.clearPassword();
 		pbekeyspec = new PBEKeySpec(corPwd, salt, 999, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
@@ -497,22 +532,23 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(3);
 		Assertions.notHasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
-		
+		pbekeyspec.clearPassword();
+
+
 		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 1000);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.mustBeInAcceptingState(pbeparspec);
 		Assertions.hasEnsuredPredicate(pbeparspec);
-		
-		
+
 		pbeparspec = new PBEParameterSpec(salt, 999);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.mustBeInAcceptingState(pbeparspec);
 		Assertions.notHasEnsuredPredicate(pbeparspec);
-		
+
 	}
-	
+
 	@Test
 	public void UsagePattern8() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
@@ -520,7 +556,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
-//		Assertions.violatedConstraint(pbekeyspec);
+		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
@@ -536,6 +572,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
+		pbekeyspec.clearPassword();
 
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
@@ -552,90 +589,96 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(c);
 		Assertions.hasEnsuredPredicate(encText);
 	}
-	
+
 	@Test
 	public void UsagePattern8a() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-//		Assertions.violatedConstraint(pbekeyspec);
+		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
-		
+
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);
-		
+
 		final Cipher c = Cipher.getInstance("AES/GCM/PKCS5Padding");
 		Assertions.extValue(0);
-		
+
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
-		
+		pbekeyspec.clearPassword();
+
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
 		Assertions.extValue(1);
 		Assertions.hasEnsuredPredicate(actKey);
-		
+
 		c.init(Cipher.ENCRYPT_MODE, actKey);
 		Assertions.extValue(0);
 		Assertions.mustBeInAcceptingState(actKey);
-		
+
 		byte[] encText = c.doFinal("TESTPLAIN".getBytes("UTF-8"));
 		c.getIV();
-		
+
 		Assertions.mustBeInAcceptingState(c);
 		Assertions.hasEnsuredPredicate(encText);
 	}
+
 	@Test
 	public void UsagePattern8c() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		Assertions.hasEnsuredPredicate(salt);
-		char [] corPwd = new char[] {'p','a','s','s','w','o','r','d'};
+		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-//		Assertions.violatedConstraint(pbekeyspec);
+		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+		pbekeyspec.clearPassword();
 	}
+
 	@Test
 	public void UsagePattern8b() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p'}, salt, 65000, 128);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] { 'p' }, salt, 65000, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
-		
+
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);
-		
+
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
 		Assertions.mustBeInAcceptingState(secFac);
-		
+		pbekeyspec.clearPassword();
+
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
 		Assertions.extValue(1);
 		Assertions.hasEnsuredPredicate(actKey);
 	}
+
 	@Test
 	public void UsagePattern9() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 		Assertions.hasEnsuredPredicate(salt);
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p','a','s','s','w','o','r','d'}, salt, 65000, 128);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' }, salt, 65000, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -667,19 +710,18 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
-	
-
 	@Test
 	public void UsagePatternTest11() throws GeneralSecurityException {
 		Encrypter enc = new Encrypter();
-		byte[] encText = enc.encrypt("Test"); 
+		byte[] encText = enc.encrypt("Test");
 		Assertions.hasEnsuredPredicate(encText);
 	}
-	
-	
-	public static class Encrypter{
+
+	public static class Encrypter {
+
 		Cipher cipher;
-		public Encrypter() throws GeneralSecurityException{
+
+		public Encrypter() throws GeneralSecurityException {
 			KeyGenerator keygen = KeyGenerator.getInstance("AES");
 			keygen.init(128);
 			SecretKey key = keygen.generateKey();
@@ -687,13 +729,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 			this.cipher.init(Cipher.ENCRYPT_MODE, key);
 			this.cipher.getIV();
 		}
-		public byte[] encrypt(String plainText) throws GeneralSecurityException{
+
+		public byte[] encrypt(String plainText) throws GeneralSecurityException {
 			byte[] encText = this.cipher.doFinal(plainText.getBytes());
 			Assertions.hasEnsuredPredicate(encText);
 			return encText;
 		}
 	}
-	
+
 	@Test
 	public void UsagePatternTest12() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -702,15 +745,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.notHasEnsuredPredicate(key);
-//		Assertions.mustBeInAcceptingState(keygen);
-//		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-//		Assertions.extValue(0);
-//		cCipher.init(Cipher.ENCRYPT_MODE, key);
-//		
-//		Assertions.extValue(0);
-//		byte[] encText = cCipher.doFinal("".getBytes());
-//		Assertions.notHasEnsuredPredicate(encText);
-//		Assertions.mustBeInAcceptingState(cCipher);
+		//		Assertions.mustBeInAcceptingState(keygen);
+		//		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		//		Assertions.extValue(0);
+		//		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		//		
+		//		Assertions.extValue(0);
+		//		byte[] encText = cCipher.doFinal("".getBytes());
+		//		Assertions.notHasEnsuredPredicate(encText);
+		//		Assertions.mustBeInAcceptingState(cCipher);
 	}
 
 	@Test
@@ -725,13 +768,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		
+
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.notHasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);
 	}
-	
+
 	@Test
 	public void UsagePatternTest14() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -742,7 +785,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 	}
-	
+
 	@Test
 	public void UsagePatternTest15() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
@@ -754,7 +797,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.notHasEnsuredPredicate(output);
 		Assertions.violatedConstraint(md);
 	}
-	
+
 	@Test
 	public void UsagePatternTest16() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -763,8 +806,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		md.update(input);
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input);
+		md.digest();
 	}
-	
+
 	@Test
 	public void UsagePatternTest16b() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -775,21 +819,21 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(digest);
 	}
-	
+
 	@Test
 	public void UsagePatternTest16c() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final String[] input = {"input1", "input2", "input3", "input4"};
+		final String[] input = { "input1", "input2", "input3", "input4" };
 		int i = 0;
 		while (i < input.length) {
-			md.update(input[i].getBytes("UTF-8"));			
+			md.update(input[i].getBytes("UTF-8"));
 		}
 		byte[] digest = md.digest();
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(digest);
 	}
-	
+
 	@Test
 	public void UsagePatternTest17() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -800,8 +844,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
+		md.digest();
 	}
-	
+
 	@Test
 	public void UsagePatternTest18() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -818,7 +863,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 	}
-	
+
 	@Test
 	public void UsagePatternTest19() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -833,8 +878,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.hasEnsuredPredicate(output);
+		md.digest();
 	}
-	
+
 	@Test
 	public void UsagePatternTest20() throws GeneralSecurityException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -845,31 +891,30 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		Assertions.mustBeInAcceptingState(md);
-		
-		
+
 		md = MessageDigest.getInstance("MD5");
 		output = md.digest(input2);
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.notHasEnsuredPredicate(output);
 	}
-	
+
 	@Test
 	public void UsagePatternTest21() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
-		
+
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
 		keyGen.initialize(2048);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
-		
+
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.hasEnsuredPredicate(privKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
-		
+
 		sign.initSign(privKey);
 		sign.update(input.getBytes("UTF-8"));
 		byte[] signature = sign.sign();
@@ -877,18 +922,18 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(signature);
 
 	}
-	
+
 	@Test
 	public void UsagePatternTest21a() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
-		
+
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
 		keyGen.initialize(2048);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
-		
+
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.hasEnsuredPredicate(privKey);
 		String algorithm = "SHA256withDSA";
@@ -897,7 +942,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		}
 		Signature sign = Signature.getInstance(algorithm);
 		Assertions.extValue(0);
-		
+
 		sign.initSign(privKey);
 		sign.update(input.getBytes("UTF-8"));
 		byte[] signature = sign.sign();
@@ -905,46 +950,45 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(signature);
 
 	}
-	
+
 	@Test
 	public void UsagePatternTest22() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
-		
+
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
 		keyGen.initialize(2048);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
-		
+
 		final PrivateKey privKey = kp.getPrivate();
 		Assertions.mustBeInAcceptingState(kp);
 		Assertions.hasEnsuredPredicate(privKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
-		
+
 		sign.initSign(privKey);
 		sign.update(input.getBytes("UTF-8"));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.hasEnsuredPredicate(signature);
-		
+
 		final PublicKey pubKey = kp.getPublic();
 		Assertions.mustBeInAcceptingState(kp);
 		Assertions.hasEnsuredPredicate(pubKey);
 
 		Signature ver = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
-//		
+		//		
 		ver.initVerify(pubKey);
 		ver.update(input.getBytes("UTF-8"));
 		ver.verify(signature);
 		Assertions.mustBeInAcceptingState(ver);
 	}
-	
-	
+
 	@Test
-	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException{
+	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException {
 		KeyGenerator c = KeyGenerator.getInstance("AES");
 		SecretKey key = c.generateKey();
 		Assertions.mustBeInAcceptingState(key);
@@ -956,13 +1000,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework{
 		key.destroy();
 		Assertions.mustBeInAcceptingState(key);
 	}
-	
+
 	@Test
-	public void messageDigest() throws NoSuchAlgorithmException, DestroyFailedException{
-		while(true){
+	public void messageDigest() throws NoSuchAlgorithmException, DestroyFailedException {
+		while (true) {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(new byte[]{});
-			md.update(new byte[]{});
+			md.update(new byte[] {});
+			md.update(new byte[] {});
 			byte[] digest = md.digest();
 			Assertions.hasEnsuredPredicate(digest);
 		}

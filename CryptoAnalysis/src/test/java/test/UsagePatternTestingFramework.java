@@ -32,8 +32,8 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -51,8 +51,11 @@ import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
+import test.assertions.MissingTypestateChange;
+import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
+import test.assertions.PredicateContradiction;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
@@ -160,7 +163,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void predicateContradiction(Node<Statement, Val> node,
 									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-								throw new RuntimeException("IMPLEMENTE predicate contradicition" + node);
+								for(Assertion e : expectedResults){
+									if(e instanceof PredicateContradiction){
+										PredicateContradiction p = (PredicateContradiction) e;
+										p.trigger();
+									}
+								}
 							}
 
 							@Override
@@ -217,8 +225,27 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						
 
 							@Override
-							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification,
-									Statement stmt) {
+							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value,
+									Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
+								boolean matched = false;
+								for(Assertion a: expectedResults){
+									if(a instanceof MissingTypestateChange){
+										MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
+										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
+											missingTypestateChange.trigger();
+											matched = true;
+										}
+									}
+									if(a instanceof NoMissingTypestateChange){
+										NoMissingTypestateChange missingTypestateChange = (NoMissingTypestateChange) a;
+//										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
+											throw new RuntimeException("Reports a typestate error that should not be reported");
+//										}
+									}
+								}
+								if(!matched){
+									throw new RuntimeException("Reports a typestate error that should not be reported");
+								}
 							}
 
 							@Override
@@ -229,6 +256,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void onSeedTimeout(Node<Statement, Val> seed) {
 								
+							}
+
+							@Override
+							public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
+								System.out.print(con.getName());
+								System.out.println(" not evaluable.");
 							}
 
 							
@@ -360,6 +393,20 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				Local queryVar = (Local) param;
 				Val val = new Val(queryVar, m);
 				queries.add(new NotInAcceptingStateAssertion(stmt, val));
+			}
+
+			if(invocationName.startsWith("predicateContradiction")){
+				queries.add(new PredicateContradiction());
+			}
+			if(invocationName.startsWith("missingTypestateChange")){
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
+					queries.add(new MissingTypestateChange((Stmt) pred));
+			}
+
+
+			if(invocationName.startsWith("noMissingTypestateChange")){
+				for(Unit pred : getPredecessorsNotBenchmark(stmt))
+					queries.add(new NoMissingTypestateChange((Stmt) pred));
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 package test.assertions;
 
+import javax.crypto.Cipher;
+
 public class Assertions {
 	public static void assertState(Object o, int state) {
 		
@@ -37,4 +39,13 @@ public class Assertions {
 		
 	}
 
+    public static void missingTypestateChange() {
+    }
+
+	public static void noMissingTypestateChange() {
+		
+	}
+
+	public static void predicateContradiction() {
+	}
 }

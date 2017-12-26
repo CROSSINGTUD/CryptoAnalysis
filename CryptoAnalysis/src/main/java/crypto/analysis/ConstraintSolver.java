@@ -45,8 +45,7 @@ public class ConstraintSolver {
 	private final List<ISLConstraint> relConstraints;
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, Statement> parsAndVals;
-	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf");
-	private final static String INV = "%%INVALID%%";
+	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
 	private final ConstraintReporter reporter;
 	private final CryptoScanner cryptoScanner;
 
@@ -58,17 +57,16 @@ public class ConstraintSolver {
 		allConstraints = spec.getRule().getConstraints();
 		relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
+			
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
 			for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
 				involvedVarNames.remove(cwpi.getVarName());
-				if (involvedVarNames.isEmpty()) {
-					relConstraints.add(cons);
-					break;
-				}
 			}
-
+			
+			if (involvedVarNames.isEmpty()) {
+				relConstraints.add(cons);
+			}
 		}
-		//		parsAndValsAsString = convertToStringMultiMap(parametersToValues);
 		this.reporter = reporter;
 	}
 
@@ -110,10 +108,16 @@ public class ConstraintSolver {
 	public int evaluateRelConstraints() {
 		int fail = 0;
 		for (ISLConstraint con : relConstraints) {
-			final Statement unit = evaluate(con);
-			if (unit != null) {
-				fail++;
-				reporter.constraintViolated(con, unit);
+			Statement unit;
+			
+			try {
+				unit = evaluate(con);
+				if (unit != null) {
+					fail++;
+					reporter.constraintViolated(con, unit);
+				}
+			} catch (UnevaluableConstraintException ex) {
+				reporter.unevaluableConstraint(ex.getFailedConstraint(), ex.getUnit());
 			}
 		}
 		return fail;
@@ -122,19 +126,19 @@ public class ConstraintSolver {
 	private Statement evaluate(CryptSLComparisonConstraint comp) {
 		Map<Integer, Statement> left = evaluate(comp.getLeft());
 		Map<Integer, Statement> right = evaluate(comp.getRight());
-		
+
 		for (Entry<Integer, Statement> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
 				return entry.getValue();
 			}
 		}
-		
+
 		for (Entry<Integer, Statement> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
 				return leftie.getValue();
 			}
 			for (Entry<Integer, Statement> rightie : right.entrySet()) {
-				
+
 				boolean cons = true;
 				switch (comp.getOperator()) {
 					case eq:
@@ -171,16 +175,16 @@ public class ConstraintSolver {
 		Map<Integer, Statement> right = extractValueAsInt(arith.getRight().getName());
 		for (Entry<Integer, Statement> rightie : right.entrySet()) {
 			if (rightie.getKey() == Integer.MIN_VALUE) {
-				return left; 
+				return left;
 			}
 		}
-		
+
 		Map<Integer, Statement> results = new HashMap<Integer, Statement>();
 		for (Entry<Integer, Statement> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
-				return left; 
+				return left;
 			}
-			
+
 			for (Entry<Integer, Statement> rightie : right.entrySet()) {
 				int sum = 0;
 				switch (arith.getOperator()) {
@@ -188,13 +192,13 @@ public class ConstraintSolver {
 						sum = leftie.getKey() - rightie.getKey();
 						break;
 					case p:
-						 sum = leftie.getKey() + rightie.getKey();
-						 break;
+						sum = leftie.getKey() + rightie.getKey();
+						break;
 					default:
 						sum = 0;
 				}
 				if (rightie.getValue() != null) {
-					results.put(sum, rightie.getValue());	
+					results.put(sum, rightie.getValue());
 				} else {
 					results.put(sum, leftie.getValue());
 				}
@@ -216,10 +220,10 @@ public class ConstraintSolver {
 			if (valueCollection.getKey().isEmpty()) {
 				return valuesInt;
 			}
-//			Entry<String, Statement> valueAsString = valueCollection;
-//			if (valueAsString.equals(INV)) {
-//				return new AbstractMap.SimpleEntry<Integer, Statement>(Integer.MIN_VALUE, valueAsString.getValue());
-//			}
+			//			Entry<String, Statement> valueAsString = valueCollection;
+			//			if (valueAsString.equals(INV)) {
+			//				return new AbstractMap.SimpleEntry<Integer, Statement>(Integer.MIN_VALUE, valueAsString.getValue());
+			//			}
 			// and cast it to Integer
 			try {
 				for (String value : valueCollection.getKey()) {
@@ -229,7 +233,7 @@ public class ConstraintSolver {
 				//If that does not work either, I'm out of ideas ...
 				throw new RuntimeException();
 			}
-			return valuesInt; 
+			return valuesInt;
 		}
 	}
 
@@ -241,8 +245,8 @@ public class ConstraintSolver {
 			return null;
 		}
 		for (Entry<String, Statement> val : vals) {
-			if (val.equals(INV) || !valueCons.getValueRange().contains(val.getKey())) {
-				return val.getValue(); 
+			if (!valueCons.getValueRange().contains(val.getKey())) {
+				return val.getValue();
 			}
 		}
 		return null;
@@ -278,19 +282,6 @@ public class ConstraintSolver {
 		return vals;
 	}
 
-//	private String getVerifiedValue(Collection<String> actualValue) {
-//		//		if (actualValue.isEmpty()) {
-//		//			return INV;
-//		//		}
-//		Iterator<String> valueIterator = actualValue.iterator();
-//		String val = null;
-//		val = valueIterator.next();
-//		if (actualValue.size() > 1) {
-//			return INV;
-//		}
-//		return val;
-//	}
-
 	private Entry<List<String>, Statement> extractValueAsString(String varName) {
 		List<String> varVal = Lists.newArrayList();
 		Statement witness = null;
@@ -318,7 +309,7 @@ public class ConstraintSolver {
 		return new AbstractMap.SimpleEntry<List<String>, Statement>(varVal, witness);
 	}
 
-	private Statement evaluate(CryptSLConstraint cons) {
+	private Statement evaluate(CryptSLConstraint cons) throws UnevaluableConstraintException {
 		Statement left = evaluate(cons.getLeft());
 		LogOps ops = cons.getOperator();
 
@@ -352,7 +343,7 @@ public class ConstraintSolver {
 		return left;
 	}
 
-	private Statement evaluate(CryptSLPredicate pred) {
+	private Statement evaluate(CryptSLPredicate pred) throws UnevaluableConstraintException {
 		String predName = pred.getPredName();
 		if (predefinedPreds.contains(predName)) {
 			return handlePredefinedNames(pred);
@@ -360,7 +351,7 @@ public class ConstraintSolver {
 		return null;
 	}
 
-	private Statement handlePredefinedNames(CryptSLPredicate pred) {
+	private Statement handlePredefinedNames(CryptSLPredicate pred) throws UnevaluableConstraintException {
 		List<ICryptSLPredicateParameter> parameters = pred.getParameters();
 		switch (pred.getPredName()) {
 			case "callTo":
@@ -428,12 +419,22 @@ public class ConstraintSolver {
 				}
 
 				return null;
+			case "length":
+				//pred looks as follows: neverTypeOf($varName)
+				// -> parameter is always the variable
+				String var = ((CryptSLObject) pred.getParameters().get(0)).getVarName();
+				for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
+					if (cs.getVarName().equals(var)) {
+						throw new UnevaluableConstraintException("Encountered length predicate on " + var, pred);
+					}
+				}
+				return null;
 			default:
-				return null; 
+				return null;
 		}
 	}
 
-	public Statement evaluate(ISLConstraint cons) {
+	public Statement evaluate(ISLConstraint cons) throws UnevaluableConstraintException {
 		if (cons instanceof CryptSLComparisonConstraint) {
 			return evaluate((CryptSLComparisonConstraint) cons);
 		} else if (cons instanceof CryptSLValueConstraint) {
