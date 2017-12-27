@@ -67,17 +67,14 @@ public class MyMojo
 		this.targetDir = new File(build.getDirectory());
 
         getLog().info( "Do" );
-        ErrorListener analysisListener = new ErrorListener(this);
-
-
         getLog().info( "BEFORE" +Joiner.on(":").join(jars));
         getLog().info( "BEFORE" +targetDir.getAbsolutePath());
-        SourceCryptoScanner.runAnalysisAllReachable(targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources", analysisListener);
-        if(analysisListener.hasErrors()){
-            getLog().info( "HASERROR" );
-
-            throw new MojoExecutionException("CogniCrypt found a problem!");
-        }
+        SourceCryptoScanner.runAnalysisAllReachable(targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources");
+//        if(analysisListener.hasErrors()){
+//            getLog().info( "HASERROR" );
+//
+//            throw new MojoExecutionException("CogniCrypt found a problem!");
+//        }
         getLog().info( "AFTER" );
 
     }

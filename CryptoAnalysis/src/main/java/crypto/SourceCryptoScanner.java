@@ -30,21 +30,41 @@ public class SourceCryptoScanner {
 	public static String RESOURCE_PATH = "rules";
 	private static CrySLAnalysisResultsAggregator reporter;
 	private static JimpleBasedInterproceduralCFG icfg;
-
+	private static CG callGraphAlogrithm = CG.SPARK;
+	
+	private static enum CG {
+		CHA, SPARK_LIBRARY, SPARK
+	}
+	
 	public static void main(String... args) {
-		initializeSootWithEntryPoint(args[0], args[1]);
 		if(args.length > 2)
 			RESOURCE_PATH = args[2];
+		if(args.length > 3){
+			if(args[3].equalsIgnoreCase("cha")){
+				callGraphAlogrithm = CG.CHA;
+			}
+			if(args[3].equalsIgnoreCase("spark")){
+				callGraphAlogrithm = CG.SPARK;
+			} 
+			if(args[3].equalsIgnoreCase("spark-library")){
+				callGraphAlogrithm = CG.SPARK_LIBRARY;
+			} 
+			if(args[3].equalsIgnoreCase("library")){
+				callGraphAlogrithm = CG.SPARK_LIBRARY;
+			} 
+		}
+		initializeSootWithEntryPointAllReachable(args[0], args[1]);
+		System.out.println("Using call graph algorithm " + callGraphAlogrithm);
 		analyse();
 		
 	}
 
-	public static void runAnalysis(String cp, String mainClass, String resPath, ICrySLResultsListener listener) {
+	public static void runAnalysis(String cp, String mainClass, String resPath) {
 		initializeSootWithEntryPoint(cp, mainClass);
 		RESOURCE_PATH = resPath;
 		analyse();
 	}
-	public static void runAnalysisAllReachable(String applicationClasses, String cp, String resPath, ICrySLResultsListener listener) {
+	public static void runAnalysisAllReachable(String applicationClasses, String cp, String resPath) {
 		initializeSootWithEntryPointAllReachable(applicationClasses,cp);
 		RESOURCE_PATH = resPath;
 		analyse();
@@ -134,11 +154,26 @@ public class SourceCryptoScanner {
 	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("cg.spark", "on");
+		switch(callGraphAlogrithm){
+			case CHA:
+				Options.v().setPhaseOption("cg.cha", "on");
+				Options.v().setPhaseOption("cg", "all-reachable:true");
+				break;
+			case SPARK_LIBRARY:
+				Options.v().setPhaseOption("cg.spark", "on");
+				Options.v().setPhaseOption("cg", "all-reachable:true,library:any-subtype");
+				break;
+			case SPARK:
+				Options.v().setPhaseOption("cg.spark", "on");
+				Options.v().setPhaseOption("cg", "all-reachable:true");
+				break;
+			default: 
+				throw new RuntimeException("No call graph option selected!");
+		}
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
-		 Options.v().setPhaseOption("cg", "all-reachable:true");
+//		Options.v().setPhaseOption("cg", "all-reachable:true,apponly:true");
 
 		Options.v().set_prepend_classpath(true);
 		Options.v().set_soot_classpath(sootClassPath);
