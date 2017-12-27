@@ -1,19 +1,39 @@
 package crypto;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
+import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.io.Files;
 
+import boomerang.jimple.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.ICrySLResultsListener;
+import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import soot.G;
+import soot.MethodOrMethodContext;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -22,15 +42,19 @@ import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
 import soot.Unit;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
+import soot.util.queue.QueueReader;
+import typestate.interfaces.ISLConstraint;
 
 public class SourceCryptoScanner {
 	public static String RESOURCE_PATH = "rules";
 	private static CrySLAnalysisResultsAggregator reporter;
 	private static JimpleBasedInterproceduralCFG icfg;
 	private static CG callGraphAlogrithm = CG.SPARK;
+	private static Stopwatch callGraphWatch;
 	
 	private static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -53,6 +77,7 @@ public class SourceCryptoScanner {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
 			} 
 		}
+		callGraphWatch = Stopwatch.createStarted();
 		initializeSootWithEntryPointAllReachable(args[0], args[1]);
 		System.out.println("Using call graph algorithm " + callGraphAlogrithm);
 		analyse();
@@ -77,9 +102,14 @@ public class SourceCryptoScanner {
 		PackManager.v().getPack("wjtp").apply();
 	}
 
+
+
+
+	protected static String processDir;
+
 	private static Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
-			
+
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				icfg = new JimpleBasedInterproceduralCFG(false);
@@ -110,6 +140,27 @@ public class SourceCryptoScanner {
 				};
 				scanner.scan();
 				System.out.println(reporter);
+				
+
+				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
+				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
+				Set<SootMethod> visited = Sets.newHashSet();
+				while (listener.hasNext()) {
+					MethodOrMethodContext next = listener.next();
+					visited.add(next.method());
+				}
+				summarizedOutput("analysis-results", processDir, new Predicate<IAnalysisSeed>() {
+
+					@Override
+					public boolean test(IAnalysisSeed t) {
+						return true;
+					}
+
+					@Override
+					public String toString() {
+						return "";
+					}
+				}, callGraphWatch.elapsed(TimeUnit.MILLISECONDS),visited.size());
 			}
 		};
 	}
@@ -152,6 +203,7 @@ public class SourceCryptoScanner {
 		Scene.v().setEntryPoints(ePoints);
 	}
 	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath) {
+		processDir = applicationClasses;
 		G.v().reset();
 		Options.v().set_whole_program(true);
 		switch(callGraphAlogrithm){
@@ -178,6 +230,217 @@ public class SourceCryptoScanner {
 		Options.v().set_prepend_classpath(true);
 		Options.v().set_soot_classpath(sootClassPath);
 		Options.v().set_process_dir(Lists.newArrayList(applicationClasses));
+		
 		Scene.v().loadNecessaryClasses();
+	}
+	
+	
+	
+
+	private static final String CSV_SEPARATOR = ";";
+	
+	private static void summarizedOutput(String fileName, String artifact, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount) {
+		try {
+			File file = new File(fileName + filter.toString() + ".csv");
+			boolean fileExisted = true;
+			if (!file.exists()) {
+				fileExisted = false;
+			}
+			FileWriter fileWriter = new FileWriter(file, true);
+			if (!fileExisted) {
+				List<String> line = Lists.newLinkedList();
+				line.add("apk_name");
+				line.add("analysisSeeds");
+				line.add("forbiddenMethodErrors");
+				line.add("typestateErrorTimeouts(seed)");
+				line.add("typestateError(seed)");
+				addRuleHeader("typestateError_", line);
+				line.add("typestateErrorEndOfObjectLifetime(seed)");
+				addRuleHeader("typestateErrorEndOfObjectLifetime_", line);
+				line.add("typestateErrorTotal(seed)");
+				addRuleHeader("typestateErrorTotal_", line);
+				line.add("typestateError(unit)");
+				// line.add("expectedPredicates");
+				line.add("missingPredicates");
+				addRuleHeader("missingPredicates_", line);
+				line.add("checkedConstraints");
+				line.add("internalConstraintViolations");
+				addRuleHeader("internalConstraintViolations_", line);
+				line.add("negationContradictions");
+				line.add("callgraphTime(ms)");
+				line.add("totalTime(ms)");
+				line.add("typestateTime(ms)");
+				line.add("typestateTime/NoBoomerang(ms)");
+				line.add("taintTime(ms)");
+				line.add("boomerangTime(ms)");
+				line.add("constraint(ms)");
+				line.add("predicate(ms)");
+				line.add("visitedMethods");
+				line.add("allMethods");
+				line.add("max_accesspath");
+				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
+			}
+			List<String> line = Lists.newLinkedList();
+			line.add(artifact);
+			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(), filter).size()));
+			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
+			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+			addTypestateDetails(line, reporter.getTypestateErrors(),filter);
+			line.add(Integer.toString(subset(reporter.getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
+			addTypestateDetails(line,reporter.getTypestateErrorsEndOfLifecycle(), filter);
+			
+			Multimap<IAnalysisSeed, Statement> merged = HashMultimap.create(reporter.getTypestateErrors());
+			merged.putAll(reporter.getTypestateErrorsEndOfLifecycle());
+			
+			line.add(Integer.toString(subset(merged.keySet(), filter).size()));
+			addTypestateDetails(line,merged, filter);
+			
+			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+						
+			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
+			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
+			addMissingPredicatesDetails(line, filter);
+			line.add(Integer.toString(subset(reporter.getCheckedConstraints().keySet(), filter).size()));
+			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(), filter).size()));
+			addMissingInternalConstraintDetails(line, filter);
+			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
+
+			// Time reporting starts here
+			line.add(Long.toString(callGraphTime));
+			line.add(Long.toString(reporter.getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter) - computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
+			line.add(Integer.toString(computeVisitedMethod(reporter.getVisitedMethods(), filter).size()));
+			line.add(Integer.toString(reachableMethodsCount));
+			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
+			fileWriter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map, Predicate<IAnalysisSeed> filter) {
+		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
+		Set<SootMethod> res = Sets.newHashSet();
+		for (IAnalysisSeed s : sub) {
+			res.addAll(map.get(s));
+		}
+		return res;
+	}
+	
+	private static long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
+		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
+		long val = 0;
+		for (IAnalysisSeed s : sub) {
+			Collection<Long> collection = map.get(s);
+			for (Long v : collection)
+				val += v;
+		}
+		return val;
+	}	
+	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
+		Set<IAnalysisSeed> filtered = Sets.newHashSet();
+		for (IAnalysisSeed s : analysisSeeds)
+			if (filter.test(s))
+				filtered.add(s);
+		return filtered;
+	}
+	private static void addRuleHeader(String string, List<String> line) {
+		List<CryptSLRule> rules = getRules();
+		for (CryptSLRule r : rules) {
+			line.add(string + r.getClassName());
+		}
+	}
+	
+
+
+	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
+		HashMap<String, Integer> classToInteger = new HashMap<>();
+		Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
+		for (AnalysisSeedWithSpecification seed : map.keySet()) {
+			Collection<ISLConstraint> col = map.get(seed);
+			if (col == null)
+				continue;
+			if (!filter.test(seed))
+				continue;
+			int size = col.size();
+			String className = seed.getSpec().getRule().getClassName();
+			Integer i = classToInteger.get(className);
+			if (i == null || i == 0) {
+				i = size;
+			} else {
+				i += size;
+			}
+			classToInteger.put(className, i);
+		}
+		List<CryptSLRule> rules = getRules();
+		for (CryptSLRule r : rules) {
+			Integer i = classToInteger.get(r.getClassName());
+			if (i == null) {
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
+	}
+
+	private static void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
+		HashMap<String, Integer> classToInteger = new HashMap<>();
+		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
+		for (AnalysisSeedWithSpecification seed : map.keySet()) {
+			Collection<CryptSLPredicate> col = map.get(seed);
+			if (col == null)
+				continue;
+			if (!filter.test(seed))
+				continue;
+			int size = col.size();
+			String className = seed.getSpec().getRule().getClassName();
+			Integer i = classToInteger.get(className);
+			if (i == null || i == 0) {
+				i = size;
+			} else {
+				i += size;
+			}
+			classToInteger.put(className, i);
+		}
+		List<CryptSLRule> rules = getRules();
+		for (CryptSLRule r : rules) {
+			Integer i = classToInteger.get(r.getClassName());
+			if (i == null) {
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
+	}
+
+	private static void addTypestateDetails(List<String> line,Multimap<IAnalysisSeed, Statement> typestateErrors, Predicate<IAnalysisSeed> filter) {
+		HashMap<String, Integer> classToInteger = new HashMap<>();
+		for (IAnalysisSeed seed : typestateErrors.keySet()) {
+			if (seed instanceof AnalysisSeedWithSpecification) {
+				if (!filter.test(seed))
+					continue;
+				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seed;
+				String className = seedWithSpec.getSpec().getRule().getClassName();
+				Integer i = classToInteger.get(className);
+				if (i == null || i == 0) {
+					i = 1;
+				} else {
+					i++;
+				}
+				classToInteger.put(className, i);
+			}
+		}
+		List<CryptSLRule> rules = getRules();
+		for (CryptSLRule r : rules) {
+			Integer i = classToInteger.get(r.getClassName());
+			if (i == null) {
+				i = 0;
+			}
+			line.add(Integer.toString(i));
+		}
 	}
 }
