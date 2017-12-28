@@ -55,15 +55,17 @@ public class SourceCryptoScanner {
 	private static JimpleBasedInterproceduralCFG icfg;
 	private static CG callGraphAlogrithm = CG.SPARK;
 	private static Stopwatch callGraphWatch;
+	private static String SOFTWARE_IDENTIFIER;
 	
 	private static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 	
 	public static void main(String... args) {
-		if(args.length > 2)
-			RESOURCE_PATH = args[2];
-		if(args.length > 3){
+		SOFTWARE_IDENTIFIER = args[0];
+		if(args.length > 3)
+			RESOURCE_PATH = args[3];
+		if(args.length > 4){
 			if(args[3].equalsIgnoreCase("cha")){
 				callGraphAlogrithm = CG.CHA;
 			}
@@ -78,7 +80,7 @@ public class SourceCryptoScanner {
 			} 
 		}
 		callGraphWatch = Stopwatch.createStarted();
-		initializeSootWithEntryPointAllReachable(args[0], args[1]);
+		initializeSootWithEntryPointAllReachable(args[1], args[2]);
 		System.out.println("Using call graph algorithm " + callGraphAlogrithm);
 		analyse();
 		
@@ -153,7 +155,7 @@ public class SourceCryptoScanner {
 						activeBodies++;
 					}
 				}
-				summarizedOutput("analysis-results", processDir, new Predicate<IAnalysisSeed>() {
+				summarizedOutput("analysis-results", new Predicate<IAnalysisSeed>() {
 
 					@Override
 					public boolean test(IAnalysisSeed t) {
@@ -243,9 +245,13 @@ public class SourceCryptoScanner {
 
 	private static final String CSV_SEPARATOR = ";";
 	
-	private static void summarizedOutput(String fileName, String artifact, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount, int activeBodies) {
+	private static void summarizedOutput(String fileName, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount, int activeBodies) {
 		try {
-			File file = new File(fileName + filter.toString() + ".csv");
+			File dir = new File(fileName);
+			if (!dir.exists()) {
+				dir.mkdir();
+			}
+			File file = new File(fileName +"/"+SOFTWARE_IDENTIFIER+ filter.toString() + ".csv");
 			boolean fileExisted = true;
 			if (!file.exists()) {
 				fileExisted = false;
@@ -286,7 +292,7 @@ public class SourceCryptoScanner {
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
-			line.add(artifact);
+			line.add(SOFTWARE_IDENTIFIER);
 			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(), filter).size()));
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));

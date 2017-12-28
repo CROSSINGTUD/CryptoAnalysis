@@ -6,20 +6,30 @@ POM_TEMPLATE = "pom.template"
 
 ALL_JARS = "classPath.txt"
 ANALYSIS_JAR = "applicationClassPath.txt"
-CRYPTOSCAN_JAR = "../../CryptoAnalysis/build/CryptoAnalysis-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
-RULES_DIR = "../../CryptoAnalysis/src/test/resources"
+CRYPTOSCAN_JAR = "CryptoAnalysis-0.0.1-SNAPSHOT-jar-with-dependencies.jar"
+RULES_DIR = "rules"
 CALLGRAPH = "SPARK-LIBRARY"
 POM_XML = "pom.xml"
 RESULT_FILE = "cognicrypt-results.txt"
 ANALYSIS_FOLDER_PREFIX = "output"
-TIMEOUT_IN_MINUTES = 30;
+TIMEOUT_IN_MINUTES = 15;
 
 groupId = sys.argv[1]
 artifactId = sys.argv[2]
 version = sys.argv[3]
 
-with open("log-start.txt", 'a') as file:
-  file.write(groupId+":"+artifactId+":"+version+"\n")
+
+def writeLogFile(suffix,identifier):
+  folder = "log-" + suffix+"/"
+  if not os.path.exists(folder):
+    try:
+      os.makedirs(folder)
+    except Exception:
+      print("Existed")
+  with open(folder+identifier, 'w') as file:
+    file.write(identifier)
+artifactIdentifier = groupId+":"+artifactId+":"+version
+writeLogFile("start", artifactIdentifier)
 
 folder = ANALYSIS_FOLDER_PREFIX + "/" + groupId + "/"+artifactId+"/"+version+"/"
 if not os.path.exists(folder):
@@ -57,15 +67,12 @@ with open(folder+ANALYSIS_JAR, 'r') as file:
 
 f = open(folder+RESULT_FILE, "w")
 print("Starting soot and writing output to " + folder+RESULT_FILE)
-with open("log-start-soot.txt", 'a') as file:
-  file.write(groupId+":"+artifactId+":"+version+"\n")
-cmd = ["java", "-Xss64m", "-Xmx12g", "-cp",CRYPTOSCAN_JAR, "crypto.SourceCryptoScanner", processDir, sootClassPath, RULES_DIR, CALLGRAPH]
+writeLogFile("soot-start",artifactIdentifier) 
+cmd = ["java", "-Xss64m", "-Xmx12g","-cp",CRYPTOSCAN_JAR, "crypto.SourceCryptoScanner", artifactIdentifier,processDir, sootClassPath, RULES_DIR, CALLGRAPH]
 try:
-	call(cmd, stdout=f,stderr=subprocess.STDOUT, timeout=TIMEOUT_IN_MINUTES*60)
-	print("Finished with soot")
-	# Write the file out again
-	with open("log-success.txt", 'a') as file:
-  		file.write(groupId+":"+artifactId+":"+version+"\n")
-except TimeoutExpired:
-	with open("log-soot-timeout.txt", 'a') as file:
-  		file.write(groupId+":"+artifactId+":"+version+"\n")
+  call(cmd, stdout=f,stderr=subprocess.STDOUT, timeout=TIMEOUT_IN_MINUTES*60)
+  print("Finished with soot")
+  writeLogFile("soot-success",artifactIdentifier)
+
+except subprocess.TimeoutExpired:
+  writeLogFile("soot-timeout",artifactIdentifier)

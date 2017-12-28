@@ -6,7 +6,7 @@ from subprocess import call
 from multiprocessing import Process, Pool
 
 PROJECTS = "maven-central-index.txt"
-
+MOUNT_POINT = "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/maven-analysis"
 def cognicryptScan(arg):
 	groupId = arg[0]
 	artifactId = arg[1]
@@ -27,6 +27,6 @@ for line in lines:
 	args.append([groupId,artifactId,version])
 
 if __name__ == '__main__':
-	with Pool(4) as p:
+	with Pool(10) as p:
 		p.map(cognicryptScan, args)
 	
