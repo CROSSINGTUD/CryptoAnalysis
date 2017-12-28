@@ -3,18 +3,30 @@
 
 import sys
 from subprocess import call
+from multiprocessing import Process, Pool
 
 PROJECTS = "maven-central-index.txt"
 
+def cognicryptScan(arg):
+	groupId = arg[0]
+	artifactId = arg[1]
+	version = arg[2]
+	print("Analyzing " + groupId +" : " + artifactId + " : " + version)
+	call(["python3", "cryptocheck.py", groupId, artifactId, version])
+
 # Read in the file
 with open(PROJECTS, 'r') as file:
-  lines = file.readlines()
+	lines = file.readlines()
  
+args = []
 for line in lines:
 	if line.startswith("#"): 
 		continue
 	line = line.replace("'","").strip()
-	print("Analyzing " + line)
 	groupId,artifactId,_,version = line.split(":")
-  	call(["python", "cryptocheck.py", groupId, artifactId, version])
-  	
+	args.append([groupId,artifactId,version])
+
+if __name__ == '__main__':
+	with Pool(4) as p:
+		p.map(cognicryptScan, args)
+	

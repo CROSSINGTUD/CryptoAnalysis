@@ -145,9 +145,13 @@ public class SourceCryptoScanner {
 				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
 				Set<SootMethod> visited = Sets.newHashSet();
+				int activeBodies = 0;
 				while (listener.hasNext()) {
 					MethodOrMethodContext next = listener.next();
 					visited.add(next.method());
+					if(next.method().hasActiveBody()){
+						activeBodies++;
+					}
 				}
 				summarizedOutput("analysis-results", processDir, new Predicate<IAnalysisSeed>() {
 
@@ -160,7 +164,7 @@ public class SourceCryptoScanner {
 					public String toString() {
 						return "";
 					}
-				}, callGraphWatch.elapsed(TimeUnit.MILLISECONDS),visited.size());
+				}, callGraphWatch.elapsed(TimeUnit.MILLISECONDS),visited.size(),activeBodies);
 			}
 		};
 	}
@@ -239,7 +243,7 @@ public class SourceCryptoScanner {
 
 	private static final String CSV_SEPARATOR = ";";
 	
-	private static void summarizedOutput(String fileName, String artifact, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount) {
+	private static void summarizedOutput(String fileName, String artifact, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount, int activeBodies) {
 		try {
 			File file = new File(fileName + filter.toString() + ".csv");
 			boolean fileExisted = true;
@@ -277,6 +281,7 @@ public class SourceCryptoScanner {
 				line.add("predicate(ms)");
 				line.add("visitedMethods");
 				line.add("allMethods");
+				line.add("allMethods_activeBodies");
 				line.add("max_accesspath");
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
@@ -317,6 +322,7 @@ public class SourceCryptoScanner {
 			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
 			line.add(Integer.toString(computeVisitedMethod(reporter.getVisitedMethods(), filter).size()));
 			line.add(Integer.toString(reachableMethodsCount));
+			line.add(Integer.toString(activeBodies));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			fileWriter.close();
 		} catch (IOException e) {
