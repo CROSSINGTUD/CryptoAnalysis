@@ -29,12 +29,16 @@ import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.ICrySLResultsListener;
+import crypto.preanalysis.SeedFactory;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import soot.Body;
+import soot.BodyTransformer;
 import soot.G;
 import soot.MethodOrMethodContext;
 import soot.PackManager;
+import soot.PhaseOptions;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootClass;
@@ -56,34 +60,54 @@ public class SourceCryptoScanner {
 	private static CG callGraphAlogrithm = CG.SPARK;
 	private static Stopwatch callGraphWatch;
 	private static String SOFTWARE_IDENTIFIER;
-	
+
 	private static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
-	
+
 	public static void main(String... args) {
 		SOFTWARE_IDENTIFIER = args[0];
-		if(args.length > 3)
+		if (args.length > 3)
 			RESOURCE_PATH = args[3];
-		if(args.length > 4){
-			if(args[3].equalsIgnoreCase("cha")){
+		if (args.length > 4) {
+			if (args[4].equalsIgnoreCase("cha")) {
 				callGraphAlogrithm = CG.CHA;
 			}
-			if(args[3].equalsIgnoreCase("spark")){
+			if (args[4].equalsIgnoreCase("spark")) {
 				callGraphAlogrithm = CG.SPARK;
-			} 
-			if(args[3].equalsIgnoreCase("spark-library")){
+			}
+			if (args[4].equalsIgnoreCase("spark-library")) {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			} 
-			if(args[3].equalsIgnoreCase("library")){
+			}
+			if (args[4].equalsIgnoreCase("library")) {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			} 
+			}
 		}
 		callGraphWatch = Stopwatch.createStarted();
-		initializeSootWithEntryPointAllReachable(args[1], args[2]);
-		System.out.println("Using call graph algorithm " + callGraphAlogrithm);
-		analyse();
+		initializeSootWithEntryPointAllReachable(args[1], args[2], false);
+		if (checkIfUsesObject()) {
+			System.out.println("Using call graph algorithm " + callGraphAlogrithm);
+			initializeSootWithEntryPointAllReachable(args[1], args[2], true);
+			analyse();
+		}
+	}
+
+	private static boolean checkIfUsesObject() {
 		
+		final SeedFactory seedFactory = new SeedFactory(getRules());
+		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
+			protected void internalTransform(Body body, String phase, Map options) {
+				if(!body.getMethod().getDeclaringClass().isApplicationClass()){
+					return;
+				}
+				for (Unit u : body.getUnits()) {
+					seedFactory.generate(body.getMethod(),u);
+				}
+			}
+		}));
+		PhaseOptions.v().setPhaseOption("jap.npc", "on");
+		PackManager.v().runPacks();
+		return seedFactory.hasSeeds();
 	}
 
 	public static void runAnalysis(String cp, String mainClass, String resPath) {
@@ -91,21 +115,21 @@ public class SourceCryptoScanner {
 		RESOURCE_PATH = resPath;
 		analyse();
 	}
+
 	public static void runAnalysisAllReachable(String applicationClasses, String cp, String resPath) {
-		initializeSootWithEntryPointAllReachable(applicationClasses,cp);
+		initializeSootWithEntryPointAllReachable(applicationClasses, cp, true);
 		RESOURCE_PATH = resPath;
 		analyse();
 	}
+
 	private static void analyse() {
-//		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreparationTransformer()));
+		// PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new
+		// PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
-
-
-
 
 	protected static String processDir;
 
@@ -129,10 +153,11 @@ public class SourceCryptoScanner {
 						return reporter;
 					}
 
-//					@Override
-//					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-//						return new NullDebugger<>();
-//					}
+					// @Override
+					// public IDebugger<TypestateDomainValue<StateNode>>
+					// debugger() {
+					// return new NullDebugger<>();
+					// }
 
 					@Override
 					public boolean isCommandLineMode() {
@@ -142,7 +167,6 @@ public class SourceCryptoScanner {
 				};
 				scanner.scan();
 				System.out.println(reporter);
-				
 
 				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -151,7 +175,7 @@ public class SourceCryptoScanner {
 				while (listener.hasNext()) {
 					MethodOrMethodContext next = listener.next();
 					visited.add(next.method());
-					if(next.method().hasActiveBody()){
+					if (next.method().hasActiveBody()) {
 						activeBodies++;
 					}
 				}
@@ -166,7 +190,7 @@ public class SourceCryptoScanner {
 					public String toString() {
 						return "";
 					}
-				}, callGraphWatch.elapsed(TimeUnit.MILLISECONDS),visited.size(),activeBodies);
+				}, callGraphWatch.elapsed(TimeUnit.MILLISECONDS), visited.size(), activeBodies);
 			}
 		};
 	}
@@ -177,7 +201,6 @@ public class SourceCryptoScanner {
 		File[] listFiles = new File(RESOURCE_PATH).listFiles();
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
-				System.out.println(file.getName());
 				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
@@ -208,50 +231,51 @@ public class SourceCryptoScanner {
 		ePoints.add(methodByName);
 		Scene.v().setEntryPoints(ePoints);
 	}
-	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath) {
+
+	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath, boolean wholeProgram) {
 		processDir = applicationClasses;
 		G.v().reset();
-		Options.v().set_whole_program(true);
-		switch(callGraphAlogrithm){
-			case CHA:
-				Options.v().setPhaseOption("cg.cha", "on");
-				Options.v().setPhaseOption("cg", "all-reachable:true");
-				break;
-			case SPARK_LIBRARY:
-				Options.v().setPhaseOption("cg.spark", "on");
-				Options.v().setPhaseOption("cg", "all-reachable:true,library:any-subtype");
-				break;
-			case SPARK:
-				Options.v().setPhaseOption("cg.spark", "on");
-				Options.v().setPhaseOption("cg", "all-reachable:true");
-				break;
-			default: 
-				throw new RuntimeException("No call graph option selected!");
+		
+		Options.v().set_whole_program(wholeProgram);
+		
+		switch (callGraphAlogrithm) {
+		case CHA:
+			Options.v().setPhaseOption("cg.cha", "on");
+			Options.v().setPhaseOption("cg", "all-reachable:true");
+			break;
+		case SPARK_LIBRARY:
+			Options.v().setPhaseOption("cg.spark", "on");
+			Options.v().setPhaseOption("cg", "all-reachable:true,library:any-subtype");
+			break;
+		case SPARK:
+			Options.v().setPhaseOption("cg.spark", "on");
+			Options.v().setPhaseOption("cg", "all-reachable:true");
+			break;
+		default:
+			throw new RuntimeException("No call graph option selected!");
 		}
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
-//		Options.v().setPhaseOption("cg", "all-reachable:true,apponly:true");
+		// Options.v().setPhaseOption("cg", "all-reachable:true,apponly:true");
 
 		Options.v().set_prepend_classpath(true);
 		Options.v().set_soot_classpath(sootClassPath);
 		Options.v().set_process_dir(Lists.newArrayList(applicationClasses));
-		
+
 		Scene.v().loadNecessaryClasses();
 	}
-	
-	
-	
 
 	private static final String CSV_SEPARATOR = ";";
-	
-	private static void summarizedOutput(String fileName, Predicate<IAnalysisSeed> filter, long callGraphTime, int reachableMethodsCount, int activeBodies) {
+
+	private static void summarizedOutput(String fileName, Predicate<IAnalysisSeed> filter, long callGraphTime,
+			int reachableMethodsCount, int activeBodies) {
 		try {
 			File dir = new File(fileName);
 			if (!dir.exists()) {
 				dir.mkdir();
 			}
-			File file = new File(fileName +"/"+SOFTWARE_IDENTIFIER+ filter.toString() + ".csv");
+			File file = new File(fileName + "/" + SOFTWARE_IDENTIFIER + filter.toString() + ".csv");
 			boolean fileExisted = true;
 			if (!file.exists()) {
 				fileExisted = false;
@@ -297,18 +321,18 @@ public class SourceCryptoScanner {
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
-			addTypestateDetails(line, reporter.getTypestateErrors(),filter);
+			addTypestateDetails(line, reporter.getTypestateErrors(), filter);
 			line.add(Integer.toString(subset(reporter.getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
-			addTypestateDetails(line,reporter.getTypestateErrorsEndOfLifecycle(), filter);
-			
+			addTypestateDetails(line, reporter.getTypestateErrorsEndOfLifecycle(), filter);
+
 			Multimap<IAnalysisSeed, Statement> merged = HashMultimap.create(reporter.getTypestateErrors());
 			merged.putAll(reporter.getTypestateErrorsEndOfLifecycle());
-			
+
 			line.add(Integer.toString(subset(merged.keySet(), filter).size()));
-			addTypestateDetails(line,merged, filter);
-			
+			addTypestateDetails(line, merged, filter);
+
 			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
-						
+
 			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
 			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
 			addMissingPredicatesDetails(line, filter);
@@ -321,7 +345,8 @@ public class SourceCryptoScanner {
 			line.add(Long.toString(callGraphTime));
 			line.add(Long.toString(reporter.getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
 			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter) - computeTime(reporter.getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)
+					- computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
 			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
@@ -335,8 +360,9 @@ public class SourceCryptoScanner {
 			e.printStackTrace();
 		}
 	}
-	
-	private static Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map, Predicate<IAnalysisSeed> filter) {
+
+	private static Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map,
+			Predicate<IAnalysisSeed> filter) {
 		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
 		Set<SootMethod> res = Sets.newHashSet();
 		for (IAnalysisSeed s : sub) {
@@ -344,7 +370,7 @@ public class SourceCryptoScanner {
 		}
 		return res;
 	}
-	
+
 	private static long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
 		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
 		long val = 0;
@@ -354,22 +380,23 @@ public class SourceCryptoScanner {
 				val += v;
 		}
 		return val;
-	}	
-	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds, Predicate<IAnalysisSeed> filter) {
+	}
+
+	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds,
+			Predicate<IAnalysisSeed> filter) {
 		Set<IAnalysisSeed> filtered = Sets.newHashSet();
 		for (IAnalysisSeed s : analysisSeeds)
 			if (filter.test(s))
 				filtered.add(s);
 		return filtered;
 	}
+
 	private static void addRuleHeader(String string, List<String> line) {
 		List<CryptSLRule> rules = getRules();
 		for (CryptSLRule r : rules) {
 			line.add(string + r.getClassName());
 		}
 	}
-	
-
 
 	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
@@ -429,7 +456,8 @@ public class SourceCryptoScanner {
 		}
 	}
 
-	private static void addTypestateDetails(List<String> line,Multimap<IAnalysisSeed, Statement> typestateErrors, Predicate<IAnalysisSeed> filter) {
+	private static void addTypestateDetails(List<String> line, Multimap<IAnalysisSeed, Statement> typestateErrors,
+			Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
 		for (IAnalysisSeed seed : typestateErrors.keySet()) {
 			if (seed instanceof AnalysisSeedWithSpecification) {

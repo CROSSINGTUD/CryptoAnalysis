@@ -103,6 +103,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	@Override
 	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
+		if(!method.getDeclaringClass().isApplicationClass()){
+			return out;
+		}
 		if(fsm.seedIsConstructor()){
 			if(unit instanceof AssignStmt){
 				AssignStmt as = (AssignStmt) unit;

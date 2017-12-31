@@ -34,6 +34,14 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*  
 
 
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y  python3-pip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install requests
+
 # Set the working directory to /app
 WORKDIR /app
 
