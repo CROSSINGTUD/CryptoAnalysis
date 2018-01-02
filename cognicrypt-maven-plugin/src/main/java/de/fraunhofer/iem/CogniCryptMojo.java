@@ -66,7 +66,7 @@ public class CogniCryptMojo
 	        if(!targetDir.exists())
 	        	return;
 	        String artifactIdentifier = model.getGroupId() +":" + model.getArtifactId()+":"+model.getVersion();
-	        SourceCryptoScanner.main(artifactIdentifier,targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources");
+	        SourceCryptoScanner.main(artifactIdentifier,targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources","CHA");
     	} catch(IllegalStateException e){
     		e.printStackTrace();
     	}

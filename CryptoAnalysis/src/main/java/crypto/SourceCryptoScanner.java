@@ -3,6 +3,7 @@ package crypto;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,6 +63,7 @@ public class SourceCryptoScanner {
 	}
 
 	public static void main(String... args) {
+		System.out.println(Arrays.toString(args));
 		SOFTWARE_IDENTIFIER = args[0];
 		if (args.length > 3)
 			RESOURCE_PATH = args[3];
