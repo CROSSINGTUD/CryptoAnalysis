@@ -23,6 +23,14 @@
                 <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>cognicrypt-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
+                <executions>
+                  <execution>
+                    <phase>test</phase>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

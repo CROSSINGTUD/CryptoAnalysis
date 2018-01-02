@@ -1,10 +1,8 @@
 package crypto;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,7 +18,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.io.Files;
 
 import boomerang.jimple.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -28,7 +25,6 @@ import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.ICrySLResultsListener;
 import crypto.preanalysis.SeedFactory;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -83,7 +79,6 @@ public class SourceCryptoScanner {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
 			}
 		}
-		callGraphWatch = Stopwatch.createStarted();
 		initializeSootWithEntryPointAllReachable(args[1], args[2], false);
 		if (checkIfUsesObject()) {
 			System.out.println("Using call graph algorithm " + callGraphAlogrithm);
@@ -127,6 +122,7 @@ public class SourceCryptoScanner {
 		// PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
+		callGraphWatch = Stopwatch.createStarted();
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
