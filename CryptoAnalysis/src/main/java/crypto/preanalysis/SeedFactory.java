@@ -32,8 +32,6 @@ public class SeedFactory {
 		for(FiniteStateMachineToTypestateChangeFunction defs : idealAnalysisDefs){
 			Collection<WeightedForwardQuery<TransitionFunction>> found = defs.generateSeed(method, unit, Collections.emptyList());
 			seeds.addAll(found);
-			if(!found.isEmpty())
-				System.out.println("HERE " + method);
 		}
 	}
 	

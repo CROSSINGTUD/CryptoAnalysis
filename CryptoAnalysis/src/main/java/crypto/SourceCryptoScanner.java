@@ -50,6 +50,7 @@ import typestate.interfaces.ISLConstraint;
 
 public abstract class SourceCryptoScanner {
 	private CrySLAnalysisResultsAggregator reporter;
+	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 
 	public static enum CG {
@@ -113,14 +114,18 @@ public abstract class SourceCryptoScanner {
 
 	public void exec() {
 		initializeSootWithEntryPointAllReachable(false);
-		if (checkIfUsesObject()) {
+		checkIfUsesObject();
+		if (hasSeeds()) {
 			System.out.println("Using call graph algorithm " + callGraphAlogrithm());
 			initializeSootWithEntryPointAllReachable(true);
 			analyse();
 		}
 	}
 
-	private boolean checkIfUsesObject() {
+	public boolean hasSeeds(){
+		return hasSeeds;
+	}
+	private void checkIfUsesObject() {
 		final SeedFactory seedFactory = new SeedFactory(getRules());
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
 			protected void internalTransform(Body body, String phase, Map options) {
@@ -134,7 +139,7 @@ public abstract class SourceCryptoScanner {
 		}));
 		PhaseOptions.v().setPhaseOption("jap.npc", "on");
 		PackManager.v().runPacks();
-		return seedFactory.hasSeeds();
+		hasSeeds = seedFactory.hasSeeds();
 	}
 
 	private void analyse() {
@@ -153,8 +158,6 @@ public abstract class SourceCryptoScanner {
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				reporter = new CrySLAnalysisResultsAggregator(null);
-				reporter.addReportListener(new CogniCryptCLIReporter());
 				CryptoScanner scanner = new CryptoScanner(SourceCryptoScanner.this.getRules()) {
 
 					@Override
@@ -164,7 +167,7 @@ public abstract class SourceCryptoScanner {
 
 					@Override
 					public CrySLAnalysisResultsAggregator getAnalysisListener() {
-						return reporter;
+						return getReporter();
 					}
 
 					// @Override
@@ -180,7 +183,7 @@ public abstract class SourceCryptoScanner {
 
 				};
 				scanner.scan();
-				System.out.println(reporter);
+				System.out.println(getReporter());
 
 				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -226,6 +229,14 @@ public abstract class SourceCryptoScanner {
 	}
 
 	protected abstract String getRulesDirectory();
+	
+	public CrySLAnalysisResultsAggregator getReporter(){
+		if(reporter == null){
+			reporter = new CrySLAnalysisResultsAggregator(null);
+			reporter.addReportListener(new CogniCryptCLIReporter());
+		}
+		return reporter;
+	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
 		G.v().reset();
@@ -325,41 +336,41 @@ public abstract class SourceCryptoScanner {
 			}
 			List<String> line = Lists.newLinkedList();
 			line.add(softwareIdentifier());
-			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(), filter).size()));
-			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
-			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
-			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
-			addTypestateDetails(line, reporter.getTypestateErrors(), filter);
-			line.add(Integer.toString(subset(reporter.getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
-			addTypestateDetails(line, reporter.getTypestateErrorsEndOfLifecycle(), filter);
+			line.add(Integer.toString(subset(getReporter().getAnalysisSeeds(), filter).size()));
+			line.add(Integer.toString(getReporter().getCallToForbiddenMethod().entries().size()));
+			line.add(Integer.toString(subset(getReporter().getTypestateTimeouts(), filter).size()));
+			line.add(Integer.toString(subset(getReporter().getTypestateErrors().keySet(), filter).size()));
+			addTypestateDetails(line, getReporter().getTypestateErrors(), filter);
+			line.add(Integer.toString(subset(getReporter().getTypestateErrorsEndOfLifecycle().keySet(), filter).size()));
+			addTypestateDetails(line, getReporter().getTypestateErrorsEndOfLifecycle(), filter);
 
-			Multimap<IAnalysisSeed, Statement> merged = HashMultimap.create(reporter.getTypestateErrors());
-			merged.putAll(reporter.getTypestateErrorsEndOfLifecycle());
+			Multimap<IAnalysisSeed, Statement> merged = HashMultimap.create(getReporter().getTypestateErrors());
+			merged.putAll(getReporter().getTypestateErrorsEndOfLifecycle());
 
 			line.add(Integer.toString(subset(merged.keySet(), filter).size()));
 			addTypestateDetails(line, merged, filter);
 
-			line.add(Integer.toString(subset(reporter.getTypestateErrors().keySet(), filter).size()));
+			line.add(Integer.toString(subset(getReporter().getTypestateErrors().keySet(), filter).size()));
 
-			// line.add(Integer.toString(reporter.getExpectedPredicates().rowKeySet().size()));
-			line.add(Integer.toString(subset(reporter.getMissingPredicates().keySet(), filter).size()));
+			// line.add(Integer.toString(getReporter().getExpectedPredicates().rowKeySet().size()));
+			line.add(Integer.toString(subset(getReporter().getMissingPredicates().keySet(), filter).size()));
 			addMissingPredicatesDetails(line, filter);
-			line.add(Integer.toString(subset(reporter.getCheckedConstraints().keySet(), filter).size()));
-			line.add(Integer.toString(subset(reporter.getInternalConstraintsViolations().keySet(), filter).size()));
+			line.add(Integer.toString(subset(getReporter().getCheckedConstraints().keySet(), filter).size()));
+			line.add(Integer.toString(subset(getReporter().getInternalConstraintsViolations().keySet(), filter).size()));
 			addMissingInternalConstraintDetails(line, filter);
-			line.add(Integer.toString(reporter.getPredicateContradictions().entries().size()));
+			line.add(Integer.toString(getReporter().getPredicateContradictions().entries().size()));
 
 			// Time reporting starts here
 			line.add(Long.toString(callGraphTime));
-			line.add(Long.toString(reporter.getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getTypestateAnalysisTime(), filter)
-					- computeTime(reporter.getBoomerangTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getTaintAnalysisTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getBoomerangTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getConstraintSolvingTime(), filter)));
-			line.add(Long.toString(computeTime(reporter.getPredicateSolvingTime(), filter)));
-			line.add(Integer.toString(computeVisitedMethod(reporter.getVisitedMethods(), filter).size()));
+			line.add(Long.toString(getReporter().getTotalAnalysisTime(TimeUnit.MILLISECONDS)));
+			line.add(Long.toString(computeTime(getReporter().getTypestateAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(getReporter().getTypestateAnalysisTime(), filter)
+					- computeTime(getReporter().getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(getReporter().getTaintAnalysisTime(), filter)));
+			line.add(Long.toString(computeTime(getReporter().getBoomerangTime(), filter)));
+			line.add(Long.toString(computeTime(getReporter().getConstraintSolvingTime(), filter)));
+			line.add(Long.toString(computeTime(getReporter().getPredicateSolvingTime(), filter)));
+			line.add(Integer.toString(computeVisitedMethod(getReporter().getVisitedMethods(), filter).size()));
 			line.add(Integer.toString(reachableMethodsCount));
 			line.add(Integer.toString(activeBodies));
 			fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
@@ -408,7 +419,7 @@ public abstract class SourceCryptoScanner {
 
 	private void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
-		Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
+		Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = getReporter().getInternalConstraintsViolations();
 		for (AnalysisSeedWithSpecification seed : map.keySet()) {
 			Collection<ISLConstraint> col = map.get(seed);
 			if (col == null)
@@ -437,7 +448,7 @@ public abstract class SourceCryptoScanner {
 
 	private void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
-		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
+		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = getReporter().getMissingPredicates();
 		for (AnalysisSeedWithSpecification seed : map.keySet()) {
 			Collection<CryptSLPredicate> col = map.get(seed);
 			if (col == null)

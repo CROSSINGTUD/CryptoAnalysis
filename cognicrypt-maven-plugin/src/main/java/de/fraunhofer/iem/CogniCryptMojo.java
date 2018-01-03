@@ -1,6 +1,13 @@
 package de.fraunhofer.iem;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.Collection;
 
 import org.apache.maven.execution.MavenSession;
@@ -51,15 +58,24 @@ public class CogniCryptMojo extends AbstractMojo {
     @Parameter( property = "check.callGraph", defaultValue = "CHA")
     private String callGraph;
     
+
+    @Parameter( property = "check.reportFolder", defaultValue = "cognicrypt-reports")
+    private String outputFolder;
+    
 	private Model model;
 	private Build build;
 	private File targetDir;
+	private Classpath jars;
 
 
 	public void execute() throws MojoExecutionException {
 		try {
-			final Collection<File> jars = new Classpath(this.project,
+			jars = new Classpath(this.project,
 					new File(this.session.getLocalRepository().getBasedir()), "compile");
+
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
 			this.model = project.getModel();
 			this.build = model.getBuild();
 			this.targetDir = new File(build.getDirectory());
@@ -84,6 +100,10 @@ public class CogniCryptMojo extends AbstractMojo {
 
 				@Override
 				protected String sootClassPath() {
+					if(jars == null){
+						System.out.println("Potentially missing some dependencies");
+						return applicationClassPath();
+					}
 					return Joiner.on(":").join(jars);
 				}
 
@@ -107,10 +127,29 @@ public class CogniCryptMojo extends AbstractMojo {
 				}
 			};
 			sourceCryptoScanner.exec();
+			if(sourceCryptoScanner.hasSeeds()){
+				File file = new File(outputFolder);
+				if(!file.isAbsolute()){
+					String absolutePath = targetDir.getAbsolutePath();
+					String targetDir = absolutePath+ File.separator + outputFolder;
+					file = new File(targetDir);
+				}
+				if(!file.exists()){
+					file.mkdirs();
+				}
+				String outputFile = file.getAbsolutePath() +File.separator + artifactIdentifier +".txt";
+				try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+			              new FileOutputStream(outputFile), "utf-8"))) {
+					writer.write(sourceCryptoScanner.getReporter().toString());
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		}
 
 	}
 }
