@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,6 @@ import soot.PackManager;
 import soot.PhaseOptions;
 import soot.Scene;
 import soot.SceneTransformer;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
@@ -50,55 +48,87 @@ import soot.options.Options;
 import soot.util.queue.QueueReader;
 import typestate.interfaces.ISLConstraint;
 
-public class SourceCryptoScanner {
-	public static String RESOURCE_PATH = "rules";
-	private static CrySLAnalysisResultsAggregator reporter;
-	private static JimpleBasedInterproceduralCFG icfg;
-	private static CG callGraphAlogrithm = CG.SPARK;
+public abstract class SourceCryptoScanner {
+	private CrySLAnalysisResultsAggregator reporter;
 	private static Stopwatch callGraphWatch;
-	private static String SOFTWARE_IDENTIFIER;
 
-	private static enum CG {
+	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
 	public static void main(String... args) {
 		System.out.println(Arrays.toString(args));
-		SOFTWARE_IDENTIFIER = args[0];
+		final String resourcesPath;
 		if (args.length > 3)
-			RESOURCE_PATH = args[3];
+			resourcesPath = args[3];
+		else 
+			resourcesPath = "rules";
+		final CG callGraphAlogrithm;
 		if (args.length > 4) {
 			if (args[4].equalsIgnoreCase("cha")) {
 				callGraphAlogrithm = CG.CHA;
-			}
-			if (args[4].equalsIgnoreCase("spark")) {
+			} else if (args[4].equalsIgnoreCase("spark")) {
 				callGraphAlogrithm = CG.SPARK;
-			}
-			if (args[4].equalsIgnoreCase("spark-library")) {
+			} else if (args[4].equalsIgnoreCase("spark-library")) {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			}
-			if (args[4].equalsIgnoreCase("library")) {
+			} else if (args[4].equalsIgnoreCase("library")) {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
+			} else {
+				callGraphAlogrithm = CG.CHA;
 			}
+		} else {
+			callGraphAlogrithm = CG.CHA;
 		}
-		initializeSootWithEntryPointAllReachable(args[1], args[2], false);
+		SourceCryptoScanner sourceCryptoScanner = new SourceCryptoScanner() {
+
+			@Override
+			protected String sootClassPath() {
+				return args[2];
+			}
+
+			@Override
+			protected String applicationClassPath() {
+				return args[1];
+			}
+
+			@Override
+			protected CG callGraphAlogrithm() {
+				return callGraphAlogrithm;
+			}
+
+			@Override
+			protected String softwareIdentifier() {
+				return args[0];
+			}
+
+			@Override
+			protected String getRulesDirectory() {
+				return resourcesPath;
+			}
+
+		};
+		sourceCryptoScanner.exec();
+
+	}
+
+	public void exec() {
+		initializeSootWithEntryPointAllReachable(false);
 		if (checkIfUsesObject()) {
-			System.out.println("Using call graph algorithm " + callGraphAlogrithm);
-			initializeSootWithEntryPointAllReachable(args[1], args[2], true);
+			System.out.println("Using call graph algorithm " + callGraphAlogrithm());
+			initializeSootWithEntryPointAllReachable(true);
 			analyse();
 		}
 	}
 
-	private static boolean checkIfUsesObject() {
-		
+	private boolean checkIfUsesObject() {
 		final SeedFactory seedFactory = new SeedFactory(getRules());
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
 			protected void internalTransform(Body body, String phase, Map options) {
-				if(!body.getMethod().getDeclaringClass().isApplicationClass()){
+				if (!body.getMethod().getDeclaringClass().isApplicationClass()) {
 					return;
 				}
 				for (Unit u : body.getUnits()) {
-					seedFactory.generate(body.getMethod(),u);
+					seedFactory.generate(body.getMethod(), u);
 				}
 			}
 		}));
@@ -107,19 +137,7 @@ public class SourceCryptoScanner {
 		return seedFactory.hasSeeds();
 	}
 
-	public static void runAnalysis(String cp, String mainClass, String resPath) {
-		initializeSootWithEntryPoint(cp, mainClass);
-		RESOURCE_PATH = resPath;
-		analyse();
-	}
-
-	public static void runAnalysisAllReachable(String applicationClasses, String cp, String resPath) {
-		initializeSootWithEntryPointAllReachable(applicationClasses, cp, true);
-		RESOURCE_PATH = resPath;
-		analyse();
-	}
-
-	private static void analyse() {
+	private void analyse() {
 		// PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new
 		// PreparationTransformer()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
@@ -129,17 +147,15 @@ public class SourceCryptoScanner {
 		PackManager.v().getPack("wjtp").apply();
 	}
 
-	protected static String processDir;
-
-	private static Transformer createAnalysisTransformer() {
+	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
 
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				icfg = new JimpleBasedInterproceduralCFG(false);
+				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				reporter = new CrySLAnalysisResultsAggregator(null);
 				reporter.addReportListener(new CogniCryptCLIReporter());
-				CryptoScanner scanner = new CryptoScanner(getRules()) {
+				CryptoScanner scanner = new CryptoScanner(SourceCryptoScanner.this.getRules()) {
 
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -193,50 +209,30 @@ public class SourceCryptoScanner {
 		};
 	}
 
-	protected static List<CryptSLRule> getRules() {
+	protected List<CryptSLRule> getRules() {
 		List<CryptSLRule> rules = Lists.newArrayList();
 
-		File[] listFiles = new File(RESOURCE_PATH).listFiles();
+		File[] listFiles = new File(getRulesDirectory()).listFiles();
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
+		if (rules.isEmpty())
+			System.out.println(
+					"CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
+							+ getRulesDirectory());
 		return rules;
 	}
 
-	private static void initializeSootWithEntryPoint(String sootClassPath, String mainClass) {
+	protected abstract String getRulesDirectory();
+
+	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
 		G.v().reset();
-		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("cg.spark", "on");
-		Options.v().set_output_format(Options.output_format_none);
-		Options.v().set_no_bodies_for_excluded(true);
-		Options.v().set_allow_phantom_refs(true);
-		// Options.v().setPhaseOption("cg", "all-reachable:true");
 
-		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_classpath(sootClassPath);
-		Options.v().set_main_class(mainClass);
-
-		Scene.v().addBasicClass(mainClass, SootClass.BODIES);
-		Scene.v().loadNecessaryClasses();
-		SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
-		if (c != null) {
-			c.setApplicationClass();
-		}
-		SootMethod methodByName = c.getMethodByName("main");
-		List<SootMethod> ePoints = new LinkedList<>();
-		ePoints.add(methodByName);
-		Scene.v().setEntryPoints(ePoints);
-	}
-
-	private static void initializeSootWithEntryPointAllReachable(String applicationClasses, String sootClassPath, boolean wholeProgram) {
-		processDir = applicationClasses;
-		G.v().reset();
-		
 		Options.v().set_whole_program(wholeProgram);
-		
-		switch (callGraphAlogrithm) {
+
+		switch (callGraphAlogrithm()) {
 		case CHA:
 			Options.v().setPhaseOption("cg.cha", "on");
 			Options.v().setPhaseOption("cg", "all-reachable:true");
@@ -257,28 +253,37 @@ public class SourceCryptoScanner {
 		Options.v().set_allow_phantom_refs(true);
 
 		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_classpath(sootClassPath + File.pathSeparator + pathToJCE());
-		Options.v().set_process_dir(Lists.newArrayList(applicationClasses));
+		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
+		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
 		Scene.v().loadNecessaryClasses();
 	}
 
+	protected CG callGraphAlogrithm() {
+		return CG.CHA;
+	}
+
+	protected abstract String sootClassPath();
+
+	protected abstract String applicationClassPath();
+
+	protected abstract String softwareIdentifier();
+
 	private static String pathToJCE() {
-		//When whole program mode is disable, the classpath misses jce.jar
-		return System.getProperty("java.home") + File.separator + "lib" + File.separator
-				+ "jce.jar";
+		// When whole program mode is disabled, the classpath misses jce.jar
+		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
 	}
 
 	private static final String CSV_SEPARATOR = ";";
 
-	private static void summarizedOutput(String fileName, Predicate<IAnalysisSeed> filter, long callGraphTime,
+	private void summarizedOutput(String fileName, Predicate<IAnalysisSeed> filter, long callGraphTime,
 			int reachableMethodsCount, int activeBodies) {
 		try {
 			File dir = new File(fileName);
 			if (!dir.exists()) {
 				dir.mkdir();
 			}
-			File file = new File(fileName + "/" + SOFTWARE_IDENTIFIER + filter.toString() + ".csv");
+			File file = new File(fileName + "/" + softwareIdentifier() + filter.toString() + ".csv");
 			boolean fileExisted = true;
 			if (!file.exists()) {
 				fileExisted = false;
@@ -319,7 +324,7 @@ public class SourceCryptoScanner {
 				fileWriter.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			}
 			List<String> line = Lists.newLinkedList();
-			line.add(SOFTWARE_IDENTIFIER);
+			line.add(softwareIdentifier());
 			line.add(Integer.toString(subset(reporter.getAnalysisSeeds(), filter).size()));
 			line.add(Integer.toString(reporter.getCallToForbiddenMethod().entries().size()));
 			line.add(Integer.toString(subset(reporter.getTypestateTimeouts(), filter).size()));
@@ -364,7 +369,7 @@ public class SourceCryptoScanner {
 		}
 	}
 
-	private static Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map,
+	private Set<SootMethod> computeVisitedMethod(Multimap<IAnalysisSeed, SootMethod> map,
 			Predicate<IAnalysisSeed> filter) {
 		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
 		Set<SootMethod> res = Sets.newHashSet();
@@ -374,7 +379,7 @@ public class SourceCryptoScanner {
 		return res;
 	}
 
-	private static long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
+	private long computeTime(Multimap<IAnalysisSeed, Long> map, Predicate<IAnalysisSeed> filter) {
 		Set<? extends IAnalysisSeed> sub = subset(map.keySet(), filter);
 		long val = 0;
 		for (IAnalysisSeed s : sub) {
@@ -385,7 +390,7 @@ public class SourceCryptoScanner {
 		return val;
 	}
 
-	private static Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds,
+	private Set<? extends IAnalysisSeed> subset(Collection<? extends IAnalysisSeed> analysisSeeds,
 			Predicate<IAnalysisSeed> filter) {
 		Set<IAnalysisSeed> filtered = Sets.newHashSet();
 		for (IAnalysisSeed s : analysisSeeds)
@@ -394,14 +399,14 @@ public class SourceCryptoScanner {
 		return filtered;
 	}
 
-	private static void addRuleHeader(String string, List<String> line) {
+	private void addRuleHeader(String string, List<String> line) {
 		List<CryptSLRule> rules = getRules();
 		for (CryptSLRule r : rules) {
 			line.add(string + r.getClassName());
 		}
 	}
 
-	private static void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
+	private void addMissingInternalConstraintDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
 		Multimap<AnalysisSeedWithSpecification, ISLConstraint> map = reporter.getInternalConstraintsViolations();
 		for (AnalysisSeedWithSpecification seed : map.keySet()) {
@@ -430,7 +435,7 @@ public class SourceCryptoScanner {
 		}
 	}
 
-	private static void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
+	private void addMissingPredicatesDetails(List<String> line, Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
 		Multimap<AnalysisSeedWithSpecification, CryptSLPredicate> map = reporter.getMissingPredicates();
 		for (AnalysisSeedWithSpecification seed : map.keySet()) {
@@ -459,7 +464,7 @@ public class SourceCryptoScanner {
 		}
 	}
 
-	private static void addTypestateDetails(List<String> line, Multimap<IAnalysisSeed, Statement> typestateErrors,
+	private void addTypestateDetails(List<String> line, Multimap<IAnalysisSeed, Statement> typestateErrors,
 			Predicate<IAnalysisSeed> filter) {
 		HashMap<String, Integer> classToInteger = new HashMap<>();
 		for (IAnalysisSeed seed : typestateErrors.keySet()) {

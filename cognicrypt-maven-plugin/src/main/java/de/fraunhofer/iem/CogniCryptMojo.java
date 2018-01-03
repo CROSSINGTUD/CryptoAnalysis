@@ -28,49 +28,89 @@ import org.apache.maven.project.MavenProject;
  * limitations under the License.
  */
 
-
 import com.google.common.base.Joiner;
 import com.jcabi.aether.Classpath;
 
 import crypto.SourceCryptoScanner;
+import crypto.SourceCryptoScanner.CG;
 
+@Mojo(name = "check")
+public class CogniCryptMojo extends AbstractMojo {
+	/**
+	 * Location of the file.
+	 */
 
-@Mojo( name = "check" )
-public class CogniCryptMojo
-    extends AbstractMojo
-{
-    /**
-     * Location of the file.
-     */
+	@Parameter(defaultValue = "${project}", readonly = true)
+	private MavenProject project;
+	@Parameter(defaultValue = "${session}", readonly = true)
+	private MavenSession session;
 
-    @Parameter( defaultValue = "${project}", readonly = true )
-    private MavenProject project;
-    @Parameter( defaultValue = "${session}", readonly = true )
-    private MavenSession session;
+    @Parameter( property = "check.rulesDirectory")
+    private String rulesDirectory;
+
+    @Parameter( property = "check.callGraph", defaultValue = "CHA")
+    private String callGraph;
+    
 	private Model model;
 	private Build build;
 	private File targetDir;
 
-    public void execute()
-        throws MojoExecutionException
-    {
-    	try{
-	        Collection<File> jars = new Classpath(
-	                this.project,
-	                new File(this.session.getLocalRepository().getBasedir()),
-	                "compile"
-	        );
-	        this.model = project.getModel();
+
+	public void execute() throws MojoExecutionException {
+		try {
+			final Collection<File> jars = new Classpath(this.project,
+					new File(this.session.getLocalRepository().getBasedir()), "compile");
+			this.model = project.getModel();
 			this.build = model.getBuild();
 			this.targetDir = new File(build.getDirectory());
-	        if(!targetDir.exists())
-	        	return;
-	        String artifactIdentifier = model.getGroupId() +":" + model.getArtifactId()+":"+model.getVersion();
-	        SourceCryptoScanner.main(artifactIdentifier,targetDir.getAbsolutePath()+"/classes", Joiner.on(":").join(jars),  "/Users/johannesspath/Arbeit/Fraunhofer/CryptoAnalysis/CryptoAnalysis/src/test/resources","CHA");
-    	} catch(IllegalStateException e){
-    		e.printStackTrace();
-    	}
-        
-       }
+			if (!targetDir.exists())
+				return;
+			final String artifactIdentifier = model.getGroupId() + ":" + model.getArtifactId() + ":"
+					+ model.getVersion();
 
+			final CG callGraphAlogrithm;
+			if (callGraph.equalsIgnoreCase("cha")) {
+				callGraphAlogrithm = CG.CHA;
+			} else if (callGraph.equalsIgnoreCase("spark")) {
+				callGraphAlogrithm = CG.SPARK;
+			} else if (callGraph.equalsIgnoreCase("spark-library")) {
+				callGraphAlogrithm = CG.SPARK_LIBRARY;
+			} else if (callGraph.equalsIgnoreCase("library")) {
+				callGraphAlogrithm = CG.SPARK_LIBRARY;
+			} else {
+				callGraphAlogrithm = CG.CHA;
+			}
+			SourceCryptoScanner sourceCryptoScanner = new SourceCryptoScanner() {
+
+				@Override
+				protected String sootClassPath() {
+					return Joiner.on(":").join(jars);
+				}
+
+				@Override
+				protected String applicationClassPath() {
+					return targetDir.getAbsolutePath() + "/classes";
+				}
+
+				@Override
+				protected String softwareIdentifier() {
+					return artifactIdentifier;
+				}
+
+				@Override
+				protected CG callGraphAlogrithm() {
+					return callGraphAlogrithm;
+				}
+				@Override
+				protected String getRulesDirectory() {
+					return rulesDirectory;
+				}
+			};
+			sourceCryptoScanner.exec();
+
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		}
+
+	}
 }
