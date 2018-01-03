@@ -6,9 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Collection;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
@@ -52,104 +52,136 @@ public class CogniCryptMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession session;
 
-    @Parameter( property = "check.rulesDirectory")
-    private String rulesDirectory;
+	@Parameter(property = "check.rulesDirectory")
+	private String rulesDirectory;
 
-    @Parameter( property = "check.callGraph", defaultValue = "CHA")
-    private String callGraph;
-    
+	@Parameter(property = "check.callGraph", defaultValue = "CHA")
+	private String callGraph;
 
-    @Parameter( property = "check.reportFolder", defaultValue = "cognicrypt-reports")
-    private String outputFolder;
-    
+	@Parameter(property = "check.reportsFolder", defaultValue = "cognicrypt-reports")
+	private String reportsFolderParameter;
+	private File reportsFolder;
+
 	private Model model;
 	private Build build;
 	private File targetDir;
-	private Classpath jars;
-
+	private String classPath;
+	private String artifactIdentifier;
+	private static final boolean REDIRECT_LOG = false;
 
 	public void execute() throws MojoExecutionException {
-		try {
-			jars = new Classpath(this.project,
-					new File(this.session.getLocalRepository().getBasedir()), "compile");
+		this.model = project.getModel();
+		this.build = model.getBuild();
+		this.artifactIdentifier = model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion();
 
-		} catch (IllegalStateException e) {
+		createReportFolder();
+		PrintStream ps_console = null;
+		if(REDIRECT_LOG){
+			ps_console = System.out;
+			redirectOutput();
+		}
+		Classpath jars;
+		try {
+			jars = new Classpath(this.project, new File(this.session.getLocalRepository().getBasedir()), "compile");
+			classPath = Joiner.on(":").join(jars);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-			this.model = project.getModel();
-			this.build = model.getBuild();
-			this.targetDir = new File(build.getDirectory());
-			if (!targetDir.exists())
-				return;
-			final String artifactIdentifier = model.getGroupId() + ":" + model.getArtifactId() + ":"
-					+ model.getVersion();
 
-			final CG callGraphAlogrithm;
-			if (callGraph.equalsIgnoreCase("cha")) {
-				callGraphAlogrithm = CG.CHA;
-			} else if (callGraph.equalsIgnoreCase("spark")) {
-				callGraphAlogrithm = CG.SPARK;
-			} else if (callGraph.equalsIgnoreCase("spark-library")) {
-				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			} else if (callGraph.equalsIgnoreCase("library")) {
-				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			} else {
-				callGraphAlogrithm = CG.CHA;
-			}
-			SourceCryptoScanner sourceCryptoScanner = new SourceCryptoScanner() {
+		this.targetDir = new File(build.getDirectory());
+		if (!targetDir.exists())
+			return;
+		if (!new File(targetDir.getAbsolutePath() + File.separator + "classes").exists())
+			return;
 
-				@Override
-				protected String sootClassPath() {
-					if(jars == null){
-						System.out.println("Potentially missing some dependencies");
-						return applicationClassPath();
-					}
-					return Joiner.on(":").join(jars);
-				}
+		final CG callGraphAlogrithm;
+		if (callGraph.equalsIgnoreCase("cha")) {
+			callGraphAlogrithm = CG.CHA;
+		} else if (callGraph.equalsIgnoreCase("spark")) {
+			callGraphAlogrithm = CG.SPARK;
+		} else if (callGraph.equalsIgnoreCase("spark-library")) {
+			callGraphAlogrithm = CG.SPARK_LIBRARY;
+		} else if (callGraph.equalsIgnoreCase("library")) {
+			callGraphAlogrithm = CG.SPARK_LIBRARY;
+		} else {
+			callGraphAlogrithm = CG.CHA;
+		}
+		SourceCryptoScanner sourceCryptoScanner = new SourceCryptoScanner() {
 
-				@Override
-				protected String applicationClassPath() {
-					return targetDir.getAbsolutePath() + "/classes";
+			@Override
+			protected String sootClassPath() {
+				if (classPath == null) {
+					System.out.println("Potentially missing some dependencies");
+					return applicationClassPath();
 				}
-
-				@Override
-				protected String softwareIdentifier() {
-					return artifactIdentifier;
-				}
-
-				@Override
-				protected CG callGraphAlogrithm() {
-					return callGraphAlogrithm;
-				}
-				@Override
-				protected String getRulesDirectory() {
-					return rulesDirectory;
-				}
-			};
-			sourceCryptoScanner.exec();
-			if(sourceCryptoScanner.hasSeeds()){
-				File file = new File(outputFolder);
-				if(!file.isAbsolute()){
-					String absolutePath = targetDir.getAbsolutePath();
-					String targetDir = absolutePath+ File.separator + outputFolder;
-					file = new File(targetDir);
-				}
-				if(!file.exists()){
-					file.mkdirs();
-				}
-				String outputFile = file.getAbsolutePath() +File.separator + artifactIdentifier +".txt";
-				try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-			              new FileOutputStream(outputFile), "utf-8"))) {
-					writer.write(sourceCryptoScanner.getReporter().toString());
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				return classPath;
 			}
 
+			@Override
+			protected String applicationClassPath() {
+				return targetDir.getAbsolutePath() + "/classes";
+			}
 
+			@Override
+			protected String softwareIdentifier() {
+				return artifactIdentifier;
+			}
+
+			@Override
+			protected CG callGraphAlogrithm() {
+				return callGraphAlogrithm;
+			}
+
+			@Override
+			protected String getRulesDirectory() {
+				return rulesDirectory;
+			}
+		};
+		sourceCryptoScanner.exec();
+		if (sourceCryptoScanner.hasSeeds()) {
+			String outputFile = reportsFolder.getAbsolutePath() + File.separator + artifactIdentifier + ".txt";
+			try (Writer writer = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(outputFile), "utf-8"))) {
+				writer.write(sourceCryptoScanner.getReporter().toString());
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if(ps_console != null)
+			System.setOut(ps_console);
+	}
+
+	private void redirectOutput() {
+		String targetDir = reportsFolder.getAbsolutePath() + File.separator + "log";
+		File logDir = new File(targetDir);
+		if (!logDir.exists()) {
+			logDir.mkdirs();
+		}
+
+		File file = new File(logDir.getAbsolutePath() + File.separator + artifactIdentifier + ".txt");
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(file);
+			PrintStream ps = new PrintStream(fos);
+			System.setOut(ps);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createReportFolder() {
+		reportsFolder = new File(reportsFolderParameter);
+		if (!reportsFolder.isAbsolute()) {
+			String absolutePath = targetDir.getAbsolutePath();
+			String targetDir = absolutePath + File.separator + reportsFolderParameter;
+			reportsFolder = new File(targetDir);
+		}
+		if (!reportsFolder.exists()) {
+			reportsFolder.mkdirs();
+		}
 	}
 }
