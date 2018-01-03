@@ -255,13 +255,18 @@ public class SourceCryptoScanner {
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
-		// Options.v().setPhaseOption("cg", "all-reachable:true,apponly:true");
 
 		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_classpath(sootClassPath);
+		Options.v().set_soot_classpath(sootClassPath + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Lists.newArrayList(applicationClasses));
 
 		Scene.v().loadNecessaryClasses();
+	}
+
+	private static String pathToJCE() {
+		//When whole program mode is disable, the classpath misses jce.jar
+		return System.getProperty("java.home") + File.separator + "lib" + File.separator
+				+ "jce.jar";
 	}
 
 	private static final String CSV_SEPARATOR = ";";
