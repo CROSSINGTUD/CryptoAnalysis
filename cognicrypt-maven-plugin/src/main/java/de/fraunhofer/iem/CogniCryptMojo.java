@@ -72,6 +72,7 @@ public class CogniCryptMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		this.model = project.getModel();
 		this.build = model.getBuild();
+		this.targetDir = new File(build.getDirectory());
 		this.artifactIdentifier = model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion();
 
 		createReportFolder();
@@ -88,7 +89,6 @@ public class CogniCryptMojo extends AbstractMojo {
 			e.printStackTrace();
 		}
 
-		this.targetDir = new File(build.getDirectory());
 		if (!targetDir.exists())
 			return;
 		if (!new File(targetDir.getAbsolutePath() + File.separator + "classes").exists())
