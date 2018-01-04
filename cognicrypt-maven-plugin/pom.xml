@@ -41,6 +41,8 @@
 			<artifactId>maven-core</artifactId>
 			<version>3.5.2</version>
 		</dependency>
+		
+		<!-- Not working for maven version later than 3.0.x
 		<dependency>
 			<groupId>com.jcabi</groupId>
 			<artifactId>jcabi-aether</artifactId>
@@ -50,7 +52,7 @@
 			<groupId>org.eclipse.aether</groupId>
 			<artifactId>aether-impl</artifactId>
 			<version>1.1.0</version>
-		</dependency>
+		</dependency> -->
 
 	</dependencies>
 

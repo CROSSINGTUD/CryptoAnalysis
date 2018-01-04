@@ -214,10 +214,12 @@ public abstract class SourceCryptoScanner {
 
 	protected List<CryptSLRule> getRules() {
 		List<CryptSLRule> rules = Lists.newArrayList();
-
+		if(getRulesDirectory() == null){
+			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
+		}
 		File[] listFiles = new File(getRulesDirectory()).listFiles();
 		for (File file : listFiles) {
-			if (file.getName().endsWith(".cryptslbin")) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}

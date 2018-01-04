@@ -19,25 +19,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import com.google.common.base.Joiner;
-import com.jcabi.aether.Classpath;
-
 import crypto.SourceCryptoScanner;
 import crypto.SourceCryptoScanner.CG;
 
@@ -52,7 +33,7 @@ public class CogniCryptMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${session}", readonly = true)
 	private MavenSession session;
 
-	@Parameter(property = "check.rulesDirectory")
+	@Parameter(property = "check.rulesDirectory", required = true)
 	private String rulesDirectory;
 
 	@Parameter(property = "check.callGraph", defaultValue = "CHA")
@@ -65,7 +46,7 @@ public class CogniCryptMojo extends AbstractMojo {
 	private Model model;
 	private Build build;
 	private File targetDir;
-	private String classPath;
+	private String classPath ="";
 	private String artifactIdentifier;
 	private static final boolean REDIRECT_LOG = false;
 
@@ -81,18 +62,20 @@ public class CogniCryptMojo extends AbstractMojo {
 			ps_console = System.out;
 			redirectOutput();
 		}
-		Classpath jars;
-		try {
-			jars = new Classpath(this.project, new File(this.session.getLocalRepository().getBasedir()), "compile");
-			classPath = Joiner.on(":").join(jars);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		if (!targetDir.exists())
+		if (rulesDirectory == null){
+			getLog().error("Set the path to the CrySL rules! Use the option check.rulesDirectory");
 			return;
-		if (!new File(targetDir.getAbsolutePath() + File.separator + "classes").exists())
+		}
+		if (!targetDir.exists()){
+			getLog().warn("Expected the directory " +targetDir+ " to exist!");
 			return;
+		}
+		final File classFolder = new File(targetDir.getAbsolutePath() + File.separator + "classes");
+		if (!classFolder.exists()){
+			getLog().error("Expected a class folder  directory " +classFolder+ " to exist! Run mvn compile first!");
+			return;
+		}
 
 		final CG callGraphAlogrithm;
 		if (callGraph.equalsIgnoreCase("cha")) {
@@ -119,7 +102,7 @@ public class CogniCryptMojo extends AbstractMojo {
 
 			@Override
 			protected String applicationClassPath() {
-				return targetDir.getAbsolutePath() + "/classes";
+				return classFolder.getAbsolutePath();
 			}
 
 			@Override
