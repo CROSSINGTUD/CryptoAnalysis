@@ -58,7 +58,7 @@ public class CogniCryptMojo extends AbstractMojo {
 	@Parameter(property = "check.callGraph", defaultValue = "CHA")
 	private String callGraph;
 
-	@Parameter(property = "check.reportsFolder", defaultValue = "cognicrypt-reports")
+	@Parameter(property = "check.reportsDirectory", defaultValue = "cognicrypt-reports")
 	private String reportsFolderParameter;
 	private File reportsFolder;
 

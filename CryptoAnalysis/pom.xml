@@ -40,12 +40,6 @@
 			<artifactId>boomerangPDS</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>IDEViz</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	<!-- 	<dependency>
 			<groupId>heros</groupId>
 			<artifactId>heros</artifactId>
