@@ -5,7 +5,15 @@ jdk:
 env:
 - NIGHTLYBUILD=$BRANCH
 
+git:
+   submodules: false
+
 build:
   ci:
+   - cd CryptoAnalysis
+   - git clone https://github.com/CROSSINGTUD/WPDS.git WeightedBoomerang
+   - git clone https://github.com/johspaeth/soot-infoflow.git 
+   - git clone https://github.com/johspaeth/soot-infoflow-android.git
+   - git submodule update --init --recursive && \
    - git checkout $NIGHTLYBUILD
    - mvn clean verify surefire:test --fail-at-end
