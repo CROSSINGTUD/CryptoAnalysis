@@ -75,4 +75,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	 <repositories>
+        <repository>
+            <id>soot-snapshot</id>
+            <name>soot snapshots</name>
+            <url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
+        </repository>
+    </repositories>
 </project>
