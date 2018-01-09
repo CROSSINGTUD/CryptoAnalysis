@@ -94,7 +94,6 @@ public class PerAPKAnalyzer {
 	public static void main(String... args) throws InterruptedException, IOException {
 		readInRelevantCalls();
 		apkFile = new File(args[0]);
-		VISUALIZATION = Boolean.parseBoolean(args[2]);
 		// TODO create dir if necessary.
 		ideVizFile = new File("target/IDEViz/" + apkFile.getName().replace(".apk", ".viz"));
 		Stopwatch callGraphWatch = Stopwatch.createStarted();

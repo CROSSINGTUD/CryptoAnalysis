@@ -43,6 +43,7 @@ import wpds.impl.Weight.NoWeight;
 
 public abstract class CryptoScanner {
 
+	public static boolean APPLICATION_CLASS_SEEDS_ONLY = false;
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();

@@ -12,6 +12,7 @@ import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.CryptoScanner;
 import crypto.rules.CryptSLMethod;
 import soot.RefType;
 import soot.SootMethod;
@@ -103,7 +104,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	@Override
 	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
-		if(!method.getDeclaringClass().isApplicationClass()){
+		if(CryptoScanner.APPLICATION_CLASS_SEEDS_ONLY && !method.getDeclaringClass().isApplicationClass()){
 			return out;
 		}
 		if(fsm.seedIsConstructor()){
