@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>boomerangPDS</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 	<!-- 	<dependency>
 			<groupId>heros</groupId>
@@ -54,13 +54,13 @@
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>idealPDS</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>testCore</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
