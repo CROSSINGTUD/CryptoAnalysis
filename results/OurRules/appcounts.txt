@@ -1,5 +1,0 @@
-ls | wc -l
-timedout: 151
-analyzed: 8422
-analyzed-no-crypto: 1230
-flowdroid-crashed: 197
