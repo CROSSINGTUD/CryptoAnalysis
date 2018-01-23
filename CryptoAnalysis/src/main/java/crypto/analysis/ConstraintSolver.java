@@ -47,10 +47,8 @@ public class ConstraintSolver {
 	private final Multimap<CallSiteWithParamIndex, Statement> parsAndVals;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
 	private final ConstraintReporter reporter;
-	private final CryptoScanner cryptoScanner;
 
-	public ConstraintSolver(CryptoScanner cs, ClassSpecification spec, Multimap<CallSiteWithParamIndex, Statement> parametersToValues, Collection<Statement> collectedCalls, ConstraintReporter reporter) {
-		cryptoScanner = cs;
+	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Statement> parametersToValues, Collection<Statement> collectedCalls, ConstraintReporter reporter) {
 		classSpec = spec;
 		parsAndVals = parametersToValues;
 		this.collectedCalls = collectedCalls;

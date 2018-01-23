@@ -121,7 +121,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(cryptoScanner, spec, parametersToValues, allCallsOnObject, new ConstraintReporter() {
+		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, new ConstraintReporter() {
 
 			@Override
 			public void constraintViolated(ISLConstraint con, Statement unit) {
