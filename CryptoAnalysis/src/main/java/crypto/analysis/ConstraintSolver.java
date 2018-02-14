@@ -62,7 +62,16 @@ public class ConstraintSolver {
 			}
 			
 			if (involvedVarNames.isEmpty()) {
-				relConstraints.add(cons);
+				if (cons instanceof CryptSLPredicate) {
+					CryptSLPredicate pred = (CryptSLPredicate) cons;
+					for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
+						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
+							relConstraints.add(new LocatedCrySLPredicate(pred, cwpi.stmt())); 
+						}
+					}
+				} else {
+					relConstraints.add(cons);
+				}
 			}
 		}
 		this.reporter = reporter;

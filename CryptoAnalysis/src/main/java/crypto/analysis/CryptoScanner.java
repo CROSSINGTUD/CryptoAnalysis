@@ -196,7 +196,9 @@ public abstract class CryptoScanner {
 		checkForContradictions();
 		for (AnalysisSeedWithSpecification seed : seedsWithSpec.values()) {
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
-			getAnalysisListener().missingPredicates(seed, missingPredicates);
+			if (!missingPredicates.isEmpty()) {
+				getAnalysisListener().missingPredicates(seed, missingPredicates);
+			}
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 		getAnalysisListener().afterAnalysis();
