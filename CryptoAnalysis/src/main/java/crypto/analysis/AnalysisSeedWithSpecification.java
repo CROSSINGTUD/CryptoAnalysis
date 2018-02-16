@@ -310,7 +310,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 		} else {
-			missingPredicates.add(predToBeEnsured);
+			LocatedCrySLPredicate locatedCrySLPredicate = new LocatedCrySLPredicate(predToBeEnsured, currStmt);
+			missingPredicates.add(locatedCrySLPredicate);
 		}
 	}
 

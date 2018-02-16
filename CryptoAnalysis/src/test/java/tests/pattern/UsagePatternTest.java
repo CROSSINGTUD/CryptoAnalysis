@@ -26,7 +26,6 @@ import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -53,6 +52,21 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(cCipher);
 		cCipher.getIV();
 	}
+	
+	@Test
+	public void UsagePatternTestInsecureKey() throws GeneralSecurityException {
+		byte[] plaintext = "WHAT!?".getBytes();
+
+		SecretKeySpec encKey = new SecretKeySpec(new byte[1] , "AES");
+		Assertions.notHasEnsuredPredicate(encKey);
+		
+		Cipher c = Cipher.getInstance("AES/CBC");
+		c.init(1, encKey);
+		String ciphertext = new String(c.doFinal(plaintext));
+		Assertions.mustBeInAcceptingState(c);
+		Assertions.notHasEnsuredPredicate(ciphertext);
+	}
+	
 
 	@Test
 	public void UsagePatternTestInter1() throws GeneralSecurityException {
