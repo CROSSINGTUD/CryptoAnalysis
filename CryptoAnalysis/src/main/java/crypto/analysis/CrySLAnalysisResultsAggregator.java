@@ -23,7 +23,6 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
-import crypto.typestate.ExtendedIDEALAnaylsis.AdditionalBoomerangQuery;
 import soot.SootMethod;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;

@@ -1,15 +1,16 @@
 package tests.endoflifecycle;
 
-import org.junit.Test;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.security.auth.DestroyFailedException;
 
-import java.security.GeneralSecurityException;
+import org.junit.Test;
+
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 /**
  * Created by johannesspath on 24.12.17.

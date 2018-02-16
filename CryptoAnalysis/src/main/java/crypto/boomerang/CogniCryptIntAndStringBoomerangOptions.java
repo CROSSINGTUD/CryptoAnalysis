@@ -1,10 +1,10 @@
 package crypto.boomerang;
 
-import boomerang.BoomerangOptions;
+import com.google.common.base.Optional;
+
 import boomerang.IntAndStringBoomerangOptions;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Val;
-import com.google.common.base.Optional;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;

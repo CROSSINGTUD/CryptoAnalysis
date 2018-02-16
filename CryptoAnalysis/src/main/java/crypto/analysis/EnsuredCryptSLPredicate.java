@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import boomerang.jimple.Statement;
 import crypto.rules.CryptSLPredicate;
 import crypto.typestate.CallSiteWithParamIndex;
-import soot.Unit;
 
 public class EnsuredCryptSLPredicate {
 

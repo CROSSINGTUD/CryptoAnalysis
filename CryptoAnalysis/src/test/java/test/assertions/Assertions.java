@@ -1,7 +1,5 @@
 package test.assertions;
 
-import javax.crypto.Cipher;
-
 public class Assertions {
 	public static void assertState(Object o, int state) {
 		

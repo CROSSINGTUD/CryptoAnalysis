@@ -16,7 +16,6 @@ import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import soot.SootMethod;
 import typestate.TransitionFunction;
-import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.MatcherTransition.Parameter;
 import typestate.finiteautomata.MatcherTransition.Type;

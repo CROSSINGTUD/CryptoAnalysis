@@ -13,15 +13,10 @@ import soot.Unit;
 import sync.pds.solver.nodes.GeneratedState;
 import sync.pds.solver.nodes.INode;
 import sync.pds.solver.nodes.Node;
-import test.Assertion;
-import test.ComparableResult;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
 import wpds.impl.Transition;
-import wpds.impl.Weight;
-import wpds.impl.WeightedPAutomaton;
-import wpds.interfaces.WPAUpdateListener;
 
 public class TestingResultReporter{
 	private Multimap<Unit, Assertion> stmtToResults = HashMultimap.create();

@@ -1,11 +1,8 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
 import soot.Unit;
 import soot.jimple.Stmt;
 import test.Assertion;
-import test.ComparableResult;
-import typestate.finiteautomata.State;
 
 /**
  * Created by johannesspath on 24.12.17.

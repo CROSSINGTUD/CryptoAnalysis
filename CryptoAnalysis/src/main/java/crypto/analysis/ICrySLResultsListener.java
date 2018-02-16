@@ -16,7 +16,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
-import soot.Unit;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
