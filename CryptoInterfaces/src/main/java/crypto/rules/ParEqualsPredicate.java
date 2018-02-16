@@ -1,5 +1,6 @@
 package crypto.rules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import typestate.interfaces.ICryptSLPredicateParameter;
@@ -25,7 +26,7 @@ public class ParEqualsPredicate extends CryptSLPredicate {
 			return false;
 		}
 		CryptSLPredicate other = (CryptSLPredicate) obj;
-		List<ICryptSLPredicateParameter> otherParams = other.getParameters();
+		List<ICryptSLPredicateParameter> otherParams = new ArrayList<>(other.getParameters());
 		if (otherParams.size() == parameters.size()) {
 			otherParams.removeAll(parameters);
 			return otherParams.isEmpty();
