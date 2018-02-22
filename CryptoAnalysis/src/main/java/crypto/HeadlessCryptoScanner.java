@@ -3,7 +3,6 @@ package crypto;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
@@ -57,8 +59,9 @@ public abstract class HeadlessCryptoScanner {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
+    private static Logger logger = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+    
 	public static void main(String... args) {
-		System.out.println(Arrays.toString(args));
 		final String resourcesPath;
 		if (args.length > 3)
 			resourcesPath = args[3];
@@ -108,7 +111,7 @@ public abstract class HeadlessCryptoScanner {
 			}
 
 		};
-		System.out.println(sourceCryptoScanner);
+		logger.info("{}",sourceCryptoScanner);
 		sourceCryptoScanner.exec();
 
 	}
@@ -117,7 +120,7 @@ public abstract class HeadlessCryptoScanner {
 		initializeSootWithEntryPointAllReachable(false);
 		checkIfUsesObject();
 		if (hasSeeds()) {
-			System.out.println("Using call graph algorithm " + callGraphAlogrithm());
+			logger.info("Using call graph algorithm " + callGraphAlogrithm());
 			initializeSootWithEntryPointAllReachable(true);
 			analyse();
 		}
@@ -192,8 +195,10 @@ public abstract class HeadlessCryptoScanner {
 					}
 
 				};
+				logger.info("Start to scan files");
 				scanner.scan();
-				System.out.println(getReporter());
+				logger.info("Finished CryptoAnalysis");
+				logger.debug("{}",getReporter().toString());
 
 				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -237,6 +242,8 @@ public abstract class HeadlessCryptoScanner {
 			System.out.println(
 					"CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
 							+ getRulesDirectory());
+
+		logger.info("Using a total of {} rules",rules.size());
 		return rules;
 	}
 
@@ -276,11 +283,11 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_allow_phantom_refs(true);
 
 		Options.v().set_prepend_classpath(true);
-		System.out.println((sootClassPath() + File.pathSeparator + pathToJCE()));
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
 		Scene.v().loadNecessaryClasses();
+		logger.info("Finished setup of Soot!");
 	}
 
 	protected CG callGraphAlogrithm() {

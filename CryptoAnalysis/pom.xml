@@ -40,12 +40,8 @@
 			<artifactId>boomerangPDS</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-	<!-- 	<dependency>
-			<groupId>heros</groupId>
-			<artifactId>heros</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>heros</groupId> <artifactId>heros</artifactId> 
+			<version>0.0.1-SNAPSHOT</version> </dependency> -->
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
@@ -74,12 +70,18 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.8.0-beta1</version>
+		</dependency>
+
 	</dependencies>
-	 <repositories>
-        <repository>
-            <id>soot-snapshot</id>
-            <name>soot snapshots</name>
-            <url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>soot-snapshot</id>
+			<name>soot snapshots</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
+		</repository>
+	</repositories>
 </project>
