@@ -154,11 +154,11 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	public String toString() {
-		String s = "CryptoScanner: \n";
+		String s = "HeadllessCryptoScanner: \n";
 		s += "\tSoftwareIdentifier: "+ softwareIdentifier() +"\n";
 		s += "\tApplicationClassPath: "+ applicationClassPath() +"\n";
 		s += "\tRules Directory: "+ getRulesDirectory() +"\n";
-		s += "\tSootClassPath: "+ sootClassPath() +"\n";
+		s += "\tSootClassPath: "+ sootClassPath() +"\n\n";
 		return s;
 	}
 
