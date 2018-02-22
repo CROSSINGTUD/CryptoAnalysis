@@ -48,7 +48,7 @@ import soot.options.Options;
 import soot.util.queue.QueueReader;
 import typestate.interfaces.ISLConstraint;
 
-public abstract class SourceCryptoScanner {
+public abstract class HeadlessCryptoScanner {
 	private CrySLAnalysisResultsAggregator reporter;
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
@@ -80,7 +80,7 @@ public abstract class SourceCryptoScanner {
 		} else {
 			callGraphAlogrithm = CG.CHA;
 		}
-		SourceCryptoScanner sourceCryptoScanner = new SourceCryptoScanner() {
+		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
 
 			@Override
 			protected String sootClassPath() {
@@ -108,6 +108,7 @@ public abstract class SourceCryptoScanner {
 			}
 
 		};
+		System.out.println(sourceCryptoScanner);
 		sourceCryptoScanner.exec();
 
 	}
@@ -151,6 +152,15 @@ public abstract class SourceCryptoScanner {
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
 	}
+	
+	public String toString() {
+		String s = "CryptoScanner: \n";
+		s += "\tSoftwareIdentifier: "+ softwareIdentifier() +"\n";
+		s += "\tApplicationClassPath: "+ applicationClassPath() +"\n";
+		s += "\tRules Directory: "+ getRulesDirectory() +"\n";
+		s += "\tSootClassPath: "+ sootClassPath() +"\n";
+		return s;
+	}
 
 	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
@@ -158,7 +168,7 @@ public abstract class SourceCryptoScanner {
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				CryptoScanner scanner = new CryptoScanner(SourceCryptoScanner.this.getRules()) {
+				CryptoScanner scanner = new CryptoScanner(HeadlessCryptoScanner.this.getRules()) {
 
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -266,6 +276,7 @@ public abstract class SourceCryptoScanner {
 		Options.v().set_allow_phantom_refs(true);
 
 		Options.v().set_prepend_classpath(true);
+		System.out.println((sootClassPath() + File.pathSeparator + pathToJCE()));
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
