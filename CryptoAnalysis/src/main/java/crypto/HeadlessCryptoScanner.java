@@ -281,6 +281,8 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
 		Scene.v().loadNecessaryClasses();
+		System.out.println("Finished initializing soot");
+
 	}
 
 	protected CG callGraphAlogrithm() {
