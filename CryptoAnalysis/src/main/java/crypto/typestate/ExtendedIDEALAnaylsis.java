@@ -77,11 +77,6 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public long analysisBudgetInSeconds() {
-				return 0;
-			}
-
-			@Override
 			public boolean enableStrongUpdates() {
 				return true;
 			}

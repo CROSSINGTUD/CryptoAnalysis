@@ -227,23 +227,23 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value,
 									Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
-								boolean matched = false;
+								boolean hasTypestateChangeError = false;
+
+								boolean expectsTypestateChangeError = false;
 								for(Assertion a: expectedResults){
 									if(a instanceof MissingTypestateChange){
 										MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
 										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
 											missingTypestateChange.trigger();
-											matched = true;
+											hasTypestateChangeError = true;
 										}
+										expectsTypestateChangeError = true;
 									}
 									if(a instanceof NoMissingTypestateChange){
-										NoMissingTypestateChange missingTypestateChange = (NoMissingTypestateChange) a;
-//										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
-											throw new RuntimeException("Reports a typestate error that should not be reported");
-//										}
+										throw new RuntimeException("Reports a typestate error that should not be reported");
 									}
 								}
-								if(!matched){
+								if(hasTypestateChangeError != expectsTypestateChangeError){
 									throw new RuntimeException("Reports a typestate error that should not be reported");
 								}
 							}
