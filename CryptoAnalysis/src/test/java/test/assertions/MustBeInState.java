@@ -22,12 +22,11 @@ public class MustBeInState implements Assertion, ComparableResult<State,Val> {
 	}
 
 	public void computedResults(State s) {
-		if ((state.toString().equals("-1") && s.equals(ErrorStateNode.v())) || state.toString().equals(s.toString())) {
+		if ((state.toString().equals("-1") && s instanceof ErrorStateNode) || state.toString().equals(s.toString())) {
 			satisfied |= true;
 			imprecise++;
 		} 
 	}
-
 
 	public Unit getStmt() {
 		return unit;

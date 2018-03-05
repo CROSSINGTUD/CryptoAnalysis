@@ -3,7 +3,6 @@ package crypto;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.ParseException;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Joiner;
@@ -21,11 +25,11 @@ import com.google.common.collect.Multimap;
 
 import boomerang.jimple.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CogniCryptCLIReporter;
 import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.preanalysis.SeedFactory;
+import crypto.reporting.CommandLineReporter;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
@@ -52,27 +56,26 @@ public abstract class HeadlessCryptoScanner {
 	private CrySLAnalysisResultsAggregator reporter;
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
+	private static CommandLine options;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) {
-		System.out.println(Arrays.toString(args));
+	public static void main(String... args) throws ParseException {
+		CommandLineParser parser = new DefaultParser();
+		options = parser.parse(new HeadlessOptions(), args);
 		final String resourcesPath;
-		if (args.length > 3)
-			resourcesPath = args[3];
+		if (options.hasOption("rulesDir"))
+			resourcesPath = options.getOptionValue("rulesDir");
 		else 
 			resourcesPath = "rules";
 		final CG callGraphAlogrithm;
-		if (args.length > 4) {
-			if (args[4].equalsIgnoreCase("cha")) {
-				callGraphAlogrithm = CG.CHA;
-			} else if (args[4].equalsIgnoreCase("spark")) {
+		if (options.hasOption("cg")) {
+			String val = options.getOptionValue("cg");
+			if (val.equalsIgnoreCase("spark")) {
 				callGraphAlogrithm = CG.SPARK;
-			} else if (args[4].equalsIgnoreCase("spark-library")) {
-				callGraphAlogrithm = CG.SPARK_LIBRARY;
-			} else if (args[4].equalsIgnoreCase("library")) {
+			} else if (val.equalsIgnoreCase("spark-library")) {
 				callGraphAlogrithm = CG.SPARK_LIBRARY;
 			} else {
 				callGraphAlogrithm = CG.CHA;
@@ -84,12 +87,12 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected String sootClassPath() {
-				return args[2];
+				return options.getOptionValue("sootCp");
 			}
 
 			@Override
 			protected String applicationClassPath() {
-				return args[1];
+				return options.getOptionValue("applicationCp");
 			}
 
 			@Override
@@ -99,19 +102,23 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected String softwareIdentifier() {
-				return args[0];
+				return options.getOptionValue("softwareIdentifier");
 			}
 
 			@Override
 			protected String getRulesDirectory() {
 				return resourcesPath;
 			}
+			
+			@Override
+			protected String getOutputFile(){
+				return options.getOptionValue("reportFile");
+			}
 
 		};
-		System.out.println(sourceCryptoScanner);
 		sourceCryptoScanner.exec();
-
 	}
+
 
 	public void exec() {
 		initializeSootWithEntryPointAllReachable(false);
@@ -168,7 +175,9 @@ public abstract class HeadlessCryptoScanner {
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				CryptoScanner scanner = new CryptoScanner(HeadlessCryptoScanner.this.getRules()) {
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
+				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFile(), rules);
+				CryptoScanner scanner = new CryptoScanner(rules) {
 
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -192,8 +201,8 @@ public abstract class HeadlessCryptoScanner {
 					}
 
 				};
+				getReporter().addReportListener(fileReporter);
 				scanner.scan();
-				System.out.println(getReporter());
 
 				ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 				QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -245,7 +254,6 @@ public abstract class HeadlessCryptoScanner {
 	public CrySLAnalysisResultsAggregator getReporter(){
 		if(reporter == null){
 			reporter = new CrySLAnalysisResultsAggregator(null);
-			reporter.addReportListener(new CogniCryptCLIReporter());
 		}
 		return reporter;
 	}
@@ -294,7 +302,10 @@ public abstract class HeadlessCryptoScanner {
 	protected abstract String applicationClassPath();
 
 	protected abstract String softwareIdentifier();
+	
+	protected abstract String getOutputFile();
 
+	
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";

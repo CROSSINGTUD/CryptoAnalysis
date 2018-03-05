@@ -169,21 +169,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (State newStateAtCurr : stateAtCurrMinusPred) {
 					typeStateChangeAtStatement(predStmt, newStateAtCurr);
-					if (newStateAtCurr.equals(ErrorStateNode.v())) {
-						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
-						cryptoScanner.getAnalysisListener().typestateErrorAt(this, predStmt, expectedMethodCalls);
+					if (newStateAtCurr instanceof ErrorStateNode && !stateAtPred.isEmpty()) {
+						ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
+						cryptoScanner.getAnalysisListener().typestateErrorAt(this, predStmt, errorStateNode.getExpectedCalls());
 					}
 				}
 			}
 		}
-	}
-
-	private Set<SootMethod> expectedMethodsCallsFor(Collection<State> stateAtPred) {
-		Set<SootMethod> res = Sets.newHashSet();
-		for (State s : stateAtPred) {
-			res.addAll(spec.getFSM().getEdgesOutOf(s));
-		}
-		return res;
 	}
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {

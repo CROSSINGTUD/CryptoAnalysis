@@ -66,11 +66,11 @@ public class SootBasedStateMachineGraph {
 		for(StateNode t :  this.stateMachineGraph.getNodes()){
 			State wrapped = wrappedState(t);
 			Collection<SootMethod> remaining = getInvolvedMethods();
-			Collection<SootMethod> outs =  this.outTransitions.get(wrapped);
-			if(outs == null)
-				outs = Sets.newHashSet();
-			remaining.removeAll(outs);
-			this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, ErrorStateNode.v(), Type.OnCallToReturn));
+			Collection<SootMethod> expected =  this.outTransitions.get(wrapped);
+			if(expected != null){
+				remaining.removeAll(expected);
+				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ErrorStateNode(expected), Type.OnCallToReturn));
+			}
 		}
 	}
 

@@ -193,7 +193,7 @@ public class CrySLAnalysisResultsAggregator{
 		crr.afterPredicateCheck(seed);
 	}
 
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Set<SootMethod> expectedMethodCalls) {
+	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedMethodCalls) {
 		reportedTypestateErros.put(classSpecification, stmt);
 		crr.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 	}
