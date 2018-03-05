@@ -405,6 +405,23 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	public void UsagePatternTestWrongModeExtraVar() throws GeneralSecurityException {
+		String trans = "AES";
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.mustBeInAcceptingState(keygen);
+		Cipher cCipher = Cipher.getInstance(trans);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		Assertions.extValue(0);
+		byte[] encText = cCipher.doFinal("".getBytes());
+		Assertions.mustBeInAcceptingState(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
+	}
+
+	@Test
 	public void UsagePatternTest4() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
