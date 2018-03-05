@@ -89,6 +89,12 @@ public abstract class ExtendedIDEALAnaylsis {
 			public BoomerangOptions boomerangOptions() {
 				return new CogniCryptBoomerangOptions();
 			}
+
+			@Override
+			public long analysisBudgetInSeconds() {
+				// TODO Auto-generated method stub
+				return 0;
+			}
 		});
 	}
 
