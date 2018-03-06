@@ -19,6 +19,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.errors.AbstractError;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.TransitionEdge;
@@ -88,7 +89,6 @@ public class CrySLAnalysisResultsAggregator{
 
 	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
 		callToForbiddenMethod.put(classSpecification, callSite);
-		crr.callToForbiddenMethod(classSpecification, callSite,alternatives);
 	}
 
 	public void discoveredSeed(IAnalysisSeed curr) {
@@ -138,19 +138,11 @@ public class CrySLAnalysisResultsAggregator{
 		crr.missingPredicates(seed, missingPredicates);
 	}
 
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {
-		internalConstraintViolations.put(analysisSeedWithSpecification, con);
-		crr.constraintViolation(analysisSeedWithSpecification, con, unit);
-	}
 
 	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getCheckedConstraints() {
 		return checkedConstraints;
 	}
 	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
-		reportedTypestateErrosAtEndOfObjectLifecycle.put(classSpecification, stmt);
-		crr.typestateErrorEndOfLifeCycle(classSpecification, value, stmt, expectedMethodsToBeCalled);
-	}
 	
 	public void checkedConstraints(AnalysisSeedWithSpecification seed, Collection<ISLConstraint> cons) {
 		checkedConstraints.putAll(seed, cons);
@@ -191,11 +183,6 @@ public class CrySLAnalysisResultsAggregator{
 			predicateWatch.stop();
 		seedToPredicateTime.put(seed, predicateWatch.elapsed(TimeUnit.MILLISECONDS));
 		crr.afterPredicateCheck(seed);
-	}
-
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedMethodCalls) {
-		reportedTypestateErros.put(classSpecification, stmt);
-		crr.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
 	}
 
 	public Multimap<IAnalysisSeed, Statement> getTypestateErrors() {
@@ -404,6 +391,10 @@ public class CrySLAnalysisResultsAggregator{
 
 	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement statement) {
 		crr.unevaluableConstraint(seed, con, statement);
+	}
+	
+	public void reportError(AbstractError err){
+		crr.reportError(err);
 	}
 	
 }

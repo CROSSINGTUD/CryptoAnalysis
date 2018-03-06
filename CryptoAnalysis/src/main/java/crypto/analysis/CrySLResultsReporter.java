@@ -14,11 +14,9 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.rules.CryptSLMethod;
+import crypto.analysis.errors.AbstractError;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
-import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
@@ -45,12 +43,6 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.callToForbiddenMethod(classSpecification, callSite, alternatives);
-		}
-	}
-
 	public void discoveredSeed(IAnalysisSeed curr) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.discoveredSeed(curr);
@@ -72,12 +64,6 @@ public class CrySLResultsReporter  {
 	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.missingPredicates(seed, missingPredicates);
-		}
-	}
-
-	public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.constraintViolation(analysisSeedWithSpecification, con, unit);
 		}
 	}
 
@@ -153,21 +139,15 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedMethodCalls) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.typestateErrorAt(classSpecification, stmt, expectedMethodCalls);
-		}
-	}
-	
-	public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.typestateErrorEndOfLifeCycle(classSpecification, value, stmt, expectedMethodsToBeCalled);
-		}
-	}
-	
 	public void unevaluableConstraint(AnalysisSeedWithSpecification classSpecification, ISLConstraint con, Statement stmt) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.unevaluableConstraint(classSpecification, con, stmt);
+		}
+	}
+
+	public void reportError(AbstractError err) {
+		for (CrySLAnalysisListener listen : listeners) {
+			listen.reportError(err);
 		}
 	}
 	

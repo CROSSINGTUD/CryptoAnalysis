@@ -3,6 +3,9 @@ package crypto.typestate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.sound.midi.Synthesizer;
+
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -47,9 +50,10 @@ public class CryptSLMethodToSootMethod {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
-		
-		if (!Scene.v().containsClass(declaringClass))
+//		Scene.v().forceResolve(declaringClass, SootClass.BODIES);
+		if (!Scene.v().containsClass(declaringClass)){
 			return res;
+		}
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
 		if (methodNameWithoutDeclaringClass.equals(sootClass.getShortName()))
@@ -57,9 +61,13 @@ public class CryptSLMethodToSootMethod {
 		int noOfParams = label.getParameters().size(); 
 		for (SootMethod m : sootClass.getMethods()) {
 			if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams) {
-				if (parametersMatch(label.getParameters(), m.getParameterTypes()))
+				if (parametersMatch(label.getParameters(), m.getParameterTypes())){
 					res.add(m);
+				}
 			}
+		}
+		if(res.isEmpty()){
+			System.out.println("Warning: Couldn't find any method for CryptSLMethod: " + label);
 		}
 		return res;
 	}

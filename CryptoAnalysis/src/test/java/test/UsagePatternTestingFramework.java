@@ -28,6 +28,13 @@ import crypto.analysis.CrySLAnalysisResultsAggregator;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.ErrorVisitor;
+import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.PredicateError;
+import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -97,21 +104,66 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							@Override
 							public void collectedValues(AnalysisSeedWithSpecification seed,
 									Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
-								for(Assertion a: expectedResults){
+								for(Assertion a : expectedResults){
 									if(a instanceof ExtractedValueAssertion){
 										((ExtractedValueAssertion) a).computedValues(collectedValues);
 									}
 								}
 							}
-
+							
 							@Override
-							public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives) {
-								for(Assertion e : expectedResults){
-									if(e instanceof CallToForbiddenMethodAssertion){
-										CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
-										expectedResults.reported(callSite.getUnit().get());
+							public void reportError(AbstractError error) {
+								error.accept(new ErrorVisitor() {
+									
+									@Override
+									public void visit(PredicateError predicateError) {
+										// TODO Auto-generated method stub
+										
 									}
-								}
+									
+									@Override
+									public void visit(TypestateError typestateError) {
+										// TODO Auto-generated method stub
+										
+									}
+									
+									@Override
+									public void visit(IncompleteOperationError incompleteOperationError) {
+										boolean hasTypestateChangeError = false;
+										boolean expectsTypestateChangeError = false;
+										for(Assertion a: expectedResults){
+											if(a instanceof MissingTypestateChange){
+												MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
+												if(missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorLocation().getUnit().get())){
+													missingTypestateChange.trigger();
+													hasTypestateChangeError = true;
+												}
+												expectsTypestateChangeError = true;
+											}
+											if(a instanceof NoMissingTypestateChange){
+												throw new RuntimeException("Reports a typestate error that should not be reported");
+											}
+										}
+										if(hasTypestateChangeError != expectsTypestateChangeError){
+											throw new RuntimeException("Reports a typestate error that should not be reported");
+										}
+									}
+									
+									@Override
+									public void visit(ForbiddenMethodError abstractError) {
+										for(Assertion e : expectedResults){
+											if(e instanceof CallToForbiddenMethodAssertion){
+												CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
+												expectedResults.reported(abstractError.getErrorLocation().getUnit().get());
+											}
+										}
+									}
+									
+									@Override
+									public void visit(ConstraintError constraintError) {
+										// TODO Auto-generated method stub
+									}
+								});
 							}
 
 							@Override
@@ -177,12 +229,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-									ISLConstraint con, Statement unit) {
-								
-							}
-
-							@Override
 							public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 									Collection<ISLConstraint> relConstraints) {
 								
@@ -223,35 +269,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 						
-
-							@Override
-							public void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val value,
-									Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled) {
-								boolean hasTypestateChangeError = false;
-
-								boolean expectsTypestateChangeError = false;
-								for(Assertion a: expectedResults){
-									if(a instanceof MissingTypestateChange){
-										MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
-										if(missingTypestateChange.getStmt().equals(stmt.getUnit().get())){
-											missingTypestateChange.trigger();
-											hasTypestateChangeError = true;
-										}
-										expectsTypestateChangeError = true;
-									}
-									if(a instanceof NoMissingTypestateChange){
-										throw new RuntimeException("Reports a typestate error that should not be reported");
-									}
-								}
-								if(hasTypestateChangeError != expectsTypestateChangeError){
-									throw new RuntimeException("Reports a typestate error that should not be reported");
-								}
-							}
-
-							@Override
-							public void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls) {
-								
-							}
 
 							@Override
 							public void onSeedTimeout(Node<Statement, Val> seed) {

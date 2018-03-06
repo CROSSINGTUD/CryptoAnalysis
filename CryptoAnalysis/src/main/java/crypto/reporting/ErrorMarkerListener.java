@@ -2,8 +2,6 @@ package crypto.reporting;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -19,11 +17,17 @@ import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.LocatedCrySLPredicate;
+import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.ErrorVisitor;
+import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.PredicateError;
+import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLComparisonConstraint.CompOp;
@@ -32,7 +36,6 @@ import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLValueConstraint;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.ArrayType;
 import soot.SootClass;
@@ -71,31 +74,73 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 	
 	@Override
-	public void callToForbiddenMethod(final ClassSpecification arg0, final Statement location, final List<CryptSLMethod> alternatives) {
-		final StringBuilder msg = new StringBuilder();
-		msg.append("Call to forbidden method ");
-		msg.append(location.getUnit().get().getInvokeExpr().getMethod().getDavaDeclaration());
-		if (!alternatives.isEmpty()) {
-			msg.append(". Instead, call to method ");
-			for (final CryptSLMethod alt : alternatives) {
-				final String methodName = alt.getMethodName();
-				msg.append(methodName.substring(methodName.lastIndexOf(".") + 1));
-				msg.append("(");
-				for (final Entry<String, String> pars : alt.getParameters()) {
-					msg.append(pars.getValue());
-					msg.append(", ");
-				}
-				msg.replace(msg.length() - 2, msg.length(), ")");
+	public void reportError(AbstractError error) {
+		error.accept(new ErrorVisitor(){
+
+			@Override
+			public void visit(ConstraintError constraintError) {
+				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
 			}
-			msg.append(".");
+
+			@Override
+			public void visit(ForbiddenMethodError forbiddenMethodError) {
+				final StringBuilder msg = new StringBuilder();
+				msg.append("Call to forbidden method ");
+				msg.append(forbiddenMethodError.getCalledMethod().getSubSignature());
+				if (!forbiddenMethodError.getAlternatives().isEmpty()) {
+					msg.append(". Instead, call to method ");
+					Collection<String> subSignatures = toSubSignatures(forbiddenMethodError.getAlternatives());
+					msg.append(Joiner.on(", ").join(subSignatures));
+					msg.append(".");
+				}
+				addMarker(forbiddenMethodError.getErrorLocation(), msg.toString());
+			}
+
+			@Override
+			public void visit(IncompleteOperationError incompleteOperationError) {
+				Statement location = incompleteOperationError.getErrorLocation();
+				Val errorVariable = incompleteOperationError.getErrorVariable();
+				Collection<SootMethod> expectedCalls = incompleteOperationError.getExpectedMethodCalls();
+				final StringBuilder msg = new StringBuilder();
+				msg.append("Operation with ");
+				final String type = errorVariable.value().getType().toString();
+				msg.append(type.substring(type.lastIndexOf('.') + 1));
+				msg.append(" object not completed. Expected call to ");
+				msg.append(Joiner.on(" or ").join(expectedCalls));
+				addMarker(location, msg.toString());
+			}
+
+			@Override
+			public void visit(TypestateError typestateError) {
+				Statement location = typestateError.getErrorLocation();
+				Collection<SootMethod> expectedCalls = typestateError.getExpectedMethodCalls();
+				final StringBuilder msg = new StringBuilder();
+				msg.append("Unexpected call to method ");
+				msg.append(getCalledMethodName(location));
+				msg.append(". Expect a call to one of the following methods ");
+				final Set<String> altMethods = new HashSet<>();
+				for (final SootMethod expectedCall : expectedCalls) {
+					altMethods.add(expectedCall.getName());
+				}
+				msg.append(Joiner.on(",").join(altMethods));
+				addMarker(location, msg.toString());
+			}
+
+			@Override
+			public void visit(PredicateError predicateError) {
+				// TODO Auto-generated method stub
+				
+			}});
+	}
+	
+	protected Collection<String> toSubSignatures(Collection<SootMethod> methods) {
+		Set<String> subSignatures = Sets.newHashSet();
+		for(SootMethod m : methods){
+			subSignatures.add(m.getSubSignature());
 		}
-		addMarker(location, msg.toString());
+		return subSignatures;
 	}
 
-	@Override
-	public void constraintViolation(final AnalysisSeedWithSpecification seed, final ISLConstraint brokenConstraint, final Statement location) {
-		addMarker(location, evaluateBrokenConstraint(brokenConstraint, location));
-	}
 
 	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint, Statement location) {
 		StringBuilder msg = new StringBuilder();
@@ -250,48 +295,12 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		addMarker(location.stmt(), "Predicate mismatch");
 	}
 
-	@Override
-	public void typestateErrorAt(final AnalysisSeedWithSpecification seed, final Statement location, final Collection<SootMethod> expectedCalls) {
-		final StringBuilder msg = new StringBuilder();
-		msg.append("Unexpected call to method ");
-		msg.append(getCalledMethodName(location));
-		msg.append(". Expect a call to one of the following methods ");
-		final Set<String> altMethods = new HashSet<>();
-		for (final SootMethod expectedCall : expectedCalls) {
-			altMethods.add(expectedCall.getName());
-		}
-		msg.append(Joiner.on(",").join(altMethods));
-		addMarker(location, msg.toString());
-	}
-
 	private String getCalledMethodName(Statement location) {
 		Stmt stmt = location.getUnit().get();
 		if(stmt.containsInvokeExpr()){
 			return stmt.getInvokeExpr().getMethod().getName();
 		}
 		return stmt.toString();
-	}
-
-	@Override
-	public void typestateErrorEndOfLifeCycle(final AnalysisSeedWithSpecification seed, final Val value, final Statement location, Set<TransitionEdge> expectedCalls) {
-		final StringBuilder msg = new StringBuilder();
-
-		msg.append("Operation with ");
-		final String type = value.value().getType().getEscapedName();
-		msg.append(type.substring(type.lastIndexOf('.') + 1));
-		msg.append(" object not completed. Expected call to ");
-
-		final Iterator<TransitionEdge> expectedIterator = expectedCalls.iterator();
-		while (expectedIterator.hasNext()) {
-			final String methodName = expectedIterator.next().getLabel().get(0).getMethodName();
-
-			msg.append(methodName.substring(methodName.lastIndexOf('.') + 1));
-			msg.append("()");
-			if (expectedIterator.hasNext()) {
-				msg.append(" or ");
-			}
-		}
-		addMarker(location, msg.toString());
 	}
 
 
