@@ -11,6 +11,7 @@ import com.google.common.collect.Table;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.errors.AbstractError;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.TransitionEdge;
@@ -22,19 +23,13 @@ import typestate.interfaces.ISLConstraint;
 
 public interface ICrySLResultsListener {
 
-	void typestateErrorAt(AnalysisSeedWithSpecification classSpecification, Statement stmt, Collection<SootMethod> expectedCalls);
-	
-	void typestateErrorEndOfLifeCycle(AnalysisSeedWithSpecification classSpecification, Val val, Statement stmt, Set<TransitionEdge> expectedMethodsToBeCalled);
-	
-	void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, List<CryptSLMethod> alternatives);
+	void reportError(AbstractError error);
 	
 	void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates);
 
 	void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
 
 	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
-
-	void constraintViolation(AnalysisSeedWithSpecification analysisSeedWithSpecification, ISLConstraint con, Statement unit);
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
 	

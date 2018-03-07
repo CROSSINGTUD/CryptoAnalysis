@@ -1,20 +1,22 @@
 package crypto.typestate;
 
+import java.util.Collection;
+import java.util.Set;
+
+import soot.SootMethod;
 import typestate.finiteautomata.State;
 
 public class ErrorStateNode implements State {
 
-	private static ErrorStateNode instance;
+	private Collection<SootMethod> expectedCalls;
 
-	private ErrorStateNode() {
-	}
-	
-	public static ErrorStateNode v(){
-		if(instance == null)
-			instance = new ErrorStateNode();
-		return instance;
+	public ErrorStateNode(Collection<SootMethod> expectedCalls) {
+		this.expectedCalls = expectedCalls;
 	}
 
+	public Collection<SootMethod> getExpectedCalls() {
+		return expectedCalls;
+	}
 	@Override
 	public boolean isErrorState() {
 		return true;
@@ -33,5 +35,15 @@ public class ErrorStateNode implements State {
 	@Override
 	public String toString() {
 		return "ERR";
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.getClass().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof ErrorStateNode;
 	}
 }

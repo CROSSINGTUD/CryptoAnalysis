@@ -19,6 +19,9 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
@@ -127,7 +130,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			@Override
 			public void constraintViolated(ISLConstraint con, Statement unit) {
-				cryptoScanner.getAnalysisListener().constraintViolation(AnalysisSeedWithSpecification.this, con, unit);
+				cryptoScanner.getAnalysisListener().reportError(new ConstraintError(unit, AnalysisSeedWithSpecification.this.getSpec().getRule(), asNode(), con));
 			}
 
 			@Override
@@ -169,29 +172,20 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				stateAtCurrMinusPred.removeAll(stateAtPred);
 				for (State newStateAtCurr : stateAtCurrMinusPred) {
 					typeStateChangeAtStatement(predStmt, newStateAtCurr);
-					if (newStateAtCurr.equals(ErrorStateNode.v())) {
-						Set<SootMethod> expectedMethodCalls = expectedMethodsCallsFor(stateAtPred);
-						cryptoScanner.getAnalysisListener().typestateErrorAt(this, predStmt, expectedMethodCalls);
+					if (newStateAtCurr instanceof ErrorStateNode && !stateAtPred.isEmpty()) {
+						ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
+						cryptoScanner.getAnalysisListener().reportError(new TypestateError(predStmt, getSpec().getRule(), errorStateNode.getExpectedCalls()));
 					}
 				}
 			}
 		}
 	}
 
-	private Set<SootMethod> expectedMethodsCallsFor(Collection<State> stateAtPred) {
-		Set<SootMethod> res = Sets.newHashSet();
-		for (State s : stateAtPred) {
-			res.addAll(spec.getFSM().getEdgesOutOf(s));
-		}
-		return res;
-	}
-
 	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {
 		Table<Statement, Val, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
 
 		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
-
-			Set<TransitionEdge> expectedMethodsToBeCalled = Sets.newHashSet();
+			Set<SootMethod> expectedMethodsToBeCalled = Sets.newHashSet();
 			for (ITransition n : c.getValue().values()) {
 				if (n.to() == null)
 					continue;
@@ -200,7 +194,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						WrappedState wrappedState = (WrappedState) n.to();
 						for (TransitionEdge t : spec.getRule().getUsagePattern().getAllTransitions()) {
 							if (t.getLeft().equals(wrappedState.delegate())) {
-								expectedMethodsToBeCalled.add(t);
+								Collection<SootMethod> converted = CryptSLMethodToSootMethod.v().convert(t.getLabel());
+								expectedMethodsToBeCalled.addAll(converted);
 							}
 						}
 					}
@@ -208,8 +203,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 			if (!expectedMethodsToBeCalled.isEmpty()) {
 				Statement s = c.getRowKey();
-				cryptoScanner.getAnalysisListener().typestateErrorEndOfLifeCycle(this, c.getColumnKey(), s,
-						expectedMethodsToBeCalled);
+				Val val = c.getColumnKey();
+				cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), asNode(), 
+						expectedMethodsToBeCalled));
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import java.util.Set;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
+import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.rules.CryptSLForbiddenMethod;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -94,7 +95,7 @@ public class ClassSpecification {
 				SootMethod method = invokeExpr.getMethod();
 				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().callToForbiddenMethod(this, new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)),forbiddenMethod.get().getAlternatives());
+					cryptoScanner.getAnalysisListener().reportError(new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
 				}
 			}
 		}
@@ -107,8 +108,8 @@ public class ClassSpecification {
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		for(CryptSLForbiddenMethod m : forbiddenMethods){
 			if(!m.getSilent()){
-				Collection<SootMethod> matchingMatched = CryptSLMethodToSootMethod.v().convert(m.getMethod());
-				if(matchingMatched.contains(method))
+				Collection<SootMethod> matchingMethod = CryptSLMethodToSootMethod.v().convert(m.getMethod());
+				if(matchingMethod.contains(method))
 					return Optional.of(m);
 				
 			}
