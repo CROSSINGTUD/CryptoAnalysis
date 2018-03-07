@@ -189,7 +189,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		cCipher.init(Cipher.DECRYPT_MODE, key);
 		Assertions.extValue(0);
-		Assertions.callToForbiddenMethod();
 
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
@@ -414,6 +413,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
 		Cipher cCipher = Cipher.getInstance(trans);
+		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		Assertions.extValue(0);
 		byte[] encText = cCipher.doFinal("".getBytes());
