@@ -46,4 +46,12 @@ public class Assertions {
 
 	public static void predicateContradiction() {
 	}
+
+	public static void predicateErrors(int i) {
+		
+	}
+
+	public static void constraintErrors(int i) {
+		
+	}
 }

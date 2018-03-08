@@ -22,7 +22,6 @@ import boomerang.jimple.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.SootMethod;
 import soot.Unit;
@@ -132,12 +131,6 @@ public class CrySLAnalysisResultsAggregator{
 		predicateContradictions.put(node, disPair);
 		crr.predicateContradiction(node, disPair);
 	}
-
-	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {
-		missingPredicatesObjectBased.putAll(seed, missingPredicates);
-		crr.missingPredicates(seed, missingPredicates);
-	}
-
 
 	public Multimap<AnalysisSeedWithSpecification, ISLConstraint> getCheckedConstraints() {
 		return checkedConstraints;

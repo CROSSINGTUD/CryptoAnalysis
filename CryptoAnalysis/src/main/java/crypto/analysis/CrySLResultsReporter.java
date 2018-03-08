@@ -61,11 +61,6 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.missingPredicates(seed, missingPredicates);
-		}
-	}
 
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {
 		for (CrySLAnalysisListener listen : listeners) {

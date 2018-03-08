@@ -55,6 +55,7 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
+import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
@@ -63,6 +64,7 @@ import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradiction;
+import test.assertions.PredicateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
@@ -117,13 +119,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									
 									@Override
 									public void visit(PredicateError predicateError) {
-										// TODO Auto-generated method stub
-										
+										for(Assertion a: expectedResults){
+											if(a instanceof PredicateErrorCountAssertion){
+												PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
+											}
+										}
 									}
 									
 									@Override
 									public void visit(TypestateError typestateError) {
-										// TODO Auto-generated method stub
 										
 									}
 									
@@ -161,7 +166,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									
 									@Override
 									public void visit(ConstraintError constraintError) {
-										// TODO Auto-generated method stub
+										for(Assertion a: expectedResults){
+											if(a instanceof ConstraintErrorCountAssertion){
+												ConstraintErrorCountAssertion errorCountAssertion = (ConstraintErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
+											}
+										}
 									}
 								});
 							}
@@ -424,6 +434,21 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			if(invocationName.startsWith("noMissingTypestateChange")){
 				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new NoMissingTypestateChange((Stmt) pred));
+			}
+			
+			if(invocationName.startsWith("predicateErrors")){	
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant))
+					continue;
+				IntConstant queryVar = (IntConstant) param;
+				queries.add(new PredicateErrorCountAssertion(queryVar.value));
+			}
+			if(invocationName.startsWith("constraintErrors")){	
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant))
+					continue;
+				IntConstant queryVar = (IntConstant) param;
+				queries.add(new ConstraintErrorCountAssertion(queryVar.value));
 			}
 		}
 	}

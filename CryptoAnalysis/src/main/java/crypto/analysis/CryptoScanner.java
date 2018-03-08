@@ -22,6 +22,7 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.errors.PredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -194,8 +195,13 @@ public abstract class CryptoScanner {
 		checkForContradictions();
 		for (AnalysisSeedWithSpecification seed : seedsWithSpec.values()) {
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
-			if (!missingPredicates.isEmpty()) {
-				getAnalysisListener().missingPredicates(seed, missingPredicates);
+			for(CryptSLPredicate pred : missingPredicates){
+				if(pred instanceof LocatedCrySLPredicate){
+					LocatedCrySLPredicate locatedCrySLPredicate = (LocatedCrySLPredicate) pred;
+					CryptSLRule rule = seed.getSpec().getRule();
+					if(!rule.getPredicates().contains(locatedCrySLPredicate.tobasicPredicate()))
+						getAnalysisListener().reportError(new PredicateError(locatedCrySLPredicate.getLocation(), seed.getSpec().getRule(),locatedCrySLPredicate));
+				}
 			}
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
