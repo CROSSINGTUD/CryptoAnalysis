@@ -28,7 +28,6 @@ import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import soot.IntType;
 import soot.SootMethod;
-import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -149,7 +148,7 @@ public class ConstraintSolver {
 				boolean cons = true;
 				switch (comp.getOperator()) {
 					case eq:
-						cons = leftie.getKey() == rightie.getKey();
+						cons = leftie.getKey().equals(rightie.getKey());
 						break;
 					case g:
 						cons = leftie.getKey() > rightie.getKey();
@@ -292,21 +291,26 @@ public class ConstraintSolver {
 	private Entry<List<String>, Statement> extractValueAsString(String varName) {
 		List<String> varVal = Lists.newArrayList();
 		Statement witness = null;
-		for (CallSiteWithParamIndex callSite : parsAndVals.keySet()) {
-			for (Statement currStmt : parsAndVals.get(callSite)) {
-				final Unit u = callSite.stmt().getUnit().get();
-				if (callSite.getVarName().equals(varName)) {
-					witness = currStmt;
-					if (callSite.stmt().equals(currStmt)) {
-						if (u instanceof AssignStmt) {
-							varVal.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(callSite.getIndex()).getValue()));
+		for (CallSiteWithParamIndex wrappedCallSite : parsAndVals.keySet()) {
+			for (Statement wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
+				final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
+				final Stmt allocSite = wrappedAllocSite.getUnit().get();
+
+				if (wrappedCallSite.getVarName().equals(varName)) {
+					if (callSite.equals(allocSite)) {
+						varVal.add(retrieveConstantFromValue(callSite.getInvokeExpr().getArg(wrappedCallSite.getIndex())));
+						witness = wrappedAllocSite;
+					} else {
+						if (allocSite instanceof AssignStmt) {
+							final Value rightSide = ((AssignStmt) allocSite).getRightOp();
+							if (rightSide instanceof Constant) {
+								varVal.add(retrieveConstantFromValue(rightSide));
+								witness = wrappedAllocSite;
+							} else {
+								System.out.println("Not a constant " + allocSite);
+							}
 						} else {
-							varVal.add(retrieveConstantFromValue(u.getUseBoxes().get(callSite.getIndex()).getValue()));
-						}
-					} else if (u instanceof AssignStmt) {
-						final Value rightSide = ((AssignStmt) u).getRightOp();
-						if (rightSide instanceof Constant) {
-							varVal.add(retrieveConstantFromValue(rightSide));
+							System.out.println("No assignstmt " + allocSite);
 						}
 					}
 				}
