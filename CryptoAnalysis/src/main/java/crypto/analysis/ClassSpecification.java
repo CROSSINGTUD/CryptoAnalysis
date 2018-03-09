@@ -43,7 +43,7 @@ public class ClassSpecification {
 			}
 
 			@Override
-			public CrySLAnalysisResultsAggregator analysisListener() {
+			public CrySLResultsReporter analysisListener() {
 				return cryptoScanner.getAnalysisListener();
 			}
 

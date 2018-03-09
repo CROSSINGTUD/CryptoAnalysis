@@ -26,7 +26,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.PredicateError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
@@ -126,7 +126,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			}
 
 			@Override
-			public void visit(PredicateError predicateError) {
+			public void visit(RequiredPredicateError predicateError) {
 				// TODO Auto-generated method stub
 				
 			}});

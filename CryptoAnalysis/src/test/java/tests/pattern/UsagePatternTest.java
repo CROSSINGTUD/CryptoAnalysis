@@ -189,6 +189,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		cCipher.init(Cipher.DECRYPT_MODE, key);
 		Assertions.extValue(0);
+		Assertions.callToForbiddenMethod();
 
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);

@@ -4,11 +4,11 @@ import boomerang.jimple.Statement;
 import crypto.analysis.LocatedCrySLPredicate;
 import crypto.rules.CryptSLRule;
 
-public class PredicateError extends AbstractError{
+public class RequiredPredicateError extends AbstractError{
 
 	private LocatedCrySLPredicate contradictedPredicate;
 
-	public PredicateError(Statement stmt, CryptSLRule rule, LocatedCrySLPredicate contradictedPredicate) {
+	public RequiredPredicateError(Statement stmt, CryptSLRule rule, LocatedCrySLPredicate contradictedPredicate) {
 		super(stmt, rule);
 		this.contradictedPredicate = contradictedPredicate;
 	}

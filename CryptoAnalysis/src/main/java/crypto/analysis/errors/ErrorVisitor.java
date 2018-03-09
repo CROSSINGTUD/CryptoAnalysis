@@ -5,5 +5,5 @@ public interface ErrorVisitor {
 	public void visit(ForbiddenMethodError abstractError);
 	public void visit(IncompleteOperationError incompleteOperationError);
 	public void visit(TypestateError typestateError);
-	public void visit(PredicateError predicateError);
+	public void visit(RequiredPredicateError predicateError);
 }

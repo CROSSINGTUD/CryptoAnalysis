@@ -397,7 +397,7 @@ public class ConstraintSolver {
 						SootMethod foundCall = call.getUnit().get().getInvokeExpr().getMethod();
 						Collection<SootMethod> convert = CryptSLMethodToSootMethod.v().convert(reqMethod);
 						if (convert.contains(foundCall)) {
-							reporter.callToForbiddenMethod(classSpec, call);
+							reporter.callToForbiddenMethod(classSpec, call, foundCall, convert);
 							//TODO: Needs to be fixed
 							return call;
 						}

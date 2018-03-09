@@ -23,7 +23,7 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.CrySLAnalysisResultsAggregator;
+import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
@@ -32,7 +32,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.PredicateError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -93,7 +93,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 
 					@Override
-					public CrySLAnalysisResultsAggregator getAnalysisListener() {
+					public CrySLResultsReporter getAnalysisListener() {
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
 							public void onSeedFinished(IAnalysisSeed seed,
@@ -116,7 +116,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								error.accept(new ErrorVisitor() {
 									
 									@Override
-									public void visit(PredicateError predicateError) {
+									public void visit(RequiredPredicateError predicateError) {
 										for(Assertion a: expectedResults){
 											if(a instanceof PredicateErrorCountAssertion){
 												PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;
@@ -297,7 +297,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							
 
 						};
-						CrySLAnalysisResultsAggregator reporters = new CrySLAnalysisResultsAggregator(ideVizFile);
+						CrySLResultsReporter reporters = new CrySLResultsReporter();
 						reporters.addReportListener(cryslListener);
 						return reporters;
 					}

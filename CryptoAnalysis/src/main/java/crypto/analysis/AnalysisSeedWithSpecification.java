@@ -20,6 +20,7 @@ import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.rules.CryptSLCondPredicate;
@@ -94,7 +95,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			@Override
-			public CrySLAnalysisResultsAggregator analysisListener() {
+			public CrySLResultsReporter analysisListener() {
 				return cryptoScanner.getAnalysisListener();
 			}
 		};
@@ -135,9 +136,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			@Override
-			public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite) {
-				cryptoScanner.getAnalysisListener().callToForbiddenMethod(classSpecification, callSite,
-						Lists.newLinkedList());
+			public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, SootMethod foundCalledMethod, Collection<SootMethod> replacement) {
+				cryptoScanner.getAnalysisListener().reportError(new ForbiddenMethodError(callSite, classSpecification.getRule(), foundCalledMethod, replacement));
 			}
 
 			@Override
