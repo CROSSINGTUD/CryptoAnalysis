@@ -62,6 +62,7 @@ import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradiction;
 import test.assertions.PredicateErrorCountAssertion;
+import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
@@ -126,7 +127,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									
 									@Override
 									public void visit(TypestateError typestateError) {
-										
+										for(Assertion a: expectedResults){
+											if(a instanceof TypestateErrorCountAssertion){
+												TypestateErrorCountAssertion errorCountAssertion = (TypestateErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
+											}
+										}
 									}
 									
 									@Override
@@ -446,6 +452,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				IntConstant queryVar = (IntConstant) param;
 				queries.add(new ConstraintErrorCountAssertion(queryVar.value));
+			}
+			if(invocationName.startsWith("typestateErrors")){	
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant))
+					continue;
+				IntConstant queryVar = (IntConstant) param;
+				queries.add(new TypestateErrorCountAssertion(queryVar.value));
 			}
 		}
 	}

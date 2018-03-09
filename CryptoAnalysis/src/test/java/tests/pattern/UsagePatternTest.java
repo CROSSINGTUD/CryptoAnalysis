@@ -1042,4 +1042,16 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 			Assertions.hasEnsuredPredicate(digest);
 		}
 	}
+	
+	@Test
+	public void messageDigestReturned() throws NoSuchAlgorithmException, DestroyFailedException {
+		MessageDigest d = createDigest();
+		byte[] digest = d.digest(new byte[] {});
+		Assertions.hasEnsuredPredicate(digest);
+		Assertions.typestateErrors(0);
+	}
+
+	private MessageDigest createDigest() throws NoSuchAlgorithmException {
+		return MessageDigest.getInstance("SHA-256");
+	}
 }
