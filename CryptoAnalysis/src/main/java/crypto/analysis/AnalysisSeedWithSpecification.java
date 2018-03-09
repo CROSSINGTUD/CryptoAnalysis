@@ -130,7 +130,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			@Override
 			public void constraintViolated(ISLConstraint con, Statement unit) {
-				cryptoScanner.getAnalysisListener().reportError(new ConstraintError(unit, AnalysisSeedWithSpecification.this.getSpec().getRule(), asNode(), con));
+				AnalysisSeedWithSpecification seed = AnalysisSeedWithSpecification.this;
+				cryptoScanner.getAnalysisListener().reportError(new ConstraintError(unit, seed.getSpec().getRule(), asNode(), con, seed.getExtractedValues()));
 			}
 
 			@Override
