@@ -1,7 +1,6 @@
 package crypto.analysis;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -12,11 +11,8 @@ import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.errors.AbstractError;
-import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.CallSiteWithParamIndex;
-import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;

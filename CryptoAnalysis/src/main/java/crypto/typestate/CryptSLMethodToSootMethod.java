@@ -3,9 +3,6 @@ package crypto.typestate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.sound.midi.Synthesizer;
-
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;

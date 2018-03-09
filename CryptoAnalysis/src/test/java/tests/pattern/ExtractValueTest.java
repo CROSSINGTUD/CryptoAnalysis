@@ -1,7 +1,6 @@
 package tests.pattern;
 
 import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.PBEKeySpec;

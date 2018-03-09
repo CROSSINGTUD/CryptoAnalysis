@@ -1,7 +1,6 @@
 package crypto.typestate;
 
 import java.util.Collection;
-import java.util.Set;
 
 import soot.SootMethod;
 import typestate.finiteautomata.State;

@@ -1,11 +1,9 @@
 package crypto.analysis.errors;
 
 import java.util.Collection;
-import java.util.Set;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;

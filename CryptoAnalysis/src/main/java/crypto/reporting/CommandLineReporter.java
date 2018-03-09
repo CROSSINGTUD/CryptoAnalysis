@@ -3,13 +3,11 @@ package crypto.reporting;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map.Entry;
-
-import crypto.rules.CryptSLRule;
-
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import crypto.rules.CryptSLRule;
 import soot.SootClass;
 import soot.SootMethod;
 

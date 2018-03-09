@@ -1,7 +1,6 @@
 package crypto;
 
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 
 public class HeadlessOptions extends Options {
