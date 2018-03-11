@@ -199,7 +199,8 @@ public abstract class CryptoScanner {
 				LocatedCrySLPredicate locatedCrySLPredicate = (LocatedCrySLPredicate) pred;
 				CryptSLRule rule = seed.getSpec().getRule();
 				if (!rule.getPredicates().contains(locatedCrySLPredicate.tobasicPredicate()))
-					getAnalysisListener().reportError(new PredicateError(locatedCrySLPredicate.getLocation(), seed.getSpec().getRule(), locatedCrySLPredicate));
+					getAnalysisListener()
+						.reportError(new PredicateError(locatedCrySLPredicate, locatedCrySLPredicate.getLocation(), seed.getSpec().getRule(), seed.getExtractedValues()));
 			}
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());

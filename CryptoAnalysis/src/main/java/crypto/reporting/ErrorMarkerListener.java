@@ -20,7 +20,6 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.LocatedCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
@@ -32,17 +31,11 @@ import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLComparisonConstraint.CompOp;
 import crypto.rules.CryptSLConstraint;
-import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CallSiteWithParamIndex;
-import soot.ArrayType;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Type;
-import soot.Value;
-import soot.ValueBox;
-import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import sync.pds.solver.nodes.Node;
@@ -229,65 +222,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		return msg.append('}').toString();
 	}
 
-	@Override
-	public void missingPredicates(final AnalysisSeedWithSpecification spec, final Set<CryptSLPredicate> missingPred) {
-		for (final CryptSLPredicate pred : missingPred) {
-			final StringBuilder msg = new StringBuilder();
-			msg.append("Predicate ");
-			msg.append(pred.getPredName());
-			msg.append(" is missing for ");
-			Statement stmt = null;
-			if (pred instanceof LocatedCrySLPredicate) {
-				stmt = ((LocatedCrySLPredicate) pred).getLocation();
-				for (ValueBox parameter : stmt.getUnit().get().getInvokeExpr().getUseBoxes()) {
-					Value value = parameter.getValue();
-					if (!(value instanceof Constant)) {
-						boolean neverFound = true;
-						for (CallSiteWithParamIndex a : spec.getExtractedValues().keySet()) {
-							if (a.getVarName().equals(pred.getParameters().get(0).getName())) {
-								if (a.fact().value().getType().equals(parameter.getValue().getType())) {
-									String varName = parameter.getValue().toString();
-									if (varName.matches("\\$[a-z][0-9]+")) {
-										msg.append("object of type ");
-										msg.append(parameter.getValue().getType().toQuotedString());
-										neverFound = false;
-									} else {
-										msg.append("variable ");
-										msg.append(varName);
-										neverFound = false;
-									}
-									break;
-								}
-							}
-						}
-						if (neverFound) {
-							Type valueType = value.getType();
-							String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
-							if (((CryptSLObject) pred.getParameters().get(0)).getJavaType().equals(type)) {
-								String varName = parameter.getValue().toString();
-								if (varName.matches("\\$[a-z][0-9]+")) {
-									msg.append("object of type ");
-									msg.append(parameter.getValue().getType().toQuotedString());
-									neverFound = false;
-								} else {
-									msg.append("variable ");
-									msg.append(varName);
-									neverFound = false;
-								}
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				stmt = spec.stmt();
-				msg.append("variable ");
-				msg.append(spec.var().value().toString());
-			}
-			msg.append(".");
-			addMarker(stmt, msg.toString());
-		}
-	}
 
 	@Override
 	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {

@@ -25,8 +25,6 @@ public interface ICrySLResultsListener {
 
 	void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair);
 
-	void missingPredicates(AnalysisSeedWithSpecification seed, Set<CryptSLPredicate> missingPredicates);
-
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
 	
 	void onSeedTimeout(Node<Statement,Val> seed);

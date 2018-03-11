@@ -231,11 +231,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void missingPredicates(AnalysisSeedWithSpecification seed,
-									Set<CryptSLPredicate> missingPredicates) {
-							}
-
-							@Override
 							public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 									Collection<ISLConstraint> relConstraints) {
 								
