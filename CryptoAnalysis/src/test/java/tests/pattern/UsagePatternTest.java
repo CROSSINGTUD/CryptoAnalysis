@@ -189,6 +189,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		cCipher.init(Cipher.DECRYPT_MODE, key);
 		Assertions.extValue(0);
+		Assertions.callToForbiddenMethod();
 
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
@@ -1041,5 +1042,17 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 			byte[] digest = md.digest();
 			Assertions.hasEnsuredPredicate(digest);
 		}
+	}
+	
+	@Test
+	public void messageDigestReturned() throws NoSuchAlgorithmException, DestroyFailedException {
+		MessageDigest d = createDigest();
+		byte[] digest = d.digest(new byte[] {});
+		Assertions.hasEnsuredPredicate(digest);
+		Assertions.typestateErrors(0);
+	}
+
+	private MessageDigest createDigest() throws NoSuchAlgorithmException {
+		return MessageDigest.getInstance("SHA-256");
 	}
 }

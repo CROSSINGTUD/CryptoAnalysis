@@ -26,6 +26,7 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 		Assertions.constraintErrors(1);
 		cCipher.getIV();
 	}
+
 	@Test
 	public void CipherPredicateCountTest2() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("DES");
@@ -39,5 +40,22 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(1);
 		Assertions.constraintErrors(1);
 		cCipher.getIV();
+	}
+
+	@Test
+	public void CipherPredicateCountTest3() throws GeneralSecurityException {
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(129);
+		SecretKey key = keyGen.generateKey();
+
+		String algorithmTransformation = "AES/CBC";
+		Cipher c = Cipher.getInstance(algorithmTransformation);
+		c.init(1, key);
+		byte[] ciphertext = c.doFinal("WHAT!?".getBytes());
+		Assertions.notHasEnsuredPredicate(ciphertext);
+		Assertions.notHasEnsuredPredicate(key);
+		Assertions.predicateErrors(2);
+		Assertions.constraintErrors(1);
+
 	}
 }

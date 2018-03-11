@@ -22,7 +22,7 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.errors.PredicateError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -49,7 +49,7 @@ public abstract class CryptoScanner {
 	private Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
 	private Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
-	private CrySLAnalysisResultsAggregator resultsAggregator = new CrySLAnalysisResultsAggregator( null);
+	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 	
 
 	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {
@@ -69,7 +69,7 @@ public abstract class CryptoScanner {
 
 	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
 
-	public CrySLAnalysisResultsAggregator getAnalysisListener() {
+	public CrySLResultsReporter getAnalysisListener() {
 		return resultsAggregator;
 	};
 
@@ -155,7 +155,7 @@ public abstract class CryptoScanner {
 							try{
 								boomerang.solve(backwardQuery);
 							} catch(BoomerangTimeoutException e){
-								resultsAggregator.boomerangQueryTimeout(backwardQuery);
+//								resultsAggregator.boomerangQueryTimeout(backwardQuery);
 							}
 							resultsAggregator.boomerangQueryFinished(seedObj, backwardQuery);
 							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
@@ -199,8 +199,7 @@ public abstract class CryptoScanner {
 				LocatedCrySLPredicate locatedCrySLPredicate = (LocatedCrySLPredicate) pred;
 				CryptSLRule rule = seed.getSpec().getRule();
 				if (!rule.getPredicates().contains(locatedCrySLPredicate.tobasicPredicate()))
-					getAnalysisListener()
-						.reportError(new PredicateError(locatedCrySLPredicate, locatedCrySLPredicate.getLocation(), seed.getSpec().getRule(), seed.getExtractedValues()));
+					getAnalysisListener().reportError(new RequiredPredicateError(locatedCrySLPredicate,locatedCrySLPredicate.getLocation(), seed.getSpec().getRule(), seed.getExtractedValues()));
 			}
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());

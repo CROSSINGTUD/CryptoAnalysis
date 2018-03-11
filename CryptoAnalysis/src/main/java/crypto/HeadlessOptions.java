@@ -34,6 +34,9 @@ public class HeadlessOptions extends Options {
 		Option reportFile = Option.builder().longOpt("reportFile").hasArg().desc("A path for the report file.")
 				.build();
 		addOption(reportFile);
+		Option csvReportFile = Option.builder().longOpt("csvReportFile").hasArg().desc("Generates a summary of the finding as a CSV file.")
+				.build();
+		addOption(csvReportFile);
 	}
 
 }

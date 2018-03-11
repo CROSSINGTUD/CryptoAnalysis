@@ -7,14 +7,14 @@ import crypto.analysis.LocatedCrySLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CallSiteWithParamIndex;
 
-public class PredicateError extends AbstractError{
+public class RequiredPredicateError extends AbstractError{
 
 	private LocatedCrySLPredicate contradictedPredicate;
 	private Multimap<CallSiteWithParamIndex, Statement> extractedValues;
 
-	public PredicateError(LocatedCrySLPredicate locatedCrySLPredicate, Statement statement, CryptSLRule cryptSLRule, Multimap<CallSiteWithParamIndex, Statement> extractedValues) {
-		super(statement, cryptSLRule);
-		this.contradictedPredicate = locatedCrySLPredicate;
+	public RequiredPredicateError(LocatedCrySLPredicate contradictedPredicate, Statement location, CryptSLRule rule, Multimap<CallSiteWithParamIndex, Statement> extractedValues) {
+		super(location, rule);
+		this.contradictedPredicate = contradictedPredicate;
 		this.extractedValues = extractedValues;
 	}
 	public LocatedCrySLPredicate getContradictedPredicate() {
@@ -28,5 +28,4 @@ public class PredicateError extends AbstractError{
 	public Multimap<CallSiteWithParamIndex, Statement> getExtractedValues() {
 		return extractedValues;
 	}
-
 }

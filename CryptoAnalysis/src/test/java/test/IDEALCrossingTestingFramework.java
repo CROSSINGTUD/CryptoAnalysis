@@ -13,7 +13,7 @@ import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
-import crypto.analysis.CrySLAnalysisResultsAggregator;
+import crypto.analysis.CrySLResultsReporter;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
@@ -57,7 +57,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			}
 			
 			@Override
-			public CrySLAnalysisResultsAggregator analysisListener() {
+			public CrySLResultsReporter analysisListener() {
 				return null;
 			}
 			

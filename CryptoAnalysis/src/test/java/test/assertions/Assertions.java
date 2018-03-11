@@ -54,4 +54,8 @@ public class Assertions {
 	public static void constraintErrors(int i) {
 		
 	}
+
+	public static void typestateErrors(int i) {
+		
+	}
 }

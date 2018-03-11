@@ -23,7 +23,7 @@ import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.CrySLAnalysisResultsAggregator;
+import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
@@ -103,14 +103,14 @@ public abstract class ExtendedIDEALAnaylsis {
 	public IDEALSeedSolver<TransitionFunction> run(Query query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
-		CrySLAnalysisResultsAggregator reports = analysisListener();
+		CrySLResultsReporter reports = analysisListener();
 		try {
 			solver = analysis.run(query);
 		} catch (IDEALSeedTimeout e){
 			System.err.println(e);
 			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
 			if (reports != null && query instanceof IAnalysisSeed) {
-				reports.seedTimedout((IAnalysisSeed)query);
+				reports.onSeedTimeout(((IAnalysisSeed)query).asNode());
 			}
 		}
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
@@ -175,8 +175,6 @@ public abstract class ExtendedIDEALAnaylsis {
 			try{
 				boomerang.solve(this);
 			} catch(BoomerangTimeoutException e){
-				if(analysisListener() != null)
-					analysisListener().boomerangQueryTimeout(this);
 			}
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
@@ -220,7 +218,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		invokedMethodsOnInstance.add(method);
 	}
 
-	public abstract CrySLAnalysisResultsAggregator analysisListener();
+	public abstract CrySLResultsReporter analysisListener();
 
 //	public Collection<Query> computeInitialSeeds() {
 	//TODO Why does this version not terminate?

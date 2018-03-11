@@ -79,7 +79,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			}
 			
 			@Override
-			public CrySLAnalysisResultsAggregator analysisListener() {
+			public CrySLResultsReporter analysisListener() {
 				return cryptoScanner.getAnalysisListener();
 			}
 			
