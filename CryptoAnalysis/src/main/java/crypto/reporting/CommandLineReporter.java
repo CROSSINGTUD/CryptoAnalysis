@@ -35,6 +35,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 				s += String.format("\t in Method: %s\n", e.getKey().getSubSignature());
 				for (ErrorMarker marker : e.getValue()) {
 					s += String.format("\t\t%s\n", marker);
+					s += String.format("\t\t\t@%s\n", marker.getLocation().getUnit().get());
 				}
 			}
 			s += "\n";

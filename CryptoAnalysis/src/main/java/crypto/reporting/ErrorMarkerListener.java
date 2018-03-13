@@ -77,7 +77,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(ForbiddenMethodError forbiddenMethodError) {
 				final StringBuilder msg = new StringBuilder();
-				msg.append("Call to forbidden method ");
+				msg.append("Detected call to forbidden method");
 				msg.append(forbiddenMethodError.getCalledMethod().getSubSignature());
 				if (!forbiddenMethodError.getAlternatives().isEmpty()) {
 					msg.append(". Instead, call to method ");
@@ -128,7 +128,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	protected Collection<String> toSubSignatures(Collection<SootMethod> methods) {
 		Set<String> subSignatures = Sets.newHashSet();
 		for(SootMethod m : methods){
-			subSignatures.add(m.getSubSignature());
+			subSignatures.add(m.getName());
 		}
 		return subSignatures;
 	}
