@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -31,13 +32,22 @@ import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLComparisonConstraint.CompOp;
 import crypto.rules.CryptSLConstraint;
+import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CallSiteWithParamIndex;
+import soot.ArrayType;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Type;
+import soot.Value;
+import soot.ValueBox;
+import soot.jimple.AssignStmt;
+import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.spark.geom.geomPA.Constants;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.interfaces.ISLConstraint;
@@ -51,6 +61,9 @@ import typestate.interfaces.ISLConstraint;
  */
 public class ErrorMarkerListener extends CrySLAnalysisListener {
 
+	public static final String NO_RES_FOUND = "No resource to generate error marker for found.";
+	public static final String OBJECT_OF_TYPE = "Object of type ";
+	public static final String VAR = "Variable ";
 	protected final Table<SootClass, SootMethod, Set<ErrorMarker>> errorMarkers = HashBasedTable.create(); 
 
 	private void addMarker(Statement location, String string) {
@@ -71,7 +84,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(ConstraintError constraintError) {
-				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
+				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getExtractedValues(),constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
 			}
 
 			@Override
@@ -134,7 +147,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 
-	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint, Statement location) {
+	private String evaluateBrokenConstraint(Multimap<CallSiteWithParamIndex, Statement> extractedValues, final ISLConstraint brokenConstraint, Statement location) {
 		StringBuilder msg = new StringBuilder();
 		if (brokenConstraint instanceof CryptSLPredicate) {
 			CryptSLPredicate brokenPred = (CryptSLPredicate) brokenConstraint;
@@ -154,7 +167,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 					break;
 			}
 		} else if (brokenConstraint instanceof CryptSLValueConstraint) {
-			return evaluateValueConstraint((CryptSLValueConstraint) brokenConstraint);
+			return evaluateValueConstraint(extractedValues, (CryptSLValueConstraint) brokenConstraint, location);
 		} else if (brokenConstraint instanceof CryptSLArithmeticConstraint) {
 			final CryptSLArithmeticConstraint brokenArthConstraint = (CryptSLArithmeticConstraint) brokenConstraint;
 			msg.append(brokenArthConstraint.getLeft());
@@ -175,17 +188,17 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			final CryptSLValueConstraint rightSide = (CryptSLValueConstraint) cryptSLConstraint.getRight();
 			switch (cryptSLConstraint.getOperator()) {
 				case and:
-					msg.append(evaluateValueConstraint(leftSide));
+					msg.append(evaluateValueConstraint(extractedValues,leftSide,location));
 					msg.append(" or ");
-					msg.append(evaluateValueConstraint(rightSide));
+					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
 					break;
 				case implies:
-					msg.append(evaluateValueConstraint(rightSide));
+					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
 					break;
 				case or:
-					msg.append(evaluateValueConstraint(leftSide));
+					msg.append(evaluateValueConstraint(extractedValues,leftSide,location));
 					msg.append(" and ");
-					msg.append(evaluateValueConstraint(rightSide));
+					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
 					break;
 				default:
 					break;
@@ -210,19 +223,96 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		}
 	}
 
-	private String evaluateValueConstraint(final CryptSLValueConstraint brokenConstraint) {
-		StringBuilder msg = new StringBuilder();
-		msg.append(brokenConstraint.getVarName());
-		msg.append(" should be any of {");
+	private String evaluateValueConstraint(Multimap<CallSiteWithParamIndex, Statement> extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
+		CryptSLObject crySLVar = brokenConstraint.getVar();
+		StringBuilder msg = new StringBuilder(extractVarName(extractedValues, location, crySLVar));
+
+		msg.append(" should be any of ");
+		CryptSLSplitter splitter = brokenConstraint.getVar().getSplitter();
+		if (splitter != null) {
+			Stmt stmt = location.getUnit().get();
+			String[] splitValues;
+			if (stmt instanceof AssignStmt) {
+				splitValues = filterQuotes(((AssignStmt) stmt).getRightOp().toString()).split(splitter.getSplitter());
+			} else {
+				splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
+			}
+			if (splitValues.length >= splitter.getIndex()) {
+				for (int i = 0; i < splitter.getIndex(); i++) {
+					msg.append(splitValues[i]);
+					msg.append(splitter.getSplitter());
+				}
+			}
+		}
+		msg.append("{");
 		for (final String val : brokenConstraint.getValueRange()) {
-			msg.append(val);
+			if (val.isEmpty()) {
+				msg.append("Empty String");
+			} else {
+				msg.append(val);
+			}
 			msg.append(", ");
 		}
 		msg.delete(msg.length() - 2, msg.length());
 		return msg.append('}').toString();
 	}
 
+	private String extractVarName(Multimap<CallSiteWithParamIndex, Statement> extractedValues, Statement location, CryptSLObject crySLVar) {
+		StringBuilder msg = new StringBuilder();
+		Stmt allocSite = location.getUnit().get();
+		if (allocSite instanceof AssignStmt && ((AssignStmt) allocSite).getLeftOp().getType().toQuotedString().equals(crySLVar.getJavaType())) {
+			AssignStmt as = (AssignStmt) allocSite;
+			msg.append(VAR);
+			msg.append(as.getLeftOp().toString());
+			return msg.toString();
+		}
 
+		for (ValueBox par : allocSite.getInvokeExpr().getUseBoxes()) {
+			Value value = par.getValue();
+			if (!(value instanceof Constant)) {
+				boolean neverFound = true;
+				for (CallSiteWithParamIndex a : extractedValues.keySet()) {
+					if (a.getVarName().equals(crySLVar.getVarName())) {
+						if (a.fact().value().getType().equals(par.getValue().getType())) {
+							String varName = par.getValue().toString();
+							if (varName.matches("\\$[a-z][0-9]+")) {
+								msg.append(OBJECT_OF_TYPE);
+								msg.append(par.getValue().getType().toQuotedString());
+								neverFound = false;
+							} else {
+								msg.append(VAR);
+								msg.append(varName);
+								neverFound = false;
+							}
+							break;
+						}
+					}
+					if (neverFound) {
+						Type valueType = value.getType();
+						String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
+						if (crySLVar.getJavaType().equals(type)) {
+							String varName = par.getValue().toString();
+							if (varName.matches("\\$[a-z][0-9]+")) {
+								msg.append(OBJECT_OF_TYPE);
+								msg.append(par.getValue().getType().toQuotedString());
+								neverFound = false;
+							} else {
+								msg.append(VAR);
+								msg.append(varName);
+								neverFound = false;
+							}
+							break;
+						}
+					}
+				}
+			} else {
+				if (((Constant) value).getType().toQuotedString().equals(crySLVar.getJavaType())) {
+					msg.append(value);
+				}
+			}
+		}
+		return msg.toString();
+	}
 	@Override
 	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {
 		addMarker(location.stmt(), "Predicate mismatch");
@@ -321,6 +411,9 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	@Override
 	public void seedStarted(final IAnalysisSeed arg0) {
 		// Nothing
+	}
+	public static String filterQuotes(final String dirty) {
+		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
 }
 
