@@ -59,9 +59,7 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 			stmntBuilder.append(" = ");
 		}
 		
-		final int afterClassNamePos = this.methodName.lastIndexOf(".");
-		
-		stmntBuilder.append(this.methodName.substring(afterClassNamePos + 1));
+		stmntBuilder.append(this.methodName);
 		stmntBuilder.append("(");
 		
 		
