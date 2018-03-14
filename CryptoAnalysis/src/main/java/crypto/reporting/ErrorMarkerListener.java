@@ -179,7 +179,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			final CryptSLComparisonConstraint brokenCompCons = (CryptSLComparisonConstraint) brokenConstraint;
 			msg.append("Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append("must be ");
+			msg.append(" must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
 			msg.append(brokenCompCons.getRight().getLeft().getName());
 		} else if (brokenConstraint instanceof CryptSLConstraint) {
