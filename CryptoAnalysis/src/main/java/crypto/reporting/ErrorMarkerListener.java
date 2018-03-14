@@ -111,7 +111,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 				final String type = errorVariable.value().getType().toString();
 				msg.append(type.substring(type.lastIndexOf('.') + 1));
 				msg.append(" object not completed. Expected call to ");
-				msg.append(Joiner.on(" or ").join(expectedCalls));
+				final Set<String> altMethods = new HashSet<>();
+				for (final SootMethod expectedCall : expectedCalls) {
+					altMethods.add(expectedCall.getName());
+				}
+				msg.append(Joiner.on(", ").join(altMethods));
 				addMarker(location, msg.toString());
 			}
 
