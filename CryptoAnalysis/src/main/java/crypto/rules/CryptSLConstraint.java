@@ -3,7 +3,8 @@ package crypto.rules;
 import java.io.Serializable;
 import java.util.Set;
 
-import typestate.interfaces.ISLConstraint;
+import boomerang.jimple.Statement;
+import crypto.interfaces.ISLConstraint;
 
 public class CryptSLConstraint implements ISLConstraint, Serializable{
 	
@@ -17,6 +18,7 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 	private LogOps operator;
 	private ISLConstraint left;
 	private ISLConstraint right;
+	private Statement location;
 
 	public CryptSLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
 		left = l;
@@ -64,6 +66,16 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 	@Override
 	public String getName() {
 		return toString();
+	}
+
+	@Override
+	public void setLocation(Statement location) {
+		this.location = location;
+	}
+
+	@Override
+	public Statement getLocation() {
+		return location;
 	}
 
 }

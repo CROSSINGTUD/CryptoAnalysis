@@ -31,9 +31,11 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
@@ -66,7 +68,6 @@ import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
-import typestate.interfaces.ISLConstraint;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
@@ -175,6 +176,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 												errorCountAssertion.increaseCount();
 											}
 										}
+									}
+
+									@Override
+									public void visit(ImpreciseValueExtractionError predicateError) {
+
 									}
 								});
 							}

@@ -3,7 +3,7 @@ package crypto.rules;
 import java.util.List;
 import java.util.Set;
 
-import typestate.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLCondPredicate extends CryptSLPredicate {
 	

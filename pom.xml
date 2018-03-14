@@ -9,7 +9,6 @@
   <modules>
     <module>CryptoAnalysis</module>
     <module>WeightedBoomerang</module>
-    <module>CryptoInterfaces</module>
   </modules>
   <build>
     <plugins>

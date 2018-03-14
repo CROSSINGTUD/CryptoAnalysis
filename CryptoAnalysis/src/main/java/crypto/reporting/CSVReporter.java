@@ -35,6 +35,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CallSiteWithParamIndex;
@@ -45,7 +46,6 @@ import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import typestate.interfaces.ISLConstraint;
 
 public class CSVReporter extends CrySLAnalysisListener {
 

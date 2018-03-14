@@ -1,7 +1,7 @@
 package crypto.rules;
 import java.util.List;
 
-import typestate.interfaces.Transition;
+import crypto.interfaces.Transition;
 
 public class TransitionEdge implements Transition<StateNode>, java.io.Serializable {
 

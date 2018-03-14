@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import typestate.interfaces.ICryptSLPredicateParameter;
-import typestate.interfaces.ISLConstraint;
+import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ISLConstraint;
 
 public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
 

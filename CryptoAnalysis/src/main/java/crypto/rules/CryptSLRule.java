@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import typestate.interfaces.ISLConstraint;
+import crypto.interfaces.ISLConstraint;
 
 public class CryptSLRule implements java.io.Serializable {
 

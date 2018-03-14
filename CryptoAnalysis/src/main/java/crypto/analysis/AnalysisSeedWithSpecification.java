@@ -19,10 +19,10 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
+import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
@@ -56,8 +56,6 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
-import typestate.interfaces.ICryptSLPredicateParameter;
-import typestate.interfaces.ISLConstraint;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
@@ -127,25 +125,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, new ConstraintReporter() {
-
-			@Override
-			public void constraintViolated(ISLConstraint con, Statement unit) {
-				AnalysisSeedWithSpecification seed = AnalysisSeedWithSpecification.this;
-				cryptoScanner.getAnalysisListener().reportError(new ConstraintError(unit, seed.getSpec().getRule(), asNode(), con, seed.getExtractedValues()));
-			}
-
-			@Override
-			public void callToForbiddenMethod(ClassSpecification classSpecification, Statement callSite, SootMethod foundCalledMethod, Collection<SootMethod> replacement) {
-				cryptoScanner.getAnalysisListener().reportError(new ForbiddenMethodError(callSite, classSpecification.getRule(), foundCalledMethod, replacement));
-			}
-
-			@Override
-			public void unevaluableConstraint(ISLConstraint con, Statement unit) {
-				cryptoScanner.getAnalysisListener().unevaluableConstraint(AnalysisSeedWithSpecification.this, con,
-						unit);
-			}
-		});
+		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, cryptoScanner.getAnalysisListener());
 		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
@@ -307,8 +287,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 		} else {
-			LocatedCrySLPredicate locatedCrySLPredicate = new LocatedCrySLPredicate(predToBeEnsured, currStmt);
-			missingPredicates.add(locatedCrySLPredicate);
+			predToBeEnsured.setLocation(currStmt);
+			missingPredicates.add(predToBeEnsured);
 		}
 	}
 
@@ -391,11 +371,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (CryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
 			final ISLConstraint conditional = rem.getConstraint();
 			if (conditional != null) {
-				try {
-					if (constraintSolver.evaluate(conditional) != null) {
-						remainingPredicates.remove(rem);
-					}
-				} catch (UnevaluableConstraintException e) {
+				if (constraintSolver.evaluate(conditional) != null) {
 					remainingPredicates.remove(rem);
 				}
 			}

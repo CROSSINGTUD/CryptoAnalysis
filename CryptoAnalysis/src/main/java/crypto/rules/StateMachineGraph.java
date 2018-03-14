@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import typestate.interfaces.FiniteStateMachine;
+import crypto.interfaces.FiniteStateMachine;
 
 
 public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {

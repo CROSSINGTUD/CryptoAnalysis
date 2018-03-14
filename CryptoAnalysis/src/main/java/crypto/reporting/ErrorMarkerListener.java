@@ -25,9 +25,11 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLComparisonConstraint.CompOp;
@@ -47,10 +49,8 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
-import soot.jimple.spark.geom.geomPA.Constants;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import typestate.interfaces.ISLConstraint;
 
 /**
  * This listener is notified of any misuses the analysis finds.
@@ -135,6 +135,15 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			public void visit(RequiredPredicateError predicateError) {
 				// TODO Auto-generated method stub
 				
+			}
+
+			@Override
+			public void visit(ImpreciseValueExtractionError extractionError) {
+				final StringBuilder msg = new StringBuilder();
+				msg.append("Constraint ");
+				msg.append(extractionError.getViolatedConstraint());
+				msg.append(" could not be evaluted due to insufficient information.");
+				addMarker(extractionError.getErrorLocation(), msg.toString());
 			}});
 	}
 	

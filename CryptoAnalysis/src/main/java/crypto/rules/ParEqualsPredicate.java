@@ -3,8 +3,9 @@ package crypto.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import typestate.interfaces.ICryptSLPredicateParameter;
-import typestate.interfaces.ISLConstraint;
+import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ISLConstraint;
+
 
 public class ParEqualsPredicate extends CryptSLPredicate {
 

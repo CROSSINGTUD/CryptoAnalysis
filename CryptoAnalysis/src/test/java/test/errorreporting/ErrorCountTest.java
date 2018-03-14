@@ -54,7 +54,7 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 		byte[] ciphertext = c.doFinal("WHAT!?".getBytes());
 		Assertions.notHasEnsuredPredicate(ciphertext);
 		Assertions.notHasEnsuredPredicate(key);
-		Assertions.predicateErrors(2);
+		Assertions.predicateErrors(1);
 		Assertions.constraintErrors(1);
 
 	}

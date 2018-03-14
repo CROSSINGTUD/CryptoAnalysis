@@ -6,4 +6,5 @@ public interface ErrorVisitor {
 	public void visit(IncompleteOperationError incompleteOperationError);
 	public void visit(TypestateError typestateError);
 	public void visit(RequiredPredicateError predicateError);
+	public void visit(ImpreciseValueExtractionError predicateError);
 }

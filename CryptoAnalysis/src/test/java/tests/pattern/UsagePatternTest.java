@@ -308,8 +308,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(2);
 		//TODO: Fails for reasons different from the ones I expected.
 		cCipher.getIV();
-//		Assertions.mustBeInAcceptingState(cCipher);
-//		Assertions.hasEnsuredPredicate(encText);
+		//		Assertions.mustBeInAcceptingState(cCipher);
+		//		Assertions.notasEnsuredPredicate(encText);
 	}
 
 	@Test

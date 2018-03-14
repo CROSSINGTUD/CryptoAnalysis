@@ -1,4 +1,4 @@
-package typestate.interfaces;
+package crypto.interfaces;
 
 import java.util.List;
 

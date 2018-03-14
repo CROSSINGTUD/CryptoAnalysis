@@ -3,7 +3,7 @@ package crypto.rules;
 import java.util.HashSet;
 import java.util.Set;
 
-import typestate.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ICryptSLPredicateParameter;
 
 public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
 
