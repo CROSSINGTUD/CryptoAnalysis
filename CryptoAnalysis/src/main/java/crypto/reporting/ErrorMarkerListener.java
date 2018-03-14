@@ -111,7 +111,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 				final String type = errorVariable.value().getType().toString();
 				msg.append(type.substring(type.lastIndexOf('.') + 1));
 				msg.append(" object not completed. Expected call to ");
-				msg.append(Joiner.on(" or ").join(expectedCalls));
+				final Set<String> altMethods = new HashSet<>();
+				for (final SootMethod expectedCall : expectedCalls) {
+					altMethods.add(expectedCall.getName());
+				}
+				msg.append(Joiner.on(", ").join(altMethods));
 				addMarker(location, msg.toString());
 			}
 
@@ -188,7 +192,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			final CryptSLComparisonConstraint brokenCompCons = (CryptSLComparisonConstraint) brokenConstraint;
 			msg.append("Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append("must be ");
+			msg.append(" must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
 			msg.append(brokenCompCons.getRight().getLeft().getName());
 		} else if (brokenConstraint instanceof CryptSLConstraint) {
