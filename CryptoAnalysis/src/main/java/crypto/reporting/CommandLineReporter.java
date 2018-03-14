@@ -29,6 +29,8 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		for (CryptSLRule r : this.rules) {
 			s += String.format("\t%s\n", r.getClassName());
 		}
+		
+		s += "\n";
 		for (SootClass c : this.errorMarkers.rowKeySet()) {
 			s += String.format("Findings in Java Class: %s\n", c.getName());
 			for (Entry<SootMethod, Set<ErrorMarker>> e : this.errorMarkers.row(c).entrySet()) {
@@ -39,6 +41,9 @@ public class CommandLineReporter extends ErrorMarkerListener {
 				}
 			}
 			s += "\n";
+		}
+		if(this.errorMarkers.rowKeySet().isEmpty()){
+			s += "No violation of any of the rules found.";
 		}
 		if (outputFile != null) {
 			try {
