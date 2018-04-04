@@ -32,6 +32,8 @@ import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -89,6 +91,8 @@ public class CSVReporter extends CrySLAnalysisListener {
 		addDynamicHeader(TypestateError.class.getSimpleName());
 		addDynamicHeader(RequiredPredicateError.class.getSimpleName());
 		addDynamicHeader(IncompleteOperationError.class.getSimpleName());
+		addDynamicHeader(ImpreciseValueExtractionError.class.getSimpleName());
+		addDynamicHeader(ForbiddenMethodError.class.getSimpleName());
 	}
 	
 	private void addDynamicHeader(String name) {
@@ -173,9 +177,11 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	private void put(String key, Object val) {
-		if(!headers.contains(key))
-			throw new RuntimeException("Did not create a header to this value" + key);
-		headersToValues.put(key, val.toString());
+		if (!headers.contains(key)) {
+			System.err.println("Did not create a header to this value " + key);
+		} else {
+			headersToValues.put(key, val.toString());
+		}
 	}
 	private void put(Headers key, Object val) {
 		put(key.toString(),val);
