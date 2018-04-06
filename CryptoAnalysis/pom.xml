@@ -25,9 +25,11 @@
 					</execution>
 				</executions>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+					<descriptors>
+						<!-- custom descriptor is copied from jar-with-dependencies -->
+						<!-- This also copies the rules from test resources as default rules into the jar -->
+						<descriptor>build/descriptor.xml</descriptor>
+					</descriptors>
 					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
