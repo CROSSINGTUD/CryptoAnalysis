@@ -1,6 +1,7 @@
 package crypto;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,7 @@ import soot.PackManager;
 import soot.PhaseOptions;
 import soot.Scene;
 import soot.SceneTransformer;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
@@ -250,7 +252,11 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
+		List<String> includeList = new LinkedList<String>();
+		includeList.add("java.lang.*");
+		Options.v().set_include(includeList);
 		Scene.v().loadNecessaryClasses();
+		
 		System.out.println("Finished initializing soot");
 
 	}

@@ -137,8 +137,13 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(RequiredPredicateError predicateError) {
-				// TODO Auto-generated method stub
-				
+				final StringBuilder msg = new StringBuilder();
+				Statement stmt = predicateError.getErrorLocation();
+				msg.append(extractVarName(predicateError.getExtractedValues(), stmt, (CryptSLObject) predicateError.getContradictedPredicate().getParameters().get(0)));
+				msg.append(" was not properly ");
+				String predName = predicateError.getContradictedPredicate().getPredName();
+				msg.append(predName);
+				addMarker(stmt, msg.toString());
 			}
 
 			@Override
