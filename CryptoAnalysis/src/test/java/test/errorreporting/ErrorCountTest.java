@@ -1,10 +1,12 @@
 package test.errorreporting;
 
+import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.junit.Test;
 
@@ -56,6 +58,14 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(key);
 		Assertions.predicateErrors(1);
 		Assertions.constraintErrors(1);
+	}
 
+	@Test
+	public void SecretKeySpecTest1() throws GeneralSecurityException, UnsupportedEncodingException {
+		SecretKeySpec key = new SecretKeySpec("keyMaterial".getBytes("UTF-8"), "AES");
+		Assertions.notHasEnsuredPredicate(key);
+		Assertions.predicateErrors(1);
+		//Should get a unsatisfied-predicate error either for randomized or for SecretKeySpec
+		//The former semms to happen for the test case, but not when applied to regular programs
 	}
 }
