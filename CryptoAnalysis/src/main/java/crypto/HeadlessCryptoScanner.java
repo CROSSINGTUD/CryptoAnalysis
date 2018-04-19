@@ -144,8 +144,9 @@ public abstract class HeadlessCryptoScanner {
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
-		callGraphWatch = Stopwatch.createStarted();
-		PackManager.v().runPacks();
+		callGraphWatch = Stopwatch.createStarted();        
+		PackManager.v().getPack("cg").apply();
+        PackManager.v().getPack("wjtp").apply();
 	}
 	
 	public String toString() {
@@ -253,7 +254,8 @@ public abstract class HeadlessCryptoScanner {
 		List<String> includeList = new LinkedList<String>();
 		includeList.add("java.lang.*");
 		Options.v().set_include(includeList);
-		Options.v().set_wrong_staticness(Options.wrong_staticness_fix);
+		Options.v().set_full_resolver(true);
+		Scene.v().loadNecessaryClasses();
 		System.out.println("Finished initializing soot");
 	}
 
