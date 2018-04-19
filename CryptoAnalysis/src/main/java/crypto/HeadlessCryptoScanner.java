@@ -145,8 +145,7 @@ public abstract class HeadlessCryptoScanner {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		callGraphWatch = Stopwatch.createStarted();
-		PackManager.v().getPack("cg").apply();
-		PackManager.v().getPack("wjtp").apply();
+		PackManager.v().runPacks();
 	}
 	
 	public String toString() {
@@ -224,7 +223,6 @@ public abstract class HeadlessCryptoScanner {
 	
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
 		G.v().reset();
-
 		Options.v().set_whole_program(wholeProgram);
 
 		switch (callGraphAlogrithm()) {
@@ -255,10 +253,8 @@ public abstract class HeadlessCryptoScanner {
 		List<String> includeList = new LinkedList<String>();
 		includeList.add("java.lang.*");
 		Options.v().set_include(includeList);
-		Scene.v().loadNecessaryClasses();
-		
+		Options.v().set_wrong_staticness(Options.wrong_staticness_fix);
 		System.out.println("Finished initializing soot");
-
 	}
 
 	protected CG callGraphAlogrithm() {
