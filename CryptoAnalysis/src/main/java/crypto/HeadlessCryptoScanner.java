@@ -253,8 +253,10 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
 
 		List<String> includeList = new LinkedList<String>();
-		includeList.add("java.lang.*");
-		Options.v().set_include(includeList);
+//		Scene.v().forceResolve("java.lang.String", SootClass.SIGNATURES);
+//		includeList.add("java.lang.*");
+//		Options.v().set_include(includeList);
+		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
 		
 		System.out.println("Finished initializing soot");
