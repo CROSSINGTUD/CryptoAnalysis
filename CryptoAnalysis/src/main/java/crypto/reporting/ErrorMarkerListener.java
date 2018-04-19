@@ -202,21 +202,21 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			msg.append(brokenCompCons.getRight().getLeft().getName());
 		} else if (brokenConstraint instanceof CryptSLConstraint) {
 			final CryptSLConstraint cryptSLConstraint = (CryptSLConstraint) brokenConstraint;
-			final CryptSLValueConstraint leftSide = (CryptSLValueConstraint) cryptSLConstraint.getLeft();
-			final CryptSLValueConstraint rightSide = (CryptSLValueConstraint) cryptSLConstraint.getRight();
+			final ISLConstraint leftSide = cryptSLConstraint.getLeft();
+			final ISLConstraint rightSide = cryptSLConstraint.getRight();
 			switch (cryptSLConstraint.getOperator()) {
 				case and:
-					msg.append(evaluateValueConstraint(extractedValues,leftSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues,leftSide,location));
 					msg.append(" or ");
-					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
 					break;
 				case implies:
-					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
 					break;
 				case or:
-					msg.append(evaluateValueConstraint(extractedValues,leftSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues,leftSide,location));
 					msg.append(" and ");
-					msg.append(evaluateValueConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
 					break;
 				default:
 					break;
