@@ -1,7 +1,9 @@
 package crypto.reporting;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CallSiteWithParamIndex;
 import soot.ArrayType;
+import soot.RefType;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
@@ -48,6 +51,7 @@ import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.Stmt;
+import soot.jimple.internal.AbstractInvokeExpr;
 import soot.jimple.internal.JAssignStmt;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -172,7 +176,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			switch (brokenPred.getPredName()) {
 				case "neverTypeOf":
-
 					if (location.getUnit().get() instanceof JAssignStmt) {
 						msg.append("Variable ");
 						msg.append(((JAssignStmt) location.getUnit().get()).getLeftOp());
@@ -197,7 +200,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			final CryptSLComparisonConstraint brokenCompCons = (CryptSLComparisonConstraint) brokenConstraint;
 			msg.append("Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append(" must be ");
+			msg.append("must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
 			msg.append(brokenCompCons.getRight().getLeft().getName());
 		} else if (brokenConstraint instanceof CryptSLConstraint) {
@@ -206,17 +209,17 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			final ISLConstraint rightSide = cryptSLConstraint.getRight();
 			switch (cryptSLConstraint.getOperator()) {
 				case and:
-					msg.append(evaluateBrokenConstraint(extractedValues,leftSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues, leftSide, location));
 					msg.append(" or ");
-					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
 					break;
 				case implies:
-					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
 					break;
 				case or:
-					msg.append(evaluateBrokenConstraint(extractedValues,leftSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues, leftSide, location));
 					msg.append(" and ");
-					msg.append(evaluateBrokenConstraint(extractedValues,rightSide,location));
+					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
 					break;
 				default:
 					break;
@@ -249,9 +252,20 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		CryptSLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
 			Stmt stmt = location.getUnit().get();
-			String[] splitValues;
+			String[] splitValues = new String[] { "" };
 			if (stmt instanceof AssignStmt) {
-				splitValues = filterQuotes(((AssignStmt) stmt).getRightOp().toString()).split(splitter.getSplitter());
+				Value rightSide = ((AssignStmt) stmt).getRightOp();
+				if (rightSide instanceof Constant) {
+					splitValues = filterQuotes(rightSide.toString()).split(splitter.getSplitter());
+				} else if (rightSide instanceof AbstractInvokeExpr) {
+					List<Value> args = ((AbstractInvokeExpr) rightSide).getArgs();
+					for (Value arg : args) {
+						if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
+							splitValues = filterQuotes(arg.toString()).split(splitter.getSplitter());
+							break;
+						}
+					}
+				}
 			} else {
 				splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
 			}
@@ -308,7 +322,16 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 					if (neverFound) {
 						Type valueType = value.getType();
 						String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
-						if (crySLVar.getJavaType().equals(type)) {
+						boolean sameType = crySLVar.getJavaType().equals(type);
+						if (!sameType && valueType instanceof RefType) {
+							SootClass sootClass = ((RefType) valueType).getSootClass();
+							List<String> superTypes = fillTypeList(sootClass);
+							for (SootClass sc : sootClass.getInterfaces()) {
+								superTypes.add(sc.getType().toQuotedString());
+							}
+							sameType = superTypes.contains(crySLVar.getJavaType());
+						}
+						if (sameType) {
 							String varName = par.getValue().toString();
 							if (varName.matches("\\$[a-z][0-9]+")) {
 								msg.append(OBJECT_OF_TYPE);
@@ -317,6 +340,10 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 							} else {
 								msg.append(VAR);
 								msg.append(varName);
+								if (varName.matches("r[0-9]+")) {
+									msg.append(" of type ");
+									msg.append(par.getValue().getType().toQuotedString());
+								}
 								neverFound = false;
 							}
 							break;
@@ -329,8 +356,22 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 				}
 			}
 		}
+		if (msg.toString().isEmpty()) {
+			msg.append(OBJECT_OF_TYPE);
+			msg.append(crySLVar.getJavaType());
+		}
 		return msg.toString();
 	}
+
+	private List<String> fillTypeList(SootClass sootClass) {
+		List<String> types = new ArrayList<String>();
+		types.add(sootClass.getType().toQuotedString());
+		if (!sootClass.getSuperclass().getType().toQuotedString().equals("java.lang.Object")) {
+			types.addAll(fillTypeList(sootClass.getSuperclass()));
+		}
+		return types;
+	}
+
 	@Override
 	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {
 		addMarker(location.stmt(), "Predicate mismatch");
