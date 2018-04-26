@@ -14,6 +14,7 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.preanalysis.SeedFactory;
@@ -42,12 +43,19 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
+	private static CrySLAnalysisListener additionalListener = null;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
 	public static void main(String... args) throws ParseException {
+		HeadlessCryptoScanner scanner = createFromOptions(null,args);
+		scanner.exec();
+	}
+
+	public static HeadlessCryptoScanner createFromOptions(CrySLAnalysisListener errorListener, String... args) throws ParseException{
+		additionalListener = errorListener;
 		CommandLineParser parser = new DefaultParser();
 		options = parser.parse(new HeadlessOptions(), args);
 		final String resourcesPath;
@@ -106,8 +114,9 @@ public abstract class HeadlessCryptoScanner {
 				return options.getOptionValue("csvReportFile");
 			}
 		};
-		sourceCryptoScanner.exec();
+		return sourceCryptoScanner;
 	}
+	
 
 
 	protected abstract String getCSVOutputFile();
@@ -174,6 +183,7 @@ public abstract class HeadlessCryptoScanner {
 	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
 
+
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
@@ -181,6 +191,8 @@ public abstract class HeadlessCryptoScanner {
 				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFile(), rules);
 
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
+				if(additionalListener != null)
+					reporter.addReportListener(additionalListener);
 				CryptoScanner scanner = new CryptoScanner(rules) {
 
 					@Override
