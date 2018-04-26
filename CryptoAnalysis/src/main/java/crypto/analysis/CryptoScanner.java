@@ -6,9 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
@@ -180,13 +182,16 @@ public abstract class CryptoScanner {
 
 	public void scan() {
 		getAnalysisListener().beforeAnalysis();
+		Stopwatch watch = Stopwatch.createStarted();
 		initialize();
-		System.out.println("Discovered "+worklist.size() + " analysis seeds!");
+		long elapsed = watch.elapsed(TimeUnit.SECONDS);
+		System.out.println("Discovered "+worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			getAnalysisListener().discoveredSeed(curr);
 			curr.execute();
 		}
+		
 //		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
 //		if (debugger instanceof CryptoVizDebugger) {
 //			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
@@ -203,6 +208,8 @@ public abstract class CryptoScanner {
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 		getAnalysisListener().afterAnalysis();
+		elapsed = watch.elapsed(TimeUnit.SECONDS);
+		System.out.println("Static Analysis took "+elapsed+ " seconds!");
 //		debugger().afterAnalysis();
 	}
 

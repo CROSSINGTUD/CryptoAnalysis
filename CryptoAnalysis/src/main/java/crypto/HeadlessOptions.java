@@ -37,6 +37,8 @@ public class HeadlessOptions extends Options {
 		Option csvReportFile = Option.builder().longOpt("csvReportFile").hasArg().desc("Generates a summary of the finding as a CSV file.")
 				.build();
 		addOption(csvReportFile);
+		Option preanalysisOpt = Option.builder().longOpt("preanalysis").hasArg(false).desc("Enables or disable a intra-procedural pre-analysis.").build();
+		addOption(preanalysisOpt);
 	}
 
 }

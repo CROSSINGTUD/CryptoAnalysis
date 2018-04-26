@@ -41,6 +41,7 @@ public abstract class HeadlessCryptoScanner {
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
+	private static boolean PRE_ANALYSIS = false;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -54,6 +55,7 @@ public abstract class HeadlessCryptoScanner {
 			resourcesPath = options.getOptionValue("rulesDir");
 		else 
 			resourcesPath = "rules";
+		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {
 			String val = options.getOptionValue("cg");
@@ -112,12 +114,23 @@ public abstract class HeadlessCryptoScanner {
 
 
 	public void exec() {
-		initializeSootWithEntryPointAllReachable(false);
-		checkIfUsesObject();
-		if (hasSeeds()) {
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		if(PRE_ANALYSIS){
+			initializeSootWithEntryPointAllReachable(false);
+			long elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
+			System.out.println("Pre-analysis soot setup done after " + elapsed +" seconds");
+			checkIfUsesObject();
+			elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
+			System.out.println("Pre-analysis finished after " + elapsed +" seconds");
+		}
+		if (!PRE_ANALYSIS || hasSeeds()) {
 			System.out.println("Using call graph algorithm " + callGraphAlogrithm());
 			initializeSootWithEntryPointAllReachable(true);
+			long elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
+			System.out.println("Analysis soot setup done after " + elapsed +" seconds");
 			analyse();
+			elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
+			System.out.println("Analysis finished after " + elapsed +" seconds");
 		}
 	}
 
@@ -250,14 +263,27 @@ public abstract class HeadlessCryptoScanner {
 		System.out.println((sootClassPath() + File.pathSeparator + pathToJCE()));
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
-
-		List<String> includeList = new LinkedList<String>();
-		includeList.add("java.lang.*");
-		Options.v().set_include(includeList);
+		Options.v().set_include(getIncludeList());
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
 		System.out.println("Finished initializing soot");
 	}
+
+	private List<String> getIncludeList() {
+		List<String> includeList = new LinkedList<String>();
+		includeList.add("java.lang.AbstractStringBuilder");
+		includeList.add("java.lang.Boolean");
+		includeList.add("java.lang.Byte");
+		includeList.add("java.lang.Class");
+		includeList.add("java.lang.Integer");
+		includeList.add("java.lang.Long");
+		includeList.add("java.lang.Object");
+		includeList.add("java.lang.String");
+		includeList.add("java.lang.StringCoding");
+		includeList.add("java.lang.StringIndexOutOfBoundsException");
+		return includeList;
+	}
+
 
 	protected CG callGraphAlogrithm() {
 		return CG.CHA;
