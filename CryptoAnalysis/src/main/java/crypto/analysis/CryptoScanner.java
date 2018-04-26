@@ -18,12 +18,12 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
-import boomerang.BoomerangTimeoutException;
 import boomerang.Query;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.rules.CryptSLPredicate;
@@ -154,14 +154,9 @@ public abstract class CryptoScanner {
 							Val val = new Val(base, callerMethod);
 							BackwardQuery backwardQuery = new BackwardQuery(statement, val);
 							resultsAggregator.boomerangQueryStarted(seedObj, backwardQuery);
-							try{
-								boomerang.solve(backwardQuery);
-							} catch(BoomerangTimeoutException e){
-//								resultsAggregator.boomerangQueryTimeout(backwardQuery);
-							}
+							boomerang.solve(backwardQuery);
 							resultsAggregator.boomerangQueryFinished(seedObj, backwardQuery);
-							Table<Statement, Val, NoWeight> results = boomerang.getResults(backwardQuery);
-							for (Cell<Statement, Val, NoWeight> p : results.cellSet()) {
+							for (Cell<Statement, Val, NoWeight> p : boomerang.getResults(backwardQuery).cellSet()) {
 								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.getRowKey(),p.getColumnKey(), specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}

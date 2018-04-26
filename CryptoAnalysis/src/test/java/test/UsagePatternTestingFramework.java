@@ -98,8 +98,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
 							public void onSeedFinished(IAnalysisSeed seed,
-									WeightedBoomerang<TransitionFunction> solver) {
-								resultReporter.onSeedFinished(seed.asNode(), solver.getSolvers().get(seed));
+									Table<Statement, Val, TransitionFunction> res) {
+								resultReporter.onSeedFinished(seed.asNode(), res);
 							}
 
 							@Override

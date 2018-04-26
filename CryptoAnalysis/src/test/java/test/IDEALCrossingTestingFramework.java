@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
+import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.rules.CryptSLRuleReader;
@@ -81,13 +83,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
-				Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolvers = executeAnalysis();
+				Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(WeightedForwardQuery<TransitionFunction> seed : seedToSolvers.keySet()){
-					for(Query q : seedToSolvers.get(seed).getPhase2Solver().getSolvers().keySet()){
-						if(q.equals(seed)){
-							testingResultReporter.onSeedFinished(q.asNode(), seedToSolvers.get(seed).getPhase2Solver().getSolvers().getOrCreate(q));
-						}
-					}
+					Table<Statement, Val, TransitionFunction> res = seedToSolvers.get(seed);
+					testingResultReporter.onSeedFinished(seed.asNode(), res);
 				}
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
@@ -110,7 +109,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> executeAnalysis() {
+	protected Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();

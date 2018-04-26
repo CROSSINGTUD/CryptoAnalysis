@@ -19,6 +19,7 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.interfaces.ICryptSLPredicateParameter;
@@ -106,11 +107,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		IDEALSeedSolver<TransitionFunction> solver = analysis.run(this);
+		analysis.run(this);
 		parametersToValues = analysis.getCollectedValues();
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, solver.getPhase2Solver());
-		onSeedFinished(solver.getPhase2Solver());
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysis.getResults());
 		cryptoScanner.getAnalysisListener().collectedValues(this, analysis.getCollectedValues());
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {
@@ -129,7 +129,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		results = analysis.getResults(this);
+		results = analysis.getResults();
 		Multimap<Statement, State> unitToStates = HashMultimap.create();
 		for (Cell<Statement, Val, TransitionFunction> c : results.cellSet()) {
 			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
