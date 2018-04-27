@@ -279,9 +279,19 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(":")));
 		Options.v().set_include(getIncludeList());
+		Options.v().set_exclude(getExcludeList());
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
 		System.out.println("Finished initializing soot");
+	}
+
+	private List<String> getExcludeList() {
+		List<String> exList = new LinkedList<String>();
+		List<CryptSLRule> rules = getRules();
+		for(CryptSLRule r : rules) {
+			exList.add(Utils.getFullyQualifiedName(r));
+		}
+		return exList;
 	}
 
 	private List<String> getIncludeList() {

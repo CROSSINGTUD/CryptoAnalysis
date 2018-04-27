@@ -13,7 +13,9 @@ import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
+import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
+import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
@@ -53,7 +55,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			
 			@Override
 			public SootBasedStateMachineGraph getStateMachine() {
-				return new SootBasedStateMachineGraph(CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile())).getUsagePattern());
+				return new SootBasedStateMachineGraph(getRule().getUsagePattern());
 			}
 			
 			@Override
@@ -68,6 +70,17 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
+	protected CryptSLRule getRule() {
+		return CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile()));
+	}
+
+	@Override
+	public List<String> excludedPackages() {
+		List<String> excludedPackages = super.excludedPackages();
+		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
+		return excludedPackages;
+	}
+	
 	protected Debugger<TransitionFunction> getDebugger() {
 		if(debugger == null)
 			debugger =  new IDEVizDebugger<>(ideVizFile, icfg);

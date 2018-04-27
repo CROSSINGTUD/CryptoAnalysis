@@ -21,6 +21,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -335,6 +336,17 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			}
 
 		};
+	}
+
+
+
+	@Override
+	public List<String> excludedPackages() {
+		List<String> excludedPackages = super.excludedPackages();
+		for(CryptSLRule r : getRules()) {
+			excludedPackages.add(Utils.getFullyQualifiedName(r));
+		}
+		return excludedPackages;
 	}
 	protected List<CryptSLRule> getRules() {
 		List<CryptSLRule> rules = Lists.newArrayList();    
