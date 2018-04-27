@@ -21,6 +21,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
@@ -99,8 +100,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
 							public void onSeedFinished(IAnalysisSeed seed,
-									Table<Statement, Val, TransitionFunction> res) {
-								resultReporter.onSeedFinished(seed.asNode(), res);
+									ForwardBoomerangResults<TransitionFunction> res) {
+								resultReporter.onSeedFinished(seed.asNode(), res.asStatementValWeightTable());
 							}
 
 							@Override

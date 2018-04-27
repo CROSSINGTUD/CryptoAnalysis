@@ -59,7 +59,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		}
 	};
 	private final IDEALAnalysis<TransitionFunction> analysis;
-	private Table<Statement, Val, TransitionFunction> results = HashBasedTable.create();
+	private ForwardBoomerangResults<TransitionFunction> results;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -107,7 +107,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 		CrySLResultsReporter reports = analysisListener();
 		try {
-			results = analysis.run(query).getResults();
+			results = analysis.run(query);
 		} catch (IDEALSeedTimeout e){
 			System.err.println(e);
 //			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
@@ -247,8 +247,8 @@ public abstract class ExtendedIDEALAnaylsis {
     }
 
 
-	public Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> run() {
-		Map<WeightedForwardQuery<TransitionFunction>, Table<Statement,Val,TransitionFunction>> seedToSolver = Maps.newHashMap();
+	public Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> run() {
+		Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolver = Maps.newHashMap();
 		for (Query s : computeInitialSeeds()) {
 			if(s instanceof WeightedForwardQuery){
 				WeightedForwardQuery seed = (WeightedForwardQuery) s;
@@ -259,7 +259,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		return seedToSolver;
 	}
 
-	public Table<Statement, Val, TransitionFunction> getResults() {
+	public ForwardBoomerangResults<TransitionFunction> getResults() {
 		return results;
 	}
 

@@ -3,9 +3,7 @@ package crypto.analysis;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.debugger.Debugger;
@@ -17,7 +15,6 @@ import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
-import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -26,7 +23,7 @@ import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private Table<Statement, Val, TransitionFunction> analysisResults = HashBasedTable.create();
+	private ForwardBoomerangResults<TransitionFunction> analysisResults;
 	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
@@ -51,7 +48,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		if(analysisResults == null)
 			return;
 
-		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.cellSet()){
+		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
 			cryptoScanner.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
 		}
 	}

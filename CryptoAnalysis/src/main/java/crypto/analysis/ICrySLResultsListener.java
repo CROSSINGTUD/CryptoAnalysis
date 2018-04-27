@@ -10,6 +10,7 @@ import com.google.common.collect.Table;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
@@ -29,7 +30,7 @@ public interface ICrySLResultsListener {
 	
 	void onSeedTimeout(Node<Statement,Val> seed);
 	
-	void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> analysisResults);
+	void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults);
 	
 	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues);
 

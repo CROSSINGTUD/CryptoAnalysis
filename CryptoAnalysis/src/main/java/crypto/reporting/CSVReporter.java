@@ -26,6 +26,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCryptSLPredicate;
@@ -251,8 +252,8 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> solver) {
-//		dataflowReachableMethods.addAll(solver.getStats().getCallVisitedMethods());
+	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> forwardResults) {
+		dataflowReachableMethods.addAll(forwardResults.getStats().getCallVisitedMethods());
 	}
 
 

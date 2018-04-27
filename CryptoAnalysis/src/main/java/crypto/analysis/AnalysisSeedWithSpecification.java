@@ -14,7 +14,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -37,7 +36,6 @@ import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
-import ideal.IDEALSeedSolver;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -63,7 +61,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private final ClassSpecification spec;
 	private ExtendedIDEALAnaylsis analysis;
 	private Multimap<CallSiteWithParamIndex, Statement> parametersToValues = HashMultimap.create();
-	private Table<Statement, Val, TransitionFunction> results;
+	private ForwardBoomerangResults<TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
@@ -110,8 +108,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		analysis.run(this);
 		parametersToValues = analysis.getCollectedValues();
 		allCallsOnObject = analysis.getInvokedMethodOnInstance();
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysis.getResults());
-		cryptoScanner.getAnalysisListener().collectedValues(this, analysis.getCollectedValues());
+		results = analysis.getResults();
+		onSeedFinished();
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
+		cryptoScanner.getAnalysisListener().collectedValues(this, parametersToValues);
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {
 			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
@@ -121,17 +121,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	public void onSeedFinished(WeightedBoomerang<TransitionFunction> solver) {
+	public void onSeedFinished() {
 		// Merge all information (all access graph here point to the seed
 		// object)
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
 		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, cryptoScanner.getAnalysisListener());
 		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
+		
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
+		System.out.println(this + " \n"+constraintSolver.getRelConstraints());
+		System.out.println(parametersToValues);
+		System.out.println(internalConstraintSatisfied);
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		results = analysis.getResults();
+		
 		Multimap<Statement, State> unitToStates = HashMultimap.create();
-		for (Cell<Statement, Val, TransitionFunction> c : results.cellSet()) {
+		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				// TODO only maintain indirectly ensured predicate as long as they are not
@@ -141,7 +145,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 
 		computeTypestateErrorUnits(unitToStates);
-		computeTypestateErrorsForEndOfObjectLifeTime(solver);
+		computeTypestateErrorsForEndOfObjectLifeTime();
 	}
 
 	private void computeTypestateErrorUnits(Multimap<Statement, State> unitToStates) {
@@ -162,8 +166,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void computeTypestateErrorsForEndOfObjectLifeTime(WeightedBoomerang<TransitionFunction> solver) {
-		Table<Statement, Val, TransitionFunction> endPathOfPropagation = solver.getObjectDestructingStatements(this);
+	private void computeTypestateErrorsForEndOfObjectLifeTime() {
+		Table<Statement, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
 
 		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
 			Set<SootMethod> expectedMethodsToBeCalled = Sets.newHashSet();
@@ -296,7 +300,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		indirectlyEnsuredPredicates.add(ensuredCryptSLPredicate);
 		if (results == null)
 			return;
-		for (Cell<Statement, Val, TransitionFunction> c : results.cellSet()) {
+		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
@@ -309,7 +313,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		if (!satisfiesConstraintSytem)
 			return;
-		for (Cell<Statement, Val, TransitionFunction> e : results.cellSet()) {
+		for (Cell<Statement, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
 			// TODO check for any reachable state that don't kill
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {

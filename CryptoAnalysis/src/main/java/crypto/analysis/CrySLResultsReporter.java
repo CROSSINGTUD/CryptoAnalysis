@@ -14,6 +14,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
@@ -122,7 +123,7 @@ public class CrySLResultsReporter  {
 		}
 	}	
 	
-	public void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> analysisResults) {
+	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults) {
 		for (CrySLAnalysisListener listen : listeners) {
 			listen.onSeedFinished(seed, analysisResults);
 		}

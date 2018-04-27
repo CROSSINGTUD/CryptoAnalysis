@@ -4,6 +4,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,7 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
@@ -38,8 +40,10 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import sync.pds.solver.nodes.INode;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
+import wpds.impl.PAutomaton;
 import wpds.impl.Weight.NoWeight;
 
 public abstract class CryptoScanner {
@@ -154,10 +158,11 @@ public abstract class CryptoScanner {
 							Val val = new Val(base, callerMethod);
 							BackwardQuery backwardQuery = new BackwardQuery(statement, val);
 							resultsAggregator.boomerangQueryStarted(seedObj, backwardQuery);
-							boomerang.solve(backwardQuery);
+							BackwardBoomerangResults<NoWeight> res = boomerang.solve(backwardQuery);
 							resultsAggregator.boomerangQueryFinished(seedObj, backwardQuery);
-							for (Cell<Statement, Val, NoWeight> p : boomerang.getResults(backwardQuery).cellSet()) {
-								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.getRowKey(),p.getColumnKey(), specification));
+							Map<ForwardQuery, PAutomaton<Statement, INode<Val>>> allocs = res.getAllocationSites();
+							for (ForwardQuery p : allocs.keySet()) {
+								AnalysisSeedWithSpecification seedWithSpec = getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(CryptoScanner.this, p.stmt(),p.var(),specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
 						}

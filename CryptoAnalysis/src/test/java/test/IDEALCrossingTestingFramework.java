@@ -15,6 +15,7 @@ import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.rules.CryptSLRule;
@@ -96,10 +97,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
-				Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> seedToSolvers = executeAnalysis();
+				Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolvers = executeAnalysis();
 				for(WeightedForwardQuery<TransitionFunction> seed : seedToSolvers.keySet()){
-					Table<Statement, Val, TransitionFunction> res = seedToSolvers.get(seed);
-					testingResultReporter.onSeedFinished(seed.asNode(), res);
+					ForwardBoomerangResults<TransitionFunction> res = seedToSolvers.get(seed);
+					testingResultReporter.onSeedFinished(seed.asNode(), res.asStatementValWeightTable());
 				}
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
@@ -122,7 +123,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> executeAnalysis() {
+	protected Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> executeAnalysis() {
 		CryptSLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();

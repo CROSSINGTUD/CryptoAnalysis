@@ -18,6 +18,7 @@ import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
@@ -165,7 +166,7 @@ public class HeadlessTests {
 			}
 
 			@Override
-			public void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> solver) {
+			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {
 			}
 
 			@Override
