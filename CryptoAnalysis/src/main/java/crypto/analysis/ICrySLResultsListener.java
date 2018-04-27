@@ -29,7 +29,7 @@ public interface ICrySLResultsListener {
 	
 	void onSeedTimeout(Node<Statement,Val> seed);
 	
-	void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver);
+	void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> analysisResults);
 	
 	void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues);
 

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -17,12 +18,13 @@ import com.google.common.collect.Table.Cell;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.BoomerangOptions;
-import boomerang.BoomerangTimeoutException;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
@@ -57,7 +59,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		}
 	};
 	private final IDEALAnalysis<TransitionFunction> analysis;
-	private IDEALSeedSolver<TransitionFunction> solver;
+	private Table<Statement, Val, TransitionFunction> results = HashBasedTable.create();
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -100,15 +102,15 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract SootBasedStateMachineGraph getStateMachine();
 
-	public IDEALSeedSolver<TransitionFunction> run(Query query) {
+	public void run(ForwardQuery query) {
 		getOrCreateTypestateChangeFunction().injectQueryForSeed(query.stmt());
 
 		CrySLResultsReporter reports = analysisListener();
 		try {
-			solver = analysis.run(query);
+			results = analysis.run(query).getResults();
 		} catch (IDEALSeedTimeout e){
 			System.err.println(e);
-			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
+//			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
 			if (reports != null && query instanceof IAnalysisSeed) {
 				reports.onSeedTimeout(((IAnalysisSeed)query).asNode());
 			}
@@ -122,7 +124,6 @@ public abstract class ExtendedIDEALAnaylsis {
 				reports.boomerangQueryFinished(query, q);
 			}
 		}
-		return solver;
 	}
 
 
@@ -172,10 +173,7 @@ public abstract class ExtendedIDEALAnaylsis {
 					return ExtendedIDEALAnaylsis.this.icfg();
 				}
 			};
-			try{
-				boomerang.solve(this);
-			} catch(BoomerangTimeoutException e){
-			}
+			boomerang.solve(this);
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
 			res = boomerang.getResults(this);
@@ -248,19 +246,21 @@ public abstract class ExtendedIDEALAnaylsis {
         return seeds;
     }
 
-	public Table<Statement, Val, TransitionFunction> getResults(IAnalysisSeed seed) {
-		return solver.getPhase2Solver().getResults(seed);
-	}
 
-	public Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> run() {
-		Map<WeightedForwardQuery<TransitionFunction>, IDEALSeedSolver<TransitionFunction>> seedToSolver = Maps.newHashMap();
+	public Map<WeightedForwardQuery<TransitionFunction>, Table<Statement, Val, TransitionFunction>> run() {
+		Map<WeightedForwardQuery<TransitionFunction>, Table<Statement,Val,TransitionFunction>> seedToSolver = Maps.newHashMap();
 		for (Query s : computeInitialSeeds()) {
 			if(s instanceof WeightedForwardQuery){
 				WeightedForwardQuery seed = (WeightedForwardQuery) s;
-				seedToSolver.put(seed, run((WeightedForwardQuery<TransitionFunction>)seed));
+				run((WeightedForwardQuery<TransitionFunction>)seed);
+				seedToSolver.put(seed, getResults());
 			}
 		}
 		return seedToSolver;
+	}
+
+	public Table<Statement, Val, TransitionFunction> getResults() {
+		return results;
 	}
 
 }

@@ -11,6 +11,7 @@ import com.google.common.collect.Table.Cell;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
@@ -38,11 +39,11 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
-		IDEALSeedSolver<TransitionFunction> s = solver.run(this);
-		analysisResults = solver.getResults(this);
+		solver.run(this);
+		analysisResults = solver.getResults();
 		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, s.getPhase2Solver());
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
 		analyzed = true;
 	}
 

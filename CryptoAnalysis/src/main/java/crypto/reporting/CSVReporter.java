@@ -251,8 +251,8 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
-		dataflowReachableMethods.addAll(solver.getStats().getCallVisitedMethods());
+	public void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> solver) {
+//		dataflowReachableMethods.addAll(solver.getStats().getCallVisitedMethods());
 	}
 
 

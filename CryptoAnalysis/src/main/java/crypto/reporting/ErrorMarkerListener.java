@@ -458,7 +458,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void onSeedFinished(final IAnalysisSeed arg0, final WeightedBoomerang<TransitionFunction> arg1) {
+	public void onSeedFinished(final IAnalysisSeed arg0, final Table<Statement, Val, TransitionFunction> arg1) {
 		// Nothing
 	}
 

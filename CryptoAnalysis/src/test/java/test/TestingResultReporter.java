@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -27,18 +29,13 @@ public class TestingResultReporter{
 		}
 	}
 
-	public void onSeedFinished(Node<Statement,Val> seed,final AbstractBoomerangSolver<TransitionFunction> seedSolver) {
+	public void onSeedFinished(Node<Statement,Val> seed,final Table<Statement, Val, TransitionFunction> res) {
 		for(final Entry<Unit, Assertion> e : stmtToResults.entries()){
 			if(e.getValue() instanceof ComparableResult){
 				final ComparableResult<State,Val> expectedResults = (ComparableResult) e.getValue();
-				for(Entry<Transition<Statement, INode<Val>>, TransitionFunction> s : seedSolver.getTransitionsToFinalWeights().entrySet()){
-					Transition<Statement, INode<Val>> t = s.getKey();
-					TransitionFunction w = s.getValue();
-					if((t.getStart() instanceof GeneratedState)  || !t.getStart().fact().equals(expectedResults.getVal()))
-						continue;
-					if(t.getLabel().getUnit().isPresent()){
-						if(t.getLabel().getUnit().get().equals(e.getKey())){
-							for(ITransition trans : w.values()){
+				for(Cell<Statement, Val, TransitionFunction> s : res.cellSet()){
+						if(s.getRowKey().getUnit().get().equals(e.getKey())){
+							for(ITransition trans : s.getValue().values()){
 								if(trans.from() == null || trans.to() == null)
 									continue;
 									
@@ -46,7 +43,6 @@ public class TestingResultReporter{
 									expectedResults.computedResults(trans.to());
 								}
 							}
-						}
 					}
 				}
 			}

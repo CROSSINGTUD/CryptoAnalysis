@@ -122,9 +122,9 @@ public class CrySLResultsReporter  {
 		}
 	}	
 	
-	public void onSeedFinished(IAnalysisSeed seed, WeightedBoomerang<TransitionFunction> solver) {
+	public void onSeedFinished(IAnalysisSeed seed, Table<Statement, Val, TransitionFunction> analysisResults) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.onSeedFinished(seed, solver);
+			listen.onSeedFinished(seed, analysisResults);
 		}
 	}
 	
