@@ -342,7 +342,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
-				System.out.println(file.getName());
 				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}

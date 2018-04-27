@@ -1,6 +1,7 @@
 package crypto;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,19 +44,17 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static CrySLAnalysisListener additionalListener = null;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
 	public static void main(String... args) throws ParseException {
-		HeadlessCryptoScanner scanner = createFromOptions(null,args);
+		HeadlessCryptoScanner scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(CrySLAnalysisListener errorListener, String... args) throws ParseException{
-		additionalListener = errorListener;
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException{
 		CommandLineParser parser = new DefaultParser();
 		options = parser.parse(new HeadlessOptions(), args);
 		final String resourcesPath;
@@ -191,8 +190,8 @@ public abstract class HeadlessCryptoScanner {
 				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFile(), rules);
 
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
-				if(additionalListener != null)
-					reporter.addReportListener(additionalListener);
+				if(getAdditionalListener() != null)
+					reporter.addReportListener(getAdditionalListener());
 				CryptoScanner scanner = new CryptoScanner(rules) {
 
 					@Override
@@ -225,6 +224,10 @@ public abstract class HeadlessCryptoScanner {
 				scanner.scan();
 			}
 		};
+	}
+
+	protected CrySLAnalysisListener getAdditionalListener() {
+		return null;
 	}
 
 	protected List<CryptSLRule> getRules() {
@@ -274,7 +277,7 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_prepend_classpath(true);
 		System.out.println((sootClassPath() + File.pathSeparator + pathToJCE()));
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
-		Options.v().set_process_dir(Lists.newArrayList(applicationClassPath()));
+		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(":")));
 		Options.v().set_include(getIncludeList());
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();

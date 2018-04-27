@@ -1,0 +1,22 @@
+SPEC com.google.common.base.Stopwatch
+OBJECTS 
+	int numAB;
+
+EVENTS
+	c: createStarted();
+	isRunning: isRunning();
+	stop: stop();
+	start: start();
+
+ORDER
+ 	c, (isRunning, stop, start?)+
+
+
+Left: -1 ====[com.google.common.base.Stopwatch.createStarted();]====> Right:0
+Left: 0 ====[com.google.common.base.Stopwatch.isRunning();]====> Right:1
+Left: 1 ====[com.google.common.base.Stopwatch.stop();]====> Right:2
+Left: 2 ====[com.google.common.base.Stopwatch.start();]====> Right:3
+Left: 3 ====[com.google.common.base.Stopwatch.isRunning();]====> Right:1
+
+There is a missing edge 2 -> 0.
+Because start should be optional
