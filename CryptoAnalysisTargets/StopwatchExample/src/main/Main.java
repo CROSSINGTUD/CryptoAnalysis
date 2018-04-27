@@ -10,11 +10,13 @@ import com.google.common.base.Stopwatch;
 
 public class Main {
 	public static void main(String...args) throws GeneralSecurityException{
-		a();
-		b();
+		correct();
+		wrong();
+		wrongWithContext();
+		wrongWithTwoContexts();
 	}
 
-	private static void a() {
+	private static void correct() {
 		Stopwatch watch = Stopwatch.createStarted();
 		watch.isRunning();
 		watch.stop();
@@ -23,9 +25,30 @@ public class Main {
 			watch.stop();
 		}
 	}
-	private static void b() {
+	private static void wrong() {
 		Stopwatch watch = Stopwatch.createStarted();
 		watch.stop();
+		watch.stop();
+	}
+	
+	private static void wrongWithContext() {
+		Stopwatch watch = Stopwatch.createStarted();
+		context(watch);
+		context(watch);
+	}
+
+
+	private static void wrongWithTwoContexts() {
+		Stopwatch watch = Stopwatch.createStarted();
+		context(watch);
+		context2(watch);
+	}
+
+	private static void context2(Stopwatch watch) {
+		watch.stop();
+	}
+
+	private static void context(Stopwatch watch) {
 		watch.stop();
 	}
 }
