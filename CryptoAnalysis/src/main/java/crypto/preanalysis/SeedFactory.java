@@ -24,7 +24,7 @@ public class SeedFactory {
 
 	public SeedFactory(List<CryptSLRule> rules) {
 		for(CryptSLRule rule : rules){
-			idealAnalysisDefs.add(new FiniteStateMachineToTypestateChangeFunction(new SootBasedStateMachineGraph(rule.getUsagePattern()), null));
+			idealAnalysisDefs.add(new FiniteStateMachineToTypestateChangeFunction(new SootBasedStateMachineGraph(rule.getUsagePattern())));
 		}
 	}
 

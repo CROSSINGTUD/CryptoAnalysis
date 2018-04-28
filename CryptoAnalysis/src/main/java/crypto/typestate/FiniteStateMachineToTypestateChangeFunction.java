@@ -31,14 +31,11 @@ import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
 
-	private Collection<SootMethod> methodsInvokedOnInstance = Sets.newHashSet();
-	
 	private Collection<RefType> analyzedType = Sets.newHashSet();
-	private ExtendedIDEALAnaylsis solver;
 
 	private SootBasedStateMachineGraph fsm;
 
-	public FiniteStateMachineToTypestateChangeFunction(SootBasedStateMachineGraph fsm, ExtendedIDEALAnaylsis solver) {
+	public FiniteStateMachineToTypestateChangeFunction(SootBasedStateMachineGraph fsm) {
 		for(MatcherTransition trans : fsm.getAllTransitions()){
 			this.addTransition(trans);
 		}
@@ -47,25 +44,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				analyzedType.add(m.getDeclaringClass().getType());
 			}
 		}
-		this.solver = solver;
 		this.fsm = fsm;
 	}
 
-
-	@Override
-	public TransitionFunction normal(Node<Statement, Val> curr, Node<Statement, Val> succ) {
-		TransitionFunction val = super.normal(curr, succ);
-		if(curr.stmt().isCallsite()){
-			Stmt callSite = (Stmt) curr.stmt().getUnit().get();
-			if(callSite.getInvokeExpr() instanceof InstanceInvokeExpr){
-				InstanceInvokeExpr e = (InstanceInvokeExpr)callSite.getInvokeExpr();
-				if(e.getBase().equals(curr.fact().value())){
-					solver.methodInvokedOnInstance(curr.stmt(), e.getMethod());
-				}
-			}
-		}
-		return val;
-	}
 
 	@Override
 	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
@@ -105,11 +86,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 
 	private WeightedForwardQuery<TransitionFunction> createQuery(Unit unit, SootMethod method, AllocVal allocVal) {
 		return new WeightedForwardQuery<TransitionFunction>(new Statement((Stmt)unit,method), allocVal, fsm.getInitialWeight());
-	}
-
-
-	public Collection<SootMethod> getAllMethodsInvokedOnInstance(){
-		return Sets.newHashSet(methodsInvokedOnInstance);
 	}
 
 

@@ -35,7 +35,6 @@ import typestate.TransitionFunction;
 public abstract class ExtendedIDEALAnaylsis {
 
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
-	private Map<Statement, SootMethod> invokedMethodsOnInstance = Maps.newHashMap();
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
 	
@@ -74,19 +73,13 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	private FiniteStateMachineToTypestateChangeFunction getOrCreateTypestateChangeFunction() {
 		if (this.changeFunction == null)
-			this.changeFunction = new FiniteStateMachineToTypestateChangeFunction(getStateMachine(), this);
+			this.changeFunction = new FiniteStateMachineToTypestateChangeFunction(getStateMachine());
 		return this.changeFunction;
 	}
 
 	public abstract SootBasedStateMachineGraph getStateMachine();
 
 	public void run(ForwardQuery query) {
-		if(query.stmt().isCallsite()) {
-			Stmt queryUnit = query.stmt().getUnit().get();
-			if(queryUnit.containsInvokeExpr()) {
-				methodInvokedOnInstance(query.stmt(), queryUnit.getInvokeExpr().getMethod());
-			}
-		}
 		CrySLResultsReporter reports = analysisListener();
 		try {
 			results = analysis.run(query);
@@ -105,14 +98,6 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public void log(String string) {
 		// System.out.println(string);
-	}
-
-	public Map<Statement,SootMethod> getInvokedMethodOnInstance() {
-		return invokedMethodsOnInstance;
-	}
-
-	public void methodInvokedOnInstance(Statement stmt, SootMethod callee) {
-		invokedMethodsOnInstance.put(stmt, callee);
 	}
 
 	public abstract CrySLResultsReporter analysisListener();

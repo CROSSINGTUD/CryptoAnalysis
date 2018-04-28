@@ -148,7 +148,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runTypestateAnalysis() {
 		analysis.run(this);
 		results = analysis.getResults();
-		allCallsOnObject = analysis.getInvokedMethodOnInstance();
+		allCallsOnObject = results.getInvokedMethodOnInstance();
 	}
 
 	private void runExtractParameterAnalysis() {
