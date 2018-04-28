@@ -3,8 +3,8 @@ package crypto.analysis;
 import com.google.common.collect.Multimap;
 
 import boomerang.jimple.Statement;
+import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.rules.CryptSLPredicate;
-import crypto.typestate.CallSiteWithParamIndex;
 
 public class EnsuredCryptSLPredicate {
 

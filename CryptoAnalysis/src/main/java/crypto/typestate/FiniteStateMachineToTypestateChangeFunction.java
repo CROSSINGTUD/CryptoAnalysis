@@ -56,49 +56,15 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	public TransitionFunction normal(Node<Statement, Val> curr, Node<Statement, Val> succ) {
 		TransitionFunction val = super.normal(curr, succ);
 		if(curr.stmt().isCallsite()){
-			for (ITransition t : val.values()) {
-				if (!(t instanceof LabeledMatcherTransition))
-					continue;
-				injectQueryAtCallSite(((LabeledMatcherTransition)t).label(),curr.stmt());
-			}		
-
 			Stmt callSite = (Stmt) curr.stmt().getUnit().get();
 			if(callSite.getInvokeExpr() instanceof InstanceInvokeExpr){
 				InstanceInvokeExpr e = (InstanceInvokeExpr)callSite.getInvokeExpr();
 				if(e.getBase().equals(curr.fact().value())){
-					solver.methodInvokedOnInstance(curr.stmt());
+					solver.methodInvokedOnInstance(curr.stmt(), e.getMethod());
 				}
 			}
 		}
 		return val;
-	}
-
-	public void injectQueryForSeed(Statement u){
-        injectQueryAtCallSite(fsm.getInitialTransition(),u);
-	}
-	
-	private void injectQueryAtCallSite(List<CryptSLMethod> list, Statement callSite) {
-		if(!callSite.isCallsite())
-			return;
-		for(CryptSLMethod matchingDescriptor : list){
-			for(SootMethod m : CryptSLMethodToSootMethod.v().convert(matchingDescriptor)){
-				SootMethod method = callSite.getUnit().get().getInvokeExpr().getMethod();
-				if (!m.equals(method))
-					continue;
-				{
-					int index = 0;
-					for(Entry<String, String> param : matchingDescriptor.getParameters()){
-						if(!param.getKey().equals("_")){
-							soot.Type parameterType = method.getParameterType(index);
-							if(parameterType.toString().equals(param.getValue())){
-								solver.addQueryAtCallsite(param.getKey(), callSite, index);
-							}
-						}
-						index++;
-					}
-				}
-			}
-		}
 	}
 
 	@Override

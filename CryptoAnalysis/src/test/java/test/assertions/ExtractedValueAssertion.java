@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import com.google.common.collect.Multimap;
 
 import boomerang.jimple.Statement;
-import crypto.typestate.CallSiteWithParamIndex;
+import crypto.extractparameter.CallSiteWithParamIndex;
 import soot.Unit;
 import test.Assertion;
 

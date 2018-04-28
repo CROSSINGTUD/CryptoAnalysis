@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -21,6 +23,8 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
+import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.interfaces.ICryptSLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLCondPredicate;
@@ -30,7 +34,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import crypto.typestate.CallSiteWithParamIndex;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
@@ -68,7 +71,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
-	protected Collection<Statement> allCallsOnObject = Sets.newHashSet();
+	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
 			ClassSpecification spec) {
@@ -105,35 +108,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
-		analysis.run(this);
-		parametersToValues = analysis.getCollectedValues();
-		allCallsOnObject = analysis.getInvokedMethodOnInstance();
-		results = analysis.getResults();
-		onSeedFinished();
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
-		cryptoScanner.getAnalysisListener().collectedValues(this, parametersToValues);
-		final CryptSLRule rule = spec.getRule();
-		for (ISLConstraint cons : rule.getConstraints()) {
-			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-				cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0),
-						((CryptSLPredicate) cons).setNegated(false));
-			}
-		}
-	}
+		runTypestateAnalysis();
+		runExtractParameterAnalysis();
+		checkInternalConstraints();
 
-	public void onSeedFinished() {
-		// Merge all information (all access graph here point to the seed
-		// object)
-		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject, cryptoScanner.getAnalysisListener());
-		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
-		
-		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
-		System.out.println(this + " \n"+constraintSolver.getRelConstraints());
-		System.out.println(parametersToValues);
-		System.out.println(internalConstraintSatisfied);
-		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
-		
 		Multimap<Statement, State> unitToStates = HashMultimap.create();
 		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
@@ -146,8 +124,39 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		computeTypestateErrorUnits(unitToStates);
 		computeTypestateErrorsForEndOfObjectLifeTime();
+		
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
+		cryptoScanner.getAnalysisListener().collectedValues(this, parametersToValues);
+		final CryptSLRule rule = spec.getRule();
+		for (ISLConstraint cons : rule.getConstraints()) {
+			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+				cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0),
+						((CryptSLPredicate) cons).setNegated(false));
+			}
+		}
 	}
 
+
+	private void checkInternalConstraints() {
+		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
+		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject.keySet(), cryptoScanner.getAnalysisListener());
+		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
+		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
+		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
+	}
+
+	private void runTypestateAnalysis() {
+		analysis.run(this);
+		results = analysis.getResults();
+		allCallsOnObject = analysis.getInvokedMethodOnInstance();
+	}
+
+	private void runExtractParameterAnalysis() {
+		ExtractParameterAnalysis parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner,allCallsOnObject, spec.getFSM());
+		parameterAnalysis.run();
+		parametersToValues = parameterAnalysis.getCollectedValues();
+	}
+	
 	private void computeTypestateErrorUnits(Multimap<Statement, State> unitToStates) {
 		for (Statement curr : unitToStates.keySet()) {
 			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));

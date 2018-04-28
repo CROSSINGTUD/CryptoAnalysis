@@ -4,9 +4,9 @@ import com.google.common.collect.Multimap;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLRule;
-import crypto.typestate.CallSiteWithParamIndex;
 import sync.pds.solver.nodes.Node;
 
 public class ConstraintError extends ErrorAtCodeObjectLocation{

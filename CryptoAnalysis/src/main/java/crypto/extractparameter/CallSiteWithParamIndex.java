@@ -1,4 +1,4 @@
-package crypto.typestate;
+package crypto.extractparameter;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;

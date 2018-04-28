@@ -12,9 +12,9 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
+import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
-import crypto.typestate.CallSiteWithParamIndex;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
