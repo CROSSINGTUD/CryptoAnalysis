@@ -1,6 +1,7 @@
 package crypto.typestate;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import boomerang.jimple.Statement;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -103,11 +105,9 @@ public class SootBasedStateMachineGraph {
 		return Sets.newHashSet(edgeLabelMethods);
 	}
 	
-	
-	
 
-	public TransitionFunction getInitialWeight() {
-		return new TransitionFunction(initialTransiton);
+	public TransitionFunction getInitialWeight(Statement stmt) {
+		return new TransitionFunction(initialTransiton,Collections.singleton(stmt));
 	}
 
 	public List<MatcherTransition> getAllTransitions() {

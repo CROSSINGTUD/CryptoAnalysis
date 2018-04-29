@@ -75,7 +75,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
 			ClassSpecification spec) {
-		super(cryptoScanner, stmt, val, spec.getFSM().getInitialWeight());
+		super(cryptoScanner, stmt, val, spec.getFSM().getInitialWeight(stmt));
 		this.spec = spec;
 		analysis = new ExtendedIDEALAnaylsis() {
 
@@ -158,19 +158,41 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 	
 	private void computeTypestateErrorUnits(Multimap<Statement, State> unitToStates) {
-		for (Statement curr : unitToStates.keySet()) {
-			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
+//		for (Statement curr : unitToStates.keySet()) {
+//			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
+//			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
+//				Statement predStmt = new Statement((Stmt) pred, curr.getMethod());
+//				Collection<State> stateAtPred = unitToStates.get(predStmt);
+//				stateAtCurrMinusPred.removeAll(stateAtPred);
+//				for (State newStateAtCurr : stateAtCurrMinusPred) {
+//					typeStateChangeAtStatement(predStmt, newStateAtCurr);
+//					if (newStateAtCurr instanceof ErrorStateNode && !stateAtPred.isEmpty()) {
+//						ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
+//						cryptoScanner.getAnalysisListener().reportError(new TypestateError(predStmt, getSpec().getRule(), errorStateNode.getExpectedCalls()));
+//					}
+//				}
+//			}
+//		}
+		
+		Set<Statement> allTypestateChangeStatements = Sets.newHashSet();
+		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			allTypestateChangeStatements.addAll(c.getValue().getLastStateChangeStatements());
+		}
+		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			Statement curr = c.getRowKey();
 			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
-				Statement predStmt = new Statement((Stmt) pred, curr.getMethod());
-				Collection<State> stateAtPred = unitToStates.get(predStmt);
-				stateAtCurrMinusPred.removeAll(stateAtPred);
-				for (State newStateAtCurr : stateAtCurrMinusPred) {
-					typeStateChangeAtStatement(predStmt, newStateAtCurr);
-					if (newStateAtCurr instanceof ErrorStateNode && !stateAtPred.isEmpty()) {
-						ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
-						cryptoScanner.getAnalysisListener().reportError(new TypestateError(predStmt, getSpec().getRule(), errorStateNode.getExpectedCalls()));
+				Statement typeStateChangeStatement = new Statement((Stmt) pred, curr.getMethod());
+				if(allTypestateChangeStatements.contains(typeStateChangeStatement)) {
+					Collection<? extends State> targetStates = getTargetStates(c.getValue());
+					for (State newStateAtCurr : targetStates) {
+						typeStateChangeAtStatement(typeStateChangeStatement, newStateAtCurr);
+						if (newStateAtCurr instanceof ErrorStateNode) {
+							ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
+							cryptoScanner.getAnalysisListener().reportError(new TypestateError(typeStateChangeStatement, getSpec().getRule(), errorStateNode.getExpectedCalls()));
+						}
 					}
 				}
+				
 			}
 		}
 	}
@@ -214,7 +236,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (predToBeEnsured.isNegated()) {
 				continue;
 			}
-
+			
 			if (isPredicateGeneratingState(predToBeEnsured, stateNode)) {
 				ensuresPred(predToBeEnsured, curr, stateNode);
 			}
@@ -274,6 +296,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void expectPredicateOnOtherObject(CryptSLPredicate predToBeEnsured, Statement currStmt, Val accessGraph,
 			boolean satisfiesConstraintSytem) {
+		//TODO refactor this method.
 		boolean matched = false;
 		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
 			if (accessGraph.value() == null) {
@@ -286,9 +309,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
 							new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 					matched = true;
-					if (satisfiesConstraintSytem)
+					if (satisfiesConstraintSytem) {
 						seed.addEnsuredPredicateFromOtherRule(
 								new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+					}
 				}
 			}
 		}
@@ -356,7 +380,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return internalConstraintSatisfied;
 	}
 
-	private boolean checkPredicates(List<ISLConstraint> relConstraints) {
+	private boolean checkPredicates(Collection<ISLConstraint> relConstraints) {
 		List<CryptSLPredicate> requiredPredicates = Lists.newArrayList();
 		for (ISLConstraint con : relConstraints) {
 			if (con instanceof CryptSLPredicate
