@@ -64,7 +64,6 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void correct()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void wrong()>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void context(com.google.common.base.Stopwatch)>", TypestateError.class, 2);
-		setErrorsCount("<main.Main: void wrongWithTwoContexts()>", TypestateError.class, 2);
 		scanner.exec();
 		assertErrors();
 
@@ -78,7 +77,8 @@ public class HeadlessTests {
 				+ new File("../CryptoAnalysisTargets/StopwatchPathExpression/lib/guava-23.0.jar").getAbsolutePath();
 		String rulesDir = new File("../CryptoAnalysisTargets/StopwatchPathExpression/rules").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
-		setErrorsCount("<pathexpression.Main: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pathexpression.PathExpressionComputer: pathexpression.IRegEx getExpressionBetween(java.lang.Object,java.lang.Object)>", TypestateError.class, 1);
+		setErrorsCount("<pathexpression.DepthFirstSearchMain: void dfsFrom(test.IntGraph,int,java.util.Set,com.google.common.base.Stopwatch)>", TypestateError.class, 1);
 		
 		//TODO this is wrong. The state machine does not label the correct accepting states for the state machine.
 		setErrorsCount("<pathexpression.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);

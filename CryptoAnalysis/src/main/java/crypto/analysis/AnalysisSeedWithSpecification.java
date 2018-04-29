@@ -186,10 +186,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					Collection<? extends State> targetStates = getTargetStates(c.getValue());
 					for (State newStateAtCurr : targetStates) {
 						typeStateChangeAtStatement(typeStateChangeStatement, newStateAtCurr);
-						if (newStateAtCurr instanceof ErrorStateNode) {
-							ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
-							cryptoScanner.getAnalysisListener().reportError(new TypestateError(typeStateChangeStatement, getSpec().getRule(), errorStateNode.getExpectedCalls()));
-						}
 					}
 				}
 				
@@ -227,7 +223,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
-		typeStateChange.put(curr, stateNode);
+		if(typeStateChange.put(curr, stateNode)) {
+			if (stateNode instanceof ErrorStateNode) {
+				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
+				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), errorStateNode.getExpectedCalls()));
+			}
+		}
 		onAddedTypestateChange(curr, stateNode);
 	}
 
