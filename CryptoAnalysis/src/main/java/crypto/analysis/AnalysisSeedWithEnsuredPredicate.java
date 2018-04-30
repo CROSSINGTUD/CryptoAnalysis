@@ -100,9 +100,4 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public String toString() {
 		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
 	}
-
-	@Override
-	public boolean contradictsNegations() {
-		return false;
-	}
 }

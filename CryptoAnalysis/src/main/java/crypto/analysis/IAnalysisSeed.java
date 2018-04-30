@@ -16,8 +16,6 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 	}
 	abstract void execute();
 
-	abstract boolean contradictsNegations();
-	
 	public SootMethod getMethod(){
 		return stmt().getMethod();
 	}

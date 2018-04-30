@@ -346,7 +346,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private Collection<? extends State> getTargetStates(TransitionFunction value) {
-		// TODO we still need to implement PhaseII of IDE in IDEAL
 		Set<State> res = Sets.newHashSet();
 		for (ITransition t : value.values()) {
 			if (t.to() != null)
@@ -531,10 +530,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return false;
 	}
 
-	@Override
-	public boolean contradictsNegations() {
-		return false;
-	}
 
 	public Set<CryptSLPredicate> getMissingPredicates() {
 		return missingPredicates;
