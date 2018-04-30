@@ -122,7 +122,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 
-		computeTypestateErrorUnits(unitToStates);
+		computeTypestateErrorUnits();
 		computeTypestateErrorsForEndOfObjectLifeTime();
 		
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
@@ -152,28 +152,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void runExtractParameterAnalysis() {
-		ExtractParameterAnalysis parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner,allCallsOnObject, spec.getFSM());
+		ExtractParameterAnalysis parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
 		parameterAnalysis.run();
 		parametersToValues = parameterAnalysis.getCollectedValues();
 	}
 	
-	private void computeTypestateErrorUnits(Multimap<Statement, State> unitToStates) {
-//		for (Statement curr : unitToStates.keySet()) {
-//			Collection<State> stateAtCurrMinusPred = Sets.newHashSet(unitToStates.get(curr));
-//			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
-//				Statement predStmt = new Statement((Stmt) pred, curr.getMethod());
-//				Collection<State> stateAtPred = unitToStates.get(predStmt);
-//				stateAtCurrMinusPred.removeAll(stateAtPred);
-//				for (State newStateAtCurr : stateAtCurrMinusPred) {
-//					typeStateChangeAtStatement(predStmt, newStateAtCurr);
-//					if (newStateAtCurr instanceof ErrorStateNode && !stateAtPred.isEmpty()) {
-//						ErrorStateNode errorStateNode = (ErrorStateNode) newStateAtCurr;
-//						cryptoScanner.getAnalysisListener().reportError(new TypestateError(predStmt, getSpec().getRule(), errorStateNode.getExpectedCalls()));
-//					}
-//				}
-//			}
-//		}
-		
+	private void computeTypestateErrorUnits() {
 		Set<Statement> allTypestateChangeStatements = Sets.newHashSet();
 		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			allTypestateChangeStatements.addAll(c.getValue().getLastStateChangeStatements());

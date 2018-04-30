@@ -1,21 +1,8 @@
 package main;
 
-import java.security.GeneralSecurityException;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.google.common.base.Stopwatch;
 
 public class Main {
-	public static void main(String...args) throws GeneralSecurityException{
-		correct();
-		wrong();
-		wrongWithContext();
-		wrongWithTwoContexts();
-	}
-
 	private static void correct() {
 		Stopwatch watch = Stopwatch.createStarted();
 		watch.isRunning();
@@ -40,8 +27,8 @@ public class Main {
 
 	private static void wrongWithTwoContexts() {
 		Stopwatch watch = Stopwatch.createStarted();
-		context(watch);
 		context2(watch);
+		context(watch);
 	}
 
 	private static void context2(Stopwatch watch) {
