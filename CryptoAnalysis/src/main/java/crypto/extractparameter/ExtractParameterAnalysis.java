@@ -14,8 +14,10 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.rules.CryptSLMethod;
@@ -117,10 +119,10 @@ public class ExtractParameterAnalysis {
 				.getOrCreate(new AdditionalBoomerangQuery(stmt, new Val((Local) parameter, stmt.getMethod())));
 		query.addListener(new QueryListener() {
 			@Override
-			public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res) {
-				for (Cell<Statement, Val, NoWeight> v : res.cellSet()) {
-					collectedValues.put(new CallSiteWithParamIndex(stmt, v.getColumnKey(), index, varNameInSpecification),
-							v.getRowKey());
+			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
+				for (ForwardQuery v : res.getAllocationSites().keySet()) {
+					collectedValues.put(new CallSiteWithParamIndex(stmt, v.var(), index, varNameInSpecification),
+							v.stmt());
 				}
 			}
 		});
@@ -138,7 +140,7 @@ public class ExtractParameterAnalysis {
 
 		protected boolean solved;
 		private List<QueryListener> listeners = Lists.newLinkedList();
-		private Table<Statement, Val, NoWeight> res;
+		private BackwardBoomerangResults<NoWeight> res;
 
 		public void solve() {
 			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
@@ -147,10 +149,9 @@ public class ExtractParameterAnalysis {
 					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
 				}
 			};
-			boomerang.solve(this);
+			res = boomerang.solve(this);
 			boomerang.debugOutput();
 			// log("Solving query "+ accessGraph + " @ " + stmt);
-			res = boomerang.getResults(this);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
 			}
@@ -170,8 +171,8 @@ public class ExtractParameterAnalysis {
 		}
 	}
 
-	public static interface QueryListener {
-		public void solved(AdditionalBoomerangQuery q, Table<Statement, Val, NoWeight> res);
+	private static interface QueryListener {
+		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
 	}
 	
 
