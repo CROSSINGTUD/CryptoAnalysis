@@ -109,6 +109,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		runTypestateAnalysis();
+		if(results == null)
+			//Timeout occured.
+			return;
+		allCallsOnObject = results.getInvokedMethodOnInstance();
 		runExtractParameterAnalysis();
 		checkInternalConstraints();
 
@@ -148,7 +152,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runTypestateAnalysis() {
 		analysis.run(this);
 		results = analysis.getResults();
-		allCallsOnObject = results.getInvokedMethodOnInstance();
 	}
 
 	private void runExtractParameterAnalysis() {

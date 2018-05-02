@@ -137,7 +137,9 @@ public abstract class ExtendedIDEALAnaylsis {
 			if(s instanceof WeightedForwardQuery){
 				WeightedForwardQuery<TransitionFunction> seed = (WeightedForwardQuery<TransitionFunction>) s;
 				run((WeightedForwardQuery<TransitionFunction>)seed);
-				seedToSolver.put(seed, getResults());
+				if(getResults() != null){
+					seedToSolver.put(seed, getResults());
+				}
 			}
 		}
 		return seedToSolver;
