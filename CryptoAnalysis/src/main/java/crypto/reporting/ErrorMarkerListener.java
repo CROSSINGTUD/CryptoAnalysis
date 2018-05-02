@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -30,9 +31,11 @@ import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLArithmeticConstraint;
 import crypto.rules.CryptSLComparisonConstraint;
@@ -158,6 +161,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 				msg.append(extractionError.getViolatedConstraint());
 				msg.append(" could not be evaluted due to insufficient information.");
 				addMarker(extractionError.getErrorLocation(), msg.toString());
+			}
+
+			@Override
+			public void visit(NeverTypeOfError neverTypeOfError) {
+				addMarker(neverTypeOfError.getErrorLocation(), evaluateBrokenConstraint(neverTypeOfError.getExtractedValues(),neverTypeOfError.getBrokenConstraint(), neverTypeOfError.getErrorLocation()));
 			}});
 	}
 	
@@ -170,7 +178,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 
-	private String evaluateBrokenConstraint(Multimap<CallSiteWithParamIndex, Statement> extractedValues, final ISLConstraint brokenConstraint, Statement location) {
+	private String evaluateBrokenConstraint(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, final ISLConstraint brokenConstraint, Statement location) {
 		StringBuilder msg = new StringBuilder();
 		if (brokenConstraint instanceof CryptSLPredicate) {
 			CryptSLPredicate brokenPred = (CryptSLPredicate) brokenConstraint;
@@ -245,7 +253,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		}
 	}
 
-	private String evaluateValueConstraint(Multimap<CallSiteWithParamIndex, Statement> extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
+	private String evaluateValueConstraint(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
 		CryptSLObject crySLVar = brokenConstraint.getVar();
 		StringBuilder msg = new StringBuilder(extractVarName(extractedValues, location, crySLVar));
 
@@ -290,7 +298,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		return msg.append('}').toString();
 	}
 
-	private String extractVarName(Multimap<CallSiteWithParamIndex, Statement> extractedValues, Statement location, CryptSLObject crySLVar) {
+	private String extractVarName(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, Statement location, CryptSLObject crySLVar) {
 		StringBuilder msg = new StringBuilder();
 		Stmt allocSite = location.getUnit().get();
 		if (allocSite instanceof AssignStmt && ((AssignStmt) allocSite).getLeftOp().getType().toQuotedString().equals(crySLVar.getJavaType())) {
@@ -444,7 +452,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void collectedValues(final AnalysisSeedWithSpecification arg0, final Multimap<CallSiteWithParamIndex, Statement> arg1) {
+	public void collectedValues(final AnalysisSeedWithSpecification arg0, final Multimap<CallSiteWithParamIndex, ExtractedValue> arg1) {
 		// Nothing
 	}
 

@@ -10,6 +10,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -17,6 +18,7 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import sync.pds.solver.nodes.Node;
@@ -38,9 +40,9 @@ public class CrySLResultsReporter  {
 		return listeners.remove(listener);
 	}
 
-	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
+	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues) {
 		for (CrySLAnalysisListener listen : listeners) {
-			listen.collectedValues(seed, collectedValues);
+			listen.collectedValues(seed, parametersToValues);
 		}
 	}
 

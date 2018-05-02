@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 
 import boomerang.IntAndStringBoomerangOptions;
 import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import soot.SootMethod;
 import soot.Unit;
@@ -21,7 +22,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
             AssignStmt as = (AssignStmt) stmt;
             if (as.getLeftOp().equals(fact.value())) {
                 if (icfg.getCalleesOfCallAt(stmt).isEmpty())
-                    return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp()));
+                    return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(),new Statement(as, m)));
             }
         }
         return super.getAllocationVal(m, stmt, fact, icfg);

@@ -22,6 +22,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -39,6 +40,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -259,7 +261,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
-			Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
+			Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
 		
 	}
 

@@ -10,14 +10,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ICryptSLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLArithmeticConstraint;
@@ -30,6 +34,7 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import java_cup.symbol_set;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Value;
@@ -45,11 +50,11 @@ public class ConstraintSolver {
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
 	private final Collection<Statement> collectedCalls;
-	private final Multimap<CallSiteWithParamIndex, Statement> parsAndVals;
+	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
 	private final CrySLResultsReporter reporter;
 
-	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, Statement> parametersToValues, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
+	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
 		classSpec = spec;
 		parsAndVals = parametersToValues;
 		this.collectedCalls = collectedCalls;
@@ -261,8 +266,8 @@ public class ConstraintSolver {
 		for (CallSiteWithParamIndex wrappedCallSite : parsAndVals.keySet()) {
 			final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
 
-			for (Statement wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
-				final Stmt allocSite = wrappedAllocSite.getUnit().get();
+			for (ExtractedValue wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
+				final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
 
 				if (wrappedCallSite.getVarName().equals(varName)) {
 					if (callSite.equals(allocSite)) {
@@ -374,14 +379,16 @@ public class ConstraintSolver {
 				Statement res = null;
 				for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
 					if (cs.getVarName().equals(varName)) {
-						Collection<Statement> vals = parsAndVals.get(cs);
-						for (Statement stmt : vals) {
+						Collection<ExtractedValue> vals = parsAndVals.get(cs);
+						for (ExtractedValue extractedVal : vals) {
+							Statement stmt = extractedVal.stmt();
 							if (stmt.getUnit().get() instanceof AssignStmt) {
 								Value rightAss = ((AssignStmt) stmt.getUnit().get()).getRightOp();
 								if (!rightAss.getType().toQuotedString().equals(parameters.get(1).getName())) {
 								} else {
-									//TODO: Fix null
-									return stmt;
+									//TODO: Fix null									
+									reporter.reportError(new NeverTypeOfError(stmt, classSpec.getRule(), null, pred, parsAndVals));
+									return null;
 								}
 							} else {
 							}

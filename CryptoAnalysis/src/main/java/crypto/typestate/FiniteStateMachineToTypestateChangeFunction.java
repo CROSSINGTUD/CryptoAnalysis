@@ -61,7 +61,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 					NewExpr newExpr = (NewExpr) as.getRightOp();
 					if(analyzedType.contains(newExpr.getType())){
 						AssignStmt stmt = (AssignStmt) unit;
-						out.add(createQuery(unit,method,new AllocVal(stmt.getLeftOp(), method, as.getRightOp())));
+						out.add(createQuery(unit,method,new AllocVal(stmt.getLeftOp(), method, as.getRightOp(), new Statement(stmt, method))));
 					}
 				}
 			}
@@ -75,11 +75,11 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		if (calledMethod.isStatic()) {
 			if(unit instanceof AssignStmt){
 				AssignStmt stmt = (AssignStmt) unit;
-				out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp())));
+				out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp(), new Statement(stmt,method))));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-			out.add(createQuery(unit,method,new AllocVal(iie.getBase(), method,iie)));
+			out.add(createQuery(unit,method,new AllocVal(iie.getBase(), method,iie, new Statement((Stmt) unit,method))));
 		}
 		return out;
 	}

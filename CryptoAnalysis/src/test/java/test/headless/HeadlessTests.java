@@ -14,6 +14,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
+import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
@@ -27,9 +28,11 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import sync.pds.solver.nodes.Node;
@@ -48,7 +51,7 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -89,6 +92,19 @@ public class HeadlessTests {
 
 	}
 
+
+	@Test
+	public void glassfishExample() {
+		String sootClassPath = new File("../CryptoAnalysisTargets/glassfish-embedded/bin").getAbsolutePath();
+		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.lang.String getKeystorePassword()>", NeverTypeOfError.class, 1);
+
+		scanner.exec();
+		assertErrors();
+	}
+	
 	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath) {
 		return createAnalysisFor(applicationClassPath, sootClassPath,
 				new File(IDEALCrossingTestingFramework.RESOURCE_PATH).getAbsolutePath());
@@ -153,6 +169,7 @@ public class HeadlessTests {
 					currCount = errorMarkerCountPerErrorTypeAndMethod
 							.get(error.getErrorLocation().getMethod().toString(), error.getClass());
 				}
+				System.out.println(error.getErrorLocation().getMethod() + "  "+error);
 				Integer newCount = --currCount;
 				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
 						error.getClass(), newCount);
@@ -185,7 +202,7 @@ public class HeadlessTests {
 
 			@Override
 			public void collectedValues(AnalysisSeedWithSpecification seed,
-					Multimap<CallSiteWithParamIndex, Statement> collectedValues) {
+					Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
 			}
 
 			@Override

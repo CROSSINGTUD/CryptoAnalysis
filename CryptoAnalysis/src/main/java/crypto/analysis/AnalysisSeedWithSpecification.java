@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -16,6 +17,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.ForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -25,6 +27,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
+import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ICryptSLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLCondPredicate;
@@ -63,7 +66,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private final ClassSpecification spec;
 	private ExtendedIDEALAnaylsis analysis;
-	private Multimap<CallSiteWithParamIndex, Statement> parametersToValues = HashMultimap.create();
+	private Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues = HashMultimap.create();
 	private ForwardBoomerangResults<TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
@@ -253,7 +256,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						&& predicateParameterEquals(predToBeEnsured.getParameters(), retObject.getKey())) {
 					AssignStmt as = (AssignStmt) currStmt.getUnit().get();
 					Value leftOp = as.getLeftOp();
-					AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), as.getRightOp());
+					AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), as.getRightOp(), new Statement(as, currStmt.getMethod()));
 					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
 				}
 				int i = 0;
@@ -450,11 +453,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return pred.isNegated() != requiredPredicatesExist;
 	}
 
-	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<Statement> collection) {
+	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
 		Collection<String> values = new ArrayList<String>();
-		for (Statement stmt : collection) {
-			Unit u = stmt.getUnit().get();
-			if (cswpi.stmt().equals(stmt)) {
+		for (ExtractedValue q : collection) {
+			Unit u = q.stmt().getUnit().get();
+			if (cswpi.stmt().equals(q.stmt())) {
 				if (u instanceof AssignStmt) {
 					values.add(retrieveConstantFromValue(
 							((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
@@ -538,7 +541,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return missingPredicates;
 	}
 
-	public Multimap<CallSiteWithParamIndex, Statement> getExtractedValues() {
+	public Multimap<CallSiteWithParamIndex, ExtractedValue> getExtractedValues() {
 		return parametersToValues;
 	}
 
