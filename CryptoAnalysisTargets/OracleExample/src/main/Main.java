@@ -1,6 +1,11 @@
 package main;
 
+import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -18,5 +23,12 @@ public class Main {
 		Mac mac = Mac.getInstance("HmacSHA1");
 		mac.init(secretKeySpec);
 		mac.doFinal(plainText);
+	}
+	
+	public static void keyStoreExample() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		KeyStore instance = KeyStore.getInstance("Test");
+		String pwdAsString = "Test";
+		char[] password = pwdAsString.toCharArray();
+		instance.load(null, password);
 	}
 }

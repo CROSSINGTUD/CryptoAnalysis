@@ -48,6 +48,7 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 
 		scanner.exec();
 		assertErrors();

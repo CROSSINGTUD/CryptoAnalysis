@@ -371,6 +371,7 @@ public class ConstraintSolver {
 				// -> first parameter is always the variable
 				// -> second parameter is always the type
 				String varName = ((CryptSLObject) parameters.get(0)).getVarName();
+				Statement res = null;
 				for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
 					if (cs.getVarName().equals(varName)) {
 						Collection<Statement> vals = parsAndVals.get(cs);
@@ -378,20 +379,18 @@ public class ConstraintSolver {
 							if (stmt.getUnit().get() instanceof AssignStmt) {
 								Value rightAss = ((AssignStmt) stmt.getUnit().get()).getRightOp();
 								if (!rightAss.getType().toQuotedString().equals(parameters.get(1).getName())) {
-									return null;
 								} else {
 									//TODO: Fix null
 									return stmt;
 								}
 							} else {
-								return null;
 							}
 
 						}
 					}
 				}
 
-				return null;
+				return res;
 			case "length":
 				//pred looks as follows: neverTypeOf($varName)
 				// -> parameter is always the variable
