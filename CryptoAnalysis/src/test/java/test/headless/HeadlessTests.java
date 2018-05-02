@@ -52,6 +52,7 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
+		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -100,6 +101,7 @@ public class HeadlessTests {
 
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.lang.String getKeystorePassword()>", NeverTypeOfError.class, 1);
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.lang.String getKeystorePassword()>", ConstraintError.class, 1);
 
 		scanner.exec();
 		assertErrors();

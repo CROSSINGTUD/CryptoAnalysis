@@ -386,9 +386,9 @@ public class ConstraintSolver {
 								Value rightAss = ((AssignStmt) stmt.getUnit().get()).getRightOp();
 								if (!rightAss.getType().toQuotedString().equals(parameters.get(1).getName())) {
 								} else {
-									//TODO: Fix null									
+									//TODO: Fix NeverTypeOfErrors also report a ConstraintError									
 									reporter.reportError(new NeverTypeOfError(stmt, classSpec.getRule(), null, pred, parsAndVals));
-									return null;
+									return stmt;
 								}
 							} else {
 							}
