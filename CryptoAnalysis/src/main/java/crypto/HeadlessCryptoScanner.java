@@ -277,7 +277,7 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_prepend_classpath(true);
 		System.out.println((sootClassPath() + File.pathSeparator + pathToJCE()));
 		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
-		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(":")));
+		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
 		Options.v().set_exclude(getExcludeList());
 		Options.v().set_full_resolver(true);

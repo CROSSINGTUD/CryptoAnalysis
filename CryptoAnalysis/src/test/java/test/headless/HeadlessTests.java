@@ -56,7 +56,7 @@ public class HeadlessTests {
 	@Test
 	public void stopwatchExample() {
 		String applicationClassPath = new File("../CryptoAnalysisTargets/StopwatchExample/bin").getAbsolutePath();
-		String sootClassPath = applicationClassPath + ":"
+		String sootClassPath = applicationClassPath + File.pathSeparator
 				+ new File("../CryptoAnalysisTargets/StopwatchExample/guava-23.0.jar").getAbsolutePath();
 		String rulesDir = new File("../CryptoAnalysisTargets/StopwatchExample/rules").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
@@ -74,7 +74,7 @@ public class HeadlessTests {
 	@Test
 	public void stopwatchPathExpressionExample() {
 		String applicationClassPath = new File("../CryptoAnalysisTargets/StopwatchPathExpression/bin").getAbsolutePath();
-		String sootClassPath = applicationClassPath + ":"
+		String sootClassPath = applicationClassPath + File.pathSeparator
 				+ new File("../CryptoAnalysisTargets/StopwatchPathExpression/lib/guava-23.0.jar").getAbsolutePath();
 		String rulesDir = new File("../CryptoAnalysisTargets/StopwatchPathExpression/rules").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
