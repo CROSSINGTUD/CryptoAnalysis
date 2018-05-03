@@ -34,6 +34,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -92,7 +93,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(ConstraintError constraintError) {
-				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getExtractedValues(),constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
+				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getCallSiteWithExtractedValue(),constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
 			}
 
 			@Override
@@ -165,7 +166,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(NeverTypeOfError neverTypeOfError) {
-				addMarker(neverTypeOfError.getErrorLocation(), evaluateBrokenConstraint(neverTypeOfError.getExtractedValues(),neverTypeOfError.getBrokenConstraint(), neverTypeOfError.getErrorLocation()));
+				addMarker(neverTypeOfError.getErrorLocation(), evaluateBrokenConstraint(neverTypeOfError.getCallSiteWithExtractedValue(),neverTypeOfError.getBrokenConstraint(), neverTypeOfError.getErrorLocation()));
 			}});
 	}
 	
@@ -178,21 +179,19 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 
-	private String evaluateBrokenConstraint(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, final ISLConstraint brokenConstraint, Statement location) {
+	private String evaluateBrokenConstraint(CallSiteWithExtractedValue extractedValues, final ISLConstraint brokenConstraint, Statement location) {
 		StringBuilder msg = new StringBuilder();
 		if (brokenConstraint instanceof CryptSLPredicate) {
 			CryptSLPredicate brokenPred = (CryptSLPredicate) brokenConstraint;
 
 			switch (brokenPred.getPredName()) {
 				case "neverTypeOf":
-					if (location.getUnit().get() instanceof JAssignStmt) {
-						msg.append("Variable ");
-						msg.append(((JAssignStmt) location.getUnit().get()).getLeftOp());
-					} else {
-						msg.append("This variable");
-					}
-					msg.append(" must not be of type ");
-					msg.append(brokenPred.getParameters().get(1).getName());
+					Value variable = extractedValues.getCallSite().fact().value();
+					msg.append("Variable ");
+					msg.append(variable);
+					msg.append(" must not be ");
+					msg.append(extractedValues.getVal().getValue());
+					msg.append(" (see definition in method" + extractedValues.getVal().stmt().getMethod().getName() +")");
 					msg.append(".");
 					break;
 			}
@@ -253,14 +252,21 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		}
 	}
 
-	private String evaluateValueConstraint(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
+	private String evaluateValueConstraint(CallSiteWithExtractedValue extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
 		CryptSLObject crySLVar = brokenConstraint.getVar();
 		StringBuilder msg = new StringBuilder(extractVarName(extractedValues, location, crySLVar));
-
+		if(extractedValues.getVal().getValue() != null){
+			Value stmt = extractedValues.getVal().getValue();
+			if(stmt instanceof Constant){
+				msg.append(" has value ");
+				msg.append(stmt);
+				msg.append(" but");
+			}
+		}
 		msg.append(" should be any of ");
 		CryptSLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Stmt stmt = location.getUnit().get();
+			Stmt stmt = extractedValues.getVal().stmt().getUnit().get();
 			String[] splitValues = new String[] { "" };
 			if (stmt instanceof AssignStmt) {
 				Value rightSide = ((AssignStmt) stmt).getRightOp();
@@ -298,7 +304,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		return msg.append('}').toString();
 	}
 
-	private String extractVarName(Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues, Statement location, CryptSLObject crySLVar) {
+	private String extractVarName(CallSiteWithExtractedValue  extractedValues, Statement location, CryptSLObject crySLVar) {
 		StringBuilder msg = new StringBuilder();
 		Stmt allocSite = location.getUnit().get();
 		if (allocSite instanceof AssignStmt && ((AssignStmt) allocSite).getLeftOp().getType().toQuotedString().equals(crySLVar.getJavaType())) {
@@ -312,51 +318,50 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			Value value = par.getValue();
 			if (!(value instanceof Constant)) {
 				boolean neverFound = true;
-				for (CallSiteWithParamIndex a : extractedValues.keySet()) {
-					if (a.getVarName().equals(crySLVar.getVarName())) {
-						if (a.fact().value().getType().equals(par.getValue().getType())) {
-							String varName = par.getValue().toString();
-							if (varName.matches("\\$[a-z][0-9]+")) {
-								msg.append(OBJECT_OF_TYPE);
-								msg.append(par.getValue().getType().toQuotedString());
-								neverFound = false;
-							} else {
-								msg.append(VAR);
-								msg.append(varName);
-								neverFound = false;
-							}
-							break;
+				CallSiteWithParamIndex a = extractedValues.getCallSite();
+				if (a.getVarName().equals(crySLVar.getVarName())) {
+					if (a.fact().value().getType().equals(par.getValue().getType())) {
+						String varName = par.getValue().toString();
+						if (varName.matches("\\$[a-z][0-9]+")) {
+							msg.append(OBJECT_OF_TYPE);
+							msg.append(par.getValue().getType().toQuotedString());
+							neverFound = false;
+						} else {
+							msg.append(VAR);
+							msg.append(varName);
+							neverFound = false;
 						}
+						break;
 					}
-					if (neverFound) {
-						Type valueType = value.getType();
-						String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
-						boolean sameType = crySLVar.getJavaType().equals(type);
-						if (!sameType && valueType instanceof RefType) {
-							SootClass sootClass = ((RefType) valueType).getSootClass();
-							List<String> superTypes = fillTypeList(sootClass);
-							for (SootClass sc : sootClass.getInterfaces()) {
-								superTypes.add(sc.getType().toQuotedString());
-							}
-							sameType = superTypes.contains(crySLVar.getJavaType());
+				}
+				if (neverFound) {
+					Type valueType = value.getType();
+					String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
+					boolean sameType = crySLVar.getJavaType().equals(type);
+					if (!sameType && valueType instanceof RefType) {
+						SootClass sootClass = ((RefType) valueType).getSootClass();
+						List<String> superTypes = fillTypeList(sootClass);
+						for (SootClass sc : sootClass.getInterfaces()) {
+							superTypes.add(sc.getType().toQuotedString());
 						}
-						if (sameType) {
-							String varName = par.getValue().toString();
-							if (varName.matches("\\$[a-z][0-9]+")) {
-								msg.append(OBJECT_OF_TYPE);
+						sameType = superTypes.contains(crySLVar.getJavaType());
+					}
+					if (sameType) {
+						String varName = par.getValue().toString();
+						if (varName.matches("\\$[a-z][0-9]+")) {
+							msg.append(OBJECT_OF_TYPE);
+							msg.append(par.getValue().getType().toQuotedString());
+							neverFound = false;
+						} else {
+							msg.append(VAR);
+							msg.append(varName);
+							if (varName.matches("r[0-9]+")) {
+								msg.append(" of type ");
 								msg.append(par.getValue().getType().toQuotedString());
-								neverFound = false;
-							} else {
-								msg.append(VAR);
-								msg.append(varName);
-								if (varName.matches("r[0-9]+")) {
-									msg.append(" of type ");
-									msg.append(par.getValue().getType().toQuotedString());
-								}
-								neverFound = false;
 							}
-							break;
+							neverFound = false;
 						}
+						break;
 					}
 				}
 			} else {

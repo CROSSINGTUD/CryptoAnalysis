@@ -116,8 +116,9 @@ public class ExtractParameterAnalysis {
 					new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification), new ExtractedValue(stmt,parameter));
 			return;
 		}
+		Val queryVal = new Val((Local) parameter, stmt.getMethod());
 		AdditionalBoomerangQuery query = additionalBoomerangQuery
-				.getOrCreate(new AdditionalBoomerangQuery(stmt, new Val((Local) parameter, stmt.getMethod())));
+				.getOrCreate(new AdditionalBoomerangQuery(stmt, queryVal));
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
@@ -129,7 +130,7 @@ public class ExtractParameterAnalysis {
 					} else {
 						extractedValue = new ExtractedValue(v.stmt(),v.var().value());
 					}
-					collectedValues.put(new CallSiteWithParamIndex(stmt, v.var(), index, varNameInSpecification),
+					collectedValues.put(new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification),
 							extractedValue);
 				}
 			}

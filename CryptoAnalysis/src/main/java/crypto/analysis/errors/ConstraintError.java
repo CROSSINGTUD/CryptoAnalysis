@@ -1,12 +1,8 @@
 package crypto.analysis.errors;
 
-import com.google.common.collect.Multimap;
-
-import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLRule;
 import sync.pds.solver.nodes.Node;
@@ -14,12 +10,12 @@ import sync.pds.solver.nodes.Node;
 public class ConstraintError extends ErrorAtCodeObjectLocation{
 
 	private ISLConstraint brokenConstraint;
-	private Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues;
+	private CallSiteWithExtractedValue callSiteWithParamIndex;
 
-	public ConstraintError(Statement stmt,  CryptSLRule rule, Node<Statement, Val> objectLocation, ISLConstraint con, Multimap<CallSiteWithParamIndex, ExtractedValue> extractedValues) {
-		super(stmt, rule, objectLocation);
+	public ConstraintError(CallSiteWithExtractedValue cs,  CryptSLRule rule, Node<Statement, Val> objectLocation, ISLConstraint con) {
+		super(cs.getCallSite().stmt(), rule, objectLocation);
+		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;
-		this.extractedValues = extractedValues;
 	}
 	
 	public ISLConstraint getBrokenConstraint() {
@@ -30,8 +26,8 @@ public class ConstraintError extends ErrorAtCodeObjectLocation{
 		visitor.visit(this);
 	}
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getExtractedValues() {
-		return extractedValues;
-	}
 
+	public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
+		return callSiteWithParamIndex;
+	}
 }

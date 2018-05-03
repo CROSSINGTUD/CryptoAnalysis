@@ -28,6 +28,9 @@ import boomerang.jimple.Val;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
+import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -202,8 +205,13 @@ public abstract class CryptoScanner {
 			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
 			for(CryptSLPredicate pred : missingPredicates){
 				CryptSLRule rule = seed.getSpec().getRule();
-				if (!rule.getPredicates().contains(pred))
-					getAnalysisListener().reportError(new RequiredPredicateError(pred, pred.getLocation(), seed.getSpec().getRule(), seed.getExtractedValues()));
+				if (!rule.getPredicates().contains(pred)){
+					for(Entry<CallSiteWithParamIndex, ExtractedValue> v : seed.getExtractedValues().entries()){
+						if(pred.getInvolvedVarNames().contains(v.getKey().getVarName())){	
+							getAnalysisListener().reportError(new RequiredPredicateError(pred, pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v.getKey(),v.getValue())));
+						}
+					}
+				}
 			}
 		}
 		getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
