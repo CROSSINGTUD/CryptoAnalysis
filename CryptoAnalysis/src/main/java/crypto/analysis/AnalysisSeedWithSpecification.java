@@ -23,6 +23,7 @@ import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
+import crypto.analysis.ConstraintSolver.EvaluatableConstraint;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -398,7 +399,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (CryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
 			final ISLConstraint conditional = rem.getConstraint();
 			if (conditional != null) {
-				if (constraintSolver.evaluate(conditional) != null) {
+				EvaluatableConstraint evalCons = constraintSolver.createConstraint(conditional);
+				evalCons.evaluate();
+				if (evalCons.hasErrors()) {
 					remainingPredicates.remove(rem);
 				}
 			}
