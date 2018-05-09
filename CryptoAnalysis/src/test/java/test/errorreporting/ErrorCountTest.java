@@ -8,6 +8,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -15,6 +16,7 @@ import test.assertions.Assertions;
 
 public class ErrorCountTest extends UsagePatternTestingFramework {
 
+	@Ignore
 	@Test
 	public void CipherPredicateCountTest1() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -28,7 +30,7 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 		Assertions.constraintErrors(1);
 		cCipher.getIV();
 	}
-
+	@Ignore
 	@Test
 	public void CipherPredicateCountTest2() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("DES");
@@ -45,6 +47,7 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@Ignore
 	public void CipherPredicateCountTest3() throws GeneralSecurityException {
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(129);
@@ -61,6 +64,7 @@ public class ErrorCountTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@Ignore
 	public void SecretKeySpecTest1() throws GeneralSecurityException, UnsupportedEncodingException {
 		SecretKeySpec key = new SecretKeySpec("keyMaterial".getBytes("UTF-8"), "AES");
 		Assertions.notHasEnsuredPredicate(key);
