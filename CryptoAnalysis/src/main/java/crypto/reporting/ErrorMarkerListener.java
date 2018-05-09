@@ -93,321 +93,45 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(ConstraintError constraintError) {
-				addMarker(constraintError.getErrorLocation(), evaluateBrokenConstraint(constraintError.getCallSiteWithExtractedValue(),constraintError.getBrokenConstraint(), constraintError.getErrorLocation()));
+				addMarker(constraintError.getErrorLocation(), constraintError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(ForbiddenMethodError forbiddenMethodError) {
-				final StringBuilder msg = new StringBuilder();
-				msg.append("Detected call to forbidden method");
-				msg.append(forbiddenMethodError.getCalledMethod().getSubSignature());
-				if (!forbiddenMethodError.getAlternatives().isEmpty()) {
-					msg.append(". Instead, call to method ");
-					Collection<String> subSignatures = toSubSignatures(forbiddenMethodError.getAlternatives());
-					msg.append(Joiner.on(", ").join(subSignatures));
-					msg.append(".");
-				}
-				addMarker(forbiddenMethodError.getErrorLocation(), msg.toString());
+				addMarker(forbiddenMethodError.getErrorLocation(), forbiddenMethodError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(IncompleteOperationError incompleteOperationError) {
-				Statement location = incompleteOperationError.getErrorLocation();
-				Val errorVariable = incompleteOperationError.getErrorVariable();
-				Collection<SootMethod> expectedCalls = incompleteOperationError.getExpectedMethodCalls();
-				final StringBuilder msg = new StringBuilder();
-				msg.append("Operation with ");
-				final String type = errorVariable.value().getType().toString();
-				msg.append(type.substring(type.lastIndexOf('.') + 1));
-				msg.append(" object not completed. Expected call to ");
-				final Set<String> altMethods = new HashSet<>();
-				for (final SootMethod expectedCall : expectedCalls) {
-					altMethods.add(expectedCall.getName());
-				}
-				msg.append(Joiner.on(", ").join(altMethods));
-				addMarker(location, msg.toString());
+				addMarker(incompleteOperationError.getErrorLocation(), incompleteOperationError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(TypestateError typestateError) {
-				Statement location = typestateError.getErrorLocation();
-				Collection<SootMethod> expectedCalls = typestateError.getExpectedMethodCalls();
-				final StringBuilder msg = new StringBuilder();
-				msg.append("Unexpected call to method ");
-				msg.append(getCalledMethodName(location));
-				msg.append(". Expect a call to one of the following methods ");
-				final Set<String> altMethods = new HashSet<>();
-				for (final SootMethod expectedCall : expectedCalls) {
-					altMethods.add(expectedCall.getName());
-				}
-				msg.append(Joiner.on(",").join(altMethods));
-				addMarker(location, msg.toString());
+				addMarker(typestateError.getErrorLocation(), typestateError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(RequiredPredicateError predicateError) {
-				final StringBuilder msg = new StringBuilder();
-				Statement stmt = predicateError.getErrorLocation();
-				msg.append(extractVarName(predicateError.getExtractedValues(), stmt, (CryptSLObject) predicateError.getContradictedPredicate().getParameters().get(0)));
-				msg.append(" was not properly ");
-				String predName = predicateError.getContradictedPredicate().getPredName();
-				msg.append(predName);
-				addMarker(stmt, msg.toString());
+				addMarker(predicateError.getErrorLocation(), predicateError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(ImpreciseValueExtractionError extractionError) {
-				final StringBuilder msg = new StringBuilder();
-				msg.append("Constraint ");
-				msg.append(extractionError.getViolatedConstraint());
-				msg.append(" could not be evaluted due to insufficient information.");
-				addMarker(extractionError.getErrorLocation(), msg.toString());
+				addMarker(extractionError.getErrorLocation(), extractionError.toErrorMarkerString());
 			}
 
 			@Override
 			public void visit(NeverTypeOfError neverTypeOfError) {
-				addMarker(neverTypeOfError.getErrorLocation(), evaluateBrokenConstraint(neverTypeOfError.getCallSiteWithExtractedValue(),neverTypeOfError.getBrokenConstraint(), neverTypeOfError.getErrorLocation()));
+				addMarker(neverTypeOfError.getErrorLocation(), neverTypeOfError.toErrorMarkerString());
 			}});
 	}
 	
-	protected Collection<String> toSubSignatures(Collection<SootMethod> methods) {
-		Set<String> subSignatures = Sets.newHashSet();
-		for(SootMethod m : methods){
-			subSignatures.add(m.getName());
-		}
-		return subSignatures;
-	}
 
-
-	private String evaluateBrokenConstraint(CallSiteWithExtractedValue extractedValues, final ISLConstraint brokenConstraint, Statement location) {
-		StringBuilder msg = new StringBuilder();
-		if (brokenConstraint instanceof CryptSLPredicate) {
-			CryptSLPredicate brokenPred = (CryptSLPredicate) brokenConstraint;
-
-			switch (brokenPred.getPredName()) {
-				case "neverTypeOf":
-					Value variable = extractedValues.getCallSite().fact().value();
-					msg.append("Variable ");
-					msg.append(variable);
-					msg.append(" must not be ");
-					msg.append(extractedValues.getVal().getValue());
-					msg.append(" (see definition in method" + extractedValues.getVal().stmt().getMethod().getName() +")");
-					msg.append(".");
-					break;
-			}
-		} else if (brokenConstraint instanceof CryptSLValueConstraint) {
-			return evaluateValueConstraint(extractedValues, (CryptSLValueConstraint) brokenConstraint, location);
-		} else if (brokenConstraint instanceof CryptSLArithmeticConstraint) {
-			final CryptSLArithmeticConstraint brokenArthConstraint = (CryptSLArithmeticConstraint) brokenConstraint;
-			msg.append(brokenArthConstraint.getLeft());
-			msg.append(" ");
-			msg.append(brokenArthConstraint.getOperator());
-			msg.append(" ");
-			msg.append(brokenArthConstraint.getRight());
-		} else if (brokenConstraint instanceof CryptSLComparisonConstraint) {
-			final CryptSLComparisonConstraint brokenCompCons = (CryptSLComparisonConstraint) brokenConstraint;
-			msg.append("Variable ");
-			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append("must be ");
-			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
-			msg.append(brokenCompCons.getRight().getLeft().getName());
-		} else if (brokenConstraint instanceof CryptSLConstraint) {
-			final CryptSLConstraint cryptSLConstraint = (CryptSLConstraint) brokenConstraint;
-			final ISLConstraint leftSide = cryptSLConstraint.getLeft();
-			final ISLConstraint rightSide = cryptSLConstraint.getRight();
-			switch (cryptSLConstraint.getOperator()) {
-				case and:
-					msg.append(evaluateBrokenConstraint(extractedValues, leftSide, location));
-					msg.append(" or ");
-					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
-					break;
-				case implies:
-					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
-					break;
-				case or:
-					msg.append(evaluateBrokenConstraint(extractedValues, leftSide, location));
-					msg.append(" and ");
-					msg.append(evaluateBrokenConstraint(extractedValues, rightSide, location));
-					break;
-				default:
-					break;
-			}
-
-		}
-		return msg.toString();
-	}
-
-	private String evaluateCompOp(CompOp operator) {
-		switch (operator) {
-			case ge:
-				return " at least ";
-			case g:
-				return " greater than ";
-			case l:
-				return " lesser than ";
-			case le:
-				return " at most ";
-			default:
-				return "equal to";
-		}
-	}
-
-	private String evaluateValueConstraint(CallSiteWithExtractedValue extractedValues, final CryptSLValueConstraint brokenConstraint, Statement location) {
-		CryptSLObject crySLVar = brokenConstraint.getVar();
-		StringBuilder msg = new StringBuilder(extractVarName(extractedValues, location, crySLVar));
-		if(extractedValues.getVal().getValue() != null){
-			Value stmt = extractedValues.getVal().getValue();
-			if(stmt instanceof Constant){
-				msg.append(" has value ");
-				msg.append(stmt);
-				msg.append(" but");
-			}
-		}
-		msg.append(" should be any of ");
-		CryptSLSplitter splitter = brokenConstraint.getVar().getSplitter();
-		if (splitter != null) {
-			Stmt stmt = extractedValues.getVal().stmt().getUnit().get();
-			String[] splitValues = new String[] { "" };
-			if (stmt instanceof AssignStmt) {
-				Value rightSide = ((AssignStmt) stmt).getRightOp();
-				if (rightSide instanceof Constant) {
-					splitValues = filterQuotes(rightSide.toString()).split(splitter.getSplitter());
-				} else if (rightSide instanceof AbstractInvokeExpr) {
-					List<Value> args = ((AbstractInvokeExpr) rightSide).getArgs();
-					for (Value arg : args) {
-						if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
-							splitValues = filterQuotes(arg.toString()).split(splitter.getSplitter());
-							break;
-						}
-					}
-				}
-			} else {
-				splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
-			}
-			if (splitValues.length >= splitter.getIndex()) {
-				for (int i = 0; i < splitter.getIndex(); i++) {
-					msg.append(splitValues[i]);
-					msg.append(splitter.getSplitter());
-				}
-			}
-		}
-		msg.append("{");
-		for (final String val : brokenConstraint.getValueRange()) {
-			if (val.isEmpty()) {
-				msg.append("Empty String");
-			} else {
-				msg.append(val);
-			}
-			msg.append(", ");
-		}
-		msg.delete(msg.length() - 2, msg.length());
-		return msg.append('}').toString();
-	}
-
-	private String extractVarName(CallSiteWithExtractedValue  extractedValues, Statement location, CryptSLObject crySLVar) {
-		StringBuilder msg = new StringBuilder();
-		Stmt allocSite = location.getUnit().get();
-		if (allocSite instanceof AssignStmt && ((AssignStmt) allocSite).getLeftOp().getType().toQuotedString().equals(crySLVar.getJavaType())) {
-			AssignStmt as = (AssignStmt) allocSite;
-			msg.append(VAR);
-			msg.append(as.getLeftOp().toString());
-			return msg.toString();
-		}
-
-		for (ValueBox par : allocSite.getInvokeExpr().getUseBoxes()) {
-			Value value = par.getValue();
-			if (!(value instanceof Constant)) {
-				boolean neverFound = true;
-				CallSiteWithParamIndex a = extractedValues.getCallSite();
-				if (a.getVarName().equals(crySLVar.getVarName())) {
-					if (a.fact().value().getType().equals(par.getValue().getType())) {
-						String varName = par.getValue().toString();
-						if (varName.matches("\\$[a-z][0-9]+")) {
-							msg.append(OBJECT_OF_TYPE);
-							msg.append(par.getValue().getType().toQuotedString());
-							neverFound = false;
-						} else {
-							msg.append(VAR);
-							msg.append(varName);
-							neverFound = false;
-						}
-						break;
-					}
-				}
-				if (neverFound) {
-					Type valueType = value.getType();
-					String type = (valueType instanceof ArrayType) ? ((ArrayType) valueType).getArrayElementType().toQuotedString() : valueType.toQuotedString();
-					boolean sameType = crySLVar.getJavaType().equals(type);
-					if (!sameType && valueType instanceof RefType) {
-						SootClass sootClass = ((RefType) valueType).getSootClass();
-						List<String> superTypes = fillTypeList(sootClass);
-						for (SootClass sc : sootClass.getInterfaces()) {
-							superTypes.add(sc.getType().toQuotedString());
-						}
-						sameType = superTypes.contains(crySLVar.getJavaType());
-					}
-					if (sameType) {
-						String varName = par.getValue().toString();
-						if (varName.matches("\\$[a-z][0-9]+")) {
-							msg.append(OBJECT_OF_TYPE);
-							msg.append(par.getValue().getType().toQuotedString());
-							neverFound = false;
-						} else {
-							msg.append(VAR);
-							msg.append(varName);
-							if (varName.matches("r[0-9]+")) {
-								msg.append(" of type ");
-								msg.append(par.getValue().getType().toQuotedString());
-							}
-							neverFound = false;
-						}
-						break;
-					}
-				}
-			} else {
-				if (((Constant) value).getType().toQuotedString().equals(crySLVar.getJavaType())) {
-					msg.append(value);
-				}
-			}
-		}
-		if (msg.toString().isEmpty()) {
-			msg.append(OBJECT_OF_TYPE);
-			msg.append(crySLVar.getJavaType());
-		}
-		return msg.toString();
-	}
-
-	private List<String> fillTypeList(SootClass sootClass) {
-		List<String> types = new ArrayList<String>();
-		types.add(sootClass.getType().toQuotedString());
-		if (!sootClass.getSuperclass().getType().toQuotedString().equals("java.lang.Object")) {
-			types.addAll(fillTypeList(sootClass.getSuperclass()));
-		}
-		return types;
-	}
 
 	@Override
 	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {
 		addMarker(location.stmt(), "Predicate mismatch");
-	}
-
-	private String getCalledMethodName(Statement location) {
-		Stmt stmt = location.getUnit().get();
-		if(stmt.containsInvokeExpr()){
-			return stmt.getInvokeExpr().getMethod().getName();
-		}
-		return stmt.toString();
-	}
-
-
-	@Override
-	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
-		final StringBuilder msg = new StringBuilder();
-
-		msg.append("Constraint ");
-		msg.append(con);
-		msg.append(" could not be evaluted due to insufficient information.");
-		addMarker(location, msg.toString());
 	}
 
 	@Override

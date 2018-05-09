@@ -270,9 +270,4 @@ public class CSVReporter extends CrySLAnalysisListener {
 		seeds++;
 	}
 
-	@Override
-	public void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location) {
-		
-	}
-
 }

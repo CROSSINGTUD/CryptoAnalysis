@@ -19,4 +19,5 @@ public abstract class AbstractError implements IError{
 	public CryptSLRule getRule() {
 		return rule;
 	}
+	public abstract String toErrorMarkerString();
 }

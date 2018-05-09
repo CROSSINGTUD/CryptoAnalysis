@@ -7,8 +7,6 @@ import java.util.Set;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
-import boomerang.ForwardQuery;
-import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -38,5 +36,4 @@ public interface ICrySLResultsListener {
 
 	void discoveredSeed(IAnalysisSeed curr);
 
-	void unevaluableConstraint(AnalysisSeedWithSpecification seed, ISLConstraint con, Statement location);
 }

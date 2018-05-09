@@ -1,12 +1,7 @@
 package crypto.analysis.errors;
 
-import com.google.common.collect.Multimap;
-
-import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 
@@ -31,5 +26,13 @@ public class RequiredPredicateError extends AbstractError{
 
 	public CallSiteWithExtractedValue getExtractedValues() {
 		return extractedValues;
+	}
+
+	@Override
+	public String toErrorMarkerString() {
+		String msg = extractedValues.toString();
+		msg += " was not properly ";
+		msg += getContradictedPredicate().getPredName();
+		return msg;
 	}
 }
