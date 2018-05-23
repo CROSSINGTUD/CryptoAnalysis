@@ -81,6 +81,18 @@ public class HeadlessTests {
 
 	}
 	
+	@Test
+	public void cryptoMisuseExampleProject() {
+		String sootClassPath = new File("../CryptoAnalysisTargets/CryptoMisuseExamples/bin").getAbsolutePath();
+		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
+		
+		scanner.exec();
+		assertErrors();
+	}
 
 	@Test
 	public void stopwatchPathExpressionExample() {
