@@ -2,7 +2,6 @@ package crypto.extractparameter;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import sync.pds.solver.nodes.Node;
 
 public class CallSiteWithParamIndex{
 

@@ -9,8 +9,6 @@ import com.beust.jcommander.internal.Lists;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
@@ -26,7 +24,6 @@ import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
-import java_cup.symbol_set;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;

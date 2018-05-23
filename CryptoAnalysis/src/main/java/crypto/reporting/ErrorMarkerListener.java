@@ -1,23 +1,17 @@
 package crypto.reporting;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
-import boomerang.ForwardQuery;
 import boomerang.Query;
-import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -34,30 +28,12 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLArithmeticConstraint;
-import crypto.rules.CryptSLComparisonConstraint;
-import crypto.rules.CryptSLComparisonConstraint.CompOp;
-import crypto.rules.CryptSLConstraint;
-import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLSplitter;
-import crypto.rules.CryptSLValueConstraint;
-import soot.ArrayType;
-import soot.RefType;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Type;
-import soot.Value;
-import soot.ValueBox;
-import soot.jimple.AssignStmt;
-import soot.jimple.Constant;
-import soot.jimple.Stmt;
-import soot.jimple.internal.AbstractInvokeExpr;
-import soot.jimple.internal.JAssignStmt;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 

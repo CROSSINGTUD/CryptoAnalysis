@@ -10,12 +10,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
@@ -39,8 +37,6 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import fj.data.vector.V;
-import java_cup.symbol_set;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Value;

@@ -34,7 +34,6 @@ import crypto.rules.CryptSLCondPredicate;
 import crypto.rules.CryptSLMethod;
 import crypto.rules.CryptSLObject;
 import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.CryptSLMethodToSootMethod;

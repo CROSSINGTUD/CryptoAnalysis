@@ -10,9 +10,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
-import boomerang.ForwardQuery;
 import boomerang.Query;
-import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;

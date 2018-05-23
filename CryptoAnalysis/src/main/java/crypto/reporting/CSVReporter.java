@@ -22,9 +22,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
-import boomerang.ForwardQuery;
 import boomerang.Query;
-import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;

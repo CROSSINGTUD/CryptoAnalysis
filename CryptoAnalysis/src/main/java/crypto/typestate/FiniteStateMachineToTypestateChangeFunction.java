@@ -2,8 +2,6 @@ package crypto.typestate;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
@@ -11,9 +9,7 @@ import com.google.common.collect.Sets;
 import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
 import crypto.analysis.CryptoScanner;
-import crypto.rules.CryptSLMethod;
 import soot.RefType;
 import soot.SootMethod;
 import soot.Unit;
@@ -22,9 +18,7 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
-import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
-import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.TypeStateMachineWeightFunctions;

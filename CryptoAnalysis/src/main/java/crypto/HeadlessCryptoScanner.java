@@ -31,7 +31,6 @@ import soot.PackManager;
 import soot.PhaseOptions;
 import soot.Scene;
 import soot.SceneTransformer;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
