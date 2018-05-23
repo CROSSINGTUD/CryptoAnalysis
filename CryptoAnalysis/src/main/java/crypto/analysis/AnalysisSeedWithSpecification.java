@@ -127,7 +127,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
 				// TODO only maintain indirectly ensured predicate as long as they are not
 				// killed by the rule
-				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+				predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
 
@@ -139,7 +139,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		final CryptSLRule rule = spec.getRule();
 		for (ISLConstraint cons : rule.getConstraints()) {
 			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-				cryptoScanner.addDisallowedPredicatePair(rule.getPredicates().get(0),
+				predicateHandler.addDisallowedPredicatePair(rule.getPredicates().get(0),
 						((CryptSLPredicate) cons).setNegated(false));
 			}
 		}
@@ -313,7 +313,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner
 				.getOrCreateSeed(new Node<Statement, Val>(currStmt, accessGraph));
-		cryptoScanner.expectPredicate(seed, currStmt, predToBeEnsured);
+		predicateHandler.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 		} else {
@@ -328,14 +328,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			for (EnsuredCryptSLPredicate pred : indirectlyEnsuredPredicates) {
-				cryptoScanner.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+				predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
 			}
 		}
 	}
 
 	private void expectPredicateWhenThisObjectIsInState(State stateNode, Statement currStmt,
 			CryptSLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
-		cryptoScanner.expectPredicate(this, currStmt, predToBeEnsured);
+		predicateHandler.expectPredicate(this, currStmt, predToBeEnsured);
 
 		if (!satisfiesConstraintSytem)
 			return;
@@ -343,7 +343,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// TODO check for any reachable state that don't kill
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
-				cryptoScanner.addNewPred(this, e.getRowKey(), e.getColumnKey(),
+				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(),
 						new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 			}
 		}

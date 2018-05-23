@@ -49,7 +49,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			return;
 
 		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
-			cryptoScanner.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
+			predicateHandler.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
 		}
 	}
 
