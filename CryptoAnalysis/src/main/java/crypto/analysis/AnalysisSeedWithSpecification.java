@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Lists;
-import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -17,7 +16,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.ForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -136,13 +134,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
 		cryptoScanner.getAnalysisListener().collectedValues(this, parametersToValues);
-		final CryptSLRule rule = spec.getRule();
-		for (ISLConstraint cons : rule.getConstraints()) {
-			if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-				predicateHandler.addDisallowedPredicatePair(rule.getPredicates().get(0),
-						((CryptSLPredicate) cons).setNegated(false));
-			}
-		}
 	}
 
 
@@ -299,10 +290,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
 				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
+					if (satisfiesConstraintSytem) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
 							new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 					matched = true;
-					if (satisfiesConstraintSytem) {
 						seed.addEnsuredPredicateFromOtherRule(
 								new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 					}

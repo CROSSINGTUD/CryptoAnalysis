@@ -482,6 +482,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
 		Assertions.mustBeInAcceptingState(hMacSHA256);
 		Assertions.hasEnsuredPredicate(macced);
+		//TODO Why doesn't the analysis find the predicate contradiction?
 		Assertions.predicateContradiction();
 	}
 

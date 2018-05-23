@@ -29,6 +29,7 @@ import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
@@ -54,6 +55,15 @@ public class PredicateHandler {
 	private CryptoScanner cryptoScanner;
 	public PredicateHandler(CryptoScanner cryptoScanner) {
 		this.cryptoScanner = cryptoScanner;
+		for(ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
+			CryptSLRule rule = c.getRule();
+			for (ISLConstraint cons : rule.getConstraints()) {
+				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+					addDisallowedPredicatePair(rule.getPredicates().get(0),
+							((CryptSLPredicate) cons).setNegated(false));
+				}
+			}
+		}
 	}
 
 	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
@@ -179,6 +189,7 @@ public class PredicateHandler {
 	}
 
 	private void checkForContradictions() {
+		System.out.println(disallowedPredPairs);
 		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Entry<Val, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();

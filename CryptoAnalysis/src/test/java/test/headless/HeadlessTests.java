@@ -87,10 +87,9 @@ public class HeadlessTests {
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
 
-//		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
-		//TODO Uncomment code in main.Msg and check why the predicate error is not correctly generated
-//		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
-//		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
 		
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);

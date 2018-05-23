@@ -41,7 +41,7 @@ public abstract class CryptoScanner {
 	public static boolean APPLICATION_CLASS_SEEDS_ONLY = false;
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
-	private final PredicateHandler predicateHandler = new PredicateHandler(this);
+	private PredicateHandler predicateHandler;
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 
 	
@@ -75,6 +75,7 @@ public abstract class CryptoScanner {
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
+		predicateHandler = new PredicateHandler(this);
 	}
 
 	
