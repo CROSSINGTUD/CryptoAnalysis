@@ -1,10 +1,10 @@
 package crypto.predicates;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Optional;
@@ -47,23 +47,13 @@ import wpds.impl.Weight.NoWeight;
 
 public class PredicateHandler {
 
-	private Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
-	private Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
-	private Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
-	private Set<Entry<CryptSLPredicate, CryptSLPredicate>> disallowedPredPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
+	private final Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
+	private final Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
+	private final Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
+	private final CryptoScanner cryptoScanner;
 	
-	private CryptoScanner cryptoScanner;
 	public PredicateHandler(CryptoScanner cryptoScanner) {
 		this.cryptoScanner = cryptoScanner;
-		for(ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
-			CryptSLRule rule = c.getRule();
-			for (ISLConstraint cons : rule.getConstraints()) {
-				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
-					addDisallowedPredicatePair(rule.getPredicates().get(0),
-							((CryptSLPredicate) cons).setNegated(false));
-				}
-			}
-		}
 	}
 
 	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
@@ -163,10 +153,6 @@ public class PredicateHandler {
 	}
 
 
-	public void addDisallowedPredicatePair(CryptSLPredicate cryptSLPredicate, CryptSLPredicate cons) {
-		disallowedPredPairs.add(new SimpleEntry<CryptSLPredicate, CryptSLPredicate>(cryptSLPredicate, cons));
-	}
-	
 	public void checkPredicates() {
 		checkMissingRequiredPredicates();
 		checkForContradictions();
@@ -189,14 +175,22 @@ public class PredicateHandler {
 	}
 
 	private void checkForContradictions() {
-		System.out.println(disallowedPredPairs);
+		Set<Entry<CryptSLPredicate, CryptSLPredicate>> contradictionPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
+		for(ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
+			CryptSLRule rule = c.getRule();
+			for (ISLConstraint cons : rule.getConstraints()) {
+				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
+					contradictionPairs.add(new SimpleEntry<CryptSLPredicate, CryptSLPredicate>(rule.getPredicates().get(0), ((CryptSLPredicate) cons).setNegated(false)));
+				}
+			}
+		}
 		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Entry<Val, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCryptSLPredicate exPred : exPredCell.getValue()) {
 					preds.add(exPred.getPredicate().getPredName());
 				}
-				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : disallowedPredPairs) {
+				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : contradictionPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
 						cryptoScanner.getAnalysisListener().predicateContradiction(new Node<Statement,Val>(generatingPredicateStmt, exPredCell.getKey()), disPair);
 					}

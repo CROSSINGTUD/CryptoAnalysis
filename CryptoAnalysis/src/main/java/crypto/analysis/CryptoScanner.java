@@ -1,37 +1,23 @@
 package crypto.analysis;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 
 import boomerang.Query;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
 import crypto.predicates.PredicateHandler;
-import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -41,7 +27,7 @@ public abstract class CryptoScanner {
 	public static boolean APPLICATION_CLASS_SEEDS_ONLY = false;
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
-	private PredicateHandler predicateHandler;
+	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 
 	
@@ -75,7 +61,6 @@ public abstract class CryptoScanner {
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
-		predicateHandler = new PredicateHandler(this);
 	}
 
 	
