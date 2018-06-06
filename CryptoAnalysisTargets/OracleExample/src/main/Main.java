@@ -14,6 +14,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import Crypto.PWHasher;
@@ -66,4 +67,21 @@ public class Main {
 //	private static void use(Cipher cCipher) throws IllegalBlockSizeException, BadPaddingException {
 //		byte[] encText = cCipher.doFinal("".getBytes());
 //	}
+	
+	public void incorrectKeyForWrongCipher() throws GeneralSecurityException{
+//		Commented this out. Why does it fail if we comment this totally unrelated code in?
+//		Object object = new Object();
+//		use(object);
+		use(new Object());
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();
+		Cipher cCipher = Cipher.getInstance("Blowfish");
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] encText = cCipher.doFinal("".getBytes());
+	}
+
+	private void use(Object object) {
+		
+	}
 }
