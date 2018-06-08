@@ -1,24 +1,29 @@
 package crypto.reporting;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CryptSLRule;
+import soot.Printer;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.util.EscapedWriter;
 
 public class CommandLineReporter extends ErrorMarkerListener {
 
-	private File outputFile;
+	private File outputFolder;
 	private List<CryptSLRule> rules;
 
 	public CommandLineReporter(String string, List<CryptSLRule> rules) {
-		this.outputFile = (string != null ? new File(string) : null);
+		this.outputFolder = (string != null ? new File(string) : null);
 		this.rules = rules;
 	}
 
@@ -56,13 +61,21 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			}
 		}
 		s += "=====================================================================";
-		if (outputFile != null) {
+		if (outputFolder != null) {
 			try {
-				FileWriter writer = new FileWriter(outputFile);
+				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
 				writer.write(s);
 				writer.close();
+				for (SootClass c : this.errorMarkers.rowKeySet()) {
+					FileOutputStream streamOut = new FileOutputStream(new File(outputFolder +"/"+c.toString()+".jimple"));
+					PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
+					Printer.v().printTo(c, writerOut);
+					writerOut.flush();
+					streamOut.close();
+					writerOut.close();
+				}
 			} catch (IOException e) {
-				throw new RuntimeException("Could not write to file " + outputFile);
+				throw new RuntimeException("Could not write to file " + outputFolder);
 			}
 		} else {
 			System.out.println(s);

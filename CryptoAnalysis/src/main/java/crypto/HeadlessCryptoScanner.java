@@ -104,7 +104,7 @@ public abstract class HeadlessCryptoScanner {
 			}
 			
 			@Override
-			protected String getOutputFile(){
+			protected String getOutputFolder(){
 				return options.getOptionValue("reportFile");
 			}
 
@@ -189,7 +189,7 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
-				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFile(), rules);
+				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
 
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
@@ -325,7 +325,7 @@ public abstract class HeadlessCryptoScanner {
 		return "";
 	};
 	
-	protected String getOutputFile(){
+	protected String getOutputFolder(){
 		return null;
 	};
 
