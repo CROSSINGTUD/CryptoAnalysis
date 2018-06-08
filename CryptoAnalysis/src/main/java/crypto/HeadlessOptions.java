@@ -28,7 +28,7 @@ public class HeadlessOptions extends Options {
 				.build();
 		addOption(applicationCp);
 
-		Option identifier = Option.builder().longOpt("softwareIdentifier").hasArg().required().desc("An identifier used to label output files.")
+		Option identifier = Option.builder().longOpt("softwareIdentifier").hasArg().desc("An identifier used to label output files.")
 				.build();
 		addOption(identifier);
 		Option reportFile = Option.builder().longOpt("reportFile").hasArg().desc("A path for the report file.")
@@ -37,7 +37,7 @@ public class HeadlessOptions extends Options {
 		Option csvReportFile = Option.builder().longOpt("csvReportFile").hasArg().desc("Generates a summary of the finding as a CSV file.")
 				.build();
 		addOption(csvReportFile);
-		Option preanalysisOpt = Option.builder().longOpt("preanalysis").hasArg(false).desc("Enables or disable a intra-procedural pre-analysis.").build();
+		Option preanalysisOpt = Option.builder().longOpt("preanalysis").hasArg(false).desc("Enables an intra-procedural pre-analysis.").build();
 		addOption(preanalysisOpt);
 	}
 

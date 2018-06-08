@@ -117,8 +117,9 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 
-
-	protected abstract String getCSVOutputFile();
+	protected String getCSVOutputFile(){
+		return null;
+	}
 
 
 	public void exec() {
@@ -318,9 +319,13 @@ public abstract class HeadlessCryptoScanner {
 
 	protected abstract String applicationClassPath();
 
-	protected abstract String softwareIdentifier();
+	protected String softwareIdentifier(){
+		return "";
+	};
 	
-	protected abstract String getOutputFile();
+	protected String getOutputFile(){
+		return null;
+	};
 
 	
 	private static String pathToJCE() {

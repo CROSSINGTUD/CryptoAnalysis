@@ -142,11 +142,6 @@ public class HeadlessTests {
 			String rulesDir) {
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
-			protected String getCSVOutputFile() {
-				return null;
-			}
-
-			@Override
 			protected String getRulesDirectory() {
 				return rulesDir;
 			}
@@ -159,16 +154,6 @@ public class HeadlessTests {
 			@Override
 			protected String applicationClassPath() {
 				return applicationClassPath;
-			}
-
-			@Override
-			protected String softwareIdentifier() {
-				return "";
-			}
-
-			@Override
-			protected String getOutputFile() {
-				return null;
 			}
 
 			@Override
