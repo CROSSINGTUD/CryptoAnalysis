@@ -80,7 +80,7 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected String sootClassPath() {
-				return options.getOptionValue("sootCp");
+				return options.hasOption("sootCp") ? options.getOptionValue("sootCp") : "";
 			}
 
 			@Override
@@ -315,7 +315,9 @@ public abstract class HeadlessCryptoScanner {
 		return CG.CHA;
 	}
 
-	protected abstract String sootClassPath();
+	protected String sootClassPath() {
+		return "";
+	}
 
 	protected abstract String applicationClassPath();
 

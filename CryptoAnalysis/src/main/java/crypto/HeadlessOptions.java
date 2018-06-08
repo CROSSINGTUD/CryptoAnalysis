@@ -19,7 +19,7 @@ public class HeadlessOptions extends Options {
 				.desc("Specify the directory for the CrySL rules").build();
 		addOption(rulesDir);
 
-		Option sootCp = Option.builder().longOpt("sootCp").hasArg().required()
+		Option sootCp = Option.builder().longOpt("sootCp").hasArg()
 				.desc("The class path of the whole project, including dependencies.").build();
 		addOption(sootCp);
 
