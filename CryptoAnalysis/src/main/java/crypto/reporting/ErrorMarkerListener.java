@@ -1,6 +1,8 @@
 package crypto.reporting;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -46,20 +48,26 @@ import typestate.TransitionFunction;
  */
 public class ErrorMarkerListener extends CrySLAnalysisListener {
 
-	public static final String NO_RES_FOUND = "No resource to generate error marker for found.";
-	public static final String OBJECT_OF_TYPE = "Object of type ";
-	public static final String VAR = "Variable ";
-	protected final Table<SootClass, SootMethod, Set<ErrorMarker>> errorMarkers = HashBasedTable.create(); 
-
-	private void addMarker(Statement location, String string) {
-		SootMethod method = location.getMethod();
+	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
+	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
+	protected int seedCount; 
+	
+	private void addMarker(AbstractError error) {
+		SootMethod method = error.getErrorLocation().getMethod();
 		SootClass sootClass = method.getDeclaringClass();
 		
-		Set<ErrorMarker> set = errorMarkers.get(sootClass, method);
+		Set<AbstractError> set = errorMarkers.get(sootClass, method);
 		if(set == null){
 			set = Sets.newHashSet();
 		}
-		set.add(new ErrorMarker(location, string));
+		if(set.add(error)){
+			Integer integer = errorMarkerCount.get(error.getClass());
+			if(integer == null){
+				integer = 0;
+			}
+			integer++;
+			errorMarkerCount.put(error.getClass(), integer);
+		}
 		errorMarkers.put(sootClass, method, set);
 	}
 	
@@ -69,37 +77,37 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 			@Override
 			public void visit(ConstraintError constraintError) {
-				addMarker(constraintError.getErrorLocation(), constraintError.toErrorMarkerString());
+				addMarker(constraintError);
 			}
 
 			@Override
 			public void visit(ForbiddenMethodError forbiddenMethodError) {
-				addMarker(forbiddenMethodError.getErrorLocation(), forbiddenMethodError.toErrorMarkerString());
+				addMarker(forbiddenMethodError);
 			}
 
 			@Override
 			public void visit(IncompleteOperationError incompleteOperationError) {
-				addMarker(incompleteOperationError.getErrorLocation(), incompleteOperationError.toErrorMarkerString());
+				addMarker(incompleteOperationError);
 			}
 
 			@Override
 			public void visit(TypestateError typestateError) {
-				addMarker(typestateError.getErrorLocation(), typestateError.toErrorMarkerString());
+				addMarker(typestateError);
 			}
 
 			@Override
 			public void visit(RequiredPredicateError predicateError) {
-				addMarker(predicateError.getErrorLocation(), predicateError.toErrorMarkerString());
+				addMarker(predicateError);
 			}
 
 			@Override
 			public void visit(ImpreciseValueExtractionError extractionError) {
-				addMarker(extractionError.getErrorLocation(), extractionError.toErrorMarkerString());
+				addMarker(extractionError);
 			}
 
 			@Override
 			public void visit(NeverTypeOfError neverTypeOfError) {
-				addMarker(neverTypeOfError.getErrorLocation(), neverTypeOfError.toErrorMarkerString());
+				addMarker(neverTypeOfError);
 			}});
 	}
 	
@@ -107,7 +115,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {
-		addMarker(location.stmt(), "Predicate mismatch");
 	}
 
 	@Override
@@ -163,7 +170,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void discoveredSeed(final IAnalysisSeed arg0) {
-		// Nothing
+		seedCount++;
 	}
 
 	@Override

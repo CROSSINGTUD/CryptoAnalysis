@@ -12,7 +12,7 @@ import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
 
-public class IncompleteOperationError extends ErrorAtCodeObjectLocation{
+public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
 	private Val errorVariable;
 	private Collection<SootMethod> expectedMethodCalls;
@@ -38,12 +38,10 @@ public class IncompleteOperationError extends ErrorAtCodeObjectLocation{
 
 	@Override
 	public String toErrorMarkerString() {
-		Val errorVariable = getErrorVariable();
 		Collection<SootMethod> expectedCalls = getExpectedMethodCalls();
 		final StringBuilder msg = new StringBuilder();
-		msg.append("Operation with ");
-		final String type = errorVariable.value().getType().toString();
-		msg.append(type.substring(type.lastIndexOf('.') + 1));
+		msg.append("Operation");
+		msg.append(getObjectType());
 		msg.append(" object not completed. Expected call to ");
 		final Set<String> altMethods = new HashSet<>();
 		for (final SootMethod expectedCall : expectedCalls) {

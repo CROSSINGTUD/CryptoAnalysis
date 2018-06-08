@@ -7,16 +7,18 @@ import java.util.Set;
 import com.google.common.base.Joiner;
 
 import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 import soot.jimple.Stmt;
+import sync.pds.solver.nodes.Node;
 
-public class TypestateError extends AbstractError{
+public class TypestateError extends ErrorWithObjectAllocation{
 
 	private Collection<SootMethod> expectedMethodCalls;
 
-	public TypestateError(Statement stmt, CryptSLRule rule, Collection<SootMethod> expectedMethodCalls) {
-		super(stmt, rule);
+	public TypestateError(Statement stmt, CryptSLRule rule, Node<Statement, Val> object, Collection<SootMethod> expectedMethodCalls) {
+		super(stmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
 	}
 
@@ -35,15 +37,19 @@ public class TypestateError extends AbstractError{
 		final StringBuilder msg = new StringBuilder();
 		msg.append("Unexpected call to method ");
 		msg.append(getCalledMethodName(location));
-		msg.append(". Expect a call to one of the following methods ");
+		msg.append(getObjectType());
 		final Set<String> altMethods = new HashSet<>();
 		for (final SootMethod expectedCall : expectedCalls) {
 			altMethods.add(expectedCall.getName());
 		}
-		msg.append(Joiner.on(",").join(altMethods));
+		if(altMethods.isEmpty()){
+			msg.append(".");
+		} else{
+			msg.append(". Expect a call to one of the following methods ");
+			msg.append(Joiner.on(",").join(altMethods));
+		}
 		return msg.toString();
 	}
-	
 
 	private String getCalledMethodName(Statement location) {
 		Stmt stmt = location.getUnit().get();

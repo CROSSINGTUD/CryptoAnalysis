@@ -32,7 +32,6 @@ public class CryptSLRule implements java.io.Serializable {
 		usagePattern = _usagePattern;
 		constraints = _constraints;
 		predicates = _predicates;
-		System.out.println(this);
 	}
 	
 	

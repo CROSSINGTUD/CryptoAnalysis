@@ -23,7 +23,7 @@ import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInvokeExpr;
 import sync.pds.solver.nodes.Node;
 
-public class ConstraintError extends ErrorAtCodeObjectLocation{
+public class ConstraintError extends ErrorWithObjectAllocation{
 
 	private ISLConstraint brokenConstraint;
 	private CallSiteWithExtractedValue callSiteWithParamIndex;

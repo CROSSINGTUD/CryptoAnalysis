@@ -55,6 +55,7 @@ import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+import soot.jimple.ThrowStmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -198,8 +199,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (!expectedMethodsToBeCalled.isEmpty()) {
 				Statement s = c.getRowKey();
 				Val val = c.getColumnKey();
-				cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), asNode(), 
-						expectedMethodsToBeCalled));
+				if(!(s.getUnit().get() instanceof ThrowStmt)){
+					cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), asNode(), 
+							expectedMethodsToBeCalled));
+				}
 			}
 		}
 	}
@@ -208,7 +211,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ErrorStateNode) {
 				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), errorStateNode.getExpectedCalls()));
+				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), this.asNode(), errorStateNode.getExpectedCalls()));
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
