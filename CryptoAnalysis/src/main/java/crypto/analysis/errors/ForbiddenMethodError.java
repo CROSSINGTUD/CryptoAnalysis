@@ -35,11 +35,12 @@ public class ForbiddenMethodError extends AbstractError{
 	@Override
 	public String toErrorMarkerString() {
 		final StringBuilder msg = new StringBuilder();
-		msg.append("Detected call to forbidden method");
+		msg.append("Detected call to forbidden method ");
 		msg.append(getCalledMethod().getSubSignature());
+		msg.append(" of class " + getCalledMethod().getDeclaringClass());
 		if (!getAlternatives().isEmpty()) {
-			msg.append(". Instead, call to method ");
-			Collection<String> subSignatures = Utils.toSubSignatures(getAlternatives());
+			msg.append(". Instead, call method ");
+			Collection<SootMethod> subSignatures = getAlternatives();
 			msg.append(Joiner.on(", ").join(subSignatures));
 			msg.append(".");
 		}

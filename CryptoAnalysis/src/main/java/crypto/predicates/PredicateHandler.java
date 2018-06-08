@@ -189,7 +189,6 @@ public class PredicateHandler {
 	}
 
 	private void checkForContradictions() {
-		System.out.println(disallowedPredPairs);
 		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Entry<Val, Set<EnsuredCryptSLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
