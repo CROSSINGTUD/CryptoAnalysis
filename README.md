@@ -21,7 +21,7 @@ Once build, a packaged  `jar` artifact including all dependency is found in `Cry
 
 CogniCrypt_SAST can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
 * The absolute path to the CrySL (binary) rule files
-* The path of the application to be analyzed (.jar file or a folder with .class files)
+* The absolute path of the application to be analyzed (.jar file or a folder with .class files)
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
