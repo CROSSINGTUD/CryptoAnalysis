@@ -25,7 +25,7 @@ Once build, a packaged  `jar` artifact including all dependency is found in `Cry
 ## Usage
 
 CogniCrypt_SAST can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the CrySL (binary) rule files
+* The absolute path to the directory of the CrySL (binary) rule files located [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysis/src/test/resources).
 * The absolute path of the application to be analyzed (.jar file or a folder with .class files)
 
 ```
@@ -34,14 +34,13 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar cry
       --applicationCp=<absolute-application-path>
 ```
 
-For an easy start we prepared a .jar containing classes with crypto misuses. . To run CogniCrypt_SAST on these classes, simply execute the following command (on a linux based system).
+For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example). To run CogniCrypt_SAST on these classes, simply execute the following command (on a linux based system).
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
   --rulesDir=$(pwd)/CryptoAnalysis/src/test/resources/ \
   --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
-The source code is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example).
 
 ## Changing the CrySL Rules
 
