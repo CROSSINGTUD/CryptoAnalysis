@@ -5,6 +5,11 @@ The static analysis CogniCrypt_SAST takes rules written in the specification lan
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
 libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](https://arxiv.org/abs/1710.00564)
 
+## Releases
+
+You can checkout a pre-compiled version of CogniCrypt_SAST [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases).
+
+
 ## Checkout and Build
 
 This repository uses git submodules, to checkout this repository use the following command for git
@@ -38,6 +43,10 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar cry
 ```
 The source code is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example).
 
+## Changing the CrySL Rules
+
+The current version of the tool takes CrySL rules in their binary formats (cryptslbin). When you want to adopt the rules you have to use
+the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt). CogniCrypt ships with a CrySL editor to modify the rules, upon changes to the rules it produces the cryptslbin files. We [plan](https://github.com/CROSSINGTUD/CryptoAnalysis/issues/42) to change CogniCrypt_SAST to take CrySL rules in source code format in the future.  
 
 ## CogniCrypt_SAST for Android Applications
 
