@@ -45,8 +45,8 @@ The source code is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tr
 
 ## Changing the CrySL Rules
 
-The current version of the tool takes CrySL rules in their binary formats (cryptslbin). When you want to adopt the rules you have to use
-the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt). CogniCrypt ships with a CrySL editor to modify the rules, upon changes to the rules it produces the cryptslbin files. We [plan](https://github.com/CROSSINGTUD/CryptoAnalysis/issues/42) to change CogniCrypt_SAST to take CrySL rules in source code format in the future.  
+The current version of the tool takes CrySL rules in their binary formats (cryptslbin). When you want to adopt the rules please use
+the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt). CogniCrypt ships with a CrySL editor to modify the rules, upon changes to the rules the editor produces the cryptslbin files. We [plan](https://github.com/CROSSINGTUD/CryptoAnalysis/issues/42) to change CogniCrypt_SAST to take CrySL rules in source code format in the future.  
 
 ## CogniCrypt_SAST for Android Applications
 
