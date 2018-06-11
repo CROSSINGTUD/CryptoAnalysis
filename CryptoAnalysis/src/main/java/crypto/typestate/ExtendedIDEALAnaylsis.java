@@ -83,7 +83,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		try {
 			results = analysis.run(query);
 		} catch (IDEALSeedTimeout e){
-			System.err.println(e);
+//			System.err.println(e);
 //			solver = (IDEALSeedSolver<TransitionFunction>) e.getSolver();
 			if (reports != null && query instanceof IAnalysisSeed) {
 				reports.onSeedTimeout(((IAnalysisSeed)query).asNode());

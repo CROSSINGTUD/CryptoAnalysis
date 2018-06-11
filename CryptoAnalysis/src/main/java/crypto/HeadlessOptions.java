@@ -31,7 +31,7 @@ public class HeadlessOptions extends Options {
 		Option identifier = Option.builder().longOpt("softwareIdentifier").hasArg().desc("An identifier used to label output files.")
 				.build();
 		addOption(identifier);
-		Option reportFile = Option.builder().longOpt("reportFile").hasArg().desc("A path for the report file.")
+		Option reportFile = Option.builder().longOpt("reportFolder").hasArg().desc("A folder for the CogniCrypt report and .jimple files.")
 				.build();
 		addOption(reportFile);
 		Option csvReportFile = Option.builder().longOpt("csvReportFile").hasArg().desc("Generates a summary of the finding as a CSV file.")
