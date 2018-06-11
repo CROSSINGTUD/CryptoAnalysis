@@ -45,6 +45,21 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar cry
   --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
+## Report and Error Types
+
+In the standard option, CogniCrypt_SAST outputs a report to the console. For each misuse CogniCrypt_SAST reports the class and the method the misuse is contained in. There are multiple misuse types:
+
+* **ConstraintError**: A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.
+* **NeverTypeOfError**: Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a `String`. (see `KeyStore` rule [here](https://github.com/CROSSINGTUD/Crypto-API-Rules/blob/master/src/de/darmstadt/tu/crossing/KeyStore.cryptsl)).
+* **ForbiddenMethodError**: A method that is forbidden (CrySL block FORBIDDEN) to be called under some circumstances was found.
+* **ImpreciseValueExtractionError**: The static analysis was not able to extract all information required within the CrySL CONSTRAINT block. For example the key size could be supplied as a value listed in a configuration file. The static analysis does not model the file's content and may not constraint on the value.
+* **TypestateError**: The ORDER block of CrySL is violated, i.e., the expected method sequence call to be made is incorrect. For example, a `Signature` object expects a call to `initSign(key)` prior to `update(data)`. 
+
+* **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
+* **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead.  
+
+When the option `--reportFolder=<folder>` is chosen, CogniCrypt_SAST writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+
 ## Changing the CrySL Rules
 
 The current version of the tool takes CrySL rules in their binary formats (cryptslbin). When you want to adopt the rules please use
