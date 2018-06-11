@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,8 @@ public abstract class CryptoScanner {
 			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(),key.var(), key.getSpec());
 		}
 	};
+	private int solvedObject;
+	private Stopwatch analysisWatch;
 
 	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
 
@@ -68,14 +71,15 @@ public abstract class CryptoScanner {
 
 	public void scan() {
 		getAnalysisListener().beforeAnalysis();
-		Stopwatch watch = Stopwatch.createStarted();
+		analysisWatch = Stopwatch.createStarted();
 		initialize();
-		long elapsed = watch.elapsed(TimeUnit.SECONDS);
+		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Discovered "+worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			getAnalysisListener().discoveredSeed(curr);
 			curr.execute();
+			estimateAnalysisTime();
 		}
 		
 //		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
@@ -86,12 +90,26 @@ public abstract class CryptoScanner {
 		predicateHandler.checkPredicates();
 		
 		getAnalysisListener().afterAnalysis();
-		elapsed = watch.elapsed(TimeUnit.SECONDS);
+		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Static Analysis took "+elapsed+ " seconds!");
 //		debugger().afterAnalysis();
 	}
 
 	
+
+	private void estimateAnalysisTime() {
+		int remaining = worklist.size();
+		solvedObject++;
+		if(remaining != 0) {
+			Duration elapsed = analysisWatch.elapsed();
+			Duration estimate = elapsed.dividedBy(solvedObject);
+			Duration remainingTime = estimate.multipliedBy(remaining);
+			System.out.println(String.format("Analysis Time: %s", elapsed));
+			System.out.println(String.format("Estimated Time: %s", remainingTime));
+			System.out.println(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
+			System.out.println(String.format("Percentage Completed: %s\n", ((float)Math.round((float)solvedObject*100 / (remaining + solvedObject)))/100));
+		}
+	}
 
 	private void initialize() {
 		for (ClassSpecification spec : getClassSpecifictions()) {
