@@ -45,6 +45,8 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar cry
   --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
+Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
+
 ## Report and Error Types
 
 In the standard option, CogniCrypt_SAST outputs a report to the console. For each misuse CogniCrypt_SAST reports the class and the method the misuse is contained in. There are multiple misuse types:
