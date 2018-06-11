@@ -7,8 +7,11 @@ libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/secur
 
 ## Releases
 
-You can checkout a pre-compiled version of CogniCrypt_SAST [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases).
+You can checkout a pre-compiled version of CogniCrypt_SAST [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). 
 
+Download the two files:
+* CryptoAnalysis-1.0.0-jar-with-dependencies.jar
+* JCA-CrySL-rules.zip
 
 ## Checkout and Build
 
@@ -26,7 +29,7 @@ Once build, a packaged  `jar` artifact including all dependency is found in `Cry
 
 CogniCrypt_SAST can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
 * The absolute path to the directory of the CrySL (binary) rule files located [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysis/src/test/resources).
-* The absolute path of the application to be analyzed (.jar file or a folder with .class files)
+* The absolute path of the application to be analyzed (.jar file or the root compilation output folder containing the .class files in packname-named subdirectories)
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
