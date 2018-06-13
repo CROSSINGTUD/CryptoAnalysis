@@ -3,7 +3,7 @@
 This repository contains CogniCrypt_SAST, the static analysis component for [CogniCrypt](www.cognicrypt.de). 
 The static analysis CogniCrypt_SAST takes rules written in the specification language CrySL as input, 
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
-libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](https://arxiv.org/abs/1710.00564)
+libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](https://arxiv.org/abs/1710.00564).
 
 ## Releases
 
@@ -58,7 +58,7 @@ In the standard option, CogniCrypt_SAST outputs a report to the console. For eac
 * **TypestateError**: The ORDER block of CrySL is violated, i.e., the expected method sequence call to be made is incorrect. For example, a `Signature` object expects a call to `initSign(key)` prior to `update(data)`. 
 
 * **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
-* **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead.  
+* **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)
 
 When the option `--reportFolder=<folder>` is chosen, CogniCrypt_SAST writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
 
