@@ -28,7 +28,7 @@ Once build, a packaged  `jar` artifact including all dependency is found in `Cry
 ## Usage
 
 CogniCrypt_SAST can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the directory of the CrySL (binary) rule files contained in [JCA-CrySL-rules.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/v1.0.0).
+* The absolute path to the directory of the CrySL (binary) rule files contained in [JCA-CrySL-rules.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/v1.0.0). This CrySL rule set contains specification for the JCA. The source code for the rules is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
@@ -49,7 +49,7 @@ Note, depending on the analyzed application, the analysis may require a lot of m
 
 ## Report and Error Types
 
-In the standard option, CogniCrypt_SAST outputs a report to the console. For each misuse CogniCrypt_SAST reports the class and the method the misuse is contained in. There are multiple misuse types:
+In the standard option, CogniCrypt_SAST outputs a report to the console. CogniCrypt_SAST reporst misuses when the code is not compliant with the CrySL rules. For each misuse CogniCrypt_SAST reports the class and the method the misuse is contained in. There are multiple misuse types:
 
 * **ConstraintError**: A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.
 * **NeverTypeOfError**: Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a `String`. (see `KeyStore` rule [here](https://github.com/CROSSINGTUD/Crypto-API-Rules/blob/master/src/de/darmstadt/tu/crossing/KeyStore.cryptsl)).
