@@ -17,6 +17,7 @@ import crypto.predicates.PredicateHandler;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
+import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -154,7 +155,7 @@ public abstract class CryptoScanner {
 
 
 	
-	public Debugger<TransitionFunction> debugger() {
+	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 		return new Debugger<>();
 	}
 

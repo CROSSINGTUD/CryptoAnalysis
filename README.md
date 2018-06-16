@@ -15,15 +15,13 @@ Download the two files:
 
 ## Checkout and Build
 
-This repository uses git submodules, to checkout this repository use the following command for git
+CogniCrypt_SAST uses maven as build tool. CogniCrypt_SAST uses WPDS as dependency which is not available at  maven central. Checkout and build WPDS from [here](https://github.com/CROSSINGTUD/WPDS). Follow the instructions and `mvn install` it to your local maven repository.
 
-```git clone --recurse-submodules git@github.com:CROSSINGTUD/CryptoAnalysis.git```
+Once done, you can compile and build this project via
 
-CogniCrypt_SAST uses maven as build tool. To compile this project `cd` into the newly checked out folder and run
+```mvn package -DskipTests=true```.
 
-```mvn package -DskipTests=true```
-
-Once build, a packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar` 
+A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar` 
 
 ## Usage
 

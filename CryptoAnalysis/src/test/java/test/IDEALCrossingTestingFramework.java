@@ -67,7 +67,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			}
 			
 			@Override
-			protected Debugger<TransitionFunction> debugger() {
+			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 				return getDebugger();
 			}
 		};

@@ -41,6 +41,7 @@ import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
+import ideal.IDEALSeedSolver;
 import soot.IntType;
 import soot.Local;
 import soot.RefType;
@@ -93,8 +94,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			@Override
-			protected Debugger<TransitionFunction> debugger() {
-				return cryptoScanner.debugger();
+			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+				return cryptoScanner.debugger(solver);
 			}
 
 			@Override

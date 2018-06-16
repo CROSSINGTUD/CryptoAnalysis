@@ -15,6 +15,7 @@ import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -83,8 +84,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			
 
 			@Override
-			protected Debugger<TransitionFunction> debugger() {
-				return cryptoScanner.debugger();
+			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+				return cryptoScanner.debugger(solver);
 			}
 		};
 		return problem;

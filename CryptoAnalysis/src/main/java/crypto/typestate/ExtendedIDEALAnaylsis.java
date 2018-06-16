@@ -20,6 +20,7 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
+import ideal.IDEALSeedSolver;
 import ideal.IDEALSeedTimeout;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -60,8 +61,8 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public Debugger<TransitionFunction> debugger() {
-				return ExtendedIDEALAnaylsis.this.debugger();
+			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+				return ExtendedIDEALAnaylsis.this.debugger(solver);
 			}
 			@Override
 			public BoomerangOptions boomerangOptions() {
@@ -93,7 +94,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 
 	protected abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
-	protected abstract Debugger<TransitionFunction> debugger();
+	protected abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver);
 
 	public void log(String string) {
 		// System.out.println(string);

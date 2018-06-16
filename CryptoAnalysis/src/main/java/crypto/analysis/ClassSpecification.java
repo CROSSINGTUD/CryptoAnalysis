@@ -14,6 +14,7 @@ import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
+import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.MethodOrMethodContext;
 import soot.Scene;
@@ -53,8 +54,8 @@ public class ClassSpecification {
 			}
 
 			@Override
-			protected Debugger<TransitionFunction> debugger() {
-				return cryptoScanner.debugger();
+			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+				return cryptoScanner.debugger(solver);
 			}
 		};
 	}
