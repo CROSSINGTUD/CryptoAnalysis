@@ -1,3 +1,5 @@
+[![Run Status](https://api.shippable.com/projects/592827ffbcb263070086391d/badge?branch=master)](https://app.shippable.com/github/CROSSINGTUD/CryptoAnalysis)
+
 # CogniCrypt_SAST
 
 This repository contains CogniCrypt_SAST, the static analysis component for [CogniCrypt](www.cognicrypt.de). 
