@@ -8,7 +8,6 @@
   <name>crypto-analysis-root</name>
   <modules>
     <module>CryptoAnalysis</module>
-    <module>WeightedBoomerang</module>
   </modules>
   <build>
     <plugins>
