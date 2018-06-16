@@ -58,7 +58,11 @@ In the standard option, CogniCrypt_SAST outputs a report to the console. CogniCr
 * **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
 * **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)
 
-When the option `--reportFolder=<folder>` is chosen, CogniCrypt_SAST writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+When the option `--reportDir=<folder>` is chosen, CogniCrypt_SAST writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+
+## Visualization
+
+When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs. 
 
 ## Changing the CrySL Rules
 
