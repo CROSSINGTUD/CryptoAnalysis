@@ -72,3 +72,7 @@ the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt). Cogn
 ## CogniCrypt_SAST for Android Applications
 
 CogniCrypt_SAST can also be run on Android Applications, checkout the repository [here](https://github.com/CROSSINGTUD/CryptoAnalysis-Android).
+
+## Contact
+
+If you have any questions regarding this project, feel free to contact [Johannes Spaeth](mailto:johannes.spaeth@iem.fraunhofer.de).
