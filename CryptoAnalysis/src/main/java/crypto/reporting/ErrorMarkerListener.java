@@ -50,7 +50,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
 	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
-	protected int seedCount; 
 	
 	private void addMarker(AbstractError error) {
 		SootMethod method = error.getErrorLocation().getMethod();
@@ -170,7 +169,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void discoveredSeed(final IAnalysisSeed arg0) {
-		seedCount++;
 	}
 
 	@Override

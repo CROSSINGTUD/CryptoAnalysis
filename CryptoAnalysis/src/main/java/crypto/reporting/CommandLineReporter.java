@@ -78,7 +78,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		}
 		s += "======================= CogniCrypt Summary ==========================\n";
 		s += String.format("\tNumber of CrySL rules: %s\n", rules.size());
-		s += String.format("\tNumber of Objects Analyzed: %s\n", this.seedCount);
+		s += String.format("\tNumber of Objects Analyzed: %s\n", this.objects.size());
 		if(this.errorMarkers.rowKeySet().isEmpty()){
 			s += "No violation of any of the rules found.";
 		} else{
