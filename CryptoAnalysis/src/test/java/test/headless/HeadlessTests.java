@@ -70,7 +70,7 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<main.Main: void cipherUsageExample()>", ConstraintError.class, 1);
 		
-//		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
+		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
 
 
 		//TODO this is a spurious finding. What happens here?

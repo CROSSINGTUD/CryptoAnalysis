@@ -24,7 +24,6 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;

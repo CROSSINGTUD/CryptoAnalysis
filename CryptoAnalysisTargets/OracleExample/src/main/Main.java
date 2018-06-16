@@ -57,19 +57,17 @@ public class Main {
 		Boolean t = pwHasher.verifyPWHash(pwd, pwdHash);
 	}
 	
-//	TODO That is weird...if we comment this in other findings will be reported differently....
-//	public static void interproceduralTypestate() throws GeneralSecurityException {
-//		String trans = "AES/CBC/PKCS5Padding";
-//		Cipher cCipher = Cipher.getInstance(trans);
-//		use(cCipher);
-//	}
-//
-//	private static void use(Cipher cCipher) throws IllegalBlockSizeException, BadPaddingException {
-//		byte[] encText = cCipher.doFinal("".getBytes());
-//	}
+	public static void interproceduralTypestate() throws GeneralSecurityException {
+		String trans = "AES/CBC/PKCS5Padding";
+		Cipher cCipher = Cipher.getInstance(trans);
+		use(cCipher);
+	}
+
+	private static void use(Cipher cCipher) throws IllegalBlockSizeException, BadPaddingException {
+		byte[] encText = cCipher.doFinal("".getBytes());
+	}
 	
 	public void incorrectKeyForWrongCipher() throws GeneralSecurityException{
-//		Commented this out. Why does it fail if we comment this totally unrelated code in?
 		Object object = new Object();
 		use(object);
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
