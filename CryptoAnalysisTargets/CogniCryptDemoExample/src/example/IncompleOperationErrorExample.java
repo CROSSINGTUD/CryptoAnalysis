@@ -14,7 +14,6 @@ import javax.crypto.NoSuchPaddingException;
 /**
  * This code contains a misuse example CogniCrypt_SAST of a Cipher object. 
  * CogniCrypt_SAST reports that the object is destroyed in an non-accepting state, or in other words the object is not used to fulfill a task.
- *  
  *
  */
 public class IncompleOperationErrorExample {

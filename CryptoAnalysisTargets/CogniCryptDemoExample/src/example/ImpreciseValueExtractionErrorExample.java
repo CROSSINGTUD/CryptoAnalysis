@@ -12,13 +12,24 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
+/**
+ * This code contains a misuse example CogniCrypt_SAST of a Cipher object. 
+ * CogniCrypt_SAST reports that the String transformation used to instantiate the Cipher object is not extractable.
+ *
+ */
 public class ImpreciseValueExtractionErrorExample {
 	public static boolean NATIVE = false;
 	public static void main(String... args) throws GeneralSecurityException, NoSuchPaddingException, IOException {
 		String transformation;
 		if(NATIVE) {
+			/**
+			 * The String transformation is either read from native:
+			 */
 			transformation = readFromNative();
 		} else {
+			/**
+			 * or it is read from some configuration file:
+			 */
 			transformation = readFromConfigFile();
 		}
 		Cipher instance = Cipher.getInstance(transformation);
