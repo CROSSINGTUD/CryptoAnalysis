@@ -70,9 +70,8 @@ public class Main {
 	
 	public void incorrectKeyForWrongCipher() throws GeneralSecurityException{
 //		Commented this out. Why does it fail if we comment this totally unrelated code in?
-//		Object object = new Object();
-//		use(object);
-		use(new Object());
+		Object object = new Object();
+		use(object);
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		keygen.init(128);
 		SecretKey key = keygen.generateKey();
@@ -81,7 +80,7 @@ public class Main {
 		byte[] encText = cCipher.doFinal("".getBytes());
 	}
 
-	private void use(Object object) {
+	public void use(Object object) {
 		
 	}
 }

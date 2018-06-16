@@ -18,11 +18,13 @@ import boomerang.jimple.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
+import crypto.analysis.RequiredCryptSLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -51,6 +53,7 @@ public class ConstraintSolver {
 
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
+	private final List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
@@ -77,11 +80,8 @@ public class ConstraintSolver {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
 					for (CallSiteWithParamIndex cwpi : this.parsAndVals.keySet()) {
 						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
-							if(object.toString().contains("Blowfish")) {
-								System.out.println("HEREEEEEE" + cwpi.stmt());
-							}
-							pred.setLocation(cwpi.stmt());
 							relConstraints.add(pred);
+							requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
 						}
 					}
 				} else {
@@ -496,5 +496,9 @@ public class ConstraintSolver {
 			}
 			return new AbstractMap.SimpleEntry<List<String>, CallSiteWithExtractedValue>(varVal, witness);
 		}
+	}
+	
+	public List<RequiredCryptSLPredicate> getRequiredPredicates() {
+		return requiredPredicates;
 	}
 }

@@ -72,7 +72,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCryptSLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
-	private Set<CryptSLPredicate> missingPredicates = Sets.newHashSet();
+	private Set<RequiredCryptSLPredicate> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
@@ -311,8 +311,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (satisfiesConstraintSytem) {
 			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
 		} else {
-			predToBeEnsured.setLocation(currStmt);
-			missingPredicates.add(predToBeEnsured);
+			missingPredicates.add(new RequiredCryptSLPredicate(predToBeEnsured, currStmt));
 		}
 	}
 
@@ -367,33 +366,32 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean checkPredicates(Collection<ISLConstraint> relConstraints) {
-		List<CryptSLPredicate> requiredPredicates = Lists.newArrayList();
-		for (ISLConstraint con : relConstraints) {
-			if (con instanceof CryptSLPredicate
-					&& !ConstraintSolver.predefinedPreds.contains(((CryptSLPredicate) con).getPredName())) {
-				requiredPredicates.add((CryptSLPredicate) con);
+		List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
+		for (RequiredCryptSLPredicate con : constraintSolver.getRequiredPredicates()) {
+			if (!ConstraintSolver.predefinedPreds.contains(con.getPred().getPredName())) {
+				requiredPredicates.add(con);
 			}
 		}
-		Set<CryptSLPredicate> remainingPredicates = Sets.newHashSet(requiredPredicates);
+		Set<RequiredCryptSLPredicate> remainingPredicates = Sets.newHashSet(requiredPredicates);
 		missingPredicates.removeAll(remainingPredicates);
 		
-		for (CryptSLPredicate pred : requiredPredicates) {
-			if (pred.isNegated()) {
+		for (RequiredCryptSLPredicate pred : requiredPredicates) {
+			if (pred.getPred().isNegated()) {
 				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-					if (ensPred.getPredicate().equals(pred))
+					if (ensPred.getPredicate().equals(pred.getPred()))
 						return false;
 				}
 				remainingPredicates.remove(pred);
 			} else {
 				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-					if (ensPred.getPredicate().equals(pred) && doPredsMatch(pred, ensPred)) {
+					if (ensPred.getPredicate().equals(pred.getPred()) && doPredsMatch(pred.getPred(), ensPred)) {
 						remainingPredicates.remove(pred);
 					}
 				}
 			}
 		}
-		for (CryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
-			final ISLConstraint conditional = rem.getConstraint();
+		for (RequiredCryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
+			final ISLConstraint conditional = rem.getPred().getConstraint();
 			if (conditional != null) {
 				EvaluatableConstraint evalCons = constraintSolver.createConstraint(conditional);
 				evalCons.evaluate();
@@ -536,7 +534,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 
-	public Set<CryptSLPredicate> getMissingPredicates() {
+	public Set<RequiredCryptSLPredicate> getMissingPredicates() {
 		return missingPredicates;
 	}
 

@@ -24,6 +24,7 @@ import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.RequiredCryptSLPredicate;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -160,13 +161,14 @@ public class PredicateHandler {
 	}
 	private void checkMissingRequiredPredicates() {
 		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeeds()) {
-			Set<CryptSLPredicate> missingPredicates = seed.getMissingPredicates();
-			for(CryptSLPredicate pred : missingPredicates){
+			Set<RequiredCryptSLPredicate> missingPredicates = seed.getMissingPredicates();
+			
+			for(RequiredCryptSLPredicate pred : missingPredicates){
 				CryptSLRule rule = seed.getSpec().getRule();
-				if (!rule.getPredicates().contains(pred)){
+				if (!rule.getPredicates().contains(pred.getPred())){
 					for(Entry<CallSiteWithParamIndex, ExtractedValue> v : seed.getExtractedValues().entries()){
-						if(pred.getInvolvedVarNames().contains(v.getKey().getVarName()) && v.getKey().stmt().equals(pred.getLocation())){	
-							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred, pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v.getKey(),v.getValue())));
+						if(pred.getPred().getInvolvedVarNames().contains(v.getKey().getVarName()) && v.getKey().stmt().equals(pred.getLocation())){	
+							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v.getKey(),v.getValue())));
 						}
 					}
 				}

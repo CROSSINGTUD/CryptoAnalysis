@@ -88,6 +88,8 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			}
 		}
 		s += "=====================================================================";
+
+		System.out.println(s);
 		if (outputFolder != null) {
 			try {
 				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
@@ -104,8 +106,6 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			} catch (IOException e) {
 				throw new RuntimeException("Could not write to file " + outputFolder);
 			}
-		} else {
-			System.out.println(s);
 		}
 	}
 }
