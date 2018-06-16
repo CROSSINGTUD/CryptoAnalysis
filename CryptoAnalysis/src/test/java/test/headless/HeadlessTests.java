@@ -39,7 +39,7 @@ import typestate.TransitionFunction;
 
 public class HeadlessTests {
 	
-	private static boolean VISUALIZATION = true;
+	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 
