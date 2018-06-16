@@ -11,8 +11,8 @@ git:
 build:
   ci:
    - cd CryptoAnalysis
-   - git clone https://github.com/CROSSINGTUD/WPDS.git WeightedBoomerang
-   - cd WeightedBoomerang
+   - git clone --recurse-submodules https://github.com/CROSSINGTUD/WPDS.git
+   - cd WPDS
    - mvn clean install -DskipTests
    - cd ..
    - git checkout $NIGHTLYBUILD
