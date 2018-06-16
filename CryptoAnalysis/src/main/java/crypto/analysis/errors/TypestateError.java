@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 import soot.jimple.Stmt;
@@ -17,7 +18,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 
 	private Collection<SootMethod> expectedMethodCalls;
 
-	public TypestateError(Statement stmt, CryptSLRule rule, Node<Statement, Val> object, Collection<SootMethod> expectedMethodCalls) {
+	public TypestateError(Statement stmt, CryptSLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
 		super(stmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
 	}

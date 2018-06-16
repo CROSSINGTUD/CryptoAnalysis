@@ -8,9 +8,9 @@ import com.google.common.base.Joiner;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
-import sync.pds.solver.nodes.Node;
 
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
@@ -18,7 +18,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	private Collection<SootMethod> expectedMethodCalls;
 
 	public IncompleteOperationError(Statement errorLocation,
-			Val errorVariable, CryptSLRule rule, Node<Statement,Val> objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
+			Val errorVariable, CryptSLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
 		super(errorLocation, rule, objectLocation);
 		this.errorVariable = errorVariable;
 		this.expectedMethodCalls = expectedMethodsToBeCalled;

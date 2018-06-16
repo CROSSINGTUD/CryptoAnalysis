@@ -6,11 +6,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ErrorWithObjectAllocation;
 import crypto.rules.CryptSLRule;
 import soot.Printer;
 import soot.SootClass;
@@ -21,12 +25,17 @@ public class CommandLineReporter extends ErrorMarkerListener {
 
 	private File outputFolder;
 	private List<CryptSLRule> rules;
+	private Collection<IAnalysisSeed> objects = new HashSet<>();
 
 	public CommandLineReporter(String string, List<CryptSLRule> rules) {
 		this.outputFolder = (string != null ? new File(string) : null);
 		this.rules = rules;
 	}
 
+	@Override
+	public void discoveredSeed(IAnalysisSeed object) {
+		this.objects.add(object);
+	}
 	@Override
 	public void afterAnalysis() {
 		String s = "";
@@ -35,6 +44,19 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		for (CryptSLRule r : this.rules) {
 			s += String.format("\t%s\n", r.getClassName());
 		}
+
+		s += "\n";
+
+		s += "Analyzed Objects: \n";
+		for (IAnalysisSeed r : this.objects) {
+			s += String.format("\tObject:\n");
+			s += String.format("\t\tVariable: %s\n", r.var().value());
+			s += String.format("\t\tType: %s\n", r.getType());
+			s += String.format("\t\tStatement: %s\n", r.stmt().getUnit().get());
+			s += String.format("\t\tMethod: %s\n", r.getMethod());
+			s += String.format("\t\tSHA-256: %s\n", r.getObjectId());
+		}
+		
 		
 		s += "\n";
 		for (SootClass c : this.errorMarkers.rowKeySet()) {
@@ -42,7 +64,12 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
 				s += String.format("\n\t in Method: %s\n", e.getKey().getSubSignature());
 				for (AbstractError marker : e.getValue()) {
-					s += String.format("\t\t%s violating CrySL rule for %s\n", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
+					s += String.format("\t\t%s violating CrySL rule for %s", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
+					if(marker instanceof ErrorWithObjectAllocation) {
+						 s += String.format(" (on Object #%s)\n", ((ErrorWithObjectAllocation) marker).getObjectLocation().getObjectId());
+					} else {
+						 s += "\n";
+					}
 					s += String.format("\t\t\t%s\n", marker.toErrorMarkerString());
 					s += String.format("\t\t\tat statement: %s\n\n", marker.getErrorLocation().getUnit().get());
 				}

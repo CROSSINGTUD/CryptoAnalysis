@@ -16,6 +16,7 @@ import boomerang.jimple.Val;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.typestate.ExtendedIDEALAnaylsis;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import soot.SootMethod;
@@ -155,7 +156,7 @@ public abstract class CryptoScanner {
 
 
 	
-	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed analyzedObject) {
 		return new Debugger<>();
 	}
 

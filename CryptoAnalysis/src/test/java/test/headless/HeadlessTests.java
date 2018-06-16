@@ -38,6 +38,8 @@ import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public class HeadlessTests {
+	
+	private static boolean VISUALIZATION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 
@@ -61,7 +63,7 @@ public class HeadlessTests {
 	public void oracleExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/OracleExample/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
-
+//
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
@@ -173,6 +175,17 @@ public class HeadlessTests {
 			@Override
 			protected CrySLAnalysisListener getAdditionalListener() {
 				return errorCountingAnalysisListener;
+			}
+			@Override
+			protected String getOutputFolder() {
+				File file = new File("cognicrypt-output/");
+				file.mkdirs();
+				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputFolder();
+			}
+			
+			@Override
+			protected boolean enableVisualization() {
+				return VISUALIZATION;
 			}
 		};
 		return scanner;

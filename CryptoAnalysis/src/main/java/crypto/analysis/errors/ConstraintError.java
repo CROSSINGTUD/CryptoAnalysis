@@ -6,6 +6,7 @@ import com.google.common.base.CharMatcher;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLArithmeticConstraint;
@@ -28,7 +29,7 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	private ISLConstraint brokenConstraint;
 	private CallSiteWithExtractedValue callSiteWithParamIndex;
 
-	public ConstraintError(CallSiteWithExtractedValue cs,  CryptSLRule rule, Node<Statement, Val> objectLocation, ISLConstraint con) {
+	public ConstraintError(CallSiteWithExtractedValue cs,  CryptSLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
 		super(cs.getCallSite().stmt(), rule, objectLocation);
 		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;

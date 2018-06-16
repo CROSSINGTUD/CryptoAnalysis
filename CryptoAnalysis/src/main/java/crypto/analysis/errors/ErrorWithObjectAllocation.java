@@ -1,25 +1,24 @@
 package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
-import sync.pds.solver.nodes.Node;
 
 public abstract class ErrorWithObjectAllocation extends AbstractError{
-	private final Node<Statement, Val> objectAllocationLocation;
+	private final IAnalysisSeed objectAllocationLocation;
 
-	public ErrorWithObjectAllocation(Statement errorLocation, CryptSLRule rule, Node<Statement,Val> objectAllocationLocation) {
+	public ErrorWithObjectAllocation(Statement errorLocation, CryptSLRule rule, IAnalysisSeed objectAllocationLocation) {
 		super(errorLocation, rule);
 		this.objectAllocationLocation = objectAllocationLocation;
 	}
 
-	public Node<Statement,Val> getObjectLocation(){
+	public IAnalysisSeed getObjectLocation(){
 		return objectAllocationLocation;
 	}
 
 	protected String getObjectType() {
-		if(this.objectAllocationLocation.fact() != null && this.objectAllocationLocation.fact().value() != null)
-			return " on object of type " + this.objectAllocationLocation.fact().value().getType();
+		if(this.objectAllocationLocation.asNode().fact() != null && this.objectAllocationLocation.asNode().fact().value() != null)
+			return " on object of type " + this.objectAllocationLocation.asNode().fact().value().getType();
 		return "";
 	}
 }

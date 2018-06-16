@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.errors.AbstractError;
@@ -48,32 +49,37 @@ import soot.jimple.StringConstant;
 
 public class ConstraintSolver {
 
-	private final ClassSpecification classSpec;
 	private final List<ISLConstraint> allConstraints;
 	private final List<ISLConstraint> relConstraints;
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
 	private final CrySLResultsReporter reporter;
+	private AnalysisSeedWithSpecification object;
+	private ClassSpecification classSpec;
 
-	public ConstraintSolver(ClassSpecification spec, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
-		classSpec = spec;
-		parsAndVals = parametersToValues;
+	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
+		this.object = object;
+		this.classSpec = object.getSpec();
+		this.parsAndVals = object.getExtractedValues();
 		this.collectedCalls = collectedCalls;
-		allConstraints = spec.getRule().getConstraints();
-		relConstraints = new ArrayList<ISLConstraint>();
+		this.allConstraints = this.classSpec.getRule().getConstraints();
+		this.relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 			
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
-			for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
+			for (CallSiteWithParamIndex cwpi : this.parsAndVals.keySet()) {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
 			
 			if (involvedVarNames.isEmpty()) {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
-					for (CallSiteWithParamIndex cwpi : parametersToValues.keySet()) {
+					for (CallSiteWithParamIndex cwpi : this.parsAndVals.keySet()) {
 						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
+							if(object.toString().contains("Blowfish")) {
+								System.out.println("HEREEEEEE" + cwpi.stmt());
+							}
 							pred.setLocation(cwpi.stmt());
 							relConstraints.add(pred);
 						}
@@ -254,7 +260,7 @@ public class ConstraintSolver {
 									if (!rightAss.getType().toQuotedString().equals(parameters.get(1).getName())) {
 									} else {
 										//TODO: Fix NeverTypeOfErrors also report a ConstraintError									
-										errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, extractedVal), classSpec.getRule(), null, pred));
+										errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, extractedVal), classSpec.getRule(), object, pred));
 										return;
 									}
 								} else {
@@ -292,14 +298,14 @@ public class ConstraintSolver {
 
 			for (Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 				if (entry.getKey() == Integer.MIN_VALUE) {
-					errors.add(new ConstraintError(entry.getValue(), classSpec.getRule(), null, comp));
+					errors.add(new ConstraintError(entry.getValue(), classSpec.getRule(), object, comp));
 					return;
 				}
 			}
 
 			for (Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 				if (leftie.getKey() == Integer.MIN_VALUE) {
-					errors.add(new ConstraintError(leftie.getValue(), classSpec.getRule(), null, comp));
+					errors.add(new ConstraintError(leftie.getValue(), classSpec.getRule(), object, comp));
 					return;
 				}
 				for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
@@ -413,7 +419,7 @@ public class ConstraintSolver {
 			}
 			for (Entry<String, CallSiteWithExtractedValue> val : vals) {
 				if (!valueCons.getValueRange().contains(val.getKey())) {
-					errors.add(new ConstraintError(val.getValue(), classSpec.getRule(), null, valueCons));
+					errors.add(new ConstraintError(val.getValue(), classSpec.getRule(), object, valueCons));
 					return;
 				}
 			}

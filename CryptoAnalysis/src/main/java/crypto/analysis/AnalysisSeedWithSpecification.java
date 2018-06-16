@@ -95,7 +95,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			@Override
 			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver);
+				return cryptoScanner.debugger(solver, AnalysisSeedWithSpecification.this);
 			}
 
 			@Override
@@ -140,7 +140,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void checkInternalConstraints() {
 		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(spec, parametersToValues, allCallsOnObject.keySet(), cryptoScanner.getAnalysisListener());
+		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), cryptoScanner.getAnalysisListener());
 		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
 		internalConstraintSatisfied = (0 == constraintSolver.evaluateRelConstraints());
 		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
@@ -201,7 +201,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Statement s = c.getRowKey();
 				Val val = c.getColumnKey();
 				if(!(s.getUnit().get() instanceof ThrowStmt)){
-					cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), asNode(), 
+					cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), this, 
 							expectedMethodsToBeCalled));
 				}
 			}
@@ -212,7 +212,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ErrorStateNode) {
 				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), this.asNode(), errorStateNode.getExpectedCalls()));
+				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
@@ -376,6 +376,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		Set<CryptSLPredicate> remainingPredicates = Sets.newHashSet(requiredPredicates);
 		missingPredicates.removeAll(remainingPredicates);
+		
 		for (CryptSLPredicate pred : requiredPredicates) {
 			if (pred.isNegated()) {
 				for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {

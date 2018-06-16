@@ -85,7 +85,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 			@Override
 			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver);
+				return cryptoScanner.debugger(solver,AnalysisSeedWithEnsuredPredicate.this);
 			}
 		};
 		return problem;

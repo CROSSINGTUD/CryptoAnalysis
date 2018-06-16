@@ -55,7 +55,7 @@ public class ClassSpecification {
 
 			@Override
 			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver);
+				return cryptoScanner.debugger(solver, null);
 			}
 		};
 	}

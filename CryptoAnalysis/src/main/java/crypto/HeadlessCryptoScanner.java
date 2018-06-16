@@ -23,6 +23,7 @@ import boomerang.preanalysis.PreTransformBodies;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.IAnalysisSeed;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -218,21 +219,16 @@ public abstract class HeadlessCryptoScanner {
 					}
 					
 					@Override
-					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
 						if(enableVisualization()) {
 							if(getOutputFolder() == null) {
 								throw new RuntimeException("The visualization requires the option --reportFolder");
 							}
-							try {
-								File vizFile = new File(getOutputFolder()+"/viz/"+URLEncoder.encode(solver.getSeed().toString(),"UTF-8")+".json");
-								vizFile.getParentFile().mkdirs();
-								return new IDEVizDebugger<>(vizFile, icfg());
-							} catch (UnsupportedEncodingException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
+							vizFile.getParentFile().mkdirs();
+							return new IDEVizDebugger<>(vizFile, icfg());
 						}
-						return super.debugger(solver);
+						return super.debugger(solver, seed);
 					}
 
 					@Override
