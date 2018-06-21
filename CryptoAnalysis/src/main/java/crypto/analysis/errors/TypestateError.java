@@ -7,12 +7,10 @@ import java.util.Set;
 import com.google.common.base.Joiner;
 
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 import soot.jimple.Stmt;
-import sync.pds.solver.nodes.Node;
 
 public class TypestateError extends ErrorWithObjectAllocation{
 

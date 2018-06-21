@@ -5,7 +5,6 @@ import java.util.Collection;
 import com.google.common.base.Joiner;
 
 import boomerang.jimple.Statement;
-import crypto.Utils;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 

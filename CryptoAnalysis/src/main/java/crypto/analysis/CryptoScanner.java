@@ -16,7 +16,6 @@ import boomerang.jimple.Val;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
-import crypto.typestate.ExtendedIDEALAnaylsis;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import soot.SootMethod;

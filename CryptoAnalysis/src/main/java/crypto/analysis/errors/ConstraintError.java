@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.google.common.base.CharMatcher;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -22,7 +20,6 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInvokeExpr;
-import sync.pds.solver.nodes.Node;
 
 public class ConstraintError extends ErrorWithObjectAllocation{
 

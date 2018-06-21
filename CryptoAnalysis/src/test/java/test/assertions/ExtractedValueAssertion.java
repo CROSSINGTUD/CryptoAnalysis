@@ -4,8 +4,6 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Multimap;
 
-import boomerang.ForwardQuery;
-import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import soot.Unit;

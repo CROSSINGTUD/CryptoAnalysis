@@ -6,8 +6,6 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.Cipher;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
