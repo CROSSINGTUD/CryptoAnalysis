@@ -236,14 +236,8 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void predicateContradiction(Node<Statement, Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-		
-	}
-
-	@Override
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 			Collection<ISLConstraint> relConstraints) {
-		
 	}
 
 	@Override

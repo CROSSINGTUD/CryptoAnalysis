@@ -25,6 +25,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.RequiredCryptSLPredicate;
+import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -42,7 +43,6 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.INode;
-import sync.pds.solver.nodes.Node;
 import wpds.impl.PAutomaton;
 import wpds.impl.Weight.NoWeight;
 
@@ -194,7 +194,7 @@ public class PredicateHandler {
 				}
 				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : contradictionPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						cryptoScanner.getAnalysisListener().predicateContradiction(new Node<Statement,Val>(generatingPredicateStmt, exPredCell.getKey()), disPair);
+						cryptoScanner.getAnalysisListener().reportError(new PredicateContradictionError(generatingPredicateStmt, null, disPair));
 					}
 				}
 			}

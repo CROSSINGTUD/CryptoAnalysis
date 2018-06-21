@@ -3,7 +3,6 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Multimap;
@@ -24,13 +23,13 @@ import typestate.TransitionFunction;
 
 public class CrySLResultsReporter  {
 
-	private List<CrySLAnalysisListener> listeners;
+	private List<ICrySLResultsListener> listeners;
 
 	public CrySLResultsReporter() {
-		listeners = new ArrayList<CrySLAnalysisListener>();
+		listeners = new ArrayList<ICrySLResultsListener>();
 	}
 
-	public boolean addReportListener(CrySLAnalysisListener listener) {
+	public boolean addReportListener(ICrySLResultsListener listener) {
 		return listeners.add(listener);
 	}
 
@@ -39,104 +38,117 @@ public class CrySLResultsReporter  {
 	}
 
 	public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.collectedValues(seed, parametersToValues);
 		}
 	}
 
 	public void discoveredSeed(IAnalysisSeed curr) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.discoveredSeed(curr);
 		}
 	}
 
 	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
+			}
 		}
 	}
-
-	public void predicateContradiction(Node<Statement,Val> node, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.predicateContradiction(node, disPair);
-		}
-	}
-
 
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.checkedConstraints(analysisSeedWithSpecification, relConstraints);
 		}
 	}
 
 	public void beforeAnalysis() {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.beforeAnalysis();
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).beforeAnalysis();
+			}
 		}
 	}
 
 	public void afterAnalysis() {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.afterAnalysis();
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).afterAnalysis();
+			}
 		}
 	}
 
 	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.beforeConstraintCheck(analysisSeedWithSpecification);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).beforeConstraintCheck(analysisSeedWithSpecification);
+			}
 		}
 	}
 
 	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.afterConstraintCheck(analysisSeedWithSpecification);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).afterConstraintCheck(analysisSeedWithSpecification);
+			}
 		}
 	}
 
 	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.beforePredicateCheck(analysisSeedWithSpecification);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).beforePredicateCheck(analysisSeedWithSpecification);
+			}
 		}
 	}
 
 	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.afterPredicateCheck(analysisSeedWithSpecification);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).afterPredicateCheck(analysisSeedWithSpecification);
+			}
 		}
 	}
 
 	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.seedStarted(analysisSeedWithSpecification);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).seedStarted(analysisSeedWithSpecification);
+			}
 		}
 	}
 
 	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.boomerangQueryStarted(seed, q);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLAnalysisListener) listen).boomerangQueryStarted(seed, q);
+			}
 		}
 	}
 
 	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		for (CrySLAnalysisListener listen : listeners) {
-			listen.boomerangQueryFinished(seed, q);
+		for (ICrySLResultsListener listen : listeners) {
+			if (listen instanceof CrySLAnalysisListener) {
+				((CrySLResultsReporter) listen).boomerangQueryFinished(seed, q);
+			}
 		}
-	}	
+	}
 	
 	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.onSeedFinished(seed, analysisResults);
 		}
 	}
 	
 	public void onSeedTimeout(Node<Statement,Val> seed) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.onSeedTimeout(seed);
 		}
 	}
 	
 	public void reportError(AbstractError err) {
-		for (CrySLAnalysisListener listen : listeners) {
+		for (ICrySLResultsListener listen : listeners) {
 			listen.reportError(err);
 		}
 	}

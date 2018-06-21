@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
@@ -17,9 +16,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
-import boomerang.ForwardQuery;
 import boomerang.Query;
-import boomerang.WeightedBoomerang;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -37,6 +34,7 @@ import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -193,6 +191,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										// TODO Auto-generated method stub
 										
 									}
+
+									@Override
+									public void visit(PredicateContradictionError predicateContradictionError) {
+										for (Assertion e : expectedResults) {
+											if (e instanceof PredicateContradiction) {
+												PredicateContradiction p = (PredicateContradiction) e;
+												p.trigger();
+											}
+										}
+									}
 								});
 							}
 
@@ -242,16 +250,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								
 							}
 
-							@Override
-							public void predicateContradiction(Node<Statement, Val> node,
-									Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
-								for(Assertion e : expectedResults){
-									if(e instanceof PredicateContradiction){
-										PredicateContradiction p = (PredicateContradiction) e;
-										p.trigger();
-									}
-								}
-							}
 
 							@Override
 							public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,

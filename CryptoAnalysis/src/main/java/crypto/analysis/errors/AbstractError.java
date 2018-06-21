@@ -20,4 +20,8 @@ public abstract class AbstractError implements IError{
 		return rule;
 	}
 	public abstract String toErrorMarkerString();
+
+	public String toString() {
+		return toErrorMarkerString();
+	}
 }

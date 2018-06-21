@@ -1,5 +1,5 @@
 package crypto.analysis;
 
-public abstract class CrySLAnalysisListener implements ICrySLPerformanceListener, ICrySLResultsListener{
+public abstract class CrySLAnalysisListener implements ICrySLPerformanceListener, ICrySLResultsListener {
 	
 }

@@ -2,7 +2,6 @@ package test.headless;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Before;
@@ -213,11 +212,6 @@ public class HeadlessTests {
 				Integer newCount = --currCount;
 				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
 						error.getClass(), newCount);
-			}
-
-			@Override
-			public void predicateContradiction(Node<Statement, Val> node,
-					Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
 			}
 
 			@Override

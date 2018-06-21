@@ -3,7 +3,6 @@ package crypto.reporting;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.beust.jcommander.internal.Sets;
@@ -28,6 +27,7 @@ import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -107,14 +107,16 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(NeverTypeOfError neverTypeOfError) {
 				addMarker(neverTypeOfError);
+			}
+
+			@Override
+			public void visit(PredicateContradictionError predicateContradictionError) {
+				addMarker(predicateContradictionError);
+				
 			}});
 	}
 	
 
-
-	@Override
-	public void predicateContradiction(final Node<Statement, Val> location, final Entry<CryptSLPredicate, CryptSLPredicate> arg1) {
-	}
 
 	@Override
 	public void afterAnalysis() {
