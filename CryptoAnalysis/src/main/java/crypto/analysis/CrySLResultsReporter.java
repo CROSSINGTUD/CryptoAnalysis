@@ -130,7 +130,7 @@ public class CrySLResultsReporter  {
 	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
 		for (ICrySLResultsListener listen : listeners) {
 			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLResultsReporter) listen).boomerangQueryFinished(seed, q);
+				((CrySLAnalysisListener) listen).boomerangQueryFinished(seed, q);
 			}
 		}
 	}

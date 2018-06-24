@@ -1,7 +1,6 @@
 package example;
 
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -29,7 +28,7 @@ public class IncompleOperationErrorExample {
 		IncompleOperationErrorExample ex = new IncompleOperationErrorExample();
 		ex.doInit();
 		ex.doUpate();
-		ex.signature.sign();
+		ex.doSign();
 	}
 
 
