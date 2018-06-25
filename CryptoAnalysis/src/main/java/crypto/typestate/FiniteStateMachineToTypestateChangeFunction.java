@@ -25,7 +25,7 @@ import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
 
-	private Collection<RefType> analyzedType = Sets.newHashSet();
+	private RefType analyzedType = null;
 
 	private SootBasedStateMachineGraph fsm;
 
@@ -35,7 +35,19 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		}
 		for(SootMethod m : fsm.initialTransitonLabel()){
 			if(m.isConstructor()){
-				analyzedType.add(m.getDeclaringClass().getType());
+				if (analyzedType == null){
+					analyzedType = m.getDeclaringClass().getType();
+				} else {
+					// This code was added to detect unidentified outlying cases affected by the changes made for issue #47.
+					if (analyzedType != m.getDeclaringClass().getType()){
+
+                        try {
+                            throw new Exception("The type of m.getDeclaringClass() does not appear to be consistent across fsm.initialTransitonLabel().");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+				}
 			}
 		}
 		this.fsm = fsm;
@@ -53,7 +65,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				AssignStmt as = (AssignStmt) unit;
 				if(as.getRightOp() instanceof NewExpr){
 					NewExpr newExpr = (NewExpr) as.getRightOp();
-					if(analyzedType.contains(newExpr.getType())){
+					if(analyzedType.equals(newExpr.getType())){
 						AssignStmt stmt = (AssignStmt) unit;
 						out.add(createQuery(unit,method,new AllocVal(stmt.getLeftOp(), method, as.getRightOp(), new Statement(stmt, method))));
 					}
