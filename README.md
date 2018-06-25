@@ -64,7 +64,9 @@ When the option `--reportDir=<folder>` is chosen, CogniCrypt_SAST writes the rep
 
 ## Visualization
 
-When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs. 
+When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs as shown below:
+
+![Visualization](https://github.com/CROSSINGTUD/WPDS/blob/master/boomerangPDS/visualization/example2.png)
 
 ## Changing the CrySL Rules
 
