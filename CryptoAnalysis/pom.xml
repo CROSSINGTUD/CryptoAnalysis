@@ -38,6 +38,11 @@
 	</build>
 	<dependencies>
 		<dependency>
+    		<groupId>com.google.guava</groupId>
+    		<artifactId>guava</artifactId>
+    		<version>25.0-jre</version>
+		</dependency>
+		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>boomerangPDS</artifactId>
 			<version>1.0.0</version>
@@ -75,6 +80,50 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+	  		<groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
+	  		<artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
+	  		<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore</artifactId>
+			<version>2.11.1-v20150805-0538</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.common</artifactId>
+			<version>2.11.0-v20150805-0538</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.eclipse.emf.ecore</groupId>
+			<artifactId>change</artifactId>
+			<version>2.3.0-v200706262000</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.eclipse.emf.ecore</groupId>
+			<artifactId>xmi</artifactId>
+			<version>2.3.0-v200706262000</version>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.eclipse.xtext</groupId>
+    		<artifactId>org.eclipse.xtext</artifactId>
+    		<version>2.14.0</version>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.eclipse.xtext</groupId>
+    		<artifactId>org.eclipse.xtext.common.types</artifactId>
+    		<version>2.13.0</version>
+		</dependency>
+		
 	</dependencies>
 	 <repositories>
         <repository>
