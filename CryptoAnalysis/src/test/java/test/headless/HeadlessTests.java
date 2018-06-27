@@ -38,8 +38,9 @@ import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public class HeadlessTests {
-	
+
 	private static boolean VISUALIZATION = false;
+	private boolean SRC_FORMAT = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 
@@ -49,37 +50,35 @@ public class HeadlessTests {
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
-		
+
 		setErrorsCount("<example.ImpreciseValueExtractionErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 2);
 
 		scanner.exec();
 		assertErrors();
 	}
-	
+
 	@Test
 	public void oracleExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/OracleExample/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
-//
+		//
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<main.Main: void cipherUsageExample()>", ConstraintError.class, 1);
-		
-		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
 
+		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
 
 		//TODO this is a spurious finding. What happens here?
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
-		
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 1);
@@ -91,8 +90,7 @@ public class HeadlessTests {
 	@Test
 	public void stopwatchExample() {
 		String applicationClassPath = new File("../CryptoAnalysisTargets/StopwatchExample/bin").getAbsolutePath();
-		String sootClassPath = applicationClassPath + File.pathSeparator
-				+ new File("../CryptoAnalysisTargets/StopwatchExample/guava-23.0.jar").getAbsolutePath();
+		String sootClassPath = applicationClassPath + File.pathSeparator + new File("../CryptoAnalysisTargets/StopwatchExample/guava-23.0.jar").getAbsolutePath();
 		String rulesDir = new File("../CryptoAnalysisTargets/StopwatchExample/rules").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
 		//TODO this is wrong. The state machine does not label the correct accepting states for the state machine.
@@ -104,21 +102,20 @@ public class HeadlessTests {
 		assertErrors();
 
 	}
-	
+
 	@Test
 	public void cryptoMisuseExampleProject() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/CryptoMisuseExamples/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
-
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", ConstraintError.class, 1);
-		
+
 		scanner.exec();
 		assertErrors();
 	}
@@ -126,13 +123,12 @@ public class HeadlessTests {
 	@Test
 	public void stopwatchPathExpressionExample() {
 		String applicationClassPath = new File("../CryptoAnalysisTargets/StopwatchPathExpression/bin").getAbsolutePath();
-		String sootClassPath = applicationClassPath + File.pathSeparator
-				+ new File("../CryptoAnalysisTargets/StopwatchPathExpression/lib/guava-23.0.jar").getAbsolutePath();
+		String sootClassPath = applicationClassPath + File.pathSeparator + new File("../CryptoAnalysisTargets/StopwatchPathExpression/lib/guava-23.0.jar").getAbsolutePath();
 		String rulesDir = new File("../CryptoAnalysisTargets/StopwatchPathExpression/rules").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
 		setErrorsCount("<pathexpression.PathExpressionComputer: pathexpression.IRegEx getExpressionBetween(java.lang.Object,java.lang.Object)>", TypestateError.class, 1);
 		setErrorsCount("<pathexpression.DepthFirstSearchMain: void dfsFrom(test.IntGraph,int,java.util.Set,com.google.common.base.Stopwatch)>", TypestateError.class, 1);
-		
+
 		//TODO this is wrong. The state machine does not label the correct accepting states for the state machine.
 		setErrorsCount("<pathexpression.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		scanner.exec();
@@ -140,27 +136,27 @@ public class HeadlessTests {
 
 	}
 
-
 	@Test
 	public void glassfishExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/glassfish-embedded/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
-		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", NeverTypeOfError.class, 1);
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>",
+			NeverTypeOfError.class, 1);
 
 		scanner.exec();
 		assertErrors();
 	}
-	
+
 	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath) {
-		return createAnalysisFor(applicationClassPath, sootClassPath,
-				new File(IDEALCrossingTestingFramework.RESOURCE_PATH).getAbsolutePath());
+		return createAnalysisFor(applicationClassPath, sootClassPath, new File(IDEALCrossingTestingFramework.RESOURCE_PATH).getAbsolutePath());
 	}
 
-	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath,
-			String rulesDir) {
+	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath, String rulesDir) {
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
+
+
 			@Override
 			protected String getRulesDirectory() {
 				return rulesDir;
@@ -180,16 +176,22 @@ public class HeadlessTests {
 			protected CrySLAnalysisListener getAdditionalListener() {
 				return errorCountingAnalysisListener;
 			}
+
 			@Override
 			protected String getOutputFolder() {
 				File file = new File("cognicrypt-output/");
 				file.mkdirs();
 				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputFolder();
 			}
-			
+
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
+			}
+
+			@Override
+			protected boolean rulesInSrcFormat() {
+				return SRC_FORMAT;
 			}
 		};
 		return scanner;
@@ -198,34 +200,28 @@ public class HeadlessTests {
 	@Before
 	public void setup() {
 		errorCountingAnalysisListener = new CrySLAnalysisListener() {
+
 			@Override
 			public void reportError(AbstractError error) {
-				Integer currCount; 
-				if(!errorMarkerCountPerErrorTypeAndMethod
-						.contains(error.getErrorLocation().getMethod().toString(), error.getClass())) {
+				Integer currCount;
+				if (!errorMarkerCountPerErrorTypeAndMethod.contains(error.getErrorLocation().getMethod().toString(), error.getClass())) {
 					currCount = 0;
 				} else {
-					currCount = errorMarkerCountPerErrorTypeAndMethod
-							.get(error.getErrorLocation().getMethod().toString(), error.getClass());
+					currCount = errorMarkerCountPerErrorTypeAndMethod.get(error.getErrorLocation().getMethod().toString(), error.getClass());
 				}
-				System.out.println(error.getErrorLocation().getMethod() + "  "+error);
+				System.out.println(error.getErrorLocation().getMethod() + "  " + error);
 				Integer newCount = --currCount;
-				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
-						error.getClass(), newCount);
+				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(), error.getClass(), newCount);
 			}
 
 			@Override
-			public void onSeedTimeout(Node<Statement, Val> seed) {
-			}
+			public void onSeedTimeout(Node<Statement, Val> seed) {}
 
 			@Override
-			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {
-			}
+			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {}
 
 			@Override
-			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-					Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-					Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 
 			}
 
@@ -235,22 +231,16 @@ public class HeadlessTests {
 			}
 
 			@Override
-			public void collectedValues(AnalysisSeedWithSpecification seed,
-					Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-			}
+			public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {}
 
 			@Override
-			public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-					Collection<ISLConstraint> relConstraints) {
-			}
+			public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {}
 
 			@Override
-			public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-			}
+			public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {}
 
 			@Override
-			public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-			}
+			public void boomerangQueryStarted(Query seed, BackwardQuery q) {}
 
 			@Override
 			public void boomerangQueryFinished(Query seed, BackwardQuery q) {
@@ -258,28 +248,22 @@ public class HeadlessTests {
 			}
 
 			@Override
-			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void beforeAnalysis() {
-			}
+			public void beforeAnalysis() {}
 
 			@Override
-			public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void afterAnalysis() {
-			}
+			public void afterAnalysis() {}
 		};
 	}
 
@@ -287,11 +271,9 @@ public class HeadlessTests {
 		for (Cell<String, Class<?>, Integer> c : errorMarkerCountPerErrorTypeAndMethod.cellSet()) {
 			if (c.getValue() != 0) {
 				if (c.getValue() > 0) {
-					throw new RuntimeException(
-							"Did not find all errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+					throw new RuntimeException("Did not find all errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				} else {
-					throw new RuntimeException(
-							"Found too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+					throw new RuntimeException("Found too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				}
 			}
 		}

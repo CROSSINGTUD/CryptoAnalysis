@@ -1,6 +1,8 @@
 package crypto;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +24,7 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.interfaces.CrySLModelReader;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -50,23 +53,28 @@ public abstract class HeadlessCryptoScanner {
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
 
+
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) throws ParseException {
+	public static void main(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		HeadlessCryptoScanner scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException{
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		CommandLineParser parser = new DefaultParser();
 		options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		final String resourcesPath;
-		if (options.hasOption("rulesDir"))
+		if (options.hasOption("rulesDir")) {
 			resourcesPath = options.getOptionValue("rulesDir");
-		else 
+		} else {
 			resourcesPath = "rules";
+		}
+		
+		//		options.hasOption("rulesInSrc")
+
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {
@@ -121,6 +129,11 @@ public abstract class HeadlessCryptoScanner {
 			@Override
 			protected boolean enableVisualization(){
 				return options.hasOption("visualization");
+			}
+
+			@Override
+			protected boolean rulesInSrcFormat() {
+				return options.hasOption("rulesInSrcFormat");
 			}
 		};
 		return sourceCryptoScanner;
@@ -251,10 +264,21 @@ public abstract class HeadlessCryptoScanner {
 
 	protected List<CryptSLRule> getRules() {
 		List<CryptSLRule> rules = Lists.newArrayList();
-		if(getRulesDirectory() == null){
+		String rulesDirectory = getRulesDirectory();
+		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
 		}
-		File[] listFiles = new File(getRulesDirectory()).listFiles();
+
+		if (rulesInSrcFormat()) {
+			try {
+				CrySLModelReader cmr = new CrySLModelReader(rulesDirectory);
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		File[] listFiles = new File(rulesDirectory).listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
@@ -263,7 +287,7 @@ public abstract class HeadlessCryptoScanner {
 		if (rules.isEmpty())
 			System.out.println(
 					"CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ getRulesDirectory());
+							+ rulesDirectory);
 		return rules;
 	}
 
@@ -337,6 +361,8 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	protected abstract String applicationClassPath();
+	
+	protected abstract boolean rulesInSrcFormat();
 
 	protected String softwareIdentifier(){
 		return "";

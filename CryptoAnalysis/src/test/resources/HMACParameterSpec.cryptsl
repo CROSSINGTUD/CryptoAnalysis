@@ -1,0 +1,10 @@
+SPEC javax.xml.crypto.dsig.spec.HMACParameterSpec
+OBJECTS 
+	int outputLength;
+EVENTS
+	c1: HMACParameterSpec(outputLength);
+	
+ORDER
+	c1
+ENSURES
+	preparedHMAC[this];

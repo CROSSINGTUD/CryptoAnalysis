@@ -1,0 +1,40 @@
+SPEC javax.crypto.KeyGenerator
+OBJECTS
+    int keySize;
+    java.security.spec.AlgorithmParameterSpec params;
+    javax.crypto.SecretKey key;
+    java.lang.String alg;
+    java.security.SecureRandom ranGen;
+
+EVENTS
+    g1: getInstance(alg);
+    g2: getInstance(alg, _);
+    Gets := g1 | g2;
+
+    i1: init(keySize);
+    i2: init(keySize, ranGen);
+    i3: init(params);
+    i4: init(params, ranGen);
+    i5: init(ranGen);
+    Inits := i1 | i2 | i3 | i4 | i5;
+    
+    gk: key = generateKey();
+
+ORDER
+    Gets, Inits?, gk
+
+CONSTRAINTS
+	alg in {"AES", "Blowfish", "DESede", "HmacSHA224", "HmacSHA256", "HmacSHA384", "HmacSHA512"};
+    alg in {"AES"} => keySize in {128, 192, 256};
+    alg in {"Blowfish"} => keySize in {128, 192, 256, 320, 384, 448};
+    alg in {"DESede"} => keySize  in {112, 168};
+    alg in {"HmacSHA224"} => keySize in {224};
+    alg in {"HmacSHA256"} => keySize in {256};
+    alg in {"HmacSHA384"} => keySize in {384};
+    alg in {"HmacSHA512"} => keySize in {512};
+   
+REQUIRES
+    randomized[ranGen];
+    
+ENSURES 
+    generatedKey[key, alg];
