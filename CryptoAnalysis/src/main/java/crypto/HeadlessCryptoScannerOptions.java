@@ -20,6 +20,7 @@ public class HeadlessCryptoScannerOptions extends Options {
 		addOption(rulesDir);
 
 		Option rulesFormat = Option.builder().longOpt("rulesInSrc").hasArg(false).desc("Specfiy that rules passed as parameter are in source format.").build();
+		addOption(rulesFormat);
 
 		Option sootCp = Option.builder().longOpt("sootCp").hasArg()
 				.desc("The class path of the whole project, including dependencies.").build();
