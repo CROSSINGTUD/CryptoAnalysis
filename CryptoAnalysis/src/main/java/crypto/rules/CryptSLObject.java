@@ -37,7 +37,7 @@ public class CryptSLObject implements Serializable, ICryptSLPredicateParameter {
 	}
 	
 	public String toString() {
-		return javaType + " " + varName + ((splitter != null) ? splitter.toString() : "");
+		return varName + ((splitter != null) ? splitter.toString() : "");
 	}
 
 	@Override

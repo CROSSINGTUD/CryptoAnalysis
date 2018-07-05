@@ -23,7 +23,27 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 	}
 	
 	public String toString() {
-		return "C:" + left + operator + right;
+		return left + " " + getOperatorString() + " " + right;
+	}
+
+	/**
+	 * @return
+	 */
+	private String getOperatorString() {
+		switch (operator) {
+			case l:
+				return "<";
+			case le:
+				return "<";
+			case g:
+				return ">";
+			case ge:
+				return ">=";
+			case neq:
+				return "!=";
+			default:
+				return "=";
+		}
 	}
 	
 	/**

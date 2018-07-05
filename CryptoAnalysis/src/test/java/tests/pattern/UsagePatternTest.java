@@ -53,6 +53,18 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		cCipher.getIV();
 	}
 	
+	@Test
+	public void UsagePatternImprecise() throws GeneralSecurityException {
+		SecretKey key = KeyGenerator.getInstance("AES").generateKey();
+		Assertions.hasEnsuredPredicate(key);
+
+		Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		c.init(Cipher.ENCRYPT_MODE, key);
+		byte[] res = c.doFinal("message".getBytes(), 0, "message".getBytes().length);
+		Assertions.mustBeInAcceptingState(c);
+		Assertions.hasEnsuredPredicate(res);
+	}
 
 	@Test
 	public void UsagePatternTest1Simple() throws GeneralSecurityException {
@@ -185,7 +197,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Assertions.notHasEnsuredPredicate(key);
+		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
 	}
 

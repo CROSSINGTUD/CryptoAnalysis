@@ -24,10 +24,10 @@ public class ImpreciseValueExtractionError extends AbstractError {
 
 	@Override
 	public String toErrorMarkerString() {
-		String msg = "Constraint ";
-		msg += violatedConstraint;
-		msg += " could not be evaluted due to insufficient information.";
-		return msg;
+		StringBuilder msg = new StringBuilder("Constraint ");
+		msg.append(violatedConstraint);
+		msg.append(" could not be evaluted due to insufficient information.");
+		return msg.toString();
 	}
 
 }

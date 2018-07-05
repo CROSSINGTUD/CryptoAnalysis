@@ -24,7 +24,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
-import crypto.constraints.ConstraintSolver.EvaluatableConstraint;
+import crypto.constraints.ConstraintSolver.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -393,7 +393,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (RequiredCryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
 			final ISLConstraint conditional = rem.getPred().getConstraint();
 			if (conditional != null) {
-				EvaluatableConstraint evalCons = constraintSolver.createConstraint(conditional);
+				EvaluableConstraint evalCons = constraintSolver.createConstraint(conditional);
 				evalCons.evaluate();
 				if (evalCons.hasErrors()) {
 					remainingPredicates.remove(rem);
