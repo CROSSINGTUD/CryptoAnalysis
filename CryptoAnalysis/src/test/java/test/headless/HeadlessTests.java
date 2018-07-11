@@ -57,7 +57,7 @@ public class HeadlessTests {
 
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		
-		setErrorsCount("<example.ImpreciseValueExtractionErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 2);
+		setErrorsCount("<example.ImpreciseValueExtractionErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -78,7 +78,7 @@ public class HeadlessTests {
 
 
 		//TODO this is a spurious finding. What happens here?
-		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
+//		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
 		
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
