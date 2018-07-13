@@ -88,6 +88,21 @@ public class HeadlessTests {
 		assertErrors();
 	}
 
+	/**
+	 * This tests should both succeed or both fail
+	 */
+	@Test
+	public void dataFlowImprecisionTest() {
+		String sootClassPath = new File("../CryptoAnalysisTargets/DataFlowImprecisionExample/bin").getAbsolutePath();
+		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringConstant()>", ConstraintError.class, 1);
+		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingParameter()>", ConstraintError.class, 1);
+
+		scanner.exec();
+		assertErrors();
+	}
+
 	@Test
 	public void stopwatchExample() {
 		String applicationClassPath = new File("../CryptoAnalysisTargets/StopwatchExample/bin").getAbsolutePath();
