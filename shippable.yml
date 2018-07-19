@@ -16,9 +16,9 @@ build:
    - mvn clean install -DskipTests
    - cd ..
    - git checkout $NIGHTLYBUILD
-   - mvn clean verify surefire:test --fail-at-end
-   
-integrations:                               
+   - mvn clean verify surefire:test cobertura:cobertura --fail-at-end
+
+integrations:
   notifications:
     - integrationName: email
       type: email
