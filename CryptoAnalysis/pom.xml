@@ -8,6 +8,20 @@
 	<build>
 		<plugins>
 			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <maxmem>256m</maxmem>
+          <aggregate>true</aggregate>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+          <outputDirectory>../shippable/codecoverage</outputDirectory>
+        </configuration>
+      </plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
