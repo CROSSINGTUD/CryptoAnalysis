@@ -7,6 +7,8 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
 public class DataFlowImprecisionExample {
+	static String field;
+
 	public static void main(String... args) throws NoSuchAlgorithmException {
 		String trans = "AES";
 		KeyGenerator keygen = KeyGenerator.getInstance(trans);
@@ -30,6 +32,26 @@ public class DataFlowImprecisionExample {
 		keygen.init(128);
 		SecretKey key = keygen.generateKey();
 		Cipher cCipher = Cipher.getInstance(trans);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] encText = cCipher.doFinal("".getBytes());
+	}
+
+	public static void cipherUsageExampleUsingStringInstance() throws GeneralSecurityException {
+		String trans = new String("AES");
+		KeyGenerator keygen = KeyGenerator.getInstance(trans);
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();
+		Cipher cCipher = Cipher.getInstance(trans);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] encText = cCipher.doFinal("".getBytes());
+	}
+
+	public static void cipherUsageExampleUsingField() throws GeneralSecurityException {
+		field = "AES";
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();
+		Cipher cCipher = Cipher.getInstance(field);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
 		byte[] encText = cCipher.doFinal("".getBytes());
 	}
