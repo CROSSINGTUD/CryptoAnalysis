@@ -80,4 +80,24 @@ public class DataFlowImprecisionExample {
         SecretKey key = keygen.generateKey();
     }
 
+    public static void cipherUsageExampleUsingStringConstantAsVariableInKeyGenerator() throws GeneralSecurityException {
+        String trans = "AES";
+        KeyGenerator keygen = KeyGenerator.getInstance(trans);
+        keygen.init(128);
+        SecretKey key = keygen.generateKey();
+        Cipher cCipher = Cipher.getInstance(trans);
+        cCipher.init(1, key);
+        byte[] encText = cCipher.doFinal("".getBytes());
+    }
+
+    public static void cipherUsageExampleUsingStringConstantAsVariableButNotInKeyGenerator() throws GeneralSecurityException {
+        String trans = "AES";
+        KeyGenerator keygen = KeyGenerator.getInstance("AES");
+        keygen.init(128);
+        SecretKey key = keygen.generateKey();
+        Cipher cCipher = Cipher.getInstance(trans);
+        cCipher.init(1, key);
+        byte[] encText = cCipher.doFinal("".getBytes());
+    }
+
 }
