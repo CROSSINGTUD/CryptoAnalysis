@@ -67,4 +67,17 @@ public class DataFlowImprecisionExample {
 		return keygen.generateKey();
 	}
 
+    public static void keyGenUsageExampleUsingStringConstantInVariable() throws GeneralSecurityException {
+        String trans = "EAS";
+        KeyGenerator keygen = KeyGenerator.getInstance(trans);
+        keygen.init(128);
+        SecretKey key = keygen.generateKey();
+    }
+
+    public static void keyGenUsageExampleUsingStringConstantDirectly() throws GeneralSecurityException {
+        KeyGenerator keygen = KeyGenerator.getInstance("EAS");
+        keygen.init(128);
+        SecretKey key = keygen.generateKey();
+    }
+
 }

@@ -102,6 +102,10 @@ public class HeadlessTests {
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringObjectDirectly()>", ConstraintError.class, 1);
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingFieldWithStringConstant()>", ConstraintError.class, 1);
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingFieldWithStringObject()>", ConstraintError.class, 1);
+
+        setErrorsCount("<main.DataFlowImprecisionExample: void keyGenUsageExampleUsingStringConstantInVariable()>", ConstraintError.class, 1);
+        setErrorsCount("<main.DataFlowImprecisionExample: void keyGenUsageExampleUsingStringConstantDirectly()>", ConstraintError.class, 1);
+
 		scanner.exec();
 		assertErrors();
 	}
