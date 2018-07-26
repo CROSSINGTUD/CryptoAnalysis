@@ -1,0 +1,38 @@
+[INFO] de.fraunhofer.iem:CryptoAnalysis:jar:1.0.0
+[INFO] +- de.fraunhofer.iem:boomerangPDS:jar:1.0.0:compile
+[INFO] |  +- de.fraunhofer.iem:WPDS:jar:1.0.0:compile
+[INFO] |  +- com.google.guava:guava:jar:23.5-jre:compile
+[INFO] |  |  +- com.google.code.findbugs:jsr305:jar:1.3.9:compile
+[INFO] |  |  +- org.checkerframework:checker-qual:jar:2.0.0:compile
+[INFO] |  |  +- com.google.errorprone:error_prone_annotations:jar:2.0.18:compil
+
+[INFO] |  |  +- com.google.j2objc:j2objc-annotations:jar:1.1:compile
+[INFO] |  |  \- org.codehaus.mojo:animal-sniffer-annotations:jar:1.14:compile
+[INFO] |  +- de.fraunhofer.iem:PathExpression:jar:1.0.0:compile
+[INFO] |  +- de.fraunhofer.iem:synchronizedPDS:jar:1.0.0:compile
+[INFO] |  +- com.googlecode.json-simple:json-simple:jar:1.1.1:compile
+[INFO] |  +- org.apache.commons:commons-lang3:jar:3.5:compile
+[INFO] |  \- org.apache.logging.log4j:log4j-core:jar:2.11.0:compile
+[INFO] |     \- org.apache.logging.log4j:log4j-api:jar:2.11.0:compile
+[INFO] +- ca.mcgill.sable:soot:jar:3.0.0-SNAPSHOT:compile
+[INFO] |  +- commons-io:commons-io:jar:2.6:compile
+[INFO] |  +- org.smali:dexlib2:jar:2.2.2:compile
+[INFO] |  |  \- org.smali:util:jar:2.2.2:compile
+[INFO] |  |     \- com.beust:jcommander:jar:1.64:compile
+[INFO] |  +- org.ow2.asm:asm-debug-all:jar:5.2:compile
+[INFO] |  +- xmlpull:xmlpull:jar:1.1.3.4d_b4_min:compile
+[INFO] |  +- org.jboss:jboss-common-core:jar:2.5.0.Final:compile
+[INFO] |  |  \- org.jboss.logging:jboss-logging-spi:jar:2.1.2.GA:compile
+[INFO] |  +- pxb.android:axml:jar:2.0.0-SNAPSHOT:compile
+[INFO] |  +- ca.mcgill.sable:polyglot:jar:2006:compile
+[INFO] |  +- heros:heros:jar:1.0.0-SNAPSHOT:compile
+[INFO] |  |  \- org.functionaljava:functionaljava:jar:4.2:compile
+[INFO] |  +- ca.mcgill.sable:jasmin:jar:3.0.0-SNAPSHOT:compile
+[INFO] |  |  \- ca.mcgill.sable:java_cup:jar:0.9.2:compile
+[INFO] |  +- org.slf4j:slf4j-api:jar:1.7.5:compile
+[INFO] |  \- org.slf4j:slf4j-simple:jar:1.7.5:compile
+[INFO] +- de.fraunhofer.iem:idealPDS:jar:1.0.0:compile
+[INFO] +- de.fraunhofer.iem:testCore:jar:1.0.0:compile
+[INFO] +- commons-cli:commons-cli:jar:1.4:compile
+[INFO] \- junit:junit:jar:4.12:test
+[INFO]    \- org.hamcrest:hamcrest-core:jar:1.3:test
