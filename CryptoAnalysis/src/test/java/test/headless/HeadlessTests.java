@@ -98,10 +98,10 @@ public class HeadlessTests {
 
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringConstantInVariable()>", ConstraintError.class, 1);
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringConstantDirectly()>", ConstraintError.class, 1);
-		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringObjectInVariable()>", ConstraintError.class, 1);
-		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringObjectDirectly()>", ConstraintError.class, 1);
+		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringObjectInVariable()>", ImpreciseValueExtractionError.class, 1);
+		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingStringObjectDirectly()>", ImpreciseValueExtractionError.class, 1);
 		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingFieldWithStringConstant()>", ConstraintError.class, 1);
-		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingFieldWithStringObject()>", ConstraintError.class, 1);
+		setErrorsCount("<main.DataFlowImprecisionExample: void cipherUsageExampleUsingFieldWithStringObject()>", ImpreciseValueExtractionError.class, 1);
 
         setErrorsCount("<main.DataFlowImprecisionExample: void keyGenUsageExampleUsingStringConstantInVariable()>", ConstraintError.class, 1);
         setErrorsCount("<main.DataFlowImprecisionExample: void keyGenUsageExampleUsingStringConstantDirectly()>", ConstraintError.class, 1);
