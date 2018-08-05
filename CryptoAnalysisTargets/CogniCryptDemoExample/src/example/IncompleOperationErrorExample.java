@@ -52,7 +52,7 @@ public class IncompleOperationErrorExample {
 	
 	private static PrivateKey getPrivateKey() throws GeneralSecurityException {
 		KeyPairGenerator kpgen = KeyPairGenerator.getInstance("RSA");
-		kpgen.initialize(1024);
+		kpgen.initialize(2048);
 		KeyPair gp = kpgen.generateKeyPair();
 		return gp.getPrivate();
 	}
