@@ -57,7 +57,7 @@ public class ConstraintSolver {
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
 	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
 	private final CrySLResultsReporter reporter;
-	private AnalysisSeedWithSpecification object;
+	private final AnalysisSeedWithSpecification object;
 	private final ClassSpecification classSpec;
 
 	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
@@ -344,7 +344,7 @@ public class ConstraintSolver {
 							cons = false;
 					}
 					if (!cons) {
-						errors.add(new ConstraintError(leftie.getValue(), classSpec.getRule(), null, origin));
+						errors.add(new ConstraintError(leftie.getValue(), classSpec.getRule(), object, origin));
 						return;
 					}
 				}
