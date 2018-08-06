@@ -1,6 +1,7 @@
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 
+
 public class Runner {
 
 	public static void main(String[] args) throws GeneralSecurityException, UnsupportedEncodingException {
@@ -11,9 +12,9 @@ public class Runner {
 //		Cipher c = Cipher.getInstance("AES/ABC");
 //		c.init(1, KeyGenerator.getInstance("AES").generateKey());
 //		error = new String(c.doFinal("WHAT!?".getBytes()));
-		
+
 		FileHandler f = new FileHandler();
-		if (!f.readFile(".\\bin\\input.txt")) {
+		if (!f.readFile(".\\resources\\input.txt")) {
 			System.err.println(error);
 			System.exit(-1);
 		}
@@ -23,7 +24,7 @@ public class Runner {
 			System.exit(-2);
 		}
 
-		if (f.writeContent(".\\resources\\output.txt")) {
+		if (f.writeContent(".\\bin\\output.txt")) {
 			System.out.println("Encrypted file successfully written!");
 		}
 

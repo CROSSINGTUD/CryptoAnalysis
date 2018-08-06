@@ -70,8 +70,6 @@ public class HeadlessTests {
 
 	  //TODO: FileEncryptor
 
-	  scanner.exec();
-	  assertErrors();
 	}
 
 	@Test
@@ -81,8 +79,6 @@ public class HeadlessTests {
 
 	  //TODO: LongTermArchiver
 
-	  scanner.exec();
-	  assertErrors();
 	}
 
 	@Test
@@ -92,8 +88,6 @@ public class HeadlessTests {
 
 	  //TODO: SecureFileTransmitter
 
-	  scanner.exec();
-	  assertErrors();
 	}
 
 	@Test
@@ -103,8 +97,6 @@ public class HeadlessTests {
 
 	  //TODO: UserAuthenticator
 
-	  scanner.exec();
-	  assertErrors();
 	}
 
 	@Test

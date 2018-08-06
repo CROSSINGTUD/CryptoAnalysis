@@ -4,6 +4,8 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
+import Crypto.PWHasher;
+
 public class Main {
 
 	public static void main(String[] args) throws IOException, GeneralSecurityException {
@@ -25,7 +27,8 @@ public class Main {
 		}
 
 		// TODO: Implement transformation of password userPwd for secure storage
-		String pwdHash = "";
+		PWHasher pwHasher = new PWHasher();
+		String pwdHash = pwHasher.createPWHash(userPwd);
 
 		System.out.println("Password" + ((pwdHash.isEmpty()) ? " not(!)" : "") + " securely stored.");
 		if (pwdHash.isEmpty()) {
@@ -33,6 +36,7 @@ public class Main {
 		}
 		// Store password in database
 		DatabaseConnection.storePassword("Annelie", pwdHash);
+		
 
 		///// PASSWORD VERIFICATION
 
@@ -51,9 +55,10 @@ public class Main {
 		String pwdFromDatabase = DatabaseConnection.retrievePassword("Annelie");
 
 		// TODO: Implement password verification
-		Boolean verified = false;
+		Boolean t = pwHasher.verifyPWHash(userPwd, pwdFromDatabase);
 
-		System.out.println("Verification " + ((verified) ? "successful" : "failed"));
+		System.out.println("Verification " + ((t) ? "successful" : "failed"));
+		
 	}
 
 }

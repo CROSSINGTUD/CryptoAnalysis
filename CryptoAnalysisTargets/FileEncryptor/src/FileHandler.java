@@ -1,6 +1,12 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+
+import javax.crypto.SecretKey;
+
+import Crypto.Enc;
+import Crypto.KeyDeriv;
 
 public class FileHandler {
 
@@ -16,11 +22,17 @@ public class FileHandler {
 		return true;
 	}
 
-	public boolean encryptContent(char[] pwd) {
+	public boolean encryptContent(char[] pwd) throws GeneralSecurityException {
 		// TODO: Implement encryption. 'content' must be encrypted, the
-		// ciphertext must be stored in 'encryptedContent.
+		// ciphered text must be stored in 'encryptedContent'.
 		
-		return false;
+		KeyDeriv kd = new KeyDeriv();
+		SecretKey key = kd.getKey(pwd);
+		Enc enc = new Enc();
+		
+		encryptedContent = enc.encrypt(content, key);
+		
+		return true;
 	}
 
 	public boolean writeContent(String path) {
@@ -33,5 +45,5 @@ public class FileHandler {
 		}
 		return true;
 	}
-
+	
 }
