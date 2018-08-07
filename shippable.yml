@@ -1,9 +1,9 @@
 language: java
 
 jdk:
-   - oraclejdk8
+  - oraclejdk8
 env:
-- NIGHTLYBUILD=$BRANCH
+  - NIGHTLYBUILD=$BRANCH
 
 git:
    submodules: false
@@ -17,6 +17,7 @@ build:
    - cd ..
    - git checkout $NIGHTLYBUILD
    - mvn clean verify surefire:test cobertura:cobertura --fail-at-end
+
 
 integrations:
   notifications:

@@ -39,7 +39,7 @@ import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public class HeadlessTests {
-	
+
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
@@ -50,15 +50,19 @@ public class HeadlessTests {
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
+
+
+
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		
+
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
-		
+
 		setErrorsCount("<example.ImpreciseValueExtractionErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 1);
 		
 		//TODO these shouldn't be here. Apparently, we misused the crypto API ourselves.
@@ -68,7 +72,43 @@ public class HeadlessTests {
 		scanner.exec();
 		assertErrors();
 	}
-	
+
+	@Test
+	public void fileEncryptor() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/FileEncryptor/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+	  //TODO: FileEncryptor
+
+	}
+
+	@Test
+	public void longTermArchiver() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/LongTermArchiver/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+	  //TODO: LongTermArchiver
+
+	}
+
+	@Test
+	public void secureFileTransmitter() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+	  //TODO: SecureFileTransmitter
+
+	}
+
+	@Test
+	public void userAuthenticator() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/UserAuthenticator/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+	  //TODO: UserAuthenticator
+
+	}
+
 	@Test
 	public void oracleExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/OracleExample/bin").getAbsolutePath();
@@ -79,13 +119,13 @@ public class HeadlessTests {
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<main.Main: void cipherUsageExample()>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
 
 
 		//TODO this is a spurious finding. What happens here?
 //		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
-		
+
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 1);
@@ -110,7 +150,7 @@ public class HeadlessTests {
 		assertErrors();
 
 	}
-	
+
 	@Test
 	public void cryptoMisuseExampleProject() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/CryptoMisuseExamples/bin").getAbsolutePath();
@@ -120,11 +160,11 @@ public class HeadlessTests {
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
-		
+
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", ConstraintError.class, 1);
-		
+
 		scanner.exec();
 		assertErrors();
 	}
@@ -138,7 +178,7 @@ public class HeadlessTests {
 		HeadlessCryptoScanner scanner = createAnalysisFor(applicationClassPath, sootClassPath, rulesDir);
 		setErrorsCount("<pathexpression.PathExpressionComputer: pathexpression.IRegEx getExpressionBetween(java.lang.Object,java.lang.Object)>", TypestateError.class, 1);
 		setErrorsCount("<pathexpression.DepthFirstSearchMain: void dfsFrom(test.IntGraph,int,java.util.Set,com.google.common.base.Stopwatch)>", TypestateError.class, 1);
-		
+
 		//TODO this is wrong. The state machine does not label the correct accepting states for the state machine.
 		setErrorsCount("<pathexpression.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		scanner.exec();
@@ -158,7 +198,7 @@ public class HeadlessTests {
 		scanner.exec();
 		assertErrors();
 	}
-	
+
 	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath) {
 		return createAnalysisFor(applicationClassPath, sootClassPath,
 				new File(IDEALCrossingTestingFramework.RESOURCE_PATH).getAbsolutePath());
@@ -192,7 +232,7 @@ public class HeadlessTests {
 				file.mkdirs();
 				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputFolder();
 			}
-			
+
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
@@ -206,7 +246,7 @@ public class HeadlessTests {
 		errorCountingAnalysisListener = new CrySLAnalysisListener() {
 			@Override
 			public void reportError(AbstractError error) {
-				Integer currCount; 
+				Integer currCount;
 				if(!errorMarkerCountPerErrorTypeAndMethod
 						.contains(error.getErrorLocation().getMethod().toString(), error.getClass())) {
 					currCount = 0;
