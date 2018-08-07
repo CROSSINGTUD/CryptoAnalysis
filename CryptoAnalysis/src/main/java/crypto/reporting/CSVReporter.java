@@ -35,6 +35,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -89,6 +90,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 		put(Headers.CallGraphReachableMethods,callgraphReachableMethods);
 		put(Headers.CallGraphReachableMethods_ActiveBodies,callgraphReachableMethodsWithActiveBodies);
 		addDynamicHeader(ConstraintError.class.getSimpleName());
+		addDynamicHeader(NeverTypeOfError.class.getSimpleName());
 		addDynamicHeader(TypestateError.class.getSimpleName());
 		addDynamicHeader(RequiredPredicateError.class.getSimpleName());
 		addDynamicHeader(IncompleteOperationError.class.getSimpleName());
