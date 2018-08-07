@@ -576,7 +576,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
-		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 1000, 128);
+		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
@@ -584,7 +584,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		pbekeyspec.clearPassword();
-		pbekeyspec = new PBEKeySpec(corPwd, salt, 999, 128);
+		pbekeyspec = new PBEKeySpec(corPwd, salt, 9999, 128);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
@@ -594,13 +594,13 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		pbekeyspec.clearPassword();
 
 
-		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 1000);
+		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 10000);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.mustBeInAcceptingState(pbeparspec);
 		Assertions.hasEnsuredPredicate(pbeparspec);
 
-		pbeparspec = new PBEParameterSpec(salt, 999);
+		pbeparspec = new PBEParameterSpec(salt, 9999);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.mustBeInAcceptingState(pbeparspec);
@@ -626,7 +626,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);
 
-		final Cipher c = Cipher.getInstance("AES/GCM/PKCS5Padding");
+		final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
 		Assertions.extValue(0);
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
@@ -655,7 +655,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 10000, 128);
 		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
@@ -667,7 +667,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 		Assertions.extValue(0);
 
-		final Cipher c = Cipher.getInstance("AES/GCM/PKCS5Padding");
+		final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
 		Assertions.extValue(0);
 
 		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
