@@ -655,7 +655,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 10000, 128);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
 		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
