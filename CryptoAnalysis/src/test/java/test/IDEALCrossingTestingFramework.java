@@ -41,7 +41,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 //	protected TestingResultReporter<StateNode> testingResultReporter;
-	public final static String RESOURCE_PATH = "src/test/resources/";
+	public final static String RESOURCE_PATH = "src/main/resources/";
 	
 	protected abstract File getCryptSLFile();
 
