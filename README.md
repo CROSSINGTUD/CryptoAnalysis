@@ -17,9 +17,7 @@ Download the two files:
 
 ## Checkout and Build
 
-CogniCrypt_SAST uses maven as build tool. CogniCrypt_SAST uses WPDS as dependency which is not available at  maven central. Checkout and build WPDS from [here](https://github.com/CROSSINGTUD/WPDS). Follow the instructions and `mvn install` it to your local maven repository.
-
-Once done, you can compile and build this project via
+CogniCrypt_SAST uses maven as build tool. You can compile and build this project via
 
 ```mvn package -DskipTests=true```.
 
