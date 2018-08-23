@@ -120,6 +120,9 @@
 			<id>soot-snapshot</id>
 			<name>soot snapshots</name>
 			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
 		</repository>
 	</repositories>
 
