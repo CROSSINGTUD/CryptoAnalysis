@@ -70,8 +70,8 @@ public class HeadlessTests {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/FileEncryptor/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
-	  //TODO: FileEncryptor
-
+		scanner.exec();
+		assertErrors();
 	}
 
 	@Test
@@ -79,8 +79,9 @@ public class HeadlessTests {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/LongTermArchiver/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
-	  //TODO: LongTermArchiver
 
+	  scanner.exec();
+	  assertErrors();
 	}
 
 	@Test
@@ -88,8 +89,9 @@ public class HeadlessTests {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
-	  //TODO: SecureFileTransmitter
 
+	  scanner.exec();
+	  assertErrors();
 	}
 
 	@Test
@@ -97,8 +99,8 @@ public class HeadlessTests {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/UserAuthenticator/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
-	  //TODO: UserAuthenticator
-
+	  scanner.exec();
+	  assertErrors();
 	}
 
 	@Test
