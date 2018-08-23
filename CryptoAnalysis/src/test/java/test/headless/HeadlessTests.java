@@ -104,6 +104,17 @@ public class HeadlessTests {
 	}
 
 	@Test
+	public void reportedIssues() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/ReportedIssues/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
+      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 1);
+	  scanner.exec();
+	  assertErrors();
+	}
+	
+	@Test
 	public void oracleExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/OracleExample/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
