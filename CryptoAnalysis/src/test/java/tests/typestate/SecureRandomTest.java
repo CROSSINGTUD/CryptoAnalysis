@@ -13,7 +13,7 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("rules/SecureRandom.cryptslbin");
+		return new File("SecureRandom.cryptslbin");
 	}
 	@Test
 	public void testSecureRandom1() throws NoSuchAlgorithmException {

@@ -14,7 +14,7 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("rules/KeyGenerator.cryptslbin");
+		return new File("KeyGenerator.cryptslbin");
 	}
 
 	@Test
