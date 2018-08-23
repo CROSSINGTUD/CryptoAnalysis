@@ -110,6 +110,14 @@ public class HeadlessTests {
 
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
+      
+      setErrorsCount("<issue68.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
+      
+      
+      setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 1);
+      setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", IncompleteOperationError.class, 1);
+
+      setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", RequiredPredicateError.class, 1);
 	  scanner.exec();
 	  assertErrors();
 	}
