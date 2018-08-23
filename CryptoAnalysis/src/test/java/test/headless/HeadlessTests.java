@@ -109,7 +109,7 @@ public class HeadlessTests {
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
-      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 1);
+      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
 	  scanner.exec();
 	  assertErrors();
 	}
@@ -129,7 +129,7 @@ public class HeadlessTests {
 
 
 		//TODO this is a spurious finding. What happens here?
-//		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
 
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
@@ -196,7 +196,10 @@ public class HeadlessTests {
 	public void glassfishExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/glassfish-embedded/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
-
+		
+		
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", RequiredPredicateError.class, 1);
+		
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", NeverTypeOfError.class, 1);
 
@@ -259,7 +262,6 @@ public class HeadlessTests {
 					currCount = errorMarkerCountPerErrorTypeAndMethod
 							.get(error.getErrorLocation().getMethod().toString(), error.getClass());
 				}
-				System.out.println(error.getErrorLocation().getMethod() + "  "+error);
 				Integer newCount = --currCount;
 				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
 						error.getClass(), newCount);

@@ -24,9 +24,6 @@ public class RequiredPredicateError extends AbstractError{
 		visitor.visit(this);
 	}
 
-	public CallSiteWithExtractedValue getExtractedValues() {
-		return extractedValues;
-	}
 
 	@Override
 	public String toErrorMarkerString() {
