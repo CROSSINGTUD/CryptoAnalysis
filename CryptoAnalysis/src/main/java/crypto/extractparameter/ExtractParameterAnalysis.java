@@ -44,6 +44,7 @@ public class ExtractParameterAnalysis {
 			return key;
 		}
 	};
+	private Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
 
 	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject, SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
@@ -80,6 +81,11 @@ public class ExtractParameterAnalysis {
 	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
 		return collectedValues;
 	}
+	
+	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
+		return querySites;
+	}
+	
 	private void injectQueryAtCallSite(List<CryptSLMethod> list, Statement callSite) {
 		if(!callSite.isCallsite())
 			return;
@@ -109,13 +115,17 @@ public class ExtractParameterAnalysis {
 			return;
 		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
 		if (!(parameter instanceof Local)) {
-			collectedValues.put(
-					new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification), new ExtractedValue(stmt,parameter));
+			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification);
+			collectedValues.put(cs
+					, new ExtractedValue(stmt,parameter));
+			querySites.add(cs);
 			return;
 		}
 		Val queryVal = new Val((Local) parameter, stmt.getMethod());
 		AdditionalBoomerangQuery query = additionalBoomerangQuery
 				.getOrCreate(new AdditionalBoomerangQuery(stmt, queryVal));
+		CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification);
+		querySites.add(callSiteWithParamIndex);
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
@@ -127,7 +137,7 @@ public class ExtractParameterAnalysis {
 					} else {
 						extractedValue = new ExtractedValue(v.stmt(),v.var().value());
 					}
-					collectedValues.put(new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification),
+					collectedValues.put(callSiteWithParamIndex,
 							extractedValue);
 				}
 			}
@@ -172,14 +182,12 @@ public class ExtractParameterAnalysis {
 			listeners.add(q);
 		}
 
-		private ExtractParameterAnalysis getOuterType() {
-			return ExtractParameterAnalysis.this;
-		}
 	}
 
 	private static interface QueryListener {
 		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
 	}
+	
 	
 
 
