@@ -291,7 +291,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			Type baseType = accessGraph.value().getType();
 			if (baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
-				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
+				if (spec.getRule().getClassName().equals(refType.getSootClass().getName())) {
 					if (satisfiesConstraintSytem) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
 							new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
