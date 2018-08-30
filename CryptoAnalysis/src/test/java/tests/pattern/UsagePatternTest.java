@@ -394,26 +394,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void UsagePatternTestImplictPadding() throws GeneralSecurityException {
-		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Assertions.extValue(0);
-		keygen.init(128);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.hasEnsuredPredicate(key);
-		Assertions.mustBeInAcceptingState(keygen);
-		Cipher cCipher = Cipher.getInstance("AES/CBC");
-		Assertions.extValue(0);
-		cCipher.init(Cipher.ENCRYPT_MODE, key);
-
-		Assertions.extValue(0);
-		byte[] encText = cCipher.doFinal("".getBytes());
-		Assertions.hasEnsuredPredicate(encText);
-		Assertions.mustBeInAcceptingState(cCipher);
-		cCipher.getIV();
-	}
-
-	@Test
 	public void UsagePatternTest3() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
