@@ -81,4 +81,40 @@ public class Main {
 	public void use(Object object) {
 		
 	}
+	public void useCorrectDoFinal() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();
+		Cipher cCipher = Cipher.getInstance("AES");
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] encText = cCipher.doFinal("".getBytes());
+	}
+
+	public void useWrongDoFinal() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();;
+		Cipher cCipher = Cipher.getInstance("AES");
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] encText = cCipher.doFinal();
+	}
+
+	public void useNoDoFinal() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();;
+		Cipher cCipher = Cipher.getInstance("AES");
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+	}
+
+	public void useDoFinalInLoop() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		SecretKey key = keygen.generateKey();;
+		Cipher cCipher = Cipher.getInstance("AES");
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		for (int i=0; i<42; i++){
+			cCipher.doFinal("".getBytes());
+		}
+	}
 }

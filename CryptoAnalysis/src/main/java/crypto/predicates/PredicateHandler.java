@@ -166,9 +166,9 @@ public class PredicateHandler {
 			for(RequiredCryptSLPredicate pred : missingPredicates){
 				CryptSLRule rule = seed.getSpec().getRule();
 				if (!rule.getPredicates().contains(pred.getPred())){
-					for(Entry<CallSiteWithParamIndex, ExtractedValue> v : seed.getExtractedValues().entries()){
-						if(pred.getPred().getInvolvedVarNames().contains(v.getKey().getVarName()) && v.getKey().stmt().equals(pred.getLocation())){	
-							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v.getKey(),v.getValue())));
+					for(CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()){
+						if(pred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(pred.getLocation())){
+							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
 						}
 					}
 				}

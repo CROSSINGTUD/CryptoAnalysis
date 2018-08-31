@@ -59,25 +59,27 @@ public class ConstraintSolver {
 	private final CrySLResultsReporter reporter;
 	private final AnalysisSeedWithSpecification object;
 	private final ClassSpecification classSpec;
+	private Collection<CallSiteWithParamIndex> parameterAnalysisQuerySites;
 
 	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
 		this.object = object;
 		this.classSpec = object.getSpec();
-		this.parsAndVals = object.getExtractedValues();
+		this.parsAndVals = object.getParameterAnalysis().getCollectedValues();
+		this.parameterAnalysisQuerySites = object.getParameterAnalysis().getAllQuerySites();
 		this.collectedCalls = collectedCalls;
 		this.allConstraints = this.classSpec.getRule().getConstraints();
 		this.relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
-			for (CallSiteWithParamIndex cwpi : this.parsAndVals.keySet()) {
+			for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
 
 			if (involvedVarNames.isEmpty()) {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
-					for (CallSiteWithParamIndex cwpi : this.parsAndVals.keySet()) {
+					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
 						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
 							relConstraints.add(pred);
 							requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));

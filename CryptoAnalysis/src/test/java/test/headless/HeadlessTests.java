@@ -104,6 +104,29 @@ public class HeadlessTests {
 	}
 
 	@Test
+	public void reportedIssues() {
+	  String sootClassPath = new File("../CryptoAnalysisTargets/ReportedIssues/bin").getAbsolutePath();
+	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+
+      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
+      setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
+      
+      setErrorsCount("<issue68.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
+      
+      
+      setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 1);
+      setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", IncompleteOperationError.class, 1);
+
+      setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", RequiredPredicateError.class, 1);
+      
+      setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class,1);
+      setErrorsCount("<issue49.Main: byte[] sign(java.lang.String)>", RequiredPredicateError.class,1);
+       
+	  scanner.exec();
+	  assertErrors();
+	}
+	
+	@Test
 	public void oracleExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/OracleExample/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
@@ -118,11 +141,19 @@ public class HeadlessTests {
 
 
 		//TODO this is a spurious finding. What happens here?
-//		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 1);
 
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 1);
+
+		setErrorsCount("<main.Main: void useWrongDoFinal()>", TypestateError.class, 1);
+		setErrorsCount("<main.Main: void useWrongDoFinal()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
+		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -185,7 +216,10 @@ public class HeadlessTests {
 	public void glassfishExample() {
 		String sootClassPath = new File("../CryptoAnalysisTargets/glassfish-embedded/bin").getAbsolutePath();
 		HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
-
+		
+		
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", RequiredPredicateError.class, 1);
+		
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", NeverTypeOfError.class, 1);
 
@@ -248,7 +282,6 @@ public class HeadlessTests {
 					currCount = errorMarkerCountPerErrorTypeAndMethod
 							.get(error.getErrorLocation().getMethod().toString(), error.getClass());
 				}
-				System.out.println(error.getErrorLocation().getMethod() + "  "+error);
 				Integer newCount = --currCount;
 				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
 						error.getClass(), newCount);
