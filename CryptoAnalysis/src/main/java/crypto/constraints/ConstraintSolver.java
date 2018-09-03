@@ -79,7 +79,7 @@ public class ConstraintSolver {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
 
-			if (involvedVarNames.isEmpty()) {
+			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
 					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {

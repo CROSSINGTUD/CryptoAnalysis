@@ -413,8 +413,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			} else if (pred.getInvolvedVarNames().contains(var)) {
 
 				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
-				Collection<String> actVals = null;
-				Collection<String> expVals = null;
+				Collection<String> actVals = Collections.emptySet();
+				Collection<String> expVals = Collections.emptySet();
 
 				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
 					if (cswpi.getVarName().equals(parameterI)) {
