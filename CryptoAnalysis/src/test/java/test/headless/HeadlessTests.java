@@ -107,9 +107,22 @@ public class HeadlessTests {
 	public void reportedIssues() {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/ReportedIssues/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
+	  
+	  setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", ConstraintError.class, 1);
+	  
+	  //TODO #81 this error should actually be reported, however it is not as soon as issue68.AESCryptor is also in the Scene.
+	  //setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
 
-	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(String[])>", ConstraintError.class, 0);
-	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(String[])>", RequiredPredicateError.class, 0);
+	  setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", IncompleteOperationError.class, 1);
+	  setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", RequiredPredicateError.class, 2);
+	  setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", NeverTypeOfError.class, 1);
+	  setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", ConstraintError.class, 1);
+		
+	  setErrorsCount("<issue81.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+	  setErrorsCount("<issue81.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
+
+	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", ConstraintError.class, 0);
+	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 	  
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
@@ -125,8 +138,6 @@ public class HeadlessTests {
       setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class,1);
       setErrorsCount("<issue49.Main: byte[] sign(java.lang.String)>", RequiredPredicateError.class,1);
       
-	  setErrorsCount("<issue81.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-	  setErrorsCount("<issue81.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 	  scanner.exec();
 	  assertErrors();
 	}

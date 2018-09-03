@@ -26,6 +26,7 @@ import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import soot.Local;
 import soot.SootMethod;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -38,6 +39,7 @@ public class ExtractParameterAnalysis {
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
 	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
+	private Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
@@ -80,6 +82,10 @@ public class ExtractParameterAnalysis {
 	}
 	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
 		return collectedValues;
+	}
+
+	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
+		return propagatedTypes;
 	}
 	
 	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
@@ -129,6 +135,7 @@ public class ExtractParameterAnalysis {
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
+				propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
 				for (ForwardQuery v : res.getAllocationSites().keySet()) {
 					ExtractedValue extractedValue = null;
 					if(v.var() instanceof AllocVal) {
