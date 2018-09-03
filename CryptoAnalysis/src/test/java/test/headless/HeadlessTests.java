@@ -108,6 +108,9 @@ public class HeadlessTests {
 	  String sootClassPath = new File("../CryptoAnalysisTargets/ReportedIssues/bin").getAbsolutePath();
 	  HeadlessCryptoScanner scanner = createAnalysisFor(sootClassPath, sootClassPath);
 
+	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(String[])>", ConstraintError.class, 0);
+	  setErrorsCount("<issueCogniCrypt210.CogniCryptSecretKeySpec: void main(String[])>", RequiredPredicateError.class, 0);
+	  
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
       setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
       
@@ -121,7 +124,7 @@ public class HeadlessTests {
       
       setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class,1);
       setErrorsCount("<issue49.Main: byte[] sign(java.lang.String)>", RequiredPredicateError.class,1);
-       
+      
 	  scanner.exec();
 	  assertErrors();
 	}
