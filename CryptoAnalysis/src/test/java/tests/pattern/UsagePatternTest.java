@@ -2,12 +2,17 @@ package tests.pattern;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.OutputStream; 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
+import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -16,6 +21,8 @@ import java.security.Signature;
 import java.util.List;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
