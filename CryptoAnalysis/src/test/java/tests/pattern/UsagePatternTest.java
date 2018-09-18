@@ -1075,8 +1075,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	//Usage Pattern tests for DigestInputStream
 	@Test
 	public void UsagePatternTest23() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
-	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
-//			Assertions.extValue(0);
+	  InputStream is = new FileInputStream(".\\resources\\dis.txt");	
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestInputStream dis = new DigestInputStream(is, md);
@@ -1085,60 +1084,38 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  while (dis.read() != -1) {
 
 	  }
-//			Assertions.hasEnsuredPredicate(dis);
 	  Assertions.mustBeInAcceptingState(dis);
 	}
 
 	@Test
 	public void UsagePatternTest23a() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestInputStream dis = new DigestInputStream(is, md);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
-	  dis.on(false);
-	  Assertions.callToForbiddenMethod();
+	  Assertions.mustNotBeInAcceptingState(dis);
 	  while (dis.read() != -1) {
 
 	  }
-	  Assertions.mustNotBeInAcceptingState(dis);
 	}
 
 	@Test
 	public void UsagePatternTest23b() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
-//			Assertions.extValue(0);
-	  MessageDigest md = MessageDigest.getInstance("SHA-256");
-	  Assertions.extValue(0);
-	  DigestInputStream dis = new DigestInputStream(is, md);
-	  Assertions.extValue(0);
-	  Assertions.extValue(1);
-	  Assertions.mustNotBeInAcceptingState(dis);
-	  while (dis.read() != -1) {
-
-	  }
-	}
-
-	@Test
-	public void UsagePatternTest23c() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
-	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestInputStream dis = new DigestInputStream(is, md);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  dis.read("input".getBytes(), 0, "input".getBytes().length);
-//			Assertions.hasEnsuredPredicate(dis);
 	  Assertions.mustBeInAcceptingState(dis);
 	}
 
 	@Test
-	public void UsagePatternTest23d() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public void UsagePatternTest23c() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestInputStream dis = new DigestInputStream(is, md);
@@ -1146,28 +1123,12 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(1);
 	  dis.read("input".getBytes(), 100, "input".getBytes().length);
 	  Assertions.violatedConstraint(dis);
-//			Assertions.mustNotBeInAcceptingState(dis);
 	}
 
 	//Usage Pattern tests for DigestOutputStream
 	@Test
 	public void UsagePatternTest24() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
-//			Assertions.extValue(0);
-	  MessageDigest md = MessageDigest.getInstance("SHA-256");
-	  Assertions.extValue(0);
-	  DigestOutputStream dos = new DigestOutputStream(os, md);
-	  Assertions.extValue(0);
-	  Assertions.extValue(1);
-	  dos.write(new String("Hello World\n").getBytes());
-//			Assertions.hasEnsuredPredicate(dos);
-	  Assertions.mustBeInAcceptingState(dos);
-	}
-
-	@Test
-	public void UsagePatternTest24a() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
-	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestOutputStream dos = new DigestOutputStream(os, md);
@@ -1180,9 +1141,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void UsagePatternTest24b() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public void UsagePatternTest24a() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestOutputStream dos = new DigestOutputStream(os, md);
@@ -1193,23 +1153,20 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void UsagePatternTest24c() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public void UsagePatternTest24b() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestOutputStream dos = new DigestOutputStream(os, md);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  dos.write("message".getBytes(), 0, "message".getBytes().length);
-//			Assertions.hasEnsuredPredicate(dos);
 	  Assertions.mustBeInAcceptingState(dos);
 	}
 
 	@Test
-	public void UsagePatternTest24d() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public void UsagePatternTest24c() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
-//			Assertions.extValue(0);
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");
 	  Assertions.extValue(0);
 	  DigestOutputStream dos = new DigestOutputStream(os, md);
@@ -1236,12 +1193,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  OutputStream os = new FileOutputStream(".\\resources\\cos.txt");
-//			Assertions.extValue(0);
-
 	  CipherOutputStream cos = new CipherOutputStream(os, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
-//			Assertions.hasEnsuredPredicate(cos);
 	  cos.write(new String("Hello World\n").getBytes());
 	  cos.close();
 	  Assertions.mustBeInAcceptingState(cos);
@@ -1262,8 +1216,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  OutputStream os = new FileOutputStream(".\\resources\\cos.txt");
-//			Assertions.extValue(0);
-
 	  CipherOutputStream cos = new CipherOutputStream(os, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
@@ -1287,14 +1239,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  OutputStream os = new FileOutputStream(".\\resources\\cos.txt");
-//			Assertions.extValue(0);
-
 	  CipherOutputStream cos = new CipherOutputStream(os, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  cos.write("message".getBytes(), 0, "message".getBytes().length);
 	  cos.close();
-//			Assertions.hasEnsuredPredicate(cos);
 	  Assertions.mustBeInAcceptingState(cos);
 	}
 
@@ -1313,13 +1262,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  OutputStream os = new FileOutputStream(".\\resources\\cos.txt");
-//			Assertions.extValue(0);
-
 	  CipherOutputStream cos = new CipherOutputStream(os, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  cos.write("message".getBytes(), 100, "message".getBytes().length);
-//			Assertions.violatedConstraint(cos);
+//		Assertions.violatedConstraint(cos);
 	  Assertions.mustNotBeInAcceptingState(cos);
 	  cos.close();
 	}
@@ -1340,8 +1287,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  InputStream is = new FileInputStream(".\\resources\\cis.txt");
-//			Assertions.extValue(0);
-
 	  CipherInputStream cis = new CipherInputStream(is, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
@@ -1349,7 +1294,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 	  }
 	  cis.close();
-//			Assertions.hasEnsuredPredicate(cis);
 	  Assertions.mustBeInAcceptingState(cis);
 	}
 
@@ -1368,14 +1312,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  InputStream is = new FileInputStream(".\\resources\\cis.txt");
-//			Assertions.extValue(0);
-
 	  CipherInputStream cis = new CipherInputStream(is, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  cis.read("input".getBytes());
 	  cis.close();
-//			Assertions.hasEnsuredPredicate(cis);
 	  Assertions.mustBeInAcceptingState(cis);
 	}
 
@@ -1394,8 +1335,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  InputStream is = new FileInputStream(".\\resources\\cis.txt");
-//			Assertions.extValue(0);
-
 	  CipherInputStream cis = new CipherInputStream(is, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
@@ -1421,14 +1360,11 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  InputStream is = new FileInputStream(".\\resources\\cis.txt");
-//			Assertions.extValue(0);
-
 	  CipherInputStream cis = new CipherInputStream(is, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  cis.read("input".getBytes(), 0, "input".getBytes().length);
 	  cis.close();
-//			Assertions.hasEnsuredPredicate(cis);
 	  Assertions.mustBeInAcceptingState(cis);
 	}
 
@@ -1447,8 +1383,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	  Assertions.extValue(0);
 
 	  InputStream is = new FileInputStream(".\\resources\\cis.txt");
-//			Assertions.extValue(0);
-
 	  CipherInputStream cis = new CipherInputStream(is, cipher);
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
