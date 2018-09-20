@@ -1072,21 +1072,21 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		return MessageDigest.getInstance("SHA-256");
 	}
 	
-//	//Usage Pattern tests for DigestInputStream
-//	@Test
-//	public void UsagePatternTest23() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
-//	  InputStream is = new FileInputStream(".\\resources\\dis.txt");	
-//	  MessageDigest md = MessageDigest.getInstance("SHA-256");
-//	  Assertions.extValue(0);
-//	  DigestInputStream dis = new DigestInputStream(is, md);
-//	  Assertions.extValue(0);
-//	  Assertions.extValue(1);
-//	  while (dis.read() != -1) {
-//
-//	  }
-//	  Assertions.mustBeInAcceptingState(dis);
-//	}
-//
+	//Usage Pattern tests for DigestInputStream
+	@Test
+	public void UsagePatternTest23() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	  InputStream is = new FileInputStream(".\\resources\\dis.txt");	
+	  MessageDigest md = MessageDigest.getInstance("SHA-256");
+	  Assertions.extValue(0);
+	  DigestInputStream dis = new DigestInputStream(is, md);
+	  Assertions.extValue(0);
+	  Assertions.extValue(1);
+	  while (dis.read() != -1) {
+
+	  }
+	  Assertions.mustBeInAcceptingState(dis);
+	}
+
 //	@Test
 //	public void UsagePatternTest23a() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 //	  InputStream is = new FileInputStream(".\\resources\\dis.txt");
