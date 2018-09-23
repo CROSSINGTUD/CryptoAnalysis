@@ -119,7 +119,9 @@ public abstract class CryptoScanner {
 				continue;
 
 			for (Query seed : spec.getInitialSeeds()) {
-				getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
+				if(!spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
+				}
 			}
 		}
 	}
