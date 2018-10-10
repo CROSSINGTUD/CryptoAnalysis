@@ -18,6 +18,7 @@ import boomerang.ForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -130,7 +131,7 @@ public class PredicateHandler {
 							cryptoScanner.getAnalysisListener().boomerangQueryStarted(seedObj, backwardQuery);
 							BackwardBoomerangResults<NoWeight> res = boomerang.solve(backwardQuery);
 							cryptoScanner.getAnalysisListener().boomerangQueryFinished(seedObj, backwardQuery);
-							Map<ForwardQuery, PAutomaton<Statement, INode<Val>>> allocs = res.getAllocationSites();
+							Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> allocs = res.getAllocationSites();
 							for (ForwardQuery p : allocs.keySet()) {
 								AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, p.stmt(),p.var(),specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
