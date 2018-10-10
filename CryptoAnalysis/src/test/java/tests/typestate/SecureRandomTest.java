@@ -15,6 +15,7 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 	protected File getCryptSLFile() {
 		return new File("SecureRandom.cryptslbin");
 	}
+	@Ignore
 	@Test
 	public void testSecureRandom1() throws NoSuchAlgorithmException {
 		final byte[] salt = new byte[32];
