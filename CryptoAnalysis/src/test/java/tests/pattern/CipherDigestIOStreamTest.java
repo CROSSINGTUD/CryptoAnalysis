@@ -23,7 +23,7 @@ import org.junit.Test;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class CipherDigestIOStreamLongTest extends UsagePatternTestingFramework{
+public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 
 	//Usage Pattern tests for DigestInputStream
 	@Test
