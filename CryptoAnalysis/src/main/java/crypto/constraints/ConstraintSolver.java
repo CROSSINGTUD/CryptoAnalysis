@@ -41,6 +41,7 @@ import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import soot.IntType;
 import soot.SootMethod;
+import soot.Type;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -60,11 +61,13 @@ public class ConstraintSolver {
 	private final AnalysisSeedWithSpecification object;
 	private final ClassSpecification classSpec;
 	private Collection<CallSiteWithParamIndex> parameterAnalysisQuerySites;
+	private Multimap<CallSiteWithParamIndex, Type> propagatedTypes;
 
 	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<Statement> collectedCalls, CrySLResultsReporter crySLResultsReporter) {
 		this.object = object;
 		this.classSpec = object.getSpec();
 		this.parsAndVals = object.getParameterAnalysis().getCollectedValues();
+		this.propagatedTypes = object.getParameterAnalysis().getPropagatedTypes();
 		this.parameterAnalysisQuerySites = object.getParameterAnalysis().getAllQuerySites();
 		this.collectedCalls = collectedCalls;
 		this.allConstraints = this.classSpec.getRule().getConstraints();
@@ -76,7 +79,7 @@ public class ConstraintSolver {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
 
-			if (involvedVarNames.isEmpty()) {
+			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
 					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
@@ -260,18 +263,14 @@ public class ConstraintSolver {
 					// -> first parameter is always the variable
 					// -> second parameter is always the type
 					String varName = ((CryptSLObject) parameters.get(0)).getVarName();
-					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
+					for (CallSiteWithParamIndex cs : parameterAnalysisQuerySites) {
 						if (cs.getVarName().equals(varName)) {
-							Collection<ExtractedValue> vals = parsAndVals.get(cs);
-							for (ExtractedValue extractedVal : vals) {
-								Statement stmt = extractedVal.stmt();
-								if (stmt.getUnit().get() instanceof AssignStmt) {
-									Value rightAss = ((AssignStmt) stmt.getUnit().get()).getRightOp();
-									if (!rightAss.getType().toQuotedString().equals(parameters.get(1).getName())) {} else {
-										//TODO: Fix NeverTypeOfErrors also report a ConstraintError									
-										errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, extractedVal), classSpec.getRule(), object, pred));
-										return;
-									}
+							Collection<Type> vals = propagatedTypes.get(cs);
+							for (Type t : vals) {
+								if (t.toQuotedString().equals(parameters.get(1).getName())) {
+									//TODO: Fix NeverTypeOfErrors also report a ConstraintError									
+									errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, null), classSpec.getRule(), object, pred));
+									return;
 								}
 							}
 						}
