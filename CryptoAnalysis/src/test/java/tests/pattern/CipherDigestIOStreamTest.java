@@ -251,7 +251,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 	}
 
 	@Test
-	public void UsagePatternTestCISAdditionalUse() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public void UsagePatternTestCISAdditionalUse1() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 	  Assertions.extValue(0);
 	  keyGenerator.init(128);
