@@ -55,6 +55,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			s += String.format("\t\tStatement: %s\n", r.stmt().getUnit().get());
 			s += String.format("\t\tMethod: %s\n", r.getMethod());
 			s += String.format("\t\tSHA-256: %s\n", r.getObjectId());
+			s += String.format("\t\tSecure: %s\n", secureObjects.contains(r));
 		}
 		
 		
