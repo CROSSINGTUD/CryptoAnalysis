@@ -65,7 +65,7 @@ public class PredicateHandler {
 		if (added) {
 			onPredicateAdded(seedObj, statement, seed, ensPred);
 		}
-
+		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);
 		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
 		if (predsObjBased == null)
 			predsObjBased = Sets.newHashSet();

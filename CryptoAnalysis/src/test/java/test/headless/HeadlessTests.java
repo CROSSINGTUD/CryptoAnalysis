@@ -371,6 +371,12 @@ public class HeadlessTests {
 			@Override
 			public void afterAnalysis() {
 			}
+
+			@Override
+			public void onSecureObjectFound(IAnalysisSeed analysisObject) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

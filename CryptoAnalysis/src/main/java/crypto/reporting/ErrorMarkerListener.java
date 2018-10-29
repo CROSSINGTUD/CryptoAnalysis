@@ -1,7 +1,9 @@
 package crypto.reporting;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,6 +52,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
 	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
+	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
 	
 	private void addMarker(AbstractError error) {
 		SootMethod method = error.getErrorLocation().getMethod();
@@ -179,8 +182,12 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void onSeedFinished(final IAnalysisSeed arg0, final ForwardBoomerangResults<TransitionFunction> arg1) {
-		// Nothing
+	public void onSeedFinished(final IAnalysisSeed analysisObject, final ForwardBoomerangResults<TransitionFunction> arg1) {
+		
+	}
+	@Override
+	public void onSecureObjectFound(final IAnalysisSeed analysisObject) {
+		secureObjects.add( analysisObject);
 	}
 
 	@Override

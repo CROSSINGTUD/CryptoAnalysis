@@ -299,6 +299,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							public void onSeedTimeout(Node<Statement, Val> seed) {
 								
 							}
+
+							@Override
+							public void onSecureObjectFound(IAnalysisSeed analysisObject) {
+								// TODO Auto-generated method stub
+								
+							}
 							
 
 						};

@@ -264,4 +264,10 @@ public class CSVReporter extends CrySLAnalysisListener {
 		seeds++;
 	}
 
+	@Override
+	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
