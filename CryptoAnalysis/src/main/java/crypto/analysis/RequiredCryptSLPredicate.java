@@ -3,7 +3,7 @@ package crypto.analysis;
 import boomerang.jimple.Statement;
 import crypto.rules.CryptSLPredicate;
 
-public class RequiredCryptSLPredicate{
+public class RequiredCryptSLPredicate {
 
 	private final CryptSLPredicate predicate;
 	private final Statement stmt;
@@ -52,4 +52,9 @@ public class RequiredCryptSLPredicate{
 		return stmt;
 	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "misses " + predicate + " @ " + stmt.toString();
+	}
 }

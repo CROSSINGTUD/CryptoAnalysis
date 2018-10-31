@@ -3,6 +3,7 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +25,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
-import crypto.constraints.ConstraintSolver.EvaluatableConstraint;
+import crypto.constraints.ConstraintSolver.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -67,7 +68,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private final ClassSpecification spec;
 	private ExtendedIDEALAnaylsis analysis;
-	private Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues = HashMultimap.create();
 	private ForwardBoomerangResults<TransitionFunction> results;
 	private Collection<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
 	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
@@ -76,12 +76,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
+	private ExtractParameterAnalysis parameterAnalysis;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
 			ClassSpecification spec) {
 		super(cryptoScanner, stmt, val, spec.getFSM().getInitialWeight(stmt));
 		this.spec = spec;
-		analysis = new ExtendedIDEALAnaylsis() {
+		this.analysis = new ExtendedIDEALAnaylsis() {
 
 			@Override
 			public SootBasedStateMachineGraph getStateMachine() {
@@ -134,7 +135,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		computeTypestateErrorsForEndOfObjectLifeTime();
 		
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
-		cryptoScanner.getAnalysisListener().collectedValues(this, parametersToValues);
+		cryptoScanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
 
 
@@ -152,9 +153,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void runExtractParameterAnalysis() {
-		ExtractParameterAnalysis parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
-		parameterAnalysis.run();
-		parametersToValues = parameterAnalysis.getCollectedValues();
+		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
+		this.parameterAnalysis .run();
 	}
 	
 	private void computeTypestateErrorUnits() {
@@ -292,13 +292,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			Type baseType = accessGraph.value().getType();
 			if (baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
-				if (spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
+				if (spec.getRule().getClassName().equals(refType.getSootClass().getName())) {
 					if (satisfiesConstraintSytem) {
 					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
 							new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 					matched = true;
 						seed.addEnsuredPredicateFromOtherRule(
-								new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+								new EnsuredCryptSLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
 					}
 				}
 			}
@@ -309,7 +309,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				.getOrCreateSeed(new Node<Statement, Val>(currStmt, accessGraph));
 		predicateHandler.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
-			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+			seed.addEnsuredPredicate(new EnsuredCryptSLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
 		} else {
 			missingPredicates.add(new RequiredCryptSLPredicate(predToBeEnsured, currStmt));
 		}
@@ -337,7 +337,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
 				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(),
-						new EnsuredCryptSLPredicate(predToBeEnsured, parametersToValues));
+						new EnsuredCryptSLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
 			}
 		}
 	}
@@ -393,7 +393,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (RequiredCryptSLPredicate rem : Lists.newArrayList(remainingPredicates)) {
 			final ISLConstraint conditional = rem.getPred().getConstraint();
 			if (conditional != null) {
-				EvaluatableConstraint evalCons = constraintSolver.createConstraint(conditional);
+				EvaluableConstraint evalCons = constraintSolver.createConstraint(conditional);
 				evalCons.evaluate();
 				if (evalCons.hasErrors()) {
 					remainingPredicates.remove(rem);
@@ -414,17 +414,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			} else if (pred.getInvolvedVarNames().contains(var)) {
 
 				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
-				Collection<String> actVals = null;
-				Collection<String> expVals = null;
+				Collection<String> actVals = Collections.emptySet();
+				Collection<String> expVals = Collections.emptySet();
 
 				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
 					if (cswpi.getVarName().equals(parameterI)) {
 						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
 					}
 				}
-				for (CallSiteWithParamIndex cswpi : parametersToValues.keySet()) {
+				for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
 					if (cswpi.getVarName().equals(var)) {
-						expVals = retrieveValueFromUnit(cswpi, parametersToValues.get(cswpi));
+						expVals = retrieveValueFromUnit(cswpi, parameterAnalysis.getCollectedValues().get(cswpi));
 					}
 				}
 
@@ -538,8 +538,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return missingPredicates;
 	}
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getExtractedValues() {
-		return parametersToValues;
+	public ExtractParameterAnalysis getParameterAnalysis() {
+		return parameterAnalysis;
 	}
 
 	@Override

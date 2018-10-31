@@ -6,9 +6,11 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>crypto-analysis-root</name>
+
   <modules>
     <module>CryptoAnalysis</module>
   </modules>
+
   <build>
     <plugins>
       <plugin>
@@ -21,4 +23,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

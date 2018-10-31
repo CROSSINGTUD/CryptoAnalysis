@@ -19,6 +19,7 @@ import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -86,6 +87,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+				BoomerangPretransformer.v().apply();
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
 				final TestingResultReporter resultReporter = new TestingResultReporter(expectedResults);
@@ -295,6 +297,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 							@Override
 							public void onSeedTimeout(Node<Statement, Val> seed) {
+								
+							}
+
+							@Override
+							public void onSecureObjectFound(IAnalysisSeed analysisObject) {
+								// TODO Auto-generated method stub
 								
 							}
 							

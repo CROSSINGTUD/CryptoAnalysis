@@ -28,4 +28,6 @@ public interface ICrySLResultsListener {
 
 	void discoveredSeed(IAnalysisSeed curr);
 
+	void onSecureObjectFound(IAnalysisSeed analysisObject);
+
 }

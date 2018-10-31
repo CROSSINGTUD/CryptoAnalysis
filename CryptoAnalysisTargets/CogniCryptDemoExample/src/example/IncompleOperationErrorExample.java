@@ -11,7 +11,7 @@ import java.security.SignatureException;
 import javax.crypto.NoSuchPaddingException;
 
 /**
- * This code contains a misuse example CogniCrypt_SAST of a Cipher object. 
+ * This code contains a misuse example CogniCrypt_SAST of a Signature object. 
  * CogniCrypt_SAST reports that the object is destroyed in an non-accepting state, or in other words the object is not used to fulfill a task.
  *
  */
@@ -52,7 +52,7 @@ public class IncompleOperationErrorExample {
 	
 	private static PrivateKey getPrivateKey() throws GeneralSecurityException {
 		KeyPairGenerator kpgen = KeyPairGenerator.getInstance("RSA");
-		kpgen.initialize(1024);
+		kpgen.initialize(2048);
 		KeyPair gp = kpgen.generateKeyPair();
 		return gp.getPrivate();
 	}

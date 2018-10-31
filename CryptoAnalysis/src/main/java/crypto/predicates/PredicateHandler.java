@@ -18,6 +18,7 @@ import boomerang.ForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -64,7 +65,7 @@ public class PredicateHandler {
 		if (added) {
 			onPredicateAdded(seedObj, statement, seed, ensPred);
 		}
-
+		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);
 		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
 		if (predsObjBased == null)
 			predsObjBased = Sets.newHashSet();
@@ -130,7 +131,7 @@ public class PredicateHandler {
 							cryptoScanner.getAnalysisListener().boomerangQueryStarted(seedObj, backwardQuery);
 							BackwardBoomerangResults<NoWeight> res = boomerang.solve(backwardQuery);
 							cryptoScanner.getAnalysisListener().boomerangQueryFinished(seedObj, backwardQuery);
-							Map<ForwardQuery, PAutomaton<Statement, INode<Val>>> allocs = res.getAllocationSites();
+							Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> allocs = res.getAllocationSites();
 							for (ForwardQuery p : allocs.keySet()) {
 								AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, p.stmt(),p.var(),specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
@@ -166,9 +167,9 @@ public class PredicateHandler {
 			for(RequiredCryptSLPredicate pred : missingPredicates){
 				CryptSLRule rule = seed.getSpec().getRule();
 				if (!rule.getPredicates().contains(pred.getPred())){
-					for(Entry<CallSiteWithParamIndex, ExtractedValue> v : seed.getExtractedValues().entries()){
-						if(pred.getPred().getInvolvedVarNames().contains(v.getKey().getVarName()) && v.getKey().stmt().equals(pred.getLocation())){	
-							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v.getKey(),v.getValue())));
+					for(CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()){
+						if(pred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(pred.getLocation())){
+							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
 						}
 					}
 				}

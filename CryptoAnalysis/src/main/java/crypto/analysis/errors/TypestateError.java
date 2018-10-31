@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 
 import boomerang.jimple.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
+import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 
 public class TypestateError extends ErrorWithObjectAllocation{
@@ -31,15 +33,20 @@ public class TypestateError extends ErrorWithObjectAllocation{
 
 	@Override
 	public String toErrorMarkerString() {
-		Statement location = getErrorLocation();
-		Collection<SootMethod> expectedCalls = getExpectedMethodCalls();
 		final StringBuilder msg = new StringBuilder();
+		boolean useSignatures = useSignatures();
+
 		msg.append("Unexpected call to method ");
-		msg.append(getCalledMethodName(location));
+		Statement location = getErrorLocation();
+		msg.append(getCalledMethodString(location, useSignatures));
 		msg.append(getObjectType());
 		final Set<String> altMethods = new HashSet<>();
-		for (final SootMethod expectedCall : expectedCalls) {
-			altMethods.add(expectedCall.getName());
+		for (final SootMethod expectedCall : expectedMethodCalls) {
+			if (useSignatures){
+				altMethods.add(expectedCall.getSignature());
+			} else {
+				altMethods.add(expectedCall.getName());
+			}
 		}
 		if(altMethods.isEmpty()){
 			msg.append(".");
@@ -50,11 +57,40 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		return msg.toString();
 	}
 
-	private String getCalledMethodName(Statement location) {
+	private String getCalledMethodString(Statement location, boolean useSignature) {
 		Stmt stmt = location.getUnit().get();
 		if(stmt.containsInvokeExpr()){
-			return stmt.getInvokeExpr().getMethod().getName();
+			if (useSignature){
+				return stmt.getInvokeExpr().getMethod().getSignature();
+			} else {
+				return stmt.getInvokeExpr().getMethod().getName();
+			}
 		}
 		return stmt.toString();
+	}
+
+	/**
+	 * This method checks whether the statement at which the error is located already calls a method with the same name
+	 * as the expected method.
+	 * This occurs when a call to the method with the correct name, but wrong signature is invoked.
+	 */
+	private boolean useSignatures(){
+		Statement errorLocation = getErrorLocation();
+		if (errorLocation.isCallsite()){
+			Optional<Stmt> stmtOptional = errorLocation.getUnit();
+			if (stmtOptional.isPresent()){
+				Stmt stmt = stmtOptional.get();
+				if (stmt.containsInvokeExpr()){
+					InvokeExpr call = stmt.getInvokeExpr();
+					SootMethod calledMethod = call.getMethod();
+					for (SootMethod expectedCall : getExpectedMethodCalls()){
+						if (calledMethod.getName().equals(expectedCall.getName())){
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

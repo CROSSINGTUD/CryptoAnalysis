@@ -44,7 +44,7 @@ public class CallSiteWithExtractedValue {
 				break;
 		}
 		res += "parameter";
-		if(val.getValue() != null){
+		if(val != null && val.getValue() != null){
 			Value allocVal = val.getValue();
 			if(allocVal instanceof Constant){
 				res += " (with value " + allocVal +")";

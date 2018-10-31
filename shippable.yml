@@ -1,19 +1,22 @@
 language: java
 
 jdk:
-   - oraclejdk8
-env:
-- NIGHTLYBUILD=$BRANCH
+  - oraclejdk8
 
 git:
    submodules: false
 
 build:
   ci:
-   - cd CryptoAnalysis
-   - git clone --recurse-submodules https://github.com/CROSSINGTUD/WPDS.git
-   - cd WPDS
-   - mvn clean install -DskipTests
-   - cd ..
-   - git checkout $NIGHTLYBUILD
-   - mvn clean verify surefire:test --fail-at-end
+   - mvn verify cobertura:cobertura --fail-at-end
+
+
+integrations:
+  notifications:
+    - integrationName: email
+      type: email
+      recipients:
+        - stefan.krueger@crossing.tu-darmstadt.de
+        - johspaeth@users.noreply.github.com
+      sendConsoleLogs: true
+      sendFailingSnippet: true

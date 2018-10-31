@@ -43,7 +43,7 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	}
 
 	public String toString() {
-		return left + " " + operator + " " + right;
+		return left + " " + (operator.equals(ArithOp.p) ? "+" : "-") + " " + right;
 	}
 
 	@Override

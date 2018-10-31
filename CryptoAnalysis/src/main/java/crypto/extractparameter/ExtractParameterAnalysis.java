@@ -26,6 +26,7 @@ import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import soot.Local;
 import soot.SootMethod;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
@@ -38,12 +39,14 @@ public class ExtractParameterAnalysis {
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
 	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
+	private Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
 	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
 			return key;
 		}
 	};
+	private Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
 
 	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject, SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
@@ -80,6 +83,15 @@ public class ExtractParameterAnalysis {
 	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
 		return collectedValues;
 	}
+
+	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
+		return propagatedTypes;
+	}
+	
+	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
+		return querySites;
+	}
+	
 	private void injectQueryAtCallSite(List<CryptSLMethod> list, Statement callSite) {
 		if(!callSite.isCallsite())
 			return;
@@ -109,16 +121,21 @@ public class ExtractParameterAnalysis {
 			return;
 		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
 		if (!(parameter instanceof Local)) {
-			collectedValues.put(
-					new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification), new ExtractedValue(stmt,parameter));
+			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, new Val(parameter, stmt.getMethod()), index, varNameInSpecification);
+			collectedValues.put(cs
+					, new ExtractedValue(stmt,parameter));
+			querySites.add(cs);
 			return;
 		}
 		Val queryVal = new Val((Local) parameter, stmt.getMethod());
 		AdditionalBoomerangQuery query = additionalBoomerangQuery
 				.getOrCreate(new AdditionalBoomerangQuery(stmt, queryVal));
+		CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification);
+		querySites.add(callSiteWithParamIndex);
 		query.addListener(new QueryListener() {
 			@Override
 			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
+				propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
 				for (ForwardQuery v : res.getAllocationSites().keySet()) {
 					ExtractedValue extractedValue = null;
 					if(v.var() instanceof AllocVal) {
@@ -127,7 +144,7 @@ public class ExtractParameterAnalysis {
 					} else {
 						extractedValue = new ExtractedValue(v.stmt(),v.var().value());
 					}
-					collectedValues.put(new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification),
+					collectedValues.put(callSiteWithParamIndex,
 							extractedValue);
 				}
 			}
@@ -172,14 +189,12 @@ public class ExtractParameterAnalysis {
 			listeners.add(q);
 		}
 
-		private ExtractParameterAnalysis getOuterType() {
-			return ExtractParameterAnalysis.this;
-		}
 	}
 
 	private static interface QueryListener {
 		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
 	}
+	
 	
 
 

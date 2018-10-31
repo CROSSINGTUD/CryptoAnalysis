@@ -153,4 +153,10 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
+	public void onSecureObjectFound(IAnalysisSeed seed) {
+		for (ICrySLResultsListener listen : listeners) {
+			listen.onSecureObjectFound(seed);
+		}
+	}
+	
 }

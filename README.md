@@ -5,7 +5,7 @@
 This repository contains CogniCrypt_SAST, the static analysis component for [CogniCrypt](www.cognicrypt.de). 
 The static analysis CogniCrypt_SAST takes rules written in the specification language CrySL as input, 
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
-libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](https://arxiv.org/abs/1710.00564).
+libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
 ## Releases
 
@@ -17,9 +17,7 @@ Download the two files:
 
 ## Checkout and Build
 
-CogniCrypt_SAST uses maven as build tool. CogniCrypt_SAST uses WPDS as dependency which is not available at  maven central. Checkout and build WPDS from [here](https://github.com/CROSSINGTUD/WPDS). Follow the instructions and `mvn install` it to your local maven repository.
-
-Once done, you can compile and build this project via
+CogniCrypt_SAST uses maven as build tool. You can compile and build this project via
 
 ```mvn package -DskipTests=true```.
 
@@ -64,7 +62,9 @@ When the option `--reportDir=<folder>` is chosen, CogniCrypt_SAST writes the rep
 
 ## Visualization
 
-When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs. 
+When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs as shown below:
+
+![Visualization](https://github.com/CROSSINGTUD/WPDS/blob/master/boomerangPDS/visualization/example2.png)
 
 ## Changing the CrySL Rules
 

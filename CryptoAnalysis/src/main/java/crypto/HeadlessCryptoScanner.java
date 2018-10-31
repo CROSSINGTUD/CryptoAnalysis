@@ -17,9 +17,10 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
-import boomerang.preanalysis.PreTransformBodies;
+import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -187,7 +188,6 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	private void analyse() {
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.prepare", new PreTransformBodies()));
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		callGraphWatch = Stopwatch.createStarted();        
@@ -210,6 +210,7 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
+				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
 				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
@@ -217,6 +218,9 @@ public abstract class HeadlessCryptoScanner {
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
+				if(enableVisualization()) {
+//					WeightedBoomerang.DEBUG = true;
+				}
 				CryptoScanner scanner = new CryptoScanner(rules) {
 
 					@Override
@@ -233,7 +237,7 @@ public abstract class HeadlessCryptoScanner {
 					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
 						if(enableVisualization()) {
 							if(getOutputFolder() == null) {
-								throw new RuntimeException("The visualization requires the option --reportFolder");
+								throw new RuntimeException("The visualization requires the option --reportDir");
 							}
 							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
 							vizFile.getParentFile().mkdirs();

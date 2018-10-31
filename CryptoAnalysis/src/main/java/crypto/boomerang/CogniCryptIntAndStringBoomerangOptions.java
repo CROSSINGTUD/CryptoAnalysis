@@ -37,4 +37,9 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
     public boolean arrayFlows() {
         return true;
     }
+
+    @Override
+    public int analysisTimeoutMS() {
+    	return 5000;
+    }
 }

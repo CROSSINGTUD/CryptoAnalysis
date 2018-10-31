@@ -95,7 +95,6 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
-		predSB.append("P:");
 		if (negated) {
 			predSB.append("!");
 		}
@@ -106,6 +105,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 			predSB.append(parameter);
 			predSB.append(",");
 		}
+		predSB.reverse().deleteCharAt(0).reverse();
 		predSB.append(")");
 		
 		

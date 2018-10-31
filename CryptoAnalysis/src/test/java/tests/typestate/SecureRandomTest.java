@@ -4,6 +4,7 @@ import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.IDEALCrossingTestingFramework;
@@ -15,6 +16,7 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 	protected File getCryptSLFile() {
 		return new File("SecureRandom.cryptslbin");
 	}
+	@Ignore
 	@Test
 	public void testSecureRandom1() throws NoSuchAlgorithmException {
 		final byte[] salt = new byte[32];
