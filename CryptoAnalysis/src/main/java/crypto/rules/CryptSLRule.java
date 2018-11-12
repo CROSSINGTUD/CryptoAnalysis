@@ -17,13 +17,13 @@ public class CryptSLRule implements java.io.Serializable {
 	
 	private final List<Entry<String, String>> objects;  
 	
-	private final List<CryptSLForbiddenMethod> forbiddenMethods;
+	protected final List<CryptSLForbiddenMethod> forbiddenMethods;
 	
-	private final StateMachineGraph usagePattern;
+	protected final StateMachineGraph usagePattern;
 	
-	private final List<ISLConstraint> constraints;
+	protected final List<ISLConstraint> constraints;
 	
-	private final List<CryptSLPredicate> predicates;
+	protected final List<CryptSLPredicate> predicates;
 	
 	public CryptSLRule(String _className, List<Entry<String, String>> defObjects, List<CryptSLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
 		className = _className;
