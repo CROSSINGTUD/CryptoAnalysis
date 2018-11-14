@@ -1079,10 +1079,10 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 			  SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
 			  Assertions.notHasEnsuredPredicate(generateSecret);
 			  byte[] keyMaterial = generateSecret.getEncoded();
-			  Assertions.hasEnsuredPredicate(keyMaterial);
+			  Assertions.notHasEnsuredPredicate(keyMaterial);
 			  SecretKey encryptionKey = new SecretKeySpec(keyMaterial, "AES");
 			  //pBEKeySpec.clearPassword();
-			  Assertions.hasEnsuredPredicate(encryptionKey);
+			  Assertions.notHasEnsuredPredicate(encryptionKey);
 			  return encryptionKey;
 	      }
 	    
