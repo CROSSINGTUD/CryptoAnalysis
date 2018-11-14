@@ -596,7 +596,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
-		//		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
@@ -615,7 +614,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
 		Assertions.extValue(1);
-		Assertions.hasEnsuredPredicate(actKey);
+		Assertions.notHasEnsuredPredicate(actKey);
 
 		c.init(Cipher.ENCRYPT_MODE, actKey);
 		Assertions.extValue(0);
@@ -625,7 +624,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		c.getIV();
 
 		Assertions.mustBeInAcceptingState(c);
-		Assertions.hasEnsuredPredicate(encText);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 
 	@Test

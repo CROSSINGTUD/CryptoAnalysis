@@ -494,6 +494,10 @@ public class CrySLModelReader {
 			String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
 			varNType.add(new CryptSLObject(object.getName(), type));
 			String qualifiedName = ((PreDefinedPredicates) lit.getCons()).getType().getQualifiedName();
+			// TODO: This is a workaround. Need to be removed 
+			if ("void".equals(qualifiedName)) {
+				qualifiedName = "java.lang.String";
+			}
 			varNType.add(new CryptSLObject(qualifiedName, "null"));
 			slci = new CryptSLPredicate(null, pred, varNType, false);
 			break;

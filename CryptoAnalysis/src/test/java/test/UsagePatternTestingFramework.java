@@ -79,13 +79,8 @@ import typestate.TransitionFunction;
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
-//	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
-//
-//	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-//		if(debugger == null)
-//			debugger = new CryptoVizDebugger(ideVizFile, icfg);
-//		return debugger;
-//	}
+	List<CryptSLRule> rules = Lists.newArrayList();
+	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
@@ -367,7 +362,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	}
 	
 	protected List<CryptSLRule> getRules(boolean srcFormat) {
-		List<CryptSLRule> rules = Lists.newArrayList();    
+		if (!rules.isEmpty()) {
+			return rules;
+		}
 
 		if (srcFormat) {
 			try {

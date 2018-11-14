@@ -52,7 +52,7 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-
+	List<CryptSLRule> rules = Lists.newArrayList();
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -274,7 +274,9 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	protected List<CryptSLRule> getRules(boolean srcFormat) {
-		List<CryptSLRule> rules = Lists.newArrayList();
+		if (!rules.isEmpty()) {
+			return rules;
+		}
 		String rulesDirectory = getRulesDirectory();
 		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
