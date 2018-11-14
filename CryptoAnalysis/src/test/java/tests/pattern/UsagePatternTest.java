@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
@@ -614,7 +615,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		byte[] keyMaterial = tmpKey.getEncoded();
 		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
 		Assertions.extValue(1);
-		Assertions.notHasEnsuredPredicate(actKey);
+		Assertions.hasEnsuredPredicate(actKey);
 
 		c.init(Cipher.ENCRYPT_MODE, actKey);
 		Assertions.extValue(0);
@@ -624,7 +625,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		c.getIV();
 
 		Assertions.mustBeInAcceptingState(c);
-		Assertions.notHasEnsuredPredicate(encText);
+		Assertions.hasEnsuredPredicate(encText);
 	}
 
 	@Test
@@ -1027,14 +1028,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	@Test
 	public void secretKeyTest() throws NoSuchAlgorithmException, DestroyFailedException {
 		KeyGenerator c = KeyGenerator.getInstance("AES");
-		SecretKey key = c.generateKey();
+		Key key = c.generateKey();
 		Assertions.mustBeInAcceptingState(key);
 		byte[] enc = key.getEncoded();
 		Assertions.mustBeInAcceptingState(key);
 		enc = key.getEncoded();
 
 		Assertions.mustBeInAcceptingState(key);
-		key.destroy();
+		((SecretKey) key).destroy();
 		Assertions.mustBeInAcceptingState(key);
 	}
 
@@ -1078,10 +1079,10 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 			  SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
 			  Assertions.notHasEnsuredPredicate(generateSecret);
 			  byte[] keyMaterial = generateSecret.getEncoded();
-			  Assertions.notHasEnsuredPredicate(keyMaterial);
+			  Assertions.hasEnsuredPredicate(keyMaterial);
 			  SecretKey encryptionKey = new SecretKeySpec(keyMaterial, "AES");
 			  //pBEKeySpec.clearPassword();
-			  Assertions.notHasEnsuredPredicate(encryptionKey);
+			  Assertions.hasEnsuredPredicate(encryptionKey);
 			  return encryptionKey;
 	      }
 	    

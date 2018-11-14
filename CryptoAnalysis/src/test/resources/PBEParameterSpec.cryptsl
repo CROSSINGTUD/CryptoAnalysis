@@ -12,7 +12,7 @@ EVENTS
 ORDER
 	Cons
 CONSTRAINTS
-	iterationCount >= 1000;	
+	iterationCount >= 10000;	
 
 REQUIRES
 	randomized[salt];

@@ -8,5 +8,8 @@ EVENTS
 	
 ORDER
 	c1
+CONSTRAINTS
+	p >= 1^2048;
+	g >= 1^2048;
 ENSURES
 	preparedDSA[this];

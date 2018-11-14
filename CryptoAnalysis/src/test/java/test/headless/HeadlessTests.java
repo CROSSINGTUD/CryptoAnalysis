@@ -40,7 +40,6 @@ import typestate.TransitionFunction;
 public class HeadlessTests {
 
 	private static boolean VISUALIZATION = false;
-	private boolean SRC_FORMAT = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 
@@ -304,10 +303,6 @@ public class HeadlessTests {
 				return VISUALIZATION;
 			}
 
-			@Override
-			protected boolean rulesInSrcFormat() {
-				return SRC_FORMAT;
-			}
 		};
 		return scanner;
 	}

@@ -3,7 +3,7 @@ OBJECTS
 	int keyLength;
 	java.math.BigInteger publicExponent;
 EVENTS
-	c1: RSAKeyGenParameterSpec(outputLength, publicExponent);
+	c1: RSAKeyGenParameterSpec(keyLength, publicExponent);
 	
 ORDER
 	c1

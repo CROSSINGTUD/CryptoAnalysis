@@ -16,7 +16,7 @@ EVENTS
 ORDER
  	c1,  cP
 CONSTRAINTS
-	iterationCount >= 1000;
+	iterationCount >= 10000;
 	neverTypeOf(password, java.lang.String) ;
 
 REQUIRES

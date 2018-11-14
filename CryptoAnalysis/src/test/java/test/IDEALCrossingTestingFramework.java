@@ -1,6 +1,8 @@
 package test;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
+import crypto.interfaces.CrySLModelReader;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -56,7 +59,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			
 			@Override
 			public SootBasedStateMachineGraph getStateMachine() {
-				return new SootBasedStateMachineGraph(getRule().getUsagePattern());
+				return new SootBasedStateMachineGraph(getRule(true).getUsagePattern());
 			}
 			
 			@Override
@@ -71,14 +74,20 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected CryptSLRule getRule() {
-		return CryptSLRuleReader.readFromFile(new File(RESOURCE_PATH + getCryptSLFile()));
+	protected CryptSLRule getRule(boolean srcFormat) {
+		File file = new File(RESOURCE_PATH + getCryptSLFile() + ".cryptsl" + (srcFormat ? "" : "bin"));
+		try {
+			return srcFormat ? (new CrySLModelReader().readRule(file)) : CryptSLRuleReader.readFromFile(file);
+		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException | IOException e) {
+		}
+		return null;
 	}
 
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
+		excludedPackages.add(Utils.getFullyQualifiedName(getRule(true)));
 		return excludedPackages;
 	}
 	

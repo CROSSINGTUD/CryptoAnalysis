@@ -7,15 +7,15 @@ OBJECTS
     byte[] input;
     byte[] output1;
     byte[] output2;
-    java.lang.String alg;
+    java.lang.String macAlg;
     java.security.spec.AlgorithmParameterSpec params;
     int offset;
     int outOffset;
     int len;
 
 EVENTS
-    g1: getInstance(alg);
-    g2: getInstance(alg);
+    g1: getInstance(macAlg);
+    g2: getInstance(macAlg);
     Gets := g1 | g2;
 
     i1: init(key);
@@ -38,7 +38,7 @@ ORDER
     Gets, Inits, (Finals | (Updates+, Finals))
 
 CONSTRAINTS
-    alg in {"HmacMD5", "HmacSHA1", "HmacSHA224", "HmacSHA256", "HmacSHA384", "HmacSHA512", "HmacPBESHA1", "PBEWithHmacSHA1", "PBEWithHmacSHA224", "PBEWithHmacSHA256", "PBEWithHmacSHA384", "PBEWithHmacSHA512"};
+    macAlg in {"HmacMD5", "HmacSHA1", "HmacSHA224", "HmacSHA256", "HmacSHA384", "HmacSHA512", "HmacPBESHA1", "PBEWithHmacSHA1", "PBEWithHmacSHA224", "PBEWithHmacSHA256", "PBEWithHmacSHA384", "PBEWithHmacSHA512"};
     offset < len;
     length(output1) > outOffset;
     

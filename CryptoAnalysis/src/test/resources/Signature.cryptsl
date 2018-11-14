@@ -44,8 +44,8 @@ CONSTRAINTS
     alg in {"NONEwithDSA", "SHA1withDSA", "SHA224withDSA", "SHA256withDSA", "SHA256withRSA", "SHA256withECDSA"};
     
 REQUIRES
-    generatedPrivkey[priv, _];
-    generatedPubkey[pub, _];
+    generatedPrivkey[priv];
+    generatedPubkey[pub];
 
 ENSURES
     signed[out, inpb] after Signs;

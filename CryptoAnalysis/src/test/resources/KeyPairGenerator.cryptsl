@@ -24,10 +24,11 @@ ORDER
     Gets, Inits, Generators
 
 CONSTRAINTS
-	alg in {"RSA", "DSA", "Diffie-Hellman"};
-    alg in {"RSA"} => keySize in {1024, 2048, 4096};
-    alg in {"DSA"} => keySize in {1024, 2048};
-	alg in {"Diffie-Hellman"} => keySize in {1024, 2048};
+	alg in {"RSA", "DSA", "DiffieHellman", "DH", "EC"};
+    alg in {"RSA"} => keySize in {2048, 4096};
+    alg in {"DSA"} => keySize in {2048};
+	alg in {"DiffieHellman", "DH"} => keySize in {2048};
+	alg in {"EC"} => keySize in {256};
 
 ENSURES
     generatedKeypair[kp, alg];

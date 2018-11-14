@@ -42,7 +42,7 @@ EVENTS
     i7: init(encmode, key, param, ranGen);
     i8: init(encmode, key, ranGen);
     IWOIV := i1 | i2 | i3 | i8;
-    IWIV := i3 | i4 | i5 | i6 | i7;
+    IWIV :=  i4 | i5 | i6 | i7;
     Inits := IWOIV | IWIV;
 
     u1: pre_ciphertext = update(pre_plaintext);
@@ -54,7 +54,7 @@ EVENTS
 
     f1: cipherText = doFinal();
     f2: cipherText =  doFinal(plainText);
-    f3: doFinal(cipherText, plain_off);
+    f3: doFinal(cipherText, ciphertext_off);
     f4: cipherText = doFinal(plainText, plain_off, len);
     f5: doFinal(plainText, plain_off, len, cipherText);
     f6: doFinal(plainText, plain_off, len, cipherText, ciphertext_off);
@@ -68,17 +68,17 @@ ORDER
     Gets, Inits, (FINWOU | (updates+, DOFINALS))+
 
 CONSTRAINTS
-	part(0, "/", transformation) in {"AES", "Blowfish", "DESede",  "PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256", "RSA"};
+	part(0, "/", transformation) in {"AES",  "PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256", "RSA"};
     part(0, "/", transformation) in {"AES"} => part(1, "/", transformation) in {"CBC", "GCM", "PCBC", "CTR", "CTS", "CFB", "OFB"};
-    part(0, "/", transformation) in {"Blowfish", "DESede"} => part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"};
     part(0, "/", transformation) in {"PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"} => part(1, "/", transformation) in {"CBC"};
     part(0, "/", transformation) in {"RSA"} => part(1, "/", transformation) in {"", "ECB"};
 
-    part(0, "/", transformation) in {"PBEWithMD5AndDES", "PBEWithMD5AndTripleDES", "PBEWithSHA1AndDESede", "PBEWithSHA1AndRC2_40", "PBEWithSHA1AndRC2_128", "PBEWithSHA1AndRC4_40", "PBEWithSHA1AndRC4_128", "PBEWithHmacSHA1AndAES_128", "PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"} => part(2, "/", transformation) in {"PKCS7Padding", "PKCS5Padding"};
+    part(0, "/", transformation) in {"PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"} => part(2, "/", transformation) in {"PKCS7Padding", "PKCS5Padding"};
     part(0, "/", transformation) in {"RSA"} => part(2, "/", transformation) in {"", "PKCS1Padding","OAEPWithMD5AndMGF1Padding", "OAEPWithSHA-224AndMGF1Padding", "OAEPWithSHA-256AndMGF1Padding", "OAEPWithSHA-384AndMGF1Padding", "OAEPWithSHA-512AndMGF1Padding"};
 
-    part(0, "/", transformation) in {"AES", "Blowfish", "DESede", "RC2"} && part(1, "/", transformation) in {"CBC", "PCBC"} => part(2, "/", transformation) in {"", "PKCS7Padding", "PKCS5Padding", "ISO10126Padding"};
-    part(0, "/", transformation) in {"AES", "Blowfish", "DESede", "RC2"} && part(1, "/", transformation) in {"GCM", "CTR", "CFB", "OFB"} => part(2, "/", transformation) in {"", "NoPadding","PKCS7Padding", "PKCS5Padding", "ISO10126Padding"};
+    part(0, "/", transformation) in {"AES"} && part(1, "/", transformation) in {"CBC", "PCBC"} => part(2, "/", transformation) in {"PKCS7Padding", "PKCS5Padding", "ISO10126Padding"};
+    part(0, "/", transformation) in {"AES"} && part(1, "/", transformation) in {"GCM", "CTR", "CFB", "OFB"} => part(2, "/", transformation) in {"NoPadding"};
+	
 	part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"} && encmode != 1 => noCallTo(IWOIV) ;
     part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"} && encmode == 1 => callTo(iv) ;     
     

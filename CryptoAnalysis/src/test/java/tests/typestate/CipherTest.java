@@ -22,7 +22,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("Cipher.cryptslbin");
+		return new File("Cipher");
 	}
 
 	@Test

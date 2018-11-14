@@ -10,5 +10,10 @@ EVENTS
 	
 ORDER
 	Cons
+
+CONSTRAINTS
+	p >= 1^2048;
+	g >= 1^2048; 
+	
 ENSURES
 	preparedDH[this];
