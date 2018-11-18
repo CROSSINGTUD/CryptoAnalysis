@@ -29,6 +29,7 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import typestate.finiteautomata.MatcherTransition;
 import wpds.impl.Weight.NoWeight;
@@ -128,27 +129,30 @@ public class ExtractParameterAnalysis {
 			return;
 		}
 		Val queryVal = new Val((Local) parameter, stmt.getMethod());
-		AdditionalBoomerangQuery query = additionalBoomerangQuery
-				.getOrCreate(new AdditionalBoomerangQuery(stmt, queryVal));
-		CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification);
-		querySites.add(callSiteWithParamIndex);
-		query.addListener(new QueryListener() {
-			@Override
-			public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
-				propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
-				for (ForwardQuery v : res.getAllocationSites().keySet()) {
-					ExtractedValue extractedValue = null;
-					if(v.var() instanceof AllocVal) {
-						AllocVal allocVal = (AllocVal) v.var();
-						extractedValue = new ExtractedValue(allocVal.allocationStatement(),allocVal.allocationValue());
-					} else {
-						extractedValue = new ExtractedValue(v.stmt(),v.var().value());
+		
+		for(Unit pred : cryptoScanner.icfg().getPredsOf(stmt.getUnit().get())) {
+			AdditionalBoomerangQuery query = additionalBoomerangQuery
+					.getOrCreate(new AdditionalBoomerangQuery(new Statement((Stmt)pred, stmt.getMethod()), queryVal));
+			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification);
+			querySites.add(callSiteWithParamIndex);
+			query.addListener(new QueryListener() {
+				@Override
+				public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
+					propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
+					for (ForwardQuery v : res.getAllocationSites().keySet()) {
+						ExtractedValue extractedValue = null;
+						if(v.var() instanceof AllocVal) {
+							AllocVal allocVal = (AllocVal) v.var();
+							extractedValue = new ExtractedValue(allocVal.allocationStatement(),allocVal.allocationValue());
+						} else {
+							extractedValue = new ExtractedValue(v.stmt(),v.var().value());
+						}
+						collectedValues.put(callSiteWithParamIndex,
+								extractedValue);
 					}
-					collectedValues.put(callSiteWithParamIndex,
-							extractedValue);
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public void addAdditionalBoomerangQuery(AdditionalBoomerangQuery q, QueryListener listener) {
