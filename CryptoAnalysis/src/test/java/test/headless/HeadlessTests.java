@@ -33,6 +33,8 @@ import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
+import soot.G;
+import soot.Scene;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
@@ -252,6 +254,7 @@ public class HeadlessTests {
 
 	private HeadlessCryptoScanner createAnalysisFor(String applicationClassPath, String sootClassPath,
 			String rulesDir) {
+		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String getRulesDirectory() {
