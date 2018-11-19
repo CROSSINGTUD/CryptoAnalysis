@@ -41,6 +41,7 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.INode;
@@ -136,6 +137,22 @@ public class PredicateHandler {
 								AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, p.stmt(),p.var(),specification));
 								seedWithSpec.addEnsuredPredicate(ensPred);
 							}
+						}
+					}
+				}
+			}
+			
+			if (ivexpr instanceof StaticInvokeExpr && statement.getUnit().get() instanceof AssignStmt) {
+				StaticInvokeExpr iie = (StaticInvokeExpr) ivexpr;
+				boolean paramMatch = false;
+				for (Value arg : iie.getArgs()) {
+					if (seed.value() != null && seed.value().equals(arg))
+						paramMatch = true;
+				}
+				if (paramMatch) {
+					for(AnalysisSeedWithSpecification spec : cryptoScanner.getAnalysisSeeds()) {
+						if(spec.stmt().equals(statement)) {
+							spec.addEnsuredPredicate(ensPred);
 						}
 					}
 				}

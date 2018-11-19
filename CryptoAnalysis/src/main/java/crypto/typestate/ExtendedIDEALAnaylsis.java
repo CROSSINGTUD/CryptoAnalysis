@@ -37,6 +37,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
+	private HashSet seeds;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -108,7 +109,10 @@ public abstract class ExtendedIDEALAnaylsis {
 //	}
 
     public Set<WeightedForwardQuery<TransitionFunction>> computeInitialSeeds() {
-        Set<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
+    		if(seeds != null) {
+    			return seeds;
+    		}
+    		seeds = new HashSet<>();
         ReachableMethods rm = Scene.v().getReachableMethods();
         QueueReader<MethodOrMethodContext> listener = rm.listener();
         while (listener.hasNext()) {
