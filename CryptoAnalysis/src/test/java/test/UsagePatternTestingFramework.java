@@ -87,6 +87,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
