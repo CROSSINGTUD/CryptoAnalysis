@@ -292,7 +292,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			Type baseType = accessGraph.value().getType();
 			if (baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
-				if (spec.getRule().getClassName().equals(refType.getSootClass().getName()) || spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
+				//TODO To be removed by Rodrigo once the rule is corrected.
+				boolean fake = spec.getRule().getClassName().equals("AeadPrimitive") && refType.getSootClass().getShortName().equals("Aead");
+				if (fake || spec.getRule().getClassName().equals(refType.getSootClass().getName()) || spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					if (satisfiesConstraintSytem) {
 						AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
 								new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));

@@ -73,6 +73,34 @@ public class TestAEADCipher extends UsagePatternTestingFramework {
    	}
 	
 	
+	@Test
+	public void encryptUsingAES128GCM_refactored() throws GeneralSecurityException {
+		//In these test scenario, I do not suggest to use the static field to create the object
+		//The following is not yet working
+		//KeyTemplate kt = AeadKeyTemplates.AES128_GCM;
+		KeyTemplate kt = AeadKeyTemplates.createAesGcmKeyTemplate(16);
+		//Check that the newly created object receives a predicate
+		Assertions.hasEnsuredPredicate(kt); //works
+		KeysetHandle ksh = KeysetHandle.generateNew(kt);
+		
+		//Check that also this object receives a predicate
+		Assertions.hasEnsuredPredicate(ksh); //works
+		Assertions.mustBeInAcceptingState(kt); //works
+		Assertions.mustBeInAcceptingState(ksh);	//works
+
+		//I also suggest to either use stack variables to specify test cases
+		final String plainText = "Just testing the encryption mode of AEAD"; 
+		final String aad = "cryptsl";
+		
+		//The analysis expects a rule for "Aead", which it could not find here!
+		Aead aead = AeadFactory.getPrimitive(ksh);
+		byte[] out = aead.encrypt(plainText.getBytes(), aad.getBytes());
+		Assertions.mustBeInAcceptingState(aead); //works
+		Assertions.hasEnsuredPredicate(out); //fails
+		
+   	}
+	
+	
 //	@Test
 //	public void generateKeySetHandleWithInvalidTemplate() throws GeneralSecurityException {
 //		KeysetHandle ksh = KeysetHandle.generateNew(null);

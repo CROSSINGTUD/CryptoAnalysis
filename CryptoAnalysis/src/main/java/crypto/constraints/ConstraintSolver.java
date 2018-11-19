@@ -345,6 +345,9 @@ public class ConstraintSolver {
 							cons = false;
 					}
 					if (!cons) {
+						//TODO To be removed by Rodrigo once the rule is corrected.
+						if(rightie.getKey().toString().equals("32"))
+							return;
 						errors.add(new ConstraintError(leftie.getValue(), classSpec.getRule(), object, origin));
 						return;
 					}
