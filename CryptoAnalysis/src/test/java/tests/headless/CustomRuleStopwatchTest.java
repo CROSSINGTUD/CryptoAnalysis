@@ -8,7 +8,7 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 
-public class CustomRuleStopwatchTest extends HeadlessTest{
+public class CustomRuleStopwatchTest extends AbstractHeadlessTest{
 
 	@Test
 	public void loadExternalRuleAndStopwatchExample() {
@@ -25,6 +25,4 @@ public class CustomRuleStopwatchTest extends HeadlessTest{
 		assertErrors();
 
 	}
-
-
 }
