@@ -1,4 +1,4 @@
-package test.headless;
+package tests.headless;
 
 import java.io.File;
 import java.util.ArrayList;
