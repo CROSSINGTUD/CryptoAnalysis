@@ -17,7 +17,7 @@ public class Enc {
 		SecureRandom.getInstanceStrong().nextBytes(ivb);
 		IvParameterSpec iv = new IvParameterSpec(ivb);
 
-		Cipher c = Cipher.getInstance("AES/CFB/PKCS5Padding");
+		Cipher c = Cipher.getInstance("AES/CFB/NoPadding");
 		c.init(Cipher.ENCRYPT_MODE, key, iv);
 
 		byte[] res = c.doFinal(data);
@@ -38,7 +38,7 @@ public class Enc {
 		byte[] data = new byte[ciphertext.length - ivb.length];
 		System.arraycopy(ciphertext, ivb.length, data, 0, data.length);
 
-		Cipher c = Cipher.getInstance("AES/CFB/PKCS5Padding");
+		Cipher c = Cipher.getInstance("AES/CFB/NoPadding");
 		c.init(Cipher.DECRYPT_MODE, key, iv);
 
 		byte[] res = c.doFinal(data);

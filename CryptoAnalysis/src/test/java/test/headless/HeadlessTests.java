@@ -79,7 +79,12 @@ public class HeadlessTests {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/FileEncryptor").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
-	
+		
+		//All the following errors are false positives
+		setErrorsCount("<Crypto.KeyDeriv: javax.crypto.SecretKey getKey(char[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<Crypto.Enc: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<Crypto.Enc: byte[] decrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 2);
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -98,7 +103,10 @@ public class HeadlessTests {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/UserAuthenticator").getAbsolutePath();
 	  	MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
-	
+
+		//All the following errors are false positives
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 2);
+		
 		scanner.exec();
 		assertErrors();
 	}

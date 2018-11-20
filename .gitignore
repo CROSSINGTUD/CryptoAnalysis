@@ -9,3 +9,4 @@ AndroidZooApps/
 .idea/
 shippable/
 *.class
+*.temp
