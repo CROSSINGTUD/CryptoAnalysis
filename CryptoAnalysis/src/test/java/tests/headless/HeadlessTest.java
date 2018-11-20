@@ -11,6 +11,7 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.collect.HashBasedTable;
@@ -89,6 +90,7 @@ public class HeadlessTest {
 		assertErrors();
 	}
 
+	@Ignore
 	@Test
 	public void secureFileTransmitter() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter").getAbsolutePath();
