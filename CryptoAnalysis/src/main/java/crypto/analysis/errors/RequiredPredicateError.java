@@ -28,8 +28,12 @@ public class RequiredPredicateError extends AbstractError{
 	@Override
 	public String toErrorMarkerString() {
 		String msg = extractedValues.toString();
-		msg += " was not properly ";
-		msg += getContradictedPredicate().getPredName();
+		msg += " was not properly generated as ";
+		String predicateName = getContradictedPredicate().getPredName();
+		String[] parts = predicateName.split("(?=[A-Z])");
+		msg += parts[0];
+		for(int i=1; i<parts.length; i++)
+			msg += " " + parts[i];
 		return msg;
 	}
 }
