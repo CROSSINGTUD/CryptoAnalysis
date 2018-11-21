@@ -7,3 +7,6 @@ AndroidZooAPIKey.txt
 AndroidZooApps/
 *.iml
 .idea/
+shippable/
+*.class
+*.temp

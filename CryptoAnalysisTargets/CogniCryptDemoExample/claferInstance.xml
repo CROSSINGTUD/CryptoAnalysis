@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<task description="SymmetricEncryption">
+  <Package>Crypto</Package>
+  <Imports>
+    <Import>java.security.InvalidAlgorithmParameterException</Import>
+    <Import>java.security.InvalidKeyException</Import>
+    <Import>java.security.NoSuchAlgorithmException</Import>
+    <Import>java.security.NoSuchAlgorithmException</Import>
+    <Import>javax.crypto.SecretKey</Import>
+    <Import>javax.crypto.BadPaddingException</Import>
+    <Import>javax.crypto.Cipher</Import>
+    <Import>javax.crypto.IllegalBlockSizeException</Import>
+    <Import>javax.crypto.NoSuchPaddingException</Import>
+    <Import>java.security.SecureRandom</Import>
+    <Import>javax.crypto.spec.IvParameterSpec</Import>
+    <Import>javax.crypto.spec.SecretKeySpec</Import>
+    <Import>java.security.spec.InvalidKeySpecException</Import>
+    <Import>java.util.List</Import>
+    <Import>java.util.Base64</Import>
+    <Import>java.io.InputStream</Import>
+    <Import>java.io.OutputStream</Import>
+    <Import>java.util.Properties</Import>
+    <Import>java.io.FileOutputStream</Import>
+    <Import>java.security.Key</Import>
+  </Imports>
+  <algorithm type="SymmetricBlockCipher">
+    <mode>OFB</mode>
+    <padding>NoPadding</padding>
+    <keySize>192</keySize>
+    <name>AES</name>
+    <description>Advanced Encryption Standard (AES) cipher</description>
+    <algorithmSecurity>Strong</algorithmSecurity>
+    <performance>Fast</performance>
+    <classPerformance>Fast</classPerformance>
+    <provider>JCA</provider>
+  </algorithm>
+  <security>4</security>
+  <algorithm type="KeyDerivationAlgorithm">
+    <iterations>65536</iterations>
+    <outputSize>512</outputSize>
+    <algorithm type="Digest">
+      <outputSize>512</outputSize>
+      <name>SHA</name>
+      <description>SHAdigest</description>
+      <algorithmSecurity>Strong</algorithmSecurity>
+      <performance>Slow</performance>
+      <classPerformance>Fast</classPerformance>
+      <provider>JCA</provider>
+    </algorithm>
+    <name>PBKDF2</name>
+    <description>PBKDF2 key derivation</description>
+    <algorithmSecurity>Strong</algorithmSecurity>
+    <performance>Slow</performance>
+    <classPerformance>VerySlow</classPerformance>
+    <provider>JCA</provider>
+  </algorithm>
+  <description>Encrypt Data Using a Secret Key</description>
+  <element type="SymmetricEncryption">
+    <cipher>AES</cipher>
+    <security>4</security>
+    <kda>pbkdf2</kda>
+  </element>
+  <code>
+    <textsize>false</textsize>
+    <dataType>String</dataType>
+  </code>
+</task>
