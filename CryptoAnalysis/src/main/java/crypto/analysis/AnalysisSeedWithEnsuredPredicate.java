@@ -2,7 +2,7 @@ package crypto.analysis;
 
 import java.util.Set;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 

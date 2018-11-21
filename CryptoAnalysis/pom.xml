@@ -15,6 +15,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.17</version>
 				<configuration>
+					<argLine>-Xmx8G -Xss128m -Dmaven.home=${maven.home}</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 				</configuration>
 				<dependencies>
@@ -96,7 +97,7 @@
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.1.0-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -125,7 +126,6 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
 			<artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
@@ -197,6 +197,13 @@
 			<artifactId>org.eclipse.xtext.common.types</artifactId>
 			<version>2.15.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-invoker-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-invoker-plugin</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
 
 	</dependencies>
 

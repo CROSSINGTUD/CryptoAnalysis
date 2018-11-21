@@ -101,6 +101,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
