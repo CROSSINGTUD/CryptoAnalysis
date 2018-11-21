@@ -17,7 +17,7 @@ public class TestAEADCipher extends UsagePatternTestingFramework {
 	
 	@Test
 	public void generateNewAES128GCMKeySet() throws GeneralSecurityException {
-		KeyTemplate kt = AeadKeyTemplates.AES256_GCM;
+		KeyTemplate kt = AeadKeyTemplates.AES128_GCM;
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.hasEnsuredPredicate(kt);
 		Assertions.mustBeInAcceptingState(kt);
@@ -51,7 +51,10 @@ public class TestAEADCipher extends UsagePatternTestingFramework {
 	@Test
 	public void encryptUsingAES128GCM() throws GeneralSecurityException {
 		KeyTemplate kt = AeadKeyTemplates.AES128_GCM;
+		
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
+		
+		//Assertions.hasEnsuredPredicate(kt);
 		
 		final String plainText = "Just testing the encryption mode of AEAD"; 
 		final String aad = "cryptsl";
@@ -61,6 +64,5 @@ public class TestAEADCipher extends UsagePatternTestingFramework {
 		
 		Assertions.mustBeInAcceptingState(aead);
 		Assertions.hasEnsuredPredicate(out);
-		
-   	}
+  	}
 }
