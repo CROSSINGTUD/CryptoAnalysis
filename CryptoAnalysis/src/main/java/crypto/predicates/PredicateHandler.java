@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
@@ -147,7 +148,7 @@ public class PredicateHandler {
 						paramMatch = true;
 				}
 				if (paramMatch) {
-					for(AnalysisSeedWithSpecification spec : cryptoScanner.getAnalysisSeeds()) {
+					for(AnalysisSeedWithSpecification spec : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
 						if(spec.stmt().equals(statement)) {
 							spec.addEnsuredPredicate(ensPred);
 						}
