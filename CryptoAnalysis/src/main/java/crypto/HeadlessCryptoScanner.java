@@ -197,6 +197,7 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
+				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
@@ -205,9 +206,6 @@ public abstract class HeadlessCryptoScanner {
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
-				if(enableVisualization()) {
-//					WeightedBoomerang.DEBUG = true;
-				}
 				CryptoScanner scanner = new CryptoScanner(rules) {
 
 					@Override
