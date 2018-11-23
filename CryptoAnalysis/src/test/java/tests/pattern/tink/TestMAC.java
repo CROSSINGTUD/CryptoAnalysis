@@ -15,9 +15,6 @@ import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class TestMAC extends UsagePatternTestingFramework {
-	
-	private static final String PLAIN_TEXT = "This is just a sample text"; 
-	
 	@Test
 	public void generateNewHMACSHA256_128BitTag() throws GeneralSecurityException {
 		KeyTemplate kt = MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256);
