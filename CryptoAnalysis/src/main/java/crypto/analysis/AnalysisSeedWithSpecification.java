@@ -164,16 +164,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			Statement curr = c.getRowKey();
-			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
-				Statement typeStateChangeStatement = new Statement((Stmt) pred, curr.getMethod());
-				if(allTypestateChangeStatements.contains(typeStateChangeStatement)) {
-					Collection<? extends State> targetStates = getTargetStates(c.getValue());
-					for (State newStateAtCurr : targetStates) {
-						typeStateChangeAtStatement(typeStateChangeStatement, newStateAtCurr);
-					}
+			if(allTypestateChangeStatements.contains(curr)) {
+				Collection<? extends State> targetStates = getTargetStates(c.getValue());
+				for (State newStateAtCurr : targetStates) {
+					typeStateChangeAtStatement(curr, newStateAtCurr);
 				}
-				
 			}
+				
 		}
 	}
 

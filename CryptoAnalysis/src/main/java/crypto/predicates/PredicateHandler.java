@@ -57,12 +57,12 @@ public class PredicateHandler {
 		this.cryptoScanner = cryptoScanner;
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
-		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(statement, seed);
+	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCryptSLPredicate ensPred) {
+		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(statement, variable);
 		boolean added = set.add(ensPred);
-		assert existingPredicates.get(statement, seed).contains(ensPred);
+		assert existingPredicates.get(statement, variable).contains(ensPred);
 		if (added) {
-			onPredicateAdded(seedObj, statement, seed, ensPred);
+			onPredicateAdded(seedObj, statement, variable, ensPred);
 		}
 		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);
 		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
