@@ -15,7 +15,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.17</version>
 				<configuration>
-					<argLine>-Xmx8G -Xss128m -Dmaven.home=${maven.home}</argLine>
+					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 				</configuration>
 				<dependencies>
@@ -55,6 +55,16 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>soot-snapshot</serverId>
+					<nexusUrl>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</nexusUrl>
 				</configuration>
 			</plugin>
 
@@ -206,6 +216,16 @@
 
 
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>true</uniqueVersion>
+			<id>soot-snapshot</id>
+			<name>Soot snapshot repository</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 
 	<repositories>
 		<repository>

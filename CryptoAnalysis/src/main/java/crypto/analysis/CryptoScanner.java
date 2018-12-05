@@ -97,11 +97,11 @@ public abstract class CryptoScanner {
 		int remaining = worklist.size();
 		solvedObject++;
 		if (remaining != 0) {
-			Duration elapsed = analysisWatch.elapsed();
-			Duration estimate = elapsed.dividedBy(solvedObject);
-			Duration remainingTime = estimate.multipliedBy(remaining);
-			System.out.println(String.format("Analysis Time: %s", elapsed));
-			System.out.println(String.format("Estimated Time: %s", remainingTime));
+//			Duration elapsed = analysisWatch.elapsed();
+//			Duration estimate = elapsed.dividedBy(solvedObject);
+//			Duration remainingTime = estimate.multipliedBy(remaining);
+//			System.out.println(String.format("Analysis Time: %s", elapsed));
+//			System.out.println(String.format("Estimated Time: %s", remainingTime));
 			System.out.println(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
 			System.out.println(String.format("Percentage Completed: %s\n",
 					((float) Math.round((float) solvedObject * 100 / (remaining + solvedObject))) / 100));

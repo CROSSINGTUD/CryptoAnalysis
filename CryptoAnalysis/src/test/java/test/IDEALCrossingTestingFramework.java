@@ -59,7 +59,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			
 			@Override
 			public SootBasedStateMachineGraph getStateMachine() {
-				return new SootBasedStateMachineGraph(getRule(true).getUsagePattern());
+				return new SootBasedStateMachineGraph(getRule().getUsagePattern());
 			}
 			
 			@Override
@@ -74,6 +74,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
+	protected CryptSLRule getRule() {
+		return getRule(false);
+	}
+	
 	protected CryptSLRule getRule(boolean srcFormat) {
 		File file = new File(RESOURCE_PATH + getCryptSLFile() + ".cryptsl" + (srcFormat ? "" : "bin"));
 		try {
@@ -87,7 +91,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule(true)));
+		excludedPackages.add(Utils.getFullyQualifiedName(getRule(false)));
 		return excludedPackages;
 	}
 	

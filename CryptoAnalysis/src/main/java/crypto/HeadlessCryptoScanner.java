@@ -246,7 +246,7 @@ public abstract class HeadlessCryptoScanner {
 
 					@Override
 					public boolean rulesInSrcFormat() {
-						return true;
+						return false;
 					}
 
 				};
@@ -268,7 +268,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	private List<CryptSLRule> getRules() {
-		return getRules(true);
+		return getRules(false);
 	}
 
 	protected List<CryptSLRule> getRules(boolean srcFormat) {

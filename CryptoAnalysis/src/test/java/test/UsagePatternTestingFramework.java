@@ -323,7 +323,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 					@Override
 					public boolean rulesInSrcFormat() {
-						return true;
+						return false;
 					}
 
 				};
@@ -356,7 +356,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		for(CryptSLRule r : getRules(true)) {
+		for(CryptSLRule r : getRules(false)) {
 			excludedPackages.add(Utils.getFullyQualifiedName(r));
 		}
 		return excludedPackages;
