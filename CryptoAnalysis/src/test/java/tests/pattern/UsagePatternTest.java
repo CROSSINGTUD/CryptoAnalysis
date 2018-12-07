@@ -37,6 +37,28 @@ import test.assertions.Assertions;
 public class UsagePatternTest extends UsagePatternTestingFramework {
 
 	@Test
+	public void useDoFinalInLoop() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();;
+		Assertions.hasEnsuredPredicate(key);
+		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		Assertions.mustNotBeInAcceptingState(cCipher);
+		byte[] enc = null;
+		for (int i=0; i<42; i++){
+			enc = cCipher.doFinal("".getBytes());
+			Assertions.mustBeInAcceptingState(cCipher);
+			Assertions.hasEnsuredPredicate(enc);
+		}
+		Assertions.mustNotBeInAcceptingState(cCipher);
+		Assertions.hasEnsuredPredicate(enc);
+	}
+	
+	@Test
 	public void UsagePatternTest1() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
