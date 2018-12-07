@@ -97,7 +97,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
-		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
+//		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 
 		scanner.exec();
