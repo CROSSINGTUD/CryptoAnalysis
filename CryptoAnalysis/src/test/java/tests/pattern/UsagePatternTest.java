@@ -8,6 +8,8 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -1108,6 +1110,19 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		  Assertions.notHasEnsuredPredicate(generateSecret);
 		  byte[] keyMaterial = generateSecret.getEncoded();
 		  Assertions.notHasEnsuredPredicate(keyMaterial);
+	}
+	
+	@Test
+	public void setEntryKeyStore() throws GeneralSecurityException, IOException {
+		KeyStore keyStore = KeyStore.getInstance("PKCS12");
+		keyStore.load(null,null);
+		Assertions.mustBeInAcceptingState(keyStore);
+		
+		// Add private and public key (certificate) to keystore
+		keyStore.setEntry("alias", null, null);
+		keyStore.store(null, "Password".toCharArray());
+		Assertions.mustBeInAcceptingState(keyStore);
+		
 	}
 	
 }
