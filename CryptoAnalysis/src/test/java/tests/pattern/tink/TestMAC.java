@@ -11,10 +11,9 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestMAC extends UsagePatternTestingFramework {
+public class TestMAC extends TestTinkPrimitives {
 	@Test
 	public void generateNewHMACSHA256_128BitTag() throws GeneralSecurityException {
 		KeyTemplate kt = MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256);

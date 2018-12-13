@@ -15,10 +15,9 @@ import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestDigitalSignature extends UsagePatternTestingFramework {
+public class TestDigitalSignature extends TestTinkPrimitives {
 	@Test
 	public void generateNewECDSA_P256() throws GeneralSecurityException {
 		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);;

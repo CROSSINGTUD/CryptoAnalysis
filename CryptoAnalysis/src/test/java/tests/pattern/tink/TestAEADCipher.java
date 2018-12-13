@@ -1,5 +1,6 @@
 package tests.pattern.tink;
 
+import java.io.File;
 import java.security.GeneralSecurityException;
 
 import org.junit.Test;
@@ -10,10 +11,9 @@ import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestAEADCipher extends UsagePatternTestingFramework {
+public class TestAEADCipher extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewAES128GCMKeySet() throws GeneralSecurityException {
@@ -66,4 +66,5 @@ public class TestAEADCipher extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(aead);
 		//Assertions.hasEnsuredPredicate(out); // this assertions still leads to a red bar. 
   	}
+	
 }

@@ -10,10 +10,9 @@ import com.google.crypto.tink.daead.DeterministicAeadFactory;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestDeterministicAEADCipher extends UsagePatternTestingFramework {
+public class TestDeterministicAEADCipher extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewAES128GCMKeySet() throws GeneralSecurityException {

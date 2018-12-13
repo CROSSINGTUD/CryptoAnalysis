@@ -16,10 +16,9 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestHybridEncryption extends UsagePatternTestingFramework {
+public class TestHybridEncryption extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_GCMKeySet() throws GeneralSecurityException {

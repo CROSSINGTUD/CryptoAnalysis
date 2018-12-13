@@ -2,7 +2,6 @@ package tests.pattern.tink;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.WriteAbortedException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
@@ -16,10 +15,9 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 
-import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class TestStreamingAEADCipher extends UsagePatternTestingFramework {
+public class TestStreamingAEADCipher extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewAES128_CTR_HMAC_SHA256_4KBKeySet() throws GeneralSecurityException {
