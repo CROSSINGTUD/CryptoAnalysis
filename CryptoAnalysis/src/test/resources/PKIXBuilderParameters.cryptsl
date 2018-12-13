@@ -1,0 +1,20 @@
+SPEC java.security.cert.PKIXBuilderParameters
+
+OBJECTS
+	java.security.KeyStore keyStore;
+	java.security.cert.CertSelector certSelector;
+	java.util.Set<java.security.cert.TrustAnchor> trustAnchors;
+
+EVENTS
+	c1: PKIXBuilderParameters(keyStore, certSelector);
+	c2: PKIXBuilderParameters(trustAnchors, certSelector);
+	
+ORDER
+	c1 | c2
+	
+REQUIRES
+	generatedKeyStore[keyStore];
+	//generatedTrustAnchor[];							
+	
+ENSURES
+	generatedCertPathParameters[this];

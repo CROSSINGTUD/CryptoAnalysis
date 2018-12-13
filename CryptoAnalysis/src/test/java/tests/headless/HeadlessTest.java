@@ -183,6 +183,8 @@ public class HeadlessTest {
 		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
+		//TODO: This is wrong.
+		setErrorsCount("<main.Main: void useDoFinalInLoop()>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 

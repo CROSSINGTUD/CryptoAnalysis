@@ -16,7 +16,7 @@ public class SignatureTests extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("Signature.cryptslbin");
+		return new File("Signature");
 	}
 
 	@Test

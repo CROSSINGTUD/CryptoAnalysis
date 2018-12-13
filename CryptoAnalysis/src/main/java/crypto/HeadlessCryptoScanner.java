@@ -1,6 +1,8 @@
 package crypto;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +17,6 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
-import boomerang.WeightedBoomerang;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -23,6 +24,7 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.interfaces.CrySLModelReader;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -50,24 +52,29 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
+	List<CryptSLRule> rules = Lists.newArrayList();
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) throws ParseException {
+	public static void main(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		HeadlessCryptoScanner scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException{
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		CommandLineParser parser = new DefaultParser();
 		options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		final String resourcesPath;
-		if (options.hasOption("rulesDir"))
+		if (options.hasOption("rulesDir")) {
 			resourcesPath = options.getOptionValue("rulesDir");
-		else 
+		} else {
 			resourcesPath = "rules";
+		}
+		
+		//		options.hasOption("rulesInSrc")
+
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {
@@ -123,6 +130,8 @@ public abstract class HeadlessCryptoScanner {
 			protected boolean enableVisualization(){
 				return options.hasOption("visualization");
 			}
+
+
 		};
 		return sourceCryptoScanner;
 	}
@@ -174,6 +183,8 @@ public abstract class HeadlessCryptoScanner {
 		hasSeeds = seedFactory.hasSeeds();
 	}
 
+
+
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
@@ -194,19 +205,16 @@ public abstract class HeadlessCryptoScanner {
 	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
 
-
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
-				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
-
+				
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
-				CryptoScanner scanner = new CryptoScanner(rules) {
+				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -236,13 +244,21 @@ public abstract class HeadlessCryptoScanner {
 						return true;
 					}
 
+					@Override
+					public boolean rulesInSrcFormat() {
+						return false;
+					}
+
 				};
+				
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(scanner.rulesInSrcFormat());
+				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
 				reporter.addReportListener(fileReporter);
 				String csvOutputFile = getCSVOutputFile();
 				if(csvOutputFile != null){
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
-				scanner.scan();
+				scanner.scan(rules);
 			}
 		};
 	}
@@ -250,22 +266,43 @@ public abstract class HeadlessCryptoScanner {
 	protected CrySLAnalysisListener getAdditionalListener() {
 		return null;
 	}
+	
+	private List<CryptSLRule> getRules() {
+		return getRules(false);
+	}
 
-	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();
-		if(getRulesDirectory() == null){
+	protected List<CryptSLRule> getRules(boolean srcFormat) {
+		if (!rules.isEmpty()) {
+			return rules;
+		}
+		String rulesDirectory = getRulesDirectory();
+		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
 		}
-		File[] listFiles = new File(getRulesDirectory()).listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(".cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
+
+		if (srcFormat) {
+			try {
+				CrySLModelReader cmr = new CrySLModelReader();
+				File[] listFiles = new File(rulesDirectory).listFiles();
+				for (File file : listFiles) {
+					if (file != null && file.getName().endsWith(".cryptsl")) {
+						rules.add(cmr.readRule(file));
+					}
+				}	
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+			}
+		} else {
+			File[] listFiles = new File(rulesDirectory).listFiles();
+			for (File file : listFiles) {
+				if (file != null && file.getName().endsWith(".cryptslbin")) {
+					rules.add(CryptSLRuleReader.readFromFile(file));
+				}
 			}
 		}
 		if (rules.isEmpty())
 			System.out.println(
 					"CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ getRulesDirectory());
+							+ rulesDirectory);
 		return rules;
 	}
 
@@ -339,7 +376,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	protected abstract String applicationClassPath();
-
+	
 	protected String softwareIdentifier(){
 		return "";
 	};

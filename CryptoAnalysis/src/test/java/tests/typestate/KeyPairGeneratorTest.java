@@ -13,7 +13,7 @@ public class KeyPairGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("KeyPairGenerator.cryptslbin");
+		return new File("KeyPairGenerator");
 	}
 
 	@Test

@@ -16,7 +16,7 @@ public class MessageDigestTest  extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("MessageDigest.cryptslbin");
+		return new File("MessageDigest");
 	}
 
 	@Test

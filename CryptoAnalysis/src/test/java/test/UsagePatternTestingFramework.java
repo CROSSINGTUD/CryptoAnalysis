@@ -1,6 +1,8 @@
 package test;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -40,6 +42,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
+import crypto.interfaces.CrySLModelReader;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -76,13 +79,8 @@ import typestate.TransitionFunction;
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
-//	private IDEVizDebugger<TypestateDomainValue<StateNode>> debugger;
-//
-//	protected IDebugger<TypestateDomainValue<StateNode>> getDebugger() {
-//		if(debugger == null)
-//			debugger = new CryptoVizDebugger(ideVizFile, icfg);
-//		return debugger;
-//	}
+	List<CryptSLRule> rules = Lists.newArrayList();
+	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
@@ -92,7 +90,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				icfg = new JimpleBasedInterproceduralCFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
 				final TestingResultReporter resultReporter = new TestingResultReporter(expectedResults);
-				CryptoScanner scanner = new CryptoScanner(getRules()) {
+				CryptoScanner scanner = new CryptoScanner() {
 					
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -323,8 +321,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						return true;
 					}
 
+					@Override
+					public boolean rulesInSrcFormat() {
+						return false;
+					}
+
 				};
-				scanner.scan();
+				scanner.scan(getRules(scanner.rulesInSrcFormat()));
 				
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
@@ -353,18 +356,30 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		for(CryptSLRule r : getRules()) {
+		for(CryptSLRule r : getRules(false)) {
 			excludedPackages.add(Utils.getFullyQualifiedName(r));
 		}
 		return excludedPackages;
 	}
-	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();    
+	
+	protected List<CryptSLRule> getRules(boolean srcFormat) {
+		if (!rules.isEmpty()) {
+			return rules;
+		}
 
-		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
-		for (File file : listFiles) {
-			if (file.getName().endsWith(".cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
+		if (srcFormat) {
+			try {
+				CrySLModelReader cmr = new CrySLModelReader();
+				rules = cmr.readRules(IDEALCrossingTestingFramework.RESOURCE_PATH);
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+			}
+			
+		} else {
+			File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
+			for (File file : listFiles) {
+				if (file.getName().endsWith(".cryptslbin")) {
+					rules.add(CryptSLRuleReader.readFromFile(file));
+				}
 			}
 		}
 		return rules;
