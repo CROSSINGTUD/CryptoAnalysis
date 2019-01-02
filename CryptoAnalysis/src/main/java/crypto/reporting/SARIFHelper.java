@@ -46,7 +46,7 @@ public class SARIFHelper {
 	
 	public JSONObject getToolInfo() {
 		JSONObject tool = new JSONObject();
-		tool.put(SARIFConfig.TOOL_FULL_NAME_KEY, SARIFConfig.TOOL_FULL_NAME_VALUE);
+		tool.put(SARIFConfig.TOOL_NAME_KEY, SARIFConfig.TOOL_NAME_VALUE);
 		tool.put(SARIFConfig.TOOL_FULL_NAME_KEY, SARIFConfig.TOOL_FULL_NAME_VALUE);
 		tool.put(SARIFConfig.VERSION, SARIFConfig.VERSION_NUMBER);
 		tool.put(SARIFConfig.SEMANTIC_VERSION_KEY,SARIFConfig.SEMANTIC_VERSION_VALUE);
