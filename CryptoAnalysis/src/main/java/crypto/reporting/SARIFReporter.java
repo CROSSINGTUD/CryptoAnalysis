@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -25,29 +27,45 @@ import soot.SootMethod;
 public class SARIFReporter extends ErrorMarkerListener {
 
 	private File outputFolder;
-//	private List<CryptSLRule> rules;
+	// private List<CryptSLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 	private JSONObject files = new JSONObject(), resources = new JSONObject(), rules = new JSONObject();
 	private JSONArray results = new JSONArray();
 	private SARIFHelper sarifHelper;
+	private Map<String, Integer> errorCountMap;
 
 	public SARIFReporter(String string, List<CryptSLRule> rules) {
 		this.outputFolder = (string != null ? new File(string) : null);
 		this.sarifHelper = new SARIFHelper();
-//		this.rules = rules;
+		this.errorCountMap = new HashMap<String, Integer>();
+		initializeMap();
+		// this.rules = rules;
 	}
 	
+	private void initializeMap() {
+		this.errorCountMap.put(SARIFConfig.CONSTRAINT_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.NEVER_TYPE_OF_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.FORBIDDEN_METHOD_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.IMPRECISE_VALUE_EXTRACTION_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.TYPE_STATE_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.REQUIRED_PREDICATE_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.INCOMPLETE_OPERATION_ERROR_KEY, 0);
+	}
+
 	private void addFile(String fileName) {
 		String filePath = this.sarifHelper.getFileName(fileName);
 		JSONObject mimeType = new JSONObject();
 		mimeType.put(SARIFConfig.MIME_TYPE_KEY, SARIFConfig.MIME_TYPE_VALUE);
 		this.files.put(filePath, mimeType);
 	}
-	
+
 	private String addRules(String errorType) {
 		String finalErrorType = errorType;
 		if (this.rules.containsKey(errorType)) {
-			finalErrorType = errorType.concat("-1");
+			int count = this.errorCountMap.get(errorType);
+			count++;
+			finalErrorType = errorType.concat("-".concat(Integer.toString(count)));
+			this.errorCountMap.put(errorType, count);
 		}
 		JSONObject ruleInfo = new JSONObject();
 		JSONObject fullDescription = new JSONObject();
@@ -57,8 +75,9 @@ public class SARIFReporter extends ErrorMarkerListener {
 		this.rules.put(finalErrorType, ruleInfo);
 		return finalErrorType;
 	}
-	
-	private void addResults(String errorType, String fileName, String methodName, int lineNumber, String text, String richText) {
+
+	private void addResults(String errorType, String fileName, String methodName, int lineNumber, String text,
+			String richText) {
 		JSONObject result = new JSONObject();
 		String finalErrorType = addRules(errorType);
 		result.put(SARIFConfig.RULE_ID_KEY, finalErrorType);
@@ -66,7 +85,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		result.put(SARIFConfig.LOCATIONS_KEY, this.sarifHelper.getLocations(fileName, methodName, lineNumber));
 		this.results.add(result);
 	}
-	
+
 	private JSONObject makeSARIF() {
 		this.resources.put(SARIFConfig.RULES_KEY, this.rules);
 		JSONObject sarif = new JSONObject();
@@ -86,16 +105,17 @@ public class SARIFReporter extends ErrorMarkerListener {
 	public void discoveredSeed(IAnalysisSeed object) {
 		this.objects.add(object);
 	}
-	
+
 	@Override
 	public void afterAnalysis() {
 		for (SootClass c : this.errorMarkers.rowKeySet()) {
 			addFile(c.getName());
-			
+
 			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
 				for (AbstractError marker : e.getValue()) {
 					String errorType = marker.getClass().getSimpleName();
-					String richText = String.format("%s violating CrySL rule for %s.", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
+					String richText = String.format("%s violating CrySL rule for %s.",
+							marker.getClass().getSimpleName(), marker.getRule().getClassName());
 					String text = String.format("%s.", marker.toErrorMarkerString());
 					int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
 					this.addResults(errorType, c.getName(), e.getKey().getName(), lineNumber, text, richText);
@@ -108,7 +128,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		System.out.println(sarif.toJSONString().replaceAll("\\\\", ""));
 		if (outputFolder != null) {
 			try {
-				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-SARIF-Report.txt");
+				FileWriter writer = new FileWriter(outputFolder + "/CogniCrypt-SARIF-Report.txt");
 				writer.write(sarif.toString());
 				writer.close();
 			} catch (IOException e) {
