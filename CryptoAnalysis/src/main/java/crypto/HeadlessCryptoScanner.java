@@ -26,6 +26,8 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
+import crypto.reporting.ErrorMarkerListener;
+import crypto.reporting.SARIFReporter;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import ideal.IDEALSeedSolver;
@@ -123,6 +125,11 @@ public abstract class HeadlessCryptoScanner {
 			protected boolean enableVisualization(){
 				return options.hasOption("visualization");
 			}
+			
+			@Override
+			protected boolean sarifReport() {
+				return options.hasOption("sarifReport");
+			}
 		};
 		return sourceCryptoScanner;
 	}
@@ -201,7 +208,12 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
-				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
+				ErrorMarkerListener fileReporter;
+				if (sarifReport()) {
+					fileReporter = new SARIFReporter(getOutputFolder(), rules);
+				} else {
+					fileReporter = new CommandLineReporter(getOutputFolder(), rules);
+				}
 
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
@@ -352,6 +364,10 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean enableVisualization(){
 		return false;
 	};
+	
+	protected boolean sarifReport() {
+		return false;
+	}
 	
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
