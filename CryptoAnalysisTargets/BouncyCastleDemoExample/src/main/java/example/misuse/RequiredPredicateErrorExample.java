@@ -17,8 +17,7 @@ public class RequiredPredicateErrorExample {
 		// TODO Auto-generated method stub
 		BlockCipher engine = new AESEngine();
 
-		// BufferedBlockCipher REQUIRES a generatedMode that is missing
-		// But according to BlockCipherVectorTest this is correct
+		// BufferedBlockCipher ENSURES generatedEngineOrMode. Hence its can take either take mode or engine directly.
 		BufferedBlockCipher cipher = new BufferedBlockCipher(engine);
 		System.out.println(cipher.getUnderlyingCipher().getAlgorithmName());
 
