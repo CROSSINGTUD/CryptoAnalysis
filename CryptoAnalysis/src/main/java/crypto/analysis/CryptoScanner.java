@@ -68,14 +68,15 @@ public abstract class CryptoScanner {
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
-		getAnalysisListener().beforeAnalysis();
+		CrySLResultsReporter listener = getAnalysisListener();
+		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
-			getAnalysisListener().discoveredSeed(curr);
+			listener.discoveredSeed(curr);
 			curr.execute();
 			estimateAnalysisTime();
 		}
@@ -87,7 +88,13 @@ public abstract class CryptoScanner {
 //		}
 		predicateHandler.checkPredicates();
 
-		getAnalysisListener().afterAnalysis();
+		for (AnalysisSeedWithSpecification seed : getAnalysisSeeds()) {
+			if (seed.isSecure()) {
+				listener.onSecureObjectFound(seed);
+			}
+		}
+		
+		listener.afterAnalysis();
 		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Static Analysis took " + elapsed + " seconds!");
 //		debugger().afterAnalysis();
