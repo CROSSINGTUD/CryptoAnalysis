@@ -16,13 +16,14 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import boomerang.BackwardQuery;
-import boomerang.Query;
-import boomerang.WeightedBoomerang;
+import boomerang.Boomerang;
+import boomerang.DefaultBoomerangOptions;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
+import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -47,13 +48,13 @@ import soot.Transformer;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import typestate.TransitionFunction;
+import wpds.impl.Weight.NoWeight;
 
 public abstract class HeadlessCryptoScanner {
 	private boolean hasSeeds;
@@ -183,15 +184,6 @@ public abstract class HeadlessCryptoScanner {
 		PackManager.v().runPacks();
 		hasSeeds = seedFactory.hasSeeds();
 	}
-	
-	//Add a new analyse method for Provider Detection
-	private void analyseProviderDetection() {
-		Transform transform = new Transform("wjtp.ifds", createProviderDetectionTransformer());
-		PackManager.v().getPack("wjtp").add(transform);        
-		PackManager.v().getPack("cg").apply();
-		BoomerangPretransformer.v().apply();
-        PackManager.v().getPack("wjtp").apply();
-	}
 
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
@@ -210,94 +202,9 @@ public abstract class HeadlessCryptoScanner {
 		return s;
 	}
 	
-	//Transformer for Provider Detection
-	private Transformer createProviderDetectionTransformer() {
-		return new SceneTransformer() {
-			
-			@Override
-			protected void internalTransform(String phaseName, Map<String, String> options) {
-				//Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
-				//OR
-				//Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
-				
-				
-				Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
-			
-				while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
-					
-					for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
-						 Body body = sootMethod.getActiveBody();
-				
-						 for (Unit unit : body.getUnits()) {
-						
-							 if(unit instanceof JAssignStmt) {
-									JAssignStmt stmt = (JAssignStmt) unit;
-									Value rightVal = stmt.getRightOp();
-									if (rightVal instanceof JStaticInvokeExpr) {
-										
-										JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
-										
-										SootMethod method = exp.getMethod();
-										String methodName = method.getName();
-										
-										SootClass methodRef = method.getDeclaringClass();
-										String refName = methodRef.toString();
-//										System.out.println(refName);
-										
-										int parameterCount = method.getParameterCount();
-										
-										String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
-																			"java.security.Signature", "javax.crypto.Cipher", 
-																			"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
-																			"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
-																			"java.security.AlgorithmParameters", "java.security.KeyStore",
-																			"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
-																			"javax.net.ssl.TrustManagerFactory"};
-										
-										boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-//									    System.out.println(ruleFound);
-										
-										if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
-											Value vl = exp.getArg(1);
-											Type type = vl.getType();
-											String strType = type.toString();
-//											System.out.println(strType);
-											
-											if(strType.matches("java.security.Provider")) {
-												System.out.println(strType+" variable used as provider.");
-												String provider = vl.toString();
-												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-												BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-												String queryString = query.toString();
-												
-											}
-											
-											else if(strType.matches("java.lang.String")) {
-												System.out.println(strType+" variable used as provider.");
-												String provider = vl.toString();
-												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-											}
-											
-											else {
-												System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
-											}
-										}
-									}
-								}
-						 }
-
-					}
-				}
-			}
-				
-		};
-			
-	}
-	
 
 	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
-
 
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
@@ -347,6 +254,114 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
 				scanner.scan();
+				
+				
+				//PROVIDER DETECTION part
+				
+				//Create a Boomerang solver.
+				Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+					public boolean onTheFlyCallGraph() {
+						//Must be turned of if no SeedFactory is specified.
+						return false;
+					};
+				}) {
+					@Override
+					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+						return icfg;
+					}
+
+					@Override
+					public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+						return null;
+					}
+				};
+				
+				//Provider Detection analysis
+				Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
+//				Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
+				
+				while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
+					
+					for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
+						 Body body = sootMethod.getActiveBody();
+				
+						 for (Unit unit : body.getUnits()) {
+						
+							 if(unit instanceof JAssignStmt) {
+									JAssignStmt stmt = (JAssignStmt) unit;
+									Value rightVal = stmt.getRightOp();
+									if (rightVal instanceof JStaticInvokeExpr) {
+										
+										JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
+										
+										SootMethod method = exp.getMethod();
+										String methodName = method.getName();
+										
+										SootClass methodRef = method.getDeclaringClass();
+										String refName = methodRef.toString();
+//										System.out.println(refName);
+										
+										int parameterCount = method.getParameterCount();
+										
+										String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
+																			"java.security.Signature", "javax.crypto.Cipher", 
+																			"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
+																			"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
+																			"java.security.AlgorithmParameters", "java.security.KeyStore",
+																			"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
+																			"javax.net.ssl.TrustManagerFactory"};
+										
+										boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
+//									    System.out.println(ruleFound);
+										
+										if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
+											Value vl = exp.getArg(1);
+											Type type = vl.getType();
+											String strType = type.toString();
+//											System.out.println(strType);
+											
+											if(strType.matches("java.security.Provider")) {
+												System.out.println(strType+" variable used as provider.");
+												String provider = vl.toString();
+												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+												
+												BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+												
+												//Submit query to the solver.
+												BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+												solver.debugOutput();
+												
+												//Print the allocation sites
+												System.out.println("All allocation sites of the query variable are:");
+												System.out.println(backwardQueryResults.getAllocationSites());
+											}
+											
+											else if(strType.matches("java.lang.String")) {
+												System.out.println(strType+" variable used as provider.");
+												String provider = vl.toString();
+												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+												
+												BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+												
+												//Submit query to the solver.
+												BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+												solver.debugOutput();
+												
+												//Print the allocation sites
+												System.out.println("All allocation sites of the query variable are:");
+												System.out.println(backwardQueryResults.getAllocationSites());
+											}
+											
+											else {
+												System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
+											}
+										}
+									}
+								}
+						 }
+
+					}
+				}
 			}
 		};
 	}

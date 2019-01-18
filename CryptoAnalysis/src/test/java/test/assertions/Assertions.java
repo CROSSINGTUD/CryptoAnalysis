@@ -9,6 +9,10 @@ public class Assertions {
 		
 	}
 	
+	public static void extProviderValue(int pos, String provider ) {
+		
+	}
+	
 	public static void assertValue(Object o, Object v) {
 		
 	}
