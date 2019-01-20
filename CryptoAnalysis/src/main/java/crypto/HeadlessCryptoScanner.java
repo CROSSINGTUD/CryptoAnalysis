@@ -253,118 +253,125 @@ public abstract class HeadlessCryptoScanner {
 				if(csvOutputFile != null){
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
+				
+				//Execute Provider Detection analysis
+				doProviderDetectionAnalysis(icfg);
+				
 				scanner.scan();
-				
-				
-				//PROVIDER DETECTION part
-				
-				//Create a Boomerang solver.
-				Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
-					public boolean onTheFlyCallGraph() {
-						//Must be turned of if no SeedFactory is specified.
-						return false;
-					};
-				}) {
-					@Override
-					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-						return icfg;
-					}
-
-					@Override
-					public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
-						return null;
-					}
-				};
-				
-				//Provider Detection analysis
-				Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
-//				Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
-				
-				while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
-					
-					for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
-						 Body body = sootMethod.getActiveBody();
-				
-						 for (Unit unit : body.getUnits()) {
-						
-							 if(unit instanceof JAssignStmt) {
-									JAssignStmt stmt = (JAssignStmt) unit;
-									Value rightVal = stmt.getRightOp();
-									if (rightVal instanceof JStaticInvokeExpr) {
-										
-										JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
-										
-										SootMethod method = exp.getMethod();
-										String methodName = method.getName();
-										
-										SootClass methodRef = method.getDeclaringClass();
-										String refName = methodRef.toString();
-//										System.out.println(refName);
-										
-										int parameterCount = method.getParameterCount();
-										
-										String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
-																			"java.security.Signature", "javax.crypto.Cipher", 
-																			"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
-																			"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
-																			"java.security.AlgorithmParameters", "java.security.KeyStore",
-																			"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
-																			"javax.net.ssl.TrustManagerFactory"};
-										
-										boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-//									    System.out.println(ruleFound);
-										
-										if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
-											Value vl = exp.getArg(1);
-											Type type = vl.getType();
-											String strType = type.toString();
-//											System.out.println(strType);
-											
-											if(strType.matches("java.security.Provider")) {
-												System.out.println(strType+" variable used as provider.");
-												String provider = vl.toString();
-												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-												
-												BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-												
-												//Submit query to the solver.
-												BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-												solver.debugOutput();
-												
-												//Print the allocation sites
-												System.out.println("All allocation sites of the query variable are:");
-												System.out.println(backwardQueryResults.getAllocationSites());
-											}
-											
-											else if(strType.matches("java.lang.String")) {
-												System.out.println(strType+" variable used as provider.");
-												String provider = vl.toString();
-												System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-												
-												BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-												
-												//Submit query to the solver.
-												BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-												solver.debugOutput();
-												
-												//Print the allocation sites
-												System.out.println("All allocation sites of the query variable are:");
-												System.out.println(backwardQueryResults.getAllocationSites());
-											}
-											
-											else {
-												System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
-											}
-										}
-									}
-								}
-						 }
-
-					}
-				}
 			}
 		};
 	}
+	
+	
+	//PROVIDER DETECTION analysis
+	private void doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg) {
+		
+		//Create a Boomerang solver.
+		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+			public boolean onTheFlyCallGraph() {
+				//Must be turned of if no SeedFactory is specified.
+				return false;
+			};
+		}) {
+			@Override
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return icfg;
+			}
+
+			@Override
+			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+				return null;
+			}
+		};
+		
+		//Provider Detection analysis
+		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
+//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
+		
+		while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
+			
+			for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
+				 Body body = sootMethod.getActiveBody();
+		
+				 for (Unit unit : body.getUnits()) {
+				
+					 if(unit instanceof JAssignStmt) {
+							JAssignStmt stmt = (JAssignStmt) unit;
+							Value rightVal = stmt.getRightOp();
+							if (rightVal instanceof JStaticInvokeExpr) {
+								
+								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
+								
+								SootMethod method = exp.getMethod();
+								String methodName = method.getName();
+								
+								SootClass methodRef = method.getDeclaringClass();
+								String refName = methodRef.toString();
+//								System.out.println(refName);
+								
+								int parameterCount = method.getParameterCount();
+								
+								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
+																	"java.security.Signature", "javax.crypto.Cipher", 
+																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
+																	"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
+																	"java.security.AlgorithmParameters", "java.security.KeyStore",
+																	"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
+																	"javax.net.ssl.TrustManagerFactory"};
+								
+								boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
+//							    System.out.println(ruleFound);
+								
+								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
+									Value vl = exp.getArg(1);
+									Type type = vl.getType();
+									String strType = type.toString();
+//									System.out.println(strType);
+									
+									if(strType.matches("java.security.Provider")) {
+										System.out.println(strType+" variable used as provider.");
+										String provider = vl.toString();
+										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+										
+										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+										
+										//Submit query to the solver.
+										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+										solver.debugOutput();
+										
+										//Print the allocation sites
+										System.out.println("All allocation sites of the query variable are:");
+										System.out.println(backwardQueryResults.getAllocationSites());
+									}
+									
+									else if(strType.matches("java.lang.String")) {
+										System.out.println(strType+" variable used as provider.");
+										String provider = vl.toString();
+										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+										
+										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+										
+										//Submit query to the solver.
+										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+										solver.debugOutput();
+										
+										//Print the allocation sites
+										System.out.println("All allocation sites of the query variable are:");
+										System.out.println(backwardQueryResults.getAllocationSites());
+									}
+									
+									else {
+										System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
+									}
+								}
+							}
+						}
+				 }
+
+			}
+		}
+	}
+	
 
 	protected CrySLAnalysisListener getAdditionalListener() {
 		return null;
