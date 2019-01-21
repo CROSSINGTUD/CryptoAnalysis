@@ -215,7 +215,9 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
+
+				//TODO Refactor the options for the Rules
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(false);
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
 					fileReporter = new SARIFReporter(getOutputFolder(), rules);
@@ -263,8 +265,6 @@ public abstract class HeadlessCryptoScanner {
 
 				};
 				
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(scanner.rulesInSrcFormat());
-				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
 				reporter.addReportListener(fileReporter);
 				String csvOutputFile = getCSVOutputFile();
 				if(csvOutputFile != null){
