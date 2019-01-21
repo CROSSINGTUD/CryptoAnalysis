@@ -128,7 +128,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		System.out.println(sarif.toJSONString().replaceAll("\\\\", ""));
 		if (outputFolder != null) {
 			try {
-				FileWriter writer = new FileWriter(outputFolder + "/CogniCrypt-SARIF-Report.txt");
+				FileWriter writer = new FileWriter(outputFolder + File.separator+"CogniCrypt-SARIF-Report.txt");
 				writer.write(sarif.toString());
 				writer.close();
 			} catch (IOException e) {
