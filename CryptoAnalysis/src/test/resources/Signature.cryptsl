@@ -1,0 +1,54 @@
+SPEC java.security.Signature
+OBJECTS
+    byte[] sign;
+    byte inpb;
+    byte[] inpba;
+    byte[] out;
+    java.nio.ByteBuffer inpBuf;
+    java.lang.String alg;
+    java.security.PrivateKey priv;
+    java.security.PublicKey pub;
+    java.security.cert.Certificate cert;
+    java.security.spec.AlgorithmParameterSpec params;
+
+EVENTS
+    g1: getInstance(alg);
+    g2: getInstance(alg, _);
+    Gets := g1 | g2;
+
+    i1: initSign(priv);
+    i2: initSign(priv, _);
+    i3: initVerify(cert);
+    i4: initVerify(pub);
+    InitSigns := i1 | i2;
+    InitVerifies := i3 | i4;
+
+    u1: update(inpb);
+    u2: update(inpba);
+    u3: update(inpba, offset, len);
+    u4: update(inpBuf);
+    Updates := u1 | u2 | u3 | u4;
+
+    s1: out = sign();
+    s2: sign(out, offset, len);
+    Signs := s1 | s2;
+
+    v1: verify(sign);
+    v2: verify(sign, offset, len);
+    Verifies := v1 | v2;
+
+ORDER
+    Gets, ((InitSigns+, (Updates+, Signs+)+ )+ | (InitVerifies+, (Updates*, Verifies+)+ )+ )
+
+CONSTRAINTS
+    alg in {"NONEwithDSA", "SHA1withDSA", "SHA224withDSA", "SHA256withDSA", "SHA256withRSA", "SHA256withECDSA"};
+    
+REQUIRES
+    generatedPrivkey[priv];
+    generatedPubkey[pub];
+
+ENSURES
+    signed[out, inpb] after Signs;
+    signed[out, inpba] after Signs;
+    signed[out, inpBuf] after Signs;
+    verified[sign];

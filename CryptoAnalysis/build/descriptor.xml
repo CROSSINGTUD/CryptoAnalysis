@@ -16,7 +16,7 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>src/main/resources/rules/</directory>
+            <directory>src/test/resources</directory>
             <outputDirectory>defaultRules</outputDirectory>
         </fileSet>
     </fileSets>
