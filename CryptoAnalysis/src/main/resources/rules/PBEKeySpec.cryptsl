@@ -1,0 +1,27 @@
+SPEC javax.crypto.spec.PBEKeySpec
+OBJECTS 
+	char[] password;
+	byte[] salt;
+	int iterationCount;
+	int keylength; 
+FORBIDDEN
+	PBEKeySpec(char[]) => c1;
+	PBEKeySpec(char[],byte[],int) => c1;
+	
+EVENTS
+	c1: PBEKeySpec(password, salt, iterationCount, keylength);
+	
+	cP: clearPassword();
+	
+ORDER
+ 	c1,  cP
+CONSTRAINTS
+	iterationCount >= 10000;
+	neverTypeOf(password, java.lang.String) ;
+
+REQUIRES
+	randomized[salt];	
+ENSURES
+	speccedKey[this, keylength] after c1;
+NEGATES
+	speccedKey[this, _] after cP;

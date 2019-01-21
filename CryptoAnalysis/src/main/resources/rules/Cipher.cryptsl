@@ -1,0 +1,102 @@
+SPEC javax.crypto.Cipher
+OBJECTS
+    java.lang.String transformation;
+    int encmode;
+    java.security.Key key;
+    java.security.cert.Certificate cert;
+    java.security.spec.AlgorithmParameterSpec params;
+    java.security.AlgorithmParameters param;
+    
+    int pre_plain_off;
+    int pre_ciphertext_off;
+    int plain_off;
+    int ciphertext_off;
+    
+    int pre_len;
+    int len;
+    
+    byte[] pre_plaintext;
+    byte[] pre_ciphertext;
+    java.nio.ByteBuffer pre_plainBuffer;
+	java.nio.ByteBuffer pre_cipherBuffer;
+	
+    
+    byte[] plainText;
+    byte[] cipherText;
+	java.nio.ByteBuffer plainBuffer;
+	java.nio.ByteBuffer cipherBuffer;
+	
+	java.security.SecureRandom ranGen;
+
+EVENTS
+    g1: getInstance(transformation);
+    g2:getInstance(transformation, _);
+    Gets := g1 | g2;
+
+    i1: init(encmode, cert);
+    i2: init(encmode, cert, ranGen);
+    i3: init(encmode, key);
+    i4: init(encmode, key, params);
+    i5: init(encmode, key, param);
+    i6: init(encmode, key, params, ranGen);
+    i7: init(encmode, key, param, ranGen);
+    i8: init(encmode, key, ranGen);
+    IWOIV := i1 | i2 | i3 | i8;
+    IWIV :=  i4 | i5 | i6 | i7;
+    Inits := IWOIV | IWIV;
+
+    u1: pre_ciphertext = update(pre_plaintext);
+    u2: pre_ciphertext = update(pre_plaintext, pre_plain_off, _);
+    u3: update(pre_plaintext, pre_plain_off, pre_len, pre_ciphertext);
+    u4: update(pre_plaintext, pre_plain_off, pre_len, pre_ciphertext, pre_ciphertext_off);
+    u5: update(pre_plainBuffer, pre_cipherBuffer);
+    updates := u1 | u2 | u3 | u4 | u5;
+
+    f1: cipherText = doFinal();
+    f2: cipherText =  doFinal(plainText);
+    f3: doFinal(cipherText, ciphertext_off);
+    f4: cipherText = doFinal(plainText, plain_off, len);
+    f5: doFinal(plainText, plain_off, len, cipherText);
+    f6: doFinal(plainText, plain_off, len, cipherText, ciphertext_off);
+    f7: doFinal(plainBuffer, cipherBuffer);
+    FINWOU := f2 | f4 | f5 | f6 | f7;
+    DOFINALS := FINWOU | f1 | f3;
+    
+    iv: getIV();
+    
+ORDER
+    Gets, Inits, (FINWOU | (updates+, DOFINALS))+
+
+CONSTRAINTS
+	part(0, "/", transformation) in {"AES",  "PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256", "RSA"};
+    part(0, "/", transformation) in {"AES"} => part(1, "/", transformation) in {"CBC", "GCM", "PCBC", "CTR", "CTS", "CFB", "OFB"};
+    part(0, "/", transformation) in {"PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"} => part(1, "/", transformation) in {"CBC"};
+    part(0, "/", transformation) in {"RSA"} => part(1, "/", transformation) in {"", "ECB"};
+
+    part(0, "/", transformation) in {"PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"} => part(2, "/", transformation) in {"PKCS7Padding", "PKCS5Padding"};
+    part(0, "/", transformation) in {"RSA"} => part(2, "/", transformation) in {"", "PKCS1Padding","OAEPWithMD5AndMGF1Padding", "OAEPWithSHA-224AndMGF1Padding", "OAEPWithSHA-256AndMGF1Padding", "OAEPWithSHA-384AndMGF1Padding", "OAEPWithSHA-512AndMGF1Padding"};
+
+    part(0, "/", transformation) in {"AES"} && part(1, "/", transformation) in {"CBC", "PCBC"} => part(2, "/", transformation) in {"PKCS7Padding", "PKCS5Padding", "ISO10126Padding"};
+    part(0, "/", transformation) in {"AES"} && part(1, "/", transformation) in {"GCM", "CTR", "CFB", "OFB"} => part(2, "/", transformation) in {"NoPadding"};
+	
+	part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"} && encmode != 1 => noCallTo(IWOIV) ;
+    part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"} && encmode == 1 => callTo(iv) ;     
+    
+    encmode in {1,2,3,4};
+    length(pre_plaintext) >= pre_plain_off + len;
+    length(pre_ciphertext) <= pre_ciphertext_off;
+    length(plainText) <= plain_off + len;
+    length(cipherText) <= ciphertext_off;
+
+REQUIRES
+	generatedKey[key, part(0, "/", transformation)];
+    randomized[ranGen];
+    preparedAlg[param, part(0, "/", transformation)];
+    !macced[_, plainText];
+	part(1, "/", transformation) in {"CBC", "PCBC", "CTR", "CTS", "CFB", "OFB"} && encmode == 1 => preparedIV[params];
+	part(1, "/", transformation) in {"GCM"} => preparedGCM[params];
+	
+ENSURES
+	encrypted[pre_ciphertext, pre_plaintext] after updates; 
+	encrypted[cipherText, plainText];
+	encrypted[cipherBuffer, plainBuffer];

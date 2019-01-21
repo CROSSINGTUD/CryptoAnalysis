@@ -1,0 +1,44 @@
+SPEC java.security.MessageDigest
+OBJECTS
+    java.lang.String digestAlg;
+    byte pre_inbyte;
+    byte[] pre_inbytearr;
+    int pre_off;
+    int pre_len;
+    java.nio.ByteBuffer pre_inpBuf;
+    byte[] inbytearr;
+    int off;
+    int len;
+    byte[] out;
+	
+EVENTS
+    g1: getInstance(digestAlg);
+    g2: getInstance(digestAlg, _);
+    Gets := g1 | g2;
+
+    u1: update(pre_inbyte);
+    u2: update(pre_inbytearr);
+    u3: update(pre_inbytearr, pre_off, pre_len);
+    u4: update(pre_inpBuf);
+    Updates := u1 | u2 | u3 | u4;
+
+    d1: out = digest();
+    d2: out = digest(inbytearr);
+    d3: digest(out, off, len);
+    DWOU := d2;
+    DWU := d1 | d3;
+    Digests := DWU | DWOU;
+    
+    r: reset();
+
+ORDER
+    Gets, (DWOU | (Updates+, Digests)), (r, (DWOU | (Updates+, Digests)))* 
+
+CONSTRAINTS
+    digestAlg in {"SHA-256", "SHA-384", "SHA-512"};
+    pre_len > pre_off;
+    len > off;
+
+ENSURES
+	digested[out, _];
+    digested[out, inbytearr];
