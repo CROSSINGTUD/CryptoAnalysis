@@ -96,7 +96,7 @@ public class ClassSpecification {
 				SootMethod method = invokeExpr.getMethod();
 				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().reportError(new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
+					cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
 				}
 			}
 		}

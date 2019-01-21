@@ -18,7 +18,7 @@ public class KeyStoreTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("KeyStore.cryptslbin");
+		return new File("KeyStore");
 	}
 
 	@Ignore

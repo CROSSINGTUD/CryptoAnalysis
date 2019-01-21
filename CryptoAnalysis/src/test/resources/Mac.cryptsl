@@ -1,0 +1,53 @@
+SPEC javax.crypto.Mac
+OBJECTS
+    javax.crypto.Mac mac;
+    java.security.Key key;
+    byte inp;
+    byte[] pre_input;
+    byte[] input;
+    byte[] output1;
+    byte[] output2;
+    java.lang.String macAlg;
+    java.security.spec.AlgorithmParameterSpec params;
+    int offset;
+    int outOffset;
+    int len;
+
+EVENTS
+    g1: getInstance(macAlg);
+    g2: getInstance(macAlg);
+    Gets := g1 | g2;
+
+    i1: init(key);
+    i2: init(key, params);
+    Inits := i1 | i2;
+
+    u1: update(inp);
+    u2: update(pre_input);
+    u3: update(pre_input, offset, len);
+    u4: update(pre_input);
+    Updates := u1 | u2 | u3 | u4;
+
+    f1: output1 = doFinal();
+    f2: output2 = doFinal(input);
+    f3: doFinal(output1, outOffset);
+    FinalsWU := f1 | f2;
+    Finals := FinalsWU | f3;
+
+ORDER
+    Gets, Inits, (Finals | (Updates+, Finals))
+
+CONSTRAINTS
+    macAlg in {"HmacMD5", "HmacSHA1", "HmacSHA224", "HmacSHA256", "HmacSHA384", "HmacSHA512", "HmacPBESHA1", "PBEWithHmacSHA1", "PBEWithHmacSHA224", "PBEWithHmacSHA256", "PBEWithHmacSHA384", "PBEWithHmacSHA512"};
+    offset < len;
+    length(output1) > outOffset;
+    
+REQUIRES
+    !encrypted[output1, _];
+    !encrypted[output2,_];
+    preparedHMAC[params];
+
+ENSURES
+    macced[output1, inp];
+    macced[output1, pre_input];
+    macced[output2, input];

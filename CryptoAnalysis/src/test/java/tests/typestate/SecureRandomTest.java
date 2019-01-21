@@ -14,7 +14,7 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("SecureRandom.cryptslbin");
+		return new File("SecureRandom");
 	}
 	@Ignore
 	@Test

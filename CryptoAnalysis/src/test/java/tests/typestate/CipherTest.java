@@ -4,7 +4,6 @@ import java.io.File;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -12,9 +11,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.junit.Test;
-
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -22,7 +19,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("Cipher.cryptslbin");
+		return new File("Cipher");
 	}
 
 	@Test
@@ -40,6 +37,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 		Assertions.assertState(c, 1);
 	}
+
 	@Test
 	public void testCipher2a() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");
@@ -48,13 +46,14 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 		Assertions.assertState(b, 1);
 	}
+
 	@Test
 	public void testCipher3() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher c = Cipher.getInstance("AES");
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
 
-		Assertions.assertState(c, 2);
+		Assertions.assertState(c, 3);
 	}
 
 	@Test
@@ -63,9 +62,10 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
 		c.doFinal(null);
-		c.doFinal(null);
+		Assertions.assertState(c, -1);
 
-		Assertions.assertState(c, 2);
+		c.doFinal(null);
+		// The object is will have an empty state because it was in an error state earlier.
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 		c.update(null);
 		c.doFinal(null);
 
-		Assertions.assertState(c, 2);
+		Assertions.assertState(c, 3);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 		c.init(1, new SecretKeySpec(null, "AES"));
 		c.update(null);
 
-		Assertions.assertState(c, 3);
+		Assertions.assertState(c, 4);
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 		c.init(2, new SecretKeySpec(null, "AES"));
 		c.doFinal(null);
 
-		Assertions.assertState(c, 2);
+		Assertions.assertState(c, 3);
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 		c.update(null);
 		Assertions.assertState(c, -1);
 		c.doFinal(null);
-		//The object is will have an empty state because it was in an error state earlier.
+		// The object is will have an empty state because it was in an error state earlier.
 	}
 
 	@Test

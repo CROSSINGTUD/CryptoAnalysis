@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -15,7 +15,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.17</version>
 				<configuration>
-					<argLine>-Xmx8G -Xss128m -Dmaven.home=${maven.home}</argLine>
+					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 				</configuration>
 				<dependencies>
@@ -57,6 +57,16 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>soot-snapshot</serverId>
+					<nexusUrl>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</nexusUrl>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -83,6 +93,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>25.0-jre</version>
+		</dependency>
+		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>boomerangPDS</artifactId>
 			<version>1.0.1-SNAPSHOT</version>
@@ -93,6 +108,12 @@
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
 			<version>3.1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
@@ -115,6 +136,77 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
+			<artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore</artifactId>
+			<version>2.15.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.common</artifactId>
+			<version>2.15.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.core.runtime</artifactId>
+			<version>3.15.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.equinox.common</artifactId>
+			<version>3.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.platform</groupId>
+			<artifactId>org.eclipse.equinox.registry</artifactId>
+			<version>3.8.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.emf.ecore</groupId>
+			<artifactId>change</artifactId>
+			<version>2.3.0-v200706262000</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.eclipse.emf.ecore</groupId>
+			<artifactId>xmi</artifactId>
+			<version>2.3.0-v200706262000</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext</artifactId>
+			<version>2.15.0</version>
+
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.common.types</artifactId>
+			<version>2.15.0</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-invoker-plugin -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
@@ -129,6 +221,16 @@
 		</dependency>
 
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<uniqueVersion>true</uniqueVersion>
+			<id>soot-snapshot</id>
+			<name>Soot snapshot repository</name>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</url>
+			<layout>default</layout>
+		</repository>
+	</distributionManagement>
 
 	<repositories>
 		<repository>
