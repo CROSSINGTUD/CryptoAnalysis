@@ -153,6 +153,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		results = analysis.getResults();
 	}
 
+
+	public boolean flowsTo(Statement statement, Val val) {
+		if(results == null) {
+			System.out.println("RUN TYPESTATE FIRST");
+			return false;
+		}
+		return results.asStatementValWeightTable().row(statement).containsKey(val);
+	}
+	
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
 		this.parameterAnalysis .run();
@@ -572,5 +581,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}
+
 
 }

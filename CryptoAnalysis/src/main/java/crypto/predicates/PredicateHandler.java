@@ -11,6 +11,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+import com.google.inject.internal.util.Lists;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
@@ -98,44 +99,9 @@ public class PredicateHandler {
 						paramMatch = true;
 				}
 				if (paramMatch) {
-					for (final ClassSpecification specification : cryptoScanner.getClassSpecifictions()) {
-						if(specification.getFSM().initialTransitonLabel().contains(method)) {
-							AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, statement,new AllocVal(base, callerMethod, base, statement),specification));
-							seedWithSpec.addEnsuredPredicate(ensPred);
-						} else if (specification.getInvolvedMethods().contains(method)) {
-							Boomerang boomerang = new Boomerang(new CogniCryptBoomerangOptions() {
-								@Override
-								public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
-										BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
-									if(stmt.containsInvokeExpr() && stmt instanceof AssignStmt){
-										AssignStmt as = (AssignStmt) stmt;
-										if(as.getLeftOp().equals(fact.value())){
-											if(icfg.getCalleesOfCallAt(stmt).isEmpty())
-												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
-											//TODO replace by check if stmt is a seed of specification
-											if(stmt.toString().contains("getInstance")){
-												return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(),new Statement(as, m)));
-											}
-										}
-									}
-									return super.getAllocationVal(m, stmt, fact, icfg);
-								}
-							}){
-								@Override
-								public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-									return cryptoScanner.icfg();
-								}
-							};
-							Val val = new Val(base, callerMethod);
-							BackwardQuery backwardQuery = new BackwardQuery(statement, val);
-							cryptoScanner.getAnalysisListener().boomerangQueryStarted(seedObj, backwardQuery);
-							BackwardBoomerangResults<NoWeight> res = boomerang.solve(backwardQuery);
-							cryptoScanner.getAnalysisListener().boomerangQueryFinished(seedObj, backwardQuery);
-							Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> allocs = res.getAllocationSites();
-							for (ForwardQuery p : allocs.keySet()) {
-								AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, p.stmt(),p.var(),specification));
-								seedWithSpec.addEnsuredPredicate(ensPred);
-							}
+					for(AnalysisSeedWithSpecification secondSeed : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
+						if(secondSeed.flowsTo(statement, new Val(base, callerMethod))) {
+							secondSeed.addEnsuredPredicate(ensPred);
 						}
 					}
 				}
