@@ -21,12 +21,14 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
+import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.RequiredCryptSLPredicate;
+import crypto.analysis.ResultsHandler;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.boomerang.CogniCryptBoomerangOptions;
@@ -43,9 +45,91 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import typestate.TransitionFunction;
 import wpds.impl.Weight.NoWeight;
 
 public class PredicateHandler {
+
+	private final class AddPredicateToOtherSeed implements ResultsHandler {
+		private final Statement statement;
+		private final Value base;
+		private final SootMethod callerMethod;
+		private final EnsuredCryptSLPredicate ensPred;
+		private final AnalysisSeedWithSpecification secondSeed;
+
+		private AddPredicateToOtherSeed(Statement statement, Value base, SootMethod callerMethod,
+				EnsuredCryptSLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+			this.statement = statement;
+			this.base = base;
+			this.callerMethod = callerMethod;
+			this.ensPred = ensPred;
+			this.secondSeed = secondSeed;
+		}
+
+		@Override
+		public void done(ForwardBoomerangResults<TransitionFunction> results) {
+			if(results.asStatementValWeightTable().row(statement).containsKey(new Val(base, callerMethod))){
+				secondSeed.addEnsuredPredicate(ensPred);
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((base == null) ? 0 : base.hashCode());
+			result = prime * result + ((callerMethod == null) ? 0 : callerMethod.hashCode());
+			result = prime * result + ((ensPred == null) ? 0 : ensPred.hashCode());
+			result = prime * result + ((secondSeed == null) ? 0 : secondSeed.hashCode());
+			result = prime * result + ((statement == null) ? 0 : statement.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AddPredicateToOtherSeed other = (AddPredicateToOtherSeed) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (base == null) {
+				if (other.base != null)
+					return false;
+			} else if (!base.equals(other.base))
+				return false;
+			if (callerMethod == null) {
+				if (other.callerMethod != null)
+					return false;
+			} else if (!callerMethod.equals(other.callerMethod))
+				return false;
+			if (ensPred == null) {
+				if (other.ensPred != null)
+					return false;
+			} else if (!ensPred.equals(other.ensPred))
+				return false;
+			if (secondSeed == null) {
+				if (other.secondSeed != null)
+					return false;
+			} else if (!secondSeed.equals(other.secondSeed))
+				return false;
+			if (statement == null) {
+				if (other.statement != null)
+					return false;
+			} else if (!statement.equals(other.statement))
+				return false;
+			return true;
+		}
+
+		private PredicateHandler getOuterType() {
+			return PredicateHandler.this;
+		}
+		
+	}
 
 	private final Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
 	private final Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
@@ -100,9 +184,8 @@ public class PredicateHandler {
 				}
 				if (paramMatch) {
 					for(AnalysisSeedWithSpecification secondSeed : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
-						if(secondSeed.flowsTo(statement, new Val(base, callerMethod))) {
-							secondSeed.addEnsuredPredicate(ensPred);
-						}
+						secondSeed.registerResultsHandler(new AddPredicateToOtherSeed(statement, base, callerMethod, ensPred, secondSeed));
+						
 					}
 				}
 			}

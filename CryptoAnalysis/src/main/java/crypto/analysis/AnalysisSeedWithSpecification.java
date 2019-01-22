@@ -77,6 +77,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
+	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
@@ -151,20 +152,25 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runTypestateAnalysis() {
 		analysis.run(this);
 		results = analysis.getResults();
+		if(results != null) {
+			for(ResultsHandler handler : Lists.newArrayList(resultHandlers)) {
+				handler.done(results);
+			}
+		}
 	}
 
-
-	public boolean flowsTo(Statement statement, Val val) {
-		if(results == null) {
-			System.out.println("RUN TYPESTATE FIRST");
-			return false;
+	
+	public void registerResultsHandler(ResultsHandler handler) {
+		if(results != null) {
+			handler.done(results);
+		} else {
+			resultHandlers.add(handler);
 		}
-		return results.asStatementValWeightTable().row(statement).containsKey(val);
 	}
 	
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
-		this.parameterAnalysis .run();
+		this.parameterAnalysis.run();
 	}
 	
 	private void computeTypestateErrorUnits() {
