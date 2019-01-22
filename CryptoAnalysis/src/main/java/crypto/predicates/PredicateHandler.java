@@ -99,7 +99,10 @@ public class PredicateHandler {
 				}
 				if (paramMatch) {
 					for (final ClassSpecification specification : cryptoScanner.getClassSpecifictions()) {
-						if (specification.getInvolvedMethods().contains(method)) {
+						if(specification.getFSM().initialTransitonLabel().contains(method)) {
+							AnalysisSeedWithSpecification seedWithSpec = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, statement,new AllocVal(base, callerMethod, base, statement),specification));
+							seedWithSpec.addEnsuredPredicate(ensPred);
+						} else if (specification.getInvolvedMethods().contains(method)) {
 							Boomerang boomerang = new Boomerang(new CogniCryptBoomerangOptions() {
 								@Override
 								public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
