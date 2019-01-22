@@ -53,17 +53,6 @@ public class SootBasedStateMachineGraph {
 		crySLinitialTransitionLabel = stateMachineGraph.getInitialTransition().getLabel();
 		
 		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
-		List<SootMethod> label = Lists.newLinkedList();
-		for(SootMethod m : initialTransitonLabel){
-			if(m.isConstructor()){
-				label.add(m);
-			}
-		}
-		if(!label.isEmpty()){
-			this.addTransition(new MatcherTransition(initialState, label, Parameter.This, initialState, Type.OnCallToReturn));
-			this.outTransitions.putAll(initialState, label);
-			seedIsConstructor = true;
-		}
 		//All transitions that are not in the state machine 
 		for(StateNode t :  this.stateMachineGraph.getNodes()){
 			State wrapped = wrappedState(t);
@@ -97,9 +86,6 @@ public class SootBasedStateMachineGraph {
 		return converted;
 	}
 
-	public boolean seedIsConstructor(){
-		return seedIsConstructor;
-	}
 
 	public Collection<SootMethod> getInvolvedMethods(){
 		return Sets.newHashSet(edgeLabelMethods);
