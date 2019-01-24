@@ -1,9 +1,7 @@
 package tests.pattern;
 
 import java.io.File;
-import java.security.GeneralSecurityException;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
+
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.DataLengthException;
@@ -22,7 +20,7 @@ import test.assertions.Assertions;
 public class AESTest extends UsagePatternTestingFramework{
 
 	private static final byte[] tData   = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
-
+	
 	@Test
 	public void testAESEngine1() throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
@@ -88,8 +86,9 @@ public class AESTest extends UsagePatternTestingFramework{
 	@Test
 	public void testAESLightEngine2() throws Exception {
 
-		BlockCipher engine = new AESLightEngine();
-
+//		AESLightEngine engine = new AESLightEngine(); // works
+		BlockCipher engine = new AESLightEngine(); //doesn't work
+		
 		//no init
 
 		byte[] buf = new byte[128];
@@ -98,7 +97,7 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		Assertions.hasEnsuredPredicate(engine);
 
-		Assertions.mustBeInAcceptingState(engine);
+		Assertions.mustNotBeInAcceptingState(engine);
 	}
 
 	@Test
