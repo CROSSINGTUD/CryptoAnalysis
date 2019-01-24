@@ -37,8 +37,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	public void UsagePatternTest1() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
-		//Added assertion for Provider Detection
-		Assertions.extProviderValue(1,"BC");
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();

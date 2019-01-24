@@ -285,7 +285,8 @@ public abstract class HeadlessCryptoScanner {
 		};
 		
 		//Provider Detection analysis
-		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
+		
+//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
 //		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
 		
 		while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
