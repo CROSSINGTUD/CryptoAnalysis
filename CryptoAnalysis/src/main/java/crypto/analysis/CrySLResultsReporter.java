@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
-
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
@@ -147,12 +145,16 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void reportError(AbstractError err) {
+	public void reportError(IAnalysisSeed object, AbstractError err) {
+		if (object != null && object instanceof AnalysisSeedWithSpecification) {
+			((AnalysisSeedWithSpecification) object).setSecure(false);
+		}
 		for (ICrySLResultsListener listen : listeners) {
 			listen.reportError(err);
 		}
 	}
-	
+
+
 	public void onSecureObjectFound(IAnalysisSeed seed) {
 		for (ICrySLResultsListener listen : listeners) {
 			listen.onSecureObjectFound(seed);

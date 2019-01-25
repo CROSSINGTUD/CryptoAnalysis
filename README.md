@@ -21,7 +21,7 @@ CogniCrypt_SAST uses maven as build tool. You can compile and build this project
 
 ```mvn package -DskipTests=true```.
 
-A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-1.0.0-jar-with-dependencies.jar` 
+A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-1.0.0-SNAPSHOT-jar-with-dependencies.jar` 
 
 ## Usage
 

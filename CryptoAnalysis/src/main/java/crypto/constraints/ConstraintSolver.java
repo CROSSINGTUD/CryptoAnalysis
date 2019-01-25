@@ -113,11 +113,11 @@ public class ConstraintSolver {
 			currentConstraint.evaluate();
 			for (AbstractError e : currentConstraint.getErrors()) {
 				if (e instanceof ImpreciseValueExtractionError) {
-					reporter.reportError(new ImpreciseValueExtractionError(con, e.getErrorLocation(), e.getRule()));
+					reporter.reportError(object, new ImpreciseValueExtractionError(con, e.getErrorLocation(), e.getRule()));
 					break;
 				} else {
 					fail++;
-					reporter.reportError(e);
+					reporter.reportError(object, e);
 				}
 			}
 		}

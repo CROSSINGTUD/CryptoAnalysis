@@ -77,6 +77,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
+	private boolean secure = true;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
 			ClassSpecification spec) {
@@ -164,16 +165,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			Statement curr = c.getRowKey();
-			for (Unit pred : cryptoScanner.icfg().getPredsOf(curr.getUnit().get())) {
-				Statement typeStateChangeStatement = new Statement((Stmt) pred, curr.getMethod());
-				if(allTypestateChangeStatements.contains(typeStateChangeStatement)) {
-					Collection<? extends State> targetStates = getTargetStates(c.getValue());
-					for (State newStateAtCurr : targetStates) {
-						typeStateChangeAtStatement(typeStateChangeStatement, newStateAtCurr);
-					}
+			if(allTypestateChangeStatements.contains(curr)) {
+				Collection<? extends State> targetStates = getTargetStates(c.getValue());
+				for (State newStateAtCurr : targetStates) {
+					typeStateChangeAtStatement(curr, newStateAtCurr);
 				}
-				
 			}
+				
 		}
 	}
 
@@ -201,7 +199,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Statement s = c.getRowKey();
 				Val val = c.getColumnKey();
 				if(!(s.getUnit().get() instanceof ThrowStmt)){
-					cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), this, 
+					cryptoScanner.getAnalysisListener().reportError(this, new IncompleteOperationError(s, val, getSpec().getRule(), this, 
 							expectedMethodsToBeCalled));
 				}
 			}
@@ -212,7 +210,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ErrorStateNode) {
 				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+				cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
@@ -565,6 +563,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		} else if (!spec.equals(other.spec))
 			return false;
 		return true;
+	}
+
+	public boolean isSecure() {
+		return secure;
+	}
+
+	public void setSecure(boolean secure) {
+		this.secure = secure;
 	}
 
 }

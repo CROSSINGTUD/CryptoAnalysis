@@ -15,7 +15,7 @@ public class PBEKeySpecTest  extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("PBEKeySpec.cryptslbin");
+		return new File("PBEKeySpec");
 	}
 
 	@Test

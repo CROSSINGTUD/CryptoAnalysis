@@ -55,12 +55,12 @@ public class PredicateHandler {
 		this.cryptoScanner = cryptoScanner;
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
-		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(statement, seed);
+	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCryptSLPredicate ensPred) {
+		Set<EnsuredCryptSLPredicate> set = getExistingPredicates(statement, variable);
 		boolean added = set.add(ensPred);
-		assert existingPredicates.get(statement, seed).contains(ensPred);
+		assert existingPredicates.get(statement, variable).contains(ensPred);
 		if (added) {
-			onPredicateAdded(seedObj, statement, seed, ensPred);
+			onPredicateAdded(seedObj, statement, variable, ensPred);
 		}
 		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);
 		Set<EnsuredCryptSLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
@@ -160,13 +160,12 @@ public class PredicateHandler {
 	private void checkMissingRequiredPredicates() {
 		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeeds()) {
 			Set<RequiredCryptSLPredicate> missingPredicates = seed.getMissingPredicates();
-			
 			for(RequiredCryptSLPredicate pred : missingPredicates){
 				CryptSLRule rule = seed.getSpec().getRule();
 				if (!rule.getPredicates().contains(pred.getPred())){
 					for(CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()){
 						if(pred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(pred.getLocation())){
-							cryptoScanner.getAnalysisListener().reportError(new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
+							cryptoScanner.getAnalysisListener().reportError(seed, new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
 						}
 					}
 				}
@@ -192,7 +191,7 @@ public class PredicateHandler {
 				}
 				for (Entry<CryptSLPredicate, CryptSLPredicate> disPair : contradictionPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						cryptoScanner.getAnalysisListener().reportError(new PredicateContradictionError(generatingPredicateStmt, null, disPair));
+						cryptoScanner.getAnalysisListener().reportError(null, new PredicateContradictionError(generatingPredicateStmt, null, disPair));
 					}
 				}
 			}

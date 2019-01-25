@@ -17,7 +17,7 @@ public class SecretKeyFactoryTest extends IDEALCrossingTestingFramework{
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("SecretKeyFactory.cryptslbin");
+		return new File("SecretKeyFactory");
 	}
 	@Test
 	public void testSecretKeyFactory1() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {

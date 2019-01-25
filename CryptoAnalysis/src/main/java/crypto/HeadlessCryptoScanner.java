@@ -1,6 +1,8 @@
 package crypto;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +20,7 @@ import com.google.common.collect.Lists;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
+
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Statement;
@@ -28,6 +31,7 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.interfaces.CrySLModelReader;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -61,24 +65,29 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
+	List<CryptSLRule> rules = Lists.newArrayList();
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) throws ParseException {
+	public static void main(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		HeadlessCryptoScanner scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException{
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
 		CommandLineParser parser = new DefaultParser();
 		options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		final String resourcesPath;
-		if (options.hasOption("rulesDir"))
+		if (options.hasOption("rulesDir")) {
 			resourcesPath = options.getOptionValue("rulesDir");
-		else 
+		} else {
 			resourcesPath = "rules";
+		}
+		
+		//		options.hasOption("rulesInSrc")
+
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {
@@ -134,6 +143,8 @@ public abstract class HeadlessCryptoScanner {
 			protected boolean enableVisualization(){
 				return options.hasOption("visualization");
 			}
+
+
 		};
 		return sourceCryptoScanner;
 	}
@@ -185,6 +196,8 @@ public abstract class HeadlessCryptoScanner {
 		hasSeeds = seedFactory.hasSeeds();
 	}
 
+
+
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
@@ -211,13 +224,11 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
-				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
-
+				
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
-				CryptoScanner scanner = new CryptoScanner(rules) {
+				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
 					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
@@ -247,152 +258,182 @@ public abstract class HeadlessCryptoScanner {
 						return true;
 					}
 
+					@Override
+					public boolean rulesInSrcFormat() {
+						return false;
+					}
+
 				};
+				
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(scanner.rulesInSrcFormat());
+				CommandLineReporter fileReporter = new CommandLineReporter(getOutputFolder(), rules);
 				reporter.addReportListener(fileReporter);
 				String csvOutputFile = getCSVOutputFile();
 				if(csvOutputFile != null){
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
-				
+
 				//Execute Provider Detection analysis
-//				doProviderDetectionAnalysis(icfg);
+				doProviderDetectionAnalysis(icfg);
 				
-				scanner.scan();
+				scanner.scan(rules);
+
 			}
 		};
 	}
 	
 	
 	//PROVIDER DETECTION analysis
-//	private void doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg) {
-//		
-//		//Create a Boomerang solver.
-//		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
-//			public boolean onTheFlyCallGraph() {
-//				//Must be turned of if no SeedFactory is specified.
-//				return false;
-//			};
-//		}) {
-//			@Override
-//			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-//				return icfg;
-//			}
-//
-//			@Override
-//			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
-//				return null;
-//			}
-//		};
-//		
-//		//Provider Detection analysis
-//		
-////		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
-////		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
-//		
-//		while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
-//			
-//			for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
-//				 Body body = sootMethod.getActiveBody();
-//		
-//				 for (Unit unit : body.getUnits()) {
-//				
-//					 if(unit instanceof JAssignStmt) {
-//							JAssignStmt stmt = (JAssignStmt) unit;
-//							Value rightVal = stmt.getRightOp();
-//							if (rightVal instanceof JStaticInvokeExpr) {
-//								
-//								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
-//								
-//								SootMethod method = exp.getMethod();
-//								String methodName = method.getName();
-//								
-//								SootClass methodRef = method.getDeclaringClass();
-//								String refName = methodRef.toString();
-////								System.out.println(refName);
-//								
-//								int parameterCount = method.getParameterCount();
-//								
-//								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
-//																	"java.security.Signature", "javax.crypto.Cipher", 
-//																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
-//																	"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
-//																	"java.security.AlgorithmParameters", "java.security.KeyStore",
-//																	"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
-//																	"javax.net.ssl.TrustManagerFactory"};
-//								
-//								boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-////							    System.out.println(ruleFound);
-//								
-//								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
-//									Value vl = exp.getArg(1);
-//									Type type = vl.getType();
-//									String strType = type.toString();
-////									System.out.println(strType);
-//									
-//									if(strType.matches("java.security.Provider")) {
-//										System.out.println(strType+" variable used as provider.");
-//										String provider = vl.toString();
-//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-//										
-//										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-//										
-//										//Submit query to the solver.
-//										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-//										solver.debugOutput();
-//										
-//										//Print the allocation sites
-//										System.out.println("All allocation sites of the query variable are:");
-//										System.out.println(backwardQueryResults.getAllocationSites());
-//									}
-//									
-//									else if(strType.matches("java.lang.String")) {
-//										System.out.println(strType+" variable used as provider.");
-//										String provider = vl.toString();
-//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-//										
-//										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-//										
-//										//Submit query to the solver.
-//										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-//										solver.debugOutput();
-//										
-//										//Print the allocation sites
-//										System.out.println("All allocation sites of the query variable are:");
-//										System.out.println(backwardQueryResults.getAllocationSites());
-//									}
-//									
-//									else {
-//										System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
-//									}
-//								}
-//							}
-//						}
-//				 }
-//
-//			}
-//		}
-//	}
+	private void doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg) {
+		
+		//Create a Boomerang solver.
+		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+			public boolean onTheFlyCallGraph() {
+				//Must be turned of if no SeedFactory is specified.
+				return false;
+			};
+		}) {
+			@Override
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return icfg;
+			}
+
+			@Override
+			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+				return null;
+			}
+		};
+		
+		//Provider Detection analysis
+		
+//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
+//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
+		
+		while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
+			
+			for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
+				 Body body = sootMethod.getActiveBody();
+		
+				 for (Unit unit : body.getUnits()) {
+				
+					 if(unit instanceof JAssignStmt) {
+							JAssignStmt stmt = (JAssignStmt) unit;
+							Value rightVal = stmt.getRightOp();
+							if (rightVal instanceof JStaticInvokeExpr) {
+								
+								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
+								
+								SootMethod method = exp.getMethod();
+								String methodName = method.getName();
+								
+								SootClass methodRef = method.getDeclaringClass();
+								String refName = methodRef.toString();
+//								System.out.println(refName);
+								
+								int parameterCount = method.getParameterCount();
+								
+								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
+																	"java.security.Signature", "javax.crypto.Cipher", 
+																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
+																	"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
+																	"java.security.AlgorithmParameters", "java.security.KeyStore",
+																	"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
+																	"javax.net.ssl.TrustManagerFactory"};
+								
+								boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
+//							    System.out.println(ruleFound);
+								
+								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
+									Value vl = exp.getArg(1);
+									Type type = vl.getType();
+									String strType = type.toString();
+//									System.out.println(strType);
+									
+									if(strType.matches("java.security.Provider")) {
+										System.out.println(strType+" variable used as provider.");
+										String provider = vl.toString();
+										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+										
+										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+										
+										//Submit query to the solver.
+										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+										solver.debugOutput();
+										
+										//Print the allocation sites
+										System.out.println("All allocation sites of the query variable are:");
+										System.out.println(backwardQueryResults.getAllocationSites());
+									}
+									
+									else if(strType.matches("java.lang.String")) {
+										System.out.println(strType+" variable used as provider.");
+										String provider = vl.toString();
+										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+										
+										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+										
+										//Submit query to the solver.
+										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+										solver.debugOutput();
+										
+										//Print the allocation sites
+										System.out.println("All allocation sites of the query variable are:");
+										System.out.println(backwardQueryResults.getAllocationSites());
+									}
+									
+									else {
+										System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
+									}
+								}
+							}
+						}
+				 }
+
+			}
+		}
+	}
 	
 
 	protected CrySLAnalysisListener getAdditionalListener() {
 		return null;
 	}
+	
+	private List<CryptSLRule> getRules() {
+		return getRules(false);
+	}
 
-	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();
-		if(getRulesDirectory() == null){
+	protected List<CryptSLRule> getRules(boolean srcFormat) {
+		if (!rules.isEmpty()) {
+			return rules;
+		}
+		String rulesDirectory = getRulesDirectory();
+		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
 		}
-		File[] listFiles = new File(getRulesDirectory()).listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(".cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
+
+		if (srcFormat) {
+			try {
+				CrySLModelReader cmr = new CrySLModelReader();
+				File[] listFiles = new File(rulesDirectory).listFiles();
+				for (File file : listFiles) {
+					if (file != null && file.getName().endsWith(".cryptsl")) {
+						rules.add(cmr.readRule(file));
+					}
+				}	
+			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
+			}
+		} else {
+			File[] listFiles = new File(rulesDirectory).listFiles();
+			for (File file : listFiles) {
+				if (file != null && file.getName().endsWith(".cryptslbin")) {
+					rules.add(CryptSLRuleReader.readFromFile(file));
+				}
 			}
 		}
 		if (rules.isEmpty())
 			System.out.println(
 					"CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ getRulesDirectory());
+							+ rulesDirectory);
 		return rules;
 	}
 
@@ -466,7 +507,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	protected abstract String applicationClassPath();
-
+	
 	protected String softwareIdentifier(){
 		return "";
 	};
