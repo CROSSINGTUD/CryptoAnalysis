@@ -44,6 +44,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 		addOption(preanalysisOpt);
 		Option visualization = Option.builder().longOpt("visualization").hasArg(false).desc("Enables the visualization. This option requires that --reportFolder is also set. A folder /viz/ is created containing Json files that can be visualized by the visualization of WPDS.").build();
 		addOption(visualization);
+		
+		Option sarif = Option.builder().longOpt("sarifReport").hasArg(false).desc("Enable sarif report").build();
+		addOption(sarif);
 	}
 
 }
