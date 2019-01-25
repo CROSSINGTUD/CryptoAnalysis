@@ -40,7 +40,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				} else {
 					// This code was added to detect unidentified outlying cases affected by the changes made for issue #47.
 					if (analyzedType != m.getDeclaringClass().getType()){
-
                         try {
                             throw new Exception("The type of m.getDeclaringClass() does not appear to be consistent across fsm.initialTransitonLabel().");
                         } catch (Exception e) {
@@ -60,23 +59,11 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		if(CryptoScanner.APPLICATION_CLASS_SEEDS_ONLY && !method.getDeclaringClass().isApplicationClass()){
 			return out;
 		}
-		if(fsm.seedIsConstructor()){
-			if(unit instanceof AssignStmt){
-				AssignStmt as = (AssignStmt) unit;
-				if(as.getRightOp() instanceof NewExpr){
-					NewExpr newExpr = (NewExpr) as.getRightOp();
-					if(analyzedType.equals(newExpr.getType())){
-						AssignStmt stmt = (AssignStmt) unit;
-						out.add(createQuery(unit,method,new AllocVal(stmt.getLeftOp(), method, as.getRightOp(), new Statement(stmt, method))));
-					}
-				}
-			}
-		}
 		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
 			return out;
 		InvokeExpr invokeExpr = ((Stmt) unit).getInvokeExpr();
 		SootMethod calledMethod = invokeExpr.getMethod();
-		if (!fsm.initialTransitonLabel().contains(calledMethod) || calledMethod.isConstructor())
+		if (!fsm.initialTransitonLabel().contains(calledMethod))
 			return out;
 		if (calledMethod.isStatic()) {
 			if(unit instanceof AssignStmt){
