@@ -9,13 +9,13 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.List;
 
 import javax.crypto.Cipher;
@@ -1147,4 +1147,26 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		
 	}
 	
+	@Test
+	public void negativeRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+		Integer keySize = new Integer(102);
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
+		Assertions.notHasEnsuredPredicate(parameters);
+		Assertions.extValue(0);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.notHasEnsuredPredicate(keyPair);
+	}
+	
+	@Test
+	public void positiveRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+		Integer keySize = new Integer(2048);
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
+		Assertions.extValue(0);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.hasEnsuredPredicate(keyPair);
+	}
 }
