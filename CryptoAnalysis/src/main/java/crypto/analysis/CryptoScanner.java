@@ -18,9 +18,13 @@ import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
+import soot.MethodOrMethodContext;
+import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -64,18 +68,19 @@ public abstract class CryptoScanner {
 	}
 
 	public void scan(List<CryptSLRule> specs) {
-
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
-		getAnalysisListener().beforeAnalysis();
+		CrySLResultsReporter listener = getAnalysisListener();
+		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
+		System.out.println("Searching fo Seeds for analysis!");
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
-			getAnalysisListener().discoveredSeed(curr);
+			listener.discoveredSeed(curr);
 			curr.execute();
 			estimateAnalysisTime();
 		}
@@ -87,7 +92,13 @@ public abstract class CryptoScanner {
 //		}
 		predicateHandler.checkPredicates();
 
-		getAnalysisListener().afterAnalysis();
+		for (AnalysisSeedWithSpecification seed : getAnalysisSeeds()) {
+			if (seed.isSecure()) {
+				listener.onSecureObjectFound(seed);
+			}
+		}
+		
+		listener.afterAnalysis();
 		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		System.out.println("Static Analysis took " + elapsed + " seconds!");
 //		debugger().afterAnalysis();
@@ -109,13 +120,20 @@ public abstract class CryptoScanner {
 	}
 
 	private void initialize() {
-		for (ClassSpecification spec : getClassSpecifictions()) {
-			spec.checkForForbiddenMethods();
-			if (!isCommandLineMode() && !spec.isLeafRule())
+		ReachableMethods rm = Scene.v().getReachableMethods();
+		QueueReader<MethodOrMethodContext> listener = rm.listener();
+		while (listener.hasNext()) {
+			MethodOrMethodContext next = listener.next();
+			SootMethod method = next.method();
+			if (method == null || !method.hasActiveBody()) {
 				continue;
-
-			for (Query seed : spec.getInitialSeeds()) {
-				if (!spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
+			}
+			for (ClassSpecification spec : getClassSpecifictions()) {
+				spec.invokesForbiddenMethod(method);
+				if (spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
+					continue;
+				}
+				for (Query seed : spec.getInitialSeeds(method)) {
 					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
 				}
 			}

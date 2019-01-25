@@ -103,26 +103,7 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLResultsReporter analysisListener();
 
-//	public Collection<Query> computeInitialSeeds() {
-	//TODO Why does this version not terminate?
-//		return analysis.computeSeeds();
-//	}
-
-    public Set<WeightedForwardQuery<TransitionFunction>> computeInitialSeeds() {
-    		if(seeds != null) {
-    			return seeds;
-    		}
-    		seeds = new HashSet<>();
-        ReachableMethods rm = Scene.v().getReachableMethods();
-        QueueReader<MethodOrMethodContext> listener = rm.listener();
-        while (listener.hasNext()) {
-            MethodOrMethodContext next = listener.next();
-            seeds.addAll(computeSeeds(next.method()));
-        }
-        return seeds;
-    }
-
-    private Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
+    public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
     	Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
         if (!method.hasActiveBody())
             return seeds;
@@ -135,9 +116,20 @@ public abstract class ExtendedIDEALAnaylsis {
     }
 
 
+    /**
+     * Only use this method for testing
+     * @return
+     */
 	public Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> run() {
+		Set<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
+		ReachableMethods rm = Scene.v().getReachableMethods();
+		QueueReader<MethodOrMethodContext> listener = rm.listener();
+		while (listener.hasNext()) {
+			MethodOrMethodContext next = listener.next();
+			seeds.addAll(computeSeeds(next.method()));
+		}
 		Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolver = Maps.newHashMap();
-		for (Query s : computeInitialSeeds()) {
+		for (Query s : seeds) {
 			if(s instanceof WeightedForwardQuery){
 				WeightedForwardQuery<TransitionFunction> seed = (WeightedForwardQuery<TransitionFunction>) s;
 				run((WeightedForwardQuery<TransitionFunction>)seed);
