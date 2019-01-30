@@ -46,6 +46,7 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
+import soot.jimple.LongConstant;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 
@@ -101,6 +102,8 @@ public class ConstraintSolver {
 			return ((StringConstant) val).value;
 		} else if (val instanceof IntConstant || val.getType() instanceof IntType) {
 			return val.toString();
+		} else if (val instanceof LongConstant) {
+				return val.toString().replaceAll("L", "");
 		} else {
 			return "";
 		}
@@ -516,18 +519,15 @@ public class ConstraintSolver {
 
 				for (ExtractedValue wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
 					final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
-
+					
 					if (wrappedCallSite.getVarName().equals(varName)) {
 						if (callSite.equals(allocSite)) {
 							varVal.add(retrieveConstantFromValue(callSite.getInvokeExpr().getArg(wrappedCallSite.getIndex())));
 							witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
 						} else if (allocSite instanceof AssignStmt) {
-							final Value rightSide = ((AssignStmt) allocSite).getRightOp();
-							if (rightSide instanceof Constant) {
-								varVal.add(retrieveConstantFromValue(rightSide));
+							if (wrappedAllocSite.getValue() instanceof Constant) {
+								varVal.add(retrieveConstantFromValue(wrappedAllocSite.getValue()));
 								witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
-							} else {
-								errors.add(new ImpreciseValueExtractionError(cons, wrappedCallSite.stmt(), classSpec.getRule()));
 							}
 						}
 					}
