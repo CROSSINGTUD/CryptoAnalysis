@@ -1,0 +1,15 @@
+SPEC java.security.spec.DSAParameterSpec
+OBJECTS 
+	java.math.BigInteger p;
+	java.math.BigInteger q;
+	java.math.BigInteger g;
+EVENTS
+	c1: DSAParameterSpec(p, q, g);
+	
+ORDER
+	c1
+CONSTRAINTS
+	p >= 1^2048;
+	g >= 1^2048;
+ENSURES
+	preparedDSA[this];

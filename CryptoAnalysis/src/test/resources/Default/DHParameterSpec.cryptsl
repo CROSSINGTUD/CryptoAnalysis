@@ -1,0 +1,19 @@
+SPEC javax.crypto.spec.DHParameterSpec
+OBJECTS 
+	java.math.BigInteger p;
+	java.math.BigInteger g;
+	int l;
+EVENTS
+	c1: DHParameterSpec(p, g);
+	c2: DHParameterSpec(p, g, l);
+	Cons := c1 | c2;
+	
+ORDER
+	Cons
+
+CONSTRAINTS
+	p >= 1^2048;
+	g >= 1^2048; 
+	
+ENSURES
+	preparedDH[this];
