@@ -155,7 +155,7 @@ public class ConstraintSolver {
 	/**
 	 * @return the relConstraints
 	 */
-	public List<ISLConstraint> getRelConstraints() {
+	public Set<ISLConstraint> getRelConstraints() {
 		return relConstraints;
 	}
 

@@ -370,7 +370,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean checkConstraintSystem() {
 		cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
-		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
+		Set<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
 		boolean checkPredicates = checkPredicates(relConstraints);
 		cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
 		if (!checkPredicates)
