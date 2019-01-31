@@ -10,3 +10,4 @@ AndroidZooApps/
 shippable/
 *.class
 *.temp
+*.cryptslbin
