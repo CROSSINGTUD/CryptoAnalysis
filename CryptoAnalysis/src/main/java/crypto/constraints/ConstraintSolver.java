@@ -53,7 +53,7 @@ import soot.jimple.StringConstant;
 public class ConstraintSolver {
 
 	private final List<ISLConstraint> allConstraints;
-	private final List<ISLConstraint> relConstraints;
+	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
@@ -72,7 +72,6 @@ public class ConstraintSolver {
 		this.parameterAnalysisQuerySites = object.getParameterAnalysis().getAllQuerySites();
 		this.collectedCalls = collectedCalls;
 		this.allConstraints = this.classSpec.getRule().getConstraints();
-		this.relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
@@ -84,9 +83,15 @@ public class ConstraintSolver {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
 					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
-						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
-							relConstraints.add(pred);
-							requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
+						for(ICryptSLPredicateParameter p : pred.getParameters()) {
+							// TODO: FIX Cipher rule
+							if (p.getName().equals("transformation"))
+								continue;
+							if (cwpi.getVarName().equals(p.getName())) {
+								
+								relConstraints.add(pred);
+								requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
+							}
 						}
 					}
 				} else {
