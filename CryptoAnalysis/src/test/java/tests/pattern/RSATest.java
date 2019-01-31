@@ -15,6 +15,16 @@ import test.assertions.Assertions;
 
 public class RSATest extends UsagePatternTestingFramework {
 	
+	@Override
+	protected String getSootClassPath() {
+		// TODO Auto-generated method stub
+		String sootCp = super.getSootClassPath();
+		
+		sootCp += File.pathSeparator + "/Users/rakshitkr/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar";
+		
+		return sootCp; 
+	}
+	
 	@Test
 	public void testRSA1() throws InvalidCipherTextException {
 	    

@@ -4,6 +4,7 @@ import java.io.File;
 import java.security.SecureRandom;
 
 import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.Mac;
 import org.bouncycastle.crypto.engines.DESEngine;
 import org.bouncycastle.crypto.macs.CBCBlockCipherMac;
 import org.bouncycastle.crypto.paddings.PKCS7Padding;
@@ -16,7 +17,7 @@ import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class MacTest extends UsagePatternTestingFramework {
-
+	
 	@Override
 	protected String getSootClassPath() {
 		// TODO Auto-generated method stub
@@ -24,7 +25,6 @@ public class MacTest extends UsagePatternTestingFramework {
 		
 		sootCp += File.pathSeparator + "/Users/rakshitkr/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar";
 		
-		System.out.println(sootCp);
 		return sootCp; 
 	}
 	
@@ -36,7 +36,7 @@ public class MacTest extends UsagePatternTestingFramework {
 		KeyParameter key = new KeyParameter(keyBytes);
 		BlockCipher cipher = new DESEngine();
         
-		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher);
+		Mac mac = new CBCBlockCipherMac(cipher);
 		
 		mac.init(key);
         

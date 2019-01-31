@@ -21,6 +21,16 @@ public class AESTest extends UsagePatternTestingFramework{
 
 	private static final byte[] tData   = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
 	
+	@Override
+	protected String getSootClassPath() {
+		// TODO Auto-generated method stub
+		String sootCp = super.getSootClassPath();
+		
+		sootCp += File.pathSeparator + "/Users/rakshitkr/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar";
+
+		return sootCp; 
+	}
+	
 	@Test
 	public void testAESEngine1() throws DataLengthException, IllegalStateException, InvalidCipherTextException {
 
@@ -86,7 +96,7 @@ public class AESTest extends UsagePatternTestingFramework{
 	@Test
 	public void testAESLightEngine2() throws Exception {
 
-//		AESLightEngine engine = new AESLightEngine(); // works
+//		AESLightEngine engine = new AESLightEngine(); // doesn't work either
 		BlockCipher engine = new AESLightEngine(); //doesn't work
 		
 		//no init
