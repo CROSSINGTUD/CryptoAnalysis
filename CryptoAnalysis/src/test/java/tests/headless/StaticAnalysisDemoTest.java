@@ -48,6 +48,13 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", ConstraintError.class, 1);
 
+
+		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", ConstraintError.class, 2);
+		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<main.Encrypt: void incorrect()>", ConstraintError.class, 2);
+		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 1);
+
 		scanner.exec();
 		assertErrors();
 	}

@@ -11,8 +11,11 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.IntConstant;
+import soot.jimple.Jimple;
 import soot.jimple.LengthExpr;
 import soot.jimple.ReturnStmt;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
@@ -54,6 +57,15 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 		AssignStmt as = (AssignStmt) stmt;
 		if (!as.getLeftOp().equals(fact.value())) {
 			return Optional.absent();
+		}
+		if (as.getRightOp() instanceof StaticFieldRef) {
+			StaticFieldRef sfr = (StaticFieldRef) as.getRightOp();
+			if(sfr.getField().toString().equals("<java.security.spec.RSAKeyGenParameterSpec: java.math.BigInteger F4>")) {
+				return Optional.of(new AllocVal(as.getLeftOp(), m, IntConstant.v(65537), new Statement(stmt, m)));
+			}
+			if(sfr.getField().toString().equals("<java.security.spec.RSAKeyGenParameterSpec: java.math.BigInteger F0>")) {
+				return Optional.of(new AllocVal(as.getLeftOp(), m, IntConstant.v(3), new Statement(stmt, m)));
+			}
 		}
 		if (as.getRightOp() instanceof LengthExpr) {
 			return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
