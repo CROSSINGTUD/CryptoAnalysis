@@ -363,6 +363,17 @@ public abstract class HeadlessCryptoScanner {
 										//Print the allocation sites
 										System.out.println("All allocation sites of the query variable are:");
 										System.out.println(backwardQueryResults.getAllocationSites());
+										
+										//choosing the rules depending on Provider detected
+										File rule = new File(".\\resources\\"+provider+"\\"+methodRef+".cryptsl");
+										if(rule.exists()) {
+											//select the corresponding CrySL rule
+										}
+										else {
+											File defaultRule = new File(".\\resources\\Default\\"+methodRef+".cryptsl");
+											System.out.println(defaultRule.exists());
+											//choose the default rule
+										}
 									}
 									
 									else if(strType.matches("java.lang.String")) {
@@ -379,6 +390,17 @@ public abstract class HeadlessCryptoScanner {
 										//Print the allocation sites
 										System.out.println("All allocation sites of the query variable are:");
 										System.out.println(backwardQueryResults.getAllocationSites());
+										
+										//choosing the rules depending on Provider detected
+										File rule = new File(".\\resources\\"+provider+"\\"+methodRef+".cryptsl");
+										if(rule.exists()) {
+											//select the corresponding CrySL rule
+										}
+										else {
+											File defaultRule = new File(".\\resources\\Default\\"+methodRef+".cryptsl");
+											System.out.println(defaultRule.exists());
+											//choose the default rule
+										}
 									}
 									
 									else {

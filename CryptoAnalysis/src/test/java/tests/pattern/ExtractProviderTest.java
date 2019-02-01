@@ -17,7 +17,7 @@ public class ExtractProviderTest extends UsagePatternTestingFramework{
 	public void UsagePatternTestExtractProvider1() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  MessageDigest md = MessageDigest.getInstance("SHA-256", "BC");
 	//Added assertion for Provider Detection
-	  Assertions.extValue(1);
+	  Assertions.extValue(0);
 	}
 	
 }
