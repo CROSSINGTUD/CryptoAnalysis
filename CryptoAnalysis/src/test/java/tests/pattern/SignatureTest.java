@@ -24,10 +24,11 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		 * The Signature API expects a call to update here. This call supplied the actual data to the signature instance.
 		 * A call such as s.update(data); would resolve this finding.
 		 */
-		s.initSign(getPrivateKey());
-//		s.update(tData);
+//		s.initSign(getPrivateKey());
+		s.update(tData);
 		s.sign();
-		Assertions.mustNotBeInAcceptingState(s);
+		Assertions.notHasEnsuredPredicate(s); // passing
+		Assertions.mustBeInAcceptingState(s); 
 	}
 	
 	private static PrivateKey getPrivateKey() throws GeneralSecurityException {

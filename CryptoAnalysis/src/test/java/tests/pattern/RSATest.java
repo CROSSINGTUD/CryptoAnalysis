@@ -33,12 +33,12 @@ public class RSATest extends UsagePatternTestingFramework {
 	    BigInteger pubExp = new BigInteger("11", 16);
 		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pubExp);
 		
-//		RSAEngine eng = new RSAEngine(); // works
-		AsymmetricBlockCipher eng = new RSAEngine(); // doesn't work
+		RSAEngine eng = new RSAEngine(); // works
+//		AsymmetricBlockCipher eng = new RSAEngine(); // doesn't work
         
 		eng.init(true, pubParameters);
-        
-        byte[] data = Hex.decode(edgeInput);
+		
+		byte[] data = Hex.decode(edgeInput);
         data = eng.processBlock(data, 0, data.length);  
         
         Assertions.hasEnsuredPredicate(eng);

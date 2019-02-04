@@ -36,7 +36,8 @@ public class MacTest extends UsagePatternTestingFramework {
 		KeyParameter key = new KeyParameter(keyBytes);
 		BlockCipher cipher = new DESEngine();
         
-		Mac mac = new CBCBlockCipherMac(cipher);
+//		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher); //works
+		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher); //doesn't work
 		
 		mac.init(key);
         
@@ -45,6 +46,8 @@ public class MacTest extends UsagePatternTestingFramework {
 		byte[]  out = new byte[4];
         mac.doFinal(out, 0);
         
+        Assertions.hasEnsuredPredicate(key);
+        Assertions.hasEnsuredPredicate(cipher);
         Assertions.hasEnsuredPredicate(mac);
         
         Assertions.mustBeInAcceptingState(mac);
@@ -59,7 +62,6 @@ public class MacTest extends UsagePatternTestingFramework {
 		KeyParameter key = new KeyParameter(keyBytes);
 		BlockCipher cipher = new DESEngine();
 		PKCS7Padding padding = new PKCS7Padding();
-//		padding.init(new SecureRandom());
 		
 		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher, padding);
 		
@@ -72,9 +74,9 @@ public class MacTest extends UsagePatternTestingFramework {
         
         Assertions.hasEnsuredPredicate(cipher);
         Assertions.hasEnsuredPredicate(key);
-//        Assertions.hasEnsuredPredicate(padding);
+        Assertions.hasEnsuredPredicate(padding);
         Assertions.hasEnsuredPredicate(param);
-//        Assertions.hasEnsuredPredicate(mac);
+        Assertions.notHasEnsuredPredicate(mac);
         
         Assertions.mustNotBeInAcceptingState(mac);
 	}

@@ -96,7 +96,7 @@ public class AESTest extends UsagePatternTestingFramework{
 	@Test
 	public void testAESLightEngine2() throws Exception {
 
-//		AESLightEngine engine = new AESLightEngine(); // doesn't work either
+//		AESLightEngine engine = new AESLightEngine(); //works as per AESLightEngine.cryptsl
 		BlockCipher engine = new AESLightEngine(); //doesn't work
 		
 		//no init
@@ -107,7 +107,7 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		Assertions.hasEnsuredPredicate(engine);
 
-		Assertions.mustNotBeInAcceptingState(engine);
+		Assertions.mustBeInAcceptingState(engine);
 	}
 
 	@Test
@@ -156,7 +156,8 @@ public class AESTest extends UsagePatternTestingFramework{
 		Assertions.hasEnsuredPredicate(engine);
 		Assertions.notHasEnsuredPredicate(kp);
 
-		Assertions.mustNotBeInAcceptingState(engine);
+//		Assertions.mustNotBeInAcceptingState(engine);
+		Assertions.mustBeInAcceptingState(engine);
 	}
 
 
