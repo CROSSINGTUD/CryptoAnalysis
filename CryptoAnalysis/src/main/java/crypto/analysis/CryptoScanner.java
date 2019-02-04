@@ -18,9 +18,13 @@ import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
+import soot.MethodOrMethodContext;
+import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
+import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -32,12 +36,10 @@ public abstract class CryptoScanner {
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 
-	
-
-	private DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement,Val>, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(Node<Statement,Val> key) {
+		protected AnalysisSeedWithEnsuredPredicate createItem(Node<Statement, Val> key) {
 			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
 		}
 	};
@@ -45,7 +47,7 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(),key.var(), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(), key.var(), key.getSpec());
 		}
 	};
 	private int solvedObject;
@@ -59,68 +61,80 @@ public abstract class CryptoScanner {
 
 	public abstract boolean isCommandLineMode();
 
+	public abstract boolean rulesInSrcFormat();
 
-	public CryptoScanner(List<CryptSLRule> specs) {
+	public CryptoScanner() {
 		CryptSLMethodToSootMethod.reset();
+	}
+
+	public void scan(List<CryptSLRule> specs) {
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
-	}
-
-	
-
-
-	public void scan() {
-		getAnalysisListener().beforeAnalysis();
+		CrySLResultsReporter listener = getAnalysisListener();
+		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
+		System.out.println("Searching fo Seeds for analysis!");
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		System.out.println("Discovered "+worklist.size() + " analysis seeds within " + elapsed + " seconds!");
+		System.out.println("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
-			getAnalysisListener().discoveredSeed(curr);
+			listener.discoveredSeed(curr);
 			curr.execute();
 			estimateAnalysisTime();
 		}
-		
+
 //		IDebugger<TypestateDomainValue<StateNode>> debugger = debugger();
 //		if (debugger instanceof CryptoVizDebugger) {
 //			CryptoVizDebugger ideVizDebugger = (CryptoVizDebugger) debugger;
 //			ideVizDebugger.addEnsuredPredicates(this.existingPredicates);
 //		}
 		predicateHandler.checkPredicates();
+
+		for (AnalysisSeedWithSpecification seed : getAnalysisSeeds()) {
+			if (seed.isSecure()) {
+				listener.onSecureObjectFound(seed);
+			}
+		}
 		
-		getAnalysisListener().afterAnalysis();
+		listener.afterAnalysis();
 		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		System.out.println("Static Analysis took "+elapsed+ " seconds!");
+		System.out.println("Static Analysis took " + elapsed + " seconds!");
 //		debugger().afterAnalysis();
 	}
-
-	
 
 	private void estimateAnalysisTime() {
 		int remaining = worklist.size();
 		solvedObject++;
-		if(remaining != 0) {
-			Duration elapsed = analysisWatch.elapsed();
-			Duration estimate = elapsed.dividedBy(solvedObject);
-			Duration remainingTime = estimate.multipliedBy(remaining);
-			System.out.println(String.format("Analysis Time: %s", elapsed));
-			System.out.println(String.format("Estimated Time: %s", remainingTime));
+		if (remaining != 0) {
+//			Duration elapsed = analysisWatch.elapsed();
+//			Duration estimate = elapsed.dividedBy(solvedObject);
+//			Duration remainingTime = estimate.multipliedBy(remaining);
+//			System.out.println(String.format("Analysis Time: %s", elapsed));
+//			System.out.println(String.format("Estimated Time: %s", remainingTime));
 			System.out.println(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
-			System.out.println(String.format("Percentage Completed: %s\n", ((float)Math.round((float)solvedObject*100 / (remaining + solvedObject)))/100));
+			System.out.println(String.format("Percentage Completed: %s\n",
+					((float) Math.round((float) solvedObject * 100 / (remaining + solvedObject))) / 100));
 		}
 	}
 
 	private void initialize() {
-		for (ClassSpecification spec : getClassSpecifictions()) {
-			spec.checkForForbiddenMethods();
-			if (!isCommandLineMode() && !spec.isLeafRule())
+		ReachableMethods rm = Scene.v().getReachableMethods();
+		QueueReader<MethodOrMethodContext> listener = rm.listener();
+		while (listener.hasNext()) {
+			MethodOrMethodContext next = listener.next();
+			SootMethod method = next.method();
+			if (method == null || !method.hasActiveBody()) {
 				continue;
-
-			for (Query seed : spec.getInitialSeeds()) {
-				if(!spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(),seed.var(),spec));
+			}
+			for (ClassSpecification spec : getClassSpecifictions()) {
+				spec.invokesForbiddenMethod(method);
+				if (spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
+					continue;
+				}
+				for (Query seed : spec.getInitialSeeds(method)) {
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
 				}
 			}
 		}
@@ -155,9 +169,8 @@ public abstract class CryptoScanner {
 		return seed;
 	}
 
-
-	
-	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed analyzedObject) {
+	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver,
+			IAnalysisSeed analyzedObject) {
 		return new Debugger<>();
 	}
 

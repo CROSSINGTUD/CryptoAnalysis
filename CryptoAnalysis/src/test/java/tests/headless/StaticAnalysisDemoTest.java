@@ -27,7 +27,6 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
-		setErrorsCount("<example.ImpreciseValueExtractionErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 1);
 		
 		scanner.exec();
 		assertErrors();
@@ -48,6 +47,13 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", ConstraintError.class, 1);
+
+
+		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", ConstraintError.class, 2);
+		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<main.Encrypt: void incorrect()>", ConstraintError.class, 2);
+		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -97,6 +103,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
+	//TODO: This is wrong.
+		setErrorsCount("<main.Main: void useDoFinalInLoop()>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 

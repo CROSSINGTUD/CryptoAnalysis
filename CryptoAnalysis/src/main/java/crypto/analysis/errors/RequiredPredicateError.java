@@ -20,6 +20,10 @@ public class RequiredPredicateError extends AbstractError{
 		return contradictedPredicate;
 	}
 	
+	public CallSiteWithExtractedValue getExtractedValues() {
+		return extractedValues;
+	}
+	
 	public void accept(ErrorVisitor visitor){
 		visitor.visit(this);
 	}

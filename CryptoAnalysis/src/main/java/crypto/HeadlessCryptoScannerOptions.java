@@ -19,6 +19,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 				.desc("Specify the directory for the CrySL rules").build();
 		addOption(rulesDir);
 
+		Option rulesFormat = Option.builder().longOpt("rulesInSrc").hasArg(false).desc("Specfiy that rules passed as parameter are in source format.").build();
+		addOption(rulesFormat);
+
 		Option sootCp = Option.builder().longOpt("sootCp").hasArg()
 				.desc("The class path of the whole project, including dependencies.").build();
 		addOption(sootCp);
@@ -41,6 +44,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 		addOption(preanalysisOpt);
 		Option visualization = Option.builder().longOpt("visualization").hasArg(false).desc("Enables the visualization. This option requires that --reportFolder is also set. A folder /viz/ is created containing Json files that can be visualized by the visualization of WPDS.").build();
 		addOption(visualization);
+		
+		Option sarif = Option.builder().longOpt("sarifReport").hasArg(false).desc("Enable sarif report").build();
+		addOption(sarif);
 	}
 
 }
