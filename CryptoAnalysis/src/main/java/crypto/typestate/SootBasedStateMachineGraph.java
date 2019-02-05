@@ -60,6 +60,9 @@ public class SootBasedStateMachineGraph {
 				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ErrorStateNode(expected), Type.OnCallToReturn));
 			}
 		}
+		//Once an object is in error state, it always remains in the error state.
+		ErrorStateNode errorState = new ErrorStateNode(Collections.emptyList());
+		this.addTransition(new MatcherTransition(errorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallToReturn));
 	}
 
 	
