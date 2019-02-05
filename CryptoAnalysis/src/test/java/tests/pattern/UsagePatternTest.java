@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -1184,5 +1185,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		generator.initialize(parameters, new SecureRandom());
 		KeyPair keyPair = generator.generateKeyPair();
 		Assertions.hasEnsuredPredicate(keyPair);
+	}
+	
+	@Test
+	public void testSignature() throws InvalidKeyException, GeneralSecurityException {
+		Signature s = Signature.getInstance("SHA256withRSA");
+//		no initSign call
+		s.update("".getBytes());
+		s.sign();
+		Assertions.notHasEnsuredPredicate(s); 
+		Assertions.mustNotBeInAcceptingState(s); 
 	}
 }
