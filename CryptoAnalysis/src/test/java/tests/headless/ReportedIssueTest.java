@@ -54,7 +54,9 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 	  
 	  	setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class,1);
 	  	setErrorsCount("<issue49.Main: byte[] sign(java.lang.String)>", RequiredPredicateError.class,1);
-	  
+
+	  	setErrorsCount("<issue103.Main: void main(java.lang.String[])>", RequiredPredicateError.class,2);
+	  	
 	  	scanner.exec();
 	  	assertErrors();
 	}
