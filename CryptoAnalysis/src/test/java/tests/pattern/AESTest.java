@@ -87,17 +87,16 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		engine.init(true, kp);
 
-		Assertions.hasEnsuredPredicate(engine);
-		Assertions.hasEnsuredPredicate(kp);
-
-		Assertions.mustBeInAcceptingState(engine);
+		Assertions.hasEnsuredPredicate(kp); //pass
+		Assertions.hasEnsuredPredicate(engine); //fails
+		
+		Assertions.mustBeInAcceptingState(engine); //fails
 	}
 
 	@Test
 	public void testAESLightEngine2() throws Exception {
 
-//		AESLightEngine engine = new AESLightEngine(); //works as per AESLightEngine.cryptsl
-		BlockCipher engine = new AESLightEngine(); //doesn't work
+		BlockCipher engine = new AESLightEngine();
 		
 		//no init
 
@@ -105,9 +104,9 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		engine.processBlock(buf, 0, buf, 0);
 
-		Assertions.hasEnsuredPredicate(engine);
+		Assertions.notHasEnsuredPredicate(engine);
 
-		Assertions.mustBeInAcceptingState(engine);
+		Assertions.mustNotBeInAcceptingState(engine);
 	}
 
 	@Test
@@ -134,15 +133,15 @@ public class AESTest extends UsagePatternTestingFramework{
 	@Test
 	public void testAESLightEngine4() throws Exception {
 
-		BlockCipher engine = new AESLightEngine();
+		AESLightEngine engine = new AESLightEngine();
 		byte[] dudKey = new byte[6];	//failed key length check
 		KeyParameter kp = new KeyParameter(dudKey);
 		engine.init(true, kp);
 
-		Assertions.hasEnsuredPredicate(engine);
-		Assertions.hasEnsuredPredicate(kp);
+		Assertions.hasEnsuredPredicate(kp); //passes
+		Assertions.hasEnsuredPredicate(engine); //fails
 
-		Assertions.mustBeInAcceptingState(engine);
+		Assertions.mustBeInAcceptingState(engine); //fails
 	}
 
 	@Test
@@ -153,11 +152,10 @@ public class AESTest extends UsagePatternTestingFramework{
 		ParametersWithIV kp = new ParametersWithIV(null, iv);	//failed parameter check
 		engine.init(true, kp);	
 
-		Assertions.hasEnsuredPredicate(engine);
+		Assertions.notHasEnsuredPredicate(engine);
 		Assertions.notHasEnsuredPredicate(kp);
 
-//		Assertions.mustNotBeInAcceptingState(engine);
-		Assertions.mustBeInAcceptingState(engine);
+		Assertions.mustNotBeInAcceptingState(engine);
 	}
 
 
