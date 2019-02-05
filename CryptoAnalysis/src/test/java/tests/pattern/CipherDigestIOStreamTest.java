@@ -90,7 +90,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 	  dos.on(false);
 	  Assertions.callToForbiddenMethod();
 	  dos.write(new String("Hello World\n").getBytes());
-	  Assertions.mustNotBeInAcceptingState(dos);
+	  Assertions.mustBeInAcceptingState(dos);
 	}
 
 	@Test
