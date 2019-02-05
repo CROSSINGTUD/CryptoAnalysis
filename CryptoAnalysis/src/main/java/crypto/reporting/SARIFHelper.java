@@ -6,16 +6,23 @@ import java.util.Map;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import soot.SootClass;
+
 @SuppressWarnings("unchecked")
 public class SARIFHelper {
 	
-	Map<String, String> rulesMap;
+	private final Map<String, String> rulesMap = new HashMap<>();
+	private final SourceCodeLocater sourceLocater;
 	
 	public SARIFHelper() {
-		rulesMap = new HashMap<>();
 		initialize();
+		this.sourceLocater = null;
 	}
 	
+	public SARIFHelper(SourceCodeLocater sourceLocater) {
+		this.sourceLocater = sourceLocater;
+	}
+
 	private void initialize() {
 		//SARIFConfig
 		this.rulesMap.put(SARIFConfig.CONSTRAINT_ERROR_KEY, SARIFConfig.CONSTRAINT_ERROR_VALUE);
@@ -40,10 +47,6 @@ public class SARIFHelper {
 		return jsonRuns;
 	}
 	
-	public String getFileName(String fileName) {
-		return fileName.replace(".", "/") + ".java";
-	}
-	
 	public JSONObject getToolInfo() {
 		JSONObject tool = new JSONObject();
 		tool.put(SARIFConfig.TOOL_NAME_KEY, SARIFConfig.TOOL_NAME_VALUE);
@@ -61,20 +64,24 @@ public class SARIFHelper {
 		return message;
 	}
 	
-	public JSONArray getLocations(String fileName, String methodName, int lineNumber) {
+	public String getFileName(SootClass c) {
+		return sourceLocater == null ? c.getName().replace(".", "/") + ".java" : sourceLocater.getAbsolutePath(c);
+	}
+	
+	public JSONArray getLocations(SootClass c, String methodName, int lineNumber) {
 		JSONArray locations = new JSONArray();
 		JSONObject location = new JSONObject();
 		
 		JSONObject startLine = new JSONObject();
 		startLine.put(SARIFConfig.START_LINE_KEY, lineNumber);
 		JSONObject uri = new JSONObject();
-		uri.put(SARIFConfig.URI_KEY, getFileName(fileName));
+		uri.put(SARIFConfig.URI_KEY, getFileName(c));
 		JSONObject physicalLocation = new JSONObject();
 		physicalLocation.put(SARIFConfig.FILE_LOCATION_KEY, uri);
 		physicalLocation.put(SARIFConfig.REGION_KEY, startLine);
 		
 		location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
-		String fullyQualifiedLogicalName = fileName.replace(".", "::") + "::" + methodName;
+		String fullyQualifiedLogicalName = c.getName().replace(".", "::") + "::" + methodName;
 		location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
 		
 		locations.add(location);
