@@ -1,6 +1,7 @@
 package crypto.typestate;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import soot.SootMethod;
 import typestate.finiteautomata.State;
@@ -8,9 +9,16 @@ import typestate.finiteautomata.State;
 public class ErrorStateNode implements State {
 
 	private Collection<SootMethod> expectedCalls;
+	private boolean report;
 
 	public ErrorStateNode(Collection<SootMethod> expectedCalls) {
 		this.expectedCalls = expectedCalls;
+		this.report = true;
+	}
+
+	public ErrorStateNode(boolean b) {
+		this.expectedCalls = Collections.emptySet();
+		this.report = false;
 	}
 
 	public Collection<SootMethod> getExpectedCalls() {
@@ -29,6 +37,10 @@ public class ErrorStateNode implements State {
 	@Override
 	public boolean isAccepting() {
 		return false;
+	}
+
+	public boolean isReport() {
+		return report;
 	}
 	
 	@Override

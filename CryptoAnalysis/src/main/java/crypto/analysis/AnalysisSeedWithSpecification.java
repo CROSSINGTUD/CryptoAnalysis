@@ -225,7 +225,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ErrorStateNode) {
 				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+				if(errorStateNode.isReport()) {
+					cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+				}
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
