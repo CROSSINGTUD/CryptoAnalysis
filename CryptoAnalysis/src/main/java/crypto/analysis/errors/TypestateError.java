@@ -43,9 +43,9 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		final Set<String> altMethods = new HashSet<>();
 		for (final SootMethod expectedCall : expectedMethodCalls) {
 			if (useSignatures){
-				altMethods.add(expectedCall.getSignature());
+				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
 			} else {
-				altMethods.add(expectedCall.getName());
+				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			}
 		}
 		if(altMethods.isEmpty()){

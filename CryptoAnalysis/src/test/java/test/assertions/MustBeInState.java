@@ -2,6 +2,7 @@ package test.assertions;
 
 import boomerang.jimple.Val;
 import crypto.typestate.ErrorStateNode;
+import crypto.typestate.ReportingErrorStateNode;
 import soot.Unit;
 import test.Assertion;
 import test.ComparableResult;
@@ -22,7 +23,7 @@ public class MustBeInState implements Assertion, ComparableResult<State,Val> {
 	}
 
 	public void computedResults(State s) {
-		if ((state.toString().equals("-1") && s instanceof ErrorStateNode) || state.toString().equals(s.toString())) {
+		if ((state.toString().equals("-1") && s instanceof ReportingErrorStateNode) || state.toString().equals(s.toString())) {
 			satisfied |= true;
 			imprecise++;
 		} 

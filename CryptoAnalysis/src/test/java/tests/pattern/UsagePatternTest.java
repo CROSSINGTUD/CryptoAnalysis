@@ -904,7 +904,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] input = "input".getBytes("UTF-8");
 		byte[] output = md.digest(input);
 		md.reset();
-		Assertions.mustNotBeInAcceptingState(md);
+		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		md.digest();
