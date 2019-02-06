@@ -77,6 +77,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
+	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
@@ -151,11 +152,25 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runTypestateAnalysis() {
 		analysis.run(this);
 		results = analysis.getResults();
+		if(results != null) {
+			for(ResultsHandler handler : Lists.newArrayList(resultHandlers)) {
+				handler.done(results);
+			}
+		}
 	}
 
+	
+	public void registerResultsHandler(ResultsHandler handler) {
+		if(results != null) {
+			handler.done(results);
+		} else {
+			resultHandlers.add(handler);
+		}
+	}
+	
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
-		this.parameterAnalysis .run();
+		this.parameterAnalysis.run();
 	}
 	
 	private void computeTypestateErrorUnits() {
@@ -210,7 +225,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if(typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ErrorStateNode) {
 				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+				if(errorStateNode.isReport()) {
+					cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+				}
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
@@ -355,7 +372,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean checkConstraintSystem() {
 		cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
-		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
+		Set<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
 		boolean checkPredicates = checkPredicates(relConstraints);
 		cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
 		if (!checkPredicates)
@@ -572,5 +589,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}
+
 
 }

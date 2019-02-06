@@ -2,20 +2,22 @@ package tests.pattern;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.List;
 
 import javax.crypto.Cipher;
@@ -902,7 +904,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] input = "input".getBytes("UTF-8");
 		byte[] output = md.digest(input);
 		md.reset();
-		Assertions.mustNotBeInAcceptingState(md);
+		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		md.digest();
@@ -1147,4 +1149,51 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		
 	}
 	
+	@Test
+	public void negativeRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+		Integer keySize = new Integer(102);
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
+		Assertions.notHasEnsuredPredicate(parameters);
+		Assertions.extValue(0);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.notHasEnsuredPredicate(keyPair);
+	}
+	
+	@Test
+	public void positiveRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+		Integer keySize = new Integer(2048);
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(parameters);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.hasEnsuredPredicate(keyPair);
+	}
+
+	@Test
+	public void positiveRsaParameterSpecTestBigInteger() throws GeneralSecurityException, IOException {
+		Integer keySize = new Integer(2048);
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, BigInteger.valueOf(65537));
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(parameters);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.hasEnsuredPredicate(keyPair);
+	}
+	
+	@Test
+	public void testSignature() throws InvalidKeyException, GeneralSecurityException {
+		Signature s = Signature.getInstance("SHA256withRSA");
+//		no initSign call
+		s.update("".getBytes());
+		s.sign();
+		Assertions.notHasEnsuredPredicate(s); 
+		Assertions.mustNotBeInAcceptingState(s); 
+	}
 }
