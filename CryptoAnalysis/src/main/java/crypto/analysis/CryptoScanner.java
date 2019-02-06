@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
@@ -35,6 +38,7 @@ public abstract class CryptoScanner {
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
+	private static final Logger logger = LogManager.getLogger();
 
 	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
@@ -74,10 +78,10 @@ public abstract class CryptoScanner {
 		CrySLResultsReporter listener = getAnalysisListener();
 		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
-		System.out.println("Searching fo Seeds for analysis!");
+		logger.info("Searching fo Seeds for analysis!");
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		System.out.println("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
+		logger.info("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			listener.discoveredSeed(curr);
@@ -100,7 +104,7 @@ public abstract class CryptoScanner {
 		
 		listener.afterAnalysis();
 		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		System.out.println("Static Analysis took " + elapsed + " seconds!");
+		logger.info("Static Analysis took " + elapsed + " seconds!");
 //		debugger().afterAnalysis();
 	}
 
@@ -113,8 +117,8 @@ public abstract class CryptoScanner {
 //			Duration remainingTime = estimate.multipliedBy(remaining);
 //			System.out.println(String.format("Analysis Time: %s", elapsed));
 //			System.out.println(String.format("Estimated Time: %s", remainingTime));
-			System.out.println(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
-			System.out.println(String.format("Percentage Completed: %s\n",
+			logger.info(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
+			logger.info(String.format("Percentage Completed: %s\n",
 					((float) Math.round((float) solvedObject * 100 / (remaining + solvedObject))) / 100));
 		}
 	}
