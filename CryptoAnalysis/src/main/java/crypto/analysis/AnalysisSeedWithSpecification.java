@@ -40,6 +40,7 @@ import crypto.rules.TransitionEdge;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
 import ideal.IDEALSeedSolver;
@@ -223,11 +224,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
 		if(typeStateChange.put(curr, stateNode)) {
-			if (stateNode instanceof ErrorStateNode) {
-				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				if(errorStateNode.isReport()) {
-					cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
-				}
+			if (stateNode instanceof ReportingErrorStateNode) {
+				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
+				cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);

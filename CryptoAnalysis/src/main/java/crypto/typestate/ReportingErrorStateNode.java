@@ -6,10 +6,17 @@ import java.util.Collections;
 import soot.SootMethod;
 import typestate.finiteautomata.State;
 
-public class ErrorStateNode implements State {
+public class ReportingErrorStateNode implements State {
 
+	private Collection<SootMethod> expectedCalls;
+	private boolean report;
 
-	public ErrorStateNode() {
+	public ReportingErrorStateNode(Collection<SootMethod> expectedCalls) {
+		this.expectedCalls = expectedCalls;
+	}
+
+	public Collection<SootMethod> getExpectedCalls() {
+		return expectedCalls;
 	}
 	@Override
 	public boolean isErrorState() {
@@ -26,6 +33,10 @@ public class ErrorStateNode implements State {
 		return false;
 	}
 
+	public boolean isReport() {
+		return report;
+	}
+	
 	@Override
 	public String toString() {
 		return "ERR";
@@ -38,6 +49,6 @@ public class ErrorStateNode implements State {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof ErrorStateNode;
+		return obj instanceof ReportingErrorStateNode;
 	}
 }
