@@ -57,12 +57,14 @@ public class SootBasedStateMachineGraph {
 			Collection<SootMethod> expected =  this.outTransitions.get(wrapped);
 			if(expected != null){
 				remaining.removeAll(expected);
-				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ErrorStateNode(expected), Type.OnCallToReturn));
+				ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(expected);
+				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ReportingErrorStateNode(expected), Type.OnCallToReturn));
+				//Once an object is in error state, it always remains in the error state.
+				ErrorStateNode errorState = new ErrorStateNode();
+				this.addTransition(new MatcherTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallToReturn));
 			}
 		}
-		//Once an object is in error state, it always remains in the error state.
-		ErrorStateNode errorState = new ErrorStateNode(false);
-		this.addTransition(new MatcherTransition(errorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallToReturn));
+		
 	}
 
 	

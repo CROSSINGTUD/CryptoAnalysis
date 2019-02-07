@@ -49,9 +49,9 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		final Set<String> altMethods = new HashSet<>();
 		for (final SootMethod expectedCall : expectedCalls) {
 			if (stmtInvokesExpectedCallName(expectedCall.getName())){
-				altMethods.add(expectedCall.getSignature());
+				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
 			} else {
-				altMethods.add(expectedCall.getName());
+				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			}
 		}
 		msg.append(Joiner.on(", ").join(altMethods));

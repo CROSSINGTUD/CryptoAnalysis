@@ -127,9 +127,6 @@ public class SARIFReporter extends ErrorMarkerListener {
 			}
 		}
 		JSONObject sarif = makeSARIF();
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		String strJson = gson.toJson(sarif);
-		System.out.println(sarif.toJSONString().replaceAll("\\\\", ""));
 		if (outputFolder != null) {
 			try {
 				FileWriter writer = new FileWriter(outputFolder + File.separator+"CogniCrypt-SARIF-Report.txt");
