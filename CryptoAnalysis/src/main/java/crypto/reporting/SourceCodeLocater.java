@@ -24,14 +24,11 @@ public class SourceCodeLocater {
 				  DirectoryFileFilter.DIRECTORY
 				);
 		for(File file : files) {
-			System.out.println(file +"  " + className);
-			if(className.getPackageName().isEmpty())
-				return file.getAbsolutePath();
-			if(file.getAbsolutePath().contains(className.getPackageName())) {
+			if(file.getAbsolutePath().contains(className.toString().replace(".", File.separator))) {
 				return file.getAbsolutePath();
 			}
 		}
 		
-		return "";
+		return className +" (No source code found)";
 	}
 }
