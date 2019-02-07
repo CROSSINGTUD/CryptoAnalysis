@@ -286,7 +286,7 @@ public abstract class HeadlessCryptoScanner {
 				}
 
 				//Execute Provider Detection analysis
-				doProviderDetectionAnalysis(icfg);
+				rules = doProviderDetectionAnalysis(icfg, rules);
 				
 				scanner.scan(rules);
 
@@ -296,27 +296,7 @@ public abstract class HeadlessCryptoScanner {
 	
 	
 	//PROVIDER DETECTION analysis
-	private void doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg) {
-		
-		//Create a Boomerang solver.
-		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
-			public boolean onTheFlyCallGraph() {
-				//Must be turned of if no SeedFactory is specified.
-				return false;
-			};
-		}) {
-			@Override
-			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-				return icfg;
-			}
-
-			@Override
-			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
-				return null;
-			}
-		};
-		
-		//Provider Detection analysis
+	private List<CryptSLRule> doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg, List<CryptSLRule> rules) {
 		
 //		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
 //		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
@@ -362,61 +342,78 @@ public abstract class HeadlessCryptoScanner {
 //									System.out.println(strType);
 									
 									if(strType.matches("java.security.Provider")) {
-										System.out.println(strType+" variable used as provider.");
-										String provider = vl.toString();
-										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
+//										System.out.println(strType+" variable used as provider.");
+										String provider;
+//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
 										
 										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+										
+										//Create a Boomerang solver.
+										Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+											public boolean onTheFlyCallGraph() {
+												//Must be turned of if no SeedFactory is specified.
+												return false;
+											};
+										}) {
+											@Override
+											public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+												return icfg;
+											}
+
+											@Override
+											public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+												return null;
+											}
+										};
 										
 										//Submit query to the solver.
 										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
 										solver.debugOutput();
 										
-										//Print the allocation sites
-										System.out.println("All allocation sites of the query variable are:");
-										System.out.println(backwardQueryResults.getAllocationSites());
+										String allocSites = backwardQueryResults.getAllocationSites().toString();
 										
-										//choosing the rules depending on Provider detected
-										File rule = new File(".\\resources\\"+provider+"\\"+methodRef+".cryptsl");
-										if(rule.exists()) {
-											//select the corresponding CrySL rule
-										}
-										else {
-											File defaultRule = new File(".\\resources\\Default\\"+methodRef+".cryptsl");
-											System.out.println(defaultRule.exists());
-											//choose the default rule
+										if(allocSites.contains("BouncyCastle")) {
+//											System.out.println("Provider is BC");
+											provider = "BC";
+											
+											//choosing the rules depending on Provider detected
+											File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+methodRef+".cryptslbin");
+											if(rule.exists()) {
+												//delete the default rules from the Default folder and load the new rules from the Provider directory
+												String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
+												
+												rules.clear();
+												
+												File[] listFiles = new File(newDirectory).listFiles();
+												for (File file : listFiles) {
+													if (file != null && file.getName().endsWith(".cryptslbin")) {
+														rules.add(CryptSLRuleReader.readFromFile(file));
+													}
+												}
+											}
 										}
 									}
 									
-									else if(strType.matches("java.lang.String")) {
-										System.out.println(strType+" variable used as provider.");
+									else if (strType.matches("java.lang.String")) {
+//										System.out.println(strType+" variable used as provider.");
 										String provider = vl.toString();
-										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-										
-										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-										
-										//Submit query to the solver.
-										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-										solver.debugOutput();
-										
-										//Print the allocation sites
-										System.out.println("All allocation sites of the query variable are:");
-										System.out.println(backwardQueryResults.getAllocationSites());
+//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
 										
 										//choosing the rules depending on Provider detected
-										File rule = new File(".\\resources\\"+provider+"\\"+methodRef+".cryptsl");
+										File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+methodRef+".cryptslbin");
 										if(rule.exists()) {
-											//select the corresponding CrySL rule
+											//delete the default rules and load the new rules from the "Provider" directory
+											String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
+											
+											rules.clear();
+											
+											File[] listFiles = new File(newDirectory).listFiles();
+											for (File file : listFiles) {
+												if (file != null && file.getName().endsWith(".cryptslbin")) {
+													rules.add(CryptSLRuleReader.readFromFile(file));
+												}
+											}
 										}
-										else {
-											File defaultRule = new File(".\\resources\\Default\\"+methodRef+".cryptsl");
-											System.out.println(defaultRule.exists());
-											//choose the default rule
-										}
-									}
-									
-									else {
-										System.out.println("The second parameter in the "+methodName+" method should only be of type 'java.lang.String' OR 'java.security.Provider' ");
 									}
 								}
 							}
@@ -425,6 +422,8 @@ public abstract class HeadlessCryptoScanner {
 
 			}
 		}
+		
+		return rules;
 	}
 	
 
