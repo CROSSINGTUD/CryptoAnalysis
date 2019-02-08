@@ -307,7 +307,7 @@ public abstract class HeadlessCryptoScanner {
 		while(iterator.hasNext()) {
 			
 			for(SootMethod sootMethod : iterator.next().getMethods()) {
-				 Body body = sootMethod.getActiveBody();
+				 Body body = sootMethod.retrieveActiveBody();
 		
 				 for (Unit unit : body.getUnits()) {
 				
