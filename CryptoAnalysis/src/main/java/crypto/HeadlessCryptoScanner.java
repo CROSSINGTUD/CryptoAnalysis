@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -301,16 +302,19 @@ public abstract class HeadlessCryptoScanner {
 //		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
 //		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
 		
-		while(Scene.v().getApplicationClasses().snapshotIterator().hasNext()) {
+		Iterator<SootClass> iterator = Scene.v().getApplicationClasses().snapshotIterator();
+		
+		while(iterator.hasNext()) {
 			
-			for(SootMethod sootMethod : Scene.v().getApplicationClasses().snapshotIterator().next().getMethods()) {
+			for(SootMethod sootMethod : iterator.next().getMethods()) {
 				 Body body = sootMethod.getActiveBody();
 		
 				 for (Unit unit : body.getUnits()) {
 				
 					 if(unit instanceof JAssignStmt) {
-							JAssignStmt stmt = (JAssignStmt) unit;
-							Value rightVal = stmt.getRightOp();
+						 JAssignStmt stmt = (JAssignStmt) unit;
+						 Value rightVal = stmt.getRightOp();
+							
 							if (rightVal instanceof JStaticInvokeExpr) {
 								
 								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
@@ -324,6 +328,7 @@ public abstract class HeadlessCryptoScanner {
 								
 								int parameterCount = method.getParameterCount();
 								
+								//list of JCA engine classes that are supported as CryptSL rules
 								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
 																	"java.security.Signature", "javax.crypto.Cipher", 
 																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
@@ -337,83 +342,15 @@ public abstract class HeadlessCryptoScanner {
 								
 								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
 									Value vl = exp.getArg(1);
-									Type type = vl.getType();
-									String strType = type.toString();
+									String strType = getProviderType(vl);
 //									System.out.println(strType);
 									
 									if(strType.matches("java.security.Provider")) {
-//										System.out.println(strType+" variable used as provider.");
-										String provider;
-//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-										
-										BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
-										
-										//Create a Boomerang solver.
-										Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
-											public boolean onTheFlyCallGraph() {
-												//Must be turned of if no SeedFactory is specified.
-												return false;
-											};
-										}) {
-											@Override
-											public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-												return icfg;
-											}
-
-											@Override
-											public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
-												return null;
-											}
-										};
-										
-										//Submit query to the solver.
-										BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-										solver.debugOutput();
-										
-										String allocSites = backwardQueryResults.getAllocationSites().toString();
-										
-										if(allocSites.contains("BouncyCastle")) {
-//											System.out.println("Provider is BC");
-											provider = "BC";
-											
-											//choosing the rules depending on Provider detected
-											File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+methodRef+".cryptslbin");
-											if(rule.exists()) {
-												//delete the default rules from the Default folder and load the new rules from the Provider directory
-												String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
-												
-												rules.clear();
-												
-												File[] listFiles = new File(newDirectory).listFiles();
-												for (File file : listFiles) {
-													if (file != null && file.getName().endsWith(".cryptslbin")) {
-														rules.add(CryptSLRuleReader.readFromFile(file));
-													}
-												}
-											}
-										}
+										rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName);
 									}
 									
 									else if (strType.matches("java.lang.String")) {
-//										System.out.println(strType+" variable used as provider.");
-										String provider = vl.toString();
-//										System.out.println("The "+methodName+" method and "+provider+" provider is used. \n");
-										
-										//choosing the rules depending on Provider detected
-										File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+methodRef+".cryptslbin");
-										if(rule.exists()) {
-											//delete the default rules and load the new rules from the "Provider" directory
-											String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
-											
-											rules.clear();
-											
-											File[] listFiles = new File(newDirectory).listFiles();
-											for (File file : listFiles) {
-												if (file != null && file.getName().endsWith(".cryptslbin")) {
-													rules.add(CryptSLRuleReader.readFromFile(file));
-												}
-											}
-										}
+										rules = chooseRulesWhenProviderTypeString(vl, refName, rules);
 									}
 								}
 							}
@@ -425,6 +362,88 @@ public abstract class HeadlessCryptoScanner {
 		
 		return rules;
 	}
+	
+	//methods used from the "doProviderDetectionAnalysis() method"
+	//-----------------------------------------------------------------------------------------------------------------
+	
+	private String getProviderType(Value vl) {
+		Type type = vl.getType();
+		String strType = type.toString();
+		return strType;
+	}
+	
+	private List<CryptSLRule> chooseRulesWhenProviderTypeString(Value vl, String refName, List<CryptSLRule> rules) {
+		String provider = vl.toString();
+		
+		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+		if(rule.exists()) {
+			//delete the default rules and load the new rules from the "Provider" directory
+			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
+			
+			rules.clear();
+			
+			File[] listFiles = new File(newDirectory).listFiles();
+			for (File file : listFiles) {
+				if (file != null && file.getName().endsWith(".cryptslbin")) {
+					rules.add(CryptSLRuleReader.readFromFile(file));
+				}
+			}
+		}
+		return rules;
+	}
+	
+	private List<CryptSLRule> chooseRulesWhenProviderTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg, String refName) {
+		String provider;
+		
+		BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+		
+		//Create a Boomerang solver.
+		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+			public boolean onTheFlyCallGraph() {
+				//Must be turned of if no SeedFactory is specified.
+				return false;
+			};
+		}) {
+			@Override
+			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				return icfg;
+			}
+
+			@Override
+			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+				return null;
+			}
+		};
+		
+		//Submit query to the solver.
+		BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+		solver.debugOutput();
+		
+		String allocSites = backwardQueryResults.getAllocationSites().toString();
+		
+		if(allocSites.contains("BouncyCastle")) {
+//			System.out.println("Provider is BC");
+			provider = "BC";
+			
+			//choosing the rules depending on Provider detected
+			File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+			if(rule.exists()) {
+				//delete the default rules from the Default folder and load the new rules from the Provider directory
+				String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
+				
+				rules.clear();
+				
+				File[] listFiles = new File(newDirectory).listFiles();
+				for (File file : listFiles) {
+					if (file != null && file.getName().endsWith(".cryptslbin")) {
+						rules.add(CryptSLRuleReader.readFromFile(file));
+					}
+				}
+			}
+		}
+		return rules;
+	}
+	//-----------------------------------------------------------------------------------------------------------------
 	
 
 	protected CrySLAnalysisListener getAdditionalListener() {
