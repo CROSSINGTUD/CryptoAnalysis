@@ -307,56 +307,57 @@ public abstract class HeadlessCryptoScanner {
 		while(iterator.hasNext()) {
 			
 			for(SootMethod sootMethod : iterator.next().getMethods()) {
-				 Body body = sootMethod.retrieveActiveBody();
-		
-				 for (Unit unit : body.getUnits()) {
-				
-					 if(unit instanceof JAssignStmt) {
-						 JAssignStmt stmt = (JAssignStmt) unit;
-						 Value rightVal = stmt.getRightOp();
-							
-							if (rightVal instanceof JStaticInvokeExpr) {
+				if(sootMethod.hasActiveBody()) {
+					Body body = sootMethod.getActiveBody();
+				 
+					for (Unit unit : body.getUnits()) {
+						
+						 if(unit instanceof JAssignStmt) {
+							 JAssignStmt stmt = (JAssignStmt) unit;
+							 Value rightVal = stmt.getRightOp();
 								
-								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
-								
-								SootMethod method = exp.getMethod();
-								String methodName = method.getName();
-								
-								SootClass methodRef = method.getDeclaringClass();
-								String refName = methodRef.toString();
-//								System.out.println(refName);
-								
-								int parameterCount = method.getParameterCount();
-								
-								//list of JCA engine classes that are supported as CryptSL rules
-								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
-																	"java.security.Signature", "javax.crypto.Cipher", 
-																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
-																	"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
-																	"java.security.AlgorithmParameters", "java.security.KeyStore",
-																	"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
-																	"javax.net.ssl.TrustManagerFactory"};
-								
-								boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-//							    System.out.println(ruleFound);
-								
-								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
-									Value vl = exp.getArg(1);
-									String strType = getProviderType(vl);
-//									System.out.println(strType);
+								if (rightVal instanceof JStaticInvokeExpr) {
 									
-									if(strType.matches("java.security.Provider")) {
-										rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName);
-									}
+									JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
 									
-									else if (strType.matches("java.lang.String")) {
-										rules = chooseRulesWhenProviderTypeString(vl, refName, rules);
+									SootMethod method = exp.getMethod();
+									String methodName = method.getName();
+									
+									SootClass methodRef = method.getDeclaringClass();
+									String refName = methodRef.toString();
+//									System.out.println(refName);
+									
+									int parameterCount = method.getParameterCount();
+									
+									//list of JCA engine classes that are supported as CryptSL rules
+									String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
+																		"java.security.Signature", "javax.crypto.Cipher", 
+																		"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
+																		"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
+																		"java.security.AlgorithmParameters", "java.security.KeyStore",
+																		"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
+																		"javax.net.ssl.TrustManagerFactory"};
+									
+									boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
+//								    System.out.println(ruleFound);
+									
+									if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
+										Value vl = exp.getArg(1);
+										String strType = getProviderType(vl);
+//										System.out.println(strType);
+										
+										if(strType.matches("java.security.Provider")) {
+											rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName);
+										}
+										
+										else if (strType.matches("java.lang.String")) {
+											rules = chooseRulesWhenProviderTypeString(vl, refName, rules);
+										}
 									}
 								}
 							}
-						}
-				 }
-
+					 }
+				}
 			}
 		}
 		
