@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -21,12 +22,13 @@ import com.google.common.collect.Lists;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
-
+import boomerang.ForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
+import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -420,9 +422,16 @@ public abstract class HeadlessCryptoScanner {
 		BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
 		solver.debugOutput();
 		
-		String allocSites = backwardQueryResults.getAllocationSites().toString();
+		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
+		Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry = map.entrySet().iterator().next();
+		ForwardQuery forwardQuery = entry.getKey();
 		
-		if(allocSites.contains("BouncyCastle")) {
+		Val forwardQueryVal = forwardQuery.var();
+		Value value = forwardQueryVal.value();
+		Type valueType = value.getType();
+		String valueTypeString = valueType.toString();
+		
+		if(valueTypeString.matches("org.bouncycastle.jce.provider.BouncyCastleProvider")) {
 //			System.out.println("Provider is BC");
 			provider = "BC";
 			
