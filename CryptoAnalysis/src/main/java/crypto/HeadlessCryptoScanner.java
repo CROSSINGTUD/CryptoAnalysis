@@ -301,9 +301,6 @@ public abstract class HeadlessCryptoScanner {
 	//PROVIDER DETECTION analysis
 	private List<CryptSLRule> doProviderDetectionAnalysis(JimpleBasedInterproceduralCFG icfg, List<CryptSLRule> rules) {
 		
-//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).getActiveBody();
-//		Scene.v().getApplicationClasses().snapshotIterator().next().getMethods().get(0).retrieveActiveBody;
-		
 		Iterator<SootClass> iterator = Scene.v().getApplicationClasses().snapshotIterator();
 		
 		while(iterator.hasNext()) {
@@ -327,7 +324,6 @@ public abstract class HeadlessCryptoScanner {
 									
 									SootClass methodRef = method.getDeclaringClass();
 									String refName = methodRef.toString();
-//									System.out.println(refName);
 									
 									int parameterCount = method.getParameterCount();
 									
@@ -341,12 +337,10 @@ public abstract class HeadlessCryptoScanner {
 																		"javax.net.ssl.TrustManagerFactory"};
 									
 									boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-//								    System.out.println(ruleFound);
 									
 									if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
 										Value vl = exp.getArg(1);
 										String strType = getProviderType(vl);
-//										System.out.println(strType);
 										
 										if(strType.matches("java.security.Provider")) {
 											rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName, rules);
@@ -432,7 +426,6 @@ public abstract class HeadlessCryptoScanner {
 		String valueTypeString = valueType.toString();
 		
 		if(valueTypeString.matches("org.bouncycastle.jce.provider.BouncyCastleProvider")) {
-//			System.out.println("Provider is BC");
 			provider = "BC";
 			
 			//choosing the rules depending on Provider detected
