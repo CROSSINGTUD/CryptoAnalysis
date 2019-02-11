@@ -347,7 +347,7 @@ public abstract class HeadlessCryptoScanner {
 //										System.out.println(strType);
 										
 										if(strType.matches("java.security.Provider")) {
-											rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName);
+											rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName, rules);
 										}
 										
 										else if (strType.matches("java.lang.String")) {
@@ -393,7 +393,7 @@ public abstract class HeadlessCryptoScanner {
 		return rules;
 	}
 	
-	private List<CryptSLRule> chooseRulesWhenProviderTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg, String refName) {
+	private List<CryptSLRule> chooseRulesWhenProviderTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg, String refName, List<CryptSLRule> rules) {
 		String provider;
 		
 		BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
