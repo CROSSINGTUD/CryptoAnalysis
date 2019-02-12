@@ -11,6 +11,9 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 
 import boomerang.WeightedForwardQuery;
+import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
@@ -41,7 +44,8 @@ import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
-	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
+	protected JimpleBasedInterproceduralCFG staticIcfg;
+	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 //	protected TestingResultReporter<StateNode> testingResultReporter;
@@ -53,7 +57,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		return new ExtendedIDEALAnaylsis() {
 			
 			@Override
-			protected BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+			protected ObservableICFG<Unit, SootMethod> icfg() {
 				return icfg;
 			}
 			
@@ -107,7 +111,9 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				icfg = new JimpleBasedInterproceduralCFG(true);
+				staticIcfg = new JimpleBasedInterproceduralCFG(true);
+//				icfg = new ObservableStaticICFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new ObservableDynamicICFG(true);
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
 				Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolvers = executeAnalysis();
@@ -153,8 +159,8 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 			return;
 		visited.add(m);
 		Body activeBody = m.getActiveBody();
-		for (Unit callSite : icfg.getCallsFromWithin(m)) {
-			for (SootMethod callee : icfg.getCalleesOfCallAt(callSite))
+		for (Unit callSite : staticIcfg.getCallsFromWithin(m)) {
+			for (SootMethod callee : staticIcfg.getCalleesOfCallAt(callSite))
 				parseExpectedQueryResults(callee, queries, visited);
 		}
 		for (Unit u : activeBody.getUnits()) {

@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -93,7 +94,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			@Override
-			protected BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+			protected ObservableICFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
 			}
 

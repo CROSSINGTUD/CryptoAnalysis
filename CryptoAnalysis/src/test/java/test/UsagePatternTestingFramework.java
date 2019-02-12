@@ -19,6 +19,9 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Query;
+import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -78,22 +81,26 @@ import typestate.TransitionFunction;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
-	protected BiDiInterproceduralCFG<Unit, SootMethod> icfg;
+	protected ObservableICFG<Unit, SootMethod> icfg;
+	private JimpleBasedInterproceduralCFG staticIcfg;
 	List<CryptSLRule> rules = Lists.newArrayList();
 	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 		return new SceneTransformer() {
+
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				icfg = new JimpleBasedInterproceduralCFG(true);
+				staticIcfg = new JimpleBasedInterproceduralCFG(true);
+//				icfg = new ObservableStaticICFG(new JimpleBasedInterproceduralCFG(true));
+				icfg = new ObservableDynamicICFG(true);
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(sootTestMethod);
 				final TestingResultReporter resultReporter = new TestingResultReporter(expectedResults);
 				CryptoScanner scanner = new CryptoScanner() {
 					
 					@Override
-					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+					public ObservableICFG<Unit, SootMethod> icfg() {
 						return icfg;
 					}
 
@@ -395,8 +402,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			return;
 		visited.add(m);
 		Body activeBody = m.getActiveBody();
-		for (Unit callSite : icfg.getCallsFromWithin(m)) {
-			for (SootMethod callee : icfg.getCalleesOfCallAt(callSite))
+		for (Unit callSite : staticIcfg.getCallsFromWithin(m)) {
+			for (SootMethod callee : staticIcfg.getCalleesOfCallAt(callSite))
 				extractBenchmarkMethods(callee, queries, visited);
 		}
 		for (Unit u : activeBody.getUnits()) {

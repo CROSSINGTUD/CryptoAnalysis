@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import boomerang.WeightedForwardQuery;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -49,7 +50,7 @@ public class ClassSpecification {
 			}
 
 			@Override
-			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+			public ObservableICFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
 			}
 

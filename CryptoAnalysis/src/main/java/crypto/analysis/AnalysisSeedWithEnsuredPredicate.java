@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
+import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -59,7 +60,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		problem = new ExtendedIDEALAnaylsis() {
 			
 			@Override
-			protected BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+			protected ObservableICFG<Unit, SootMethod> icfg() {
 				return cryptoScanner.icfg();
 			}
 			

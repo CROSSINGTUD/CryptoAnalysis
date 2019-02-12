@@ -13,6 +13,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import boomerang.Query;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -57,7 +58,7 @@ public abstract class CryptoScanner {
 	private int solvedObject;
 	private Stopwatch analysisWatch;
 
-	public abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
+	public abstract ObservableICFG<Unit, SootMethod> icfg();
 
 	public CrySLResultsReporter getAnalysisListener() {
 		return resultsAggregator;

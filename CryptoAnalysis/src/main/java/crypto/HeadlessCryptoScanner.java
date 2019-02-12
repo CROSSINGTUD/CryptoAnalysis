@@ -17,6 +17,9 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -215,7 +218,8 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-
+				ObservableStaticICFG observableStaticICFG = new ObservableStaticICFG(icfg);
+				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				//TODO Refactor the options for the Rules
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(false);
 				ErrorMarkerListener fileReporter;
@@ -231,8 +235,8 @@ public abstract class HeadlessCryptoScanner {
 				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
-					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-						return icfg;
+					public ObservableICFG<Unit, SootMethod> icfg() {
+						return observableStaticICFG;
 					}
 
 					@Override

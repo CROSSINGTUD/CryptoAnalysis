@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -172,7 +173,7 @@ public class ExtractParameterAnalysis {
 		public void solve() {
 			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
 				@Override
-				public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+				public ObservableICFG<Unit, SootMethod> icfg() {
 					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
 				}
 			};
