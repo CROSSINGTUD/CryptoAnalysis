@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.common.types.JvmExecutable;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
+import org.eclipse.xtext.common.types.access.impl.IndexedJvmTypeAccess;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
@@ -96,16 +97,19 @@ public class CrySLModelReader {
 		String a = System.getProperty("java.class.path");
 		String[] l = a.split(";");
 
-		URL[] classpath = new URL[l.length];
-		for (int i = 0; i < classpath.length; i++) {
+		URL[] classpath = new URL[l.length + 2];
+		for (int i = 0; i < l.length; i++) {
 			classpath[i] = new File(l[i]).toURI().toURL();
 		}
+		
+		String javaHome = System.getProperty("java.home");
+		if (javaHome == null || javaHome.equals(""))
+			throw new RuntimeException("Could not get property java.home!");
 
-		URLClassLoader ucl = new URLClassLoader(classpath);
+		classpath[l.length] = new File(javaHome + "/lib/rt.jar").toURI().toURL();
+		classpath[l.length + 1] = new File(javaHome + "/lib/jce.jar").toURI().toURL();
+
 		this.resourceSet.setClasspathURIContext(new URLClassLoader(classpath));
-
-		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
-
 		this.resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
 	}
 

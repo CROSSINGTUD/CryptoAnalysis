@@ -75,7 +75,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		return getRule(false);
+		return getRule(true);
 	}
 	
 	protected CryptSLRule getRule(boolean srcFormat) {

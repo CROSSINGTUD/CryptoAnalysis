@@ -402,15 +402,11 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean enableVisualization() {
 		return false;
 	};
-<<<<<<< HEAD
-
-=======
 	
 	protected boolean sarifReport() {
 		return false;
 	}
 	
->>>>>>> master
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
