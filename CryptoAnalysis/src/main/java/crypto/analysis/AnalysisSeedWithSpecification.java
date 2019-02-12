@@ -40,6 +40,7 @@ import crypto.rules.TransitionEdge;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
+import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
 import ideal.IDEALSeedSolver;
@@ -77,6 +78,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintSatisfied;
 	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
+	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
+	private boolean secure = true;
 
 	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val,
 			ClassSpecification spec) {
@@ -150,11 +153,25 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runTypestateAnalysis() {
 		analysis.run(this);
 		results = analysis.getResults();
+		if(results != null) {
+			for(ResultsHandler handler : Lists.newArrayList(resultHandlers)) {
+				handler.done(results);
+			}
+		}
 	}
 
+	
+	public void registerResultsHandler(ResultsHandler handler) {
+		if(results != null) {
+			handler.done(results);
+		} else {
+			resultHandlers.add(handler);
+		}
+	}
+	
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
-		this.parameterAnalysis .run();
+		this.parameterAnalysis.run();
 	}
 	
 	private void computeTypestateErrorUnits() {
@@ -198,7 +215,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Statement s = c.getRowKey();
 				Val val = c.getColumnKey();
 				if(!(s.getUnit().get() instanceof ThrowStmt)){
-					cryptoScanner.getAnalysisListener().reportError(new IncompleteOperationError(s, val, getSpec().getRule(), this, 
+					cryptoScanner.getAnalysisListener().reportError(this, new IncompleteOperationError(s, val, getSpec().getRule(), this, 
 							expectedMethodsToBeCalled));
 				}
 			}
@@ -207,9 +224,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
 		if(typeStateChange.put(curr, stateNode)) {
-			if (stateNode instanceof ErrorStateNode) {
-				ErrorStateNode errorStateNode = (ErrorStateNode) stateNode;
-				cryptoScanner.getAnalysisListener().reportError(new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
+			if (stateNode instanceof ReportingErrorStateNode) {
+				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
+				cryptoScanner.getAnalysisListener().reportError(this, new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls()));
 			}
 		}
 		onAddedTypestateChange(curr, stateNode);
@@ -354,7 +371,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean checkConstraintSystem() {
 		cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
-		List<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
+		Set<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
 		boolean checkPredicates = checkPredicates(relConstraints);
 		cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
 		if (!checkPredicates)
@@ -563,5 +580,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return false;
 		return true;
 	}
+
+	public boolean isSecure() {
+		return secure;
+	}
+
+	public void setSecure(boolean secure) {
+		this.secure = secure;
+	}
+
 
 }

@@ -46,13 +46,14 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
+import soot.jimple.LongConstant;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 
 public class ConstraintSolver {
 
 	private final List<ISLConstraint> allConstraints;
-	private final List<ISLConstraint> relConstraints;
+	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
@@ -71,7 +72,6 @@ public class ConstraintSolver {
 		this.parameterAnalysisQuerySites = object.getParameterAnalysis().getAllQuerySites();
 		this.collectedCalls = collectedCalls;
 		this.allConstraints = this.classSpec.getRule().getConstraints();
-		this.relConstraints = new ArrayList<ISLConstraint>();
 		for (ISLConstraint cons : allConstraints) {
 
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
@@ -83,9 +83,15 @@ public class ConstraintSolver {
 				if (cons instanceof CryptSLPredicate) {
 					CryptSLPredicate pred = (CryptSLPredicate) cons;
 					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
-						if (cwpi.getVarName().equals(pred.getParameters().get(0).getName())) {
-							relConstraints.add(pred);
-							requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
+						for(ICryptSLPredicateParameter p : pred.getParameters()) {
+							// TODO: FIX Cipher rule
+							if (p.getName().equals("transformation"))
+								continue;
+							if (cwpi.getVarName().equals(p.getName())) {
+								
+								relConstraints.add(pred);
+								requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
+							}
 						}
 					}
 				} else {
@@ -101,6 +107,8 @@ public class ConstraintSolver {
 			return ((StringConstant) val).value;
 		} else if (val instanceof IntConstant || val.getType() instanceof IntType) {
 			return val.toString();
+		} else if (val instanceof LongConstant) {
+				return val.toString().replaceAll("L", "");
 		} else {
 			return "";
 		}
@@ -113,11 +121,11 @@ public class ConstraintSolver {
 			currentConstraint.evaluate();
 			for (AbstractError e : currentConstraint.getErrors()) {
 				if (e instanceof ImpreciseValueExtractionError) {
-					reporter.reportError(new ImpreciseValueExtractionError(con, e.getErrorLocation(), e.getRule()));
+					reporter.reportError(object, new ImpreciseValueExtractionError(con, e.getErrorLocation(), e.getRule()));
 					break;
 				} else {
 					fail++;
-					reporter.reportError(e);
+					reporter.reportError(object, e);
 				}
 			}
 		}
@@ -147,7 +155,7 @@ public class ConstraintSolver {
 	/**
 	 * @return the relConstraints
 	 */
-	public List<ISLConstraint> getRelConstraints() {
+	public Set<ISLConstraint> getRelConstraints() {
 		return relConstraints;
 	}
 
@@ -516,18 +524,15 @@ public class ConstraintSolver {
 
 				for (ExtractedValue wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
 					final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
-
+					
 					if (wrappedCallSite.getVarName().equals(varName)) {
 						if (callSite.equals(allocSite)) {
 							varVal.add(retrieveConstantFromValue(callSite.getInvokeExpr().getArg(wrappedCallSite.getIndex())));
 							witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
 						} else if (allocSite instanceof AssignStmt) {
-							final Value rightSide = ((AssignStmt) allocSite).getRightOp();
-							if (rightSide instanceof Constant) {
-								varVal.add(retrieveConstantFromValue(rightSide));
+							if (wrappedAllocSite.getValue() instanceof Constant) {
+								varVal.add(retrieveConstantFromValue(wrappedAllocSite.getValue()));
 								witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
-							} else {
-								errors.add(new ImpreciseValueExtractionError(cons, wrappedCallSite.stmt(), classSpec.getRule()));
 							}
 						}
 					}

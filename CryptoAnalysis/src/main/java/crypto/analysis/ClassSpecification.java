@@ -64,30 +64,23 @@ public class ClassSpecification {
 		return cryptSLRule.isLeafRule();
 	}
 
-	public Set<WeightedForwardQuery<TransitionFunction>> getInitialSeeds() {
-		return extendedIdealAnalysis.computeInitialSeeds();
+	
+
+	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds(SootMethod m) {
+		return extendedIdealAnalysis.computeSeeds(m);
 	}
+
 
 	@Override
 	public String toString() {
 		return cryptSLRule.getClassName().toString();
 	}
 
-	public void checkForForbiddenMethods() {
-		ReachableMethods rm = Scene.v().getReachableMethods();
-		QueueReader<MethodOrMethodContext> listener = rm.listener();
-		while (listener.hasNext()) {
-			MethodOrMethodContext next = listener.next();
-			SootMethod method = next.method();
-			if (method == null || !method.hasActiveBody()) {
-				continue;
-			}
-			invokesForbiddenMethod(method.getActiveBody());
+	public void invokesForbiddenMethod(SootMethod m) {
+		if ( !m.hasActiveBody()) {
+			return;
 		}
-	}
-
-	private void invokesForbiddenMethod(Body activeBody) {
-		for (Unit u : activeBody.getUnits()) {
+		for (Unit u : m.getActiveBody().getUnits()) {
 			if (u instanceof Stmt) {
 				Stmt stmt = (Stmt) u;
 				if (!stmt.containsInvokeExpr())
@@ -96,7 +89,7 @@ public class ClassSpecification {
 				SootMethod method = invokeExpr.getMethod();
 				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().reportError(new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
+					cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
 				}
 			}
 		}

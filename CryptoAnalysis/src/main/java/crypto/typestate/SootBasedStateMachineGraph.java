@@ -26,12 +26,10 @@ import typestate.finiteautomata.State;
 public class SootBasedStateMachineGraph {
 
 	private Set<MatcherTransition> transition = new HashSet<>();
-	private final WrappedState initialState;
 	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
 	
 	private final StateMachineGraph stateMachineGraph;
 	private Multimap<State, SootMethod> outTransitions = HashMultimap.create();
-	private boolean seedIsConstructor;
 	private Collection<SootMethod> initialTransitonLabel;
 	private List<CryptSLMethod> crySLinitialTransitionLabel;
 	private LabeledMatcherTransition initialTransiton;
@@ -39,7 +37,6 @@ public class SootBasedStateMachineGraph {
 	public SootBasedStateMachineGraph(StateMachineGraph fsm) {
 		this.stateMachineGraph = fsm;
 		//TODO #15 we must start the analysis in state stateMachineGraph.getInitialTransition().from();
-		initialState = wrappedState(stateMachineGraph.getInitialTransition().to());
 		for (final TransitionEdge t : stateMachineGraph.getAllTransitions()) {
 			WrappedState from = wrappedState(t.from());
 			WrappedState to = wrappedState(t.to());
@@ -53,17 +50,6 @@ public class SootBasedStateMachineGraph {
 		crySLinitialTransitionLabel = stateMachineGraph.getInitialTransition().getLabel();
 		
 		initialTransitonLabel = convert(stateMachineGraph.getInitialTransition().getLabel());
-		List<SootMethod> label = Lists.newLinkedList();
-		for(SootMethod m : initialTransitonLabel){
-			if(m.isConstructor()){
-				label.add(m);
-			}
-		}
-		if(!label.isEmpty()){
-			this.addTransition(new MatcherTransition(initialState, label, Parameter.This, initialState, Type.OnCallToReturn));
-			this.outTransitions.putAll(initialState, label);
-			seedIsConstructor = true;
-		}
 		//All transitions that are not in the state machine 
 		for(StateNode t :  this.stateMachineGraph.getNodes()){
 			State wrapped = wrappedState(t);
@@ -71,9 +57,14 @@ public class SootBasedStateMachineGraph {
 			Collection<SootMethod> expected =  this.outTransitions.get(wrapped);
 			if(expected != null){
 				remaining.removeAll(expected);
-				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ErrorStateNode(expected), Type.OnCallToReturn));
+				ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(expected);
+				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ReportingErrorStateNode(expected), Type.OnCallToReturn));
+				//Once an object is in error state, it always remains in the error state.
+				ErrorStateNode errorState = new ErrorStateNode();
+				this.addTransition(new MatcherTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallToReturn));
 			}
 		}
+		
 	}
 
 	
@@ -97,9 +88,6 @@ public class SootBasedStateMachineGraph {
 		return converted;
 	}
 
-	public boolean seedIsConstructor(){
-		return seedIsConstructor;
-	}
 
 	public Collection<SootMethod> getInvolvedMethods(){
 		return Sets.newHashSet(edgeLabelMethods);
