@@ -17,13 +17,13 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
 		setErrorsCount("<example.misuse.TypeStateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.misuse.RequiredPredicateError: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.misuse.IncompleteOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);		
 		
-		// false negatives
-		setErrorsCount("<example.misuse.RequiredPredicateError: void useModeInsideAnotherMode()>", RequiredPredicateError.class, 1);
-		
-		// false positives
+		// Ignored
 		setErrorsCount("<example.misuse.TypeStateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);				
+		setErrorsCount("<example.misuse.RequiredPredicateErrorExample: void useModeInsideAnotherMode()>", ImpreciseValueExtractionError.class, 3);
+		setErrorsCount("<example.misuse.RequiredPredicateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
+		setErrorsCount("<example.nomisuse.TypeStateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
 		setErrorsCount("<example.nomisuse.IncompleteOperationErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
 		setErrorsCount("<example.nomisuse.RequiredPredicateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
 		
@@ -37,6 +37,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
+		setErrorsCount("<pattern.AESTest: void testAESEngine2()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<pattern.AESTest: void testAESLightEngine2()>", TypestateError.class, 1);
+		
+		// Ignored
+		setErrorsCount("<pattern.AESTest: void testAESEngine1()>", ImpreciseValueExtractionError.class, 2);
+		setErrorsCount("<pattern.AESTest: void testAESEngine2()>", ImpreciseValueExtractionError.class, 1);
+		setErrorsCount("<pattern.AESTest: void testMonteCarloAndVector()>", ImpreciseValueExtractionError.class, 2);
+
 		scanner.exec();
 	  	assertErrors();
 	}
@@ -56,6 +64,11 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleMacExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		
+		setErrorsCount("<pattern.MacTest: void testMac2()>", IncompleteOperationError.class, 1);
+		
+		// Ignored
+		setErrorsCount("<pattern.MacTest: void testMac1()>", ImpreciseValueExtractionError.class, 1);
 		
 		scanner.exec();
 	  	assertErrors();
