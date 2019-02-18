@@ -1,4 +1,4 @@
-package tests.pattern;
+package tests.pattern.bc;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -33,8 +33,7 @@ public class RSATest extends UsagePatternTestingFramework {
 	    BigInteger pubExp = new BigInteger("11", 16);
 		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pubExp);
 		
-		RSAEngine eng = new RSAEngine(); // works
-//		AsymmetricBlockCipher eng = new RSAEngine(); // doesn't work
+		AsymmetricBlockCipher eng = new RSAEngine();
         
 		eng.init(true, pubParameters);
 		

@@ -1,4 +1,4 @@
-package tests.pattern;
+package tests.pattern.bc;
 
 import java.io.File;
 import java.security.SecureRandom;
@@ -34,10 +34,9 @@ public class MacTest extends UsagePatternTestingFramework {
 		byte[] keyBytes = Hex.decode("0123456789abcdef");
 		byte[] input1 = Hex.decode("37363534333231204e6f77206973207468652074696d6520666f7220");
 		KeyParameter key = new KeyParameter(keyBytes);
-		BlockCipher cipher = new DESEngine();
+		BlockCipher engine = new DESEngine();
         
-//		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher); //works
-		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher); //doesn't work
+		Mac mac = new CBCBlockCipherMac(engine);
 		
 		mac.init(key);
         
@@ -47,7 +46,7 @@ public class MacTest extends UsagePatternTestingFramework {
         mac.doFinal(out, 0);
         
         Assertions.hasEnsuredPredicate(key);
-        Assertions.hasEnsuredPredicate(cipher);
+        Assertions.hasEnsuredPredicate(engine);
         Assertions.hasEnsuredPredicate(mac);
         
         Assertions.mustBeInAcceptingState(mac);
@@ -60,10 +59,10 @@ public class MacTest extends UsagePatternTestingFramework {
 		byte[] input2 = Hex.decode("3736353433323120");
 		byte[]   ivBytes = Hex.decode("1234567890abcdef");
 		KeyParameter key = new KeyParameter(keyBytes);
-		BlockCipher cipher = new DESEngine();
+		BlockCipher engine = new DESEngine();
 		PKCS7Padding padding = new PKCS7Padding();
 		
-		CBCBlockCipherMac mac = new CBCBlockCipherMac(cipher, padding);
+		CBCBlockCipherMac mac = new CBCBlockCipherMac(engine, padding);
 		
 		ParametersWithIV param = new ParametersWithIV(key, ivBytes);
         mac.init(param);
@@ -72,7 +71,7 @@ public class MacTest extends UsagePatternTestingFramework {
         
         //missing doFinal call
         
-        Assertions.hasEnsuredPredicate(cipher);
+        Assertions.hasEnsuredPredicate(engine);
         Assertions.hasEnsuredPredicate(key);
         Assertions.hasEnsuredPredicate(padding);
         Assertions.hasEnsuredPredicate(param);

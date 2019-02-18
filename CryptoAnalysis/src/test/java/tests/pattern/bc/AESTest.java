@@ -1,4 +1,4 @@
-package tests.pattern;
+package tests.pattern.bc;
 
 import java.io.File;
 
@@ -17,7 +17,7 @@ import org.junit.Test;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class AESTest extends UsagePatternTestingFramework{
+public class AESTest extends UsagePatternTestingFramework {
 
 	private static final byte[] tData   = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
 	
@@ -50,6 +50,7 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		Assertions.hasEnsuredPredicate(engine);
 		Assertions.hasEnsuredPredicate(mode);
+		Assertions.hasEnsuredPredicate(kp);
 		Assertions.hasEnsuredPredicate(params);
 
 		Assertions.mustBeInAcceptingState(cipher);
@@ -87,10 +88,10 @@ public class AESTest extends UsagePatternTestingFramework{
 
 		engine.init(true, kp);
 
-		Assertions.hasEnsuredPredicate(kp); //pass
-		Assertions.hasEnsuredPredicate(engine); //fails
+		Assertions.hasEnsuredPredicate(kp);
+		Assertions.hasEnsuredPredicate(engine);
 		
-		Assertions.mustBeInAcceptingState(engine); //fails
+		Assertions.mustBeInAcceptingState(engine);
 	}
 
 	@Test
@@ -138,10 +139,10 @@ public class AESTest extends UsagePatternTestingFramework{
 		KeyParameter kp = new KeyParameter(dudKey);
 		engine.init(true, kp);
 
-		Assertions.hasEnsuredPredicate(kp); //passes
-		Assertions.hasEnsuredPredicate(engine); //fails
+		Assertions.hasEnsuredPredicate(kp);
+		Assertions.hasEnsuredPredicate(engine);
 
-		Assertions.mustBeInAcceptingState(engine); //fails
+		Assertions.mustBeInAcceptingState(engine);
 	}
 
 	@Test
@@ -152,10 +153,10 @@ public class AESTest extends UsagePatternTestingFramework{
 		ParametersWithIV kp = new ParametersWithIV(null, iv);	//failed parameter check
 		engine.init(true, kp);	
 
-		Assertions.notHasEnsuredPredicate(engine);
 		Assertions.notHasEnsuredPredicate(kp);
+		Assertions.notHasEnsuredPredicate(engine);
 
-		Assertions.mustNotBeInAcceptingState(engine);
+		Assertions.mustBeInAcceptingState(engine);
 	}
 
 
