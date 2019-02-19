@@ -80,11 +80,13 @@ public class ProviderDetection {
 									String strType = getProviderType(vl);
 										
 									if(strType.matches("java.security.Provider")) {
-										rules = chooseRulesWhenProviderTypeProvider(stmt, method, vl, icfg, refName, rules);
+										String provider = getProvider(stmt, method, vl, icfg);
+										rules = chooseRules(rules, provider, refName); 
 									}
 										
 									else if (strType.matches("java.lang.String")) {
-										rules = chooseRulesWhenProviderTypeString(vl, refName, rules);
+										String provider = vl.toString();
+										rules = chooseRules(rules, provider, refName);
 									}
 								}
 							}
@@ -106,28 +108,9 @@ public class ProviderDetection {
 		return strType;
 	}
 	
-	private List<CryptSLRule> chooseRulesWhenProviderTypeString(Value vl, String refName, List<CryptSLRule> rules) {
-		String provider = vl.toString();
-		
-		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
-		if(rule.exists()) {
-			//delete the default rules and load the new rules from the "Provider" directory
-			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
-			
-			rules.clear();
-			
-			File[] listFiles = new File(newDirectory).listFiles();
-			for (File file : listFiles) {
-				if (file != null && file.getName().endsWith(".cryptslbin")) {
-					rules.add(CryptSLRuleReader.readFromFile(file));
-				}
-			}
-		}
-		return rules;
-	}
 	
-	private List<CryptSLRule> chooseRulesWhenProviderTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg, String refName, List<CryptSLRule> rules) {
-		String provider;
+	private String getProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg) {
+		String provider = null;
 		
 		BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
 		
@@ -162,25 +145,30 @@ public class ProviderDetection {
 		Type valueType = value.getType();
 		String valueTypeString = valueType.toString();
 		
-		if(valueTypeString.matches("org.bouncycastle.jce.provider.BouncyCastleProvider")) {
+		if(valueTypeString.contains("BouncyCastle")) {
 			provider = "BC";
+		}
+		
+		return provider;
+	}
+	
+	
+	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String refName) {
+		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+		if(rule.exists()) {
+			//delete the default rules and load the new rules from the "Provider" directory
+			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
 			
-			//choosing the rules depending on Provider detected
-			File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
-			if(rule.exists()) {
-				//delete the default rules from the Default folder and load the new rules from the Provider directory
-				String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
-				
-				rules.clear();
-				
-				File[] listFiles = new File(newDirectory).listFiles();
-				for (File file : listFiles) {
-					if (file != null && file.getName().endsWith(".cryptslbin")) {
-						rules.add(CryptSLRuleReader.readFromFile(file));
-					}
+			rules.clear();
+			
+			File[] listFiles = new File(newDirectory).listFiles();
+			for (File file : listFiles) {
+				if (file != null && file.getName().endsWith(".cryptslbin")) {
+					rules.add(CryptSLRuleReader.readFromFile(file));
 				}
 			}
 		}
+		
 		return rules;
 	}
 	//-----------------------------------------------------------------------------------------------------------------
