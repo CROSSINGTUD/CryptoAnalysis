@@ -236,7 +236,7 @@ public abstract class HeadlessCryptoScanner {
 
 					@Override
 					public ObservableICFG<Unit, SootMethod> icfg() {
-						return observableStaticICFG;
+						return observableDynamicICFG;
 					}
 
 					@Override

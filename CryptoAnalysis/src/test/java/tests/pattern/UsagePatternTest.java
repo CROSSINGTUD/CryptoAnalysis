@@ -576,7 +576,15 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
 		Assertions.callToForbiddenMethod();
 	}
+	@Test
+	public void UsagePatternMinPBEIterationsMinimized() throws GeneralSecurityException, IOException {
+		final byte[] salt = new byte[32];
+		SecureRandom.getInstanceStrong().nextBytes(salt);
 
+		char[] corPwd = new char[] { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
+		Assertions.extValue(1);
+	}
 	@Test
 	public void UsagePatternMinPBEIterations() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];

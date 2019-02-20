@@ -22,14 +22,15 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override
 	public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
 			ObservableICFG<Unit, SootMethod> icfg) {
-		if (stmt.containsInvokeExpr() && stmt instanceof AssignStmt) {
-			AssignStmt as = (AssignStmt) stmt;
-			if (as.getLeftOp().equals(fact.value())) {
-//				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
-//					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
-			}
-		}
+	
 		if (stmt.containsInvokeExpr()) {
+			if (stmt instanceof AssignStmt) {
+				AssignStmt as = (AssignStmt) stmt;
+				if (as.getLeftOp().equals(fact.value())) {
+					if(as.getInvokeExpr().getMethod().isNative())
+						return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+				}
+			}
 			if (stmt.getInvokeExpr().getMethod().isConstructor()
 					&& (stmt.getInvokeExpr() instanceof InstanceInvokeExpr)) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();

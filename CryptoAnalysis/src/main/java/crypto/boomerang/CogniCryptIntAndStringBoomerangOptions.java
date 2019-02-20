@@ -7,6 +7,7 @@ import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -36,6 +37,11 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 					Value arg = as.getInvokeExpr().getArg(0);
 					return Optional.of(new AllocVal(as.getLeftOp(), m, arg, new Statement(stmt, m)));
 				}
+				if(as.getInvokeExpr().getMethod().isNative())
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+
+				if(!Scene.v().isExcluded(as.getInvokeExpr().getMethod().getDeclaringClass()))
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
 
 //				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
 //					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
