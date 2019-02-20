@@ -73,4 +73,32 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		scanner.exec();
 	  	assertErrors();
 	}
+	
+	@Test
+	public void testDigest() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleDigestExamples").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		
+		setErrorsCount("<DigestTest: void digestWithoutUpdate()>", TypestateError.class, 1);
+		
+		// False Positives due to issue #129
+		setErrorsCount("<DigestTest: void digestDefaultUsage()>", TypestateError.class, 1);
+		setErrorsCount("<DigestTest: void digestWithMultipleUpdates()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<DigestTest: void multipleDigests()>", IncompleteOperationError.class, 2);
+		setErrorsCount("<DigestTest: void digestWithReset()>", TypestateError.class, 1);
+		
+		scanner.exec();
+	  	assertErrors();
+	}
+	
+	@Test
+	public void testSigner() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleSignerExamples").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		
+		scanner.exec();
+	  	assertErrors();
+	}
 }
