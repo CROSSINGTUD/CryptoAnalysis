@@ -18,13 +18,14 @@ public class DigestRandomNumberTest extends UsagePatternTestingFramework {
 		// TODO Auto-generated method stub
 		String sootCp = super.getSootClassPath();
 		
-		sootCp += File.pathSeparator + "/Users/rakshitkr/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar";
-
+		String dir = System.getProperty("user.dir");
+		sootCp += File.pathSeparator + dir + "/src/test/resources/bcprov-jdk15on-1.60.jar";
+		
 		return sootCp; 
 	}
 	
 	@Test
-	public void test1() {
+	public void UsagePatternTest1() {
 		Digest digest = new SHA256Digest();
 		DigestRandomGenerator rGen = new DigestRandomGenerator(digest);
 		byte[] seed = Hex.decode("81dcfafc885914057876");
