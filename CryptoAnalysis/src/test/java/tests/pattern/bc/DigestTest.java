@@ -18,8 +18,9 @@ public class DigestTest extends UsagePatternTestingFramework {
 		// TODO Auto-generated method stub
 		String sootCp = super.getSootClassPath();
 		
-		sootCp += File.pathSeparator + "/Users/rakshitkr/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.60/bcprov-jdk15on-1.60.jar";
-
+		String dir = System.getProperty("user.dir");
+		sootCp += File.pathSeparator + dir + "/src/test/resources/bcprov-jdk15on-1.60.jar";
+		
 		return sootCp; 
 	}
 	
@@ -61,7 +62,7 @@ public class DigestTest extends UsagePatternTestingFramework {
 	
 	@Test
 	public void UsagePatternTest4() throws UnsupportedEncodingException {
-		Digest digest = new SHA256Digest();
+		SHA256Digest digest = new SHA256Digest();
 		final byte[] input = "input".getBytes("UTF-8");
 		byte[] resBuf = new byte[digest.getDigestSize()]; 
 		digest.doFinal(resBuf, 0);
@@ -93,19 +94,20 @@ public class DigestTest extends UsagePatternTestingFramework {
 
 	@Test
 	public void UsagePatternTest6() throws UnsupportedEncodingException {
-		Digest digest = new SHA256Digest();
+		SHA256Digest digest = new SHA256Digest();
 		final byte[] input = "input".getBytes("UTF-8");
 		final byte[] input2 = "input2".getBytes("UTF-8");
 		digest.update(input, 0, input.length);
 		byte[] resBuf = new byte[digest.getDigestSize()];
 		digest.doFinal(resBuf, 0);
-		Assertions.hasEnsuredPredicate(input);
+		Assertions.notHasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(resBuf);
 		digest.reset();
 		digest.update(input2, 0, input2.length);
 		Assertions.mustNotBeInAcceptingState(digest);
 		Assertions.notHasEnsuredPredicate(input2);
 		digest.doFinal(resBuf, 0);
+		Assertions.hasEnsuredPredicate(resBuf);
 	}
 
 	
