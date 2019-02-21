@@ -37,14 +37,22 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 					Value arg = as.getInvokeExpr().getArg(0);
 					return Optional.of(new AllocVal(as.getLeftOp(), m, arg, new Statement(stmt, m)));
 				}
+				if(sig.equals("<java.lang.String: char[] toCharArray()>")) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
+				}
+				if(sig.equals("<java.lang.String: byte[] getBytes()>")) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
+				}
+				
 				if(as.getInvokeExpr().getMethod().isNative())
 					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
 
 				if(Scene.v().isExcluded(as.getInvokeExpr().getMethod().getDeclaringClass()))
 					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
 
-//				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
-//					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+				if(!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+				}
 			}
 		}
 		if (stmt.containsInvokeExpr()) {
