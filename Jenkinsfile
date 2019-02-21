@@ -4,13 +4,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                sh 'cd CryptoAnalysis; mvn clean compile'
             }
         }
 
 	    stage('Test') {
 	        steps {
-	            sh 'mvn test'
+	            sh 'cd CryptoAnalysis; mvn test'
 	        }
 		}
 
@@ -22,7 +22,7 @@ pipeline {
 	        steps {
 				configFileProvider(
 	        		[configFile(fileId: 'd8345989-7f12-4d8f-ae12-0fe9ce025188', variable: 'MAVEN_SETTINGS')]) {
-	      		  		sh 'mvn -s $MAVEN_SETTINGS clean deploy -DskipTests'
+	      		  		sh 'cd CryptoAnalysis; mvn -s $MAVEN_SETTINGS clean deploy -DskipTests'
 				}
 	        }
 		}
