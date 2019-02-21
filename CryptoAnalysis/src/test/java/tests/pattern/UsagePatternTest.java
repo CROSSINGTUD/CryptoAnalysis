@@ -29,6 +29,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.SSLParameters;
 import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
@@ -1196,4 +1197,23 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(s); 
 		Assertions.mustNotBeInAcceptingState(s); 
 	}
+	
+	@Test
+	public void elementsSSLParametersTest() {
+		
+		/*
+		 * 	elements(protocols) in {"TLSv1.2","TLSv1.1"};
+		 *	elements(ciphersuites) in {"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",....
+		 */
+		
+		String[] ciphersuites = {"wrongCiphersuiteA", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"};
+		String[] protocols = {"wrongProtocol", "TLSv1.1"};
+		SSLParameters params = new SSLParameters();
+		params.setCipherSuites(ciphersuites);
+		params.setProtocols(protocols);
+		Assertions.violatedConstraint(params);
+	}
+	
+	
+	
 }
