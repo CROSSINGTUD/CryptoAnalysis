@@ -40,7 +40,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 				if(as.getInvokeExpr().getMethod().isNative())
 					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
 
-				if(!Scene.v().isExcluded(as.getInvokeExpr().getMethod().getDeclaringClass()))
+				if(Scene.v().isExcluded(as.getInvokeExpr().getMethod().getDeclaringClass()))
 					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
 
 //				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
