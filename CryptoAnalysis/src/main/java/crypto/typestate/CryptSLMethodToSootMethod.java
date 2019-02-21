@@ -1,6 +1,7 @@
 package crypto.typestate;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -60,10 +61,7 @@ public class CryptSLMethodToSootMethod {
 			methodNameWithoutDeclaringClass = "<init>";
 		} else {
 			//For all other EVENTS, any call of the hierarchy matches.
-			if(!sootClass.isInterface()) {
-				classes.addAll(Scene.v().getActiveHierarchy().getSuperclassesOf(sootClass));
-			}
-			classes.addAll(sootClass.getInterfaces());
+			classes.addAll(getFullHierarchyOf(sootClass));
 		}
 		int noOfParams = label.getParameters().size(); 
 		for(SootClass c : classes) {
@@ -80,6 +78,29 @@ public class CryptSLMethodToSootMethod {
 		}
 		return res;
 	}
+
+    private Collection<? extends SootClass> getFullHierarchyOf(SootClass sootClass) {
+        LinkedList<SootClass> worklist = Lists.newLinkedList();
+        Set<SootClass> visited = Sets.newHashSet();
+        worklist.add(sootClass);
+        visited.add(sootClass);
+        while (!worklist.isEmpty()) {
+            SootClass first = worklist.pop();
+            Set<SootClass> hierarchy = Sets.newHashSet();
+            hierarchy.addAll(first.getInterfaces());
+            if (first.isInterface()) {
+                hierarchy.addAll(Scene.v().getActiveHierarchy().getSuperinterfacesOf(first));
+            } else {
+                hierarchy.addAll(Scene.v().getActiveHierarchy().getSuperclassesOf(first));
+            }
+            for (SootClass h : hierarchy) {
+                if (visited.add(h)) {
+                    worklist.add(h);
+                }
+            }
+        }
+        return visited;
+    }
 
 	private boolean parametersMatch(List<Entry<String, String>> parameters, List<Type> parameterTypes) {
 		int i = 0;
