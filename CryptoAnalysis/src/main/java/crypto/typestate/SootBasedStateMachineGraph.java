@@ -41,7 +41,7 @@ public class SootBasedStateMachineGraph {
 			WrappedState from = wrappedState(t.from());
 			WrappedState to = wrappedState(t.to());
 			LabeledMatcherTransition trans = new LabeledMatcherTransition(from, t.getLabel(),
-					Parameter.This, to, Type.OnCallToReturn);
+					Parameter.This, to, Type.OnCallOrOnCallToReturn);
 			this.addTransition(trans);
 			outTransitions.putAll(from, convert(t.getLabel()));
 			if(stateMachineGraph.getInitialTransition().equals(t))
@@ -58,10 +58,10 @@ public class SootBasedStateMachineGraph {
 			if(expected != null){
 				remaining.removeAll(expected);
 				ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(expected);
-				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ReportingErrorStateNode(expected), Type.OnCallToReturn));
+				this.addTransition(new MatcherTransition(wrapped, remaining, Parameter.This, new ReportingErrorStateNode(expected), Type.OnCallOrOnCallToReturn));
 				//Once an object is in error state, it always remains in the error state.
 				ErrorStateNode errorState = new ErrorStateNode();
-				this.addTransition(new MatcherTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallToReturn));
+				this.addTransition(new MatcherTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState, Type.OnCallOrOnCallToReturn));
 			}
 		}
 		
