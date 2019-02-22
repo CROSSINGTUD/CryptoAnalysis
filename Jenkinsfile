@@ -17,7 +17,7 @@ pipeline {
 
 		stage('Deploy'){
 		    when { 
-		    	branch 'master'
+		    	anyOf { branch 'master'; branch 'ofcg' } 
 			}
 	        steps {
 				configFileProvider(
