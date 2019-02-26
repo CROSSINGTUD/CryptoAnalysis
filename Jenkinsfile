@@ -12,6 +12,12 @@ pipeline {
 	        steps {
 	            sh 'cd CryptoAnalysis; mvn test'
 	        }
+		    post {  
+	    		always {
+	                	junit 'shippable/testresults/*.xml'
+	            	}
+	    	    }
+	        }
 		}
 
 

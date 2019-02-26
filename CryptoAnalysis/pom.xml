@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>1.0.0-ofcg-SNAPSHOT</version>
+	<version>1.0.1-ofcg-SNAPSHOT</version>
 
 	<build>
 		<plugins>
@@ -100,7 +100,7 @@
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>boomerangPDS</artifactId>
-			<version>1.0.2-ofcg-SNAPSHOT</version>
+			<version>1.0.4-ofcg-SNAPSHOT</version>
 		</dependency>
 		<!-- <dependency> <groupId>heros</groupId> <artifactId>heros</artifactId> 
 			<version>0.0.1-SNAPSHOT</version> </dependency> -->
