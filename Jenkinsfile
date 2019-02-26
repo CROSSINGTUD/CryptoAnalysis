@@ -14,9 +14,8 @@ pipeline {
 	        }
 		    post {  
 	    		always {
-	                	junit 'shippable/testresults/*.xml'
-	            	}
-	    	    }
+	                junit 'shippable/testresults/*.xml'
+	            }
 	        }
 		}
 
