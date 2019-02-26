@@ -27,7 +27,6 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
-import crypto.interfaces.CrySLModelReader;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -218,10 +217,9 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				ObservableStaticICFG observableStaticICFG = new ObservableStaticICFG(icfg);
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				//TODO Refactor the options for the Rules
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(false);
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
 					fileReporter = new SARIFReporter(getOutputFolder(), rules);
@@ -283,11 +281,8 @@ public abstract class HeadlessCryptoScanner {
 		return null;
 	}
 	
-	private List<CryptSLRule> getRules() {
-		return getRules(false);
-	}
 
-	protected List<CryptSLRule> getRules(boolean srcFormat) {
+	protected List<CryptSLRule> getRules() {
 		if (!rules.isEmpty()) {
 			return rules;
 		}
@@ -295,24 +290,10 @@ public abstract class HeadlessCryptoScanner {
 		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
 		}
-
-		if (srcFormat) {
-			try {
-				CrySLModelReader cmr = new CrySLModelReader();
-				File[] listFiles = new File(rulesDirectory).listFiles();
-				for (File file : listFiles) {
-					if (file != null && file.getName().endsWith(".cryptsl")) {
-						rules.add(cmr.readRule(file));
-					}
-				}	
-			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
-			}
-		} else {
-			File[] listFiles = new File(rulesDirectory).listFiles();
-			for (File file : listFiles) {
-				if (file != null && file.getName().endsWith(".cryptslbin")) {
-					rules.add(CryptSLRuleReader.readFromFile(file));
-				}
+		File[] listFiles = new File(rulesDirectory).listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
 		if (rules.isEmpty())

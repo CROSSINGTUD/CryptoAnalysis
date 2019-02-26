@@ -1,8 +1,6 @@
 package test;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,7 +19,6 @@ import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -45,7 +42,6 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.CrySLModelReader;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
@@ -59,7 +55,6 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
@@ -374,19 +369,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			return rules;
 		}
 
-		if (srcFormat) {
-			try {
-				CrySLModelReader cmr = new CrySLModelReader();
-				rules = cmr.readRules(IDEALCrossingTestingFramework.RESOURCE_PATH);
-			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
-			}
-			
-		} else {
-			File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
-			for (File file : listFiles) {
-				if (file.getName().endsWith(".cryptslbin")) {
-					rules.add(CryptSLRuleReader.readFromFile(file));
-				}
+		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
 		return rules;

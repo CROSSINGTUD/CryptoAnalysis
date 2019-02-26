@@ -21,7 +21,6 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
-import crypto.interfaces.CrySLModelReader;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -79,23 +78,14 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		return getRule(false);
-	}
-	
-	protected CryptSLRule getRule(boolean srcFormat) {
-		File file = new File(RESOURCE_PATH + getCryptSLFile() + ".cryptsl" + (srcFormat ? "" : "bin"));
-		try {
-			return srcFormat ? (new CrySLModelReader().readRule(file)) : CryptSLRuleReader.readFromFile(file);
-		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
-				| IllegalArgumentException | InvocationTargetException | IOException e) {
-		}
-		return null;
+		File file = new File(RESOURCE_PATH + getCryptSLFile() + ".cryptslbin");
+		return CryptSLRuleReader.readFromFile(file);
 	}
 
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule(false)));
+		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
 		return excludedPackages;
 	}
 	

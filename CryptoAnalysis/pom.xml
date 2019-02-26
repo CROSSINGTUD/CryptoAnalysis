@@ -31,7 +31,43 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
+					<reportsDirectory>../shippable/testresults</reportsDirectory>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit4</artifactId>
+						<version>2.17</version>
+					</dependency>
+					<dependency>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+						<version>4.12</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		      <plugin>
+		        <groupId>de.fraunhofer.iem</groupId>
+		        <artifactId>maven-plugins</artifactId>
+		        <version>0.8</version>
+		        
+		        <executions> <execution>
+              <id>run-cognicrypt</id>
+              <phase>verify</phase>
+              <goals><goal>nullness</goal></goals>
+              <configuration>
+              	<includeDependencies>true</includeDependencies>
+              	<callGraph>cha</callGraph>
+              </configuration>
+            </execution>
+		        </executions>
+		      </plugin>	
 			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate 
 				coverage reports -->
 			<plugin>
@@ -136,78 +172,6 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
-			<artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.emf</groupId>
-			<artifactId>org.eclipse.emf.ecore</artifactId>
-			<version>2.15.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.emf</groupId>
-			<artifactId>org.eclipse.emf.common</artifactId>
-			<version>2.15.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.core.runtime</artifactId>
-			<version>3.15.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.equinox.common</artifactId>
-			<version>3.10.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.equinox.registry</artifactId>
-			<version>3.8.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.emf.ecore</groupId>
-			<artifactId>change</artifactId>
-			<version>2.3.0-v200706262000</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.eclipse.emf.ecore</groupId>
-			<artifactId>xmi</artifactId>
-			<version>2.3.0-v200706262000</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.xtext</groupId>
-			<artifactId>org.eclipse.xtext</artifactId>
-			<version>2.15.0</version>
-
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.xtext</groupId>
-			<artifactId>org.eclipse.xtext.common.types</artifactId>
-			<version>2.15.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-invoker-plugin -->
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-invoker-plugin</artifactId>
