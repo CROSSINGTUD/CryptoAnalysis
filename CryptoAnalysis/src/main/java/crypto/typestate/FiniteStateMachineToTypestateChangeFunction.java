@@ -54,7 +54,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 
 
 	@Override
-	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit, Collection<SootMethod> optional) {
+	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
 		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
 			return out;

@@ -43,8 +43,8 @@ public abstract class ExtendedIDEALAnaylsis {
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
-			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
-				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt, calledMethod);
+			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt) {
+				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt);
 			}
 
 			@Override
@@ -110,9 +110,7 @@ public abstract class ExtendedIDEALAnaylsis {
         if (!method.hasActiveBody())
             return seeds;
         for (Unit u : method.getActiveBody().getUnits()) {
-//            Collection<SootMethod> calledMethods = (icfg().isCallStmt(u) ? icfg().getCalleesOfCallAt(u)
-//                    : new HashSet<SootMethod>());
-            seeds.addAll( getOrCreateTypestateChangeFunction().generateSeed(method, u, Collections.emptySet()));
+            seeds.addAll( getOrCreateTypestateChangeFunction().generateSeed(method, u));
         }
         return seeds;
     }
