@@ -1,5 +1,6 @@
 package crypto.providerdetection;
 
+import java.awt.print.Printable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -46,8 +47,7 @@ public class ProviderDetection {
 		//default constructor
 	}
 	
-
-	public String getSootClassPath(){
+	public String getMainSootClassPath() {
 		//Assume target folder to be directly in user dir; this should work in eclipse
 		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
 		File classPathDir = new File(this.sootClassPath);
@@ -62,6 +62,26 @@ public class ProviderDetection {
 				throw new RuntimeException("Classpath could not be found.");
 			}
 		}
+		System.out.println(this.sootClassPath);
+		return this.sootClassPath;
+	}
+	
+
+	public String getSootClassPath(){
+		//Assume target folder to be directly in user dir; this should work in eclipse
+		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
+		File classPathDir = new File(this.sootClassPath);
+		if (!classPathDir.exists()){
+			//We haven't found our target folder
+			//Check if if it is in the boomerangPDS in user dir; this should work in IntelliJ
+			this.sootClassPath = System.getProperty("user.dir") + File.separator + "boomerangPDS"+ File.separator+
+					"target"+File.separator+"test-classes";
+			classPathDir = new File(this.sootClassPath);
+			if (!classPathDir.exists()){
+				//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
+				throw new RuntimeException("Classpath could not be found.");
+			}
+		}
 		return this.sootClassPath;
 	}
 	
@@ -69,9 +89,8 @@ public class ProviderDetection {
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-//		Options.v().setPhaseOption("cg.spark", "on");
-		Options.v().setPhaseOption("cg.cha", "on");
-		Options.v().setPhaseOption("cg", "all-reachable:true");
+		Options.v().setPhaseOption("cg.spark", "on");
+//		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
@@ -229,7 +248,7 @@ public class ProviderDetection {
 		solver.debugOutput();
 		
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
-		System.out.println("Map size is: "+map.size());
+//		System.out.println("Map size is: "+map.size());
 		
 		for(Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry : map.entrySet()) {
 			ForwardQuery forwardQuery = entry.getKey();
@@ -238,13 +257,9 @@ public class ProviderDetection {
 			Value value = forwardQueryVal.value();
 			Type valueType = value.getType();
 			String valueTypeString = valueType.toString();
-			System.out.println(valueTypeString);
+//			System.out.println(valueTypeString);
 			
-			if(valueTypeString.contains("BouncyCastlePQCProvider")) {
-				provider = "BCPQC";
-			}
-			
-			else if(valueTypeString.contains("BouncyCastleProvider")) {
+			if(valueTypeString.contains("BouncyCastleProvider")) {
 				provider = "BC";
 			}
 		}
