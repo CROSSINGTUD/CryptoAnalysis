@@ -24,7 +24,9 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 
 	public Boolean addEdge(TransitionEdge edge) {
-		if (!(nodes.contains(edge.getLeft()) || nodes.contains(edge.getRight()))) {
+		final StateNode right =  edge.getRight();
+		final StateNode left =  edge.getLeft();
+		if (!(nodes.parallelStream().anyMatch(e -> e.equals(left)) || nodes.parallelStream().anyMatch(e -> e.equals(right)))) {
 			return false;
 		}
 		if (edges.contains(edge)) {
