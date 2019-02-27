@@ -1,6 +1,5 @@
 package crypto.providerdetection;
 
-import java.awt.print.Printable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -47,6 +46,7 @@ public class ProviderDetection {
 		//default constructor
 	}
 	
+	//Used to initially test Provider Detection from the main folder
 	public String getMainSootClassPath() {
 		//Assume target folder to be directly in user dir; this should work in eclipse
 		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
@@ -269,12 +269,16 @@ public class ProviderDetection {
 	
 	
 	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String refName) {
-		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+		
+		File rule = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider+File.separator+refName+".cryptslbin");
+//		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+		
 		if(rule.exists()) {
 			//delete the default rules and load the new rules from the "Provider" directory
-			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
-			
 			rules.clear();
+			
+			String newDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
+//			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
 			
 			File[] listFiles = new File(newDirectory).listFiles();
 			for (File file : listFiles) {
