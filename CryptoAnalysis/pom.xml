@@ -174,14 +174,14 @@
 		<snapshotRepository>
 			<id>soot-snapshot</id>
 			<name>Soot snapshot repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</url>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
 			<layout>default</layout>
 		</snapshotRepository>
 		<repository>
 			<uniqueVersion>true</uniqueVersion>
 			<id>soot-release</id>
 			<name>Soot release repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release</url>
+			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
 			<layout>default</layout>
 		</repository>
 	</distributionManagement>
