@@ -31,27 +31,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.17</version>
-				<configuration>
-					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
-					<reportsDirectory>../shippable/testresults</reportsDirectory>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit4</artifactId>
-						<version>2.17</version>
-					</dependency>
-					<dependency>
-						<groupId>junit</groupId>
-						<artifactId>junit</artifactId>
-						<version>4.12</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate 
 				coverage reports -->
 			<plugin>
@@ -77,17 +56,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.8</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>soot-snapshot</serverId>
-					<nexusUrl>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot</nexusUrl>
-				</configuration>
-			</plugin>
-
+			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
