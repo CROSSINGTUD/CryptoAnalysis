@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
+
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
@@ -41,6 +43,7 @@ public class ProviderDetection {
 	
 	public String provider = null;
 	public String sootClassPath = null;
+	public List<CryptSLRule> rules = Lists.newArrayList();
 	
 	public ProviderDetection() {
 		//default constructor
@@ -62,7 +65,7 @@ public class ProviderDetection {
 				throw new RuntimeException("Classpath could not be found.");
 			}
 		}
-		System.out.println(this.sootClassPath);
+//		System.out.println(this.sootClassPath);
 		return this.sootClassPath;
 	}
 	
@@ -89,12 +92,20 @@ public class ProviderDetection {
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("cg.spark", "on");
+//		Options.v().setPhaseOption("cg.spark", "on");
+//		Options.v().setPhaseOption("cg", "all-reachable:true");
+		Options.v().setPhaseOption("cg.cha", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
+		Options.v().set_prepend_classpath(true);
+		Options.v().set_soot_classpath(sootClassPath);
+		SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
+		if (c != null) {
+			c.setApplicationClass();
+		}
 
 		List<String> includeList = new LinkedList<String>();
 		includeList.add("java.lang.*");
@@ -106,17 +117,9 @@ public class ProviderDetection {
 		includeList.add("javax.crypto.*");
 
 		Options.v().set_include(includeList);
-		Options.v().setPhaseOption("jb", "use-original-names:true");
-
-		Options.v().set_soot_classpath(sootClassPath);
-		Options.v().set_prepend_classpath(true);
-		// Options.v().set_main_class(this.getTargetClass());
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
-		SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
-		if (c != null) {
-			c.setApplicationClass();
-		}
+		
 		for(SootMethod m : c.getMethods()){
 			System.out.println(m);
 		}
@@ -139,8 +142,12 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-				List<CryptSLRule> rules = null;
+				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
+//				System.out.println("Rules dir is: "+rulesDirectory);
+				rules = getRules(rulesDirectory);
+//				System.out.println("The list size of the rules returned is: "+rules.size());
 				doAnalysis(icfg, rules);
+				 
 			}
 		};
 	}
@@ -167,6 +174,7 @@ public class ProviderDetection {
 									
 								SootClass methodRef = method.getDeclaringClass();
 								String refName = methodRef.toString();
+//								System.out.println(refName);
 									
 								int parameterCount = method.getParameterCount();
 									
@@ -189,6 +197,7 @@ public class ProviderDetection {
 										
 									if(strType.matches("java.security.Provider")) {
 										this.provider = getProvider(stmt, sootMethod, vl, icfg);
+//										System.out.println("Provider is: "+provider);
 										rules = chooseRules(rules, provider, refName); 
 									}
 										
@@ -262,23 +271,38 @@ public class ProviderDetection {
 			if(valueTypeString.contains("BouncyCastleProvider")) {
 				provider = "BC";
 			}
+			
+			else if (valueTypeString.contains("BouncyCastlePQCProvider")) {
+				provider = "BCPQC";
+			}
 		}
 		
+//		System.out.println(provider);
 		return provider;
 	}
 	
 	
 	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String refName) {
+		boolean ruleExists = false;
+		String rule = refName.substring(refName.lastIndexOf(".") + 1);
 		
-		File rule = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider+File.separator+refName+".cryptslbin");
-//		File rule = new File(".\\.\\.\\test\\resources\\"+provider+"\\"+refName+".cryptslbin");
+		File ruleDir = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider);
+		File[] listRuleDirFiles = ruleDir.listFiles();
+		for (File file : listRuleDirFiles) {
+//			System.out.println(file.getName());
+			if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
+				ruleExists = true;
+			}
+		}
 		
-		if(rule.exists()) {
+//		System.out.println("Rule exists: "+ruleExists);
+		
+		if(ruleExists) {
 			//delete the default rules and load the new rules from the "Provider" directory
 			rules.clear();
+//			System.out.println("List size after rules are deleted is: "+rules.size());
 			
 			String newDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
-//			String newDirectory = ".\\.\\.\\test\\resources\\"+provider;
 			
 			File[] listFiles = new File(newDirectory).listFiles();
 			for (File file : listFiles) {
@@ -287,6 +311,23 @@ public class ProviderDetection {
 				}
 			}
 		}
+		
+//		System.out.println("After provider is detected, the rules size is: "+rules.size());
+		return rules;
+	}
+	
+	
+	private List<CryptSLRule> getRules(String rulesDirectory) {
+		File directory = new File(rulesDirectory);
+		
+		File[] listFiles = directory.listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
+		if (rules.isEmpty())
+			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
 		
 		return rules;
 	}

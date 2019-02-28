@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.crypto.KeyGenerator;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
 
 public class ProviderDetectionExample {
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
