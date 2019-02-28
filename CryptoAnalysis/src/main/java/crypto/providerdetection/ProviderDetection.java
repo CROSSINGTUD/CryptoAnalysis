@@ -155,6 +155,7 @@ public class ProviderDetection {
 
 	public List<CryptSLRule> doAnalysis(JimpleBasedInterproceduralCFG icfg, List<CryptSLRule> rules) {
 		
+		outerloop:
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
 			for(SootMethod sootMethod : sootClass.getMethods()) {
 				if(sootMethod.hasActiveBody()) {
@@ -198,13 +199,19 @@ public class ProviderDetection {
 									if(strType.matches("java.security.Provider")) {
 										this.provider = getProvider(stmt, sootMethod, vl, icfg);
 //										System.out.println("Provider is: "+provider);
-										rules = chooseRules(rules, provider, refName); 
+										if(ruleExists(provider, refName)) {
+											rules = chooseRules(rules, provider, refName);
+											break outerloop;
+										} 
 									}
 										
 									else if (strType.matches("java.lang.String")) {
 										this.provider = vl.toString();
 //										this.provider = getProvider(stmt, sootMethod, vl, icfg);
-										rules = chooseRules(rules, provider, refName);
+										if(ruleExists(provider, refName)) {
+											rules = chooseRules(rules, provider, refName);
+											break outerloop;
+										}
 									}
 								}
 							}
@@ -283,6 +290,26 @@ public class ProviderDetection {
 	
 	
 	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String refName) {
+		
+		//delete the default rules and load the new rules from the "Provider" directory
+		rules.clear();
+//		System.out.println("List size after rules are deleted is: "+rules.size());
+		
+		String newDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
+		
+		File[] listFiles = new File(newDirectory).listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
+		
+//		System.out.println("After provider is detected, the rules size is: "+rules.size());
+		return rules;
+	}
+	
+	
+	private boolean ruleExists(String provider, String refName) {
 		boolean ruleExists = false;
 		String rule = refName.substring(refName.lastIndexOf(".") + 1);
 		
@@ -295,25 +322,8 @@ public class ProviderDetection {
 			}
 		}
 		
-//		System.out.println("Rule exists: "+ruleExists);
-		
-		if(ruleExists) {
-			//delete the default rules and load the new rules from the "Provider" directory
-			rules.clear();
-//			System.out.println("List size after rules are deleted is: "+rules.size());
-			
-			String newDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
-			
-			File[] listFiles = new File(newDirectory).listFiles();
-			for (File file : listFiles) {
-				if (file != null && file.getName().endsWith(".cryptslbin")) {
-					rules.add(CryptSLRuleReader.readFromFile(file));
-				}
-			}
-		}
-		
-//		System.out.println("After provider is detected, the rules size is: "+rules.size());
-		return rules;
+		System.out.println(rule);
+		return ruleExists;
 	}
 	
 	
