@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.JLabel;
+
 import com.google.common.collect.Lists;
 
 import boomerang.BackwardQuery;
@@ -22,6 +24,7 @@ import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import soot.Body;
 import soot.G;
+import soot.Local;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -32,11 +35,17 @@ import soot.Transformer;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.JastAddJ.LabeledStmt;
+import soot.jimple.InvokeExpr;
+import soot.jimple.Stmt;
+import soot.jimple.StringConstant;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
+import soot.toDex.LabelAssigner;
 import wpds.impl.Weight.NoWeight;
 
 public class ProviderDetection {
@@ -92,9 +101,9 @@ public class ProviderDetection {
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-//		Options.v().setPhaseOption("cg.spark", "on");
+		Options.v().setPhaseOption("cg.spark", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
-		Options.v().setPhaseOption("cg.cha", "on");
+//		Options.v().setPhaseOption("cg.cha", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
@@ -161,13 +170,10 @@ public class ProviderDetection {
 				if(sootMethod.hasActiveBody()) {
 					Body body = sootMethod.getActiveBody();
 					for (Unit unit : body.getUnits()) {
-						
 						if(unit instanceof JAssignStmt) {
 							JAssignStmt stmt = (JAssignStmt) unit;
 							Value rightVal = stmt.getRightOp();
-								
 							if (rightVal instanceof JStaticInvokeExpr) {
-									
 								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
 									
 								SootMethod method = exp.getMethod();
@@ -192,13 +198,12 @@ public class ProviderDetection {
 									
 								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
 									Value vl = exp.getArg(1);
-//									System.out.println(vl);
+//									System.out.println(vl.toString());
 									String strType = getProviderType(vl);
 //									System.out.println("The provider used is of type: "+strType);
 										
 									if(strType.matches("java.security.Provider")) {
 										this.provider = getProvider(stmt, sootMethod, vl, icfg);
-//										System.out.println("Provider is: "+provider);
 										if(ruleExists(provider, refName)) {
 											rules = chooseRules(rules, provider, refName);
 											break outerloop;
@@ -206,8 +211,15 @@ public class ProviderDetection {
 									}
 										
 									else if (strType.matches("java.lang.String")) {
-										this.provider = vl.toString();
-//										this.provider = getProvider(stmt, sootMethod, vl, icfg);
+//										for(Unit u : body.getUnits()) {
+//											if(u instanceof JIfStmt) {
+//												JIfStmt l = (JIfStmt) u;
+//												System.out.println("labeled: "+l.toString() + " "+l.getClass());
+//												System.out.println(l.getUnitBoxes());
+//											}
+//										}
+										
+										this.provider = getProviderWhenTypeString(vl, body);
 										if(ruleExists(provider, refName)) {
 											rules = chooseRules(rules, provider, refName);
 											break outerloop;
@@ -231,8 +243,25 @@ public class ProviderDetection {
 	
 	private String getProviderType(Value vl) {
 		Type type = vl.getType();
+//		System.out.println("Soot type: "+type);
 		String strType = type.toString();
 		return strType;
+	}
+	
+	
+	private String getProviderWhenTypeString(Value vl, Body body) {
+		String provider = null;
+		for(Unit u : body.getUnits()) {
+			if(u instanceof JAssignStmt) {
+				JAssignStmt s = (JAssignStmt) u;
+				if(s.getLeftOp().equals(vl)) {
+					String prov = s.getRightOp().toString().replaceAll("\"","");
+					provider = prov;
+				}
+			}
+		}
+		
+		return provider;
 	}
 	
 	
@@ -314,15 +343,18 @@ public class ProviderDetection {
 		String rule = refName.substring(refName.lastIndexOf(".") + 1);
 		
 		File ruleDir = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider);
-		File[] listRuleDirFiles = ruleDir.listFiles();
-		for (File file : listRuleDirFiles) {
-//			System.out.println(file.getName());
-			if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
-				ruleExists = true;
+		if(ruleDir.exists()) {
+			File[] listRuleDirFiles = ruleDir.listFiles();
+			for (File file : listRuleDirFiles) {
+//				System.out.println(file.getName());
+				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
+					ruleExists = true;
+				}
 			}
 		}
 		
-		System.out.println(rule);
+		
+//		System.out.println(rule);
 		return ruleExists;
 	}
 	
