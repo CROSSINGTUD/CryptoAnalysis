@@ -31,8 +31,9 @@ public class ProviderDetectionExample {
 		String pString2 = "BCPQC";
 //		MessageDigest md = MessageDigest.getInstance("AES", BouncyCastleProvider.PROVIDER_NAME);
 		
-		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", ((n%2==0) ? pString1 : pString2));
+		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", p2);
 		
 		//((n%2==0) ? p1 : p2)
+		//((n%2==0) ? pString1 : pString2)
 	}
 }

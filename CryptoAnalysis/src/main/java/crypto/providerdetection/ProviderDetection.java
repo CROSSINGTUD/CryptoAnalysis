@@ -53,6 +53,7 @@ public class ProviderDetection {
 	public String provider = null;
 	public String sootClassPath = null;
 	public List<CryptSLRule> rules = Lists.newArrayList();
+	public String rulesDirectory = null;
 	
 	public ProviderDetection() {
 		//default constructor
@@ -64,15 +65,8 @@ public class ProviderDetection {
 		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
 		File classPathDir = new File(this.sootClassPath);
 		if (!classPathDir.exists()){
-			//We haven't found our target folder
-			//Check if if it is in the boomerangPDS in user dir; this should work in IntelliJ
-			this.sootClassPath = System.getProperty("user.dir") + File.separator + "boomerangPDS"+ File.separator+
-					"target"+File.separator+"classes";
-			classPathDir = new File(this.sootClassPath);
-			if (!classPathDir.exists()){
-				//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
-				throw new RuntimeException("Classpath could not be found.");
-			}
+			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
+			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
 //		System.out.println(this.sootClassPath);
 		return this.sootClassPath;
@@ -84,15 +78,8 @@ public class ProviderDetection {
 		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 		File classPathDir = new File(this.sootClassPath);
 		if (!classPathDir.exists()){
-			//We haven't found our target folder
-			//Check if if it is in the boomerangPDS in user dir; this should work in IntelliJ
-			this.sootClassPath = System.getProperty("user.dir") + File.separator + "boomerangPDS"+ File.separator+
-					"target"+File.separator+"test-classes";
-			classPathDir = new File(this.sootClassPath);
-			if (!classPathDir.exists()){
-				//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
-				throw new RuntimeException("Classpath could not be found.");
-			}
+			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
+			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
 		return this.sootClassPath;
 	}
@@ -101,9 +88,9 @@ public class ProviderDetection {
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("cg.spark", "on");
+//		Options.v().setPhaseOption("cg.spark", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
-//		Options.v().setPhaseOption("cg.cha", "on");
+		Options.v().setPhaseOption("cg.cha", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
@@ -204,10 +191,16 @@ public class ProviderDetection {
 										
 									if(strType.matches("java.security.Provider")) {
 										this.provider = getProvider(stmt, sootMethod, vl, icfg);
+										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
+//										System.out.println(rulesDirectory);
+										
 										if(ruleExists(provider, refName)) {
+											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
+//											System.out.println(rulesDirectory);
+											
 											rules = chooseRules(rules, provider, refName);
 											break outerloop;
-										} 
+										}
 									}
 										
 									else if (strType.matches("java.lang.String")) {
@@ -220,7 +213,13 @@ public class ProviderDetection {
 //										}
 										
 										this.provider = getProviderWhenTypeString(vl, body);
+										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
+//										System.out.println(rulesDirectory);
+										
 										if(ruleExists(provider, refName)) {
+											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
+//											System.out.println(rulesDirectory);
+											
 											rules = chooseRules(rules, provider, refName);
 											break outerloop;
 										}
@@ -293,26 +292,38 @@ public class ProviderDetection {
 		solver.debugOutput();
 		
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
-//		System.out.println("Map size is: "+map.size());
+		System.out.println("Map size is: "+map.size());
 		
-		for(Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry : map.entrySet()) {
-			ForwardQuery forwardQuery = entry.getKey();
-			
-			Val forwardQueryVal = forwardQuery.var();
-			Value value = forwardQueryVal.value();
-			Type valueType = value.getType();
-			String valueTypeString = valueType.toString();
-//			System.out.println(valueTypeString);
-			
-			if(valueTypeString.contains("BouncyCastleProvider")) {
-				provider = "BC";
-			}
-			
-			else if (valueTypeString.contains("BouncyCastlePQCProvider")) {
-				provider = "BCPQC";
+		if(map.size() == 1) {
+			for(Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry : map.entrySet()) {
+				ForwardQuery forwardQuery = entry.getKey();
+				
+				Val forwardQueryVal = forwardQuery.var();
+				Value value = forwardQueryVal.value();
+				Type valueType = value.getType();
+				String valueTypeString = valueType.toString();
+//				System.out.println(valueTypeString);
+				
+				if(valueTypeString.contains("BouncyCastleProvider")) {
+					provider = "BC";
+				}
+				
+				else if (valueTypeString.contains("BouncyCastlePQCProvider")) {
+					provider = "BCPQC";
+				}
+//				break;
 			}
 		}
+		else if (map.size() > 1) {
+			throw new RuntimeException("Only one provider can be used as parameter in the getInstance()"
+					+ " method, for the Provider Detection analysis to take place.");
+		}
 		
+		else {
+			throw new RuntimeException("Error occured to detect provider in the Provider Detection"
+					+ " analysis.");
+		}
+	
 //		System.out.println(provider);
 		return provider;
 	}
@@ -348,6 +359,8 @@ public class ProviderDetection {
 			for (File file : listRuleDirFiles) {
 //				System.out.println(file.getName());
 				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
+//					System.out.println(file.getAbsolutePath());
+//					System.out.println(file.getParentFile());
 					ruleExists = true;
 				}
 			}

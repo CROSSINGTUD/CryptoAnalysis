@@ -47,10 +47,10 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 2;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
+	
 	
 	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
 	//is given directly, and the rules for that provider exist
@@ -62,9 +62,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 2;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
@@ -77,9 +76,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 44;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
 	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
@@ -92,9 +90,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 44;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
 	//checks if provider of type `java.lang.String` is detected when given as a variable
@@ -135,9 +132,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 2;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -150,9 +146,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 2;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -165,9 +160,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 44;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
 	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -180,9 +174,8 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		int expected = 44;
-		int actual = providerDetection.rules.size();
-		assertEquals(expected, actual);
+		String rulesDirectory = providerDetection.rulesDirectory;
+		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
 }
