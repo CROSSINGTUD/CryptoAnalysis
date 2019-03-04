@@ -39,6 +39,7 @@ import soot.JastAddJ.LabeledStmt;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
@@ -51,8 +52,6 @@ import wpds.impl.Weight.NoWeight;
 public class ProviderDetection {
 	
 	public String provider = null;
-	public String sootClassPath = null;
-	public List<CryptSLRule> rules = Lists.newArrayList();
 	public String rulesDirectory = null;
 	
 	public ProviderDetection() {
@@ -62,26 +61,26 @@ public class ProviderDetection {
 	//Used to initially test Provider Detection from the main folder
 	public String getMainSootClassPath() {
 		//Assume target folder to be directly in user dir; this should work in eclipse
-		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
-		File classPathDir = new File(this.sootClassPath);
+		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
+		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
 			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
-//		System.out.println(this.sootClassPath);
-		return this.sootClassPath;
+//		System.out.println(sootClassPath);
+		return sootClassPath;
 	}
 	
 
 	public String getSootClassPath(){
 		//Assume target folder to be directly in user dir; this should work in eclipse
-		this.sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
-		File classPathDir = new File(this.sootClassPath);
+		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
+		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
 			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
-		return this.sootClassPath;
+		return sootClassPath;
 	}
 	
 	
@@ -104,13 +103,16 @@ public class ProviderDetection {
 		}
 
 		List<String> includeList = new LinkedList<String>();
-		includeList.add("java.lang.*");
-		includeList.add("java.util.*");
-		includeList.add("java.io.*");
-		includeList.add("sun.misc.*");
-		includeList.add("java.net.*");
-		includeList.add("javax.servlet.*");
-		includeList.add("javax.crypto.*");
+		includeList.add("java.lang.AbstractStringBuilder");
+		includeList.add("java.lang.Boolean");
+		includeList.add("java.lang.Byte");
+		includeList.add("java.lang.Class");
+		includeList.add("java.lang.Integer");
+		includeList.add("java.lang.Long");
+		includeList.add("java.lang.Object");
+		includeList.add("java.lang.String");
+		includeList.add("java.lang.StringCoding");
+		includeList.add("java.lang.StringIndexOutOfBoundsException");
 
 		Options.v().set_include(includeList);
 		Options.v().set_full_resolver(true);
@@ -119,6 +121,8 @@ public class ProviderDetection {
 		for(SootMethod m : c.getMethods()){
 			System.out.println(m);
 		}
+		
+//		System.out.println("Soot is setup.");
 	}
 	
 	
@@ -140,10 +144,10 @@ public class ProviderDetection {
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 //				System.out.println("Rules dir is: "+rulesDirectory);
-				rules = getRules(rulesDirectory);
+				List<CryptSLRule> rules = Lists.newArrayList();
+				rules = getRules(rulesDirectory, rules);
 //				System.out.println("The list size of the rules returned is: "+rules.size());
 				doAnalysis(icfg, rules);
-				 
 			}
 		};
 	}
@@ -185,12 +189,12 @@ public class ProviderDetection {
 									
 								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
 									Value vl = exp.getArg(1);
-//									System.out.println(vl.toString());
+//									System.out.println("Provider param: "+vl.toString());
 									String strType = getProviderType(vl);
 //									System.out.println("The provider used is of type: "+strType);
 										
 									if(strType.matches("java.security.Provider")) {
-										this.provider = getProvider(stmt, sootMethod, vl, icfg);
+										this.provider = getProviderWhenTypeProvider(stmt, sootMethod, vl, icfg);
 										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 //										System.out.println(rulesDirectory);
 										
@@ -204,17 +208,14 @@ public class ProviderDetection {
 									}
 										
 									else if (strType.matches("java.lang.String")) {
-//										for(Unit u : body.getUnits()) {
-//											if(u instanceof JIfStmt) {
-//												JIfStmt l = (JIfStmt) u;
-//												System.out.println("labeled: "+l.toString() + " "+l.getClass());
-//												System.out.println(l.getUnitBoxes());
-//											}
-//										}
-										
 										this.provider = getProviderWhenTypeString(vl, body);
 										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 //										System.out.println(rulesDirectory);
+										
+										//checks if `provider` param is given flowing through IF stmts
+										checkIfStmt(vl, body);
+										//checks if `provider` param is given flowing through SWITCH stmts
+										checkSwitchStmt(vl, body);
 										
 										if(ruleExists(provider, refName)) {
 											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
@@ -248,6 +249,38 @@ public class ProviderDetection {
 	}
 	
 	
+	private void checkIfStmt(Value vl, Body body) {
+		String value = vl.toString();
+		for(Unit u : body.getUnits()) {
+			if(u instanceof JIfStmt) {
+				JIfStmt l = (JIfStmt) u;
+				System.out.println("IF stmt: "+l.toString());
+				if(l.toString().contains(value)) {
+					throw new RuntimeException("The provider parameter must be passed directly to the"
+							+ " getInstance() method call, and not through IF statements or"
+							+ " TERNARY operators.");
+				}
+			}
+		}
+		return;
+	}
+	
+	private void checkSwitchStmt(Value vl, Body body) {
+		String value = vl.toString();
+		for(Unit u : body.getUnits()) {
+			if(u instanceof TableSwitchStmt) {
+				TableSwitchStmt l = (TableSwitchStmt) u;
+				System.out.println("SWITCH stmt: "+l.toString());
+				if(l.toString().contains(value)) {
+					throw new RuntimeException("The provider parameter must be passed directly to the"
+							+ " getInstance() method call, and not through SWITCH statements.");
+				}
+			}
+		}
+		return;
+	}
+	
+	
 	private String getProviderWhenTypeString(Value vl, Body body) {
 		String provider = null;
 		for(Unit u : body.getUnits()) {
@@ -256,6 +289,7 @@ public class ProviderDetection {
 				if(s.getLeftOp().equals(vl)) {
 					String prov = s.getRightOp().toString().replaceAll("\"","");
 					provider = prov;
+					break;
 				}
 			}
 		}
@@ -264,7 +298,7 @@ public class ProviderDetection {
 	}
 	
 	
-	private String getProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg) {
+	private String getProviderWhenTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg) {
 		String provider = null;
 		
 		BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
@@ -292,7 +326,7 @@ public class ProviderDetection {
 		solver.debugOutput();
 		
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
-		System.out.println("Map size is: "+map.size());
+//		System.out.println("Map size is: "+map.size());
 		
 		if(map.size() == 1) {
 			for(Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry : map.entrySet()) {
@@ -311,14 +345,13 @@ public class ProviderDetection {
 				else if (valueTypeString.contains("BouncyCastlePQCProvider")) {
 					provider = "BCPQC";
 				}
-//				break;
 			}
 		}
 		else if (map.size() > 1) {
-			throw new RuntimeException("Only one provider can be used as parameter in the getInstance()"
-					+ " method, for the Provider Detection analysis to take place.");
+			throw new RuntimeException("The provider parameter must be passed directly to the"
+					+ " getInstance() method call, and not through IF, SWITCH statements or"
+					+ " TERNARY operators.");
 		}
-		
 		else {
 			throw new RuntimeException("Error occured to detect provider in the Provider Detection"
 					+ " analysis.");
@@ -372,7 +405,7 @@ public class ProviderDetection {
 	}
 	
 	
-	private List<CryptSLRule> getRules(String rulesDirectory) {
+	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
 		File directory = new File(rulesDirectory);
 		
 		File[] listFiles = directory.listFiles();

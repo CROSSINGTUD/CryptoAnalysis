@@ -10,7 +10,7 @@ public class ProviderDetectionTest {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		System.out.println("The provider used is: "+providerDetection.provider);
-		System.out.println("The rules size is: "+providerDetection.rules.size());
+		System.out.println("The rules directory is: "+providerDetection.rulesDirectory);
 //		System.out.println(providerDetection.sootClassPath);
 	}
 
