@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.swing.JLabel;
-
 import com.google.common.collect.Lists;
 
 import boomerang.BackwardQuery;
@@ -24,7 +22,6 @@ import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import soot.Body;
 import soot.G;
-import soot.Local;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -35,10 +32,6 @@ import soot.Transformer;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.JastAddJ.LabeledStmt;
-import soot.jimple.InvokeExpr;
-import soot.jimple.Stmt;
-import soot.jimple.StringConstant;
 import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
@@ -46,7 +39,6 @@ import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
-import soot.toDex.LabelAssigner;
 import wpds.impl.Weight.NoWeight;
 
 public class ProviderDetection {
@@ -87,10 +79,8 @@ public class ProviderDetection {
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
-//		Options.v().setPhaseOption("cg.spark", "on");
-//		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().setPhaseOption("cg.cha", "on");
-//		Options.v().setPhaseOption("cg", "all-reachable:true");
+		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
@@ -117,10 +107,6 @@ public class ProviderDetection {
 		Options.v().set_include(includeList);
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
-		
-		for(SootMethod m : c.getMethods()){
-			System.out.println(m);
-		}
 		
 //		System.out.println("Soot is setup.");
 	}
@@ -212,9 +198,9 @@ public class ProviderDetection {
 										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 //										System.out.println(rulesDirectory);
 										
-										//checks if `provider` param is given flowing through IF stmts
+										//checks if `provider` param flowing through IF stmts
 										checkIfStmt(vl, body);
-										//checks if `provider` param is given flowing through SWITCH stmts
+										//checks if `provider` param flowing through SWITCH stmts
 										checkSwitchStmt(vl, body);
 										
 										if(ruleExists(provider, refName)) {
@@ -243,7 +229,6 @@ public class ProviderDetection {
 	
 	private String getProviderType(Value vl) {
 		Type type = vl.getType();
-//		System.out.println("Soot type: "+type);
 		String strType = type.toString();
 		return strType;
 	}
@@ -390,7 +375,6 @@ public class ProviderDetection {
 		if(ruleDir.exists()) {
 			File[] listRuleDirFiles = ruleDir.listFiles();
 			for (File file : listRuleDirFiles) {
-//				System.out.println(file.getName());
 				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
 //					System.out.println(file.getAbsolutePath());
 //					System.out.println(file.getParentFile());
