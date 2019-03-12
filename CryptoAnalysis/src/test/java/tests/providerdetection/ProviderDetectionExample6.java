@@ -9,6 +9,7 @@ public class ProviderDetectionExample6 {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
 		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", "BC");
+		keygenerator.generateKey();
 	}
 
 }

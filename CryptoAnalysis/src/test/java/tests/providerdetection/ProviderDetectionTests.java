@@ -8,7 +8,7 @@ import crypto.providerdetection.ProviderDetection;
 
 public class ProviderDetectionTests {
 	
-	//checks if provider of type `java.security.Provider` is detected when given as a variable
+	// Checks if provider of type `java.security.Provider` is detected when given as a variable
 	@Test
 	public void providerDetectionTest1() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -18,11 +18,11 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String expected = "BC";
-		String actual = providerDetection.provider;
+		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
 	
-	//checks if provider of type `java.security.Provider` is detected when given directly
+	// Checks if provider of type `java.security.Provider` is detected when given directly
 	@Test
 	public void providerDetectionTest2() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -32,13 +32,13 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String expected = "BC";
-		String actual = providerDetection.provider;
+		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
 	
 
-	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	//is given as a variable, and the rules for that provider exist
+	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
+	// is given as a variable, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest3() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -47,13 +47,13 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	
-	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	//is given directly, and the rules for that provider exist
+	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
+	// is given directly, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest4() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -62,12 +62,12 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	//is given as a variable, and the rules for that provider do not exist => so it takes Default rules
+	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
+	// is given as a variable, and the rules for that provider do not exist => so it takes Default rules
 	@Test
 	public void providerDetectionTest5() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -76,12 +76,12 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	//is given directly, and the rules for that provider do not exist => so it takes Default rules
+	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
+	// is given directly, and the rules for that provider do not exist => so it takes Default rules
 	@Test
 	public void providerDetectionTest6() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -90,11 +90,11 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
-	//checks if provider of type `java.lang.String` is detected when given as a variable
+	// Checks if provider of type `java.lang.String` is detected when given as a variable
 	@Test
 	public void providerDetectionTest7() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -104,11 +104,11 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String expected = "BC";
-		String actual = providerDetection.provider;
+		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
 	
-	//checks if provider of type `java.lang.String` is detected when given directly
+	// Checks if provider of type `java.lang.String` is detected when given directly
 	@Test
 	public void providerDetectionTest8() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -118,12 +118,12 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String expected = "BC";
-		String actual = providerDetection.provider;
+		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	//is given as a variable, and the rules for that provider exist
+	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
+	// is given as a variable, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest9() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -132,12 +132,12 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	//is given directly, and the rules for that provider exist
+	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
+	// is given directly, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest10() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -146,12 +146,12 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	//is given as a variable, and the rules for that provider do not exist => so it takes Default rules
+	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
+	// is given as a variable, and the rules for that provider do not exist => so it takes Default rules
 	@Test
 	public void providerDetectionTest11() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -160,12 +160,12 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("resources"));
 	}
 	
-	//checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	//is given directly, and the rules for that provider do not exist => so it takes Default rules
+	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
+	// is given directly, and the rules for that provider do not exist => so it takes Default rules
 	@Test
 	public void providerDetectionTest12() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -174,8 +174,74 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String rulesDirectory = providerDetection.rulesDirectory;
+		String rulesDirectory = providerDetection.getRulesDirectory();
 		assertEquals(true, rulesDirectory.endsWith("resources"));
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// flows through TERNARY operators
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest13() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample9"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// flows through IF-ELSE statements
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest14() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample10"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// flows through SWITCH statements
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest15() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample11"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// flows through TERNARY operators
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest16() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample12"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// flows through IF-ELSE statements
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest17() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample13"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
+	}
+	
+	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// flows through SWITCH statements
+	@Test(expected = RuntimeException.class)
+	public void providerDetectionTest18() {
+		ProviderDetection providerDetection = new ProviderDetection();
+		String sootClassPath = providerDetection.getSootClassPath();
+		String mainClass = "tests.providerdetection.ProviderDetectionExample14"; 
+		providerDetection.setupSoot(sootClassPath, mainClass);
+		providerDetection.analyze();
 	}
 	
 }

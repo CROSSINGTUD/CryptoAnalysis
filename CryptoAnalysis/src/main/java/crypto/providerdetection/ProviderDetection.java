@@ -1,11 +1,21 @@
+/**
+ * The ProviderDetection class helps in detecting the provider used when
+ * coding with JCA's Cryptographic APIs and chooses the corresponding set of
+ * CryptSL rules that are implemented for that provider.
+ *
+ * @author  Enri Ozuni
+ * 
+ */
 package crypto.providerdetection;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.collect.Lists;
 
@@ -43,39 +53,54 @@ import wpds.impl.Weight.NoWeight;
 
 public class ProviderDetection {
 	
-	public String provider = null;
-	public String rulesDirectory = null;
-	
+	private String provider = null;
+	private String rulesDirectory = null;
+
+
 	public ProviderDetection() {
 		//default constructor
 	}
 	
-	//Used to initially test Provider Detection from the main folder
+	public String getProvider() {
+		return provider;
+	}
+
+	public String getRulesDirectory() {
+		return rulesDirectory;
+	}
+	
+	
+	/**
+	 * This method is used to get the Soot classpath from `src/main/java`
+	 * in order to test the Provider Detection from there
+	 */
 	public String getMainSootClassPath() {
-		//Assume target folder to be directly in user dir; this should work in eclipse
+		//Assume target folder to be directly in user dir
 		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
 		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
-			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
-//		System.out.println(sootClassPath);
 		return sootClassPath;
 	}
 	
-
+	/**
+	 * This method is used to get the Soot classpath from `src/test/java`
+	 * in order to run the JUnit test cases for Provider Detection
+	 */
 	public String getSootClassPath(){
-		//Assume target folder to be directly in user dir; this should work in eclipse
+		//Assume target folder to be directly in user dir
 		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
-			//We haven't found our bytecode anyway, notify now instead of starting analysis anyway
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
 		return sootClassPath;
 	}
 	
-	
+	/**
+	 * This method is used to setup Soot
+	 */
 	public void setupSoot(String sootClassPath, String mainClass) {
 		G.v().reset();
 		Options.v().set_whole_program(true);
@@ -107,8 +132,6 @@ public class ProviderDetection {
 		Options.v().set_include(includeList);
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
-		
-//		System.out.println("Soot is setup.");
 	}
 	
 	
@@ -129,16 +152,25 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().apply();
 				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
-//				System.out.println("Rules dir is: "+rulesDirectory);
-				List<CryptSLRule> rules = Lists.newArrayList();
-				rules = getRules(rulesDirectory, rules);
-//				System.out.println("The list size of the rules returned is: "+rules.size());
-				doAnalysis(icfg, rules);
+				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
+				defaultCryptoRules = getRules(rulesDirectory, defaultCryptoRules);
+				doAnalysis(icfg, defaultCryptoRules);
 			}
 		};
 	}
 
-
+	
+	/**
+	 * This method does the Provider Detection analysis and returns the detected set 
+	 * of CryptSL rules after the analysis is finished. If no Provider is detected, 
+	 * it returns the default set of CryptSL rules. Otherwise it returns all CryptSL 
+	 * rules for that provider, plus additional default CryptSL rules that were not 
+	 * yet implemented for the detected provider
+	 * 
+	 * @param icfg
+	 *            
+	 * @param rules 
+	 */
 	public List<CryptSLRule> doAnalysis(JimpleBasedInterproceduralCFG icfg, List<CryptSLRule> rules) {
 		
 		outerloop:
@@ -148,66 +180,59 @@ public class ProviderDetection {
 					Body body = sootMethod.getActiveBody();
 					for (Unit unit : body.getUnits()) {
 						if(unit instanceof JAssignStmt) {
-							JAssignStmt stmt = (JAssignStmt) unit;
-							Value rightVal = stmt.getRightOp();
-							if (rightVal instanceof JStaticInvokeExpr) {
-								JStaticInvokeExpr exp = (JStaticInvokeExpr) rightVal;
+							JAssignStmt statement = (JAssignStmt) unit;
+							Value rightSideOfStatement = statement.getRightOp();
+							if (rightSideOfStatement instanceof JStaticInvokeExpr) {
+								JStaticInvokeExpr expression = (JStaticInvokeExpr) rightSideOfStatement;
 									
-								SootMethod method = exp.getMethod();
+								SootMethod method = expression.getMethod();
 								String methodName = method.getName();
 									
-								SootClass methodRef = method.getDeclaringClass();
-								String refName = methodRef.toString();
-//								System.out.println(refName);
+								SootClass declaringClass = method.getDeclaringClass();
+								String declaringClassName = declaringClass.toString();
+								declaringClassName = declaringClassName.substring(declaringClassName.lastIndexOf(".") + 1);
 									
-								int parameterCount = method.getParameterCount();
+								int methodParameterCount = method.getParameterCount();
+								
+								// List of all CryptSL rules
+								List<String> availableCryptSLRules = new ArrayList<String>();
+								
+								for(CryptSLRule rule : rules) {
+									String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
+									availableCryptSLRules.add(ruleName);
+								}
 									
-								//list of JCA engine classes that are supported as CryptSL rules
-								String[] crySLRules = new String[] {"java.security.SecureRandom", "java.security.MessageDigest",
-																	"java.security.Signature", "javax.crypto.Cipher", 
-																	"javax.crypto.Mac", "javax.crypto.SecretKeyFactory",
-																	"javax.crypto.KeyGenerator", "java.security.KeyPairGenerator",
-																	"java.security.AlgorithmParameters", "java.security.KeyStore",
-																	"javax.net.ssl.KeyManagerFactory", "javax.net.ssl.SSLContext",
-																	"javax.net.ssl.TrustManagerFactory"};
+								// Checks if detected declaring class is implemented as a CryptSL rule
+								boolean ruleFound = availableCryptSLRules.contains(declaringClassName);
 									
-								boolean ruleFound = Arrays.asList(crySLRules).contains(refName);
-									
-								if((ruleFound) && (methodName.matches("getInstance")) && (parameterCount==2) ) {
-									Value vl = exp.getArg(1);
-//									System.out.println("Provider param: "+vl.toString());
-									String strType = getProviderType(vl);
-//									System.out.println("The provider used is of type: "+strType);
+								if((ruleFound) && (methodName.matches("getInstance")) && (methodParameterCount==2) ) {
+									// Gets the second parameter from getInstance() method, since it is the provider parameter
+									Value providerValue = expression.getArg(1);
+									String providerType = getProviderType(providerValue);
 										
-									if(strType.matches("java.security.Provider")) {
-										this.provider = getProviderWhenTypeProvider(stmt, sootMethod, vl, icfg);
-										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
-//										System.out.println(rulesDirectory);
+									if(providerType.matches("java.security.Provider")) {
+										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, icfg);
+										this.rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 										
-										if(ruleExists(provider, refName)) {
-											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
-//											System.out.println(rulesDirectory);
+										if(ruleExists(provider, declaringClassName)) {
+											this.rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
 											
-											rules = chooseRules(rules, provider, refName);
+											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
 										}
 									}
 										
-									else if (strType.matches("java.lang.String")) {
-										this.provider = getProviderWhenTypeString(vl, body);
+									else if (providerType.matches("java.lang.String")) {
+										this.provider = getProviderWhenTypeString(providerValue, body);
 										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
-//										System.out.println(rulesDirectory);
 										
-										//checks if `provider` param flowing through IF stmts
-										checkIfStmt(vl, body);
-										//checks if `provider` param flowing through SWITCH stmts
-										checkSwitchStmt(vl, body);
+										checkIfStmt(providerValue, body);
+										checkSwitchStmt(providerValue, body);
 										
-										if(ruleExists(provider, refName)) {
+										if(ruleExists(provider, declaringClassName)) {
 											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
-//											System.out.println(rulesDirectory);
 											
-											rules = chooseRules(rules, provider, refName);
+											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
 										}
 									}
@@ -224,69 +249,37 @@ public class ProviderDetection {
 	
 	
 	
-	//methods used from the "doAnalysis() method"
+	// Methods used from the `doAnalysis()` method
 	//-----------------------------------------------------------------------------------------------------------------
 	
-	private String getProviderType(Value vl) {
-		Type type = vl.getType();
-		String strType = type.toString();
-		return strType;
+	/**
+	 * This method returns the type of Provider detected, since
+	 * it can be either `java.security.Provider` or `java.lang.String`
+	 * 
+	 * @param providerValue
+	 */
+	private String getProviderType(Value providerValue) {
+		String providerType = providerValue.getType().toString();
+		return providerType;
 	}
 	
 	
-	private void checkIfStmt(Value vl, Body body) {
-		String value = vl.toString();
-		for(Unit u : body.getUnits()) {
-			if(u instanceof JIfStmt) {
-				JIfStmt l = (JIfStmt) u;
-				System.out.println("IF stmt: "+l.toString());
-				if(l.toString().contains(value)) {
-					throw new RuntimeException("The provider parameter must be passed directly to the"
-							+ " getInstance() method call, and not through IF statements or"
-							+ " TERNARY operators.");
-				}
-			}
-		}
-		return;
-	}
-	
-	private void checkSwitchStmt(Value vl, Body body) {
-		String value = vl.toString();
-		for(Unit u : body.getUnits()) {
-			if(u instanceof TableSwitchStmt) {
-				TableSwitchStmt l = (TableSwitchStmt) u;
-				System.out.println("SWITCH stmt: "+l.toString());
-				if(l.toString().contains(value)) {
-					throw new RuntimeException("The provider parameter must be passed directly to the"
-							+ " getInstance() method call, and not through SWITCH statements.");
-				}
-			}
-		}
-		return;
-	}
-	
-	
-	private String getProviderWhenTypeString(Value vl, Body body) {
-		String provider = null;
-		for(Unit u : body.getUnits()) {
-			if(u instanceof JAssignStmt) {
-				JAssignStmt s = (JAssignStmt) u;
-				if(s.getLeftOp().equals(vl)) {
-					String prov = s.getRightOp().toString().replaceAll("\"","");
-					provider = prov;
-					break;
-				}
-			}
-		}
-		
-		return provider;
-	}
-	
-	
-	private String getProviderWhenTypeProvider(JAssignStmt stmt, SootMethod method, Value vl, JimpleBasedInterproceduralCFG icfg) {
+	/**
+	 * This method return the provider used when Provider detected is of type `java.security.Provider`
+	 * 
+	 * @param statement
+	 *            
+	 * @param sootMethod
+	 *           
+	 * @param providerValue
+	 *            
+	 * @param icfg
+	 *            
+	 */
+	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, JimpleBasedInterproceduralCFG icfg) {
 		String provider = null;
 		
-		BackwardQuery query = new BackwardQuery(new Statement(stmt,method), new Val(vl, method));
+		BackwardQuery query = new BackwardQuery(new Statement(statement,sootMethod), new Val(providerValue, sootMethod));
 		
 		//Create a Boomerang solver.
 		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
@@ -311,8 +304,11 @@ public class ProviderDetection {
 		solver.debugOutput();
 		
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
-//		System.out.println("Map size is: "+map.size());
 		
+		// The Provider can be correctly detected from this static analysis, if there is only one allocation site
+		// where the Provider variable was initialized. Otherwise, it throws an error because it is not possible
+		// to detect for sure the provider, if is given as parameter to the getInstance() method through the use of
+		// IF-ELSE, SWITCH statements or TERNARY operators
 		if(map.size() == 1) {
 			for(Entry<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> entry : map.entrySet()) {
 				ForwardQuery forwardQuery = entry.getKey();
@@ -321,74 +317,184 @@ public class ProviderDetection {
 				Value value = forwardQueryVal.value();
 				Type valueType = value.getType();
 				String valueTypeString = valueType.toString();
-//				System.out.println(valueTypeString);
 				
 				if(valueTypeString.contains("BouncyCastleProvider")) {
 					provider = "BC";
-				}
-				
-				else if (valueTypeString.contains("BouncyCastlePQCProvider")) {
-					provider = "BCPQC";
 				}
 			}
 		}
 		else if (map.size() > 1) {
 			throw new RuntimeException("The provider parameter must be passed directly to the"
-					+ " getInstance() method call, and not through IF, SWITCH statements or"
+					+ " getInstance() method call, and not through IF-ELSE, SWITCH statements or"
 					+ " TERNARY operators.");
 		}
 		else {
 			throw new RuntimeException("Error occured to detect provider in the Provider Detection"
 					+ " analysis.");
 		}
-	
-//		System.out.println(provider);
 		return provider;
 	}
 	
 	
-	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String refName) {
-		
-		//delete the default rules and load the new rules from the "Provider" directory
-		rules.clear();
-//		System.out.println("List size after rules are deleted is: "+rules.size());
-		
-		String newDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
-		
-		File[] listFiles = new File(newDirectory).listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(".cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
-			}
-		}
-		
-//		System.out.println("After provider is detected, the rules size is: "+rules.size());
-		return rules;
-	}
-	
-	
-	private boolean ruleExists(String provider, String refName) {
-		boolean ruleExists = false;
-		String rule = refName.substring(refName.lastIndexOf(".") + 1);
-		
-		File ruleDir = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider);
-		if(ruleDir.exists()) {
-			File[] listRuleDirFiles = ruleDir.listFiles();
-			for (File file : listRuleDirFiles) {
-				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
-//					System.out.println(file.getAbsolutePath());
-//					System.out.println(file.getParentFile());
-					ruleExists = true;
+	/**
+	 * This method return the provider used when Provider detected is of type `java.lang.String`
+	 * 
+	 * @param providerValue
+	 *            
+	 * @param body
+	 *            - i.e. the ActiveBody
+	 *            
+	 */
+	private String getProviderWhenTypeString(Value providerValue, Body body) {
+		for(Unit unit : body.getUnits()) {
+			if(unit instanceof JAssignStmt) {
+				JAssignStmt assignStatement = (JAssignStmt) unit;
+				if(assignStatement.getLeftOp().equals(providerValue)) {
+					return assignStatement.getRightOp().toString().replaceAll("\"","");
 				}
 			}
 		}
 		
+		return null;
+	}
+	
+	
+	/**
+	 * This method checks if the provider detected has only one allocation site
+	 * and it is not flowing through IF-ELSE statements or TERNARY operators, because
+	 * otherwise the provider can not be correctly detected through the use of
+	 * static analysis
+	 * 
+	 * @param providerValue
+	 *            
+	 * @param body
+	 *            - i.e. the ActiveBody
+	 *            
+	 */
+	private void checkIfStmt(Value providerValue, Body body) {
+		String value = providerValue.toString();
+		for(Unit unit : body.getUnits()) {
+			if(unit instanceof JIfStmt) {
+				JIfStmt ifStatement = (JIfStmt) unit;
+				if(ifStatement.toString().contains(value)) {
+					throw new RuntimeException("The provider parameter must be passed directly to the"
+							+ " getInstance() method call, and not through IF-ELSE statements or"
+							+ " TERNARY operators.");
+				}
+			}
+		}
+		return;
+	}
+	
+	
+	/**
+	 * This method checks if the provider detected has only one allocation site
+	 * and it is not flowing through SWITCH statements, because otherwise the 
+	 * provider can not be correctly detected through the use of static analysis
+	 * 
+	 * @param providerValue
+	 *            
+	 * @param body
+	 *            - i.e. the ActiveBody
+	 *            
+	 */
+	private void checkSwitchStmt(Value providerValue, Body body) {
+		String value = providerValue.toString();
+		for(Unit unit : body.getUnits()) {
+			if(unit instanceof TableSwitchStmt) {
+				TableSwitchStmt switchStatement = (TableSwitchStmt) unit;
+				if(switchStatement.toString().contains(value)) {
+					throw new RuntimeException("The provider parameter must be passed directly to the"
+							+ " getInstance() method call, and not through SWITCH statements.");
+				}
+			}
+		}
+		return;
+	}
+	
+	
+	/**
+	 * This method is used to check if the CryptSL rule for the detected provider exists
+	 * 
+	 * @param provider
+	 *            - i.e. BC
+	 * @param declaringClassName
+	 *            - i.e. MessageDigest
+	 */
+	private boolean ruleExists(String provider, String declaringClassName) {
+		boolean ruleExists = false;
+		String rule = declaringClassName;
 		
-//		System.out.println(rule);
+		File rulesDirectory = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider);
+		if(rulesDirectory.exists()) {
+			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
+			for (File file : listRulesDirectoryFiles) {
+				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
+					ruleExists = true;
+					break;
+				}
+			}
+		}
+		
 		return ruleExists;
 	}
 	
 	
+	/**
+	 * This method is used to choose the CryptSL rules from the detected Provider
+	 * 
+	 * @param rules
+	 *            
+	 * @param provider
+	 *            - i.e. BC
+	 * @param declaringClassName
+	 * 			  - i.e. MessageDigest
+	 */
+	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String declaringClassName) {
+		
+		String newRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources"+File.separator+provider;
+		
+		// Forms a list of all the new CryptSL rules in the detected provider's directory.
+		// This list contains only String elements and it holds only the rule's names, i.e Cipher, MessageDigest, etc
+		List<String> newRules = new ArrayList<String>();
+		File[] files = new File(newRulesDirectory).listFiles();
+		for (File file : files) {
+		    if (file.isFile() && file.getName().endsWith(".cryptslbin")) {
+		        newRules.add(StringUtils.substringBefore(file.getName(), "."));
+		    }
+		}
+		
+		// A new CryptSL rules list is created which will contain all the new rules.
+		// Firstly, all the default rules that are not present in the detected provider's rules are added.
+		// e.g if Cipher rule is not present in the detected provider's directory, then the default Cipher rule
+		// is added to the new CryptSL rules list
+		List<CryptSLRule> newCryptSLRules = Lists.newArrayList();
+		for(CryptSLRule rule : rules) {
+			String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
+			if(!newRules.contains(ruleName)) {
+				newCryptSLRules.add(rule);
+			}
+		}
+		
+		// At the end, the remaining CryptSL rules from the detected provider's directory
+		// are added to the new CryptSL rules list
+		File[] listFiles = new File(newRulesDirectory).listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
+				newCryptSLRules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
+		return newCryptSLRules;
+	}
+	
+	
+	/**
+	 * This method is used to get all the default CryptSL rules
+	 * 
+	 * @param rulesDirectory
+	 * 
+	 * @param rules
+	 */
 	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
 		File directory = new File(rulesDirectory);
 		

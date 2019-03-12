@@ -9,9 +9,8 @@ public class ProviderDetectionTest {
 		String mainClass = "crypto.providerdetection.ProviderDetectionExample"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
-		System.out.println("The provider used is: "+providerDetection.provider);
-		System.out.println("The rules directory is: "+providerDetection.rulesDirectory);
-//		System.out.println(providerDetection.sootClassPath);
+		System.out.println("The provider used is: "+providerDetection.getProvider());
+		System.out.println("The rules directory is: "+providerDetection.getRulesDirectory());
 	}
 
 }

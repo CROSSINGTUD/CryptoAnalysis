@@ -10,6 +10,7 @@ public class ProviderDetectionExample2 {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
 		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", new BouncyCastleProvider());
+		keygenerator.generateKey();
 	}
 
 }

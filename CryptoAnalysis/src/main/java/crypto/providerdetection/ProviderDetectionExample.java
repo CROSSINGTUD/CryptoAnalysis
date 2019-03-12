@@ -38,6 +38,13 @@ public class ProviderDetectionExample {
 //			pString1 = "BCPQC";
 //		}
 		
+//		if(n%2==0) {
+//			p1 = new BouncyCastleProvider();
+//		}
+//		else {
+//			p1 = new BouncyCastlePQCProvider();
+//		}
+		
 //		switch(n) {
 //			case 0:
 //				pString1="A";
@@ -53,7 +60,24 @@ public class ProviderDetectionExample {
 //				break;
 //		}
 		
-		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", pString1);
+//		switch(n) {
+//			case 0:
+//				p1 = new BouncyCastleProvider();
+//				break;
+//			case 1: 
+//				p1 = new BouncyCastlePQCProvider();
+//				break;
+//			case 2:
+//				p1 = new BouncyCastleProvider();
+//				break;
+//			default:
+//				p1 = new BouncyCastlePQCProvider();
+//				break;
+//		}
+		
+		
+		
+		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", p1);
 		keygenerator.generateKey();
 //		Provider p = keygenerator.getProvider();
 //		System.out.println(p.getInfo());

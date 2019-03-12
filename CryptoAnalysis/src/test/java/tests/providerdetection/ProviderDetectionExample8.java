@@ -8,6 +8,8 @@ public class ProviderDetectionExample8 {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
 		MessageDigest md = MessageDigest.getInstance("AES", "BC");
+		byte[] input = "message".getBytes();
+		md.digest(input);
 	}
 
 }
