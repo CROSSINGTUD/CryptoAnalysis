@@ -37,6 +37,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
+	private HashSet seeds;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -101,7 +102,6 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 	public abstract CrySLResultsReporter analysisListener();
-
 
     public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
     	Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
