@@ -307,11 +307,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			Type baseType = accessGraph.value().getType();
 			if (baseType instanceof RefType) {
 				RefType refType = (RefType) baseType;
-				if (spec.getRule().getClassName().equals(refType.getSootClass().getName())) {
+				if (spec.getRule().getClassName().equals(refType.getSootClass().getName()) || spec.getRule().getClassName().equals(refType.getSootClass().getShortName())) {
 					if (satisfiesConstraintSytem) {
-					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
-							new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
-					matched = true;
+						AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(
+								new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
+						matched = true;
 						seed.addEnsuredPredicateFromOtherRule(
 								new EnsuredCryptSLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
 					}

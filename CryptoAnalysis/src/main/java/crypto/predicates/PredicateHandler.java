@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
@@ -43,6 +44,7 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import typestate.TransitionFunction;
@@ -186,6 +188,22 @@ public class PredicateHandler {
 					for(AnalysisSeedWithSpecification secondSeed : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
 						secondSeed.registerResultsHandler(new AddPredicateToOtherSeed(statement, base, callerMethod, ensPred, secondSeed));
 						
+					}
+				}
+			}
+			
+			if (ivexpr instanceof StaticInvokeExpr && statement.getUnit().get() instanceof AssignStmt) {
+				StaticInvokeExpr iie = (StaticInvokeExpr) ivexpr;
+				boolean paramMatch = false;
+				for (Value arg : iie.getArgs()) {
+					if (seed.value() != null && seed.value().equals(arg))
+						paramMatch = true;
+				}
+				if (paramMatch) {
+					for(AnalysisSeedWithSpecification spec : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
+						if(spec.stmt().equals(statement)) {
+							spec.addEnsuredPredicate(ensPred);
+						}
 					}
 				}
 			}
