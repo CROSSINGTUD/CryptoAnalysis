@@ -2,26 +2,17 @@ package crypto.predicates;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.api.client.util.Lists;
-import com.google.common.base.Optional;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 import com.google.inject.internal.util.Lists;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
-import boomerang.ForwardQuery;
-import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import boomerang.results.AbstractBoomerangResults;
-import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -32,7 +23,6 @@ import crypto.analysis.RequiredCryptSLPredicate;
 import crypto.analysis.ResultsHandler;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
-import crypto.boomerang.CogniCryptBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.interfaces.ISLConstraint;
@@ -46,9 +36,7 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import typestate.TransitionFunction;
-import wpds.impl.Weight.NoWeight;
 
 public class PredicateHandler {
 
