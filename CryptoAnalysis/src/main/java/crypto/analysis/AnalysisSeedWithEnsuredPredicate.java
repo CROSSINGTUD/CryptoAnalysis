@@ -102,4 +102,9 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	public String toString() {
 		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
 	}
+
+	@Override
+	public Set<Node<Statement, Val>> getDataFlowPath() {
+		return analysisResults.getDataFlowPath();
+	}
 }

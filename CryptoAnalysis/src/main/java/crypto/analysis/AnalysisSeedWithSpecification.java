@@ -590,5 +590,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		this.secure = secure;
 	}
 
+	@Override
+	public Set<Node<Statement, Val>> getDataFlowPath() {
+		return results.getDataFlowPath();
+	}
+
 
 }

@@ -216,9 +216,7 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				//TODO Refactor the options for the Rules
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
