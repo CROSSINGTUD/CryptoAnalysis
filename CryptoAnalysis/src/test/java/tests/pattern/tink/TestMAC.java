@@ -2,6 +2,7 @@ package tests.pattern.tink;
 
 import java.security.GeneralSecurityException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.crypto.tink.KeysetHandle;
@@ -13,6 +14,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 
 import test.assertions.Assertions;
 
+@Ignore
 public class TestMAC extends TestTinkPrimitives {
 	@Test
 	public void generateNewHMACSHA256_128BitTag() throws GeneralSecurityException {

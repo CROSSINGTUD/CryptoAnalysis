@@ -6,6 +6,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.crypto.tink.KeysetHandle;
@@ -17,6 +18,7 @@ import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 
 import test.assertions.Assertions;
 
+@Ignore
 public class TestStreamingAEADCipher extends TestTinkPrimitives {
 	
 	@Test

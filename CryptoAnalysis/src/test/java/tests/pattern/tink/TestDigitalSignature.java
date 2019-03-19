@@ -2,6 +2,7 @@ package tests.pattern.tink;
 
 import java.security.GeneralSecurityException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.crypto.tink.KeysetHandle;
@@ -17,6 +18,7 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 
 import test.assertions.Assertions;
 
+@Ignore
 public class TestDigitalSignature extends TestTinkPrimitives {
 	@Test
 	public void generateNewECDSA_P256() throws GeneralSecurityException {

@@ -2,6 +2,7 @@ package tests.pattern.tink;
 
 import java.security.GeneralSecurityException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.crypto.tink.HybridDecrypt;
@@ -18,6 +19,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 
 import test.assertions.Assertions;
 
+@Ignore
 public class TestHybridEncryption extends TestTinkPrimitives {
 	
 	@Test

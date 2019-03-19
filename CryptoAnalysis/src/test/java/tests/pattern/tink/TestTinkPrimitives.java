@@ -2,8 +2,11 @@ package tests.pattern.tink;
 
 import java.io.File;
 
+import org.junit.Ignore;
+
 import test.UsagePatternTestingFramework;
 
+@Ignore
 public abstract class TestTinkPrimitives extends UsagePatternTestingFramework {
 	@Override
 	protected String getSootClassPath() {

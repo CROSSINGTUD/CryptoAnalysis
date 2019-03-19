@@ -3,6 +3,7 @@ package tests.pattern.tink;
 import java.io.File;
 import java.security.GeneralSecurityException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.crypto.tink.Aead;
@@ -13,6 +14,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 
 import test.assertions.Assertions;
 
+@Ignore
 public class TestAEADCipher extends TestTinkPrimitives {
 	
 	@Test
