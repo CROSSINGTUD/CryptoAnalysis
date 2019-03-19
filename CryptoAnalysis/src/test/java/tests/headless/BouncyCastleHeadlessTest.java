@@ -32,7 +32,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}	
 	
 	@Test
-	public void testAES() {
+	public void testBCMacExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCMacExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
@@ -50,7 +50,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	public void testRSA() {
+	public void testBCSymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
@@ -60,7 +60,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	public void testMac() {
+	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
@@ -75,7 +75,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	public void testDigest() {
+	public void testBCDigestExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCDigestExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
@@ -93,7 +93,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	public void testSigner() {
+	public void testBCSignerExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSignerExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
