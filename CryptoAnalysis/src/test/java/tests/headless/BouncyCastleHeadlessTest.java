@@ -18,15 +18,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<example.misuse.TypeStateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.misuse.IncompleteOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);		
-		
-		// Ignored
-		setErrorsCount("<example.misuse.TypeStateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);				
-		setErrorsCount("<example.misuse.RequiredPredicateErrorExample: void useModeInsideAnotherMode()>", ImpreciseValueExtractionError.class, 3);
-		setErrorsCount("<example.misuse.RequiredPredicateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
-		setErrorsCount("<example.nomisuse.TypeStateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
-		setErrorsCount("<example.nomisuse.IncompleteOperationErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
-		setErrorsCount("<example.nomisuse.RequiredPredicateErrorExample: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 3);
-		
+				
 		scanner.exec();
 	  	assertErrors();
 	}	
