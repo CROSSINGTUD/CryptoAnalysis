@@ -41,6 +41,7 @@ public class AESTest extends UsagePatternTestingFramework {
 		KeyParameter kp = new KeyParameter(Hex.decode("5F060D3716B345C253F6749ABAC10917"));
 		ParametersWithIV params = new ParametersWithIV(kp, new byte[16]);
 
+		Assertions.hasEnsuredPredicate(params);
 		cipher.init(true, params);
 
 		byte[] out = new byte[cipher.getOutputSize(tData.length)];

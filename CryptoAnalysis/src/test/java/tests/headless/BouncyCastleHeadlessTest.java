@@ -55,6 +55,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
+
+		setErrorsCount("<pattern.AESTest: void testAESLightEngine2()>", TypestateError.class, 1);
+		setErrorsCount("<pattern.AESTest: void testAESEngineWithoutFinal()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<pattern.AESTest: void testAESLightEngineWithIV()>", RequiredPredicateError.class, 1);
 		scanner.exec();
 	  	assertErrors();
 	}
