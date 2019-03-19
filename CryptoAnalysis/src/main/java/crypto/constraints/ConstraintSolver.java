@@ -276,7 +276,6 @@ public class ConstraintSolver {
 							Collection<Type> vals = propagatedTypes.get(cs);
 							for (Type t : vals) {
 								if (t.toQuotedString().equals(parameters.get(1).getName())) {
-									//TODO: Fix NeverTypeOfErrors also report a ConstraintError	
 									for(ExtractedValue v : parsAndVals.get(cs)) {
 										errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 									}
