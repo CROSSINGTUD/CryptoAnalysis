@@ -17,6 +17,9 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -24,7 +27,6 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
-import crypto.interfaces.CrySLModelReader;
 import crypto.preanalysis.SeedFactory;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
@@ -214,10 +216,8 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
-
-				//TODO Refactor the options for the Rules
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules(false);
+				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
+				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
 					fileReporter = new SARIFReporter(getOutputFolder(), rules);
@@ -231,8 +231,8 @@ public abstract class HeadlessCryptoScanner {
 				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
-					public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-						return icfg;
+					public ObservableICFG<Unit, SootMethod> icfg() {
+						return observableDynamicICFG;
 					}
 
 					@Override
@@ -279,11 +279,8 @@ public abstract class HeadlessCryptoScanner {
 		return null;
 	}
 	
-	private List<CryptSLRule> getRules() {
-		return getRules(false);
-	}
 
-	protected List<CryptSLRule> getRules(boolean srcFormat) {
+	protected List<CryptSLRule> getRules() {
 		if (!rules.isEmpty()) {
 			return rules;
 		}
@@ -291,24 +288,10 @@ public abstract class HeadlessCryptoScanner {
 		if(rulesDirectory == null){
 			throw new RuntimeException("Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
 		}
-
-		if (srcFormat) {
-			try {
-				CrySLModelReader cmr = new CrySLModelReader();
-				File[] listFiles = new File(rulesDirectory).listFiles();
-				for (File file : listFiles) {
-					if (file != null && file.getName().endsWith(".cryptsl")) {
-						rules.add(cmr.readRule(file));
-					}
-				}	
-			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException e) {
-			}
-		} else {
-			File[] listFiles = new File(rulesDirectory).listFiles();
-			for (File file : listFiles) {
-				if (file != null && file.getName().endsWith(".cryptslbin")) {
-					rules.add(CryptSLRuleReader.readFromFile(file));
-				}
+		File[] listFiles = new File(rulesDirectory).listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(".cryptslbin")) {
+				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
 		if (rules.isEmpty())

@@ -12,12 +12,17 @@ pipeline {
 	        steps {
 	            sh 'cd CryptoAnalysis; mvn test'
 	        }
+		    post {  
+	    		always {
+	                junit 'shippable/testresults/*.xml'
+	            }
+	        }
 		}
 
 
 		stage('Deploy'){
 		    when { 
-		    	branch 'master'
+		    	anyOf { branch 'master'; branch 'ofcg' } 
 			}
 	        steps {
 				configFileProvider(

@@ -1,6 +1,7 @@
 package crypto.typestate;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,7 @@ import boomerang.BoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -37,12 +39,13 @@ public abstract class ExtendedIDEALAnaylsis {
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
+	private HashSet seeds;
 	
 	public ExtendedIDEALAnaylsis(){
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
-			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt, Collection<SootMethod> calledMethod) {
-				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt, calledMethod);
+			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt) {
+				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt);
 			}
 
 			@Override
@@ -51,7 +54,7 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
+			public ObservableICFG<Unit, SootMethod> icfg() {
 				return ExtendedIDEALAnaylsis.this.icfg();
 			}
 
@@ -93,7 +96,7 @@ public abstract class ExtendedIDEALAnaylsis {
 	}
 
 
-	protected abstract BiDiInterproceduralCFG<Unit, SootMethod> icfg();
+	protected abstract ObservableICFG<Unit, SootMethod> icfg();
 	protected abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver);
 
 	public void log(String string) {
@@ -102,15 +105,12 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLResultsReporter analysisListener();
 
-
     public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
     	Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
         if (!method.hasActiveBody())
             return seeds;
         for (Unit u : method.getActiveBody().getUnits()) {
-            Collection<SootMethod> calledMethods = (icfg().isCallStmt(u) ? icfg().getCalleesOfCallAt(u)
-                    : new HashSet<SootMethod>());
-            seeds.addAll( getOrCreateTypestateChangeFunction().generateSeed(method, u, calledMethods));
+            seeds.addAll( getOrCreateTypestateChangeFunction().generateSeed(method, u));
         }
         return seeds;
     }

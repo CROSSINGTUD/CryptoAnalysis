@@ -18,6 +18,7 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
@@ -80,6 +81,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 
 	//Usage Pattern tests for DigestOutputStream
 	@Test
+	@Ignore
 	public void UsagePatternTestDOSCallToForbiddenMethod() throws GeneralSecurityException, UnsupportedEncodingException, FileNotFoundException, IOException {
 	  OutputStream os = new FileOutputStream(".\\resources\\dos.txt");
 	  MessageDigest md = MessageDigest.getInstance("SHA-256");

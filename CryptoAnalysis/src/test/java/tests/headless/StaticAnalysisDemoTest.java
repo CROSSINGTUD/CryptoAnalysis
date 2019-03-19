@@ -23,6 +23,9 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.fixed.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -45,9 +48,13 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
 
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: void encryptAlgFromField()>", IncompleteOperationError.class, 1);
+		
 		setErrorsCount("<main.Msg: void encrypt()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: void encrypt()>", IncompleteOperationError.class, 1);
+		
 		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", ConstraintError.class, 1);
-
+		setErrorsCount("<main.Msg: void encryptAlgFromVar()>", IncompleteOperationError.class, 1);
 
 		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", ConstraintError.class, 2);
 		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", RequiredPredicateError.class, 1);

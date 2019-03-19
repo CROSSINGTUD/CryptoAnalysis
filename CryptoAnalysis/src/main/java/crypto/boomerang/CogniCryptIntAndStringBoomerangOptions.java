@@ -3,9 +3,11 @@ package crypto.boomerang;
 import com.google.common.base.Optional;
 
 import boomerang.IntAndStringBoomerangOptions;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -25,7 +27,7 @@ import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomerangOptions {
 	@Override
 	public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
-			BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
+			ObservableICFG<Unit, SootMethod> icfg) {
 		if (stmt.containsInvokeExpr() && stmt instanceof AssignStmt) {
 			AssignStmt as = (AssignStmt) stmt;
 			if (as.getLeftOp().equals(fact.value())) {
@@ -35,9 +37,22 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 					Value arg = as.getInvokeExpr().getArg(0);
 					return Optional.of(new AllocVal(as.getLeftOp(), m, arg, new Statement(stmt, m)));
 				}
-
-				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
+				if(sig.equals("<java.lang.String: char[] toCharArray()>")) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
+				}
+				if(sig.equals("<java.lang.String: byte[] getBytes()>")) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
+				}
+				
+				if(as.getInvokeExpr().getMethod().isNative())
 					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+
+				if(Scene.v().isExcluded(as.getInvokeExpr().getMethod().getDeclaringClass()))
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+
+				if(!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
+					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+				}
 			}
 		}
 		if (stmt.containsInvokeExpr()) {
@@ -70,16 +85,16 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 		if (as.getRightOp() instanceof LengthExpr) {
 			return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
 		}
-		if (as.containsInvokeExpr()) {
-			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
-				for (Unit u : icfg.getEndPointsOf(callee)) {
-					if (u instanceof ReturnStmt && isAllocationVal(((ReturnStmt) u).getOp())) {
-						return Optional.of(
-								new AllocVal(as.getLeftOp(), m, ((ReturnStmt) u).getOp(), new Statement((Stmt) u, m)));
-					}
-				}
-			}
-		}
+//		if (as.containsInvokeExpr()) {
+//			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
+//				for (Unit u : icfg.getEndPointsOf(callee)) {
+//					if (u instanceof ReturnStmt && isAllocationVal(((ReturnStmt) u).getOp())) {
+//						return Optional.of(
+//								new AllocVal(as.getLeftOp(), m, ((ReturnStmt) u).getOp(), new Statement((Stmt) u, m)));
+//					}
+//				}
+//			}
+//		}
 		if (isAllocationVal(as.getRightOp())) {
 			return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
 		}
@@ -100,5 +115,10 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 	@Override
 	public int analysisTimeoutMS() {
 		return 5000;
+	}
+	
+	@Override
+	public boolean trackStaticFieldAtEntryPointToClinit() {
+		return false;
 	}
 }

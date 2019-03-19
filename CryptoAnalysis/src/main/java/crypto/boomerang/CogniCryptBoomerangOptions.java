@@ -3,6 +3,7 @@ package crypto.boomerang;
 import com.google.common.base.Optional;
 
 import boomerang.DefaultBoomerangOptions;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -20,15 +21,16 @@ import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override
 	public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
-			BiDiInterproceduralCFG<Unit, SootMethod> icfg) {
-		if (stmt.containsInvokeExpr() && stmt instanceof AssignStmt) {
-			AssignStmt as = (AssignStmt) stmt;
-			if (as.getLeftOp().equals(fact.value())) {
-				if (icfg.getCalleesOfCallAt(stmt).isEmpty())
-					return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
-			}
-		}
+			ObservableICFG<Unit, SootMethod> icfg) {
+	
 		if (stmt.containsInvokeExpr()) {
+			if (stmt instanceof AssignStmt) {
+				AssignStmt as = (AssignStmt) stmt;
+				if (as.getLeftOp().equals(fact.value())) {
+					if(as.getInvokeExpr().getMethod().isNative())
+						return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+				}
+			}
 			if (stmt.getInvokeExpr().getMethod().isConstructor()
 					&& (stmt.getInvokeExpr() instanceof InstanceInvokeExpr)) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();
@@ -46,16 +48,16 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 		if (!as.getLeftOp().equals(fact.value())) {
 			return Optional.absent();
 		}
-		if (as.containsInvokeExpr()) {
-			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
-				for (Unit u : icfg.getEndPointsOf(callee)) {
-					if (u instanceof ReturnStmt && isAllocationVal(((ReturnStmt) u).getOp())) {
-						return Optional.of(
-								new AllocVal(as.getLeftOp(), m, ((ReturnStmt) u).getOp(), new Statement((Stmt) u, m)));
-					}
-				}
-			}
-		}
+//		if (as.containsInvokeExpr()) {
+//			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
+//				for (Unit u : icfg.getEndPointsOf(callee)) {
+//					if (u instanceof ReturnStmt && isAllocationVal(((ReturnStmt) u).getOp())) {
+//						return Optional.of(
+//								new AllocVal(as.getLeftOp(), m, ((ReturnStmt) u).getOp(), new Statement((Stmt) u, m)));
+//					}
+//				}
+//			}
+//		}
 		if (isAllocationVal(as.getRightOp())) {
 			return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
 		}
@@ -97,5 +99,10 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override
 	public int analysisTimeoutMS() {
 		return 5000;
+	}
+	
+	@Override
+	public boolean trackStaticFieldAtEntryPointToClinit() {
+		return false;
 	}
 }
