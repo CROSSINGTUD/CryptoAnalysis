@@ -12,7 +12,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
 	@Test
 	public void testDemo() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleDemoExample").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCDemoExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
@@ -33,7 +33,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
 	@Test
 	public void testAES() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleAESExamples").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCMacExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
@@ -51,7 +51,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
 	@Test
 	public void testRSA() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleRSAExamples").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
@@ -61,7 +61,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
 	@Test
 	public void testMac() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleMacExamples").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
@@ -76,7 +76,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
 	@Test
 	public void testDigest() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleDigestExamples").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCDigestExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
@@ -94,7 +94,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
 	@Test
 	public void testSigner() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BouncyCastleSignerExamples").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSignerExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		

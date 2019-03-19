@@ -21,6 +21,9 @@ public class MavenProject {
 	private String fullProjectClassPath;
 
 	public MavenProject(String pathToProjectRoot) {
+		File file = new File(pathToProjectRoot);
+		if(!file.exists())
+			throw new RuntimeException("The path " + pathToProjectRoot + " does not exist!");
 		this.pathToProjectRoot = new File(pathToProjectRoot).getAbsolutePath();
 	}
 	
