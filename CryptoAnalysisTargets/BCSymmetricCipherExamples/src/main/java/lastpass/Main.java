@@ -13,7 +13,7 @@ import org.bouncycastle.util.Arrays;
 
 public class Main {
 
-	private static byte[] EncryptAes256(byte[] data, byte[] encryptionKey)
+	public static byte[] EncryptAes256(byte[] data, byte[] encryptionKey)
 	{
 		try {
 			KeyParameter keyParam = new KeyParameter(encryptionKey);

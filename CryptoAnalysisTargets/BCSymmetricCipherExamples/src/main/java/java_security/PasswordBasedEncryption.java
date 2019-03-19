@@ -12,7 +12,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 public class PasswordBasedEncryption {
 	
 	private static final String constantSalt = "This is a long fixed phrase that will be used each time as the salt. Both the encryption and decryption use the same salt.";
-	private static final int iterations = 10000;
+	private static final int iterations = 250;
 	
 	/**
 	 * A password-based data decryption using a constant salt value "<b>constantSalt</b>"

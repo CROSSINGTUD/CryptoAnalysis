@@ -59,6 +59,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pattern.AESTest: void testAESLightEngine2()>", TypestateError.class, 1);
 		setErrorsCount("<pattern.AESTest: void testAESEngineWithoutFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<pattern.AESTest: void testAESLightEngineWithIV()>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", NeverTypeOfError.class, 1);
+		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", ConstraintError.class, 1);
+		
+		//TODO the key is hard coded but the analysis doesn't find it.
+//		setErrorsCount("<burstcoin.Crypto: byte[] aesDecrypt(byte[], byte[], byte[], byte[])>", NeverTypeOfError.class, 1);
+		
 		scanner.exec();
 	  	assertErrors();
 	}
