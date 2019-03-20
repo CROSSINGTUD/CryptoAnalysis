@@ -37,6 +37,7 @@ import crypto.rules.CryptSLRuleReader;
 import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.BodyTransformer;
+import soot.EntryPoints;
 import soot.G;
 import soot.PackManager;
 import soot.PhaseOptions;
@@ -310,15 +311,13 @@ public abstract class HeadlessCryptoScanner {
 		switch (callGraphAlogrithm()) {
 		case CHA:
 			Options.v().setPhaseOption("cg.cha", "on");
-			Options.v().setPhaseOption("cg", "all-reachable:true");
 			break;
 		case SPARK_LIBRARY:
 			Options.v().setPhaseOption("cg.spark", "on");
-			Options.v().setPhaseOption("cg", "all-reachable:true,library:any-subtype");
+			Options.v().setPhaseOption("cg", "library:any-subtype");
 			break;
 		case SPARK:
 			Options.v().setPhaseOption("cg.spark", "on");
-			Options.v().setPhaseOption("cg", "all-reachable:true");
 			break;
 		default:
 			throw new RuntimeException("No call graph option selected!");
@@ -333,8 +332,17 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_include(getIncludeList());
 		Options.v().set_exclude(getExcludeList());
 		Options.v().set_full_resolver(true);
+		
 		Scene.v().loadNecessaryClasses();
+		Scene.v().setEntryPoints(getEntryPoints());
 		System.out.println("Finished initializing soot");
+	}
+
+	private List<SootMethod> getEntryPoints() {
+		List<SootMethod> entryPoints = Lists.newArrayList();
+		entryPoints.addAll(EntryPoints.v().application());
+		entryPoints.addAll(EntryPoints.v().methodsOfApplicationClasses());
+		return entryPoints;
 	}
 
 	private List<String> getExcludeList() {
