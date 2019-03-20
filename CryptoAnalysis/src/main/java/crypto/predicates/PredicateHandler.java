@@ -135,8 +135,6 @@ public class PredicateHandler {
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(statement, variable).contains(ensPred);
 		if (added) {
-			if(ensPred.toString().contains("generatedCipherParams"))
-			System.out.println(ensPred + " " + statement + "  " + variable +"\n" + seedObj);
 			onPredicateAdded(seedObj, statement, variable, ensPred);
 		}
 		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);

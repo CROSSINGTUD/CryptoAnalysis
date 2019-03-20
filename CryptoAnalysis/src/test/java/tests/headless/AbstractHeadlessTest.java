@@ -75,11 +75,6 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			protected CG callGraphAlogrithm() {
-				// TODO Auto-generated method stub
-				return CG.SPARK;
-			}
-			@Override
 			protected String sootClassPath() {
 				return mp.getBuildDirectory() +(mp.getFullClassPath().equals("") ? "": File.pathSeparator+ mp.getFullClassPath());
 			}
