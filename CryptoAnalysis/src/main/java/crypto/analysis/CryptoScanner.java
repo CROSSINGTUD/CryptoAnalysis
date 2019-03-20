@@ -129,7 +129,7 @@ public abstract class CryptoScanner {
 		while (listener.hasNext()) {
 			MethodOrMethodContext next = listener.next();
 			SootMethod method = next.method();
-			if (method == null || !method.hasActiveBody()) {
+			if (method == null || !method.hasActiveBody() || !method.getDeclaringClass().isApplicationClass()) {
 				continue;
 			}
 			for (ClassSpecification spec : getClassSpecifictions()) {
