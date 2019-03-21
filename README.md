@@ -1,4 +1,4 @@
-[![Run Status](https://api.shippable.com/projects/592827ffbcb263070086391d/badge?branch=master)](https://app.shippable.com/github/CROSSINGTUD/CryptoAnalysis)
+[![Build Status](https://soot-build.cs.uni-paderborn.de/jenkins/buildStatus/icon?job=boomerang%2FCryptoAnalysis-Multibranch%2Fmaster)](https://soot-build.cs.uni-paderborn.de/jenkins/job/boomerang/job/CryptoAnalysis-Multibranch/job/master/)
 
 # CogniCrypt<sub>SAST</sub>
 
