@@ -48,17 +48,13 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
 		
 
-		setErrorsCount("<pattern.AESTest: void testAESLightEngine2()>", TypestateError.class, 1);
-		setErrorsCount("<pattern.AESTest: void testAESEngineWithoutFinal()>", IncompleteOperationError.class, 1);
-		setErrorsCount("<pattern.AESTest: void testAESLightEngineWithIV()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
 		
-		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", RequiredPredicateError.class, 1);
-		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", NeverTypeOfError.class, 1);
-		setErrorsCount("<java_security.PasswordBasedEncryption: byte[] decrypt(byte[],java.lang.String)>", ConstraintError.class, 1);
-		
-		//TODO the key is hard coded but the analysis doesn't find it.
-//		setErrorsCount("<burstcoin.Crypto: byte[] aesDecrypt(byte[], byte[], byte[], byte[])>", NeverTypeOfError.class, 1);
-		
+		//False Positive because a single SecureRandom object may not call nextBytes(...) twice. Correct the rule!
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", TypestateError.class, 1);
+				
+
 		scanner.exec();
 	  	assertErrors();
 	}

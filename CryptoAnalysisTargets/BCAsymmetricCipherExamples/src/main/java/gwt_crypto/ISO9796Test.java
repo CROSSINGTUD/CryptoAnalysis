@@ -52,10 +52,48 @@ public class ISO9796Test {
 			System.out.println("failed ISO9796-1 retrieve");
 		}
 	}
+	public void doTestThree()
+			throws Exception
+	{
 
+		BigInteger mod1 = new BigInteger("0100000000000000000000000000000000bba2d15dbb303c8a21c5ebbcbae52b7125087920dd7cdf358ea119fd66fb064012ec8ce692f0a0b8e8321b041acd40b7", 16);
+		BigInteger pub1 = new BigInteger("03", 16);	
+		BigInteger pri1 = new BigInteger("2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac9f0783a49dd5f6c5af651f4c9d0dc9281c96a3f16a85f9572d7cc3f2d0f25a9dbf1149e4cdc32273faadd3fda5dcda7", 16);
+
+		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod1, pub1);
+		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod1, pri1);
+		RSAEngine rsa = new RSAEngine();
+		byte[] data;
+
+		//
+		// ISO 9796-1 - public encrypt, private decrypt
+		//
+		ISO9796d1Encoding eng = new ISO9796d1Encoding(rsa);
+
+		eng.init(true, privParameters);
+
+		eng.setPadBits(4);
+
+		data = eng.processBlock(msg1, 0, msg1.length);
+
+		eng.init(false, pubParameters);
+
+		if (!Arrays.equals(sig1, data))
+		{
+			System.out.println("failed ISO9796-1 generation");
+		}
+
+		data = eng.processBlock(data, 0, data.length);
+
+		if (!Arrays.equals(msg1, data))
+		{
+			System.out.println("failed ISO9796-1 retrieve");
+		}
+	}
 	public void doTestTwo()
 			throws Exception
 	{
+
 		byte[] salt = Hex.decode("61DF870C4890FE85D6E3DD87C3DCE3723F91DB49");
 		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod1, pub1);
 		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod1, pri1);

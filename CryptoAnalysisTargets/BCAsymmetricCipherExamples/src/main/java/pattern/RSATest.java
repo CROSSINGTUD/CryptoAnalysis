@@ -35,4 +35,10 @@ public class RSATest {
 			byte[] signed = engine.processBlock(message, 0, message.length);
 		}
 	}
+	
+	public static void main(String...args) {
+		RSATest rsaTest = new RSATest();
+		rsaTest.testRSAEngineOne();
+		rsaTest.testRSAEngineTwo(1);
+	}
 }
