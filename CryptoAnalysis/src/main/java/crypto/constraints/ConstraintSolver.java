@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -459,7 +460,8 @@ public class ConstraintSolver {
 				return;
 			}
 			for (Entry<String, CallSiteWithExtractedValue> val : vals) {
-				if (!valCons.getValueRange().contains(val.getKey())) {
+				List<String> values = valCons.getValueRange().parallelStream().map(e -> e.toLowerCase()).collect(Collectors.toList());
+				if (!values.contains(val.getKey().toLowerCase())) {
 					errors.add(new ConstraintError(val.getValue(), classSpec.getRule(), object, valCons));
 				}
 			}

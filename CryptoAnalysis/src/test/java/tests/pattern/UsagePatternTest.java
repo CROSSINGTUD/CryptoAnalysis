@@ -61,6 +61,22 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
+	public void caseInsensitiveNames() throws GeneralSecurityException{
+		KeyGenerator keygen = KeyGenerator.getInstance("aes");
+		Assertions.extValue(0);
+		keygen.init(128);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
+		Cipher cCipher = Cipher.getInstance("Aes/CbC/pKCS5PADDING");
+		Assertions.extValue(0);
+		cCipher.init(Cipher.ENCRYPT_MODE, key);
+		byte[] enc = cCipher.doFinal("".getBytes());
+		Assertions.mustBeInAcceptingState(cCipher);
+		Assertions.hasEnsuredPredicate(enc);
+	}
+	
+	@Test
 	public void UsagePatternTest1() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
