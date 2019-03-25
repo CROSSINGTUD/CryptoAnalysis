@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -423,13 +424,13 @@ public class ConstraintSolver {
 			} catch (NumberFormatException ex) {
 				//2. If not, it's a variable name.
 				//Get value of variable left from map
-				final Entry<List<String>, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons);
-				if (valueCollection.getKey().isEmpty()) {
+				final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons);
+				if (valueCollection.isEmpty()) {
 					return valuesInt;
 				}
 				try {
-					for (String value : valueCollection.getKey()) {
-						valuesInt.put(Integer.parseInt(value), valueCollection.getValue());
+					for (Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
+						valuesInt.put(Integer.parseInt(value.getKey()), value.getValue());
 					}
 				} catch (NumberFormatException ex1) {
 					//If that does not work either, I'm out of ideas ...
@@ -460,7 +461,6 @@ public class ConstraintSolver {
 			for (Entry<String, CallSiteWithExtractedValue> val : vals) {
 				if (!valCons.getValueRange().contains(val.getKey())) {
 					errors.add(new ConstraintError(val.getValue(), classSpec.getRule(), object, valCons));
-					return;
 				}
 			}
 			return;
@@ -468,14 +468,15 @@ public class ConstraintSolver {
 
 		private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CryptSLObject var, ISLConstraint cons) {
 			final String varName = var.getVarName();
-			final Entry<List<String>, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
+			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
 			List<Entry<String, CallSiteWithExtractedValue>> vals = new ArrayList<>();
-			if (valueCollection.getKey().isEmpty()) {
+			if (valueCollection.isEmpty()) {
 				return vals;
 			}
-			for (String val : valueCollection.getKey()) {
+			for (Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
 				CryptSLSplitter splitter = var.getSplitter();
-				final CallSiteWithExtractedValue location = valueCollection.getValue();
+				final CallSiteWithExtractedValue location = e.getValue();
+				String val = e.getKey();
 				if (splitter != null) {
 					int ind = splitter.getIndex();
 					String splitElement = splitter.getSplitter();
@@ -517,9 +518,8 @@ public class ConstraintSolver {
 			return !errors.isEmpty();
 		}
 
-		protected Entry<List<String>, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
-			List<String> varVal = Lists.newArrayList();
-			CallSiteWithExtractedValue witness = null;
+		protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
+			Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 			for (CallSiteWithParamIndex wrappedCallSite : parsAndVals.keySet()) {
 				final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
 
@@ -528,18 +528,16 @@ public class ConstraintSolver {
 					
 					if (wrappedCallSite.getVarName().equals(varName)) {
 						if (callSite.equals(allocSite)) {
-							varVal.add(retrieveConstantFromValue(callSite.getInvokeExpr().getArg(wrappedCallSite.getIndex())));
-							witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
+							varVal.put(retrieveConstantFromValue(callSite.getInvokeExpr().getArg(wrappedCallSite.getIndex())), new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						} else if (allocSite instanceof AssignStmt) {
 							if (wrappedAllocSite.getValue() instanceof Constant) {
-								varVal.add(retrieveConstantFromValue(wrappedAllocSite.getValue()));
-								witness = new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite);
+								varVal.put(retrieveConstantFromValue(wrappedAllocSite.getValue()), new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 							}
 						}
 					}
 				}
 			}
-			return new AbstractMap.SimpleEntry<List<String>, CallSiteWithExtractedValue>(varVal, witness);
+			return varVal;
 		}
 	}
 
