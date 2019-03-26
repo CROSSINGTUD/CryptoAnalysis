@@ -25,6 +25,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -365,7 +366,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			return rules;
 		}
 
-		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH).listFiles();
+		File[] listFiles = new File(IDEALCrossingTestingFramework.RESOURCE_PATH + getRuleSet() +"/").listFiles();
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
@@ -373,6 +374,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		}
 		return rules;
 	}
+	protected abstract Ruleset getRuleSet();
+
+
+
 	private Set<Assertion> extractBenchmarkMethods(SootMethod sootTestMethod) {
 		Set<Assertion> results = new HashSet<>();
 		extractBenchmarkMethods(sootTestMethod, results, new HashSet<SootMethod>());

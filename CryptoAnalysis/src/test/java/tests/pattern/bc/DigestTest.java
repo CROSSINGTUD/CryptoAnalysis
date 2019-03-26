@@ -8,11 +8,16 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class DigestTest extends UsagePatternTestingFramework {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.BouncyCastle;
+	}
 	@Override
 	protected String getSootClassPath() {
 		// TODO Auto-generated method stub

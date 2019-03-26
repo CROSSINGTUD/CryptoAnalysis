@@ -17,11 +17,16 @@ import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 
+import crypto.analysis.Constants.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestHybridEncryption extends TestTinkPrimitives {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_GCMKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(EllipticCurveType.NIST_P256,

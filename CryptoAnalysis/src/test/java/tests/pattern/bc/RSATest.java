@@ -10,11 +10,16 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class RSATest extends UsagePatternTestingFramework {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.BouncyCastle;
+	}
 	@Override
 	protected String getSootClassPath() {
 		// TODO Auto-generated method stub

@@ -13,11 +13,16 @@ import org.bouncycastle.crypto.signers.RSADigestSigner;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class SignerTest extends UsagePatternTestingFramework {
 
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.BouncyCastle;
+	}
 	@Override
 	protected String getSootClassPath() {
 		// TODO Auto-generated method stub

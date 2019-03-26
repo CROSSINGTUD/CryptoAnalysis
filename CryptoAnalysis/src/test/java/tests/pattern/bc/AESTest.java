@@ -14,11 +14,16 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class AESTest extends UsagePatternTestingFramework {
 
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.BouncyCastle;
+	}
 	private static final byte[] tData   = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
 	
 	@Override

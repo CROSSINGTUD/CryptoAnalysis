@@ -6,6 +6,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -27,6 +28,11 @@ public class PBEKeySpecTest  extends UsagePatternTestingFramework {
 	public void PBEKeySpecTest3() throws NoSuchAlgorithmException {
 		PBEKeySpec pbe = new PBEKeySpec(new char[]{}, new byte[1], 1000);
 		Assertions.callToForbiddenMethod();
+	}
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
 	
 }

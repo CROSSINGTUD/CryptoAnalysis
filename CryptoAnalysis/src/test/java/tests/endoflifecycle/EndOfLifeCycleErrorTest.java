@@ -9,6 +9,7 @@ import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -88,5 +89,10 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 
 	private class Container {
 		Cipher c;
+	}
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
 }

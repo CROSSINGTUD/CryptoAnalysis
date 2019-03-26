@@ -11,11 +11,16 @@ import com.google.crypto.tink.daead.DeterministicAeadFactory;
 import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 
+import crypto.analysis.Constants.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestDeterministicAEADCipher extends TestTinkPrimitives {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewAES128GCMKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = DeterministicAeadKeyTemplates.createAesSivKeyTemplate(64);

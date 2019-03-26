@@ -33,11 +33,16 @@ import javax.security.auth.DestroyFailedException;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class UsagePatternTest extends UsagePatternTestingFramework {
 
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
+	}
 	@Test
 	public void useDoFinalInLoop() throws GeneralSecurityException{
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
