@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -13,7 +14,7 @@ public class KeyPairGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("KeyPairGenerator");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/KeyPairGenerator");
 	}
 
 	@Test

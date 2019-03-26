@@ -5,6 +5,7 @@ import java.io.File;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
+import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.errors.*;
 import test.IDEALCrossingTestingFramework;
 
@@ -63,7 +64,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH, Ruleset.BouncyCastle);
 		
 		setErrorsCount("<pattern.MacTest: void testMac2()>", IncompleteOperationError.class, 1);
 		

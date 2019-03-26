@@ -10,6 +10,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -17,7 +18,7 @@ public class SecretKeyFactoryTest extends IDEALCrossingTestingFramework{
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("SecretKeyFactory");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/SecretKeyFactory");
 	}
 	@Test
 	public void testSecretKeyFactory1() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {

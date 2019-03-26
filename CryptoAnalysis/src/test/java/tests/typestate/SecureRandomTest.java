@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -14,7 +15,7 @@ public class SecureRandomTest extends IDEALCrossingTestingFramework{
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("SecureRandom");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/SecureRandom");
 	}
 	@Ignore
 	@Test

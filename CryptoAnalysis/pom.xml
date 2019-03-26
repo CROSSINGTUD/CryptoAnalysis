@@ -5,13 +5,111 @@
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
 	<version>2.1-SNAPSHOT</version>
-	
+
 	<properties>
-   	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-dependency-plugin</artifactId>
+										<versionRange>3.1.1</versionRange>
+										<goals>
+											<goal>unpack</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>unpack-jca</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>de.darmstadt.tu.crossing</groupId>
+									<artifactId>JavaCryptographicArchitecture</artifactId>
+									<version>1.0-SNAPSHOT</version>
+									<classifier>ruleset</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>src/main/resources</outputDirectory>
+									<includes>**</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-bc</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>de.fraunhofer.iem</groupId>
+									<artifactId>BouncyCastle</artifactId>
+									<version>1.0-SNAPSHOT</version>
+									<classifier>ruleset</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>src/main/resources</outputDirectory>
+									<includes>**</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-tink</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>de.darmstadt.tu.crossing</groupId>
+									<artifactId>Tink</artifactId>
+									<version>1.0-SNAPSHOT</version>
+									<classifier>ruleset</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>src/main/resources</outputDirectory>
+									<includes>**</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Adding The Surefire Maven Plugin to The POM File so it can generate 
 				test reports -->
 			<plugin>
@@ -60,7 +158,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -151,9 +249,9 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
-		    <groupId>com.google.code.gson</groupId>
-		    <artifactId>gson</artifactId>
-		    <version>1.4</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>1.4</version>
 		</dependency>
 	</dependencies>
 
@@ -182,7 +280,7 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-		
+
 		<repository>
 			<id>soot-release</id>
 			<name>soot release</name>
