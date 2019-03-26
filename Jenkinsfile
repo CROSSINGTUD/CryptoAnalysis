@@ -4,7 +4,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'cd CryptoAnalysis; mvn clean compile'
+                sh 'cd CryptoAnalysis; mvn clean compile -U'
             }
         }
 
