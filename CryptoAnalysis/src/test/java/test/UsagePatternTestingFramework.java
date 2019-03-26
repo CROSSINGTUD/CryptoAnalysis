@@ -313,10 +313,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						reporters.addReportListener(cryslListener);
 						return reporters;
 					}
-//					@Override
-//					public IDebugger<TypestateDomainValue<StateNode>> debugger() {
-//						return UsagePatternTestingFramework.this.getDebugger();
-//					}
 
 					@Override
 					public boolean isCommandLineMode() {
