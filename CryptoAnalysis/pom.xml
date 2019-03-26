@@ -46,7 +46,7 @@
 				<version>3.1.1</version>
 				<executions>
 					<execution>
-						<id>unpack-jca</id>
+						<id>unpack</id>
 						<phase>compile</phase>
 						<goals>
 							<goal>unpack</goal>
@@ -63,17 +63,6 @@
 									<outputDirectory>src/main/resources</outputDirectory>
 									<includes>**</includes>
 								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-bc</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
 								<artifactItem>
 									<groupId>de.fraunhofer.iem</groupId>
 									<artifactId>BouncyCastle</artifactId>
@@ -84,17 +73,6 @@
 									<outputDirectory>src/main/resources</outputDirectory>
 									<includes>**</includes>
 								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-tink</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>Tink</artifactId>
