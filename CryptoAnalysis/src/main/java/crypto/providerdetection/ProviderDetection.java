@@ -23,6 +23,8 @@ import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
+import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -150,11 +152,11 @@ public class ProviderDetection {
 			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				final JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG(false);
+				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
 				defaultCryptoRules = getRules(rulesDirectory, defaultCryptoRules);
-				doAnalysis(icfg, defaultCryptoRules);
+				doAnalysis(observableDynamicICFG, defaultCryptoRules);
 			}
 		};
 	}
@@ -171,7 +173,7 @@ public class ProviderDetection {
 	 *            
 	 * @param rules 
 	 */
-	public List<CryptSLRule> doAnalysis(JimpleBasedInterproceduralCFG icfg, List<CryptSLRule> rules) {
+	public List<CryptSLRule> doAnalysis(ObservableDynamicICFG observableDynamicICFG, List<CryptSLRule> rules) {
 		
 		outerloop:
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
@@ -211,7 +213,7 @@ public class ProviderDetection {
 									String providerType = getProviderType(providerValue);
 										
 									if(providerType.matches("java.security.Provider")) {
-										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, icfg);
+										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, observableDynamicICFG);
 										this.rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"test"+File.separator+"resources";
 										
 										if(ruleExists(provider, declaringClassName)) {
@@ -276,7 +278,7 @@ public class ProviderDetection {
 	 * @param icfg
 	 *            
 	 */
-	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, JimpleBasedInterproceduralCFG icfg) {
+	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableDynamicICFG observableDynamicICFG) {
 		String provider = null;
 		
 		BackwardQuery query = new BackwardQuery(new Statement(statement,sootMethod), new Val(providerValue, sootMethod));
@@ -289,8 +291,8 @@ public class ProviderDetection {
 			};
 		}) {
 			@Override
-			public BiDiInterproceduralCFG<Unit, SootMethod> icfg() {
-				return icfg;
+			public ObservableICFG<Unit, SootMethod> icfg() {
+				return observableDynamicICFG;
 			}
 
 			@Override
