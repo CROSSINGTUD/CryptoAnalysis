@@ -7,6 +7,7 @@ import javax.crypto.KeyGenerator;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -14,7 +15,7 @@ public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("KeyGenerator");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/KeyGenerator");
 	}
 
 	@Test

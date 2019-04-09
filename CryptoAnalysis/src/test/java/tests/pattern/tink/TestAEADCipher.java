@@ -12,11 +12,16 @@ import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 
+import crypto.analysis.Constants.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestAEADCipher extends TestTinkPrimitives {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewAES128GCMKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = AeadKeyTemplates.createAesGcmKeyTemplate(16);

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -456,7 +457,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					if (index > -1) {
 						foundVal = foundVal.split(splitter)[index];
 					}
-					requiredPredicatesExist &= actVals.contains(foundVal);
+					actVals = actVals.parallelStream().map(e -> e.toLowerCase()).collect(Collectors.toList());
+					requiredPredicatesExist &= actVals.contains(foundVal.toLowerCase());
 				}
 			} else {
 				requiredPredicatesExist = false;

@@ -7,10 +7,16 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class ExtractValueTest  extends UsagePatternTestingFramework{
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
+	}
 	@Test
 	public void testInterproceduralStringFlow() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance(getAES());
