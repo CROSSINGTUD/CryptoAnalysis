@@ -15,12 +15,12 @@ public class InitInMacCalledMoreThanOnceExample {
 		SecureRandom secRandom1 = new SecureRandom();
 		keyGen1.init(secRandom1);
 		Key key1 = keyGen1.generateKey();
-		
+
 		KeyGenerator keyGen2 = KeyGenerator.getInstance("AES");
 		SecureRandom secRandom2 = new SecureRandom();
 		keyGen2.init(secRandom2);
 		Key key2 = keyGen1.generateKey();
-		
+
 		Mac mac = Mac.getInstance("HmacSHA256");
 		mac.init(key1);
 		mac.init(key2);

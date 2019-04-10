@@ -19,7 +19,7 @@ public class EmptyArrayUsedForCipherDoFinalExample {
 		KeyGenerator keygenerator = KeyGenerator.getInstance("AES");
 		keygenerator.init(keySize);
 		SecretKey key = keygenerator.generateKey();
-		
+
 		Cipher aesCipher = Cipher.getInstance("AES/GCM/PKCS5Padding");
 		aesCipher.init(Cipher.ENCRYPT_MODE, key);
 		byte[] encrypted = aesCipher.doFinal(plainText.getBytes());
