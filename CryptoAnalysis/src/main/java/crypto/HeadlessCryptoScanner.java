@@ -276,7 +276,7 @@ public abstract class HeadlessCryptoScanner {
 				
 				//create a new object to execute the Provider Detection analysis
 				ProviderDetection providerDetection = new ProviderDetection();
-				rules = providerDetection.doAnalysis(icfg, rules);
+				rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
 				
 				scanner.scan(rules);
 
