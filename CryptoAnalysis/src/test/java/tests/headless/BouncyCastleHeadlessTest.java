@@ -89,4 +89,24 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		scanner.exec();
 	  	assertErrors();
 	}
+	
+	@Test
+	public void testBCEllipticCurveExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH, Ruleset.BouncyCastle);
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testOne()>", RequiredPredicateError.class, 2);
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testTwo()>", TypestateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 1); //But the message shown is incorrect
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>", RequiredPredicateError.class, 1); //But the message shown is incorrect
+		
+		setErrorsCount("<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<params.ParametersWithRandomTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 3);
+		setErrorsCount("<params.ParametersWithRandomTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 4);
+		setErrorsCount("<params.ECDomainParametersTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, 1);
+		scanner.exec();
+	  	assertErrors();
+	}
 }
