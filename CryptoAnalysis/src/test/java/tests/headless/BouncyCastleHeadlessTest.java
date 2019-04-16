@@ -101,11 +101,17 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>", RequiredPredicateError.class, 1); //But the message shown is incorrect
 		
 		setErrorsCount("<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 2);
 		setErrorsCount("<params.ParametersWithRandomTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<params.ParametersWithRandomTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 4);
 		setErrorsCount("<params.ECDomainParametersTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 1);
 		
-		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testThree()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testFour()>", TypestateError.class, 1);
+		
+		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, 2);
 		scanner.exec();
 	  	assertErrors();
 	}
