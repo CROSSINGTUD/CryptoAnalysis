@@ -30,6 +30,7 @@ import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
+import boomerang.seedfactory.SeedFactory;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import soot.Body;
@@ -48,8 +49,6 @@ import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
-import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import wpds.impl.Weight.NoWeight;
 
@@ -107,7 +106,7 @@ public class ProviderDetection {
 		G.v().reset();
 		Options.v().set_whole_program(true);
 		Options.v().setPhaseOption("cg.cha", "on");
-		Options.v().setPhaseOption("cg", "all-reachable:true");
+//		Options.v().setPhaseOption("cg", "all-reachable:true");
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
@@ -281,8 +280,6 @@ public class ProviderDetection {
 	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableDynamicICFG observableDynamicICFG) {
 		String provider = null;
 		
-		BackwardQuery query = new BackwardQuery(new Statement(statement,sootMethod), new Val(providerValue, sootMethod));
-		
 		//Create a Boomerang solver.
 		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
 			public boolean onTheFlyCallGraph() {
@@ -296,11 +293,13 @@ public class ProviderDetection {
 			}
 
 			@Override
-			public boomerang.seedfactory.SeedFactory<NoWeight> getSeedFactory() {
+			public SeedFactory<NoWeight> getSeedFactory() {
 				return null;
 			}
 		};
 		
+		//Create a backward query
+		BackwardQuery query = new BackwardQuery(new Statement(statement,sootMethod), new Val(providerValue, sootMethod));
 		//Submit query to the solver.
 		BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
 		solver.debugOutput();
