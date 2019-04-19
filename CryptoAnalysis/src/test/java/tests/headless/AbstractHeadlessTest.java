@@ -1,21 +1,13 @@
 package tests.headless;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationRequest;
-import org.apache.maven.shared.invoker.Invoker;
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
@@ -33,20 +25,12 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 import soot.G;
-import soot.Scene;
 import sync.pds.solver.nodes.Node;
-import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public abstract class AbstractHeadlessTest {
@@ -59,6 +43,23 @@ public abstract class AbstractHeadlessTest {
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	public static enum findingType {
+		TRUE_POSITIVE {
+			public String toString() {
+				return "TruePositive";
+			}
+		},
+		FALSE_POSITIVE {
+			public String toString() {
+				return "FalsePositive";
+			}
+		},
+		FALSE_NEGATIVE {
+			public String toString() {
+				return "FalseNegative";
+			}
+		}
+	};
 
 
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -222,5 +223,12 @@ public abstract class AbstractHeadlessTest {
 			throw new RuntimeException("Error Type already specified for this method");
 		}
 		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, errorMarkerCount);
+	}
+	
+	protected void setErrorsCount(String methodSignature, Class<?> errorType, Map<String, findingType> findingsType) {
+		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
+			throw new RuntimeException("Error Type already specified for this method");
+		}
+		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, findingsType.size());
 	}
 }

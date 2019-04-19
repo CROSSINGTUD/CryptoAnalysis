@@ -1,13 +1,17 @@
 package tests.headless;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.Constants.Ruleset;
-import crypto.analysis.errors.*;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.RequiredPredicateError;
+import crypto.analysis.errors.TypestateError;
 import test.IDEALCrossingTestingFramework;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
@@ -91,27 +95,95 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
+	@SuppressWarnings("serial")
 	public void testBCEllipticCurveExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH, Ruleset.BouncyCastle);
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testOne()>", RequiredPredicateError.class, 2);
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testTwo()>", TypestateError.class, 1);
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 1); //But the message shown is incorrect
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>", RequiredPredicateError.class, 1); //But the message shown is incorrect
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testOne()>", RequiredPredicateError.class, new HashMap<String, findingType>(){
+			{
+				put("First parameter was not properly generated as generated Parameters With Random", findingType.TRUE_POSITIVE);
+				put("First parameter was not properly generated as generated E C Public Key Parameters", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testTwo()>", TypestateError.class, new HashMap<String, findingType>(){
+			{
+				put("Unexpected call to method encrypt on object of type org.bouncycastle.crypto.ec.ECElGamalEncryptor. Expect a call to one of the following methods init", 
+						findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("First parameter was not properly generated as generated Parameters With Random", findingType.FALSE_POSITIVE);
+			}
+		}); //issue29:Crypto-API-Rules
+		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("First parameter was not properly generated as generated E C Public Key Parameters", findingType.FALSE_POSITIVE);
+			}
+		}); //issue29:Crypto-API-Rules
 		
-		setErrorsCount("<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 2);
-		setErrorsCount("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 2);
-		setErrorsCount("<params.ParametersWithRandomTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 3);
-		setErrorsCount("<params.ParametersWithRandomTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 4);
-		setErrorsCount("<params.ECDomainParametersTest: void testThree(java.lang.String)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Second parameter was not properly generated as generated E C Domain Parameters", findingType.TRUE_POSITIVE);
+				put("Fiveth parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Second parameter was not properly generated as generated E C Domain Parameters", findingType.TRUE_POSITIVE);
+				put("Fiveth parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ParametersWithRandomTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Fiveth parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+				put("First parameter was not properly generated as generated E C Public Key Parameters", findingType.TRUE_POSITIVE);
+				put("Second parameter was not properly generated as generated E C Domain Parameters", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ParametersWithRandomTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Second parameter was not properly generated as generated E C Domain Parameters", findingType.TRUE_POSITIVE);
+				put("First parameter was not properly generated as generated E C Public Key Parameters", findingType.TRUE_POSITIVE);
+				put("Second parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+				put("Fiveth parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ECDomainParametersTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Fiveth parameter was not properly generated as randomized", findingType.TRUE_POSITIVE);
+			}
+		});
 		
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>", RequiredPredicateError.class, 1);
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>", RequiredPredicateError.class, 1);
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testThree()>", RequiredPredicateError.class, 1);
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testFour()>", TypestateError.class, 1);
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("First parameter was not properly generated as generated E C Private Key Parameters", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("First parameter was not properly generated as generated E C Private Key Parameters", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testThree()>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("First parameter was not properly generated as generated E C Private Key Parameters", findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testFour()>", TypestateError.class, new HashMap<String, findingType>() {
+			{
+				put("Unexpected call to method decrypt on object of type org.bouncycastle.crypto.ec.ECElGamalDecryptor. Expect a call to one of the following methods init",
+						findingType.TRUE_POSITIVE);
+			}
+		});
 		
-		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, 2);
+		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, new HashMap<String, findingType>() {
+			{
+				put("Second parameter was not properly generated as generated E C Domain Parameters$r12", findingType.TRUE_POSITIVE);
+				put("Second parameter was not properly generated as generated E C Domain Parameters$r14", findingType.TRUE_POSITIVE);
+			}
+		});
 		scanner.exec();
 	  	assertErrors();
 	}
