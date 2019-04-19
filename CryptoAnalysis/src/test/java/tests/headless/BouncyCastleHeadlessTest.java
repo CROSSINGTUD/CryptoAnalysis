@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -48,17 +49,13 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	  	assertErrors();
 	}
 	
-	@Ignore
 	@Test
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH, Ruleset.BouncyCastle);
 		
-		setErrorsCount("<pattern.MacTest: void testMac2()>", IncompleteOperationError.class, 1);
-		
-		// Ignored
-		setErrorsCount("<pattern.MacTest: void testMac1()>", ImpreciseValueExtractionError.class, 1);
+		setErrorsCount("<rsa_misuse.RSATest: java.lang.String Encrypt(byte[], org.bouncycastle.crypto.params.AsymmetricKeyParameter)>", TypestateError.class, 1);
 		
 		scanner.exec();
 	  	assertErrors();
