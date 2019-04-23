@@ -50,8 +50,6 @@ public class RSATest {
 
 	public static String Encrypt(byte[] data, AsymmetricKeyParameter publicKey) throws Exception{
 		
-		Security.addProvider(new BouncyCastleProvider());
-
 		RSAEngine engine = new RSAEngine();
 //		engine.init(true, publicKey); // init() is skipped
 
@@ -61,8 +59,6 @@ public class RSATest {
 	}
 
 	public static String Decrypt(String encrypted, AsymmetricKeyParameter privateKey) throws InvalidCipherTextException{
-
-		Security.addProvider(new BouncyCastleProvider());
 
 		AsymmetricBlockCipher engine = new RSAEngine();
 		engine.init(false, privateKey);

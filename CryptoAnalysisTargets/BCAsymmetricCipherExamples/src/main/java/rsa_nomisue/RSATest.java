@@ -35,7 +35,7 @@ public class RSATest {
 	} 
 
 	public static AsymmetricCipherKeyPair GenerateKeys() throws NoSuchAlgorithmException{
-		//		Source: http://stackoverflow.com/questions/3087049/bouncy-castle-rsa-keypair-generation-using-lightweight-api
+
 		RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
 		generator.init(new RSAKeyGenerationParameters
 				(
@@ -49,8 +49,6 @@ public class RSATest {
 	}
 
 	public static String Encrypt(byte[] data, AsymmetricKeyParameter publicKey) throws Exception{
-		//		Source: http://www.cs.berkeley.edu/~jonah/bc/org/bouncycastle/crypto/engines/RSAEngine.html	
-		Security.addProvider(new BouncyCastleProvider());
 
 		RSAEngine engine = new RSAEngine();
 		engine.init(true, publicKey); //true for encryption
@@ -61,9 +59,6 @@ public class RSATest {
 	}
 
 	public static String Decrypt(String encrypted, AsymmetricKeyParameter privateKey) throws InvalidCipherTextException{
-		//		Source: http://www.mysamplecode.com/2011/08/java-rsa-decrypt-string-using-bouncy.html
-
-		Security.addProvider(new BouncyCastleProvider());
 
 		AsymmetricBlockCipher engine = new RSAEngine();
 		engine.init(false, privateKey); //false for decryption
@@ -75,7 +70,6 @@ public class RSATest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		//		AsymmetricCipherKeypair includes both private and public keys, but AsymmetricKeyPair includes only public
 
 		AsymmetricCipherKeyPair keyPair = GenerateKeys();
 
