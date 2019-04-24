@@ -17,7 +17,9 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
@@ -25,6 +27,7 @@ import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -45,10 +48,12 @@ import soot.Transformer;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.jimple.Stmt;
 import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
+import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import wpds.impl.Weight.NoWeight;
 
@@ -172,7 +177,7 @@ public class ProviderDetection {
 	 *            
 	 * @param rules 
 	 */
-	public List<CryptSLRule> doAnalysis(ObservableDynamicICFG observableDynamicICFG, List<CryptSLRule> rules) {
+	public List<CryptSLRule> doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, List<CryptSLRule> rules) {
 		
 		outerloop:
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
@@ -277,7 +282,7 @@ public class ProviderDetection {
 	 * @param icfg
 	 *            
 	 */
-	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableDynamicICFG observableDynamicICFG) {
+	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
 		String provider = null;
 		
 		//Create a Boomerang solver.
@@ -297,14 +302,15 @@ public class ProviderDetection {
 				return null;
 			}
 		};
-		
-		//Create a backward query
-		BackwardQuery query = new BackwardQuery(new Statement(statement,sootMethod), new Val(providerValue, sootMethod));
-		//Submit query to the solver.
-		BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
-		solver.debugOutput();
-		
-		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = backwardQueryResults.getAllocationSites();
+		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = Maps.newHashMap();
+		for(Unit pred : observableDynamicICFG.getPredsOf(statement)) {
+			//Create a backward query
+			BackwardQuery query = new BackwardQuery(new Statement((Stmt) pred,sootMethod), new Val(providerValue, sootMethod));
+			//Submit query to the solver.
+			
+			BackwardBoomerangResults<NoWeight> backwardQueryResults = solver.solve(query);
+			map.putAll(backwardQueryResults.getAllocationSites());
+		}
 		
 		// The Provider can be correctly detected from this static analysis, if there is only one allocation site
 		// where the Provider variable was initialized. Otherwise, it throws an error because it is not possible
