@@ -12,6 +12,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
+
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -19,7 +21,7 @@ public class CipherTest extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("Cipher");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/Cipher");
 	}
 
 	@Test

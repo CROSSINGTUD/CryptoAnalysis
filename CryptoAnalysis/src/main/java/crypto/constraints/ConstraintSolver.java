@@ -289,15 +289,7 @@ public class ConstraintSolver {
 
 					return;
 				case "length":
-					//pred looks as follows: neverTypeOf($varName)
-					// -> parameter is always the variable
-					String var = ((CryptSLObject) pred.getParameters().get(0)).getVarName();
-					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
-						if (cs.getVarName().equals(var)) {
-							errors.add(new ImpreciseValueExtractionError(origin, cs.stmt(), classSpec.getRule()));
-							break;
-						}
-					}
+					//TODO Not implemented!
 					return;
 				default:
 					return;

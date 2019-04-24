@@ -8,6 +8,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -15,7 +16,7 @@ public class PBEKeySpecTest  extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("PBEKeySpec");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/PBEKeySpec");
 	}
 
 	@Test

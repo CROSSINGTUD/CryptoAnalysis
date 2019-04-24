@@ -9,6 +9,7 @@ import java.security.SignatureException;
 
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -16,7 +17,7 @@ public class SignatureTests extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("Signature");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/Signature");
 	}
 
 	@Test

@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
@@ -16,7 +17,7 @@ public class MessageDigestTest  extends IDEALCrossingTestingFramework {
 
 	@Override
 	protected File getCryptSLFile() {
-		return new File("MessageDigest");
+		return new File(Ruleset.JavaCryptographicArchitecture +"/MessageDigest");
 	}
 
 	@Test

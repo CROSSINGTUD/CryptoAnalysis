@@ -21,6 +21,7 @@ import javax.crypto.SecretKey;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import crypto.analysis.Constants.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -345,6 +346,12 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 //			Assertions.violatedConstraint(cis);
 	  Assertions.mustNotBeInAcceptingState(cis);
 	  cis.close();
+	}
+
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
 
 }	

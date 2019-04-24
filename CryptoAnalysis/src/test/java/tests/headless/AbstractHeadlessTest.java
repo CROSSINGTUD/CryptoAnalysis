@@ -27,6 +27,8 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.Constants;
+import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
@@ -67,11 +69,16 @@ public abstract class AbstractHeadlessTest {
 
 	protected HeadlessCryptoScanner createScanner(MavenProject mp,
 			String rulesDir) {
+		return createScanner(mp, rulesDir, Constants.Ruleset.JavaCryptographicArchitecture);
+	}
+	
+	protected HeadlessCryptoScanner createScanner(MavenProject mp,
+			String rulesDir, Ruleset ruleset) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String getRulesDirectory() {
-				return rulesDir;
+				return rulesDir + ruleset +"/";
 			}
 
 			@Override

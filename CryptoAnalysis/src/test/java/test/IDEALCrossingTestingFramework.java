@@ -20,6 +20,7 @@ import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
+import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
@@ -47,8 +48,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
-//	protected TestingResultReporter<StateNode> testingResultReporter;
-	public final static String RESOURCE_PATH = "src/test/resources/";
+	public final static String RESOURCE_PATH = "src/main/resources/";
 	
 	protected abstract File getCryptSLFile();
 
@@ -183,5 +183,4 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected boolean staticallyUnknown() {
 		return true;
 	}
-
 }

@@ -23,7 +23,7 @@ public class IncompleOperationErrorExample {
 		/**
 		 * The following call is missing, therefore the Signature object is never actually used to compute a Signature.
 		 */
-		//instance.sign();
+		instance.sign();
 		
 		IncompleOperationErrorExample ex = new IncompleOperationErrorExample();
 		ex.doInit();
