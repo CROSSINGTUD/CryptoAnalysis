@@ -2,7 +2,7 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
@@ -225,7 +225,7 @@ public abstract class AbstractHeadlessTest {
 		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, errorMarkerCount);
 	}
 	
-	protected void setErrorsCount(String methodSignature, Class<?> errorType, Map<String, findingType> findingsType) {
+	protected void setErrorsCount(String methodSignature, Class<?> errorType, List<findingType> findingsType) {
 		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
 			throw new RuntimeException("Error Type already specified for this method");
 		}
