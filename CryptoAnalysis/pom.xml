@@ -4,10 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>2.1</version>
-
+	<version>2.2-SNAPSHOT</version>
+	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+   	 	<sootVersion>3.2.0</sootVersion>
+   	 	<spdsVersion>2.2-SNAPSHOT</spdsVersion>
 	</properties>
 
 	<build>
@@ -66,7 +68,7 @@
 								<artifactItem>
 									<groupId>de.fraunhofer.iem</groupId>
 									<artifactId>BouncyCastle</artifactId>
-									<version>0.1</version>
+									<version>0.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -169,12 +171,12 @@
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>boomerangPDS</artifactId>
-			<version>2.1</version>
+			<version>${spdsVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.2.0</version>
+			<version>${sootVersion}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.guava</groupId>
@@ -185,12 +187,12 @@
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>idealPDS</artifactId>
-			<version>2.1</version>
+			<version>${spdsVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>testCore</artifactId>
-			<version>2.1</version>
+			<version>${spdsVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
