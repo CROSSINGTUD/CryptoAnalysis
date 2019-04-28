@@ -12,7 +12,6 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class RSATest {
 	

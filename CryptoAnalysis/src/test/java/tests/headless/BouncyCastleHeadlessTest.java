@@ -3,7 +3,6 @@ package tests.headless;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -50,12 +49,74 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
+	@SuppressWarnings("serial")
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH, Ruleset.BouncyCastle);
 		
-		setErrorsCount("<rsa_misuse.RSATest: java.lang.String Encrypt(byte[], org.bouncycastle.crypto.params.AsymmetricKeyParameter)>", TypestateError.class, 1);
+		setErrorsCount("<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>", TypestateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.RSAEngineTest: void testEncryptTwo()>", TypestateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.RSAEngineTest: void testDecryptTwo(byte[])>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.RSAEngineTest: void testDecryptTwo(byte[])>", TypestateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.RSAEngineTest: void testEncryptOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.FALSE_POSITIVE);
+			}
+		});
+		setErrorsCount("<crypto.RSAEngineTest: void testDecryptOne(byte[])>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.FALSE_POSITIVE);
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testThree()>", TypestateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testFour()>", IncompleteOperationError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testTwo()>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ParametersWithRandomTest: void testTwo()>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.FALSE_POSITIVE);
+				add(findingType.FALSE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.ParametersWithRandomTest: void testOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.FALSE_POSITIVE);
+			}
+		});
+		setErrorsCount("<params.RSAPrivateCrtKeyParametersTest: void testOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
+			{
+				add(findingType.TRUE_POSITIVE);
+			}
+		});
 		
 		scanner.exec();
 	  	assertErrors();
