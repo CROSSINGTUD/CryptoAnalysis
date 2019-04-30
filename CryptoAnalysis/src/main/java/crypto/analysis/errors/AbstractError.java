@@ -2,14 +2,25 @@ package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
 import crypto.rules.CryptSLRule;
+import soot.jimple.internal.JAssignStmt;
 
 public abstract class AbstractError implements IError {
-	private Statement errorLocation;
-	private CryptSLRule rule;
+	private final Statement errorLocation;
+	private final CryptSLRule rule;
+	private final String outerMethod;
+	private final String invokeMethod;
 
 	public AbstractError(Statement errorLocation, CryptSLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
+		this.outerMethod = errorLocation.getMethod().getSignature();
+		
+		if(errorLocation.getUnit().get().containsInvokeExpr()) {
+			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
+		}
+		else {
+			this.invokeMethod = ((JAssignStmt)errorLocation.getUnit().get()).getLeftOp().toString();
+		}	
 	}
 
 	public Statement getErrorLocation() {
@@ -28,12 +39,11 @@ public abstract class AbstractError implements IError {
 
 	@Override
 	public int hashCode() {
-		final String outerMethod = errorLocation.getMethod().getName();
-		final String method = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((invokeMethod == null) ? 0 : invokeMethod.hashCode());
 		result = prime * result + ((outerMethod == null) ? 0 : outerMethod.hashCode());
-		result = prime * result + ((method == null) ? 0 : method.hashCode());
+		result = prime * result + ((rule == null) ? 0 : rule.hashCode());
 		return result;
 	}
 
@@ -46,15 +56,15 @@ public abstract class AbstractError implements IError {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractError other = (AbstractError) obj;
-		if (errorLocation.getMethod().getName() == null) {
-			if (other.errorLocation.getMethod().getName() != null)
+		if (invokeMethod == null) {
+			if (other.invokeMethod != null)
 				return false;
-		} else if (!errorLocation.getMethod().getName().equals(other.errorLocation.getMethod().getName()))
+		} else if (!invokeMethod.equals(other.invokeMethod))
 			return false;
-		if (errorLocation.getUnit().get().getInvokeExpr().getMethod().toString() == null) {
-			if (other.errorLocation.getUnit().get().getInvokeExpr().getMethod().toString() != null)
+		if (outerMethod == null) {
+			if (other.outerMethod != null)
 				return false;
-		} else if (!errorLocation.getUnit().get().getInvokeExpr().getMethod().toString().equals(other.errorLocation.getUnit().get().getInvokeExpr().getMethod().toString()))
+		} else if (!outerMethod.equals(other.outerMethod))
 			return false;
 		if (rule == null) {
 			if (other.rule != null)
@@ -63,4 +73,8 @@ public abstract class AbstractError implements IError {
 			return false;
 		return true;
 	}
+	
+	
+
+	
 }
