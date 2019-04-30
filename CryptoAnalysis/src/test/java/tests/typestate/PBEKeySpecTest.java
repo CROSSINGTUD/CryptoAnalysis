@@ -1,6 +1,5 @@
 package tests.typestate;
 
-import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -8,15 +7,20 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class PBEKeySpecTest  extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getCryptSLFile() {
-		return new File(Ruleset.JavaCryptographicArchitecture +"/PBEKeySpec");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
+	}
+	
+	@Override
+	protected String getRulename() {
+		return "PBEKeySpec";
 	}
 
 	@Test

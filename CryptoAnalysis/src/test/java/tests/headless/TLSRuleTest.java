@@ -14,7 +14,7 @@ public class TLSRuleTest extends AbstractHeadlessTest{
 	public void secureFileTransmitter() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 	
 		scanner.exec();
 		assertErrors();

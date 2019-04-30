@@ -2,7 +2,6 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -15,7 +14,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 	public void fileEncryptor() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/FileEncryptor").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		//All the following errors are false positives
 		setErrorsCount("<Crypto.KeyDeriv: javax.crypto.SecretKey getKey(char[])>", RequiredPredicateError.class, 1);
@@ -31,7 +30,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 	public void userAuthenticator() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/UserAuthenticator").getAbsolutePath();
 	  	MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		//All the following errors are false positives
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 2);

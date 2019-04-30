@@ -1,6 +1,5 @@
 package tests.typestate;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -11,17 +10,21 @@ import java.security.cert.CertificateException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class KeyStoreTest extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getCryptSLFile() {
-		return new File(Ruleset.JavaCryptographicArchitecture +"/KeyStore");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
-
+	
+	@Override
+	protected String getRulename() {
+		return "KeyStore";
+	}
 	@Ignore
 	@Test
 	public void correctUsage() throws KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException, CertificateException, IOException {

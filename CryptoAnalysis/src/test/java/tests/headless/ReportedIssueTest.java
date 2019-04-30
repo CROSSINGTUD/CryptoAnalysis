@@ -2,16 +2,13 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
 import test.IDEALCrossingTestingFramework;
 
 public class ReportedIssueTest extends AbstractHeadlessTest {
@@ -20,7 +17,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 	public void reportedIssues() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportedIssues").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 	  
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", ConstraintError.class, 1);
 	  

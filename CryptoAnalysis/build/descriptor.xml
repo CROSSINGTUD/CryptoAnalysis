@@ -14,10 +14,4 @@
             <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
-    <fileSets>
-        <fileSet>
-            <directory>src/test/resources</directory>
-            <outputDirectory>defaultRules</outputDirectory>
-        </fileSet>
-    </fileSets>
 </assembly>
