@@ -1,7 +1,12 @@
 package crypto.analysis;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
+
+import org.apache.tools.ant.types.CommandlineJava.SysProperties;
 
 import com.google.inject.internal.util.Lists;
 
@@ -12,16 +17,10 @@ public class CrySLRulesetSelector {
 	public static enum Ruleset {
 		JavaCryptographicArchitecture, BouncyCastle, Tink
 	}
-
-	/**
-	 * The directory containing the rulesets in subdirectories. Must end in a slash.
-	 */
-	public static String RESOURCE_PATH = "src/main/resources/";
-
-	public static List<CryptSLRule> makeFromRuleset(Ruleset... set) {
+	public static List<CryptSLRule> makeFromRuleset(String rulesBasePath, Ruleset... set) {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
-			rules.addAll(getRulesset(s));
+			rules.addAll(getRulesset(rulesBasePath, s));
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found for rulesset " + set);
@@ -35,7 +34,7 @@ public class CrySLRulesetSelector {
 	 * @param rulesetString
 	 * @return
 	 */
-	public static List<CryptSLRule> makeFromRulesetString(String rulesetString) {
+	public static List<CryptSLRule> makeFromRulesetString(String rulesBasePath, String rulesetString) {
 		String[] set = rulesetString.split(",");
 		List<Ruleset> ruleset = Lists.newArrayList();
 		for (String s : set) {
@@ -52,12 +51,12 @@ public class CrySLRulesetSelector {
 		if (ruleset.isEmpty()) {
 			throw new RuntimeException("Could not parse " + rulesetString + ". Was not able to find rulesets.");
 		}
-		return makeFromRuleset(ruleset.toArray(new Ruleset[ruleset.size()]));
+		return makeFromRuleset(rulesBasePath, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
 	
-	private static List<CryptSLRule> getRulesset(Ruleset s){
+	private static List<CryptSLRule> getRulesset(String rulesBasePath, Ruleset s){
 		List<CryptSLRule> rules = Lists.newArrayList();
-		File[] listFiles = new File(RESOURCE_PATH + s +"/").listFiles();
+		File[] listFiles = new File(rulesBasePath + s+"/").listFiles();
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
@@ -66,8 +65,8 @@ public class CrySLRulesetSelector {
 		return rules;
 	}
 
-	public static CryptSLRule makeSingleRule(Ruleset ruleset, String rulename) {
-		File file = new File(RESOURCE_PATH + ruleset+"/"+rulename + ".cryptslbin");
+	public static CryptSLRule makeSingleRule(String rulesBasePath, Ruleset ruleset, String rulename) {
+		File file = new File(rulesBasePath +rulename + ".cryptslbin");
 		if(!file.exists()) {
 			throw new RuntimeException("Could not locate rule " + rulename +" within set " + ruleset );
 		}

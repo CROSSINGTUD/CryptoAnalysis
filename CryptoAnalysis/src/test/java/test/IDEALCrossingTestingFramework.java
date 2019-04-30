@@ -45,7 +45,8 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
-
+	public static final String RULES_BASE_DIR = "src/main/resources/";
+	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
 			
@@ -72,7 +73,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		return CrySLRulesetSelector.makeSingleRule(getRuleset(), getRulename());
+		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
 //		CryptSLRuleReader.readFromFile(file);
 	}
 

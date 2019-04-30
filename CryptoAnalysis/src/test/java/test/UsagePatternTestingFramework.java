@@ -341,7 +341,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	private List<CryptSLRule> getRules() {
 		if(rules == null) {
-			rules = CrySLRulesetSelector.makeFromRuleset(getRuleSet());
+			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
 		}
 		return rules;
 	}

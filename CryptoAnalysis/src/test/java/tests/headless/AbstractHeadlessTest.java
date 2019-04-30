@@ -32,6 +32,7 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import soot.G;
 import sync.pds.solver.nodes.Node;
+import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public abstract class AbstractHeadlessTest {
@@ -66,7 +67,7 @@ public abstract class AbstractHeadlessTest {
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(ruleset);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
 			}
 			@Override
 			protected String applicationClassPath() {

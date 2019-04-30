@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -35,7 +34,6 @@ import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
 import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
 import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.BodyTransformer;
@@ -49,8 +47,6 @@ import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
 import soot.Unit;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
-import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
@@ -59,7 +55,7 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static List<CryptSLRule> rules = Lists.newArrayList();
+	private static List<CryptSLRule> rules;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -264,10 +260,10 @@ public abstract class HeadlessCryptoScanner {
 	
 
 	protected List<CryptSLRule> getRules() {
-		if (!rules.isEmpty()) {
+		if (rules != null) {
 			return rules;
 		}
-		return rules = CrySLRulesetSelector.makeFromRuleset(Ruleset.JavaCryptographicArchitecture);
+		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources", Ruleset.JavaCryptographicArchitecture);
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
