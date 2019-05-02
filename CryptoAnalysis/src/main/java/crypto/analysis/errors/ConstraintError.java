@@ -1,10 +1,13 @@
 package crypto.analysis.errors;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.Multimap;
 
+import boomerang.ForwardQuery;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
@@ -44,9 +47,49 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 		visitor.visit(this);
 	}
 	
+
+	/**
+	 * Returns the actual data-flow path for this constraints violation.
+	 * 
+	 * Example: {@code
+	 * if(...) 
+	 * 	x = "AES/CBC/PKCS5Padding"; 
+	 * 	y = x; 
+	 * else 
+	 * 	y = "DES"; (1)
+	 * 
+	 * Cipher.getInstance(y); (2)
+	 * } 
+	 * When this constraint error represents the violation that "DES" is used, the returned
+	 * data-flow path will only contain the statements marked by (1) and (2).
+	 * 
+	 * @return The map of allocation sites to the set of statements leading to the violation
+	 */
 	@Override
-	public Set<Node<Statement, Val>> getDataFlowPath() {
-		return callSiteWithParamIndex.getVal().getDataFlowPath();
+	public Collection<Node<Statement, Val>> getDataFlowPath() {
+		return callSiteWithParamIndex.getVal().getRelevantDataFlowPath();
+	}
+	
+
+	/**
+	 * Returns all other statements of the data-flow path for this constraints violation.
+	 * 
+	 * Example: {@code
+	 * if(...) 
+	 * 	x = "AES/CBC/PKCS5Padding"; (1)
+	 * 	y = x; (2)
+	 * else 
+	 * 	y = "DES"; (3)
+	 * 
+	 * Cipher.getInstance(y); (4)
+	 * } 
+	 * When this constraint error represents the violation that "DES" is used, the returned
+	 * map of statements is {1 => {1,2,4}, 3 => {3,4}}
+	 * 
+	 * @return The map of allocation sites to the set of statements reaching the violation location
+	 */
+	public Multimap<ForwardQuery, Node<Statement, Val>> getAllDataFlowPaths() {
+		return callSiteWithParamIndex.getVal().getAllDataFlowPaths();
 	}
 
 

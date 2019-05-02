@@ -16,6 +16,7 @@ import soot.Unit;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import typestate.TransitionFunction;
@@ -66,6 +67,9 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 			if(unit instanceof AssignStmt){
 				AssignStmt stmt = (AssignStmt) unit;
 				out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp(), new Statement(stmt,method))));
+			} else if(unit instanceof Stmt && ((Stmt) unit).containsInvokeExpr()) {
+				Stmt stmt = (Stmt) unit;
+				out.add(createQuery(stmt,method,new AllocVal(stmt.getInvokeExpr(), method, stmt.getInvokeExpr(), new Statement(stmt,method))));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;

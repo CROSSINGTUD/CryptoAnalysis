@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -18,6 +17,7 @@ import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
@@ -33,7 +33,6 @@ import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import typestate.finiteautomata.MatcherTransition;
 import wpds.impl.Weight.NoWeight;
@@ -52,7 +51,6 @@ public class ExtractParameterAnalysis {
 			return key;
 		}
 	};
-
 	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject, SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
@@ -122,10 +120,11 @@ public class ExtractParameterAnalysis {
 		if (!(parameter instanceof Local)) {
 			Val parameterVal = new Val(parameter, stmt.getMethod());
 			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameterVal, index, varNameInSpecification);
-			Set<Node<Statement,Val>> dataFlowPath = Sets.newHashSet();
-			dataFlowPath.add(new Node<Statement, Val>(stmt, parameterVal));
+			Multimap<ForwardQuery,Node<Statement,Val>> dataFlowPath = HashMultimap.create();
+			ForwardQuery q  = new ForwardQuery(stmt, parameterVal);
+			dataFlowPath.put(q, new Node<Statement, Val>(stmt, parameterVal));
 			collectedValues.put(cs
-					, new ExtractedValue(stmt,parameter, dataFlowPath));
+					, new ExtractedValue(stmt,parameter, q, dataFlowPath));
 			querySites.add(cs);
 			return;
 		}
@@ -140,13 +139,14 @@ public class ExtractParameterAnalysis {
 				@Override
 				public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
 					propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
+					Multimap<ForwardQuery, Node<Statement, Val>> allDataFlowPath = computeDataFlowPath(res);
 					for (ForwardQuery v : res.getAllocationSites().keySet()) {
 						ExtractedValue extractedValue = null;
 						if(v.var() instanceof AllocVal) {
 							AllocVal allocVal = (AllocVal) v.var();
-							extractedValue = new ExtractedValue(allocVal.allocationStatement(),allocVal.allocationValue(), res.getDataFlowPath(v));
+							extractedValue = new ExtractedValue(allocVal.allocationStatement(),allocVal.allocationValue(), v,allDataFlowPath);
 						} else {
-							extractedValue = new ExtractedValue(v.stmt(),v.var().value(), res.getDataFlowPath(v));
+							extractedValue = new ExtractedValue(v.stmt(),v.var().value(), v, allDataFlowPath);
 						}
 						collectedValues.put(callSiteWithParamIndex,
 								extractedValue);
@@ -161,6 +161,17 @@ public class ExtractParameterAnalysis {
 				}
 			});
 		}
+	}
+
+	protected Multimap<ForwardQuery, Node<Statement, Val>> computeDataFlowPath(BackwardBoomerangResults<NoWeight> results) {
+		Multimap<ForwardQuery, Node<Statement,Val>> res = HashMultimap.create();
+		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> allocationSites = results.getAllocationSites();
+		for(ForwardQuery q : allocationSites.keySet()) {
+			System.out.println(q);
+			res.putAll(q, results.getDataFlowPath(q));
+			System.out.println(results.getDataFlowPath(q));
+		}
+		return res;
 	}
 
 	public void addAdditionalBoomerangQuery(AdditionalBoomerangQuery q, QueryListener listener) {

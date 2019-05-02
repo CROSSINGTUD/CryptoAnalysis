@@ -1,5 +1,6 @@
 package crypto.analysis.errors;
 
+import java.util.Collection;
 import java.util.Set;
 
 import boomerang.jimple.Statement;
@@ -26,7 +27,7 @@ public abstract class ErrorWithObjectAllocation extends AbstractError{
 		return "";
 	}
 	
-	public Set<Node<Statement, Val>> getDataFlowPath(){
+	public Collection<Node<Statement, Val>> getDataFlowPath(){
 		return objectAllocationLocation.getDataFlowPath();
 	}
 }
