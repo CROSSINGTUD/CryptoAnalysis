@@ -12,7 +12,7 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore

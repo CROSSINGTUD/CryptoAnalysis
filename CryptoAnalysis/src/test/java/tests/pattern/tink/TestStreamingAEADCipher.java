@@ -16,7 +16,7 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
