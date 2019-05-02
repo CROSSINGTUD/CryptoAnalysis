@@ -10,7 +10,7 @@ import java.security.Signature;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 

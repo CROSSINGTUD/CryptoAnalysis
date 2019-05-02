@@ -19,9 +19,9 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.Constants;
-import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.CrySLAnalysisListener;
+import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.EnsuredCryptSLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -29,8 +29,10 @@ import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
 import soot.G;
 import sync.pds.solver.nodes.Node;
+import test.IDEALCrossingTestingFramework;
 import typestate.TransitionFunction;
 
 public abstract class AbstractHeadlessTest {
@@ -68,25 +70,22 @@ public abstract class AbstractHeadlessTest {
 		return mi;
 	}
 
-	protected HeadlessCryptoScanner createScanner(MavenProject mp,
-			String rulesDir) {
-		return createScanner(mp, rulesDir, Constants.Ruleset.JavaCryptographicArchitecture);
+	protected HeadlessCryptoScanner createScanner(MavenProject mp) {
+		return createScanner(mp, Ruleset.JavaCryptographicArchitecture);
 	}
 	
-	protected HeadlessCryptoScanner createScanner(MavenProject mp,
-			String rulesDir, Ruleset ruleset) {
+	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
-			@Override
-			protected String getRulesDirectory() {
-				return rulesDir + ruleset +"/";
-			}
-
 			@Override
 			protected String sootClassPath() {
 				return mp.getBuildDirectory() +(mp.getFullClassPath().equals("") ? "": File.pathSeparator+ mp.getFullClassPath());
 			}
 
+			@Override
+			protected List<CryptSLRule> getRules() {
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
+			}
 			@Override
 			protected String applicationClassPath() {
 				return mp.getBuildDirectory();

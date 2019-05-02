@@ -1,22 +1,28 @@
 package tests.typestate;
 
-import java.io.File;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
 
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class KeyGeneratorTest extends IDEALCrossingTestingFramework {
 
+
 	@Override
-	protected File getCryptSLFile() {
-		return new File(Ruleset.JavaCryptographicArchitecture +"/KeyGenerator");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
+	
+	@Override
+	protected String getRulename() {
+		return "KeyGenerator";
+	}
+	
 
 	@Test
 	public void testKeyGenerator1() throws NoSuchAlgorithmException {

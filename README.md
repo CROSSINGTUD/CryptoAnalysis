@@ -23,6 +23,10 @@ CogniCrypt<sub>SAST</sub> uses maven as build tool. You can compile and build th
 
 A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar` 
 
+### Build in Eclipse
+
+Importing the porject into eclipse and compiling with m2e does not work. m2e cannot download and extract the rules from nexus. Please run a `mvn compile` from the *command line* within the project directory, from now on m2e can be used.
+
 ## Usage
 
 CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 

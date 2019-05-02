@@ -63,10 +63,6 @@ public abstract class CryptoScanner {
 		return resultsAggregator;
 	};
 
-	public abstract boolean isCommandLineMode();
-
-	public abstract boolean rulesInSrcFormat();
-
 	public CryptoScanner() {
 		CryptSLMethodToSootMethod.reset();
 	}

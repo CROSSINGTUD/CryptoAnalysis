@@ -1,22 +1,28 @@
 package tests.typestate;
 
-import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class SecureRandomTest extends IDEALCrossingTestingFramework{
 
+
 	@Override
-	protected File getCryptSLFile() {
-		return new File(Ruleset.JavaCryptographicArchitecture +"/SecureRandom");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
+	
+	@Override
+	protected String getRulename() {
+		return "SecureRandom";
+	}
+	
 	@Ignore
 	@Test
 	public void testSecureRandom1() throws NoSuchAlgorithmException {
