@@ -33,14 +33,14 @@ import crypto.rules.CryptSLRule;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
+import tests.headless.FindingsType.FalseNegatives;
+import tests.headless.FindingsType.NoFalseNegatives;
 import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.NoFalsePositives;
 import tests.headless.FindingsType.TruePositives;
 import typestate.TransitionFunction;
 
 public abstract class AbstractHeadlessTest {
-
-	private static int numberOfFindings;
 
 	/**
 	 * To run these test cases in Eclipse, specify your maven home path as JVM
@@ -213,7 +213,7 @@ public abstract class AbstractHeadlessTest {
 		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, errorMarkerCount);
 	}
 
-	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalsePositives fp, String methodSignature) {
+	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalsePositives fp, FalseNegatives fn, String methodSignature) {
 		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
 			throw new RuntimeException("Error Type already specified for this method");
 		}
@@ -221,10 +221,18 @@ public abstract class AbstractHeadlessTest {
 	}
 	
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, String methodSignature) {
-		setErrorsCount(errorType,tp, new NoFalsePositives(), methodSignature);
+		setErrorsCount(errorType,tp, new NoFalsePositives(), new NoFalseNegatives(),  methodSignature);
+	}
+
+	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalseNegatives fn, String methodSignature) {
+		setErrorsCount(errorType,tp, new NoFalsePositives(), fn, methodSignature);
 	}
 
 	protected void setErrorsCount(Class<?> errorType, FalsePositives fp, String methodSignature) {
-		setErrorsCount(errorType,new TruePositives(0), fp, methodSignature);
+		setErrorsCount(errorType,new TruePositives(0), fp, new NoFalseNegatives(),  methodSignature);
+	}
+
+	protected void setErrorsCount(Class<?> errorType, FalseNegatives fn, String methodSignature) {
+		setErrorsCount(errorType,new TruePositives(0), new NoFalsePositives(), fn,  methodSignature);
 	}
 }

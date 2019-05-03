@@ -1,7 +1,6 @@
 package tests.headless;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,6 +11,7 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import tests.headless.FindingsType.FalseNegatives;
 import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.TruePositives;
 
@@ -66,8 +66,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testEncryptTwo()>");
 		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
 		
-		//TODO?
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalsePositives(1, null), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), new FalseNegatives(1, "Fifth parameter not randomized! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/140"),  "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
 		setErrorsCount(TypestateError.class,  new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
 		setErrorsCount(IncompleteOperationError.class, new TruePositives(1),  "<generators.RSAKeyPairGeneratorTest: void testFour()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<generators.RSAKeyPairGeneratorTest: void testTwo()>");
@@ -114,10 +113,12 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
+		
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>"); 
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>");
+		
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.ECElGamalEncryptorTest: void testOne()>");
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.ECElGamalEncryptorTest: void testTwo()>");
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "#29:Crypto-API-Rules"), "<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>"); 
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "#29:Crypto-API-Rules"), "<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>");
 		
 		setErrorsCount(RequiredPredicateError.class,new TruePositives(2), "<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>");
