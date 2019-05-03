@@ -33,37 +33,25 @@ import crypto.rules.CryptSLRule;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
+import tests.headless.FindingsType.FalsePositives;
+import tests.headless.FindingsType.NoFalsePositives;
+import tests.headless.FindingsType.TruePositives;
 import typestate.TransitionFunction;
 
 public abstract class AbstractHeadlessTest {
 
+	private static int numberOfFindings;
+
 	/**
-	 * To run these test cases in Eclipse, specify your maven home path as JVM argument:
-	 * -Dmaven.home=<PATH_TO_MAVEN_BIN>
+	 * To run these test cases in Eclipse, specify your maven home path as JVM
+	 * argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
 	 */
-	
+
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
-	public static enum findingType {
-		TRUE_POSITIVE {
-			public String toString() {
-				return "TruePositive";
-			}
-		},
-		FALSE_POSITIVE {
-			public String toString() {
-				return "FalsePositive";
-			}
-		},
-		FALSE_NEGATIVE {
-			public String toString() {
-				return "FalseNegative";
-			}
-		}
-	};
 
-
+	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
@@ -73,19 +61,21 @@ public abstract class AbstractHeadlessTest {
 	protected HeadlessCryptoScanner createScanner(MavenProject mp) {
 		return createScanner(mp, Ruleset.JavaCryptographicArchitecture);
 	}
-	
+
 	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {
-				return mp.getBuildDirectory() +(mp.getFullClassPath().equals("") ? "": File.pathSeparator+ mp.getFullClassPath());
+				return mp.getBuildDirectory()
+						+ (mp.getFullClassPath().equals("") ? "" : File.pathSeparator + mp.getFullClassPath());
 			}
 
 			@Override
 			protected List<CryptSLRule> getRules() {
 				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
 			}
+
 			@Override
 			protected String applicationClassPath() {
 				return mp.getBuildDirectory();
@@ -95,6 +85,7 @@ public abstract class AbstractHeadlessTest {
 			protected CrySLAnalysisListener getAdditionalListener() {
 				return errorCountingAnalysisListener;
 			}
+
 			@Override
 			protected String getOutputFolder() {
 				File file = new File("cognicrypt-output/");
@@ -116,16 +107,14 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
-				if(!errorMarkerCountPerErrorTypeAndMethod
-						.contains(error.getErrorLocation().getMethod().toString(), error.getClass())) {
+				String methodContainingError = error.getErrorLocation().getMethod().toString();
+				if (!errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = 0;
 				} else {
-					currCount = errorMarkerCountPerErrorTypeAndMethod
-							.get(error.getErrorLocation().getMethod().toString(), error.getClass());
+					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
 				}
 				Integer newCount = --currCount;
-				errorMarkerCountPerErrorTypeAndMethod.put(error.getErrorLocation().getMethod().toString(),
-						error.getClass(), newCount);
+				errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
 			}
 
 			@Override
@@ -198,7 +187,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void onSecureObjectFound(IAnalysisSeed analysisObject) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
 	}
@@ -223,11 +212,19 @@ public abstract class AbstractHeadlessTest {
 		}
 		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, errorMarkerCount);
 	}
-	
-	protected void setErrorsCount(String methodSignature, Class<?> errorType, List<findingType> findingsType) {
+
+	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalsePositives fp, String methodSignature) {
 		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
 			throw new RuntimeException("Error Type already specified for this method");
 		}
-		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, findingsType.size());
+		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
+	}
+	
+	protected void setErrorsCount(Class<?> errorType, TruePositives tp, String methodSignature) {
+		setErrorsCount(errorType,tp, new NoFalsePositives(), methodSignature);
+	}
+
+	protected void setErrorsCount(Class<?> errorType, FalsePositives fp, String methodSignature) {
+		setErrorsCount(errorType,new TruePositives(0), fp, methodSignature);
 	}
 }

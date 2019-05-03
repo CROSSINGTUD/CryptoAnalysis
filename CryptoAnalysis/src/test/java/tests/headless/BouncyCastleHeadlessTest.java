@@ -12,7 +12,8 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import test.IDEALCrossingTestingFramework;
+import tests.headless.FindingsType.FalsePositives;
+import tests.headless.FindingsType.TruePositives;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	@Ignore
@@ -54,69 +55,24 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
+
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "AsymmetricCipherKeyPair.getPrivate() not specified."), "<rsa_nomisuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "AsymmetricCipherKeyPair.getPrivate() not specified."),"<rsa_misuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "AsymmetricCipherKeyPair.getPublic() not specified"), "<rsa_nomisuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
 		
-		setErrorsCount("<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>", TypestateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.RSAEngineTest: void testEncryptTwo()>", TypestateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.RSAEngineTest: void testDecryptTwo(byte[])>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.RSAEngineTest: void testDecryptTwo(byte[])>", TypestateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.RSAEngineTest: void testEncryptOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.RSAEngineTest: void testDecryptOne(byte[])>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testThree()>", TypestateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testFour()>", IncompleteOperationError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<generators.RSAKeyPairGeneratorTest: void testTwo()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ParametersWithRandomTest: void testTwo()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-				add(findingType.FALSE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ParametersWithRandomTest: void testOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.RSAPrivateCrtKeyParametersTest: void testOne()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testEncryptTwo()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		
+		//TODO?
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalsePositives(1, null), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
+		setErrorsCount(TypestateError.class,  new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1),  "<generators.RSAKeyPairGeneratorTest: void testFour()>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<generators.RSAKeyPairGeneratorTest: void testTwo()>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ParametersWithRandomTest: void testTwo()>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
 		
 		scanner.exec();
 	  	assertErrors();
@@ -158,88 +114,23 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testOne()>", RequiredPredicateError.class, new ArrayList<findingType>(){
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testTwo()>", TypestateError.class, new ArrayList<findingType>(){
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-			}
-		}); //issue29:Crypto-API-Rules
-		setErrorsCount("<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.FALSE_POSITIVE);
-			}
-		}); //issue29:Crypto-API-Rules
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.ECElGamalEncryptorTest: void testOne()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.ECElGamalEncryptorTest: void testTwo()>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "#29:Crypto-API-Rules"), "<crypto.ECElGamalEncryptorTest: void testThree(java.lang.String)>"); 
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "#29:Crypto-API-Rules"), "<crypto.ECElGamalEncryptorTest: void testFour(java.lang.String)>");
 		
-		setErrorsCount("<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ParametersWithRandomTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ParametersWithRandomTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<params.ECDomainParametersTest: void testThree(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
+		setErrorsCount(RequiredPredicateError.class,new TruePositives(2), "<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class,new TruePositives(3), "<params.ParametersWithRandomTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(4),"<params.ParametersWithRandomTest: void testThree(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ECDomainParametersTest: void testThree(java.lang.String)>");
 		
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testThree()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
-		setErrorsCount("<crypto.ECElGamalDecryptorTest: void testFour()>", TypestateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testThree()>");
+		setErrorsCount(TypestateError.class,new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testFour()>");
 		
-		setErrorsCount("<constants.Constants: void <clinit>()>", RequiredPredicateError.class, new ArrayList<findingType>() {
-			{
-				add(findingType.TRUE_POSITIVE);
-				add(findingType.TRUE_POSITIVE);
-			}
-		});
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<constants.Constants: void <clinit>()>");
 		scanner.exec();
 	  	assertErrors();
 	}

@@ -1,4 +1,4 @@
-package rsa_nomisue;
+package rsa_nomisuse;
 
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
