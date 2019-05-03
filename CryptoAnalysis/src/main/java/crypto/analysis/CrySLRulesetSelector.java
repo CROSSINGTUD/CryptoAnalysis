@@ -66,7 +66,7 @@ public class CrySLRulesetSelector {
 	}
 
 	public static CryptSLRule makeSingleRule(String rulesBasePath, Ruleset ruleset, String rulename) {
-		File file = new File(rulesBasePath +rulename + ".cryptslbin");
+		File file = new File(rulesBasePath +"/"+ruleset+"/"+rulename + ".cryptslbin");
 		if(!file.exists()) {
 			throw new RuntimeException("Could not locate rule " + rulename +" within set " + ruleset );
 		}
