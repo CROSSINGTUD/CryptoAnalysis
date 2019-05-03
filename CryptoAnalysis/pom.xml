@@ -9,7 +9,7 @@
 	<properties>
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
    	 	<sootVersion>3.2.0</sootVersion>
-   	 	<spdsVersion>2.2-SNAPSHOT</spdsVersion>
+   	 	<spdsVersion>2.2</spdsVersion>
 	</properties>
 
 	<build>
