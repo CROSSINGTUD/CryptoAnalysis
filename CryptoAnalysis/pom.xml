@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>2.2</version>
+	<version>2.3-SNAPSHOT</version>
 	
 	<properties>
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<sootVersion>3.2.0</sootVersion>
-   	 	<spdsVersion>2.2</spdsVersion>
+   	 	<sootVersion>3.3.0-SNAPSHOT</sootVersion>
+   	 	<spdsVersion>2.3-SNAPSHOT</spdsVersion>
 	</properties>
 
 	<build>
@@ -170,28 +170,7 @@
 		</dependency>
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>boomerangPDS</artifactId>
-			<version>${spdsVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.mcgill.sable</groupId>
-			<artifactId>soot</artifactId>
-			<version>${sootVersion}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>idealPDS</artifactId>
-			<version>${spdsVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
-			<artifactId>testCore</artifactId>
 			<version>${spdsVersion}</version>
 		</dependency>
 		<dependency>
