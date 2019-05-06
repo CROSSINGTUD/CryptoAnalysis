@@ -1,6 +1,5 @@
 package tests.typestate;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -9,15 +8,20 @@ import java.security.NoSuchAlgorithmException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class MessageDigestTest  extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getCryptSLFile() {
-		return new File(Ruleset.JavaCryptographicArchitecture +"/MessageDigest");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
+	}
+	
+	@Override
+	protected String getRulename() {
+		return "MessageDigest";
 	}
 
 	@Test

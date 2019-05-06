@@ -1,8 +1,6 @@
 package test;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +11,15 @@ import com.google.common.collect.Lists;
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
-import crypto.analysis.Constants.Ruleset;
 import crypto.analysis.CrySLResultsReporter;
+import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -36,7 +34,6 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import test.assertions.MustBeInState;
 import test.core.selfrunning.AbstractTestingFramework;
@@ -48,10 +45,8 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
-	public final static String RESOURCE_PATH = "src/main/resources/";
+	public static final String RULES_BASE_DIR = "src/main/resources/";
 	
-	protected abstract File getCryptSLFile();
-
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
 			
@@ -78,9 +73,13 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		File file = new File(RESOURCE_PATH + getCryptSLFile() + ".cryptslbin");
-		return CryptSLRuleReader.readFromFile(file);
+		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
+//		CryptSLRuleReader.readFromFile(file);
 	}
+
+	protected abstract String getRulename();
+
+	protected abstract Ruleset getRuleset();
 
 	@Override
 	public List<String> excludedPackages() {
