@@ -9,12 +9,14 @@ public abstract class AbstractError implements IError {
 	private final CryptSLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
-
+	private final String declaringClass;
+	
 	public AbstractError(Statement errorLocation, CryptSLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
 		this.outerMethod = errorLocation.getMethod().getSignature();
-		
+		this.declaringClass = errorLocation.getMethod().getDeclaringClass().toString();
+
 		if(errorLocation.getUnit().get().containsInvokeExpr()) {
 			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
 		}
@@ -41,6 +43,7 @@ public abstract class AbstractError implements IError {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
 		result = prime * result + ((invokeMethod == null) ? 0 : invokeMethod.hashCode());
 		result = prime * result + ((outerMethod == null) ? 0 : outerMethod.hashCode());
 		result = prime * result + ((rule == null) ? 0 : rule.hashCode());
@@ -56,6 +59,11 @@ public abstract class AbstractError implements IError {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractError other = (AbstractError) obj;
+		if (declaringClass == null) {
+			if (other.declaringClass != null)
+				return false;
+		} else if (!declaringClass.equals(other.declaringClass))
+			return false;
 		if (invokeMethod == null) {
 			if (other.invokeMethod != null)
 				return false;
@@ -73,6 +81,7 @@ public abstract class AbstractError implements IError {
 			return false;
 		return true;
 	}
+
 	
 	
 
