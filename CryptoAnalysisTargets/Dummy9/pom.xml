@@ -17,6 +17,7 @@
     </plugins>
   </build>
   <modules>
-  	<module>module-maven-demo</module>
+  	<module>Dummy9ModuleOne</module>
+  	<module>Dummy9ModuleTwo</module>
   </modules>
 </project>
