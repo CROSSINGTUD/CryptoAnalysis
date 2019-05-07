@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.RequiredPredicateError;
-import test.IDEALCrossingTestingFramework;
 
 public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 

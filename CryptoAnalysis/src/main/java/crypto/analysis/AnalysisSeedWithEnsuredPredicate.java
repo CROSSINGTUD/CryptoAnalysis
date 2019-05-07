@@ -19,7 +19,6 @@ import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 

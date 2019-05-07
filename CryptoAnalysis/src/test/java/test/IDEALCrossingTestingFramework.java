@@ -1,6 +1,5 @@
 package test;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,6 @@ import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
 import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;

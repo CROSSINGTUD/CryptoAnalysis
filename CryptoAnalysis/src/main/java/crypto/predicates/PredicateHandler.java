@@ -6,10 +6,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-import com.google.inject.internal.util.Lists;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;

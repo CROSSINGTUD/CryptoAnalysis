@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.IncompleteOperationError;
-import test.IDEALCrossingTestingFramework;
 
 public class MessageDigestExampleTest extends AbstractHeadlessTest{
 
