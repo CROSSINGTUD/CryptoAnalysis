@@ -49,6 +49,7 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.LongConstant;
+import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 
@@ -58,8 +59,8 @@ public class ConstraintSolver {
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
-	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;
-	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length");
+	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;   
+    public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length", "notHardCoded");
 	private final CrySLResultsReporter reporter;
 	private final AnalysisSeedWithSpecification object;
 	private final ClassSpecification classSpec;
@@ -291,6 +292,20 @@ public class ConstraintSolver {
 				case "length":
 					//TODO Not implemented!
 					return;
+				case "notHardCoded":
+					//TODO: Add implementation for notHardCoded predicate
+					String arg = ((CryptSLObject) pred.getParameters().get(0)).getVarName();
+					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
+						if (cs.getVarName().equals(arg)) {
+							Collection<ExtractedValue> values = parsAndVals.get(cs);
+							for(ExtractedValue v : values) {
+								if(isHardCoded(v)) {
+									errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
+								}
+							}
+						}
+					}
+					break;
 				default:
 					return;
 			}
@@ -410,6 +425,15 @@ public class ConstraintSolver {
 
 		private Map<Integer, CallSiteWithExtractedValue> extractValueAsInt(String exp, ISLConstraint cons) {
 			final HashMap<Integer, CallSiteWithExtractedValue> valuesInt = new HashMap<>();
+			//0. exp may be true or false
+			if(exp.equalsIgnoreCase("true")){
+				valuesInt.put(1, null);
+				return valuesInt;
+			}
+			if(exp.equalsIgnoreCase("false")){
+				valuesInt.put(0, null);
+				return valuesInt;
+			}
 			try {
 				//1. exp may (already) be an integer
 				valuesInt.put(Integer.parseInt(exp), null);
@@ -537,5 +561,13 @@ public class ConstraintSolver {
 
 	public List<RequiredCryptSLPredicate> getRequiredPredicates() {
 		return requiredPredicates;
+	}
+
+	public boolean isHardCoded(ExtractedValue val) {
+		if(val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant)
+			return true;
+		if(val.getValue() instanceof NewExpr && ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"))
+			return true;
+		return false;
 	}
 }
