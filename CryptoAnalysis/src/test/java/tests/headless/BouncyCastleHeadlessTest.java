@@ -108,7 +108,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	@SuppressWarnings("serial")
 	public void testBCEllipticCurveExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -120,16 +119,53 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.ECElGamalEncryptorTest: void testOne()>");
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.ECElGamalEncryptorTest: void testTwo()>");
 		
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testThree()>");
+		setErrorsCount(TypestateError.class,new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testFour()>");
+		
 		setErrorsCount(RequiredPredicateError.class,new TruePositives(2), "<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class,new TruePositives(3), "<params.ParametersWithRandomTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(4),"<params.ParametersWithRandomTest: void testThree(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ECDomainParametersTest: void testThree(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<params.ECKeyGenerationParametersTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<params.ECKeyGenerationParametersTest: void testThree(java.lang.String)>");
 		
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testOne(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testTwo(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testThree()>");
-		setErrorsCount(TypestateError.class,new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testFour()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<transforms.ECFixedTransformTest: void testFive(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECFixedTransformTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECFixedTransformTest: void testFour(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<transforms.ECFixedTransformTest: void testThree(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECFixedTransformTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<transforms.ECFixedTransformTest: void testSix(java.lang.String)>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<transforms.ECFixedTransformTest: void testSix(java.lang.String)>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<transforms.ECNewPublicKeyTransformTest: void testThree(java.lang.String)>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<transforms.ECNewPublicKeyTransformTest: void testFour(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewPublicKeyTransformTest: void testFour(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewPublicKeyTransformTest: void testFive(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewPublicKeyTransformTest: void testFive(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<transforms.ECNewPublicKeyTransformTest: void testSix(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(2, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewPublicKeyTransformTest: void testSix(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewPublicKeyTransformTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewPublicKeyTransformTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testThree(java.lang.String)>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(2, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>");
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<generators.ECKeyPairGeneratorTest: void testTwo(java.lang.String)>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<generators.ECKeyPairGeneratorTest: void testThree(java.lang.String)>");
 		
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<constants.Constants: void <clinit>()>");
 		scanner.exec();

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.internal.runners.ErrorReportingRunner;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -215,9 +216,12 @@ public abstract class AbstractHeadlessTest {
 
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalsePositives fp, FalseNegatives fn, String methodSignature) {
 		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
-			throw new RuntimeException("Error Type already specified for this method");
+			int errorCount = errorMarkerCountPerErrorTypeAndMethod.get(methodSignature, errorType);
+			errorMarkerCountPerErrorTypeAndMethod.remove(methodSignature, errorType);
+			errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings() + errorCount);
+		} else {
+			errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
 		}
-		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
 	}
 	
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, String methodSignature) {
