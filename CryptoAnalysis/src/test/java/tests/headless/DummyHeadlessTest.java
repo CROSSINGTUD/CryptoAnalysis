@@ -5,6 +5,7 @@ import java.io.File;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 
 public class DummyHeadlessTest extends AbstractHeadlessTest {
@@ -13,7 +14,7 @@ public class DummyHeadlessTest extends AbstractHeadlessTest {
 //	public void testOne() {
 //		String mavenProjectPath = new File("../CryptoAnalysisTargets/Dummy9").getAbsolutePath();
 //		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
 //		
 //		scanner.exec();
 //	  	assertErrors();
@@ -23,7 +24,7 @@ public class DummyHeadlessTest extends AbstractHeadlessTest {
 //	public void testTwo() {
 //		String mavenProjectPath = new File("../CryptoAnalysisTargets/Dummy8").getAbsolutePath();
 //		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
 //		
 //		scanner.exec();
 //	  	assertErrors();
@@ -33,7 +34,7 @@ public class DummyHeadlessTest extends AbstractHeadlessTest {
 	public void testThree() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/JPMSExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
 		
 		scanner.exec();
 	  	assertErrors();
