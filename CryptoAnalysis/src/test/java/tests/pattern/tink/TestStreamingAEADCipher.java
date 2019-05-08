@@ -16,11 +16,16 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestStreamingAEADCipher extends TestTinkPrimitives {
-	
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewAES128_CTR_HMAC_SHA256_4KBKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = StreamingAeadKeyTemplates.createAesCtrHmacStreamingKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096);

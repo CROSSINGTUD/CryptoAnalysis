@@ -1,24 +1,26 @@
 package tests.typestate;
 
-import java.io.File;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 
 import org.junit.Test;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class SignatureTests extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getCryptSLFile() {
-		return new File("Signature");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
-
+	
+	@Override
+	protected String getRulename() {
+		return "Signature";
+	}
 	@Test
 	public void signatureTest() throws GeneralSecurityException {
 		Signature signature = Signature.getInstance("SHA256withRSA");

@@ -12,10 +12,16 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestMAC extends TestTinkPrimitives {
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewHMACSHA256_128BitTag() throws GeneralSecurityException {
 		KeyTemplate kt = MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256);

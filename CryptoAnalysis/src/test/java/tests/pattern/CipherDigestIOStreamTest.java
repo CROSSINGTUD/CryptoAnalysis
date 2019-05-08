@@ -1,12 +1,12 @@
 package tests.pattern;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.DigestOutputStream;
 import java.security.GeneralSecurityException;
@@ -21,6 +21,7 @@ import javax.crypto.SecretKey;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -345,6 +346,12 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 //			Assertions.violatedConstraint(cis);
 	  Assertions.mustNotBeInAcceptingState(cis);
 	  cis.close();
+	}
+
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
 
 }	

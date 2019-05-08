@@ -2,12 +2,10 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -20,7 +18,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 	public void cogniCryptDemoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -29,7 +27,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
 		scanner.exec();
 		assertErrors();
@@ -40,7 +38,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 	public void cryptoMisuseExampleProject() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoMisuseExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		  
 
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
@@ -70,7 +68,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 	public void glassfishExample() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/glassfish-embedded").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", RequiredPredicateError.class, 1);
 		
@@ -86,7 +84,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 	public void oracleExample() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/OracleExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		  
 //
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);

@@ -1,9 +1,9 @@
 package tests.typestate;
 
-import java.io.File;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -11,17 +11,25 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.junit.Test;
+
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.IDEALCrossingTestingFramework;
 import test.assertions.Assertions;
 
 public class CipherTest extends IDEALCrossingTestingFramework {
 
 	@Override
-	protected File getCryptSLFile() {
-		return new File("Cipher");
+	protected Ruleset getRuleset() {
+		return Ruleset.JavaCryptographicArchitecture;
 	}
-
+	
+	@Override
+	protected String getRulename() {
+		return "Cipher";
+	}
+	
 	@Test
 	public void testCipher1() throws NoSuchAlgorithmException, NoSuchPaddingException {
 		Cipher c = Cipher.getInstance("AES");

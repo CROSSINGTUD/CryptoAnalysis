@@ -16,10 +16,16 @@ import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore
 public class TestDigitalSignature extends TestTinkPrimitives {
+
+	@Override
+	protected Ruleset getRuleSet() {
+		return Ruleset.Tink;
+	}
 	@Test
 	public void generateNewECDSA_P256() throws GeneralSecurityException {
 		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);;

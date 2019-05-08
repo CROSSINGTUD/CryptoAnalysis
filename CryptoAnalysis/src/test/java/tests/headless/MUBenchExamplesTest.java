@@ -28,7 +28,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 	public void muBenchExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/MUBenchExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		/**
 		 * The links for each test case redirect to the description of the misuse, 
