@@ -17,6 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
+import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
@@ -57,7 +58,7 @@ public class ConstraintSolver {
 
 	private final List<ISLConstraint> allConstraints;
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
-	private final List<RequiredCryptSLPredicate> requiredPredicates = Lists.newArrayList();
+	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parsAndVals;   
     public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length", "notHardCoded");
@@ -84,18 +85,16 @@ public class ConstraintSolver {
 
 			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
 				if (cons instanceof CryptSLPredicate) {
-					CryptSLPredicate pred = (CryptSLPredicate) cons;
-					for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
-						for(ICryptSLPredicateParameter p : pred.getParameters()) {
-							// TODO: FIX Cipher rule
-							if (p.getName().equals("transformation"))
-								continue;
-							if (cwpi.getVarName().equals(p.getName())) {
-								
-								relConstraints.add(pred);
-								requiredPredicates.add(new RequiredCryptSLPredicate(pred, cwpi.stmt()));
-							}
-						}
+					RequiredCryptSLPredicate pred = retrieveValuesForPred(cons);
+					relConstraints.add(pred.getPred());
+					requiredPredicates.add(pred);
+				} else if (cons instanceof CryptSLConstraint) {
+					if (((CryptSLConstraint) cons).getLeft() instanceof CryptSLPredicate) {
+						RequiredCryptSLPredicate alt1 = retrieveValuesForPred(((CryptSLConstraint) cons).getLeft());
+						RequiredCryptSLPredicate alt2 = retrieveValuesForPred(((CryptSLConstraint) cons).getRight());
+						requiredPredicates.add(new AlternativeReqPredicate(alt1.getPred(), alt2.getPred(), alt1.getLocation()));
+					} else {
+						relConstraints.add(cons);
 					}
 				} else {
 					relConstraints.add(cons);
@@ -103,6 +102,21 @@ public class ConstraintSolver {
 			}
 		}
 		this.reporter = crySLResultsReporter;
+	}
+
+	private RequiredCryptSLPredicate retrieveValuesForPred(ISLConstraint cons) {
+		CryptSLPredicate pred = (CryptSLPredicate) cons;
+		for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
+			for(ICryptSLPredicateParameter p : pred.getParameters()) {
+				// TODO: FIX Cipher rule
+				if (p.getName().equals("transformation"))
+					continue;
+				if (cwpi.getVarName().equals(p.getName())) {
+					return new RequiredCryptSLPredicate(pred, cwpi.stmt());
+				}
+			}
+		}
+		return null;
 	}
 
 	private static String retrieveConstantFromValue(Value val) {
@@ -559,7 +573,7 @@ public class ConstraintSolver {
 		}
 	}
 
-	public List<RequiredCryptSLPredicate> getRequiredPredicates() {
+	public List<ISLConstraint> getRequiredPredicates() {
 		return requiredPredicates;
 	}
 
