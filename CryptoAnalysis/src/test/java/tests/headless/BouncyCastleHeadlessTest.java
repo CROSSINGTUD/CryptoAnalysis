@@ -152,22 +152,40 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>");
 		
-		setErrorsCount(TypestateError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testThree(java.lang.String)>");
-		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(2, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(4), "<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>");
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"), "<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>");
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testThree(java.lang.String)>")
+				.withTPs(new TruePositives(TypestateError.class, 1))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>")
+				.withTPs(new TruePositives(IncompleteOperationError.class, 1))
+				.withTPs(new TruePositives(RequiredPredicateError.class, 3))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>")
+				.withTPs(new TruePositives(RequiredPredicateError.class, 4))
+				.withFPs(new FalsePositives(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>")
+				.withTPs(new TruePositives(RequiredPredicateError.class, 2))
+				.withFPs(new FalsePositives(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>")
+				.withTPs(new TruePositives(RequiredPredicateError.class, 4))
+				.withFPs(new FalsePositives(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>")
+				.withTPs(new TruePositives(RequiredPredicateError.class, 3))
+				.withFPs(new FalsePositives(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptSL/issues/11"))
+				.build());
 		
-		setErrorsCount(TypestateError.class, new TruePositives(1), "<generators.ECKeyPairGeneratorTest: void testTwo(java.lang.String)>");
-		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<generators.ECKeyPairGeneratorTest: void testThree(java.lang.String)>");
+		setErrorsCount(new ErrorSpecificationBuilder("<generators.ECKeyPairGeneratorTest: void testTwo(java.lang.String)>")
+				.withTPs(new TruePositives(TypestateError.class, 1))
+				.build());
+		setErrorsCount(new ErrorSpecificationBuilder("<generators.ECKeyPairGeneratorTest: void testThree(java.lang.String)>")
+				.withTPs(new TruePositives(IncompleteOperationError.class, 1))
+				.build());
 		
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<constants.Constants: void <clinit>()>");
+		setErrorsCount(new ErrorSpecificationBuilder("<constants.Constants: void <clinit>()>")
+				.withTPs(new TruePositives(RequiredPredicateError.class, 2))
+				.build());
 		scanner.exec();
 	  	assertErrors();
 	}

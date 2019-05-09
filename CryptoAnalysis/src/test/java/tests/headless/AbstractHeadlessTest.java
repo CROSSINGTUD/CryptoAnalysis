@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.internal.runners.ErrorReportingRunner;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -35,8 +34,8 @@ import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
 import tests.headless.FindingsType.FalseNegatives;
-import tests.headless.FindingsType.NoFalseNegatives;
 import tests.headless.FindingsType.FalsePositives;
+import tests.headless.FindingsType.NoFalseNegatives;
 import tests.headless.FindingsType.NoFalsePositives;
 import tests.headless.FindingsType.TruePositives;
 import typestate.TransitionFunction;
@@ -238,5 +237,16 @@ public abstract class AbstractHeadlessTest {
 
 	protected void setErrorsCount(Class<?> errorType, FalseNegatives fn, String methodSignature) {
 		setErrorsCount(errorType,new TruePositives(0), new NoFalsePositives(), fn,  methodSignature);
+	}
+	
+	protected void setErrorsCount(ErrorSpecification errorSpecification) {
+		if (errorSpecification.getTotalNumberOfFindings() > 0) {
+			for (TruePositives tp: errorSpecification.getTruePositives()) {
+				setErrorsCount(tp.getErrorType(), tp, new NoFalsePositives(), new NoFalseNegatives(), errorSpecification.getMethodSignature());
+			}
+			for (FalsePositives fp: errorSpecification.getFalsePositives()) {
+				setErrorsCount(fp.getErrorType(), new TruePositives(0), fp, new NoFalseNegatives(), errorSpecification.getMethodSignature());
+			}
+		}
 	}
 }
