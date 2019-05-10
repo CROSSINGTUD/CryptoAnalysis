@@ -533,7 +533,7 @@ public class ConstraintSolver {
 
 	public abstract class EvaluableConstraint {
 
-		Set<AbstractError> errors = Sets.newHashSet();
+		List<AbstractError> errors = Lists.newArrayList();
 		ISLConstraint origin;
 
 		public abstract void evaluate();
