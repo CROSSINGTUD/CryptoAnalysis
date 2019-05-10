@@ -8,7 +8,6 @@
 	
 	<properties>
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<sootVersion>3.3.0-SNAPSHOT</sootVersion>
    	 	<spdsVersion>2.3-SNAPSHOT</spdsVersion>
 	</properties>
 
