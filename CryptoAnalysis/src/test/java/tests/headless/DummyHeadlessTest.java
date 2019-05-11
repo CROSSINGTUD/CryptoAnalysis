@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.IDEALCrossingTestingFramework;
 
 public class DummyHeadlessTest extends AbstractHeadlessTest {
 
@@ -19,7 +18,17 @@ public class DummyHeadlessTest extends AbstractHeadlessTest {
 //		scanner.exec();
 //	  	assertErrors();
 //	}
-
+	
+//	@Test
+//	public void testFour() {
+//		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
+//		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+//		
+//		scanner.exec();
+//	  	assertErrors();
+//	}
+//
 //	@Test
 //	public void testTwo() {
 //		String mavenProjectPath = new File("../CryptoAnalysisTargets/Dummy8").getAbsolutePath();
