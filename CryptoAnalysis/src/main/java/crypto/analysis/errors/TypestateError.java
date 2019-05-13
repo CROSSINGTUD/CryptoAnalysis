@@ -1,7 +1,11 @@
 package crypto.analysis.errors;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
@@ -98,7 +102,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((expectedMethodCalls == null) ? 0 : expectedMethodCalls.hashCode());
+		result = prime * result + ((expectedMethodCalls == null) ? 0 :expectedMethodCallsHashCode(expectedMethodCalls));
 		return result;
 	}
 
@@ -114,9 +118,25 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		if (expectedMethodCalls == null) {
 			if (other.expectedMethodCalls != null)
 				return false;
-		} else if (!expectedMethodCalls.equals(other.expectedMethodCalls))
+		} else if (expectedMethodCallsHashCode(expectedMethodCalls) != (expectedMethodCallsHashCode(other.expectedMethodCalls)))
 			return false;
 		return true;
 	}
 
+	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {
+		final int prime = 31;
+		int result = 1;
+		
+		List<SootMethod> expectedMethodCallsList = new ArrayList<SootMethod>(expectedMethodCalls);
+		Collections.sort(expectedMethodCallsList, new Comparator<SootMethod>() {
+			public int compare(SootMethod s1, SootMethod s2) {
+				return s1.getSignature().toString().compareToIgnoreCase(s2.getSignature().toString());
+			}
+		});
+
+		for (SootMethod method : expectedMethodCallsList) {
+			result = prime * result + ((method == null) ? 0 : method.getSignature().toString().hashCode());
+		}
+		return result;
+	}
 }

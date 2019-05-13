@@ -1,6 +1,10 @@
 package crypto.analysis.errors;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.google.common.base.Joiner;
 
@@ -50,8 +54,8 @@ public class ForbiddenMethodError extends AbstractError{
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
-		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.hashCode());
+		result = prime * result + ((alternatives == null) ? 0 :alternativesHashCode(alternatives));
+		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().toString().hashCode());
 		return result;
 	}
 
@@ -67,14 +71,31 @@ public class ForbiddenMethodError extends AbstractError{
 		if (alternatives == null) {
 			if (other.alternatives != null)
 				return false;
-		} else if (!alternatives.equals(other.alternatives))
+		} else if (alternativesHashCode(alternatives) != (alternativesHashCode(other.alternatives)))
 			return false;
 		if (calledMethod == null) {
 			if (other.calledMethod != null)
 				return false;
-		} else if (!calledMethod.equals(other.calledMethod))
+		} else if (!calledMethod.getSignature().toString().equals(other.calledMethod.getSignature().toString()))
 			return false;
 		return true;
+	}
+	
+	private int alternativesHashCode(Collection<SootMethod> alternatives) {
+		final int prime = 31;
+		int result = 1;
+		
+		List<SootMethod> alternativesList = new ArrayList<SootMethod>(alternatives);
+		Collections.sort(alternativesList, new Comparator<SootMethod>() {
+			public int compare(SootMethod s1, SootMethod s2) {
+				return s1.getSignature().toString().compareToIgnoreCase(s2.getSignature().toString());
+			}
+		});
+
+		for (SootMethod method : alternativesList) {
+			result = prime * result + ((method == null) ? 0 : method.getSignature().toString().hashCode());
+		}
+		return result;
 	}
 
 }
