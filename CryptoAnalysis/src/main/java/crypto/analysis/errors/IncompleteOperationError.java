@@ -24,12 +24,17 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
 	private Val errorVariable;
 	private Collection<SootMethod> expectedMethodCalls;
+	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public IncompleteOperationError(Statement errorLocation,
 			Val errorVariable, CryptSLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
 		super(errorLocation, rule, objectLocation);
 		this.errorVariable = errorVariable;
 		this.expectedMethodCalls = expectedMethodsToBeCalled;	
+		
+		for (SootMethod method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getSignature());
+		}	
 	}
 
 	public Val getErrorVariable() {
@@ -89,7 +94,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((expectedMethodCalls == null) ? 0 :expectedMethodCallsHashCode(expectedMethodCalls));
+		result = prime * result + ((expectedMethodCallsSet == null) ? 0 : expectedMethodCallsSet.hashCode());
 		return result;
 	}
 
@@ -105,7 +110,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		if (expectedMethodCalls == null) {
 			if (other.expectedMethodCalls != null)
 				return false;
-		} else if (expectedMethodCallsHashCode(expectedMethodCalls) != (expectedMethodCallsHashCode(other.expectedMethodCalls)))
+		} else if (expectedMethodCallsSet != other.expectedMethodCallsSet)
 			return false;
 		
 		return true;

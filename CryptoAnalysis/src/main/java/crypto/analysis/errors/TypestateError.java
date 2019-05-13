@@ -1,11 +1,7 @@
 package crypto.analysis.errors;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
@@ -22,10 +18,15 @@ import soot.jimple.Stmt;
 public class TypestateError extends ErrorWithObjectAllocation{
 
 	private Collection<SootMethod> expectedMethodCalls;
+	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public TypestateError(Statement stmt, CryptSLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
 		super(stmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
+		
+		for (SootMethod method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getSignature());
+		}	
 	}
 
 	public Collection<SootMethod> getExpectedMethodCalls() {
@@ -103,7 +104,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((expectedMethodCalls == null) ? 0 :expectedMethodCallsHashCode(expectedMethodCalls));
+		result = prime * result + ((expectedMethodCallsSet == null) ? 0 : expectedMethodCallsSet.hashCode());
 		return result;
 	}
 
@@ -116,19 +117,11 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		if (getClass() != obj.getClass())
 			return false;
 		TypestateError other = (TypestateError) obj;
-		if (expectedMethodCalls == null) {
-			if (other.expectedMethodCalls != null)
+		if (expectedMethodCallsSet == null) {
+			if (other.expectedMethodCallsSet != null)
 				return false;
-		} else if (expectedMethodCallsHashCode(expectedMethodCalls) != (expectedMethodCallsHashCode(other.expectedMethodCalls)))
+		} else if (expectedMethodCallsSet != other.expectedMethodCallsSet)
 			return false;
 		return true;
-	}
-
-	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {
-		Set<String> expectedMethodCallsSet = Sets.newHashSet();
-		for (SootMethod method : expectedMethodCalls) {
-			expectedMethodCallsSet.add(method.getSignature());
-		}
-		return expectedMethodCallsSet.hashCode();
 	}
 }

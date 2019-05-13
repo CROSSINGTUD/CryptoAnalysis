@@ -1,10 +1,6 @@
 package crypto.analysis.errors;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
@@ -18,12 +14,17 @@ public class ForbiddenMethodError extends AbstractError {
 
 	private Collection<SootMethod> alternatives;
 	private SootMethod calledMethod;
+	private Set<String> alternativesSet = Sets.newHashSet();
 
 	public ForbiddenMethodError(Statement errorLocation, CryptSLRule rule, SootMethod calledMethod,
 			Collection<SootMethod> collection) {
 		super(errorLocation, rule);
 		this.calledMethod = calledMethod;
 		this.alternatives = collection;
+		
+		for (SootMethod method : alternatives) {
+			this.alternativesSet.add(method.getSignature());
+		}	
 	}
 
 	public Collection<SootMethod> getAlternatives() {
@@ -57,8 +58,8 @@ public class ForbiddenMethodError extends AbstractError {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((alternatives == null) ? 0 : alternativesHashCode(alternatives));
-		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().toString().hashCode());
+		result = prime * result + ((alternativesSet == null) ? 0 : alternativesSet.hashCode());
+		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().hashCode());
 		return result;
 	}
 
@@ -71,25 +72,20 @@ public class ForbiddenMethodError extends AbstractError {
 		if (getClass() != obj.getClass())
 			return false;
 		ForbiddenMethodError other = (ForbiddenMethodError) obj;
-		if (alternatives == null) {
-			if (other.alternatives != null)
+		if (alternativesSet == null) {
+			if (other.alternativesSet != null)
 				return false;
-		} else if (alternativesHashCode(alternatives) != (alternativesHashCode(other.alternatives)))
+		} else if (!alternativesSet.equals(other.alternativesSet))
 			return false;
 		if (calledMethod == null) {
 			if (other.calledMethod != null)
 				return false;
-		} else if (!calledMethod.getSignature().toString().equals(other.calledMethod.getSignature().toString()))
+		} else if (!calledMethod.getSignature().equals(other.calledMethod.getSignature()))
 			return false;
 		return true;
 	}
 
-	private int alternativesHashCode(Collection<SootMethod> alternatives) {
-		Set<String> alternativesSet = Sets.newHashSet();
-		for (SootMethod method : alternatives) {
-			alternativesSet.add(method.getSignature());
-		}
-		return alternativesSet.hashCode();
-	}
+
+	
 
 }
