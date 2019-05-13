@@ -93,4 +93,30 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		}
 		return false;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((expectedMethodCalls == null) ? 0 : expectedMethodCalls.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TypestateError other = (TypestateError) obj;
+		if (expectedMethodCalls == null) {
+			if (other.expectedMethodCalls != null)
+				return false;
+		} else if (!expectedMethodCalls.equals(other.expectedMethodCalls))
+			return false;
+		return true;
+	}
+
 }

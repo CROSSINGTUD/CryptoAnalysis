@@ -45,4 +45,36 @@ public class ForbiddenMethodError extends AbstractError{
 		}
 		return msg.toString();
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
+		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ForbiddenMethodError other = (ForbiddenMethodError) obj;
+		if (alternatives == null) {
+			if (other.alternatives != null)
+				return false;
+		} else if (!alternatives.equals(other.alternatives))
+			return false;
+		if (calledMethod == null) {
+			if (other.calledMethod != null)
+				return false;
+		} else if (!calledMethod.equals(other.calledMethod))
+			return false;
+		return true;
+	}
+
 }
