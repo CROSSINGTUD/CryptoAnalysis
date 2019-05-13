@@ -22,7 +22,7 @@ pipeline {
 
 		stage('Deploy'){
 		    when { 
-		    	anyOf { branch 'master'; branch 'ofcg' } 
+		    	anyOf { branch 'master'; branch 'develop' } 
 			}
 	        steps {
 				configFileProvider(

@@ -1,6 +1,5 @@
 package crypto.analysis;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +26,6 @@ import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;

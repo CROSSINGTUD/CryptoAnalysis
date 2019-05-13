@@ -9,7 +9,6 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
-import test.IDEALCrossingTestingFramework;
 
 public class ReportedIssueTest extends AbstractHeadlessTest {
 

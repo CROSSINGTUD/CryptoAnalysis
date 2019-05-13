@@ -13,10 +13,8 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.NullConstant;
-import soot.jimple.ReturnStmt;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
 
 public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override

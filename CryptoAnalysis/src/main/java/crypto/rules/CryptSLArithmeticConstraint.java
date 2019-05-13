@@ -50,19 +50,25 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	public Set<String> getInvolvedVarNames() {
 		Set<String> varNames = new HashSet<String>();
 		String name = left.getName();
-		try {
-			Integer.parseInt(name);
-		} catch(NumberFormatException ex) {
+		if(!isIntOrBoolean(name)) {
 			varNames.add(name);
 		}
 		
 		name = right.getName();
-		try {
-			Integer.parseInt(name);
-		} catch(NumberFormatException ex) {
+		if(!isIntOrBoolean(name)) {
 			varNames.add(name);
 		}
 		return varNames;
+	}
+
+	private boolean isIntOrBoolean(String name) {
+		try {
+			Integer.parseInt(name);
+			return true;
+		} catch(NumberFormatException ex) {
+		}
+		
+		return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
 	}
 
 	@Override

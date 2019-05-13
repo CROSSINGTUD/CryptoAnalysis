@@ -1,10 +1,13 @@
 package crypto.analysis;
 
+import java.util.Set;
 import boomerang.jimple.Statement;
+import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
 
-public class RequiredCryptSLPredicate {
+public class RequiredCryptSLPredicate implements ISLConstraint {
 
+	private static final long serialVersionUID = 9111353268603202392L;
 	private final CryptSLPredicate predicate;
 	private final Statement stmt;
 
@@ -56,5 +59,20 @@ public class RequiredCryptSLPredicate {
 	public String toString() {
 		// TODO Auto-generated method stub
 		return "misses " + predicate + " @ " + stmt.toString();
+	}
+
+	@Override
+	public String getName() {
+		return predicate.getName();
+	}
+
+	@Override
+	public Set<String> getInvolvedVarNames() {
+		return predicate.getInvolvedVarNames();
+	}
+
+	@Override
+	public void setLocation(Statement location) {
+		throw new UnsupportedOperationException();
 	}
 }

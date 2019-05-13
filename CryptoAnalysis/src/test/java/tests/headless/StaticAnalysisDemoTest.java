@@ -10,7 +10,6 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import test.IDEALCrossingTestingFramework;
 
 public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 

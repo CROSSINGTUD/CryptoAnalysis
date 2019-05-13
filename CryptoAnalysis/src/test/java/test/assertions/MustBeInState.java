@@ -1,7 +1,6 @@
 package test.assertions;
 
 import boomerang.jimple.Val;
-import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ReportingErrorStateNode;
 import soot.Unit;
 import test.Assertion;

@@ -1,6 +1,7 @@
 package tests.pattern;
 
 import java.io.File;
+import java.math.BigInteger;
 
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -30,6 +31,19 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 //		eng.init(true, pubParameters);
         byte[] cipherText = eng.processBlock(data, 0, data.length);
         Assertions.mustNotBeInAcceptingState(eng);
+	}
+	
+	@Test
+	public void rsKeyParameters() {
+		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
+		BigInteger pub = new BigInteger("9f0783a49...da", 16);	
+		BigInteger pri = new BigInteger("21231...cda7", 16); 
+		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod, pri); //<--- warning here
+		Assertions.mustBeInAcceptingState(privParameters);
+		Assertions.notHasEnsuredPredicate(privParameters);
+		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pub); //<--- but no warning here
+		Assertions.mustBeInAcceptingState(pubParameters);
+		Assertions.hasEnsuredPredicate(pubParameters);
 	}
 	
 	@Override

@@ -4,19 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
-
 import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
-import crypto.analysis.CryptoScanner;
 import soot.RefType;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
-import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.MatcherTransition;
