@@ -59,6 +59,7 @@ public abstract class HeadlessCryptoScanner {
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
 	List<CryptSLRule> rules = Lists.newArrayList();
+	private boolean providerDetectionToggle = true;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -273,9 +274,11 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
 				
+				if(providerDetectionToggle) {
 				//create a new object to execute the Provider Detection analysis
 				ProviderDetection providerDetection = new ProviderDetection();
 				rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+				}
 				
 				scanner.scan(rules);
 			}
