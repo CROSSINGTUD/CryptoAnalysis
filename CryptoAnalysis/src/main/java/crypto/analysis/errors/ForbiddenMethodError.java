@@ -5,19 +5,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.base.Joiner;
+import com.google.inject.internal.util.Sets;
 
 import boomerang.jimple.Statement;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
 
-public class ForbiddenMethodError extends AbstractError{
+public class ForbiddenMethodError extends AbstractError {
 
 	private Collection<SootMethod> alternatives;
 	private SootMethod calledMethod;
 
-	public ForbiddenMethodError(Statement errorLocation, CryptSLRule rule, SootMethod calledMethod, Collection<SootMethod> collection) {
+	public ForbiddenMethodError(Statement errorLocation, CryptSLRule rule, SootMethod calledMethod,
+			Collection<SootMethod> collection) {
 		super(errorLocation, rule);
 		this.calledMethod = calledMethod;
 		this.alternatives = collection;
@@ -27,7 +30,7 @@ public class ForbiddenMethodError extends AbstractError{
 		return alternatives;
 	}
 
-	public void accept(ErrorVisitor visitor){
+	public void accept(ErrorVisitor visitor) {
 		visitor.visit(this);
 	}
 
@@ -49,12 +52,12 @@ public class ForbiddenMethodError extends AbstractError{
 		}
 		return msg.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((alternatives == null) ? 0 :alternativesHashCode(alternatives));
+		result = prime * result + ((alternatives == null) ? 0 : alternativesHashCode(alternatives));
 		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().toString().hashCode());
 		return result;
 	}
@@ -80,22 +83,13 @@ public class ForbiddenMethodError extends AbstractError{
 			return false;
 		return true;
 	}
-	
-	private int alternativesHashCode(Collection<SootMethod> alternatives) {
-		final int prime = 31;
-		int result = 1;
-		
-		List<SootMethod> alternativesList = new ArrayList<SootMethod>(alternatives);
-		Collections.sort(alternativesList, new Comparator<SootMethod>() {
-			public int compare(SootMethod s1, SootMethod s2) {
-				return s1.getSignature().toString().compareToIgnoreCase(s2.getSignature().toString());
-			}
-		});
 
-		for (SootMethod method : alternativesList) {
-			result = prime * result + ((method == null) ? 0 : method.getSignature().toString().hashCode());
+	private int alternativesHashCode(Collection<SootMethod> alternatives) {
+		Set<String> alternativesSet = Sets.newHashSet();
+		for (SootMethod method : alternatives) {
+			alternativesSet.add(method.getSignature());
 		}
-		return result;
+		return alternativesSet.hashCode();
 	}
 
 }

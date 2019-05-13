@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.inject.internal.util.Sets;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -110,21 +111,12 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		return true;
 	}
 	
-	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {
-		final int prime = 31;
-		int result = 1;
-		
-		List<SootMethod> expectedMethodCallsList = new ArrayList<SootMethod>(expectedMethodCalls);
-		Collections.sort(expectedMethodCallsList, new Comparator<SootMethod>() {
-			public int compare(SootMethod s1, SootMethod s2) {
-				return s1.getSignature().toString().compareToIgnoreCase(s2.getSignature().toString());
-			}
-		});
-
-		for (SootMethod method : expectedMethodCallsList) {
-			result = prime * result + ((method == null) ? 0 : method.getSignature().toString().hashCode());
+	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
+		Set<String> expectedMethodCallsSet = Sets.newHashSet();
+		for (SootMethod method : expectedMethodCalls) {
+			expectedMethodCallsSet.add(method.getSignature());
 		}
-		return result;
+		return expectedMethodCallsSet.hashCode();
 	}
 	
 	
