@@ -4,13 +4,13 @@ import boomerang.jimple.Statement;
 import crypto.rules.CryptSLRule;
 import soot.jimple.internal.JAssignStmt;
 
-public abstract class AbstractError implements IError {
-	private final Statement errorLocation;
-	private final CryptSLRule rule;
+public abstract class AbstractError implements IError{
+	private Statement errorLocation;
+	private CryptSLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
 	private final String declaringClass;
-	
+
 	public AbstractError(Statement errorLocation, CryptSLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
@@ -21,7 +21,7 @@ public abstract class AbstractError implements IError {
 			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
 		}
 		else {
-			this.invokeMethod = ((JAssignStmt)errorLocation.getUnit().get()).getLeftOp().toString();
+			this.invokeMethod = ((JAssignStmt) errorLocation.getUnit().get()).getLeftOp().toString();
 		}	
 	}
 
@@ -32,12 +32,12 @@ public abstract class AbstractError implements IError {
 	public CryptSLRule getRule() {
 		return rule;
 	}
-
 	public abstract String toErrorMarkerString();
 
 	public String toString() {
 		return toErrorMarkerString();
 	}
+	
 
 	@Override
 	public int hashCode() {
@@ -81,9 +81,4 @@ public abstract class AbstractError implements IError {
 			return false;
 		return true;
 	}
-
-	
-	
-
-	
 }
