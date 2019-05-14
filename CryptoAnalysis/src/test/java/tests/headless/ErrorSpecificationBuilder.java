@@ -14,20 +14,20 @@ public class ErrorSpecificationBuilder {
 	private List<FalseNegatives> falseNegatives;
 	private Class<?> errorType;
 	
-	public ErrorSpecificationBuilder(String methodSignature) {
+	private ErrorSpecificationBuilder(String methodSignature) {
 		this.methodSignature = methodSignature;
 		this.truePositives = new ArrayList<TruePositives>();
 		this.falseNegatives = new ArrayList<FalseNegatives>();
 		this.falsePositives = new ArrayList<FalsePositives>();
 	}
 	
-	public ErrorSpecificationBuilder withTPs(TruePositives truePositives) {
-		this.truePositives.add(truePositives);
+	public ErrorSpecificationBuilder withTPs(Class<?> errorType, int numberOfFindings) {
+		this.truePositives.add(new TruePositives(errorType, numberOfFindings));
 		return this;
 	}
 	
-	public ErrorSpecificationBuilder withFPs(FalsePositives falsePositives) {
-		this.falsePositives.add(falsePositives);
+	public ErrorSpecificationBuilder withFPs(Class<?> errorType, int numberOfFindings, String explanation) {
+		this.falsePositives.add(new FalsePositives(errorType, numberOfFindings, explanation));
 		return this;
 	}
 	

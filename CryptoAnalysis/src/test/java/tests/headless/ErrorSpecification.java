@@ -1,5 +1,6 @@
 package tests.headless;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import tests.headless.FindingsType.FalseNegatives;
@@ -62,5 +63,39 @@ public class ErrorSpecification {
 		if (totalFindings == 0)
 			throw new IllegalArgumentException("Specify atleast one findings type.");
 		return totalFindings;
+	}
+	
+	public static class Builder {
+		private String methodSignature;
+		private List<TruePositives> truePositives;
+		private List<FalsePositives> falsePositives;
+		private List<FalseNegatives> falseNegatives;
+		private Class<?> errorType;
+		
+		public Builder(String methodSignature) {
+			this.methodSignature = methodSignature;
+			this.truePositives = new ArrayList<TruePositives>();
+			this.falseNegatives = new ArrayList<FalseNegatives>();
+			this.falsePositives = new ArrayList<FalsePositives>();
+		}
+		
+		public Builder withTPs(Class<?> errorType, int numberOfFindings) {
+			this.truePositives.add(new TruePositives(errorType, numberOfFindings));
+			return this;
+		}
+		
+		public Builder withFPs(Class<?> errorType, int numberOfFindings, String explanation) {
+			this.falsePositives.add(new FalsePositives(errorType, numberOfFindings, explanation));
+			return this;
+		}
+		
+		public Builder withFNs(FalseNegatives falseNegatives) {
+			this.falseNegatives.add(falseNegatives);
+			return this;
+		}
+		
+		public ErrorSpecification build() {
+			return new ErrorSpecification(methodSignature, errorType, truePositives, falsePositives, falseNegatives);
+		}
 	}
 }
