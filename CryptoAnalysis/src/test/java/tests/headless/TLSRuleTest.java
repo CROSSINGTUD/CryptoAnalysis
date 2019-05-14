@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
-import test.IDEALCrossingTestingFramework;
 
 public class TLSRuleTest extends AbstractHeadlessTest{
 	@Ignore

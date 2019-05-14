@@ -1,14 +1,9 @@
 package crypto.analysis;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 
-import org.apache.tools.ant.types.CommandlineJava.SysProperties;
-
-import com.google.inject.internal.util.Lists;
+import com.google.common.collect.Lists;
 
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;

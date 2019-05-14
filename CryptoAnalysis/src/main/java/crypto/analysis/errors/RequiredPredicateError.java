@@ -40,4 +40,30 @@ public class RequiredPredicateError extends AbstractError{
 			msg += " " + parts[i];
 		return msg;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((contradictedPredicate == null) ? 0 : contradictedPredicate.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RequiredPredicateError other = (RequiredPredicateError) obj;
+		if (contradictedPredicate == null) {
+			if (other.contradictedPredicate != null)
+				return false;
+		} else if (!contradictedPredicate.equals(other.contradictedPredicate))
+			return false;
+		return true;
+	}
+
 }

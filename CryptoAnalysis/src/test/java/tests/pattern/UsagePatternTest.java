@@ -19,7 +19,6 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.List;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -30,9 +29,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
-
 import org.junit.Test;
-
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
@@ -79,6 +76,19 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		byte[] enc = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.hasEnsuredPredicate(enc);
+	}
+	
+	@Test
+	public void UsagePatternTestReqPredOr() throws GeneralSecurityException {
+		SecureRandom secRand = new SecureRandom();
+		Assertions.hasEnsuredPredicate(secRand);
+		
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		Assertions.extValue(0);
+		keygen.init(128, secRand);
+		Assertions.extValue(0);
+		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
 	}
 	
 	@Test
