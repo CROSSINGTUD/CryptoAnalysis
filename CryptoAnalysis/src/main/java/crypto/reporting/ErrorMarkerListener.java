@@ -26,6 +26,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
@@ -116,6 +117,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			public void visit(PredicateContradictionError predicateContradictionError) {
 				addMarker(predicateContradictionError);
 				
+			}
+
+			@Override
+			public void visit(HardCodedError hardcodedError) {
+				addMarker(hardcodedError);
 			}});
 	}
 	

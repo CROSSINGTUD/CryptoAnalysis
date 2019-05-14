@@ -25,6 +25,7 @@ import crypto.analysis.RequiredCryptSLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -314,7 +315,7 @@ public class ConstraintSolver {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
 							for(ExtractedValue v : values) {
 								if(isHardCoded(v)) {
-									errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
+									errors.add(new HardCodedError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
 							}
 						}
