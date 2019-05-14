@@ -40,7 +40,7 @@ public class RequiredPredicateError extends AbstractError{
 			msg += " " + parts[i];
 		return msg;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -65,6 +65,5 @@ public class RequiredPredicateError extends AbstractError{
 			return false;
 		return true;
 	}
-	
 
 }

@@ -176,13 +176,15 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int paramIndex = callSiteWithParamIndex.getCallSite().getIndex();
+		final Value parameterValue = callSiteWithParamIndex.getVal().getValue();
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + paramIndex;
+		result = prime * result + ((parameterValue == null) ? 0 : parameterValue.hashCode());
 		return result;
 	}
 
@@ -198,7 +200,11 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 		if (callSiteWithParamIndex.getCallSite().getIndex() != other.callSiteWithParamIndex.getCallSite().getIndex()) {
 			return false;
 		} 
+		if (callSiteWithParamIndex.getVal().getValue() == null) {
+			if (other.callSiteWithParamIndex.getVal().getValue() != null)
+				return false;
+		} else if (!callSiteWithParamIndex.getVal().getValue().equals(other.callSiteWithParamIndex.getVal().getValue()))
+			return false;
 		return true;
 	}
-
 }
