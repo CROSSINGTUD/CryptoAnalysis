@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.inject.internal.util.Sets;
+import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
 import crypto.analysis.IAnalysisSeed;
