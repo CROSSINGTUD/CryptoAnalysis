@@ -73,6 +73,9 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 					msg.append(brokenPred.getParameters().get(1).getName());
 					msg.append(".");
 					break;
+				case "notHardCoded":
+					msg.append(" should never be hardcoded.");
+					break;
 			}
 		} else if (brokenConstraint instanceof CryptSLValueConstraint) {
 			return evaluateValueConstraint((CryptSLValueConstraint) brokenConstraint);
