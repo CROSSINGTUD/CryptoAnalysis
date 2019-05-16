@@ -3,7 +3,6 @@
   <groupId>Dummy9</groupId>
   <artifactId>Dummy9</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
   <build>
     <plugins>
       <plugin>
@@ -16,8 +15,4 @@
       </plugin>
     </plugins>
   </build>
-  <modules>
-  	<module>Dummy9ModuleOne</module>
-  	<module>Dummy9ModuleTwo</module>
-  </modules>
 </project>
