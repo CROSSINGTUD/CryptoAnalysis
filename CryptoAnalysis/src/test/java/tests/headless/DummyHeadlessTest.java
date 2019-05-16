@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -21,37 +22,38 @@ public class DummyHeadlessTest extends AbstractHeadlessTest {
 	  	assertErrors();
 	}
 	
-//	@Test
-//	public void testFour() {
-//		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
-//		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
-//		
-//		scanner.exec();
-//	  	assertErrors();
-//	}
-//
-//	@Test
-//	public void testTwo() {
-//		String mavenProjectPath = new File("../CryptoAnalysisTargets/Dummy8").getAbsolutePath();
-//		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
-//		
-//		scanner.exec();
-//	  	assertErrors();
-//	}
+	@Test
+	public void testFour() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		
+		scanner.exec();
+	  	assertErrors();
+	}
+
+	@Test
+	public void testTwo() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/Dummy8").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		
+		scanner.exec();
+	  	assertErrors();
+	}
 	
-//	@Test
-//	public void testThree() {
-//		String mavenProjectPath = new File("../CryptoAnalysisTargets/JPMSExample").getAbsolutePath();
-//		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
-//		
-//		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", ConstraintError.class, 1);
-//		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-//
-//		
-//		scanner.exec();
-//	  	assertErrors();
-//	}
+	@Ignore
+	@Test
+	public void testThree() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/JPMSExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		
+		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+
+		
+		scanner.exec();
+	  	assertErrors();
+	}
 }
