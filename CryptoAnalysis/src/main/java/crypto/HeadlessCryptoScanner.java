@@ -292,23 +292,32 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
-		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_modulepath("VIRTUAL_FS_FOR_JDK");
 		
-//		Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
+//		// JAVA 8
+//		if(getJavaVersion() < 9)
+//		{
+//			System.out.println("java 8 settings applied");
+//			Options.v().set_prepend_classpath(true);
+//			Options.v().set_soot_classpath(sootClassPath());
+//		}
+//		// JAVA 9 && CLASSPATH
+//		else if(getJavaVersion() >= 9)
+//		{
+//			System.out.println("java 9 classpath settings applied");
+//			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
+//		}
+		
+		// JAVA 9 && MODULEPATH
+		{
+			System.out.println("java 9 modulepath settings applied");
+			Options.v().set_prepend_classpath(true);
+			Options.v().set_soot_modulepath(sootClassPath());
+		}	
+		
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
 		Options.v().set_exclude(getExcludeList());
 		Options.v().set_full_resolver(true);
-		
-		Map<String, List<String>> map = ModulePathSourceLocator.v().getClassUnderModulePath("VIRTUAL_FS_FOR_JDK");
-        for (String module : map.keySet()) {
-            for (String klass : map.get(module)) {
-                System.out.println("Loaded Class: " + klass + "\n");
-                loadClass(klass, false, module);
-
-            }
-        }
 		
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
@@ -320,7 +329,6 @@ public abstract class HeadlessCryptoScanner {
 		entryPoints.addAll(EntryPoints.v().application());
 		entryPoints.addAll(EntryPoints.v().methodsOfApplicationClasses());
 		System.out.println("APPLICATION CLASS : " + EntryPoints.v().application());
-		System.out.println("APPLICATION METHODS : " + EntryPoints.v().methodsOfApplicationClasses());
 		return entryPoints;
 	}
 
@@ -381,12 +389,13 @@ public abstract class HeadlessCryptoScanner {
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
 	}
 	
-	public static SootClass loadClass(String name, boolean main, String module) {
-        SootClass c = ModuleScene.v().loadClassAndSupport(name, Optional.of(module));
-        c.setApplicationClass();
-        if (main)
-            Scene.v().setMainClass(c);
-        return c;
-    }
-
+	private static int getJavaVersion() {
+	    String version = System.getProperty("java.version");
+	    if(version.startsWith("1.")) {
+	        version = version.substring(2, 3);
+	    } else {
+	        int dot = version.indexOf(".");
+	        if(dot != -1) { version = version.substring(0, dot); }
+	    } return Integer.parseInt(version);
+	}
 }
