@@ -409,6 +409,9 @@ public class ConstraintSolver {
 						case p:
 							sum = leftie.getKey() + rightie.getKey();
 							break;
+						case m: 
+							sum = leftie.getKey() % rightie.getKey();
+							break;
 						default:
 							sum = 0;
 					}
