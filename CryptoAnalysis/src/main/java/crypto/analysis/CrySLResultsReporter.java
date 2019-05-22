@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;

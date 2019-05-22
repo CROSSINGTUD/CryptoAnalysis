@@ -1,11 +1,16 @@
 package crypto.analysis.errors;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
@@ -19,12 +24,17 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
 	private Val errorVariable;
 	private Collection<SootMethod> expectedMethodCalls;
+	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public IncompleteOperationError(Statement errorLocation,
 			Val errorVariable, CryptSLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
 		super(errorLocation, rule, objectLocation);
 		this.errorVariable = errorVariable;
-		this.expectedMethodCalls = expectedMethodsToBeCalled;
+		this.expectedMethodCalls = expectedMethodsToBeCalled;	
+		
+		for (SootMethod method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getSignature());
+		}	
 	}
 
 	public Val getErrorVariable() {
@@ -79,4 +89,40 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		}
 		return false;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((expectedMethodCallsSet == null) ? 0 : expectedMethodCallsSet.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IncompleteOperationError other = (IncompleteOperationError) obj;
+		if (expectedMethodCalls == null) {
+			if (other.expectedMethodCalls != null)
+				return false;
+		} else if (expectedMethodCallsSet != other.expectedMethodCallsSet)
+			return false;
+		
+		return true;
+	}
+	
+	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
+		Set<String> expectedMethodCallsSet = Sets.newHashSet();
+		for (SootMethod method : expectedMethodCalls) {
+			expectedMethodCallsSet.add(method.getSignature());
+		}
+		return expectedMethodCallsSet.hashCode();
+	}
+	
+	
 }

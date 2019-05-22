@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
 import crypto.analysis.IAnalysisSeed;
@@ -17,10 +18,15 @@ import soot.jimple.Stmt;
 public class TypestateError extends ErrorWithObjectAllocation{
 
 	private Collection<SootMethod> expectedMethodCalls;
+	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public TypestateError(Statement stmt, CryptSLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
 		super(stmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
+		
+		for (SootMethod method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getSignature());
+		}	
 	}
 
 	public Collection<SootMethod> getExpectedMethodCalls() {
@@ -92,5 +98,30 @@ public class TypestateError extends ErrorWithObjectAllocation{
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((expectedMethodCallsSet == null) ? 0 : expectedMethodCallsSet.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TypestateError other = (TypestateError) obj;
+		if (expectedMethodCallsSet == null) {
+			if (other.expectedMethodCallsSet != null)
+				return false;
+		} else if (expectedMethodCallsSet != other.expectedMethodCallsSet)
+			return false;
+		return true;
 	}
 }

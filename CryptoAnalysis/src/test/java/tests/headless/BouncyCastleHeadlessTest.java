@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -42,7 +43,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
 
-		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
@@ -122,6 +123,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount(RequiredPredicateError.class,new TruePositives(2), "<params.ECPublicKeyParametersTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>");
+		setErrorsCount(HardCodedError.class, new FalsePositives(1, "Does not use a hardcoded String as input to new BigInteger(...)"),"<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class,new TruePositives(3), "<params.ParametersWithRandomTest: void testOne(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(4),"<params.ParametersWithRandomTest: void testThree(java.lang.String)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ECDomainParametersTest: void testThree(java.lang.String)>");
@@ -132,6 +134,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(TypestateError.class,new TruePositives(1),"<crypto.ECElGamalDecryptorTest: void testFour()>");
 		
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2),"<constants.Constants: void <clinit>()>");
+		setErrorsCount(HardCodedError.class, new TruePositives(1),"<constants.Constants: void <clinit>()>");
+		setErrorsCount(HardCodedError.class, new FalsePositives(1, "Does not use a hardcoded String as input to new BigInteger(...)"),"<params.ECPrivateKeyParametersTest: void testTwo(java.lang.String)>");
 		scanner.exec();
 	  	assertErrors();
 	}

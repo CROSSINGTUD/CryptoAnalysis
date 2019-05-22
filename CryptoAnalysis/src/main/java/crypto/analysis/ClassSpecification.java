@@ -3,7 +3,6 @@ package crypto.analysis;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableICFG;
@@ -16,16 +15,10 @@ import crypto.typestate.CryptSLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
-import soot.Body;
-import soot.MethodOrMethodContext;
-import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.callgraph.ReachableMethods;
-import soot.jimple.toolkits.ide.icfg.BiDiInterproceduralCFG;
-import soot.util.queue.QueueReader;
 import typestate.TransitionFunction;
 
 public class ClassSpecification {

@@ -1,9 +1,5 @@
 package crypto.typestate;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import soot.SootMethod;
 import typestate.finiteautomata.State;
 
 public class ErrorStateNode implements State {
