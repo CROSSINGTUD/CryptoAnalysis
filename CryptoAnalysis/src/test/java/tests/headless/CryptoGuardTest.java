@@ -46,4 +46,22 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		scanner.exec();
 		assertErrors();
 	}
+	
+	@Test
+	public void brokenHashExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/brokenhash").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java
+		setErrorsCount("<example.brokenhash.BrokenHashABICase1: void go(java.lang.String,java.lang.String)>", ConstraintError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase2.java
+		setErrorsCount("<example.brokenhash.BrokenHashBBCase2: void main(java.lang.String[])>", ConstraintError.class, 1);
+				
+		scanner.exec();
+		assertErrors();
+	}
 }
