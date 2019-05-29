@@ -199,7 +199,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					if (n.to() instanceof WrappedState) {
 						WrappedState wrappedState = (WrappedState) n.to();
 						for (TransitionEdge t : spec.getRule().getUsagePattern().getAllTransitions()) {
-							if (t.getLeft().equals(wrappedState.delegate())) {
+							if (t.getLeft().equals(wrappedState.delegate()) && (t.getRight().getHopsToAccepting() == 0 || t.getRight().getHopsToAccepting() < wrappedState.delegate().getHopsToAccepting())) {
 								Collection<SootMethod> converted = CryptSLMethodToSootMethod.v().convert(t.getLabel());
 								expectedMethodsToBeCalled.addAll(converted);
 							}

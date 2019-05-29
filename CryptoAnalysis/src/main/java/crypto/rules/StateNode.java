@@ -11,6 +11,7 @@ public class StateNode implements java.io.Serializable {
 
 	private Boolean init = false;
 	private Boolean accepting = false;
+	private int hopsToAccepting = Integer.MAX_VALUE;
 
 	public StateNode(String _name) {
 		name = _name;
@@ -94,6 +95,14 @@ public class StateNode implements java.io.Serializable {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	public void setHopsToAccepting(int hops) {
+		hopsToAccepting = hops;
+	}
+
+	public int getHopsToAccepting() {
+		return hopsToAccepting;
 	}
 
 }
