@@ -29,7 +29,7 @@ public class ImpreciseValueExtractionError extends AbstractError {
 		msg.append(" could not be evaluted due to insufficient information.");
 		return msg.toString();
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -54,6 +54,5 @@ public class ImpreciseValueExtractionError extends AbstractError {
 			return false;
 		return true;
 	}
-	
-	
+
 }

@@ -25,6 +25,7 @@ import crypto.analysis.RequiredCryptSLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -314,7 +315,7 @@ public class ConstraintSolver {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
 							for(ExtractedValue v : values) {
 								if(isHardCoded(v)) {
-									errors.add(new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
+									errors.add(new HardCodedError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
 							}
 						}
@@ -407,6 +408,9 @@ public class ConstraintSolver {
 							break;
 						case p:
 							sum = leftie.getKey() + rightie.getKey();
+							break;
+						case m: 
+							sum = leftie.getKey() % rightie.getKey();
 							break;
 						default:
 							sum = 0;
@@ -533,7 +537,7 @@ public class ConstraintSolver {
 
 	public abstract class EvaluableConstraint {
 
-		List<AbstractError> errors = Lists.newArrayList();
+		Set<AbstractError> errors = Sets.newHashSet();
 		ISLConstraint origin;
 
 		public abstract void evaluate();

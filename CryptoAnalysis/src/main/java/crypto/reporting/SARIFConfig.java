@@ -44,6 +44,8 @@ public class SARIFConfig {
 	public static final String CONSTRAINT_ERROR_VALUE = "A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.";
 	public static final String NEVER_TYPE_OF_ERROR_KEY = "NeverTypeOfError";
 	public static final String NEVER_TYPE_OF_ERROR_VALUE = "Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a String";
+	public static final String HARDCODED_ERROR_KEY = "HardCodedError";
+	public static final String HARDCODED_ERROR_VALUE = "A hardcoded value was found. Load the value dynamically from a data storage.";
 	public static final String FORBIDDEN_METHOD_ERROR_KEY = "ForbiddenMethodError";
 	public static final String FORBIDDEN_METHOD_ERROR_VALUE = "A method that is forbidden (CrySL block FORBIDDEN) to be called under some circumstances was found.";
 	public static final String IMPRECISE_VALUE_EXTRACTION_ERROR_KEY = "ImpreciseValueExtractionError";

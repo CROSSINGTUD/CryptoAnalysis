@@ -9,4 +9,5 @@ public interface ErrorVisitor {
 	public void visit(ImpreciseValueExtractionError predicateError);
 	public void visit(NeverTypeOfError predicateError);
 	public void visit(PredicateContradictionError predicateContradictionError);
+	public void visit(HardCodedError hardcodedError);
 }
