@@ -119,5 +119,38 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		assertErrors();
 	}
 	
-	
+	@Test
+	public void staticInitializationVectorExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticinitializationvector").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABHCase1: void go()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABHCase1: void go()>", RequiredPredicateError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABHCase2: void go()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABHCase2: void go()>", RequiredPredicateError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABICase1: void go(javax.crypto.spec.IvParameterSpec)>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABICase1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABICase2: void go(javax.crypto.spec.IvParameterSpec)>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABICase2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorBBCase1: void go()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorBBCase1: void go()>", IncompleteOperationError.class, 1);
+				
+		scanner.exec();
+		assertErrors();
+	}
 }
