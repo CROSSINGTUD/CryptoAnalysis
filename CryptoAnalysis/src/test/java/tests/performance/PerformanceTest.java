@@ -26,13 +26,19 @@ public class PerformanceTest{
 	
 	private static boolean VISUALIZATION = false;
 	String projectPath, sootClassPath;
+	HeadlessCryptoScanner scanner;
 	Ruleset ruleSet;
 	boolean isMavenProject;
+	String statisticsFilePath;
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
 		return mi;
+	}
+	
+	protected void recordStats() {
+		
 	}
 	
 	@SuppressWarnings("static-access")
@@ -57,9 +63,8 @@ public class PerformanceTest{
 
 
 			@Override
-			protected CrySLAnalysisListener getAdditionalListener() {
-				// TODO Auto-generated method stub
-				return new PerformanceReportListener();
+			public CrySLAnalysisListener getAdditionalListener() {
+				return new PerformanceReportListener(statisticsFilePath);
 			}
 
 			@Override
@@ -99,7 +104,7 @@ public class PerformanceTest{
 
 			@Override
 			protected CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener();
+				return new PerformanceReportListener(statisticsFilePath);
 			}
 
 			@Override
@@ -121,7 +126,7 @@ public class PerformanceTest{
 	public static Iterable<Object[]> data() {
 		ArrayList<Object[]> params = Lists.newArrayList();
 		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/BouncyCastle/COSE", Ruleset.BouncyCastle, true, ""});
-		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", Ruleset.JavaCryptographicArchitecture, false, ""});
+		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", Ruleset.JavaCryptographicArchitecture, true, ""});
 		return params;
 	}
 	
@@ -136,11 +141,11 @@ public class PerformanceTest{
 	public void test() throws Exception {
 		if (isMavenProject) {
 			MavenProject mavenProject = createAndCompile(new File(projectPath).getAbsolutePath());
-			HeadlessCryptoScanner scanner = createScanner(mavenProject, ruleSet);
-			scanner.exec();
+			scanner = createScanner(mavenProject, ruleSet);
 		} else {
-			HeadlessCryptoScanner scanner = createScanner(new File(projectPath).getAbsolutePath(), ruleSet, sootClassPath);
-			scanner.exec();
+			scanner = createScanner(new File(projectPath).getAbsolutePath(), ruleSet, sootClassPath);
 		}
+		scanner.exec();
+		recordStats();
 	}
 }

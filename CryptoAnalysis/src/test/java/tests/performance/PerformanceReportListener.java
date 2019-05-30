@@ -1,11 +1,14 @@
 package tests.performance;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
@@ -28,6 +31,17 @@ import typestate.TransitionFunction;
 public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	private Stopwatch analysisTime = Stopwatch.createUnstarted();
+	private Stopwatch seedAnalysisWatch = Stopwatch.createUnstarted();
+	private Stopwatch boomerangAnalysisWatch = Stopwatch.createUnstarted();
+	private List<Double> seedAnalysisTime = new ArrayList<>();
+	private List<Double> boomerangAnalysisTime = new ArrayList<>();
+	private String statisticsFilePath;
+	private int seeds = 0, secureObjectsFound = 0;
+	private Set<AbstractError> errors = Sets.newHashSet();
+	
+	public PerformanceReportListener(String statsFilePath) {
+		statisticsFilePath = statsFilePath;
+	}
 	
 	@Override
 	public void beforeAnalysis() {
@@ -37,6 +51,11 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void afterAnalysis() {
 		analysisTime.stop();
+		//Analysis time
+		//Average seed analysis time
+		//Number of seeds
+		//Total secure objects found
+		//Boomerang analysis time
 		System.out.println("From new listener - " + analysisTime.elapsed(TimeUnit.SECONDS));
 		
 	}
@@ -67,20 +86,18 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-		
+		seedAnalysisWatch.start();
 	}
 
 	@Override
 	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-		// TODO Auto-generated method stub
-		
+		boomerangAnalysisWatch.start();
 	}
 
 	@Override
 	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		// TODO Auto-generated method stub
-		
+		boomerangAnalysisTime.add((double) boomerangAnalysisWatch.elapsed(TimeUnit.SECONDS));
+		boomerangAnalysisWatch.reset();
 	}
 
 	@Override
@@ -93,27 +110,24 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void reportError(AbstractError error) {
-		// TODO Auto-generated method stub
-		
+		errors.add(error);
 	}
 
 	@Override
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 			Collection<ISLConstraint> relConstraints) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onSeedTimeout(Node<Statement, Val> seed) {
-		// TODO Auto-generated method stub
-		
+		seedAnalysisWatch.reset();
 	}
 
 	@Override
 	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults) {
-		// TODO Auto-generated method stub
-		
+		seedAnalysisTime.add((double) seedAnalysisWatch.elapsed(TimeUnit.SECONDS));
+		seedAnalysisWatch.reset();
 	}
 
 	@Override
@@ -125,14 +139,12 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void discoveredSeed(IAnalysisSeed curr) {
-		// TODO Auto-generated method stub
-		
+		seeds++;
 	}
 
 	@Override
 	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
-		// TODO Auto-generated method stub
-		
+		secureObjectsFound++;
 	}
 
 }
