@@ -26,29 +26,29 @@ import tests.headless.MavenProject;
 
 @RunWith(Parameterized.class)
 public class PerformanceTest{
-	
+
 	private static boolean VISUALIZATION = false;
 	String projectPath, sootClassPath;
 	HeadlessCryptoScanner scanner;
 	Ruleset ruleSet;
 	boolean isMavenProject;
 	String statisticsFilePath;
-	
+
 	@BeforeClass
 	public static void setup() throws IOException, GeneralSecurityException {
 		GoogleSpreadsheetWriter.createSheet(Arrays.asList(new String[] {"AnalysisTime", "AverageSeedAnalysisTime", "AverageBoomerangAnalysisTime", "NumberOfSeeds", "NumberOfSecureObjects"}));
 	}
-	
+
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
 		return mi;
 	}
-	
+
 	protected void recordStats() {
-		
+
 	}
-	
+
 	@SuppressWarnings("static-access")
 	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
 		G.v().reset();
@@ -89,7 +89,7 @@ public class PerformanceTest{
 		};
 		return scanner;
 	}
-	
+
 	@SuppressWarnings("static-access")
 	protected HeadlessCryptoScanner createScanner(String applicationPath, Ruleset ruleset, String sootClassPath) {
 		G.v().reset();
@@ -129,7 +129,7 @@ public class PerformanceTest{
 		};
 		return scanner;
 	}
-	
+
 	@Parameters
 	public static Iterable<Object[]> data() {
 		ArrayList<Object[]> params = Lists.newArrayList();
@@ -137,14 +137,14 @@ public class PerformanceTest{
 		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", Ruleset.JavaCryptographicArchitecture, true, ""});
 		return params;
 	}
-	
+
 	public PerformanceTest(String projectPath, Ruleset rSet, boolean isMvnProject, String sootCp) {
 		this.projectPath = projectPath;
 		this.ruleSet = rSet;
 		this.isMavenProject = isMvnProject;
 		this.sootClassPath = sootCp;
 	}
-	
+
 	@Test
 	public void test() throws Exception {
 		if (isMavenProject) {

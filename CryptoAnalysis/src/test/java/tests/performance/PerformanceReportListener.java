@@ -41,11 +41,11 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	private String statisticsFilePath;
 	private int seeds = 0, secureObjectsFound = 0;
 	private Set<AbstractError> errors = Sets.newHashSet();
-	
+
 	public PerformanceReportListener(String statsFilePath) {
 		statisticsFilePath = statsFilePath;
 	}
-	
+
 	@Override
 	public void beforeAnalysis() {
 		analysisTime.start();
@@ -74,25 +74,25 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
 			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
 			Collection<ISLConstraint> relConstraints) {
-		
+
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	public void collectedValues(AnalysisSeedWithSpecification seed,
 			Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
