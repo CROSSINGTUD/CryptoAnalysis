@@ -1,9 +1,12 @@
 package tests.performance;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,6 +33,11 @@ public class PerformanceTest{
 	Ruleset ruleSet;
 	boolean isMavenProject;
 	String statisticsFilePath;
+	
+	@BeforeClass
+	public static void setup() throws IOException, GeneralSecurityException {
+		GoogleSpreadsheetWriter.createSheet(Arrays.asList(new String[] {"AnalysisTime", "AverageSeedAnalysisTime", "AverageBoomerangAnalysisTime", "NumberOfSeeds", "NumberOfSecureObjects"}));
+	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);

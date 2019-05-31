@@ -5,10 +5,10 @@
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
 	<version>2.4-SNAPSHOT</version>
-	
+
 	<properties>
-   	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<spdsVersion>2.3</spdsVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spdsVersion>2.3</spdsVersion>
 	</properties>
 
 	<build>
@@ -211,6 +211,17 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-sheets -->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-sheets</artifactId>
+			<version>v4-rev553-1.25.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client-jetty</artifactId>
+			<version>1.27.0</version>
 		</dependency>
 	</dependencies>
 

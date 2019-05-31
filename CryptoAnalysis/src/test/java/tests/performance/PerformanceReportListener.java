@@ -1,6 +1,9 @@
 package tests.performance;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +60,15 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		//Total secure objects found
 		//Boomerang analysis time
 		System.out.println("From new listener - " + analysisTime.elapsed(TimeUnit.SECONDS));
-		
+		try {
+			GoogleSpreadsheetWriter.write(asCSVLine());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -147,4 +158,15 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		secureObjectsFound++;
 	}
 
+	private List<Object> asCSVLine() {
+		long elapsed = analysisTime.elapsed(TimeUnit.SECONDS);
+		String analysisTime = String.valueOf(elapsed);
+		Double avgSAT = seedAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
+		String averageSeedAnalysisTime = String.valueOf(avgSAT);
+		Double avgBAT = boomerangAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
+		String averageBoomerangAnalysisTime = String.valueOf(avgBAT);
+		String numberOfSeeds = String.valueOf(seeds);
+		String numberOfSecureObjects = String.valueOf(secureObjectsFound);
+		return Arrays.asList(new String[] {analysisTime, averageSeedAnalysisTime, averageBoomerangAnalysisTime, numberOfSeeds, numberOfSecureObjects});
+	}
 }
