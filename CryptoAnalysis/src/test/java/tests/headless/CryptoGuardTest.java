@@ -37,10 +37,16 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", ConstraintError.class, 2);
 		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", IncompleteOperationError.class, 1);
 		
+		// ABICase3, ABICase4, ABICase9 not included as tests due to being similar to ABICase1 and ABICase2 above
+		// ABICase5, -6, -7, -8, -10 not included as tests due to misuses not being caught by analysis
+		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java
 		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", ConstraintError.class, 2);
 		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", IncompleteOperationError.class, 1);
+		
+		// BBCase1, BBCase2, BBCase4, BBCase5 not included as tests due to being similar to BBCase3 above
+		// ABSCase1, -2, -3, -4, -5 not included as tests due to misuses not being caught by analysis
 		
 		scanner.exec();
 		assertErrors();
