@@ -89,8 +89,8 @@ public class ErrorSpecification {
 			return this;
 		}
 		
-		public Builder withFNs(FalseNegatives falseNegatives) {
-			this.spec.falseNegatives.add(falseNegatives);
+		public Builder withFNs(Class<?> errorType, int numberOfFindings, String explanation) {
+			this.spec.falseNegatives.add(new FalseNegatives(errorType, numberOfFindings, explanation));
 			return this;
 		}
 		
