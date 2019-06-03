@@ -244,10 +244,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(new ErrorSpecification.Builder("<constants.Constants: void <clinit>()>")
 				.withTPs(HardCodedError.class, 1)
 				.build());
-		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testTwo(java.lang.String)>")
-				.withFPs(HardCodedError.class, 1, "Does not use a hardcoded String as input to new BigInteger(...)")
-				.build()
-				);
 		scanner.exec();
 	  	assertErrors();
 	}
