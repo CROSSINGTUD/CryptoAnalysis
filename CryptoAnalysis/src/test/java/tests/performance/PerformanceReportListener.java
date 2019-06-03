@@ -59,6 +59,9 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		//Number of seeds
 		//Total secure objects found
 		//Boomerang analysis time
+		//Memory usage per project - TODO
+		//Number of rules - TODO
+		//Number of reachable methods in a soot scene - TODO
 		System.out.println("From new listener - " + analysisTime.elapsed(TimeUnit.SECONDS));
 		try {
 			GoogleSpreadsheetWriter.write(asCSVLine());
