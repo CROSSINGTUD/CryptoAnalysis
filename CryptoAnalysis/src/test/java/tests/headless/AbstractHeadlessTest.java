@@ -215,9 +215,12 @@ public abstract class AbstractHeadlessTest {
 
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalsePositives fp, FalseNegatives fn, String methodSignature) {
 		if (errorMarkerCountPerErrorTypeAndMethod.contains(methodSignature, errorType)) {
-			throw new RuntimeException("Error Type already specified for this method");
+			int errorCount = errorMarkerCountPerErrorTypeAndMethod.get(methodSignature, errorType);
+			errorMarkerCountPerErrorTypeAndMethod.remove(methodSignature, errorType);
+			errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings() + errorCount);
+		} else {
+			errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
 		}
-		errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
 	}
 	
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, String methodSignature) {
@@ -234,5 +237,16 @@ public abstract class AbstractHeadlessTest {
 
 	protected void setErrorsCount(Class<?> errorType, FalseNegatives fn, String methodSignature) {
 		setErrorsCount(errorType,new TruePositives(0), new NoFalsePositives(), fn,  methodSignature);
+	}
+	
+	protected void setErrorsCount(ErrorSpecification errorSpecification) {
+		if (errorSpecification.getTotalNumberOfFindings() > 0) {
+			for (TruePositives tp: errorSpecification.getTruePositives()) {
+				setErrorsCount(tp.getErrorType(), tp, new NoFalsePositives(), new NoFalseNegatives(), errorSpecification.getMethodSignature());
+			}
+			for (FalsePositives fp: errorSpecification.getFalsePositives()) {
+				setErrorsCount(fp.getErrorType(), new TruePositives(0), fp, new NoFalseNegatives(), errorSpecification.getMethodSignature());
+			}
+		}
 	}
 }
