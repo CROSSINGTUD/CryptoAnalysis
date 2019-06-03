@@ -43,8 +43,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
 
-		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
+//TODO A False negative, when key is not properly generated, processing shall not work!!!
+//		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
 	  	assertErrors();
@@ -242,6 +244,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(new ErrorSpecification.Builder("<constants.Constants: void <clinit>()>")
 				.withTPs(HardCodedError.class, 1)
 				.build());
+		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testTwo(java.lang.String)>")
+				.withFPs(HardCodedError.class, 1, "Does not use a hardcoded String as input to new BigInteger(...)")
+				.build()
+				);
 		scanner.exec();
 	  	assertErrors();
 	}

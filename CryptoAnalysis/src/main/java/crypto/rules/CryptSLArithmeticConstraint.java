@@ -9,7 +9,11 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 
 	private static final long serialVersionUID = 1L;
 
-	public enum ArithOp { p, n}
+	public enum ArithOp { p, n, m}
+	/* p = +
+	 * n = -
+	 * m = % 
+	 */
 	
 	private ArithOp operator;
 	private ICryptSLPredicateParameter  left;
@@ -43,7 +47,7 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	}
 
 	public String toString() {
-		return left + " " + (operator.equals(ArithOp.p) ? "+" : "-") + " " + right;
+		return left + " " + (operator.equals(ArithOp.p) ? "+" : (operator.equals(ArithOp.m) ? "%" : "-")) + " " + right;
 	}
 
 	@Override
@@ -76,6 +80,4 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 		return toString();
 	}
 	
-
-
 }
