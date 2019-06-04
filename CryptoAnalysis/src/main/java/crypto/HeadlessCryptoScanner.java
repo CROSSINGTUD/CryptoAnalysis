@@ -293,26 +293,26 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
 		
-//		// JAVA 8
-//		if(getJavaVersion() < 9)
-//		{
-//			System.out.println("java 8 settings applied");
-//			Options.v().set_prepend_classpath(true);
-//			Options.v().set_soot_classpath(sootClassPath());
-//		}
-//		// JAVA 9 && CLASSPATH
-//		else if(getJavaVersion() >= 9)
-//		{
-//			System.out.println("java 9 classpath settings applied");
-//			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
-//		}
-		
-		// JAVA 9 && MODULEPATH
+		// JAVA 8
+		if(getJavaVersion() < 9)
 		{
-			System.out.println("java 9 modulepath settings applied");
+			System.out.println("java 8 settings applied");
 			Options.v().set_prepend_classpath(true);
-			Options.v().set_soot_modulepath(sootClassPath());
-		}	
+			Options.v().set_soot_classpath(sootClassPath());
+		}
+		// JAVA 9 && CLASSPATH
+		else if(getJavaVersion() >= 9)
+		{
+			System.out.println("java 9 classpath settings applied");
+			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
+		}
+		
+//		// JAVA 9 && MODULEPATH
+//		{
+//			System.out.println("java 9 modulepath settings applied");
+//			Options.v().set_prepend_classpath(true);
+//			Options.v().set_soot_modulepath(sootClassPath());
+//		}	
 		
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
