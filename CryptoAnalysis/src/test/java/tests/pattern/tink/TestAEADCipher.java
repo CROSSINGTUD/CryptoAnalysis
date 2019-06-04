@@ -1,6 +1,5 @@
 package tests.pattern.tink;
 
-import java.io.File;
 import java.security.GeneralSecurityException;
 
 import org.junit.Ignore;
@@ -12,7 +11,7 @@ import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 
-import crypto.analysis.Constants.Ruleset;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
 @Ignore

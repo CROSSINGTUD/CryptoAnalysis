@@ -9,7 +9,11 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 
 	private static final long serialVersionUID = 1L;
 
-	public enum ArithOp { p, n}
+	public enum ArithOp { p, n, m}
+	/* p = +
+	 * n = -
+	 * m = % 
+	 */
 	
 	private ArithOp operator;
 	private ICryptSLPredicateParameter  left;
@@ -43,26 +47,32 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	}
 
 	public String toString() {
-		return left + " " + (operator.equals(ArithOp.p) ? "+" : "-") + " " + right;
+		return left + " " + (operator.equals(ArithOp.p) ? "+" : (operator.equals(ArithOp.m) ? "%" : "-")) + " " + right;
 	}
 
 	@Override
 	public Set<String> getInvolvedVarNames() {
 		Set<String> varNames = new HashSet<String>();
 		String name = left.getName();
-		try {
-			Integer.parseInt(name);
-		} catch(NumberFormatException ex) {
+		if(!isIntOrBoolean(name)) {
 			varNames.add(name);
 		}
 		
 		name = right.getName();
-		try {
-			Integer.parseInt(name);
-		} catch(NumberFormatException ex) {
+		if(!isIntOrBoolean(name)) {
 			varNames.add(name);
 		}
 		return varNames;
+	}
+
+	private boolean isIntOrBoolean(String name) {
+		try {
+			Integer.parseInt(name);
+			return true;
+		} catch(NumberFormatException ex) {
+		}
+		
+		return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
 	}
 
 	@Override
@@ -70,6 +80,4 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 		return toString();
 	}
 	
-
-
 }

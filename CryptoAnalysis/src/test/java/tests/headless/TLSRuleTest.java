@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
-import test.IDEALCrossingTestingFramework;
 
 public class TLSRuleTest extends AbstractHeadlessTest{
 	@Ignore
@@ -14,7 +13,7 @@ public class TLSRuleTest extends AbstractHeadlessTest{
 	public void secureFileTransmitter() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, IDEALCrossingTestingFramework.RESOURCE_PATH);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 	
 		scanner.exec();
 		assertErrors();

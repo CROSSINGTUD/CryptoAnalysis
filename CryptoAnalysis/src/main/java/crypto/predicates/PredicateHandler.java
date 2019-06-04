@@ -4,16 +4,15 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-import com.google.inject.internal.util.Lists;
-
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
+import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CryptoScanner;
@@ -26,6 +25,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.interfaces.ISLConstraint;
+import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLRule;
 import soot.SootMethod;
@@ -47,8 +47,7 @@ public class PredicateHandler {
 		private final EnsuredCryptSLPredicate ensPred;
 		private final AnalysisSeedWithSpecification secondSeed;
 
-		private AddPredicateToOtherSeed(Statement statement, Value base, SootMethod callerMethod,
-				EnsuredCryptSLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+		private AddPredicateToOtherSeed(Statement statement, Value base, SootMethod callerMethod, EnsuredCryptSLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
 			this.statement = statement;
 			this.base = base;
 			this.callerMethod = callerMethod;
@@ -58,7 +57,7 @@ public class PredicateHandler {
 
 		@Override
 		public void done(ForwardBoomerangResults<TransitionFunction> results) {
-			if(results.asStatementValWeightTable().row(statement).containsKey(new Val(base, callerMethod))){
+			if (results.asStatementValWeightTable().row(statement).containsKey(new Val(base, callerMethod))) {
 				secondSeed.addEnsuredPredicate(ensPred);
 			}
 		}
@@ -118,14 +117,14 @@ public class PredicateHandler {
 		private PredicateHandler getOuterType() {
 			return PredicateHandler.this;
 		}
-		
+
 	}
 
 	private final Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates = HashBasedTable.create();
 	private final Table<Statement, IAnalysisSeed, Set<EnsuredCryptSLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
 	private final Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private final CryptoScanner cryptoScanner;
-	
+
 	public PredicateHandler(CryptoScanner cryptoScanner) {
 		this.cryptoScanner = cryptoScanner;
 	}
@@ -145,7 +144,7 @@ public class PredicateHandler {
 		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
 		return added;
 	}
-	
+
 	/**
 	 * @return the existingPredicates
 	 */
@@ -157,7 +156,6 @@ public class PredicateHandler {
 		}
 		return set;
 	}
-	
 
 	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCryptSLPredicate ensPred) {
 		if (statement.isCallsite()) {
@@ -173,13 +171,13 @@ public class PredicateHandler {
 						paramMatch = true;
 				}
 				if (paramMatch) {
-					for(AnalysisSeedWithSpecification secondSeed : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
+					for (AnalysisSeedWithSpecification secondSeed : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
 						secondSeed.registerResultsHandler(new AddPredicateToOtherSeed(statement, base, callerMethod, ensPred, secondSeed));
-						
+
 					}
 				}
 			}
-			
+
 			if (ivexpr instanceof StaticInvokeExpr && statement.getUnit().get() instanceof AssignStmt) {
 				StaticInvokeExpr iie = (StaticInvokeExpr) ivexpr;
 				boolean paramMatch = false;
@@ -188,8 +186,8 @@ public class PredicateHandler {
 						paramMatch = true;
 				}
 				if (paramMatch) {
-					for(AnalysisSeedWithSpecification spec : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
-						if(spec.stmt().equals(statement)) {
+					for (AnalysisSeedWithSpecification spec : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
+						if (spec.stmt().equals(statement)) {
 							spec.addEnsuredPredicate(ensPred);
 						}
 					}
@@ -205,35 +203,46 @@ public class PredicateHandler {
 			if (set == null)
 				set = Sets.newHashSet();
 			set.add(predToBeEnsured);
-			expectedPredicateObjectBased.put(new Statement((Stmt)succ,stmt.getMethod()), object, set);
+			expectedPredicateObjectBased.put(new Statement((Stmt) succ, stmt.getMethod()), object, set);
 		}
 	}
-
 
 	public void checkPredicates() {
 		checkMissingRequiredPredicates();
 		checkForContradictions();
 		cryptoScanner.getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 	}
+
 	private void checkMissingRequiredPredicates() {
 		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeeds()) {
-			Set<RequiredCryptSLPredicate> missingPredicates = seed.getMissingPredicates();
-			for(RequiredCryptSLPredicate pred : missingPredicates){
-				CryptSLRule rule = seed.getSpec().getRule();
-				if (!rule.getPredicates().contains(pred.getPred())){
-					for(CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()){
-						if(pred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(pred.getLocation())){
-							cryptoScanner.getAnalysisListener().reportError(seed, new RequiredPredicateError(pred.getPred(), pred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
-						}
-					}
+			Set<ISLConstraint> missingPredicates = seed.getMissingPredicates();
+			for (ISLConstraint pred : missingPredicates) {
+				if (pred instanceof RequiredCryptSLPredicate) {
+					reportMissingPred(seed, (RequiredCryptSLPredicate) pred);
+				} else if (pred instanceof CryptSLConstraint) {
+					AlternativeReqPredicate altPred = (AlternativeReqPredicate) pred;
+					reportMissingPred(seed, new RequiredCryptSLPredicate(altPred.getAlternative1(), altPred.getLocation()));
+					reportMissingPred(seed, new RequiredCryptSLPredicate(altPred.getAlternative2(), altPred.getLocation()));
 				}
 			}
-		}	
+		}
+	}
+
+	private void reportMissingPred(AnalysisSeedWithSpecification seed, RequiredCryptSLPredicate missingPred) {
+		CryptSLRule rule = seed.getSpec().getRule();
+		if (!rule.getPredicates().contains(missingPred.getPred())) {
+			for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
+				if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
+					cryptoScanner.getAnalysisListener().reportError(seed,
+							new RequiredPredicateError(missingPred.getPred(), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
+				}
+			}
+		}
 	}
 
 	private void checkForContradictions() {
 		Set<Entry<CryptSLPredicate, CryptSLPredicate>> contradictionPairs = new HashSet<Entry<CryptSLPredicate, CryptSLPredicate>>();
-		for(ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
+		for (ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
 			CryptSLRule rule = c.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
 				if (cons instanceof CryptSLPredicate && ((CryptSLPredicate) cons).isNegated()) {
