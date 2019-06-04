@@ -17,7 +17,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -27,7 +26,6 @@ import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -53,7 +51,6 @@ import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
-import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import soot.options.Options;
 import wpds.impl.Weight.NoWeight;
 
