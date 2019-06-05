@@ -58,6 +58,7 @@ public class ProviderDetection {
 	
 	private String provider = null;
 	private String rulesDirectory = null;
+	private String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
 	
 	public String getProvider() {
 		return provider;
@@ -149,9 +150,9 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
+//				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
 				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
-				defaultCryptoRules = getRules(rulesDirectory, defaultCryptoRules);
+				defaultCryptoRules = getRules(defaultRulesDirectory, defaultCryptoRules);
 				doAnalysis(observableDynamicICFG, defaultCryptoRules);
 			}
 		};
@@ -210,10 +211,10 @@ public class ProviderDetection {
 										
 									if(providerType.matches("java.security.Provider")) {
 										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, observableDynamicICFG);
-										this.rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
+										this.rulesDirectory = defaultRulesDirectory;
 										
 										if(ruleExists(provider, declaringClassName)) {
-											this.rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture"+File.separator+provider;
+											this.rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
@@ -222,13 +223,13 @@ public class ProviderDetection {
 										
 									else if (providerType.matches("java.lang.String")) {
 										this.provider = getProviderWhenTypeString(providerValue, body);
-										rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
+										rulesDirectory = defaultRulesDirectory;
 										
 										checkIfStmt(providerValue, body);
 										checkSwitchStmt(providerValue, body);
 										
 										if(ruleExists(provider, declaringClassName)) {
-											rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture"+File.separator+provider;
+											rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
@@ -424,7 +425,7 @@ public class ProviderDetection {
 		boolean ruleExists = false;
 		String rule = declaringClassName;
 		
-		File rulesDirectory = new File(System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture"+File.separator+provider);
+		File rulesDirectory = new File(defaultRulesDirectory+File.separator+provider);
 		if(rulesDirectory.exists()) {
 			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
 			for (File file : listRulesDirectoryFiles) {
@@ -451,7 +452,7 @@ public class ProviderDetection {
 	 */
 	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String declaringClassName) {
 		
-		String newRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture"+File.separator+provider;
+		String newRulesDirectory = defaultRulesDirectory+File.separator+provider;
 		
 		// Forms a list of all the new CryptSL rules in the detected provider's directory.
 		// This list contains only String elements and it holds only the rule's names, i.e Cipher, MessageDigest, etc
