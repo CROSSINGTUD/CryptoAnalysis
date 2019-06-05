@@ -14,7 +14,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
@@ -40,13 +39,10 @@ import soot.Body;
 import soot.BodyTransformer;
 import soot.EntryPoints;
 import soot.G;
-import soot.ModulePathSourceLocator;
-import soot.ModuleScene;
 import soot.PackManager;
 import soot.PhaseOptions;
 import soot.Scene;
 import soot.SceneTransformer;
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Transformer;
