@@ -60,6 +60,9 @@ public class ProviderDetection {
 	private String rulesDirectory = null;
 	private String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
 	
+	private String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
+	private String sootClassPathForTests = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
+	
 	public String getProvider() {
 		return provider;
 	}
@@ -71,11 +74,9 @@ public class ProviderDetection {
 	
 	/**
 	 * This method is used to get the Soot classpath from `src/main/java`
-	 * in order to test the Provider Detection from there
 	 */
 	public String getMainSootClassPath() {
 		//Assume target folder to be directly in user dir
-		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
 		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
 			throw new RuntimeException("Classpath for the test cases could not be found.");
@@ -89,12 +90,11 @@ public class ProviderDetection {
 	 */
 	public String getSootClassPath(){
 		//Assume target folder to be directly in user dir
-		String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
-		File classPathDir = new File(sootClassPath);
+		File classPathDir = new File(sootClassPathForTests);
 		if (!classPathDir.exists()){
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
-		return sootClassPath;
+		return sootClassPathForTests;
 	}
 	
 	/**
@@ -150,7 +150,6 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-//				String rulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
 				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
 				defaultCryptoRules = getRules(defaultRulesDirectory, defaultCryptoRules);
 				doAnalysis(observableDynamicICFG, defaultCryptoRules);
