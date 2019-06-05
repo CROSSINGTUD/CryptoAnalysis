@@ -58,11 +58,6 @@ public class ProviderDetection {
 	
 	private String provider = null;
 	private String rulesDirectory = null;
-
-
-	public ProviderDetection() {
-		//default constructor
-	}
 	
 	public String getProvider() {
 		return provider;
