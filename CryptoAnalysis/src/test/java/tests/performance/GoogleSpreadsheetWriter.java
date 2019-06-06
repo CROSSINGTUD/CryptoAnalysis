@@ -16,6 +16,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -31,9 +32,8 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 
 public class GoogleSpreadsheetWriter {
 
-	private static final String APPLICATION_NAME = "CryptoAnalysis-PerformanceWriter";
-	private static final String SPREADSHEET_ID = "1mSqVxzV5rlaXjhZN9PFXvpVxzr_RkvVpi83sVbuz8Gc";
-	private static final String SHEET_ID = "metrics";
+	private static final String APPLICATION_NAME = "CryptoAnalysis-Performance";
+	private static final String SPREADSHEET_ID = "1NrfiAUsPYNXYsE05nSimu7JFAO5LXOpSQXtv_8lA8LM"; 
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
@@ -41,9 +41,8 @@ public class GoogleSpreadsheetWriter {
 	 * Global instance of the scopes required by this quickstart.
 	 * If modifying these scopes, delete your previously saved tokens/ folder.
 	 */
-	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS_READONLY);
+	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
 	private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-	private static boolean onlyOnce;
 
 	/**
 	 * Creates an authorized Credential object.
@@ -68,33 +67,53 @@ public class GoogleSpreadsheetWriter {
 		LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
 		return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 	}
-
-	public static void createSheet(List<Object> headers) throws IOException, GeneralSecurityException {
-		if(onlyOnce)
-			return;
-		onlyOnce = true;	
+	
+	private static boolean addSheet(String projectName) throws GoogleJsonResponseException {
+		Sheets service;
+		boolean sheetAdded = true;
+		try {
+			service = getService();
+			AddSheetRequest addSheet = new AddSheetRequest();
+			addSheet.setProperties(new SheetProperties().setTitle(projectName));
+			List<Request> requests = new ArrayList<>(); 
+			requests.add(new Request().setAddSheet(addSheet));
+			BatchUpdateSpreadsheetRequest requestBody = new BatchUpdateSpreadsheetRequest();
+			requestBody.setRequests(requests);
+			service.spreadsheets().batchUpdate(SPREADSHEET_ID, requestBody).execute();
+		} catch (GoogleJsonResponseException e) {
+			if (e.getMessage().contains("Invalid requests[0].addSheet"))
+				sheetAdded = false;
+			else
+				e.printStackTrace();
+		} catch (IOException | GeneralSecurityException e) {
+			e.printStackTrace();
+			return sheetAdded;
+		}
+		return sheetAdded;
+	}
+	
+	private static void addHeaders(List<Object> headers, String projectName, String projectUrl) throws IOException, GeneralSecurityException {
 		Sheets service = getService();
-		List<Request> requests = new ArrayList<>(); 
-		AddSheetRequest addSheet = new AddSheetRequest();
-		addSheet.setProperties(new SheetProperties().setTitle(SHEET_ID));
-		requests.add(new Request().setAddSheet(addSheet));
-		BatchUpdateSpreadsheetRequest requestBody = new BatchUpdateSpreadsheetRequest();
-		requestBody.setRequests(requests);
-		service.spreadsheets().batchUpdate(SPREADSHEET_ID, requestBody).execute();
-
-		ArrayList<List<Object>> rows = Lists.newArrayList();
-		rows.add(headers);
-		ValueRange body = new ValueRange().setValues(Arrays.asList(headers));
-		service.spreadsheets().values().append(SPREADSHEET_ID, SHEET_ID, body).setValueInputOption("USER_ENTERED")
+		ValueRange metricNames = new ValueRange().setValues(Arrays.asList(headers));
+		ValueRange projectDetails = new ValueRange().setValues(Arrays.asList(Arrays.asList(new String[] {projectName, projectUrl})));
+		service.spreadsheets().values().append(SPREADSHEET_ID, projectName, projectDetails).setValueInputOption("USER_ENTERED")
+		.execute();
+		service.spreadsheets().values().append(SPREADSHEET_ID, projectName, metricNames).setValueInputOption("USER_ENTERED")
 		.execute();
 	}
 
-	public static void write(List<Object> data) throws IOException, GeneralSecurityException  {
+	public static void createSheet(String projectName, String projectUrl, List<Object> headers) throws IOException, GeneralSecurityException {
+		if (addSheet(projectName)) {
+			addHeaders(headers, projectName, projectUrl);
+		}
+	}
+
+	public static void write(List<Object> data, String projectName) throws IOException, GeneralSecurityException  {
 		Sheets service = getService();
 		ArrayList<List<Object>> rows = Lists.newArrayList();
 		rows.add(data);
 		ValueRange body = new ValueRange().setValues(rows);
-		service.spreadsheets().values().append(SPREADSHEET_ID, SHEET_ID, body).setValueInputOption("USER_ENTERED")
+		service.spreadsheets().values().append(SPREADSHEET_ID, projectName, body).setValueInputOption("USER_ENTERED")
 		.execute();
 	}
 

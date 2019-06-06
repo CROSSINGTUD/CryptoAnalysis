@@ -28,6 +28,8 @@ import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CryptSLPredicate;
+import crypto.rules.CryptSLRule;
+import soot.Scene;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -38,12 +40,19 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	private Stopwatch boomerangAnalysisWatch = Stopwatch.createUnstarted();
 	private List<Double> seedAnalysisTime = new ArrayList<>();
 	private List<Double> boomerangAnalysisTime = new ArrayList<>();
-	private String statisticsFilePath;
 	private int seeds = 0, secureObjectsFound = 0;
 	private Set<AbstractError> errors = Sets.newHashSet();
+	private String gitCommitId;
+	private BenchmarkProject curProject;
+	private int sootReachableMethods;
+	long memoryUsed;
+	int noOfRules;
+	private long MEGABYTE = 1024L * 1024L;
 
-	public PerformanceReportListener(String statsFilePath) {
-		statisticsFilePath = statsFilePath;
+	public PerformanceReportListener(BenchmarkProject proj, String commitId, List<CryptSLRule> rules) {
+		gitCommitId = commitId;
+		curProject = proj;
+		noOfRules = rules.size();
 	}
 
 	@Override
@@ -53,49 +62,33 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void afterAnalysis() {
-		analysisTime.stop();
-		//Analysis time
-		//Average seed analysis time
-		//Number of seeds
-		//Total secure objects found
-		//Boomerang analysis time
-		//Memory usage per project - TODO
-		//Number of rules - TODO
-		//Number of reachable methods in a soot scene - TODO
-		System.out.println("From new listener - " + analysisTime.elapsed(TimeUnit.SECONDS));
+		Runtime rt = Runtime.getRuntime();
+		rt.gc();
+		memoryUsed = (rt.totalMemory() - rt.freeMemory()) / MEGABYTE;
+		sootReachableMethods = Scene.v().getReachableMethods().size();
 		try {
-			GoogleSpreadsheetWriter.write(asCSVLine());
+			GoogleSpreadsheetWriter.write(asCSVLine(), curProject.getName());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -118,8 +111,6 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
 			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
 			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -147,8 +138,6 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
 			Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -163,13 +152,26 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	private List<Object> asCSVLine() {
 		long elapsed = analysisTime.elapsed(TimeUnit.SECONDS);
+		analysisTime.stop();
 		String analysisTime = String.valueOf(elapsed);
+		String memUsed = String.valueOf(memoryUsed);
+		String reachableMethods = String.valueOf(sootReachableMethods);
+		String nRules = String.valueOf(noOfRules);
 		Double avgSAT = seedAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
 		String averageSeedAnalysisTime = String.valueOf(avgSAT);
 		Double avgBAT = boomerangAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
 		String averageBoomerangAnalysisTime = String.valueOf(avgBAT);
 		String numberOfSeeds = String.valueOf(seeds);
 		String numberOfSecureObjects = String.valueOf(secureObjectsFound);
-		return Arrays.asList(new String[] {analysisTime, averageSeedAnalysisTime, averageBoomerangAnalysisTime, numberOfSeeds, numberOfSecureObjects});
+		return Arrays.asList(new String[] { gitCommitId, 
+				analysisTime, 
+				memUsed, 
+				reachableMethods, 
+				nRules, 
+				numberOfSeeds, 
+				numberOfSecureObjects,
+				averageSeedAnalysisTime,
+				averageBoomerangAnalysisTime
+				});
 	}
 }

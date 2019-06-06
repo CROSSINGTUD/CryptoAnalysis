@@ -6,7 +6,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.BeforeClass;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,15 +29,23 @@ import tests.headless.MavenProject;
 public class PerformanceTest{
 
 	private static boolean VISUALIZATION = false;
-	String projectPath, sootClassPath;
 	HeadlessCryptoScanner scanner;
-	Ruleset ruleSet;
-	boolean isMavenProject;
-	String statisticsFilePath;
+	BenchmarkProject curProj;
+	private static final String COMMIT_ID_PARAM = "commitId";
 
-	@BeforeClass
-	public static void setup() throws IOException, GeneralSecurityException {
-		GoogleSpreadsheetWriter.createSheet(Arrays.asList(new String[] {"AnalysisTime", "AverageSeedAnalysisTime", "AverageBoomerangAnalysisTime", "NumberOfSeeds", "NumberOfSecureObjects"}));
+	@Before
+	public void setup() throws IOException, GeneralSecurityException {
+		GoogleSpreadsheetWriter.createSheet(curProj.getName(), 
+				curProj.getGitUrl(), 
+				Arrays.asList(new String[] {"Git Commit Id", 
+						"Analysis Time", 
+						"Memory Used (MB)", 
+						"Soot Reachable Methods", 
+						"#Rules", 
+						"Number Of Seeds", 
+						"Number Of Secure Objects",
+						"Average Seed Analysis Time", 
+						"Average Boomerang Analysis Time"}));
 	}
 
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -45,12 +54,8 @@ public class PerformanceTest{
 		return mi;
 	}
 
-	protected void recordStats() {
-
-	}
-
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
+	protected HeadlessCryptoScanner createScanner(MavenProject mp, BenchmarkProject proj, String commitId) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -61,7 +66,7 @@ public class PerformanceTest{
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, proj.getRuleSet());
 			}
 
 			@Override
@@ -72,7 +77,7 @@ public class PerformanceTest{
 
 			@Override
 			public CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(statisticsFilePath);
+				return new PerformanceReportListener(proj, commitId, getRules());
 			}
 
 			@Override
@@ -91,28 +96,28 @@ public class PerformanceTest{
 	}
 
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(String applicationPath, Ruleset ruleset, String sootClassPath) {
+	protected HeadlessCryptoScanner createScanner(BenchmarkProject proj, String commitId) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {
-				return sootClassPath;
+				return proj.getSootClassPath();
 			}
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, proj.getRuleSet());
 			}
 
 			@Override
 			protected String applicationClassPath() {
-				return applicationPath;
+				return new File(proj.getProjectPath()).getAbsolutePath();
 			}
 
 
 			@Override
 			protected CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(statisticsFilePath);
+				return new PerformanceReportListener(proj, commitId, getRules());
 			}
 
 			@Override
@@ -133,27 +138,40 @@ public class PerformanceTest{
 	@Parameters
 	public static Iterable<Object[]> data() {
 		ArrayList<Object[]> params = Lists.newArrayList();
-		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/BouncyCastle/COSE", Ruleset.BouncyCastle, true, ""});
-		params.add(new Object[] {"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", Ruleset.JavaCryptographicArchitecture, true, ""});
+		BenchmarkProject project1 = new BenchmarkProject("CogniCryptDemoExample-1", 
+				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", 
+				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
+				"", 
+				true, 
+				Ruleset.JavaCryptographicArchitecture
+				);
+		BenchmarkProject project2 = new BenchmarkProject("CogniCryptDemoExample-2", 
+				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", 
+				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
+				"", 
+				true, 
+				Ruleset.JavaCryptographicArchitecture
+				);
+		params.add(new Object[] {project1});
+		params.add(new Object[] {project2});
 		return params;
 	}
 
-	public PerformanceTest(String projectPath, Ruleset rSet, boolean isMvnProject, String sootCp) {
-		this.projectPath = projectPath;
-		this.ruleSet = rSet;
-		this.isMavenProject = isMvnProject;
-		this.sootClassPath = sootCp;
+	public PerformanceTest(BenchmarkProject proj) {
+		this.curProj = proj;
 	}
 
 	@Test
 	public void test() throws Exception {
-		if (isMavenProject) {
-			MavenProject mavenProject = createAndCompile(new File(projectPath).getAbsolutePath());
-			scanner = createScanner(mavenProject, ruleSet);
+		String gitCommitId = "test-commit-id-"+System.currentTimeMillis();
+		if (System.getProperty(COMMIT_ID_PARAM) != null)
+			gitCommitId = System.getProperty(COMMIT_ID_PARAM);
+		if (curProj.getIsMavenProject()) {
+			MavenProject mavenProject = createAndCompile(new File(curProj.getProjectPath()).getAbsolutePath());
+			scanner = createScanner(mavenProject, curProj, gitCommitId);
 		} else {
-			scanner = createScanner(new File(projectPath).getAbsolutePath(), ruleSet, sootClassPath);
+			scanner = createScanner(curProj, gitCommitId);
 		}
 		scanner.exec();
-		recordStats();
 	}
 }
