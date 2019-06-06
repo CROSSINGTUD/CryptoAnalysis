@@ -212,7 +212,7 @@ public class ProviderDetection {
 										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, observableDynamicICFG);
 										this.rulesDirectory = defaultRulesDirectory;
 										
-										if(ruleExists(provider, declaringClassName)) {
+										if((this.provider != null) && (ruleExists(provider, declaringClassName))) {
 											this.rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
@@ -227,7 +227,7 @@ public class ProviderDetection {
 										checkIfStmt(providerValue, body);
 										checkSwitchStmt(providerValue, body);
 										
-										if(ruleExists(provider, declaringClassName)) {
+										if((this.provider != null) && (ruleExists(provider, declaringClassName))) {
 											rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
@@ -317,6 +317,7 @@ public class ProviderDetection {
 				Type valueType = value.getType();
 				String valueTypeString = valueType.toString();
 				
+				// In here are listed all the supported providers so far
 				if(valueTypeString.contains("BouncyCastleProvider")) {
 					provider = "BC";
 				}
