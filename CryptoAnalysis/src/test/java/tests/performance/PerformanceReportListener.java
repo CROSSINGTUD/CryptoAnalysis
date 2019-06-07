@@ -42,15 +42,16 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	private List<Double> boomerangAnalysisTime = new ArrayList<>();
 	private int seeds = 0, secureObjectsFound = 0;
 	private Set<AbstractError> errors = Sets.newHashSet();
-	private String gitCommitId;
+	private String gitCommitId, gitBranchUrl;
 	private BenchmarkProject curProject;
 	private int sootReachableMethods;
 	long memoryUsed;
 	int noOfRules;
 	private long MEGABYTE = 1024L * 1024L;
 
-	public PerformanceReportListener(BenchmarkProject proj, String commitId, List<CryptSLRule> rules) {
+	public PerformanceReportListener(BenchmarkProject proj, String commitId, List<CryptSLRule> rules, String branchUrl) {
 		gitCommitId = commitId;
+		gitBranchUrl = branchUrl;
 		curProject = proj;
 		noOfRules = rules.size();
 	}
@@ -153,6 +154,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	private List<Object> asCSVLine() {
 		long elapsed = analysisTime.elapsed(TimeUnit.SECONDS);
 		analysisTime.stop();
+		String hyperLinkForCommit = "=HYPERLINK(\"" + gitBranchUrl + "\"; \"" + gitCommitId + "\")";
 		String analysisTime = String.valueOf(elapsed);
 		String memUsed = String.valueOf(memoryUsed);
 		String reachableMethods = String.valueOf(sootReachableMethods);
@@ -163,7 +165,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		String averageBoomerangAnalysisTime = String.valueOf(avgBAT);
 		String numberOfSeeds = String.valueOf(seeds);
 		String numberOfSecureObjects = String.valueOf(secureObjectsFound);
-		return Arrays.asList(new String[] { gitCommitId, 
+		return Arrays.asList(new String[] { hyperLinkForCommit, 
 				analysisTime, 
 				memUsed, 
 				reachableMethods, 

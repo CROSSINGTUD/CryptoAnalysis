@@ -31,7 +31,9 @@ public class PerformanceTest{
 	private static boolean VISUALIZATION = false;
 	HeadlessCryptoScanner scanner;
 	BenchmarkProject curProj;
-	private static final String COMMIT_ID_PARAM = "commitId";
+	private static final String PARAM_COMMIT_ID = "commitId";
+	private static final String PARAM_GIT_BRANCH_NAME = "branchName";
+	private static final String PARAM_GIT_URL = "gitUrl";
 
 	@Before
 	public void setup() throws IOException, GeneralSecurityException {
@@ -55,7 +57,7 @@ public class PerformanceTest{
 	}
 
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(MavenProject mp, BenchmarkProject proj, String commitId) {
+	protected HeadlessCryptoScanner createScanner(MavenProject mp, BenchmarkProject proj, String commitId, String branchUrl) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -77,7 +79,7 @@ public class PerformanceTest{
 
 			@Override
 			public CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(proj, commitId, getRules());
+				return new PerformanceReportListener(proj, commitId, getRules(), branchUrl);
 			}
 
 			@Override
@@ -96,7 +98,7 @@ public class PerformanceTest{
 	}
 
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(BenchmarkProject proj, String commitId) {
+	protected HeadlessCryptoScanner createScanner(BenchmarkProject proj, String commitId, String branchUrl) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -117,7 +119,7 @@ public class PerformanceTest{
 
 			@Override
 			protected CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(proj, commitId, getRules());
+				return new PerformanceReportListener(proj, commitId, getRules(), branchUrl);
 			}
 
 			@Override
@@ -160,17 +162,34 @@ public class PerformanceTest{
 	public PerformanceTest(BenchmarkProject proj) {
 		this.curProj = proj;
 	}
+	
+	private String getBranchUrl(String branchName, String gitUrl) {
+		String branchUrl = "";
+		if (branchName != null && gitUrl != null) {
+	        String[] branchNameList = branchName.split("/");
+	        String[] gitUrlList = gitUrl.split("\\.git");
+	        branchUrl = gitUrlList[0] + File.separator + branchNameList[branchNameList.length - 1];
+		}
+		return branchUrl;
+	}
 
 	@Test
 	public void test() throws Exception {
-		String gitCommitId = "test-commit-id-"+System.currentTimeMillis();
-		if (System.getProperty(COMMIT_ID_PARAM) != null)
-			gitCommitId = System.getProperty(COMMIT_ID_PARAM);
+		String gitCommitId = String.valueOf(System.currentTimeMillis()), branchName = "", gitUrl = "";
+		if (System.getProperty(PARAM_COMMIT_ID) != null)
+			gitCommitId = System.getProperty(PARAM_COMMIT_ID);
+		
+		if (System.getProperty(PARAM_GIT_BRANCH_NAME) != null)
+			branchName = System.getProperty(PARAM_GIT_BRANCH_NAME);
+		
+		if (System.getProperty(PARAM_GIT_URL) != null)
+			gitUrl = System.getProperty(PARAM_GIT_URL);
+		
 		if (curProj.getIsMavenProject()) {
 			MavenProject mavenProject = createAndCompile(new File(curProj.getProjectPath()).getAbsolutePath());
-			scanner = createScanner(mavenProject, curProj, gitCommitId);
+			scanner = createScanner(mavenProject, curProj, gitCommitId, getBranchUrl(branchName, gitUrl));
 		} else {
-			scanner = createScanner(curProj, gitCommitId);
+			scanner = createScanner(curProj, gitCommitId, getBranchUrl(branchName, gitUrl));
 		}
 		scanner.exec();
 	}
