@@ -163,14 +163,13 @@ public class PerformanceTest{
 		this.curProj = proj;
 	}
 	
-	private String getBranchUrl(String branchName, String gitUrl) {
-		String branchUrl = "";
-		if (branchName != null && gitUrl != null) {
-	        String[] branchNameList = branchName.split("/");
+	private String getCommitUrl(String gitUrl, String gitCommitId) {
+		String commitUrl = "";
+		if (gitUrl != null && gitCommitId != null) {
 	        String[] gitUrlList = gitUrl.split("\\.git");
-	        branchUrl = gitUrlList[0] + File.separator + "tree" + File.separator + branchNameList[branchNameList.length - 1];
+	        commitUrl = gitUrlList[0] + File.separator + "commit" + File.separator + gitCommitId;
 		}
-		return branchUrl;
+		return commitUrl;
 	}
 
 	@Test
@@ -187,9 +186,9 @@ public class PerformanceTest{
 		
 		if (curProj.getIsMavenProject()) {
 			MavenProject mavenProject = createAndCompile(new File(curProj.getProjectPath()).getAbsolutePath());
-			scanner = createScanner(mavenProject, curProj, gitCommitId, getBranchUrl(branchName, gitUrl));
+			scanner = createScanner(mavenProject, curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId));
 		} else {
-			scanner = createScanner(curProj, gitCommitId, getBranchUrl(branchName, gitUrl));
+			scanner = createScanner(curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId));
 		}
 		scanner.exec();
 	}
