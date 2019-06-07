@@ -168,7 +168,7 @@ public class PerformanceTest{
 		if (branchName != null && gitUrl != null) {
 	        String[] branchNameList = branchName.split("/");
 	        String[] gitUrlList = gitUrl.split("\\.git");
-	        branchUrl = gitUrlList[0] + File.separator + branchNameList[branchNameList.length - 1];
+	        branchUrl = gitUrlList[0] + File.separator + "tree" + File.separator + branchNameList[branchNameList.length - 1];
 		}
 		return branchUrl;
 	}
