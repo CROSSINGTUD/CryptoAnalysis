@@ -5,14 +5,14 @@ import crypto.analysis.CrySLRulesetSelector.Ruleset;
 public class BenchmarkProject {
 	String name, projectPath, gitUrl, sootClassPath;
 	boolean isMavenProject;
-	Ruleset ruleSet;
+	Ruleset[] ruleSet;
 
 	public String getName() {
 		return name;
 	}
 
 	public BenchmarkProject(String name, String projectPath, String gitUrl, String sootClassPath, boolean isMavenProject,
-			Ruleset ruleSet) {
+			Ruleset[] ruleSet) {
 		this.name = name;
 		this.projectPath = projectPath;
 		this.gitUrl = gitUrl;
@@ -21,11 +21,11 @@ public class BenchmarkProject {
 		this.ruleSet = ruleSet;
 	}
 
-	public Ruleset getRuleSet() {
+	public Ruleset[] getRuleSet() {
 		return ruleSet;
 	}
 
-	public void setRuleSet(Ruleset ruleSet) {
+	public void setRuleSet(Ruleset[] ruleSet) {
 		this.ruleSet = ruleSet;
 	}
 

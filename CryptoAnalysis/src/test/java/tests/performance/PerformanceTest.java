@@ -57,7 +57,7 @@ public class PerformanceTest{
 	}
 
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(MavenProject mp, BenchmarkProject proj, String commitId, String branchUrl) {
+	protected HeadlessCryptoScanner createScanner(MavenProject mp, BenchmarkProject proj, String commitId, String branchUrl, Ruleset... rulesets) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -68,7 +68,7 @@ public class PerformanceTest{
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, proj.getRuleSet());
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, rulesets);
 			}
 
 			@Override
@@ -98,7 +98,7 @@ public class PerformanceTest{
 	}
 
 	@SuppressWarnings("static-access")
-	protected HeadlessCryptoScanner createScanner(BenchmarkProject proj, String commitId, String branchUrl) {
+	protected HeadlessCryptoScanner createScanner(BenchmarkProject proj, String commitId, String branchUrl, Ruleset... rulesets) {
 		G.v().reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -108,7 +108,7 @@ public class PerformanceTest{
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, proj.getRuleSet());
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, rulesets);
 			}
 
 			@Override
@@ -145,14 +145,14 @@ public class PerformanceTest{
 				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
 				"", 
 				true, 
-				Ruleset.JavaCryptographicArchitecture
+				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
 				);
 		BenchmarkProject project2 = new BenchmarkProject("CogniCryptDemoExample-2", 
 				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", 
 				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
 				"", 
 				true, 
-				Ruleset.JavaCryptographicArchitecture
+				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
 				);
 		params.add(new Object[] {project1});
 		params.add(new Object[] {project2});
@@ -186,9 +186,9 @@ public class PerformanceTest{
 		
 		if (curProj.getIsMavenProject()) {
 			MavenProject mavenProject = createAndCompile(new File(curProj.getProjectPath()).getAbsolutePath());
-			scanner = createScanner(mavenProject, curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId));
+			scanner = createScanner(mavenProject, curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId), curProj.getRuleSet());
 		} else {
-			scanner = createScanner(curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId));
+			scanner = createScanner(curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId), curProj.getRuleSet());
 		}
 		scanner.exec();
 	}
