@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools { 
-        jdk 'jdk9' 
+        jdk 'Oracle JDK 9' 
     }
 
     stages {
