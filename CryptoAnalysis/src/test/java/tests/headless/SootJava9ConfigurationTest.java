@@ -52,8 +52,8 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
 		
-		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<org.demo.jpms.HelloModularWorld: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.exec();
 	  	assertErrors();
