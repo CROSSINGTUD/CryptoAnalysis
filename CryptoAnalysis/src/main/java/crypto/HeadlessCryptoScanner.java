@@ -293,7 +293,7 @@ public abstract class HeadlessCryptoScanner {
 		if(getJavaVersion() < 9)
 		{
 			Options.v().set_prepend_classpath(true);
-			Options.v().set_soot_classpath(sootClassPath());
+			Options.v().set_soot_classpath(sootClassPath()+ File.pathSeparator + pathToJCE());
 		}
 		// JAVA VERSION 9 && IS A CLASSPATH PROJECT
 		else if(getJavaVersion() >= 9 && !isModularProject())
