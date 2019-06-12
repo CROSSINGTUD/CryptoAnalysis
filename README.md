@@ -30,7 +30,7 @@ Importing the porject into eclipse and compiling with m2e does not work. m2e can
 ## Usage
 
 CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the directory of the CrySL (binary) rule files contained in [JCA-CrySL-rules.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/v1.0.0). This CrySL rule set contains specification for the JCA. The source code for the rules is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+* The absolute path to the directory of the CrySL (binary) rule files contained in [JCA-CrySL-rulesets.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/2.3). This CrySL rule set contains specification for the JCA. The source code for the rules is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
