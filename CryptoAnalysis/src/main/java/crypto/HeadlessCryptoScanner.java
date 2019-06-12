@@ -292,20 +292,17 @@ public abstract class HeadlessCryptoScanner {
 		// JAVA 8
 		if(getJavaVersion() < 9)
 		{
-			System.out.println("java 8 settings applied");
 			Options.v().set_prepend_classpath(true);
 			Options.v().set_soot_classpath(sootClassPath());
 		}
 		// JAVA VERSION 9 && IS A CLASSPATH PROJECT
 		else if(getJavaVersion() >= 9 && !isModularProject())
 		{
-			System.out.println("java 9 classpath settings applied");
 			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
 		}
 		// JAVA VERSION 9 && IS A MODULEPATH PROJECT
 		else if(getJavaVersion() >= 9 && isModularProject())
 		{
-			System.out.println("java 9 modulepath settings applied");
 			Options.v().set_prepend_classpath(true);
 			Options.v().set_soot_modulepath(sootClassPath());
 		}	
@@ -317,14 +314,12 @@ public abstract class HeadlessCryptoScanner {
 		
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
-		System.out.println("Finished initializing soot");
 	}
 
 	private List<SootMethod> getEntryPoints() {
 		List<SootMethod> entryPoints = Lists.newArrayList();
 		entryPoints.addAll(EntryPoints.v().application());
 		entryPoints.addAll(EntryPoints.v().methodsOfApplicationClasses());
-		System.out.println("APPLICATION CLASS : " + EntryPoints.v().application());
 		return entryPoints;
 	}
 
