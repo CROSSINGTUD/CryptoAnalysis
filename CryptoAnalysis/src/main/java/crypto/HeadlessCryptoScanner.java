@@ -296,19 +296,19 @@ public abstract class HeadlessCryptoScanner {
 			Options.v().set_prepend_classpath(true);
 			Options.v().set_soot_classpath(sootClassPath());
 		}
-		// JAVA 9 && CLASSPATH
-		else if(getJavaVersion() >= 9)
+		// JAVA VERSION 9 && IS A CLASSPATH PROJECT
+		else if(getJavaVersion() >= 9 && !isModularProject())
 		{
 			System.out.println("java 9 classpath settings applied");
 			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
 		}
-		
-//		// JAVA 9 && MODULEPATH
-//		{
-//			System.out.println("java 9 modulepath settings applied");
-//			Options.v().set_prepend_classpath(true);
-//			Options.v().set_soot_modulepath(sootClassPath());
-//		}	
+		// JAVA VERSION 9 && IS A MODULEPATH PROJECT
+		else if(getJavaVersion() >= 9 && isModularProject())
+		{
+			System.out.println("java 9 modulepath settings applied");
+			Options.v().set_prepend_classpath(true);
+			Options.v().set_soot_modulepath(sootClassPath());
+		}	
 		
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
@@ -393,5 +393,13 @@ public abstract class HeadlessCryptoScanner {
 	        int dot = version.indexOf(".");
 	        if(dot != -1) { version = version.substring(0, dot); }
 	    } return Integer.parseInt(version);
+	}
+	
+	private boolean isModularProject() {
+		String applicationClassPath = applicationClassPath();
+		File dirName = new File(applicationClassPath);
+	    String moduleFile = dirName + File.separator + "module-info.class";
+	    boolean check = new File(moduleFile).exists();
+	    return check;
 	}
 }
