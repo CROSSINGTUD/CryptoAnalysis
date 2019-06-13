@@ -12,9 +12,20 @@ public class FindingsType {
 	}
 
 	public static final class TruePositives extends FindingsType {
-
+		
+		private Class<?> errorType;
+		
 		public TruePositives(int numberOfFindings) {
 			super(numberOfFindings);
+		}
+		
+		public TruePositives(Class<?> errorType, int numberOfFindings) {
+			super(numberOfFindings);
+			this.errorType = errorType;
+		}
+		
+		public Class<?> getErrorType(){
+			return errorType;
 		}
 
 		@Override
@@ -26,10 +37,21 @@ public class FindingsType {
 	public static class FalsePositives extends FindingsType {
 
 		private String explanation;
+		private Class<?> errorType;
 
 		public FalsePositives(int numberOfFindings, String explanation) {
 			super(numberOfFindings);
 			this.explanation = explanation;
+		}
+		
+		public FalsePositives(Class<?> errorType, int numberOfFindings, String explanation) {
+			super(numberOfFindings);
+			this.explanation = explanation;
+			this.errorType = errorType;
+		}
+		
+		public Class<?> getErrorType(){
+			return errorType;
 		}
 
 		public String getExplanation() {
@@ -45,10 +67,21 @@ public class FindingsType {
 	public static class FalseNegatives extends FindingsType {
 
 		private String explanation;
+		private Class<?> errorType;
 
 		public FalseNegatives(int numberOfFindings, String explanation) {
 			super(numberOfFindings);
 			this.explanation = explanation;
+		}
+		
+		public FalseNegatives(Class<?> errorType, int numberOfFindings, String explanation) {
+			super(numberOfFindings);
+			this.explanation = explanation;
+			this.errorType = errorType;
+		}
+		
+		public Class<?> getErrorType(){
+			return errorType;
 		}
 
 		public String getExplanation() {

@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.jboss.aerogear</groupId>
+    <artifactId>aerogear-crypto</artifactId>
+    <version>0.1.7-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.jboss.aerogear</groupId>
+        <artifactId>aerogear-parent</artifactId>
+        <version>0.2.20</version>
+    </parent>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <distribution>repo</distribution>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>aerogear</id>
+            <name>AeroGear Team</name>
+            <email>aerogear-dev@lists.jboss.org</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/aerogear/aerogear-crypto-java.git</connection>
+        <developerConnection>scm:git:git@github.com:aerogear/aerogear-crypto-java.git</developerConnection>
+        <url>https://github.com/aerogear/aerogear-crypto-java.git</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <aerogear.bom.version>0.2.20</aerogear.bom.version>
+
+        <debug>true</debug>
+
+        <!-- Override version of AeroGear BOM -->
+        <junit.version>4.8.2</junit.version>
+
+        <!-- Override version of jboss-parent -->
+        <shade.plugin.version>2.2</shade.plugin.version>
+
+        <!-- Vulnerability check -->
+        <enforce-victims.version>1.3.4</enforce-victims.version>
+        <maven.enforcer.version>1.3.1</maven.enforcer.version>
+
+        <!-- Plugins version -->
+        <maven-resources.version>2.6</maven-resources.version>
+        <maven-compiler.version>2.3.2</maven-compiler.version>
+
+    </properties>
+
+
+    <dependencyManagement>
+
+        <dependencies>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <!-- AeroGear Dependencies BOM Imports -->
+            <dependency>
+                <groupId>org.jboss.aerogear</groupId>
+                <artifactId>aerogear-bom</artifactId>
+                <version>${aerogear.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- AeroGear Test Dependencies BOM Imports -->
+            <dependency>
+                <groupId>org.jboss.aerogear</groupId>
+                <artifactId>aerogear-test-bom</artifactId>
+                <version>${aerogear.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- Overrides version from jboss-parent, which is 2.0-->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${shade.plugin.version}</version>
+                </plugin>
+             </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>enforcer</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>${maven.enforcer.version}</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.redhat.victims</groupId>
+                                <artifactId>enforce-victims-rule</artifactId>
+                                <version>${enforce-victims.version}</version>
+                                <type>jar</type>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>enforce-victims-rule</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <rule implementation="com.redhat.victims.VictimsRule">
+                                            <!--
+                                      Check the project's dependencies against the database using
+                                      name and version. The default mode for this is 'warning'.
+
+                                      Valid options are:
+
+                                      disabled: Rule is still run but only INFO level messages aand no errors.
+                                      warning : Rule will spit out a warning message but doesn't result in a failure.
+                                      fatal   : Rule will spit out an error message and fail the build.
+                                    -->
+                                            <metadata>fatal</metadata>
+
+                                            <!--
+                                              Check the project's dependencies against the database using
+                                              the SHA-512 checksum of the artifact. The default is fatal.
+
+                                              Valid options are:
+
+                                              disabled: Rule is still run but only INFO level messages aand no errors.
+                                              warning : Rule will spit out a warning message but doesn't result in a failure.
+                                              fatal   : Rule will spit out an error message and fail the build.
+                                            -->
+                                            <fingerprint>fatal</fingerprint>
+
+                                            <!--
+                                              Disables the synchronization mechansim. By default the rule will
+                                              attempt to update the database for each build.
+
+                                              Valid options are:
+
+                                              auto  : Automatically update the database entries on each build.
+                                              daily : Update the database entries once per day.
+                                              weekly: Update the database entries once per week.
+                                              offline   : Disable the synchronization mechanism.
+                                            -->
+                                            <updates>daily</updates>
+
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- This profile is to build an specific jar file for Android
+             The API was built to support Android, JEE, JSE apps, the problem is to
+             switch between BouncyCastle and SpongyCastle
+        -->
+        <profile>
+            <id>android</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.madgag</groupId>
+                    <artifactId>scprov-jdk15on</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>android</shadedClassifierName>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                                <exclude>META-INF/maven/com.madgag/**</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                    <relocations>
+                                        <relocation>
+                                            <pattern>org.spongycastle</pattern>
+                                            <shadedPattern>org.bouncycastle</shadedPattern>
+                                        </relocation>
+                                    </relocations>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+</project>

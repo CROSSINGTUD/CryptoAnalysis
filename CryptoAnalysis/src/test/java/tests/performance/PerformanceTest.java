@@ -140,22 +140,30 @@ public class PerformanceTest{
 	@Parameters
 	public static Iterable<Object[]> data() {
 		ArrayList<Object[]> params = Lists.newArrayList();
-		BenchmarkProject project1 = new BenchmarkProject("CogniCryptDemoExample-1", 
-				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", 
-				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
+		BenchmarkProject project1 = new BenchmarkProject("Bitpay", 
+				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/bitpay", 
+				"https://github.com/bitpay/java-bitpay-client", 
 				"", 
 				true, 
 				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
 				);
-		BenchmarkProject project2 = new BenchmarkProject("CogniCryptDemoExample-2", 
-				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/CogniCryptDemoExample", 
-				"https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample", 
+		BenchmarkProject project2 = new BenchmarkProject("Aerogear-Crypto", 
+				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/aerogear-crypto", 
+				"https://github.com/aerogear/aerogear-crypto-java", 
+				"", 
+				true, 
+				new Ruleset[] {Ruleset.JavaCryptographicArchitecture, Ruleset.BouncyCastle}
+				);
+		BenchmarkProject project3 = new BenchmarkProject("Commons-Crypto", 
+				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/commons-crypto", 
+				"https://github.com/apache/commons-crypto", 
 				"", 
 				true, 
 				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
 				);
 		params.add(new Object[] {project1});
 		params.add(new Object[] {project2});
+		params.add(new Object[] {project3});
 		return params;
 	}
 

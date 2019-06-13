@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+  - oraclejdk7
+  - openjdk7
+  - oraclejdk8
+
+script: "mvn -Penforcer clean install -Djsse.enableSNIExtension=false"
+
+notifications:
+  irc: "irc.freenode.org#aerogear"
