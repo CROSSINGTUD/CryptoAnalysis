@@ -2,7 +2,6 @@ package tests.performance;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -36,10 +35,6 @@ import typestate.TransitionFunction;
 public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	private Stopwatch analysisTime = Stopwatch.createUnstarted();
-	private Stopwatch seedAnalysisWatch = Stopwatch.createUnstarted();
-	private Stopwatch boomerangAnalysisWatch = Stopwatch.createUnstarted();
-	private List<Double> seedAnalysisTime = new ArrayList<>();
-	private List<Double> boomerangAnalysisTime = new ArrayList<>();
 	private int seeds = 0, secureObjectsFound = 0;
 	private Set<AbstractError> errors = Sets.newHashSet();
 	private String gitCommitId, gitBranchUrl;
@@ -94,18 +89,14 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-		seedAnalysisWatch.start();
 	}
 
 	@Override
 	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-		boomerangAnalysisWatch.start();
 	}
 
 	@Override
 	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		boomerangAnalysisTime.add((double) boomerangAnalysisWatch.elapsed(TimeUnit.SECONDS));
-		boomerangAnalysisWatch.reset();
 	}
 
 	@Override
@@ -127,13 +118,10 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 
 	@Override
 	public void onSeedTimeout(Node<Statement, Val> seed) {
-		seedAnalysisWatch.reset();
 	}
 
 	@Override
 	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults) {
-		seedAnalysisTime.add((double) seedAnalysisWatch.elapsed(TimeUnit.SECONDS));
-		seedAnalysisWatch.reset();
 	}
 
 	@Override
@@ -159,10 +147,6 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		String memUsed = String.valueOf(memoryUsed);
 		String reachableMethods = String.valueOf(sootReachableMethods);
 		String nRules = String.valueOf(noOfRules);
-		Double avgSAT = seedAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
-		String averageSeedAnalysisTime = String.valueOf(avgSAT);
-		Double avgBAT = boomerangAnalysisTime.stream().mapToDouble(d -> d).average().orElse(0.0);
-		String averageBoomerangAnalysisTime = String.valueOf(avgBAT);
 		String numberOfSeeds = String.valueOf(seeds);
 		String numberOfSecureObjects = String.valueOf(secureObjectsFound);
 		return Arrays.asList(new String[] { hyperLinkForCommit, 
@@ -172,8 +156,6 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 				nRules, 
 				numberOfSeeds, 
 				numberOfSecureObjects,
-				averageSeedAnalysisTime,
-				averageBoomerangAnalysisTime
 				});
 	}
 }

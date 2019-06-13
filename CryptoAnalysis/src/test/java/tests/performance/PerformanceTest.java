@@ -40,14 +40,13 @@ public class PerformanceTest{
 		GoogleSpreadsheetWriter.createSheet(curProj.getName(), 
 				curProj.getGitUrl(), 
 				Arrays.asList(new String[] {"Git Commit Id", 
-						"Analysis Time", 
+						"Analysis Time (s)", 
 						"Memory Used (MB)", 
 						"Soot Reachable Methods", 
 						"#Rules", 
 						"Number Of Seeds", 
 						"Number Of Secure Objects",
-						"Average Seed Analysis Time", 
-						"Average Boomerang Analysis Time"}));
+						}));
 	}
 
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -180,6 +179,7 @@ public class PerformanceTest{
 		return commitUrl;
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void test() throws Exception {
 		String gitCommitId = String.valueOf(System.currentTimeMillis()), branchName = "", gitUrl = "";
