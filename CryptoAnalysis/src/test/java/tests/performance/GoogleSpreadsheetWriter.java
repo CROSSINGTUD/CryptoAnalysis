@@ -114,7 +114,6 @@ public class GoogleSpreadsheetWriter {
 		// Build a new authorized API client service.
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 		Credential cred = getCredentials(HTTP_TRANSPORT, credentials);
-		cred.refreshToken();
 		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
 				.setApplicationName(APPLICATION_NAME).build();
 	}
