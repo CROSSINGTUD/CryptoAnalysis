@@ -8,6 +8,7 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
+import crypto.analysis.errors.TypestateError;
 import tests.headless.FindingsType.FalseNegatives;
 import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.TruePositives;
@@ -58,6 +59,10 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.brokencrypto.BrokenCryptoABSCase1: byte[] encrypt(java.lang.String, java.lang.String)>");
 		// ABSCase2, -3, -4, -5 not included as tests due to being similar to ABSCase1 above
 		
+		// Test cases regarding ecbcrypto project were not added, due to being similar to
+		// all the test cases above:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/ecbcrypto
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -91,6 +96,32 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		scanner.exec();
 		assertErrors();
 	}
+	
+	@Test
+	public void insecureAsymmetricCryptoExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/insecureasymmetriccrypto").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void main(java.lang.String[])>", TypestateError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
+		setErrorsCount(ConstraintError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>");
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBB Case1.java
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", ConstraintError.class, 1);
+				
+		scanner.exec();
+		assertErrors();
+	}
+	
 //	
 //	@Test
 //	public void pbeIterationExamples() {
