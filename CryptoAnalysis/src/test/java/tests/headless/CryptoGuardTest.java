@@ -7,6 +7,7 @@ import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import tests.headless.FindingsType.FalseNegatives;
@@ -173,17 +174,36 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 			
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablecryptographickey.PredictableCryptographicKeyABHCase2: void main(java.lang.String[])>");		
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablecryptographickey.PredictableCryptographicKeyABHCase2: void main(java.lang.String[])>");		
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>");		
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>");		
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.predictablecryptographickey.Crypto: byte[] encrypt(java.lang.String,java.lang.String)>");		
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.predictablecryptographickey.Crypto: byte[] encrypt(java.lang.String,java.lang.String)>");		
 		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABSCase1: void <init>()>", IncompleteOperationError.class, 1);
 	
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void predictableKeyStorePasswordExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablekeystorepassword").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java
+		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 1);
+			
+		// ABH1, ABI2, ABS1, BB1 are other similar test cases that were not included
+		// All test cases in this project produce FP regarding NeverTypeOfError 
+		// misuse, as is explained in the link below:
+		// https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -201,7 +221,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 //		scanner.exec();
 //		assertErrors();
 //	}
-//	
+	
 //	@Test
 //	public void staticInitializationVectorExamples() {
 //		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticinitializationvector").getAbsolutePath();
