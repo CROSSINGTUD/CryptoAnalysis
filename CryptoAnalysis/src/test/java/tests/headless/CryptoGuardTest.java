@@ -208,19 +208,35 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		assertErrors();
 	}
 	
-//	@Test
-//	public void predictablePBEPasswordExamples() {
-//		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablepbepassword").getAbsolutePath();
-//		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-//		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-//		
-//		// This test case corresponds to the following project in CryptoGuard:
-//		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
-//		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordBBCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-//					
-//		scanner.exec();
-//		assertErrors();
-//	}
+	@Test
+	public void predictablePBEPasswordExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablepbepassword").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordBBCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABHCase2.java
+		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>");		
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABSCase1.java
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABSCase1: void <init>()>", IncompleteOperationError.class, 1);
+		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.predictablepbepassword.CryptoPredictablePBE: void encrypt(java.lang.String)>");		
+
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABICase1.java
+		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166"), "<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>");		
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		// ABHCase1, BBCase1 are similar to the case above
+		
+		scanner.exec();
+		assertErrors();
+	}
 	
 //	@Test
 //	public void staticInitializationVectorExamples() {
