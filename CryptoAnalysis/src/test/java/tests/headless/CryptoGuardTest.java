@@ -8,6 +8,9 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
+import tests.headless.FindingsType.FalseNegatives;
+import tests.headless.FindingsType.FalsePositives;
+import tests.headless.FindingsType.TruePositives;
 
 
 /**
@@ -23,31 +26,38 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	 */
 	@Test
 	public void brokenCryptoExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticsalts").getAbsolutePath();
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/brokencrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-//		// This test case corresponds to the following project in CryptoGuard:
-//		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase1: void doCrypto(java.lang.String)>", ConstraintError.class, 1);
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase1: void doCrypto(java.lang.String)>", IncompleteOperationError.class, 1);
-//		
-//		// This test case corresponds to the following project in CryptoGuard:
-//		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", ConstraintError.class, 2);
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", IncompleteOperationError.class, 1);
-//		
-//		// ABICase3, ABICase4, ABICase9 not included as tests due to being similar to ABICase1 and ABICase2 above
-//		// ABICase5, -6, -7, -8, -10 not included as tests due to misuses not being caught by analysis
-//		
-//		// This test case corresponds to the following project in CryptoGuard:
-//		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", ConstraintError.class, 2);
-//		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", IncompleteOperationError.class, 1);
-//		
-//		// BBCase1, BBCase2, BBCase4, BBCase5 not included as tests due to being similar to BBCase3 above
-//		// ABSCase1, -2, -3, -4, -5 not included as tests due to misuses not being caught by analysis
-//		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java
+		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase1: void doCrypto(java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase1: void doCrypto(java.lang.String)>", IncompleteOperationError.class, 1);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase2.java
+		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", ConstraintError.class, 2);
+		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase2: void doCrypto(java.lang.String)>", IncompleteOperationError.class, 1);
+		// ABICase3, ABICase4, ABICase9 not included as tests due to being similar to ABICase1 and ABICase2 above
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase5.java
+		setErrorsCount("<example.brokencrypto.BrokenCryptoABICase5: void doCrypto()>", IncompleteOperationError.class, 1);
+		setErrorsCount(ConstraintError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.brokencrypto.BrokenCryptoABICase5: void doCrypto()>");
+		// ABICase6, -7, -8, -10 not included as tests due to being similar to ABICase5 above
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoBBCase3.java
+		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", ConstraintError.class, 2);
+		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", IncompleteOperationError.class, 1);
+		// BBCase1, BBCase2, BBCase4, BBCase5 not included as tests due to being similar to BBCase3 above
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java
+		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.brokencrypto.BrokenCryptoABSCase1: byte[] encrypt(java.lang.String, java.lang.String)>");
+		// ABSCase2, -3, -4, -5 not included as tests due to being similar to ABSCase1 above
+		
 		scanner.exec();
 		assertErrors();
 	}
