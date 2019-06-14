@@ -288,8 +288,25 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
-		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_classpath(sootClassPath() + File.pathSeparator + pathToJCE());
+		
+		// JAVA 8
+		if(getJavaVersion() < 9)
+		{
+			Options.v().set_prepend_classpath(true);
+			Options.v().set_soot_classpath(sootClassPath()+ File.pathSeparator + pathToJCE());
+		}
+		// JAVA VERSION 9 && IS A CLASSPATH PROJECT
+		else if(getJavaVersion() >= 9 && !isModularProject())
+		{
+			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
+		}
+		// JAVA VERSION 9 && IS A MODULEPATH PROJECT
+		else if(getJavaVersion() >= 9 && isModularProject())
+		{
+			Options.v().set_prepend_classpath(true);
+			Options.v().set_soot_modulepath(sootClassPath());
+		}	
+		
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
 		Options.v().set_exclude(getExcludeList());
@@ -297,7 +314,6 @@ public abstract class HeadlessCryptoScanner {
 		
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
-		System.out.println("Finished initializing soot");
 	}
 
 	private List<SootMethod> getEntryPoints() {
@@ -363,5 +379,22 @@ public abstract class HeadlessCryptoScanner {
 		// When whole program mode is disabled, the classpath misses jce.jar
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
 	}
-
+	
+	private static int getJavaVersion() {
+	    String version = System.getProperty("java.version");
+	    if(version.startsWith("1.")) {
+	        version = version.substring(2, 3);
+	    } else {
+	        int dot = version.indexOf(".");
+	        if(dot != -1) { version = version.substring(0, dot); }
+	    } return Integer.parseInt(version);
+	}
+	
+	private boolean isModularProject() {
+		String applicationClassPath = applicationClassPath();
+		File dirName = new File(applicationClassPath);
+	    String moduleFile = dirName + File.separator + "module-info.class";
+	    boolean check = new File(moduleFile).exists();
+	    return check;
+	}
 }
