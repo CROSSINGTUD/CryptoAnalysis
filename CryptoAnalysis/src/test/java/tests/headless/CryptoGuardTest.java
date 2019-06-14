@@ -112,7 +112,10 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
-		setErrorsCount(ConstraintError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>");
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// In the case above, misuse is caught correctly, but the keysize is reported to be 0
+		// and not 1024, as it really is. This is caused because of the structure of the project
+		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBB Case1.java
@@ -144,8 +147,12 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABICase2.java
-		setErrorsCount(ConstraintError.class, new TruePositives(1), new FalseNegatives(1, "ConstraintError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.pbeiteration.LessThan1000IterationPBEABICase2: void key2()>");		
+		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABICase2: void key2()>", ConstraintError.class, 1);
+		// In the case above, misuse is caught correctly, but the count is reported to be 0
+		// and not 20, as it really is. This is caused because of the structure of the project
+		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 				
+		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABSCase1.java
 		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.pbeiteration.LessThan1000IterationPBEABSCase1: encrypt(int)>");		
@@ -174,15 +181,15 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 			
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase2.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablecryptographickey.PredictableCryptographicKeyABHCase2: void main(java.lang.String[])>");		
+		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABHCase2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163"), "<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>");		
+		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>", RequiredPredicateError.class, 1);
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "RequiredPredicateError not properly caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.predictablecryptographickey.Crypto: byte[] encrypt(java.lang.String,java.lang.String)>");		
+		setErrorsCount("<example.predictablecryptographickey.Crypto: byte[] encrypt(java.lang.String,java.lang.String)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABSCase1: void <init>()>", IncompleteOperationError.class, 1);
 	
 		scanner.exec();
