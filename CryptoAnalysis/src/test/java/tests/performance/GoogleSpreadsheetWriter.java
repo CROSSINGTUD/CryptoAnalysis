@@ -113,7 +113,9 @@ public class GoogleSpreadsheetWriter {
 	private static Sheets getService(String credentials) throws IOException, GeneralSecurityException {
 		// Build a new authorized API client service.
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY,  getCredentials(HTTP_TRANSPORT, credentials))
+		Credential cred = getCredentials(HTTP_TRANSPORT, credentials);
+		cred.refreshToken();
+		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
 				.setApplicationName(APPLICATION_NAME).build();
 	}
 }
