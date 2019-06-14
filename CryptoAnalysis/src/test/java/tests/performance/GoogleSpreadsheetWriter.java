@@ -1,9 +1,7 @@
 package tests.performance;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +40,6 @@ public class GoogleSpreadsheetWriter {
 	 * If modifying these scopes, delete your previously saved tokens/ folder.
 	 */
 	private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-	private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
 	/**
 	 * Creates an authorized Credential object.
@@ -50,13 +47,9 @@ public class GoogleSpreadsheetWriter {
 	 * @return An authorized Credential object.
 	 * @throws IOException If the credentials.json file cannot be found.
 	 */
-	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+	private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, String credentials) throws IOException {
 		// Load client secrets.
-		InputStream in = GoogleSpreadsheetWriter.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-		if (in == null) {
-			throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-		}
-		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new StringReader(credentials));
 
 		// Build flow and trigger user authorization request.
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
@@ -68,11 +61,11 @@ public class GoogleSpreadsheetWriter {
 		return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
 	}
 	
-	private static boolean addSheet(String projectName) throws GoogleJsonResponseException {
+	private static boolean addSheet(String projectName, String credentials) throws GoogleJsonResponseException {
 		Sheets service;
 		boolean sheetAdded = true;
 		try {
-			service = getService();
+			service = getService(credentials);
 			AddSheetRequest addSheet = new AddSheetRequest();
 			addSheet.setProperties(new SheetProperties().setTitle(projectName));
 			List<Request> requests = new ArrayList<>(); 
@@ -92,8 +85,8 @@ public class GoogleSpreadsheetWriter {
 		return sheetAdded;
 	}
 	
-	private static void addHeaders(List<Object> headers, String projectName, String projectUrl) throws IOException, GeneralSecurityException {
-		Sheets service = getService();
+	private static void addHeaders(List<Object> headers, String projectName, String projectUrl, String credentials) throws IOException, GeneralSecurityException {
+		Sheets service = getService(credentials);
 		ValueRange metricNames = new ValueRange().setValues(Arrays.asList(headers));
 		ValueRange projectDetails = new ValueRange().setValues(Arrays.asList(Arrays.asList(new String[] {projectName, projectUrl})));
 		service.spreadsheets().values().append(SPREADSHEET_ID, projectName, projectDetails).setValueInputOption("USER_ENTERED")
@@ -102,14 +95,14 @@ public class GoogleSpreadsheetWriter {
 		.execute();
 	}
 
-	public static void createSheet(String projectName, String projectUrl, List<Object> headers) throws IOException, GeneralSecurityException {
-		if (addSheet(projectName)) {
-			addHeaders(headers, projectName, projectUrl);
+	public static void createSheet(String projectName, String projectUrl, List<Object> headers, String credentials) throws IOException, GeneralSecurityException {
+		if (addSheet(projectName, credentials)) {
+			addHeaders(headers, projectName, projectUrl, credentials);
 		}
 	}
 
-	public static void write(List<Object> data, String projectName) throws IOException, GeneralSecurityException  {
-		Sheets service = getService();
+	public static void write(List<Object> data, String projectName, String credentials) throws IOException, GeneralSecurityException  {
+		Sheets service = getService(credentials);
 		ArrayList<List<Object>> rows = Lists.newArrayList();
 		rows.add(data);
 		ValueRange body = new ValueRange().setValues(rows);
@@ -117,10 +110,10 @@ public class GoogleSpreadsheetWriter {
 		.execute();
 	}
 
-	private static Sheets getService() throws IOException, GeneralSecurityException {
+	private static Sheets getService(String credentials) throws IOException, GeneralSecurityException {
 		// Build a new authorized API client service.
 		final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY,  getCredentials(HTTP_TRANSPORT))
+		return new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY,  getCredentials(HTTP_TRANSPORT, credentials))
 				.setApplicationName(APPLICATION_NAME).build();
 	}
 }

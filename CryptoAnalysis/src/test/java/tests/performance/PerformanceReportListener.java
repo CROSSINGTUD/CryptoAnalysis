@@ -1,14 +1,10 @@
 package tests.performance;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -34,26 +30,20 @@ import typestate.TransitionFunction;
 
 public class PerformanceReportListener extends CrySLAnalysisListener {
 
-	private Stopwatch analysisTime = Stopwatch.createUnstarted();
 	private int seeds = 0, secureObjectsFound = 0;
 	private Set<AbstractError> errors = Sets.newHashSet();
-	private String gitCommitId, gitBranchUrl;
-	private BenchmarkProject curProject;
 	private int sootReachableMethods;
 	long memoryUsed;
-	int noOfRules;
 	private long MEGABYTE = 1024L * 1024L;
+	private Map<String, String> observations;
 
-	public PerformanceReportListener(BenchmarkProject proj, String commitId, List<CryptSLRule> rules, String branchUrl) {
-		gitCommitId = commitId;
-		gitBranchUrl = branchUrl;
-		curProject = proj;
-		noOfRules = rules.size();
+	public PerformanceReportListener(List<CryptSLRule> rules,  Map<String, String> observations) {
+		this.observations = observations;
+		this.observations.put(SpreadSheetConstants.NO_OF_RULES, String.valueOf(rules.size()));
 	}
 
 	@Override
 	public void beforeAnalysis() {
-		analysisTime.start();
 	}
 
 	@Override
@@ -62,13 +52,11 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 		rt.gc();
 		memoryUsed = (rt.totalMemory() - rt.freeMemory()) / MEGABYTE;
 		sootReachableMethods = Scene.v().getReachableMethods().size();
-		try {
-			GoogleSpreadsheetWriter.write(asCSVLine(), curProject.getName());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-		}
+		this.observations.put(SpreadSheetConstants.MEMORY_USED, String.valueOf(memoryUsed));
+		this.observations.put(SpreadSheetConstants.SOOT_REACHABLE_METHODS, String.valueOf(sootReachableMethods));
+		this.observations.put(SpreadSheetConstants.NO_OF_SEEDS, String.valueOf(seeds));
+		this.observations.put(SpreadSheetConstants.NO_OF_SECURE_OBJECTS, String.valueOf(secureObjectsFound));
+		this.observations.put(SpreadSheetConstants.NO_OF_FINDINGS, String.valueOf(errors.size()));
 	}
 
 	@Override
@@ -137,25 +125,5 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
 		secureObjectsFound++;
-	}
-
-	private List<Object> asCSVLine() {
-		long elapsed = analysisTime.elapsed(TimeUnit.SECONDS);
-		analysisTime.stop();
-		String hyperLinkForCommit = "=HYPERLINK(\"" + gitBranchUrl + "\"; \"" + gitCommitId + "\")";
-		String analysisTime = String.valueOf(elapsed);
-		String memUsed = String.valueOf(memoryUsed);
-		String reachableMethods = String.valueOf(sootReachableMethods);
-		String nRules = String.valueOf(noOfRules);
-		String numberOfSeeds = String.valueOf(seeds);
-		String numberOfSecureObjects = String.valueOf(secureObjectsFound);
-		return Arrays.asList(new String[] { hyperLinkForCommit, 
-				analysisTime, 
-				memUsed, 
-				reachableMethods, 
-				nRules, 
-				numberOfSeeds, 
-				numberOfSecureObjects,
-				});
 	}
 }

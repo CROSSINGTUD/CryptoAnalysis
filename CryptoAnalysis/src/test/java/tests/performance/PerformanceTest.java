@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
 import crypto.HeadlessCryptoScanner;
@@ -25,6 +29,24 @@ import test.IDEALCrossingTestingFramework;
 import tests.headless.MavenProject;
 
 
+/**
+ * 
+ * @author kummitasriteja
+ * Class that is used to record some performance metrics with respective to CryptoAnalysis on 
+ * some set of benchmark projects and storing them in google sheet online.
+ * This class requires the following parameters to run,
+ * 		recent commit id
+ * 		branch name
+ * 		url of the repository
+ * 		credentials of google sheet.
+ * Ex. 
+ * mvn -Dtest=PerformanceTest test -DcommitId=test-commit-id -DbranchName=testBranch -DgitUrl=https://helloworld.com 
+ * 		-DgoogleSheetCredentials={\"test_key\": \"test_value\"}
+ * 
+ * This can be run in jenkins as part of the build by using the following command,
+ * 		mvn -Dtest=PerformanceTest test -DcommitId=${GIT_COMMIT} -DbranchName=${GIT_BRANCH} -DgitUrl=${GIT_URL}
+ * 			-DgoogleSheetCredentials=<credentials>
+ */
 @RunWith(Parameterized.class)
 public class PerformanceTest{
 
@@ -34,19 +56,26 @@ public class PerformanceTest{
 	private static final String PARAM_COMMIT_ID = "commitId";
 	private static final String PARAM_GIT_BRANCH_NAME = "branchName";
 	private static final String PARAM_GIT_URL = "gitUrl";
+	private static final String PARAM_GOOGLE_SHEET_CREDENTIALS = "googleSheetCredentials";
+	private Map<String, String> observations = new HashMap<>();
+	private Stopwatch analysisTime = Stopwatch.createUnstarted();
 
 	@Before
 	public void setup() throws IOException, GeneralSecurityException {
+		String googleSheetCreds = System.getProperty(PARAM_GOOGLE_SHEET_CREDENTIALS);
 		GoogleSpreadsheetWriter.createSheet(curProj.getName(), 
 				curProj.getGitUrl(), 
-				Arrays.asList(new String[] {"Git Commit Id", 
-						"Analysis Time (s)", 
-						"Memory Used (MB)", 
-						"Soot Reachable Methods", 
-						"#Rules", 
-						"Number Of Seeds", 
-						"Number Of Secure Objects",
-						}));
+				Arrays.asList(new String[] {
+						SpreadSheetConstants.GIT_COMMIT_ID, 
+						SpreadSheetConstants.ANALYSIS_TIME, 
+						SpreadSheetConstants.MEMORY_USED, 
+						SpreadSheetConstants.SOOT_REACHABLE_METHODS, 
+						SpreadSheetConstants.NO_OF_RULES, 
+						SpreadSheetConstants.NO_OF_SEEDS, 
+						SpreadSheetConstants.NO_OF_SECURE_OBJECTS,
+						SpreadSheetConstants.NO_OF_FINDINGS
+						}),
+				googleSheetCreds);
 	}
 
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -78,7 +107,7 @@ public class PerformanceTest{
 
 			@Override
 			public CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(proj, commitId, getRules(), branchUrl);
+				return new PerformanceReportListener(getRules(), observations);
 			}
 
 			@Override
@@ -118,7 +147,7 @@ public class PerformanceTest{
 
 			@Override
 			protected CrySLAnalysisListener getAdditionalListener() {
-				return new PerformanceReportListener(proj, commitId, getRules(), branchUrl);
+				return new PerformanceReportListener(getRules(), observations);
 			}
 
 			@Override
@@ -178,20 +207,37 @@ public class PerformanceTest{
 		}
 		return commitUrl;
 	}
+	
+	private List<Object> asCSVLine() {
+		return Arrays.asList(new String[] { 
+				observations.get(SpreadSheetConstants.HYPERLINK_COMMIT_ID),
+				observations.get(SpreadSheetConstants.ANALYSIS_TIME),
+				observations.get(SpreadSheetConstants.MEMORY_USED),
+				observations.get(SpreadSheetConstants.SOOT_REACHABLE_METHODS),
+				observations.get(SpreadSheetConstants.NO_OF_RULES),
+				observations.get(SpreadSheetConstants.NO_OF_SEEDS),
+				observations.get(SpreadSheetConstants.NO_OF_SECURE_OBJECTS),
+				observations.get(SpreadSheetConstants.NO_OF_FINDINGS),
+				});
+	}
+	
+	private void createHyperLink(String gitUrl, String gitCommitId) {
+		String hyperLinkForCommit = "=HYPERLINK(\"" + getCommitUrl(gitUrl, gitCommitId) + "\"; \"" + gitCommitId + "\")";
+		observations.put(SpreadSheetConstants.HYPERLINK_COMMIT_ID, hyperLinkForCommit);
+	}
 
 	@SuppressWarnings("unused")
 	@Test
 	public void test() throws Exception {
-		String gitCommitId = String.valueOf(System.currentTimeMillis()), branchName = "", gitUrl = "";
-		if (System.getProperty(PARAM_COMMIT_ID) != null)
-			gitCommitId = System.getProperty(PARAM_COMMIT_ID);
-		
+		String gitCommitId = String.valueOf(System.currentTimeMillis()), branchName = "", gitUrl = "", googleSheetCreds = "";
+		gitCommitId = System.getProperty(PARAM_COMMIT_ID);		
 		if (System.getProperty(PARAM_GIT_BRANCH_NAME) != null)
 			branchName = System.getProperty(PARAM_GIT_BRANCH_NAME);
+		gitUrl = System.getProperty(PARAM_GIT_URL);
+		googleSheetCreds = System.getProperty(PARAM_GOOGLE_SHEET_CREDENTIALS);
+		createHyperLink(gitUrl, gitCommitId);
 		
-		if (System.getProperty(PARAM_GIT_URL) != null)
-			gitUrl = System.getProperty(PARAM_GIT_URL);
-		
+		analysisTime.start();
 		if (curProj.getIsMavenProject()) {
 			MavenProject mavenProject = createAndCompile(new File(curProj.getProjectPath()).getAbsolutePath());
 			scanner = createScanner(mavenProject, curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId), curProj.getRuleSet());
@@ -199,5 +245,10 @@ public class PerformanceTest{
 			scanner = createScanner(curProj, gitCommitId, getCommitUrl(gitUrl, gitCommitId), curProj.getRuleSet());
 		}
 		scanner.exec();
+		long elapsed = analysisTime.elapsed(TimeUnit.SECONDS);
+		analysisTime.stop();
+		observations.put(SpreadSheetConstants.ANALYSIS_TIME, String.valueOf(elapsed));
+		
+		GoogleSpreadsheetWriter.write(asCSVLine(), curProj.getName(), googleSheetCreds);
 	}
 }
