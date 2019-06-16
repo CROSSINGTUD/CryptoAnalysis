@@ -55,11 +55,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.brokencrypto.BrokenCryptoBBCase3: void go()>", IncompleteOperationError.class, 1);
 		// BBCase1, BBCase2, BBCase4, BBCase5 not included as tests due to being similar to BBCase3 above
 		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABSCase1.java
-		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.brokencrypto.BrokenCryptoABSCase1: byte[] encrypt(java.lang.String, java.lang.String)>");
-		// ABSCase2, -3, -4, -5 not included as tests due to being similar to ABSCase1 above
-		
 		// Test cases regarding ecbcrypto project were not added, due to being similar to
 		// all the test cases above:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/ecbcrypto
@@ -88,11 +83,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashBBCase2.java
 		setErrorsCount("<example.brokenhash.BrokenHashBBCase2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		// BBCase1, -3, -4 not included due to being similar to BBCase2 above
-		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABSCase1.java
-		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.brokenhash.BrokenHashABSCase1: void encrypt(java.lang.String, java.lang.String)>");		
-		// All other ABS cases not included due to being similar to the ABSCase1 above
 		
 		scanner.exec();
 		assertErrors();
@@ -151,12 +141,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// In the case above, misuse is caught correctly, but the count is reported to be 0
 		// and not 20, as it really is. This is caused because of the structure of the project
 		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
-				
-		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABSCase1.java
-		setErrorsCount(ConstraintError.class, new FalseNegatives(1, "ConstraintError not caught! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.pbeiteration.LessThan1000IterationPBEABSCase1: encrypt(int)>");		
-				
+						
 		scanner.exec();
 		assertErrors();
 	}
@@ -186,11 +171,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java
 		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>", RequiredPredicateError.class, 1);
-				
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABSCase1.java
-		setErrorsCount("<example.predictablecryptographickey.Crypto: byte[] encrypt(java.lang.String,java.lang.String)>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABSCase1: void <init>()>", IncompleteOperationError.class, 1);
 	
 		scanner.exec();
 		assertErrors();
@@ -206,7 +186,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java
 		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 1);
 			
-		// ABH1, ABI2, ABS1, BB1 are other similar test cases that were not included
+		// ABH1, ABI2, BB1 are other similar test cases that were not included
 		// All test cases in this project produce FP regarding NeverTypeOfError 
 		// misuse, as is explained in the link below:
 		// https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166
@@ -230,11 +210,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>");		
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABSCase1.java
-		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABSCase1: void <init>()>", IncompleteOperationError.class, 1);
-		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/164"), "<example.predictablepbepassword.CryptoPredictablePBE: void encrypt(java.lang.String)>");		
-
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABICase1.java
 		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166"), "<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>");		
@@ -275,12 +250,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorBBCase1.java
 		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorBBCase1: void go()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorBBCase1: void go()>", IncompleteOperationError.class, 1);
-		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABSCase1.java
-		setErrorsCount("<example.staticinitializationvector.CryptoStaticIV1: void encrypt(javax.crypto.spec.IvParameterSpec)>", IncompleteOperationError.class, 1);
-		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorABSCase1: void <init>()>", RequiredPredicateError.class, 1);
-		
+			
 		scanner.exec();
 		assertErrors();
 	}
@@ -306,12 +276,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.staticsalts.StaticSaltsBBCase1: void key2()>", ConstraintError.class, 1);
 		setErrorsCount("<example.staticsalts.StaticSaltsBBCase1: void key2()>", RequiredPredicateError.class, 1);
 		// ABICase1 is similar to the examples above	
-		
-		// This test case corresponds to the following project in CryptoGuard:
-		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/staticsalts/StaticSaltsABSCase1.java
-		setErrorsCount("<example.staticsalts.CryptoStaticSalt1: void encrypt(byte[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.staticsalts.CryptoStaticSalt1: void encrypt(byte[])>", ConstraintError.class, 1);
-				
+					
 		scanner.exec();
 		assertErrors();
 	}
