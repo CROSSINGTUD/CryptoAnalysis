@@ -184,12 +184,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java
-		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 1);
-			
+		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 1);	
 		// ABH1, ABI2, BB1 are other similar test cases that were not included
-		// All test cases in this project produce FP regarding NeverTypeOfError 
-		// misuse, as is explained in the link below:
-		// https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166
 		
 		scanner.exec();
 		assertErrors();
@@ -207,12 +203,12 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABHCase2.java
-		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/165"), "<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>");		
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>", NeverTypeOfError.class, 1);	
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABICase1.java
-		setErrorsCount(NeverTypeOfError.class, new FalsePositives(1, "NeverTypeOfError is a FP! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/166"), "<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>");		
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>", NeverTypeOfError.class, 1);	
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		// ABHCase1, BBCase1 are similar to the case above
 		
