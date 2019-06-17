@@ -8,7 +8,7 @@
 	
 	<properties>
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<spdsVersion>2.3</spdsVersion>
+   	 	<spdsVersion>2.4-SNAPSHOT</spdsVersion>
 	</properties>
 
 	<build>
@@ -67,7 +67,7 @@
 								<artifactItem>
 									<groupId>de.fraunhofer.iem</groupId>
 									<artifactId>BouncyCastle</artifactId>
-									<version>0.4</version>
+									<version>0.5</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>

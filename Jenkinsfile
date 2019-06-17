@@ -1,5 +1,10 @@
 pipeline {
     agent any
+
+    tools { 
+        jdk 'Oracle JDK 9' 
+    }
+
     stages {
 
         stage('Build') {
