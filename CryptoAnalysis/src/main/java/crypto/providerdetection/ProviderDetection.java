@@ -59,9 +59,8 @@ public class ProviderDetection {
 	private String provider = null;
 	private String rulesDirectory = null;
 	private String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
-	
-	private String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
-	private String sootClassPathForTests = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
+
+	private String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
 	
@@ -73,30 +72,17 @@ public class ProviderDetection {
 		return rulesDirectory;
 	}
 	
-	
-	/**
-	 * This method is used to get the Soot classpath from `src/main/java`
-	 */
-	public String getMainSootClassPath() {
-		//Assume target folder to be directly in user dir
-		File classPathDir = new File(sootClassPath);
-		if (!classPathDir.exists()){
-			throw new RuntimeException("Classpath for the test cases could not be found.");
-		}
-		return sootClassPath;
-	}
-	
 	/**
 	 * This method is used to get the Soot classpath from `src/test/java`
 	 * in order to run the JUnit test cases for Provider Detection
 	 */
 	public String getSootClassPath(){
-		//Assume target folder to be directly in user dir
-		File classPathDir = new File(sootClassPathForTests);
+		//Assume target folder to be directly in user directory
+		File classPathDir = new File(sootClassPath);
 		if (!classPathDir.exists()){
 			throw new RuntimeException("Classpath for the test cases could not be found.");
 		}
-		return sootClassPathForTests;
+		return sootClassPath;
 	}
 	
 	/**
