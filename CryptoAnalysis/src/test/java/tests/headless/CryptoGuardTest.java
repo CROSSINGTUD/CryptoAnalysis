@@ -216,6 +216,13 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		assertErrors();
 	}
 	
+	// Headless test cases regarding the CryptoGuard projects `predictableseeds` 
+	// were not added due to the misuses not being caught by the analysis.
+	// The projects are CryptoGuard projects are found in the link below:
+	// https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/predictableseeds
+	// For the misuse an issue is opened and can be found in the link below:
+	// https://github.com/CROSSINGTUD/CryptoAnalysis/issues/140
+	
 	@Test
 	public void staticInitializationVectorExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticinitializationvector").getAbsolutePath();
