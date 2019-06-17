@@ -63,6 +63,8 @@ public class ProviderDetection {
 	private String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"classes";
 	private String sootClassPathForTests = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
+	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
+	
 	public String getProvider() {
 		return provider;
 	}
@@ -318,7 +320,7 @@ public class ProviderDetection {
 				String valueTypeString = valueType.toString();
 				
 				// In here are listed all the supported providers so far
-				if(valueTypeString.contains("BouncyCastleProvider")) {
+				if(valueTypeString.contains(BOUNCY_CASTLE)) {
 					provider = "BC";
 				}
 			}
