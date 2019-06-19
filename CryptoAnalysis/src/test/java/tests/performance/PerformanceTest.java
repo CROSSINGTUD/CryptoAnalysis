@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +56,7 @@ import tests.headless.MavenProject;
 public class PerformanceTest{
 
 	private static boolean VISUALIZATION = false;
+	private static final String GIT_DOWNLOAD_PATH = "../CryptoAnalysisTargets/PerformanceBenchmarkProjects/";
 	HeadlessCryptoScanner scanner;
 	BenchmarkProject curProj;
 	private static final String PARAM_COMMIT_ID = "commitId";
@@ -170,21 +176,24 @@ public class PerformanceTest{
 		ArrayList<Object[]> params = Lists.newArrayList();
 		BenchmarkProject project1 = new BenchmarkProject("Bitpay", 
 				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/bitpay", 
-				"https://github.com/bitpay/java-bitpay-client", 
+				"https://github.com/bitpay/java-bitpay-client.git", 
+				"32a8e9e08ef293e7d138584462c5c488ffe5f196",
 				"", 
 				true, 
 				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
 				);
 		BenchmarkProject project2 = new BenchmarkProject("Aerogear-Crypto", 
 				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/aerogear-crypto", 
-				"https://github.com/aerogear/aerogear-crypto-java", 
+				"https://github.com/aerogear/aerogear-crypto-java.git", 
+				"7f73045d46a21260fbff5ac4a9d66aec764ec3c8",
 				"", 
 				true, 
 				new Ruleset[] {Ruleset.JavaCryptographicArchitecture, Ruleset.BouncyCastle}
 				);
 		BenchmarkProject project3 = new BenchmarkProject("Commons-Crypto", 
 				"../CryptoAnalysisTargets/PerformanceBenchmarkProjects/commons-crypto", 
-				"https://github.com/apache/commons-crypto", 
+				"https://github.com/apache/commons-crypto.git", 
+				"02e6f9efccae6ee4d57336bfb5d08271737b4e29",
 				"", 
 				true, 
 				new Ruleset[] {Ruleset.JavaCryptographicArchitecture}
@@ -225,10 +234,26 @@ public class PerformanceTest{
 		String hyperLinkForCommit = "=HYPERLINK(\"" + getCommitUrl(gitUrl, gitCommitId) + "\"; \"" + gitCommitId + "\")";
 		observations.put(SpreadSheetConstants.HYPERLINK_COMMIT_ID, hyperLinkForCommit);
 	}
+	
+	private void cloneRepository() {
+		try {
+			Git git = Git.cloneRepository().setURI(curProj.getGitUrl()).setDirectory(new File(curProj.getProjectPath())).call();
+			git.checkout().setName(curProj.getCommitId()).call();
+		} catch (InvalidRemoteException e) {
+			e.printStackTrace();
+		} catch (TransportException e) {
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	@SuppressWarnings("unused")
 	@Test
 	public void test() throws Exception {
+		cloneRepository();
+		
 		String gitCommitId = String.valueOf(System.currentTimeMillis()), branchName = "", gitUrl = "", googleSheetCreds = "";
 		gitCommitId = System.getProperty(PARAM_COMMIT_ID);		
 		if (System.getProperty(PARAM_GIT_BRANCH_NAME) != null)
@@ -250,5 +275,6 @@ public class PerformanceTest{
 		observations.put(SpreadSheetConstants.ANALYSIS_TIME, String.valueOf(elapsed));
 		
 		GoogleSpreadsheetWriter.write(asCSVLine(), curProj.getName(), googleSheetCreds);
+		FileUtils.cleanDirectory(new File(curProj.getProjectPath() + File.separator + ".." + File.separator)); 
 	}
 }

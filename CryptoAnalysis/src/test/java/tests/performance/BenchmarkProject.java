@@ -3,7 +3,7 @@ package tests.performance;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 
 public class BenchmarkProject {
-	String name, projectPath, gitUrl, sootClassPath;
+	String name, projectPath, gitUrl, sootClassPath, commitId;
 	boolean isMavenProject;
 	Ruleset[] ruleSet;
 
@@ -11,16 +11,25 @@ public class BenchmarkProject {
 		return name;
 	}
 
-	public BenchmarkProject(String name, String projectPath, String gitUrl, String sootClassPath, boolean isMavenProject,
+	public BenchmarkProject(String name, String projectPath, String gitUrl, String commitId, String sootClassPath, boolean isMavenProject,
 			Ruleset[] ruleSet) {
 		this.name = name;
 		this.projectPath = projectPath;
 		this.gitUrl = gitUrl;
+		this.commitId = commitId;
 		this.sootClassPath = sootClassPath;
 		this.isMavenProject = isMavenProject;
 		this.ruleSet = ruleSet;
 	}
 
+	public String getCommitId() {
+		return commitId;
+	}
+
+	public void setCommitId(String commitId) {
+		this.commitId = commitId;
+	}
+	
 	public Ruleset[] getRuleSet() {
 		return ruleSet;
 	}
