@@ -58,11 +58,13 @@ public class ProviderDetection {
 	
 	private String provider = null;
 	private String rulesDirectory = null;
-	private String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
-
-	private String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
+	private static final String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
+	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
+	
+	private static final String CRYPTSLBIN = ".cryptslbin";
 	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
+	
 	
 	public String getProvider() {
 		return provider;
@@ -71,6 +73,7 @@ public class ProviderDetection {
 	public String getRulesDirectory() {
 		return rulesDirectory;
 	}
+	
 	
 	/**
 	 * This method is used to get the Soot classpath from `src/test/java`
@@ -417,7 +420,7 @@ public class ProviderDetection {
 		if(rulesDirectory.exists()) {
 			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
 			for (File file : listRulesDirectoryFiles) {
-				if (file != null && file.getAbsolutePath().endsWith(rule+".cryptslbin")) {
+				if (file != null && file.getAbsolutePath().endsWith(rule+CRYPTSLBIN)) {
 					ruleExists = true;
 					break;
 				}
@@ -447,7 +450,7 @@ public class ProviderDetection {
 		List<String> newRules = new ArrayList<String>();
 		File[] files = new File(newRulesDirectory).listFiles();
 		for (File file : files) {
-		    if (file.isFile() && file.getName().endsWith(".cryptslbin")) {
+		    if (file.isFile() && file.getName().endsWith(CRYPTSLBIN)) {
 		        newRules.add(StringUtils.substringBefore(file.getName(), "."));
 		    }
 		}
@@ -468,7 +471,7 @@ public class ProviderDetection {
 		// are added to the new CryptSL rules list
 		File[] listFiles = new File(newRulesDirectory).listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(".cryptslbin")) {
+			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
 				newCryptSLRules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
@@ -488,7 +491,7 @@ public class ProviderDetection {
 		
 		File[] listFiles = directory.listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(".cryptslbin")) {
+			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
 			}
 		}
