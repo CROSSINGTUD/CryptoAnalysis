@@ -72,7 +72,8 @@ public class CommandLineReporter extends ErrorMarkerListener {
 						 s += "\n";
 					}
 					s += String.format("\t\t\t%s\n", marker.toErrorMarkerString());
-					s += String.format("\t\t\tat statement: %s\n\n", marker.getErrorLocation().getUnit().get());
+					s += String.format("\t\t\tat statement: %s\n", marker.getErrorLocation().getUnit().get());
+					s += String.format("\t\t\tat line: %s\n\n", marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber());
 				}
 			}
 			s += "\n";
