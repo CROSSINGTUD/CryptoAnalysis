@@ -1,6 +1,8 @@
 package crypto.reporting;
 
 public class SARIFConfig {
+	public static final String SCHEMA_KEY = "$schema";
+	public static final String SCHEMA_VALUE = "http://json.schemastore.org/sarif-2.0.0";
 	public static final String VERSION = "version";
 	public static final String SARIF_VERSION_NUMBER = "2.0.0";
 	public static final String VERSION_NUMBER = "1.0.0";

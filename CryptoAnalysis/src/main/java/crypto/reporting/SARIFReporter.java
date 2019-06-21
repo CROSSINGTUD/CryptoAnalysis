@@ -91,6 +91,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		this.resources.put(SARIFConfig.RULES_KEY, this.rules);
 		JSONObject sarif = new JSONObject();
 		sarif.put(SARIFConfig.VERSION, SARIFConfig.SARIF_VERSION_NUMBER);
+		sarif.put(SARIFConfig.SCHEMA_KEY, SARIFConfig.SCHEMA_VALUE);
 		JSONArray runs = new JSONArray();
 		JSONObject run = new JSONObject();
 		run.put(SARIFConfig.TOOL_KEY, this.sarifHelper.getToolInfo());
