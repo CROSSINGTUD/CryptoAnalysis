@@ -1,0 +1,36 @@
+SPEC java.security.AlgorithmParameters
+OBJECTS
+    java.lang.String alg;
+    java.security.spec.AlgorithmParameterSpec params;
+	byte[] parAr; 
+	java.lang.String format;
+	byte[] parsRes;
+
+EVENTS
+    g1: getInstance(alg);
+    g2: getInstance(alg, _);
+    Gets := g1 | g2;
+
+    i1: init(params);
+    i2: init(parAr);
+    i3: init(parAr, _);
+    Inits := i1 | i2 | i3;
+    
+    e1: parsRes = getEncoded();
+    e2: parsRes = getEncoded(format);
+    Encoded := e1 | e2;
+
+ORDER
+    Gets, Inits, Encoded?
+
+CONSTRAINTS
+	alg in {"AES", "Blowfish", "DESede", "DiffieHellman", "OEAP", "PBEWithHmacSHA224AndAES_128", "PBEWithHmacSHA256AndAES_128", "PBEWithHmacSHA384AndAES_128", "PBEWithHmacSHA512AndAES_128", "PBEWithHmacSHA224AndAES_256", "PBEWithHmacSHA256AndAES_256", "PBEWithHmacSHA384AndAES_256", "PBEWithHmacSHA512AndAES_256"};
+
+REQUIRES    
+    preparedAlg[parAr];
+    alg in {"AES", "Blowfish", "DESede"} => preparedIV[params];
+    alg in {"DiffieHellman"} => preparedDH[params];
+    
+ENSURES 
+    preparedAlg[this, alg] after Inits;
+    preparedAlg[parsRes, alg] after Encoded;

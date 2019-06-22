@@ -1,0 +1,16 @@
+SPEC org.bouncycastle.crypto.modes.CBCBlockCipher
+
+OBJECTS
+	org.bouncycastle.crypto.BlockCipher engine;
+	
+EVENTS
+	c : CBCBlockCipher(engine);
+	
+ORDER
+	c
+
+REQUIRES
+	generatedAESEngine[engine];
+	
+ENSURES
+	generatedCBCBlockCipher[this];

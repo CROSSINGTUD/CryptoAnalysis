@@ -1,0 +1,21 @@
+SPEC org.bouncycastle.crypto.params.AEADParameters
+
+OBJECTS
+	org.bouncycastle.crypto.params.KeyParameter keyParam;
+
+EVENTS
+	c1 : AEADParameters(keyParam,_,_);
+	c2 : AEADParameters(keyParam,_,_,_);
+	CONS := c1 | c2;
+
+ORDER
+	CONS
+	
+REQUIRES
+	generatedKeyParameter[keyParam];
+	
+ENSURES
+	generatedAEADParameters[this];
+	//Can be removed as soon as REQUIRES supports OR
+	generatedAEADParametersOrParametersWithIV[this];
+	

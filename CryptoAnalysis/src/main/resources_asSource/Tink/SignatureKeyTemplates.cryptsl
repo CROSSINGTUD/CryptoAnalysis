@@ -1,0 +1,34 @@
+/*
+ * This is a CrySL specification for the Google Tink implementation of 
+ * the class SignatureKeyTemplates. 
+ * 
+ * Note: in this case, we are not specifying the correct usage of the 
+ * API, but actually guaranteeing that the Google Tink API implementation 
+ * actually exposes some key templates as static attributes. This 
+ * information simplifies the specification of other properties for 
+ * correctly using the API. 
+ * 
+ */
+
+SPEC com.google.crypto.tink.signature.SignatureKeyTemplates
+
+OBJECTS
+	com.google.crypto.tink.proto.KeyTemplate ecdsa;
+	
+	com.google.crypto.tink.proto.HashType hashType;
+	com.google.crypto.tink.proto.EllipticCurveType curveType;
+	
+EVENTS
+	ecdsa_evt : ecdsa = createEcdsaKeyTemplate(hashType, curveType, _);
+	
+ORDER 
+	ecdsa_evt
+
+//CONSTRAINTS
+ 	//hashType in {SHA256, SHA52}
+	//curveType in {NIST_P384, NIST_P521, NIST_P256}	
+	//hashType == SHA256 => curveType == P256
+	//hashType == SHA512 => curveType in {NIST_P384, NIST_P521} 
+	 
+ENSURES
+	keyTemplate[ecdsa];

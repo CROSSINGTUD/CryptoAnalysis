@@ -1,0 +1,22 @@
+SPEC org.bouncycastle.crypto.modes.GCMBlockCipher
+
+OBJECTS
+	org.bouncycastle.crypto.BlockCipher engine;
+	org.bouncycastle.crypto.CipherParameters params;
+	
+EVENTS
+	c1 : GCMBlockCipher(engine);
+	Cons := c1;
+
+	
+ORDER
+	Cons
+
+REQUIRES
+	generatedAESEngine[engine];
+	//Can be removed as soon as REQUIRES supports OR
+	generatedAEADParametersOrParametersWithIV[params];
+		
+	
+ENSURES
+	generatedGCMBlockCipherMode[this] after Cons;

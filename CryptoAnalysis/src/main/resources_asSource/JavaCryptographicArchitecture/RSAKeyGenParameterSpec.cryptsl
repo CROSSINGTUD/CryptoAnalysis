@@ -1,0 +1,14 @@
+SPEC java.security.spec.RSAKeyGenParameterSpec
+OBJECTS 
+	int keyLength;
+	java.math.BigInteger publicExponent;
+EVENTS
+	c1: RSAKeyGenParameterSpec(keyLength, publicExponent);
+	
+ORDER
+	c1
+CONSTRAINTS
+	 keyLength in {1024, 2048, 4096};
+	 publicExponent in {65537};
+ENSURES
+	preparedRSA[this];

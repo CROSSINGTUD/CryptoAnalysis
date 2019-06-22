@@ -1,0 +1,21 @@
+/*
+ * A CrySL specification for using the AEAD Factory 
+ * of the Google Google library. 
+ */
+SPEC com.google.crypto.tink.aead.AeadFactory
+
+OBJECTS
+	com.google.crypto.tink.KeysetHandle ksh;
+	com.google.crypto.tink.Aead aead; 
+
+EVENTS
+	gp : aead = getPrimitive(ksh);
+
+ORDER
+	gp
+
+REQUIRES 
+	generatedKeySet[ksh]; 
+	
+ENSURES
+	aeadPrimitive[aead];

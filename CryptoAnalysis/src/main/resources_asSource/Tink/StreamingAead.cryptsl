@@ -1,0 +1,21 @@
+/*
+ * A CrySL specification for using the Streaming AEAD Ciphers (Authenticated 
+ * Encryption with Associated Data) of the Google Tink library, together with a 
+ * ReadableByteChannel. 
+ */
+SPEC com.google.crypto.tink.StreamingAead
+
+OBJECTS 
+	java.nio.channels.WritableByteChannel writer; 
+	java.nio.channels.ReadableByteChannel reader; 
+
+EVENTS
+	create_writable_channel_evt : writer = newEncryptingChannel(_, _);
+	create_readable_channel_evt : reader = newDecryptingChannel(_, _);
+ 
+
+ORDER 
+	(create_writable_channel_evt | create_readable_channel_evt)+
+	
+REQUIRES
+	streamingAeadPrimitive[this];

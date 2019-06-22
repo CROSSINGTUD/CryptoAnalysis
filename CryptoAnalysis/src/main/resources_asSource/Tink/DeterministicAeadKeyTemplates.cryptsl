@@ -1,0 +1,35 @@
+/*
+ * This is a CrySL specification for the Google Tink implementation of 
+ * the class DeterministicAeadKeyTemplates. 
+ * 
+ * Note: in this case, we are not specifying the correct usage of the 
+ * API, but actually guaranteeing that the Google Tink API implementation 
+ * actually exposes some key templates as static attributes. This 
+ * information simplifies the specification of other properties for 
+ * correctly using the API. 
+ * 
+ * 
+ * It constraints the use of the API to the following key templates: 
+ * 
+ * - aes256_siv
+ */
+
+SPEC com.google.crypto.tink.daead.DeterministicAeadKeyTemplates
+
+OBJECTS
+	com.google.crypto.tink.proto.KeyTemplate aes256_siv;
+	
+	int k64;
+	
+EVENTS
+    aes256_siv_evt : aes256_siv = createAesSivKeyTemplate(k64);
+	
+ORDER 
+	aes256_siv_evt*	
+
+CONSTRAINTS
+	k64 in {64};
+	
+ENSURES
+	keyTemplate[aes256_siv];
+	

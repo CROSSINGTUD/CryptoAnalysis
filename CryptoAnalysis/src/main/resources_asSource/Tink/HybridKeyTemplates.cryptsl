@@ -1,0 +1,38 @@
+/*
+ * This is a CrySL specification for the Google Tink implementation of 
+ * the class HybridKeyTemplates. 
+ * 
+ * Note: in this case, we are not specifying the correct usage of the 
+ * API, but actually guaranteeing that the Google Tink API implementation 
+ * actually exposes some key templates as static attributes. This 
+ * information simplifies the specification of other properties for 
+ * correctly using the API. 
+ * 
+ * 
+ * It constraints the use of the API to the following key templates: 
+ * 
+ * - ecies_aes128_gcm
+ * - ecies_aes128_ctr_hmac
+ */
+
+SPEC com.google.crypto.tink.hybrid.HybridKeyTemplates
+
+OBJECTS
+	com.google.crypto.tink.proto.KeyTemplate ecies_aes128_gcm; 
+	com.google.crypto.tink.proto.KeyTemplate ecies_aes128_ctr_hmac; 
+				
+EVENTS
+   	ecies_aes128_gcm_evt: ecies_aes128_gcm = createEciesAeadHkdfKeyTemplate(_, _, _, _, _);
+	ecies_aes128_ctr_hmac_evt: ecies_aes128_ctr_hmac = createEciesAeadHkdfKeyTemplate(_, _, _, _, _);
+	
+	CreateKeyTemplates := ecies_aes128_gcm_evt | ecies_aes128_ctr_hmac_evt;
+	
+ORDER 
+	(CreateKeyTemplates)*	
+
+	
+ENSURES
+	keyTemplate[ecies_aes128_gcm];
+	keyTemplate[ecies_aes128_ctr_hmac];
+	
+	

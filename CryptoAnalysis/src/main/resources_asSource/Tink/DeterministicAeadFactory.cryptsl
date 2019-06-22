@@ -1,0 +1,21 @@
+/*
+ * A CrySL specification for using the Deterministic AEAD Factory 
+ * of the Google Google library. 
+ */
+SPEC com.google.crypto.tink.daead.DeterministicAeadFactory
+
+OBJECTS
+	com.google.crypto.tink.KeysetHandle ksh;
+	com.google.crypto.tink.DeterministicAead daead; 
+
+EVENTS
+	gp : daead = getPrimitive(ksh);
+
+ORDER
+	gp
+
+REQUIRES 
+	generatedKeySet[ksh]; 
+	
+ENSURES
+	daeadPrimitive[daead];

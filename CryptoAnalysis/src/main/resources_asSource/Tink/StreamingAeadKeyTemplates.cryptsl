@@ -1,0 +1,47 @@
+/*
+ * This is a CrySL specification for the Google Tink implementation of 
+ * the class StreamingAeadKeyTemplates. 
+ * 
+ * Note: in this case, we are not specifying the correct usage of the 
+ * API, but actually guaranteeing that the Google Tink API implementation 
+ * actually exposes some key templates as static attributes. This 
+ * information simplifies the specification of other properties for 
+ * correctly using the API. 
+ * 
+ * 
+ * It constraints the use of the API to the following key templates: 
+ * 
+ * - aes_ctr_hmac_sha256_4kb
+ * - aes_gcm_hkdf_4kb
+ */
+
+SPEC com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates
+
+OBJECTS
+	com.google.crypto.tink.proto.KeyTemplate aes_ctr_hmac_sha256_4kb;
+	com.google.crypto.tink.proto.KeyTemplate aes_gcm_hkdf_4kb; 
+		
+	int key;
+	int tag32;
+	int segmentSize; 
+	
+	
+EVENTS
+   	aes_ctr_hmac_sha256_4kb_evt: aes_ctr_hmac_sha256_4kb = createAesCtrHmacStreamingKeyTemplate(key, _, key, _, tag32, segmentSize);
+	aes_gcm_hkdf_4kb_evt : aes_gcm_hkdf_4kb = createAesGcmHkdfStreamingKeyTemplate(key, _, key, segmentSize);
+	
+	CreateKeyTemplates := aes_ctr_hmac_sha256_4kb_evt | aes_gcm_hkdf_4kb_evt;
+	
+ORDER 
+	(CreateKeyTemplates)*	
+
+CONSTRAINTS
+	key in {16, 32};
+	tag32 in {32}; 
+	segmentSize in {4096};
+	
+ENSURES
+	keyTemplate[aes_ctr_hmac_sha256_4kb];
+	keyTemplate[aes_gcm_hkdf_4kb];
+	
+	

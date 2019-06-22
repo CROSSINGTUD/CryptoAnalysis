@@ -1,0 +1,23 @@
+/*
+ * A CrySL specification for using the Public Key Signature Factory 
+ * of the Google Google library. 
+ */
+ 
+SPEC com.google.crypto.tink.signature.PublicKeySignFactory
+
+OBJECTS 
+	com.google.crypto.tink.KeysetHandle ksh;
+	com.google.crypto.tink.PublicKeySign pks;
+
+EVENTS
+	gp : pks = getPrimitive(ksh);
+
+ORDER 
+	gp+
+	
+REQUIRES 
+	generatedKeySet[ksh]; 
+	
+ENSURES
+	publicKeySignaturePrimitive[pks];	
+			

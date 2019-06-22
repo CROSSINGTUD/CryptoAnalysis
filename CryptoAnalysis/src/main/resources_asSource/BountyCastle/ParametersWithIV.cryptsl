@@ -1,0 +1,23 @@
+SPEC org.bouncycastle.crypto.params.ParametersWithIV
+
+OBJECTS
+	org.bouncycastle.crypto.CipherParameters params;
+	byte[] iv;
+	int ivOff;
+	int ivLen;
+	
+EVENTS
+	c1 : ParametersWithIV(params, iv);
+	c2 : ParametersWithIV(params, iv, ivOff, ivLen);
+	Cons := c1 | c2;
+	
+ORDER
+	Cons
+	
+REQUIRES
+	randomized[iv];
+
+ENSURES
+	generatedParametersWithIV[this];
+	//Can be removed as soon as REQUIRES supports OR
+	generatedAEADParametersOrParametersWithIV[this];

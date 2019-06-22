@@ -1,0 +1,19 @@
+/*
+ * A CrySL specification for using the Hybrid Encryption modes 
+ * of the Google Tink library. 
+ */
+ SPEC com.google.crypto.tink.HybridDecrypt
+
+OBJECTS
+	byte[] plainText;
+	byte[] cipherText;
+	byte[] context;
+
+EVENTS
+	dec : plainText = decrypt(cipherText, context);
+
+ORDER
+	dec*
+
+REQUIRES 
+	hybridDecryptPrimitive[this];

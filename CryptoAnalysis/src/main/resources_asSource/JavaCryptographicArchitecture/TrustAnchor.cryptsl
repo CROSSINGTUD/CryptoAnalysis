@@ -1,0 +1,25 @@
+SPEC java.security.cert.TrustAnchor
+
+OBJECTS
+	java.security.PublicKey pubKey;
+	byte[] nameConstraints;	/* nameConstraints - a byte array containing the ASN.1 DER encoding of a 
+	 						 * NameConstraints extension to be used for checking name constraints. 
+	 						 * Only the value of the extension is included, not the OID or criticality flag. 
+	 						 * Specify null to omit the parameter. */
+	 						 
+	java.security.cert.X509Certificate cert;
+	javax.security.auth.x500.X500Principal princ;
+	
+EVENTS
+	c1: TrustAnchor(_,pubKey,nameConstraints);
+	c2: TrustAnchor(cert, nameConstraints);
+	c3: TrustAnchor(princ, pubKey, nameConstraints);
+	
+ORDER
+	c1 | c2 | c3
+	
+REQUIRES
+	generatedPubkey[pubKey];
+	
+ENSURES
+	generatedTrustAnchor[this];

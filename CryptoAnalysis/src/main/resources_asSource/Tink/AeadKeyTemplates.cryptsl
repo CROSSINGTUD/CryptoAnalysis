@@ -1,0 +1,56 @@
+/*
+ * This is a CrySL specification for the Google Tink implementation of 
+ * the class AeadKeyTemplates. 
+ * 
+ * Note: in this case, we are not specifying the correct usage of the 
+ * API, but actually guaranteeing that the Google Tink API implementation 
+ * actually exposes some key templates as static attributes. This 
+ * information simplifies the specification of other properties for 
+ * correctly using the API. 
+ * 
+ * 
+ * It constraints the use of the API to the following key templates: 
+ * 
+ * - aes128_gcm
+ * - aes256_gcm
+ * - aes128_eax
+ * - aes256_eax
+ * - aes128_ctr_hmac_sha256
+ * - aes256_ctr_hmac_sha256
+ * 
+ */
+
+SPEC com.google.crypto.tink.aead.AeadKeyTemplates
+
+OBJECTS
+	com.google.crypto.tink.proto.KeyTemplate kt;
+	
+	int key;
+	int iv; 
+	
+	com.google.crypto.tink.proto.HashType hashType;  // HashType enum: (1) - SHA1, (3) - SHA256, and (4) - SHA 512. 
+	
+EVENTS
+	aes_gcm_evt : kt = createAesGcmKeyTemplate(key);
+	aes_eax_evt : kt = createAesEaxKeyTemplate(key, iv);
+
+//	aes128_ctr_hmac_sha256_evt : aes128_ctr_hmac_sha256 = createAesCtrHmacAeadKeyTemplate(k16, iv16, hmk32, tag16, hashType);
+//	aes256_ctr_hmac_sha256_evt : aes256_ctr_hmac_sha256 = createAesCtrHmacAeadKeyTemplate(k16, iv16, hmk32, tag32, hashType);
+	
+	CreateKeyTemplates := aes_gcm_evt | aes_eax_evt;// | aes128_ctr_hmac_sha256_evt | aes256_ctr_hmac_sha256_evt ;
+	
+ORDER 
+	(CreateKeyTemplates)+	
+
+CONSTRAINTS
+	key in {16, 32};
+	iv in {16}; 
+	 
+	//hashType == com.google.crypto.tink.proto.HashType.HashTyp.SHA256; 
+	
+ENSURES
+	keyTemplate[kt];
+
+//	keyTemplate[aes128_ctr_hmac_sha256] after aes128_ctr_hmac_sha256_evt;
+//	keyTemplate[aes256_ctr_hmac_sha256] after aes256_ctr_hmac_sha256_evt;
+	
