@@ -72,7 +72,9 @@ public abstract class HeadlessCryptoScanner {
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath));
+			//rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath));
+			//read rules as sourcecode format
+			rules = CrySLRulesetSelector.makeFromPathFromSource(new File(resourcesPath));
 		}
 		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
@@ -263,7 +265,9 @@ public abstract class HeadlessCryptoScanner {
 		if (rules != null) {
 			return rules;
 		}
-		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources", Ruleset.JavaCryptographicArchitecture);
+		//return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources", Ruleset.JavaCryptographicArchitecture);
+		//makeFromRuleset as sourcecode format
+		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", Ruleset.JavaCryptographicArchitecture);
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
