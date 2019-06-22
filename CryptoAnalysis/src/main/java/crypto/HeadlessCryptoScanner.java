@@ -265,8 +265,9 @@ public abstract class HeadlessCryptoScanner {
 		if (rules != null) {
 			return rules;
 		}
-		//return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources", Ruleset.JavaCryptographicArchitecture);
-		//makeFromRuleset as sourcecode format
+		/*
+		 * makeFromRuleset as sourcecode format
+		 */
 		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", Ruleset.JavaCryptographicArchitecture);
 	}
 
