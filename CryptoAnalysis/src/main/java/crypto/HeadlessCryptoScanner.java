@@ -73,7 +73,9 @@ public abstract class HeadlessCryptoScanner {
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
 			//rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath));
-			//read rules as sourcecode format
+			/*
+			 * Read rules as source code format
+			 */
 			rules = CrySLRulesetSelector.makeFromPathFromSource(new File(resourcesPath));
 		}
 		
