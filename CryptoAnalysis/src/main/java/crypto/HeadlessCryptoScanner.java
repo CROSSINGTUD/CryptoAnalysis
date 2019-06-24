@@ -131,6 +131,12 @@ public abstract class HeadlessCryptoScanner {
 			protected boolean sarifReport() {
 				return options.hasOption("sarifReport");
 			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return options.hasOption("providerDetection");
+			}
+			
 		};
 		return sourceCryptoScanner;
 	}
@@ -251,9 +257,11 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
 				
-				//create a new object to execute the Provider Detection analysis
-				ProviderDetection providerDetection = new ProviderDetection();
-				rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+				if (providerDetection()) {
+					//create a new object to execute the Provider Detection analysis
+					ProviderDetection providerDetection = new ProviderDetection();
+					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+				}
 				
 				scanner.scan(rules);
 			}
@@ -378,6 +386,10 @@ public abstract class HeadlessCryptoScanner {
 	};
 	
 	protected boolean sarifReport() {
+		return false;
+	}
+	
+	protected boolean providerDetection() {
 		return false;
 	}
 	
