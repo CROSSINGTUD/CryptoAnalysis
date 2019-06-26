@@ -127,7 +127,8 @@ public class CrySLModelReader {
 		if (!cryslFileEnding.equals(extension)) {
 			return null;
 		}
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(),																																																		// true), true);
+		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(),
+		// true), true);
 		EcoreUtil.resolveAll(resourceSet);
 		final EObject eObject = (EObject) resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
@@ -167,10 +168,6 @@ public class CrySLModelReader {
 			}
 		}
 		final CryptSLRule rule = new CryptSLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
-		/*System.out.println(rule);
-		System.out.println("===========================================");
-		System.out.println("");
-
 		/*if (!testMode) {
 			final String className = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
 			String folderPath = Utils.getResourceFromWithin(Constants.RELATIVE_RULES_DIR, Activator.PLUGIN_ID).getAbsolutePath();
@@ -592,8 +589,7 @@ public class CrySLModelReader {
 			for (final SuPar var : innerPred.getPred().getParList().getParameters()) {
 				if (var.getVal() != null) {
 					final LiteralExpression lit = var.getVal();
-
-					final ObjectImpl object = (ObjectImpl) ((LiteralExpression) lit.getLit().getName()).getValue();
+					final ObjectImpl object =   (ObjectImpl) ((LiteralExpression) lit.getLit().getName()).getValue();
 					final String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
 					final String variable = object.getName();
 

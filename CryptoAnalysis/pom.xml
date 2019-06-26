@@ -10,7 +10,6 @@
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
    	 	<spdsVersion>2.4-SNAPSHOT</spdsVersion>
 	</properties>
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -158,9 +157,9 @@
 					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
+				
 		</plugins>
 	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -216,8 +215,23 @@
 		    <groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
 		    <artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
 		    <version>1.0.0-SNAPSHOT</version>
-		    <scope>system</scope>
-		    <systemPath>${project.basedir}/src/main/lib/de.darmstadt.tu.crossing.CryptSL.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.xtext</groupId>
+			<artifactId>org.eclipse.xtext.xbase</artifactId>
+			<version>2.18.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.common -->
+		<dependency>
+		    <groupId>org.eclipse.emf</groupId>
+		    <artifactId>org.eclipse.emf.common</artifactId>
+		    <version>2.15.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore -->
+		<dependency>
+		    <groupId>org.eclipse.emf</groupId>
+		    <artifactId>org.eclipse.emf.ecore</artifactId>
+		    <version>2.15.0</version>
 		</dependency>
 	</dependencies>
 
@@ -246,12 +260,10 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-
 		<repository>
 			<id>soot-release</id>
 			<name>soot release</name>
 			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
 		</repository>
 	</repositories>
-
 </project>
