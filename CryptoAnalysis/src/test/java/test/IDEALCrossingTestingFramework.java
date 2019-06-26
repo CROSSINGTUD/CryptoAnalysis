@@ -71,8 +71,9 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
-//		CryptSLRuleReader.readFromFile(file);
+		//return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
+		return CrySLRulesetSelector.makeSingleRuleFromSource(RULES_BASE_DIR, getRuleset(), getRulename());
+		//CryptSLRuleReader.readFromFile(file);
 	}
 
 	protected abstract String getRulename();

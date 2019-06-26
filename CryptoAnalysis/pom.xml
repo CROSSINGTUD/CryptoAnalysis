@@ -212,6 +212,13 @@
 			<artifactId>gson</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<dependency>
+		    <groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
+		    <artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
+		    <version>1.0.0-SNAPSHOT</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/src/main/lib/de.darmstadt.tu.crossing.CryptSL.jar</systemPath>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>

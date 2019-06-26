@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -15,7 +16,11 @@ public class CrySLRulesetSelector {
 	public static List<CryptSLRule> makeFromRuleset(String rulesBasePath, Ruleset... set) {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
-			rules.addAll(getRulesset(rulesBasePath, s));
+			//rules.addAll(getRulesset(rulesBasePath, s));
+			/*
+			 * getRules as sourcecode format
+			 */
+			rules.addAll(getRulessetFromSource(rulesBasePath,s));
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found for rulesset " + set);
@@ -49,7 +54,9 @@ public class CrySLRulesetSelector {
 		return makeFromRuleset(rulesBasePath, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
 	
-	private static List<CryptSLRule> getRulesset(String rulesBasePath, Ruleset s){
+	/*
+	 * read rules as cryptslbin format.
+	 * private static List<CryptSLRule> getRulesset(String rulesBasePath, Ruleset s){
 		List<CryptSLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s+"/").listFiles();
 		for (File file : listFiles) {
@@ -59,7 +66,6 @@ public class CrySLRulesetSelector {
 		}
 		return rules;
 	}
-
 	public static CryptSLRule makeSingleRule(String rulesBasePath, Ruleset ruleset, String rulename) {
 		File file = new File(rulesBasePath +"/"+ruleset+"/"+rulename + ".cryptslbin");
 		if(!file.exists()) {
@@ -67,10 +73,6 @@ public class CrySLRulesetSelector {
 		}
 		return CryptSLRuleReader.readFromFile(file);
 	}
-
-	/*
-	 * Takes a File resource path and finds all .cryptslbin files in the directory.
-	 */
 	public static List<CryptSLRule> makeFromPath(File resourcesPath) {
 		if(!resourcesPath.isDirectory())
 			throw new RuntimeException("The specified path is not a directory" + resourcesPath);
@@ -79,6 +81,67 @@ public class CrySLRulesetSelector {
 		for (File file : listFiles) {
 			if (file.getName().endsWith(".cryptslbin")) {
 				rules.add(CryptSLRuleReader.readFromFile(file));
+			}
+		}
+		if (rules.isEmpty()) {
+			System.out.println("No CrySL rules found in " + resourcesPath);
+		}
+		return rules;
+	}*/
+	
+	/*
+	 *Take rule files as source code format and create ruleset 
+	 */
+	private static List<CryptSLRule> getRulessetFromSource(String rulesBasePath, Ruleset s){
+		List<CryptSLRule> rules = Lists.newArrayList();
+		File[] listFiles = new File(rulesBasePath + s+"/").listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptsl")) {
+				try {
+					rules.add(CryptSLRuleReader.readFromSourceFile(file));
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return rules;
+	}
+	
+	/*
+	 *Take single rule file as source code format and create ruleset 
+	 */
+	public static CryptSLRule makeSingleRuleFromSource(String rulesBasePath, Ruleset ruleset, String rulename) {
+		File file = new File(rulesBasePath +"/"+ruleset+"/"+rulename + ".cryptsl");
+		CryptSLRule rule;
+		if(!file.exists()) {
+			throw new RuntimeException("Could not locate rule " + rulename +" within set " + ruleset );
+		}
+		try {
+			rule = CryptSLRuleReader.readFromSourceFile(file);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			rule=null;
+		} 
+		return rule;
+	}
+	/*
+	 * Take a resource path and find all .cryptsl files in the directory
+	 */
+	public static List<CryptSLRule> makeFromPathFromSource(File resourcesPath) {
+		if(!resourcesPath.isDirectory())
+			throw new RuntimeException("The specified path is not a directory" + resourcesPath);
+		List<CryptSLRule> rules = Lists.newArrayList();
+		File[] listFiles = resourcesPath.listFiles();
+		for (File file : listFiles) {
+			if (file.getName().endsWith(".cryptsl")) {
+				try {
+					rules.add(CryptSLRuleReader.readFromSourceFile(file));
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		if (rules.isEmpty()) {
