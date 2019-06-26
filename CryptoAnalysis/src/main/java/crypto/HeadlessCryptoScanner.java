@@ -72,7 +72,7 @@ public abstract class HeadlessCryptoScanner {
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			if(options.hasOption("ruleFormat") && options.getOptionValue("ruleFormat").equals("cryptslbin")) {
+			if(options.hasOption("rulesInBin")) {
 				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), "cryptslbin");
 			}else {
 				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath),"cryptsl");
@@ -267,7 +267,7 @@ public abstract class HeadlessCryptoScanner {
 		if (rules != null) {
 			return rules;
 		}
-		if(options.hasOption("Ruleformat") && options.getOptionValue("ruleFormat").equals("cryptslbin")) {
+		if(options.hasOption("rulesInBin")) {
 			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptslbin",Ruleset.JavaCryptographicArchitecture);
 		}else {
 			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptsl", Ruleset.JavaCryptographicArchitecture);
