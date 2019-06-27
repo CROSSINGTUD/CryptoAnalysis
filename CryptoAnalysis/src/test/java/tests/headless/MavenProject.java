@@ -1,16 +1,21 @@
 package tests.headless;
 
+import java.awt.image.RescaleOp;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
+import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.apache.maven.shared.invoker.PrintStreamHandler;
 
 import com.google.common.collect.Lists;
 
@@ -35,9 +40,14 @@ public class MavenProject {
 	    request.setGoals(goals);
 	     
 	    Invoker invoker = new DefaultInvoker();
-	    try {
-			invoker.execute( request );
-		} catch (MavenInvocationException e) {
+	    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	            PrintStream out = new PrintStream(baos)) {
+	        request.setOutputHandler(new PrintStreamHandler(out, true));
+			InvocationResult res = invoker.execute( request );
+			if(res.getExitCode() != 0) {
+				throw new RuntimeException("Was not able to compile project " + pathToProjectRoot +".");
+			}
+		} catch (MavenInvocationException | IOException e) {
 			throw new RuntimeException("Was not able to invoke maven in path " + pathToProjectRoot +". Does a pom.xml exist?");
 		}
 	    compiled = true;
