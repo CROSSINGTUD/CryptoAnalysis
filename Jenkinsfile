@@ -19,7 +19,7 @@ pipeline {
 	        }
 		    post {  
 	    		always {
-	                junit 'CryptoAnalaiys/shippable/testresults/*.xml'
+	                junit 'shippable/testresults/*.xml'
 	            }
 	        }
 		}

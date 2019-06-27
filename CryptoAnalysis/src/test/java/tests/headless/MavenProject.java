@@ -60,11 +60,15 @@ public class MavenProject {
 	    ArrayList<String> goals = Lists.newArrayList();
 	    goals.add("dependency:build-classpath");
 	    goals.add("-Dmdep.outputFile=\"classPath.temp\"");
-	    request.setGoals(goals);
-	    Invoker invoker = new DefaultInvoker();
-	    try {
-			invoker.execute( request );
-		} catch (MavenInvocationException e) {
+	    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	            PrintStream out = new PrintStream(baos)) {
+	        request.setOutputHandler(new PrintStreamHandler(out, true));
+	        request.setGoals(goals);
+	        Invoker invoker = new DefaultInvoker();InvocationResult res = invoker.execute( request );
+			if(res.getExitCode() != 0) {
+				throw new RuntimeException("Was not able to compute dependencies " + pathToProjectRoot +".");
+			}
+		} catch (MavenInvocationException | IOException e) {
 			throw new RuntimeException("Was not able to invoke maven to compute depenencies");
 		}
 	    try {
