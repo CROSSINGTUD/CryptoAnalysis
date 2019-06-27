@@ -17,8 +17,10 @@ import org.apache.commons.cli.ParseException;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 
+import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
+import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
@@ -206,7 +208,7 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
+				ObservableStaticICFG observableDynamicICFG = new ObservableStaticICFG(new BoomerangICFG(false));
 				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
