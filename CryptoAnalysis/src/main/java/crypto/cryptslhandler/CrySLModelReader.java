@@ -514,7 +514,7 @@ public class CrySLModelReader {
 				final Object object = (de.darmstadt.tu.crossing.cryptSL.Object) ((PreDefinedPredicates) lit.getCons()).getObj().get(0);
 				final String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
 				varNType.add(new CryptSLObject(object.getName(), type));
-				final String qualifiedName = ((PreDefinedPredicates) lit.getCons()).getType().getQualifiedName();
+				final String qualifiedName = ((PreDefinedPredicates) lit.getCons()).getType().getType().getQualifiedName();
 				varNType.add(new CryptSLObject(qualifiedName, NULL));
 				slci = new CryptSLPredicate(null, pred, varNType, false);
 				break;
