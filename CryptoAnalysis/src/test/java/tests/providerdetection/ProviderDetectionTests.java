@@ -180,7 +180,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
 	// flows through TERNARY operators
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest13() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
@@ -191,7 +191,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
 	// flows through IF-ELSE statements
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest14() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
@@ -202,7 +202,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
 	// flows through SWITCH statements
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest15() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
@@ -213,7 +213,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
 	// flows through TERNARY operators
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest16() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
@@ -224,7 +224,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
 	// flows through IF-ELSE statements
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest17() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
@@ -235,7 +235,7 @@ public class ProviderDetectionTests {
 	
 	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
 	// flows through SWITCH statements
-	@Test(expected = RuntimeException.class)
+	@Test
 	public void providerDetectionTest18() {
 		ProviderDetection providerDetection = new ProviderDetection();
 		String sootClassPath = providerDetection.getSootClassPath();
