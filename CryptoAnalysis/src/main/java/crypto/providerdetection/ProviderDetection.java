@@ -220,10 +220,12 @@ public class ProviderDetection {
 										this.provider = getProviderWhenTypeString(providerValue, body);
 										rulesDirectory = defaultRulesDirectory;
 										
-										checkIfStmt(providerValue, body);
-										checkSwitchStmt(providerValue, body);
+										// Gets the boolean value of whether the provider is passed
+										// using IF-ELSE, SWITCH statements or TERNARY operators
+										boolean ifStmt = checkIfStmt(providerValue, body);
+										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
-										if((this.provider != null) && (ruleExists(provider, declaringClassName))) {
+										if((!ifStmt) && (!switchStmt) && (ruleExists(provider, declaringClassName))) {
 											rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
@@ -320,12 +322,12 @@ public class ProviderDetection {
 			}
 		}
 		else if (map.size() > 1) {
-			LOGGER.info("The provider parameter must be passed directly to the"
+			LOGGER.error("The provider parameter must be passed directly to the"
 					+ " getInstance() method call, and not through IF-ELSE, SWITCH statements or"
 					+ " TERNARY operators.");
 		}
 		else {
-			LOGGER.info("Error occured to detect provider in the Provider Detection"
+			LOGGER.error("Error occured to detect provider in the Provider Detection"
 					+ " analysis.");
 		}
 		return provider;
@@ -359,7 +361,8 @@ public class ProviderDetection {
 	 * This method checks if the provider detected has only one allocation site
 	 * and it is not flowing through IF-ELSE statements or TERNARY operators, because
 	 * otherwise the provider can not be correctly detected through the use of
-	 * static analysis
+	 * static analysis. In case it has more than one allocation site, this method 
+	 * return true.
 	 * 
 	 * @param providerValue
 	 *            
@@ -367,26 +370,28 @@ public class ProviderDetection {
 	 *            - i.e. the ActiveBody
 	 *            
 	 */
-	private void checkIfStmt(Value providerValue, Body body) {
+	private boolean checkIfStmt(Value providerValue, Body body) {
 		String value = providerValue.toString();
 		for(Unit unit : body.getUnits()) {
 			if(unit instanceof JIfStmt) {
 				JIfStmt ifStatement = (JIfStmt) unit;
 				if(ifStatement.toString().contains(value)) {
-					LOGGER.info("The provider parameter must be passed directly to the"
+					LOGGER.error("The provider parameter must be passed directly to the"
 							+ " getInstance() method call, and not through IF-ELSE statements or"
 							+ " TERNARY operators.");
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 	
 	
 	/**
 	 * This method checks if the provider detected has only one allocation site
 	 * and it is not flowing through SWITCH statements, because otherwise the 
-	 * provider can not be correctly detected through the use of static analysis
+	 * provider can not be correctly detected through the use of static analysis.
+	 * In case it has more than one allocation site, this method return true.
 	 * 
 	 * @param providerValue
 	 *            
@@ -394,18 +399,19 @@ public class ProviderDetection {
 	 *            - i.e. the ActiveBody
 	 *            
 	 */
-	private void checkSwitchStmt(Value providerValue, Body body) {
+	private boolean checkSwitchStmt(Value providerValue, Body body) {
 		String value = providerValue.toString();
 		for(Unit unit : body.getUnits()) {
 			if(unit instanceof TableSwitchStmt) {
 				TableSwitchStmt switchStatement = (TableSwitchStmt) unit;
 				if(switchStatement.toString().contains(value)) {
-					LOGGER.info("The provider parameter must be passed directly to the"
+					LOGGER.error("The provider parameter must be passed directly to the"
 							+ " getInstance() method call, and not through SWITCH statements.");
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 	
 	

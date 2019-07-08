@@ -178,7 +178,7 @@ public class ProviderDetectionTests {
 		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// Checks if the default ruleset is chosen when provider of type `java.security.Provider`
 	// flows through TERNARY operators
 	@Test
 	public void providerDetectionTest13() {
@@ -187,9 +187,12 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample9"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// Checks if the default ruleset is chosen when provider of type `java.security.Provider`
 	// flows through IF-ELSE statements
 	@Test
 	public void providerDetectionTest14() {
@@ -198,9 +201,12 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample10"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.security.Provider`
+	// Checks if the default ruleset is chosen when provider of type `java.security.Provider`
 	// flows through SWITCH statements
 	@Test
 	public void providerDetectionTest15() {
@@ -209,9 +215,12 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample11"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// Checks if the default ruleset is chosen when provider of type `java.lang.String`
 	// flows through TERNARY operators
 	@Test
 	public void providerDetectionTest16() {
@@ -220,9 +229,12 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample12"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// Checks if the default ruleset is chosen when provider of type `java.lang.String`
 	// flows through IF-ELSE statements
 	@Test
 	public void providerDetectionTest17() {
@@ -231,9 +243,12 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample13"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
-	// Checks if RuntimeException is thrown when provider of type `java.lang.String`
+	// Checks if the default ruleset is chosen when provider of type `java.lang.String`
 	// flows through SWITCH statements
 	@Test
 	public void providerDetectionTest18() {
@@ -242,6 +257,9 @@ public class ProviderDetectionTests {
 		String mainClass = "tests.providerdetection.ProviderDetectionExample14"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
+		
+		String rulesDirectory = providerDetection.getRulesDirectory();
+		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
 	}
 	
 }
