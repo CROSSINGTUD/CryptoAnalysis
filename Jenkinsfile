@@ -9,13 +9,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'cd CryptoAnalysis; mvn clean compile -U'
+                sh 'mvn clean compile -U'
             }
         }
 
 	    stage('Test') {
 	        steps {
-	            sh 'cd CryptoAnalysis; mvn test'
+	            sh 'mvn test'
 	        }
 		    post {  
 	    		always {
@@ -33,6 +33,7 @@ pipeline {
 				configFileProvider(
 	        		[configFile(fileId: '1d7d4c57-de41-4f04-8e95-9f3bb6382327', variable: 'MAVEN_SETTINGS')]) {
 	      		  		sh 'cd CryptoAnalysis; mvn -s $MAVEN_SETTINGS clean deploy -DskipTests'
+	      		  		sh 'cd CryptoAnalysis-Android; mvn -s $MAVEN_SETTINGS clean deploy -DskipTests'
 				}
 	        }
 		}

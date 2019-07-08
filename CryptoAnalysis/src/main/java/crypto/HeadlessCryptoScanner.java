@@ -13,6 +13,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -57,6 +59,7 @@ public abstract class HeadlessCryptoScanner {
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
 	private static List<CryptSLRule> rules;
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -151,20 +154,16 @@ public abstract class HeadlessCryptoScanner {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		if(PRE_ANALYSIS){
 			initializeSootWithEntryPointAllReachable(false);
-			long elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
-			System.out.println("Pre-analysis soot setup done after " + elapsed +" seconds");
+			LOGGER.info("Pre-Analysis soot setup done in {} ",stopwatch);
 			checkIfUsesObject();
-			elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
-			System.out.println("Pre-analysis finished after " + elapsed +" seconds");
+			LOGGER.info("Pre-Analysis  finished in {}", stopwatch);
 		}
 		if (!PRE_ANALYSIS || hasSeeds()) {
-			System.out.println("Using call graph algorithm " + callGraphAlogrithm());
+			LOGGER.info("Using call graph algorithm {}", callGraphAlogrithm());
 			initializeSootWithEntryPointAllReachable(true);
-			long elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
-			System.out.println("Analysis soot setup done after " + elapsed +" seconds");
+			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
 			analyse();
-			elapsed = stopwatch.elapsed(TimeUnit.SECONDS);
-			System.out.println("Analysis finished after " + elapsed +" seconds");
+			LOGGER.info("Analysis finished in {}", stopwatch);
 		}
 	}
 
