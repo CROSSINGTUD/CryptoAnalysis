@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -32,6 +34,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
+import crypto.HeadlessCryptoScanner;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import soot.Body;
@@ -55,6 +58,8 @@ import soot.options.Options;
 import wpds.impl.Weight.NoWeight;
 
 public class ProviderDetection {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
 	
 	private String provider = null;
 	private String rulesDirectory = null;
@@ -315,12 +320,12 @@ public class ProviderDetection {
 			}
 		}
 		else if (map.size() > 1) {
-			throw new RuntimeException("The provider parameter must be passed directly to the"
+			LOGGER.info("The provider parameter must be passed directly to the"
 					+ " getInstance() method call, and not through IF-ELSE, SWITCH statements or"
 					+ " TERNARY operators.");
 		}
 		else {
-			throw new RuntimeException("Error occured to detect provider in the Provider Detection"
+			LOGGER.info("Error occured to detect provider in the Provider Detection"
 					+ " analysis.");
 		}
 		return provider;
@@ -368,7 +373,7 @@ public class ProviderDetection {
 			if(unit instanceof JIfStmt) {
 				JIfStmt ifStatement = (JIfStmt) unit;
 				if(ifStatement.toString().contains(value)) {
-					throw new RuntimeException("The provider parameter must be passed directly to the"
+					LOGGER.info("The provider parameter must be passed directly to the"
 							+ " getInstance() method call, and not through IF-ELSE statements or"
 							+ " TERNARY operators.");
 				}
@@ -395,7 +400,7 @@ public class ProviderDetection {
 			if(unit instanceof TableSwitchStmt) {
 				TableSwitchStmt switchStatement = (TableSwitchStmt) unit;
 				if(switchStatement.toString().contains(value)) {
-					throw new RuntimeException("The provider parameter must be passed directly to the"
+					LOGGER.info("The provider parameter must be passed directly to the"
 							+ " getInstance() method call, and not through SWITCH statements.");
 				}
 			}
