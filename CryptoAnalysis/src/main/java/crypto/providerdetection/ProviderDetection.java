@@ -64,8 +64,9 @@ public class ProviderDetection {
 	private String provider = null;
 	private String rulesDirectory = null;
 	
-	public static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
-	private static final String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+defaultRuleset;
+	private static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
+	private static final String rootRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	private static final String CRYPTSLBIN = ".cryptslbin";
