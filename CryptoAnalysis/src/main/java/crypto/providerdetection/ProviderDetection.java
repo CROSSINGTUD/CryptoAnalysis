@@ -34,9 +34,9 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
-import crypto.HeadlessCryptoScanner;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import soot.Body;
 import soot.G;
 import soot.PackManager;
@@ -64,7 +64,8 @@ public class ProviderDetection {
 	private String provider = null;
 	private String rulesDirectory = null;
 	
-	private static final String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+"JavaCryptographicArchitecture";
+	public static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
+	private static final String defaultRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources"+File.separator+defaultRuleset;
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	private static final String CRYPTSLBIN = ".cryptslbin";
