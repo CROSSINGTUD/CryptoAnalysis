@@ -31,6 +31,7 @@ import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.preanalysis.SeedFactory;
+import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
@@ -137,6 +138,12 @@ public abstract class HeadlessCryptoScanner {
 			protected boolean sarifReport() {
 				return options.hasOption("sarifReport");
 			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return options.hasOption("providerDetection");
+			}
+			
 		};
 		return sourceCryptoScanner;
 	}
@@ -252,6 +259,13 @@ public abstract class HeadlessCryptoScanner {
 				if(csvOutputFile != null){
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
+				
+				if (providerDetection()) {
+					//create a new object to execute the Provider Detection analysis
+					ProviderDetection providerDetection = new ProviderDetection();
+					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+				}
+				
 				scanner.scan(rules);
 			}
 		};
@@ -380,6 +394,10 @@ public abstract class HeadlessCryptoScanner {
 	};
 	
 	protected boolean sarifReport() {
+		return false;
+	}
+	
+	protected boolean providerDetection() {
 		return false;
 	}
 	
