@@ -46,7 +46,8 @@ public abstract class AbstractHeadlessTest {
 	 * To run these test cases in Eclipse, specify your maven home path as JVM
 	 * argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
 	 */
-
+	
+	private static final String ruleFormat = "cryptsl";
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
@@ -73,7 +74,7 @@ public abstract class AbstractHeadlessTest {
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
 			}
 
 			@Override
