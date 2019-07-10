@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis-Android</artifactId>
-	<version>2.4</version>
+	<version>2.5</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<cryptoAnalysisVersion>2.4</cryptoAnalysisVersion>
+		<cryptoAnalysisVersion>2.5</cryptoAnalysisVersion>
 		<flowDroidVersion>2.7.1</flowDroidVersion>
 	</properties>
 	<build>
