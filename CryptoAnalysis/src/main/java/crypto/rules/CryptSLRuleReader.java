@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.MalformedURLException;
 
+import crypto.cryptslhandler.CrySLModelReader;
 
 public class CryptSLRuleReader {
 	public static CryptSLRule readFromFile(File file) {
@@ -18,6 +20,12 @@ public class CryptSLRuleReader {
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return crytpSLRule;
+	}
+	public static CryptSLRule readFromSourceFile(File file) throws MalformedURLException {
+		CryptSLRule crytpSLRule = null;
+		CrySLModelReader csmr= new CrySLModelReader();
+		crytpSLRule=csmr.readRule(file);
 		return crytpSLRule;
 	}
 	

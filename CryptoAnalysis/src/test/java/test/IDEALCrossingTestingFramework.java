@@ -44,6 +44,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
+	private static final String ruleFormat = "cryptsl";
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
@@ -71,8 +72,9 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CryptSLRule getRule() {
-		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
-//		CryptSLRuleReader.readFromFile(file);
+		//return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
+		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
+		//CryptSLRuleReader.readFromFile(file);
 	}
 
 	protected abstract String getRulename();
