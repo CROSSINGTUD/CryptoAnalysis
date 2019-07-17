@@ -114,18 +114,20 @@ public class CrySLRulesetSelector {
 			}else {
 				if (new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding).exists()){
 						binRulesDir = CryslReaderUtils.createBinRulesDir(binRulePath);
+						CryptSLRule rule;
 						try {
+							rule = CryptSLRuleReader.readFromSourceFile(new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding));
 							try {
-								CryslReaderUtils.storeRuletoFile(CryptSLRuleReader.readFromSourceFile(new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding)),binRulesDir);
+								CryslReaderUtils.storeRuletoFile(rule,binRulesDir);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							return CryptSLRuleReader.readFromSourceFile(new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding));
+							return rule;
 						} catch (MalformedURLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						}
+						}			
 				}
 				return null;
 			}
