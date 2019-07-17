@@ -1,10 +1,16 @@
 package crypto.cryptslhandler;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+
 import crypto.rules.CryptSLMethod;
+import crypto.rules.CryptSLRule;
 import de.darmstadt.tu.crossing.cryptSL.Aggregate;
 import de.darmstadt.tu.crossing.cryptSL.Event;
 import de.darmstadt.tu.crossing.cryptSL.Method;
@@ -14,6 +20,8 @@ import de.darmstadt.tu.crossing.cryptSL.ParList;
 import de.darmstadt.tu.crossing.cryptSL.SuperType;
 
 public class CryslReaderUtils {
+	public static final String outerFileSeparator = System.getProperty("file.separator");
+	public static final String innerFileSeparator = "/";
 	protected static List<CryptSLMethod> resolveAggregateToMethodeNames(final Event leaf) {
 		if (leaf instanceof Aggregate) {
 			final Aggregate ev = (Aggregate) leaf;
@@ -77,7 +85,30 @@ public class CryslReaderUtils {
 		}
 		return new CryptSLMethod(qualifiedName, pars, new ArrayList<Boolean>(), returnObject);
 	}
-
-
+	public static void storeRuletoFile(final CryptSLRule rule, final String folderPath) throws IOException {
+		String className = rule.getClassName();
+		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(folderPath + outerFileSeparator + className.substring(className.lastIndexOf(".") + 1) + ".cryptslbin"))) {
+			out.writeObject(rule);
+		}
+	}
+	public static File getResourceFromWithin(final String inputPath) {
+		return new File(inputPath);
+	}
+	public static String createBinRulesDir(String dir) {
+		File theDir = new File(dir);
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+		    System.out.println("creating directory for cryslbin rule files: " + theDir.getAbsolutePath());
+		    try{
+		        theDir.mkdir();
+		        return dir;
+		    } 
+		    catch(SecurityException se){
+		        //handle it
+		    	return null;
+		    }        
+		}
+		return dir;
+	}
 }
 

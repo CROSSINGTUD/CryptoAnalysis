@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.logging.log4j.Logger;
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -170,14 +168,13 @@ public class CrySLModelReader {
 		final CryptSLRule rule = new CryptSLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 		/*if (!testMode) {
 			final String className = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
-			String folderPath = Utils.getResourceFromWithin(Constants.RELATIVE_RULES_DIR, Activator.PLUGIN_ID).getAbsolutePath();
+			String folderPath = CryslReaderUtils.getResourceFromWithin(RELATIVE_RULES_DIR).getAbsolutePath();
 			try {
-				CrySLReaderUtils.storeRuletoFile(rule, folderPath);
-				System.out.println("gokce test");
-				CrySLReaderUtils.readRuleFromBinaryFile(folderPath, className);
-			}
-			catch (ClassNotFoundException | IOException e) {
-				Activator.getDefault().logError(e, "Failed to store CrySL Rule for " + className + " to disk.");
+				System.out.println(folderPath);
+				CryslReaderUtils.storeRuletoFile(rule, folderPath);
+				CryslReaderUtils.readRuleFromBinaryFile(folderPath, className);
+			}catch (ClassNotFoundException | IOException e) {
+				//Activator.getDefault().logError(e, "Failed to store CrySL Rule for " + className + " to disk.");
 			}
 		}*/
 		return rule;
