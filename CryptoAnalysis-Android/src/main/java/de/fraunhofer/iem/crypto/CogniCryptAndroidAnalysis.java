@@ -68,7 +68,7 @@ public class CogniCryptAndroidAnalysis {
 		return rulesDirectory;
 	}
 	
-	public Collection<String> getRulesDirectory(){
+	public Collection<String> getApplicationClassFilter(){
 		return applicationClassFilter;
 	}
 
