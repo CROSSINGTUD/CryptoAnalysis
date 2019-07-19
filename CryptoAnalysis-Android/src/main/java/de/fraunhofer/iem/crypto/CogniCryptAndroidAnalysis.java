@@ -55,6 +55,22 @@ public class CogniCryptAndroidAnalysis {
 		constructCallGraph();
 		return runCryptoAnalysis();
 	}
+	
+	public String getApkFile(){
+		return apkFile;
+	}
+	
+	public String getPlatformsDirectory(){
+		return platformsDirectory;
+	}
+	
+	public String getRulesDirectory(){
+		return rulesDirectory;
+	}
+	
+	public Collection<String> getApplicationClassFilter(){
+		return applicationClassFilter;
+	}
 
 	private void constructCallGraph() {
 		InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
