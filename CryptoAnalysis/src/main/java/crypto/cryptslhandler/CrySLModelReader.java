@@ -92,7 +92,6 @@ public class CrySLModelReader {
 	private List<CryptSLForbiddenMethod> forbiddenMethods = null;
 	private StateMachineGraph smg = null;
 	private XtextResourceSet resourceSet;
-	private boolean testMode = false;
 	public static final String cryslFileEnding = ".cryptsl";
 
 	private static final String INT = "int";
@@ -100,6 +99,7 @@ public class CrySLModelReader {
 	private static final String ANY_TYPE = "AnyType";
 	private static final String NULL = "null";
 	private static final String UNDERSCORE = "_";
+	
 	public CrySLModelReader() throws MalformedURLException {
 		CryptSLStandaloneSetup cryptSLStandaloneSetup = new CryptSLStandaloneSetup();
 		final Injector injector = cryptSLStandaloneSetup.createInjectorAndDoEMFRegistration();
@@ -118,7 +118,6 @@ public class CrySLModelReader {
 		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
 		this.resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
 
-		testMode = true;
 	}
 
 	public CryptSLRule readRule(File ruleFile) {
@@ -167,26 +166,14 @@ public class CrySLModelReader {
 						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond))));
 			}
 		}
-		final CryptSLRule rule = new CryptSLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
-		/*if (!testMode) {
-			final String className = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
-			String folderPath = Utils.getResourceFromWithin(Constants.RELATIVE_RULES_DIR, Activator.PLUGIN_ID).getAbsolutePath();
-			try {
-				CrySLReaderUtils.storeRuletoFile(rule, folderPath);
-				System.out.println("gokce test");
-				CrySLReaderUtils.readRuleFromBinaryFile(folderPath, className);
-			}
-			catch (ClassNotFoundException | IOException e) {
-				Activator.getDefault().logError(e, "Failed to store CrySL Rule for " + className + " to disk.");
-			}
-		}*/
-		return rule;
+		return new CryptSLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 	}
 	private void validateOrder(Order order) {
 		List<String> collected = new ArrayList<String>();
 		collected.addAll(collectLabelsFromExpression(order.getLeft()));
 		collected.addAll(collectLabelsFromExpression(order.getRight()));
 	}
+	
 	private List<String> collectLabelsFromExpression(Expression exp) {
 		List<String> collected = new ArrayList<String>();
 		if (exp instanceof Order || exp instanceof SimpleOrder) {
@@ -455,21 +442,37 @@ public class CrySLModelReader {
 	private List<ISLConstraint> collectRequiredPredicates(final EList<ReqPred> requiredPreds) {
 		final List<ISLConstraint> preds = new ArrayList<>();
 		for (final ReqPred pred : requiredPreds) {
-			final ReqPred left = pred.getLeftExpression();
-			final ReqPred right = pred.getRightExpression();
 			ISLConstraint reqPred = null;
-			if (left == null && right == null) {
+			if (pred instanceof ReqPredLit) {
 				reqPred = extractReqPred(pred);
 			} else {
-				CryptSLPredicate l = extractReqPred(left);
-				CryptSLPredicate r = extractReqPred(right);
-				reqPred = new CryptSLConstraint(l, r, LogOps.or);
+				final ReqPred left = pred.getLeftExpression();
+				final ReqPred right = pred.getRightExpression();
+				
+				List<CryptSLPredicate> altPreds = retrieveReqPredFromAltPreds(left);
+				altPreds.add(extractReqPred(right));
+				reqPred = new CryptSLConstraint(altPreds.get(0), altPreds.get(1), LogOps.or);
+				for (int i = 2; i < altPreds.size(); i++) {
+					reqPred = new CryptSLConstraint(reqPred, altPreds.get(i), LogOps.or);
+				}
 			}
 			preds.add(reqPred);
 		}
 
 		return preds;
 	}
+
+	private List<CryptSLPredicate> retrieveReqPredFromAltPreds(ReqPred left) {
+		List<CryptSLPredicate> preds = new ArrayList<CryptSLPredicate>();
+		if (left instanceof ReqPredLit) {
+			preds.add(extractReqPred(left));
+		} else {
+			preds.addAll(retrieveReqPredFromAltPreds(left.getLeftExpression()));
+			preds.add(extractReqPred(left.getRightExpression()));
+		}
+		return preds;
+	}
+	
 	private List<Entry<String, String>> getObjects(final UseBlock usage) {
 		final List<Entry<String, String>> objects = new ArrayList<>();
 
