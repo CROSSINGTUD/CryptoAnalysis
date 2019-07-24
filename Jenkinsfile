@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    
     stages {
 
         stage('Build') {
@@ -19,6 +20,24 @@ pipeline {
 	        }
 		}
 
+		stage('Performance') {
+            environment {
+                 GOOGLE_SHEET_CREDS = credentials("GOOGLE_SHEET_CREDENTIALS")
+            }
+            steps {
+                script{
+                    def scmVars = checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/develop'], [name: '*/master']],
+                        userRemoteConfigs: [[url: 'https://github.com/CROSSINGTUD/CryptoAnalysis.git/']],
+                    ])
+                    env.GIT_COMMIT = scmVars.GIT_COMMIT
+                    env.GIT_BRANCH = scmVars.GIT_BRANCH
+                    env.GIT_URL = scmVars.GIT_URL
+                }
+                sh 'cd CryptoAnalysis; mvn -Dtest=PerformanceTest test -DcommitId=${GIT_COMMIT} -DbranchName=${GIT_BRANCH} -DgitUrl=${GIT_URL} -DgoogleSheetCredentials=${GOOGLE_SHEET_CREDS}'
+            }
+        }
 
 		stage('Deploy'){
 		    when { 
