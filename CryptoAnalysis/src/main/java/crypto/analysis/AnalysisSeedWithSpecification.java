@@ -371,7 +371,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		List<ISLConstraint> requiredPredicates = Lists.newArrayList();
 		for (ISLConstraint con : constraintSolver.getRequiredPredicates()) {
 			if (!ConstraintSolver.predefinedPreds.contains((con instanceof RequiredCryptSLPredicate) ? ((RequiredCryptSLPredicate) con).getPred().getPredName()
-					: ((AlternativeReqPredicate) con).getAlternative1().getPredName())) {
+					: ((AlternativeReqPredicate) con).getAlternatives().get(0).getPredName())) {
 				requiredPredicates.add(con);
 			}
 		}
@@ -397,56 +397,43 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 			} else {
 				AlternativeReqPredicate alt = (AlternativeReqPredicate) pred;
-				CryptSLPredicate alternative1 = alt.getAlternative1();
-				CryptSLPredicate alternative2 = alt.getAlternative2();
+				List<CryptSLPredicate> alternatives = alt.getAlternatives();
 				boolean satisfied = false;
-				if (alternative1.isNegated() && alternative2.isNegated()) {
+				List<CryptSLPredicate> negatives = alternatives.parallelStream().filter(e -> e.isNegated()).collect(Collectors.toList());
+				
+				if (negatives.size() == alternatives.size()) {
 					for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(alternative1) || ensPred.getPredicate().equals(alternative2)) {
+						if (alternatives.parallelStream().anyMatch(e -> e.getPredName().equals(ensPred.getPredicate().getPredName()))) {
 							return false;
 						}
 					}
 					remainingPredicates.remove(pred);
-				} else if (alternative1.isNegated()) {
-					boolean neg = true;
+				} else if (negatives.isEmpty()) {
 					for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
+						if (alternatives.parallelStream().anyMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
+							remainingPredicates.remove(pred);
+							break;
+						}
+					}
+				} else {
+					boolean neg = true;
 
-						if (ensPred.getPredicate().equals(alternative1)) {
+					for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
+						if (negatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()))) {
 							neg = false;
 						}
-						if (ensPred.getPredicate().equals(alternative2) && doPredsMatch(alternative2, ensPred)) {
+
+						alternatives.removeAll(negatives);
+						if (alternatives.parallelStream().allMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
 							satisfied = true;
 						}
+
 						if (satisfied | neg) {
 							remainingPredicates.remove(pred);
 						}
 					}
-
-				} else if (alternative2.isNegated()) {
-					boolean neg = true;
-					for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(alternative2)) {
-							neg = false;
-						}
-						if (ensPred.getPredicate().equals(alternative1) && doPredsMatch(alternative1, ensPred)) {
-							satisfied = true;
-						}
-					}
-					if (satisfied | neg) {
-						remainingPredicates.remove(pred);
-					}
-				} else {
-					for (EnsuredCryptSLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(alternative1) && doPredsMatch(alternative1, ensPred)) {
-							remainingPredicates.remove(pred);
-							break;
-						}
-						if (ensPred.getPredicate().equals(alternative2) && doPredsMatch(alternative2, ensPred)) {
-							remainingPredicates.remove(pred);
-							break;
-						}
-					}
 				}
+
 			}
 		}
 
@@ -457,9 +444,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					remainingPredicates.remove(singlePred);
 				}
 			} else if (rem instanceof CryptSLConstraint) {
-				AlternativeReqPredicate altPred = (AlternativeReqPredicate) rem;
-				if (evaluatePredCond(altPred.getAlternative1()) || evaluatePredCond(altPred.getAlternative2())) {
-					remainingPredicates.remove(altPred);
+				List<CryptSLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
+				if (altPred.parallelStream().anyMatch(e -> evaluatePredCond(e))) {
+					remainingPredicates.remove(rem);
 				}
 			}
 		}
