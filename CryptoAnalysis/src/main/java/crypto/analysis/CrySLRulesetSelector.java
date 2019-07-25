@@ -65,7 +65,7 @@ public class CrySLRulesetSelector {
 				}
 			}
 		}else {
-			if (new File(rulesBasePath + s + "/" + BIN_RULES_RELATIVE_PATH).exists()){	
+			if (new File(rulesBasePath + s + "/" + BIN_RULES_RELATIVE_PATH).exists()){
 				File[] listFiles = new File(rulesBasePath + s + "/" + BIN_RULES_RELATIVE_PATH +"/").listFiles();
 				for (File file : listFiles) {
 					if (file.getName().endsWith(cryslbinFileEnding)) {
@@ -73,9 +73,9 @@ public class CrySLRulesetSelector {
 					}
 				}
 			}else {
-				File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
-				binRulesDir = CryslReaderUtils.createBinRulesDir(rulesBasePath + s + "/" + "/" + BIN_RULES_RELATIVE_PATH);
+				binRulesDir = CryslReaderUtils.createBinRulesDir(rulesBasePath + s + "/" + BIN_RULES_RELATIVE_PATH);
 				if(binRulesDir != null) {
+					File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 					for (File file : listFiles) {
 						if(file.getName().endsWith(cryslFileEnding)) {
 							CryptSLRule rule;
@@ -109,7 +109,8 @@ public class CrySLRulesetSelector {
 			if(new File(binRulePath+"/"+rulename+cryslbinFileEnding).exists()) {
 					return CryptSLRuleReader.readFromFile(new File(binRulePath+"/"+rulename+cryslbinFileEnding));
 			}else {
-				if (new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding).exists()){
+				File file = new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding);
+				if(file.exists()) {
 					binRulesDir = CryslReaderUtils.createBinRulesDir(binRulePath);
 					if(binRulesDir != null) {
 						try {
@@ -141,8 +142,9 @@ public class CrySLRulesetSelector {
 				}
 			}
 		}else {
-			if(new File(resourcesPath.getAbsolutePath()+BIN_RULES_RELATIVE_PATH).exists()){
-				File[] listFiles = new File(resourcesPath.getAbsolutePath()+BIN_RULES_RELATIVE_PATH).listFiles();
+			String binRulePath= resourcesPath.getAbsolutePath()+ "/"+BIN_RULES_RELATIVE_PATH;
+			if(new File(binRulePath).exists()){
+				File[] listFiles = new File(binRulePath).listFiles();
 				for (File file : listFiles) {
 					if (file.getName().endsWith(cryslbinFileEnding)) {
 						rules.add(CryptSLRuleReader.readFromFile(file));
@@ -150,7 +152,7 @@ public class CrySLRulesetSelector {
 				}
 			}else {
 				File[] listFiles = resourcesPath.listFiles();
-				binRulesDir=CryslReaderUtils.createBinRulesDir(resourcesPath.getAbsolutePath()+ "/" + BIN_RULES_RELATIVE_PATH);
+				binRulesDir=CryslReaderUtils.createBinRulesDir(binRulePath);
 				if(binRulesDir != null) {
 					for (File file : listFiles) {
 						if(file.getName().endsWith(cryslFileEnding)) {
