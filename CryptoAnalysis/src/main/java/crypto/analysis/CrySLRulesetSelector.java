@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.cryptslhandler.CryslReaderUtils;
+import org.apache.commons.io.FilenameUtils;
 
 public class CrySLRulesetSelector {
 	private static String binRulesDir=null;
@@ -77,20 +78,16 @@ public class CrySLRulesetSelector {
 				if(binRulesDir != null) {
 					for (File file : listFiles) {
 						if(file.getName().endsWith(cryslFileEnding)) {
-								try {
-									rules.add(CryptSLRuleReader.readFromSourceFile(file));
-									try {
-										CryslReaderUtils.storeRuletoFile(CryptSLRuleReader.readFromSourceFile(file), binRulesDir);
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-								} catch (MalformedURLException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								
-							
+							CryptSLRule rule;
+							try {
+								rule = CryptSLRuleReader.readFromSourceFile(file);
+								rules.add(rule);
+								CryslReaderUtils.storeRuletoFile(rule, binRulesDir);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								System.out.println("Failed to store" + FilenameUtils.removeExtension(file.getName()) + ".crypslbin file in" + binRulesDir);
+								e.printStackTrace();
+							}
 						}
 					}
 				}else {
@@ -113,25 +110,24 @@ public class CrySLRulesetSelector {
 					return CryptSLRuleReader.readFromFile(new File(binRulePath+"/"+rulename+cryslbinFileEnding));
 			}else {
 				if (new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding).exists()){
-						binRulesDir = CryslReaderUtils.createBinRulesDir(binRulePath);
-						CryptSLRule rule;
+					binRulesDir = CryslReaderUtils.createBinRulesDir(binRulePath);
+					if(binRulesDir != null) {
 						try {
-							rule = CryptSLRuleReader.readFromSourceFile(new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding));
-							try {
-								CryslReaderUtils.storeRuletoFile(rule,binRulesDir);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							return rule;
-						} catch (MalformedURLException e) {
+							CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(new File(rulesBasePath +"/"+ruleset+"/"+rulename + cryslFileEnding));
+							CryslReaderUtils.storeRuletoFile(rule,binRulesDir);
+							return rule;		
+						} catch (IOException e) {
 							// TODO Auto-generated catch block
+							System.out.println("Failed to store" +rulename+".crypslbin file in "+ binRulesDir );
 							e.printStackTrace();
-						}			
+						}
+					}else {
+						System.out.println("Failed to create directory for crypslbin files in" + binRulePath);
 				}
-				return null;
 			}
-		}	
+			return null;
+		}
+	}
 	}
 	public static List<CryptSLRule> makeFromPath(File resourcesPath, String ruleFormat){
 		if (!resourcesPath.isDirectory())
@@ -159,10 +155,12 @@ public class CrySLRulesetSelector {
 					for (File file : listFiles) {
 						if(file.getName().endsWith(cryslFileEnding)) {
 							try {
-								rules.add(CryptSLRuleReader.readFromSourceFile(file));
-								CryslReaderUtils.storeRuletoFile(CryptSLRuleReader.readFromSourceFile(file), binRulesDir);
+								CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
+								rules.add(rule);
+								CryslReaderUtils.storeRuletoFile(rule, binRulesDir);
 							} catch ( IOException e) {
 								// TODO Auto-generated catch block
+								System.out.println("Failed to store" + FilenameUtils.removeExtension(file.getName()) + ".crypslbin file in" + binRulesDir);
 								e.printStackTrace();
 							}
 							
