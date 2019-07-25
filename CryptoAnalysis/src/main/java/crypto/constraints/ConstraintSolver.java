@@ -90,7 +90,8 @@ public class ConstraintSolver {
 					relConstraints.add(pred.getPred());
 					requiredPredicates.add(pred);
 				} else if (cons instanceof CryptSLConstraint) {
-					if (((CryptSLConstraint) cons).getRight() instanceof CryptSLPredicate) {
+					ISLConstraint right = ((CryptSLConstraint) cons).getRight();
+					if (right instanceof CryptSLPredicate && !predefinedPreds.contains(((CryptSLPredicate) right).getPredName())) {
 						requiredPredicates.add(collectAlternativePredicates((CryptSLConstraint)cons, null));
 					} else {
 						relConstraints.add(cons);
