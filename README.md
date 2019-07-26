@@ -2,7 +2,7 @@
 
 # CogniCrypt<sub>SAST</sub>
 
-This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](www.cognicrypt.de). 
+This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](https://www.cognicrypt.de). 
 The static analysis CogniCrypt<sub>SAST</sub> takes rules written in the specification language CrySL as input, 
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
 libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
