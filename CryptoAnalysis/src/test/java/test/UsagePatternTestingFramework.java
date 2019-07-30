@@ -79,6 +79,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
+	private static final String ruleFormat="cryptsl";
 	List<CryptSLRule> rules;
 	
 	@Override
@@ -347,7 +348,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	private List<CryptSLRule> getRules() {
 		if(rules == null) {
-			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
+			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
 		}
 		return rules;
 	}

@@ -90,10 +90,9 @@ public class ConstraintSolver {
 					relConstraints.add(pred.getPred());
 					requiredPredicates.add(pred);
 				} else if (cons instanceof CryptSLConstraint) {
-					if (((CryptSLConstraint) cons).getLeft() instanceof CryptSLPredicate) {
-						RequiredCryptSLPredicate alt1 = retrieveValuesForPred(((CryptSLConstraint) cons).getLeft());
-						RequiredCryptSLPredicate alt2 = retrieveValuesForPred(((CryptSLConstraint) cons).getRight());
-						requiredPredicates.add(new AlternativeReqPredicate(alt1.getPred(), alt2.getPred(), alt1.getLocation()));
+					ISLConstraint right = ((CryptSLConstraint) cons).getRight();
+					if (right instanceof CryptSLPredicate && !predefinedPreds.contains(((CryptSLPredicate) right).getPredName())) {
+						requiredPredicates.add(collectAlternativePredicates((CryptSLConstraint)cons, null));
 					} else {
 						relConstraints.add(cons);
 					}
@@ -103,6 +102,23 @@ public class ConstraintSolver {
 			}
 		}
 		this.reporter = crySLResultsReporter;
+	}
+
+	private ISLConstraint collectAlternativePredicates(CryptSLConstraint cons, AlternativeReqPredicate alt) {
+		CryptSLPredicate right = (CryptSLPredicate)cons.getRight();
+		if (alt == null) {
+			alt = new AlternativeReqPredicate(right, right.getLocation());
+		} else {
+			alt.addAlternative(right);
+		}
+		
+		if (cons.getLeft() instanceof CryptSLPredicate) {
+			alt.addAlternative((CryptSLPredicate) cons.getLeft()); 
+		} else {
+			return collectAlternativePredicates((CryptSLConstraint)cons.getLeft(), alt);
+		}
+				
+		return alt;
 	}
 
 	private RequiredCryptSLPredicate retrieveValuesForPred(ISLConstraint cons) {

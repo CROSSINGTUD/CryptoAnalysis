@@ -18,6 +18,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 		Option rulesDir = Option.builder().longOpt("rulesDir").hasArg().required()
 				.desc("Specify the directory for the CrySL rules").build();
 		addOption(rulesDir);
+		
+		Option rulesInBin = Option.builder().longOpt("rulesInBin").hasArg(false).desc("Specify the rule format for the CrySL rules").build();
+		addOption(rulesInBin);
 
 		Option rulesFormat = Option.builder().longOpt("rulesInSrc").hasArg(false).desc("Specfiy that rules passed as parameter are in source format.").build();
 		addOption(rulesFormat);
@@ -47,6 +50,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 		
 		Option sarif = Option.builder().longOpt("sarifReport").hasArg(false).desc("Enable sarif report").build();
 		addOption(sarif);
+		
+		Option providerDetection = Option.builder().longOpt("providerDetection").hasArg(false).desc("Enable Provider Detection analysis").build();
+		addOption(providerDetection);
 	}
 
 }

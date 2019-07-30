@@ -2,7 +2,7 @@
 
 # CogniCrypt<sub>SAST</sub>
 
-This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](www.cognicrypt.de). 
+This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](https://www.cognicrypt.de). 
 The static analysis CogniCrypt<sub>SAST</sub> takes rules written in the specification language CrySL as input, 
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
 libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
@@ -30,20 +30,29 @@ Importing the porject into eclipse and compiling with m2e does not work. m2e can
 ## Usage
 
 CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the directory of the CrySL (binary) rule files contained in [JCA-CrySL-rulesets.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/2.3). This CrySL rule set contains specification for the JCA. The source code for the rules is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+* The absolute path to the directory of the CrySL (source code format) rule files. The source code for the rules which contains spesification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-      --rulesDir=<absolute-path-to-crysl-rules> \
+      --rulesDir=<absolute-path-to-crysl-source-code-format-rules> \
       --applicationCp=<absolute-application-path>
+```
+
+Optionally you can also start CogniCrypt<sub>SAST</sub> with binary rule files contained in [JCA-CrySL-rulesets.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/2.3).
+
+```
+java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+      --rulesDir=<absolute-path-to-crysl-binary-format-rules> \
+      --applicationCp=<absolute-application-path>
+      --rulesInBin
 ```
 
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-  --rulesDir=$(pwd)/CryptoAnalysis/src/test/resources/ \
+  --rulesDir=$(pwd)/CryptoAnalysis/src/test/resources/JavaCryptographicArchitecture \
   --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
@@ -72,8 +81,10 @@ When the `--reportDir` options is set, using the flag `--visualization` outputs 
 
 ## Changing the CrySL Rules
 
-The current version of the tool takes CrySL rules in their binary formats (cryptslbin). When you want to adopt the rules please use
-the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt). CogniCrypt ships with a CrySL editor to modify the rules, upon changes to the rules the editor produces the cryptslbin files. We [plan](https://github.com/CROSSINGTUD/CryptoAnalysis/issues/42) to change CogniCrypt<sub>SAST</sub> to take CrySL rules in source code format in the future.  
+
+The tool takes CrySL rules in their source code formats (cryptsl). You can adapt the rules in any text editor.
+Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt) ships with a CrySL editor to modify the rules, upon changes to the rules the editor produces the cryptslbin files. 
+
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 

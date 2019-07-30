@@ -220,9 +220,9 @@ public class PredicateHandler {
 				if (pred instanceof RequiredCryptSLPredicate) {
 					reportMissingPred(seed, (RequiredCryptSLPredicate) pred);
 				} else if (pred instanceof CryptSLConstraint) {
-					AlternativeReqPredicate altPred = (AlternativeReqPredicate) pred;
-					reportMissingPred(seed, new RequiredCryptSLPredicate(altPred.getAlternative1(), altPred.getLocation()));
-					reportMissingPred(seed, new RequiredCryptSLPredicate(altPred.getAlternative2(), altPred.getLocation()));
+					for (CryptSLPredicate altPred : ((AlternativeReqPredicate) pred).getAlternatives()) {
+						reportMissingPred(seed, new RequiredCryptSLPredicate(altPred, altPred.getLocation()));
+					}
 				}
 			}
 		}
