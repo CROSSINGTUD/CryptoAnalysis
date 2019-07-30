@@ -260,6 +260,7 @@
 		    <groupId>org.eclipse.jgit</groupId>
 		    <artifactId>org.eclipse.jgit</artifactId>
 		    <version>4.8.0.201706111038-r</version>
+		</dependency>
 		<dependency>
 		    <groupId>de.darmstadt.tu.crossing.CryptSL</groupId>
 		    <artifactId>de.darmstadt.tu.crossing.CryptSL</artifactId>
