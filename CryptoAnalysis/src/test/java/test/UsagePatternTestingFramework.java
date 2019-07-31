@@ -27,6 +27,7 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCryptSLPredicate;
@@ -79,7 +80,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
-	private static final String ruleFormat="cryptsl";
+	private static final RuleFormat ruleFormat= RuleFormat.SOURCE;
 	List<CryptSLRule> rules;
 	
 	@Override

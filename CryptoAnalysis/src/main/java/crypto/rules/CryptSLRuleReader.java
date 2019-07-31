@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import crypto.cryptslhandler.CrySLModelReader;
 
 public class CryptSLRuleReader {
+	private static CrySLModelReader csmr;
 	public static CryptSLRule readFromFile(File file) {
 		CryptSLRule crytpSLRule = null;
 		try {
@@ -23,10 +24,9 @@ public class CryptSLRuleReader {
 		return crytpSLRule;
 	}
 	public static CryptSLRule readFromSourceFile(File file) throws MalformedURLException {
-		CryptSLRule crytpSLRule = null;
-		CrySLModelReader csmr= new CrySLModelReader();
-		crytpSLRule=csmr.readRule(file);
-		return crytpSLRule;
+		if(csmr == null)
+			csmr= new CrySLModelReader();
+		return csmr.readRule(file);
 	}
 	
 }

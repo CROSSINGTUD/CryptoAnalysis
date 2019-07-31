@@ -94,21 +94,5 @@ public class CryslReaderUtils {
 	public static File getResourceFromWithin(final String inputPath) {
 		return new File(inputPath);
 	}
-	public static String createBinRulesDir(String dir) {
-		File theDir = new File(dir);
-		// if the directory does not exist, create it
-		if (!theDir.exists()) {
-		    System.out.println("creating directory for cryslbin rule files: " + theDir.getAbsolutePath());
-		    try{
-		        theDir.mkdir();
-		        return dir;
-		    } 
-		    catch(SecurityException se){
-		        //handle it
-		    	return null;
-		    }        
-		}
-		return dir;
-	}
 }
 
