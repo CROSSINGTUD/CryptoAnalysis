@@ -36,6 +36,7 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import soot.Body;
 import soot.G;
@@ -69,7 +70,7 @@ public class ProviderDetection {
 	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
-	private static final String CRYPTSLBIN = ".cryptslbin";
+	private static final String CRYPTSLBIN = RuleFormat.BINARY.toString();
 	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
 	
 	
