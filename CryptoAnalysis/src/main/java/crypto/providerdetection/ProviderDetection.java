@@ -9,6 +9,7 @@
 package crypto.providerdetection;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,7 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import soot.Body;
@@ -70,6 +72,7 @@ public class ProviderDetection {
 	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
+	private static final String CRYPTSL = RuleFormat.SOURCE.toString();
 	private static final String CRYPTSLBIN = RuleFormat.BINARY.toString();
 	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
 	
@@ -150,7 +153,7 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
-				defaultCryptoRules = getRules(defaultRulesDirectory, defaultCryptoRules);
+				defaultCryptoRules = CrySLRulesetSelector.makeFromPath(new File(defaultRulesDirectory), RuleFormat.SOURCE);
 				doAnalysis(observableDynamicICFG, defaultCryptoRules);
 			}
 		};
@@ -228,7 +231,7 @@ public class ProviderDetection {
 										boolean ifStmt = checkIfStmt(providerValue, body);
 										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
-										if((!ifStmt) && (!switchStmt) && (ruleExists(provider, declaringClassName))) {
+										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (ruleExists(provider, declaringClassName))) {
 											rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
@@ -434,7 +437,7 @@ public class ProviderDetection {
 		if(rulesDirectory.exists()) {
 			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
 			for (File file : listRulesDirectoryFiles) {
-				if (file != null && file.getAbsolutePath().endsWith(rule+CRYPTSLBIN)) {
+				if (file != null && file.getAbsolutePath().endsWith(rule+CRYPTSL)) {
 					ruleExists = true;
 					break;
 				}
@@ -464,7 +467,7 @@ public class ProviderDetection {
 		List<String> newRules = new ArrayList<String>();
 		File[] files = new File(newRulesDirectory).listFiles();
 		for (File file : files) {
-		    if (file.isFile() && file.getName().endsWith(CRYPTSLBIN)) {
+		    if (file.isFile() && file.getName().endsWith(CRYPTSL)) {
 		        newRules.add(StringUtils.substringBefore(file.getName(), "."));
 		    }
 		}
@@ -485,34 +488,15 @@ public class ProviderDetection {
 		// are added to the new CryptSL rules list
 		File[] listFiles = new File(newRulesDirectory).listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
-				newCryptSLRules.add(CryptSLRuleReader.readFromFile(file));
+			if (file != null && file.getName().endsWith(CRYPTSL)) {
+				try {
+					newCryptSLRules.add(CryptSLRuleReader.readFromSourceFile(file));
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return newCryptSLRules;
 	}
-	
-	
-	/**
-	 * This method is used to get all the default CryptSL rules
-	 * 
-	 * @param rulesDirectory
-	 * 
-	 * @param rules
-	 */
-	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
-		File directory = new File(rulesDirectory);
-		
-		File[] listFiles = directory.listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
-			}
-		}
-		if (rules.isEmpty())
-			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
-		
-		return rules;
-	}
-	//-----------------------------------------------------------------------------------------------------------------
 }
