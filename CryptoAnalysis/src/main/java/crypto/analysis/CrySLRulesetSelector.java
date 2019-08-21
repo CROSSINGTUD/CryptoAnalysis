@@ -18,11 +18,6 @@ public class CrySLRulesetSelector {
 				return".cryptsl";
 			}
 		},
-		BINARY() {
-			public String toString() {
-				return".cryptslbin";
-			}
-		},
 	}
 
 	public static enum Ruleset {
@@ -71,17 +66,11 @@ public class CrySLRulesetSelector {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
-			if (ruleFormat.equals(RuleFormat.BINARY) && file.getName().endsWith(ruleFormat.toString())) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
-			}
-
-			if (ruleFormat.equals(RuleFormat.SOURCE) && file.getName().endsWith(ruleFormat.toString())) {
-				try {
-					rules.add(CryptSLRuleReader.readFromSourceFile(file));
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			try {
+				rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return rules;
@@ -89,22 +78,13 @@ public class CrySLRulesetSelector {
 
 	public static CryptSLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
 			String rulename) {
-		if (ruleFormat.equals(RuleFormat.BINARY)) {
-			File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.BINARY);
-			if (!file.exists()) {
-				throw new RuntimeException("Could not locate rule " + rulename + " within set " + ruleset);
-			}
-			return CryptSLRuleReader.readFromFile(file);
-		} else {
-			File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
-			if (file.exists()) {
-				try {
-					CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
-					return rule;
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
+		if (file.exists()) {
+			try {
+				CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
+				return rule;
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		return null;
@@ -116,15 +96,10 @@ public class CrySLRulesetSelector {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
-			if (ruleFormat.equals(RuleFormat.BINARY) && file.getName().endsWith(RuleFormat.BINARY.toString())) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
-			} 
-			if(ruleFormat.equals(RuleFormat.SOURCE) && file.getName().endsWith(RuleFormat.SOURCE.toString())) {
-				try {
-					rules.add(CryptSLRuleReader.readFromSourceFile(file));
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			try {
+				rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
 			}
 		}
 		if (rules.isEmpty()) {
