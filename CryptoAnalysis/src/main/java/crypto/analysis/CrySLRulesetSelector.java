@@ -66,12 +66,7 @@ public class CrySLRulesetSelector {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
-			try {
-				rules.add(CryptSLRuleReader.readFromSourceFile(file));
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			rules.add(CryptSLRuleReader.readFromSourceFile(file));
 		}
 		return rules;
 	}
@@ -80,12 +75,8 @@ public class CrySLRulesetSelector {
 			String rulename) {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
 		if (file.exists()) {
-			try {
-				CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
-				return rule;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
+			return rule;
 		}
 		return null;
 	}
@@ -96,11 +87,7 @@ public class CrySLRulesetSelector {
 		List<CryptSLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
-			try {
-				rules.add(CryptSLRuleReader.readFromSourceFile(file));
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			}
+			rules.add(CryptSLRuleReader.readFromSourceFile(file));
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found in " + resourcesPath);
