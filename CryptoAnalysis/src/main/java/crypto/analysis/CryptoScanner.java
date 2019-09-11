@@ -36,7 +36,7 @@ public abstract class CryptoScanner {
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger(CryptoScanner.class);
 
 	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
