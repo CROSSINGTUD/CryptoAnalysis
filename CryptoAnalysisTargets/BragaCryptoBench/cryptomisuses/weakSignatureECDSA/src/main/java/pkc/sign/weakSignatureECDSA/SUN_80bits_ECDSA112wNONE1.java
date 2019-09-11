@@ -1,6 +1,6 @@
 package pkc.sign.weakSignatureECDSA;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;

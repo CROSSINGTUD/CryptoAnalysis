@@ -1,7 +1,7 @@
 package wc.brokenInsecureMAC;
 
 
-import static _utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import javax.crypto.*;
 import java.security.*;
 import javax.crypto.spec.*;

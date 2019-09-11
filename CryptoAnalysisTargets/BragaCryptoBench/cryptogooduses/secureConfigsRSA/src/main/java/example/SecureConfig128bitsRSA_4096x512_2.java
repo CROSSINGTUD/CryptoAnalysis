@@ -1,6 +1,6 @@
 package example;
 
-import example._utils.U;
+import org.alexmbraga.utils.U;
 import javax.crypto.*;
 import java.security.*;
 import org.bouncycastle.jce.provider.*;

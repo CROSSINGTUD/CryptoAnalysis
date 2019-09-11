@@ -1,6 +1,6 @@
 package wc.brokenInsecureHash;
 
-import static _utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import java.security.*;
 
 public final class InsecureHashes5 {

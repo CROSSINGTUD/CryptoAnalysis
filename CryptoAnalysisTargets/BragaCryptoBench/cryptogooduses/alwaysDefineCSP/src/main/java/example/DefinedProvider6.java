@@ -1,6 +1,6 @@
 package example;
 
-import static example._utils.U.x2s;
+import static org.alexmbraga.utils.U.x2s;
 import javax.crypto.*;
 import java.security.*;
 

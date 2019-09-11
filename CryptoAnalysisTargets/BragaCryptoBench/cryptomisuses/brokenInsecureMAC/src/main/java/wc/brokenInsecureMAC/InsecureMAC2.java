@@ -1,7 +1,7 @@
 package wc.brokenInsecureMAC;
 
 
-import static _utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;

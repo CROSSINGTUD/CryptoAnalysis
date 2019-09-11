@@ -1,6 +1,6 @@
 package cib.printPrivSecKey;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;

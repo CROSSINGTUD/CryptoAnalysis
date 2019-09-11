@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import _utils.CertUtils;
+import org.alexmbraga.utils.CertUtils;
 
 public final class ValidateCertChainButNoCRL {
 

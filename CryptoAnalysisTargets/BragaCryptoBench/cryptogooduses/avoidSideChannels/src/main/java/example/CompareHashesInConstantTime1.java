@@ -1,7 +1,7 @@
 package example;
 
-import example._utils.U;
-import static example._utils.U.cancaoDoExilio;
+import org.alexmbraga.utils.U;
+import static org.alexmbraga.utils.U.cancaoDoExilio;
 import javax.crypto.*;
 import java.security.*;
 

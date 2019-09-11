@@ -1,6 +1,6 @@
 package icv.brokenSSLorTLS;
 
-import _utils.CertUtils;
+import org.alexmbraga.utils.CertUtils;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

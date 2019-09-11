@@ -1,7 +1,7 @@
 
 package pkc.enc.deterministicCrypto;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

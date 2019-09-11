@@ -1,6 +1,6 @@
 package pkm.ImproperKeyLen;
 
-import static _utils.U.x2s;
+import static org.alexmbraga.utils.U.x2s;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;

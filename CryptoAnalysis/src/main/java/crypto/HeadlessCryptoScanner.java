@@ -399,7 +399,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected boolean providerDetection() {
-		return false;
+		return true;
 	}
 	
 	private static String pathToJCE() {

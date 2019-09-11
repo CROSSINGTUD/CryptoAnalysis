@@ -14,7 +14,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import _utils.CertUtils;
+import org.alexmbraga.utils.CertUtils;
 
 public final class NoValidationCaPubKey {
 

@@ -1,6 +1,6 @@
 package wc.riskyInsecureCrypto;
 
-import static _utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;

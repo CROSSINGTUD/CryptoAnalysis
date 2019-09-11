@@ -1,6 +1,6 @@
 package icv.brokenSSLorTLS;
 
-import _utils.CertUtils;
+import org.alexmbraga.utils.CertUtils;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import javax.net.ssl.*;

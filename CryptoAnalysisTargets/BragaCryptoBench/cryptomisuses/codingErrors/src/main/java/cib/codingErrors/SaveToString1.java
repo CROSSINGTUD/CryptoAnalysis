@@ -1,6 +1,6 @@
 package cib.codingErrors;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;

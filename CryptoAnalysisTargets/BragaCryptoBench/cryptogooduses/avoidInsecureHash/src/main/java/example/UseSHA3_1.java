@@ -1,6 +1,6 @@
 package example;
 
-import static example._utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import java.security.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 

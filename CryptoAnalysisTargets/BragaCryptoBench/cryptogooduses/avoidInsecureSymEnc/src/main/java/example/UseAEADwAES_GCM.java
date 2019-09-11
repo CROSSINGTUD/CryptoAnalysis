@@ -1,6 +1,6 @@
 package example;
 
-import example._utils.*;
+import org.alexmbraga.utils.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;

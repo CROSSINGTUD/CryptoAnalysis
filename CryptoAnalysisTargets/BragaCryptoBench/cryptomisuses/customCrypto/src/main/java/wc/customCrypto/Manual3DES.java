@@ -1,6 +1,6 @@
 package wc.customCrypto;
 
-import static _utils.U.*;
+import static org.alexmbraga.utils.U.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;

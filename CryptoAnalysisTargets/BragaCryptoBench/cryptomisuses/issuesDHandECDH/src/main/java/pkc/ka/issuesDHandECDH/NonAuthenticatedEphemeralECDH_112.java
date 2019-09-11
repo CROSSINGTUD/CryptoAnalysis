@@ -1,6 +1,6 @@
 package pkc.ka.issuesDHandECDH;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Arrays;

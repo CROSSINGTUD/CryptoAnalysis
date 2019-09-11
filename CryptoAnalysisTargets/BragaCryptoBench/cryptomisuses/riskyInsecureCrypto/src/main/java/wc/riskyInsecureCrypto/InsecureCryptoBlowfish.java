@@ -1,6 +1,6 @@
 package wc.riskyInsecureCrypto;
 
-import static _utils.U.x2s;
+import static org.alexmbraga.utils.U.x2s;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;

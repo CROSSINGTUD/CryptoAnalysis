@@ -1,6 +1,6 @@
 package pdf.sideChannelAttacks;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.*;
 import java.util.Arrays;// this is insecure due to side channel
 import javax.crypto.*;

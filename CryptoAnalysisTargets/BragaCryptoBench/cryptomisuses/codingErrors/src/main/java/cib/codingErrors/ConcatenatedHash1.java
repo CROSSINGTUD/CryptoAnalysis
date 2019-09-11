@@ -1,6 +1,6 @@
 package cib.codingErrors;
 
-import static _utils.U.b2x;
+import static org.alexmbraga.utils.U.b2x;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;

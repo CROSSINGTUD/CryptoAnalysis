@@ -1,6 +1,6 @@
 package br.predictableSeed;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;

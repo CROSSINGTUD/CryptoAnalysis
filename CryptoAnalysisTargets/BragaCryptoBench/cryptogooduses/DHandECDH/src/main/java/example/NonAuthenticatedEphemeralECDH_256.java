@@ -1,6 +1,6 @@
 package example;
 
-import example._utils.U;
+import org.alexmbraga.utils.U;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Arrays;

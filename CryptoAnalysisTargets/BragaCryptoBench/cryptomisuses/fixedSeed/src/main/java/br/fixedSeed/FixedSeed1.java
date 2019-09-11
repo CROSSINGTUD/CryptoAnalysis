@@ -1,7 +1,7 @@
 package br.fixedSeed;
 
-import _utils.U;
-import static _utils.U.b2x;
+import org.alexmbraga.utils.U;
+import static org.alexmbraga.utils.U.b2x;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;

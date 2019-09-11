@@ -5,7 +5,7 @@ Evitando Maus Usos de Criptografia em Sistemas de Software
 */
 package pdf.insecureDefault;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import javax.crypto.*;
 import java.security.*;
 import java.security.spec.*;

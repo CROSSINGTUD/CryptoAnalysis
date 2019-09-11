@@ -1,6 +1,6 @@
 package pkc.ecc.insecurecurves;
 
-import _utils.U;
+import org.alexmbraga.utils.U;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
