@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -36,7 +36,7 @@ public abstract class CryptoScanner {
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
-	private static final Logger logger = LogManager.getLogger(CryptoScanner.class);
+	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
 
 	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
