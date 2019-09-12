@@ -1,5 +1,6 @@
 package crypto.rules;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,7 +116,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	@Override
 	public Set<String> getInvolvedVarNames() {
 		Set<String> varNames = new HashSet<String>();
-		if (predName.equals("neverTypeOf")) {
+		if (Arrays.asList(new String[] {"neverTypeOf", "instanceOf"}).contains(predName)) {
 			varNames.add(parameters.get(0).getName());
 		} else {
 		for (ICryptSLPredicateParameter var : parameters) {
