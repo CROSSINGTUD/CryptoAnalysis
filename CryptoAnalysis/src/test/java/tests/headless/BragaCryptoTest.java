@@ -411,6 +411,109 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
+	public void randomIVExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/randomIV").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount("<example.UseRandomIVsForCBC: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCBC: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCBC: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForCTS: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForCTS: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForCTS: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForOFB: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForOFB: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForOFB: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForOFB128: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForOFB128: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForOFB128: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForOFB128: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForPCBC: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseRandomIVsForPCBC: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForPCBC: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseRandomIVsForPCBC: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.UseUniqueNonces: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.UseUniqueNonces: void main(java.lang.String[])>", TypestateError.class, 1);
+							
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void secureConfigsRSAExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/secureConfigsRSA").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", ConstraintError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", ConstraintError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", ConstraintError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", TypestateError.class, 1);				
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", ConstraintError.class, 1);				
+																				
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void securecurvesExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/securecurves").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount("<example.SecureCurve_secp224r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp521r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect163r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp192r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect239k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp256r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect233r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect283r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect409k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect163k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp384r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect283k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect571k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect233k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp256k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect409r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect163r2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_sect571r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp192k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+		setErrorsCount("<example.SecureCurve_secp224k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
+							
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
 	public void secureStreamCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/secureStreamCipher").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -422,5 +525,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		scanner.exec();
 		assertErrors();
 	}
+	
+	
 	
 }
