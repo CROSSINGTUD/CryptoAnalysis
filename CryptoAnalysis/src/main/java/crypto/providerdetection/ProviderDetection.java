@@ -73,7 +73,6 @@ public class ProviderDetection {
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	private static final String CRYPTSL = RuleFormat.SOURCE.toString();
-	private static final String CRYPTSLBIN = RuleFormat.BINARY.toString();
 	private static final String BOUNCY_CASTLE = "BouncyCastle";
 	
 	
@@ -356,6 +355,7 @@ public class ProviderDetection {
 				if(assignStatement.getLeftOp().equals(providerValue)) {
 					String provider = assignStatement.getRightOp().toString().replaceAll("\"","");
 					if(provider.equals("BC") || provider.equals("BCPQC") || provider.equals("BCJSSE")) {
+						provider = "BC";
 						return provider;
 					}
 				}
