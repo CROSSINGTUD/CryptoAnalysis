@@ -27,6 +27,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
@@ -77,9 +78,9 @@ public abstract class HeadlessCryptoScanner {
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
 			if(options.hasOption("rulesInBin")) {
-				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), "cryptslbin");
+				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.BINARY);
 			}else {
-				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath),"cryptsl");
+				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
 			}
 			
 		}
@@ -281,9 +282,9 @@ public abstract class HeadlessCryptoScanner {
 			return rules;
 		}
 		if(options.hasOption("rulesInBin")) {
-			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptslbin",Ruleset.JavaCryptographicArchitecture);
+			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.BINARY,Ruleset.JavaCryptographicArchitecture);
 		}else {
-			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptsl", Ruleset.JavaCryptographicArchitecture);
+			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
 		}
 		
 	}

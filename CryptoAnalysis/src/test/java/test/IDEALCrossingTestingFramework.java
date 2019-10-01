@@ -18,6 +18,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
 import crypto.typestate.CryptSLMethodToSootMethod;
@@ -44,7 +45,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
-	private static final String ruleFormat = "cryptsl";
+	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
