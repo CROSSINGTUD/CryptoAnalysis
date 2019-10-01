@@ -9,6 +9,7 @@
 package crypto.providerdetection;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +39,9 @@ import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import soot.Body;
 import soot.G;
 import soot.PackManager;
@@ -150,7 +154,7 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
-				defaultCryptoRules = getRules(defaultRulesDirectory, defaultCryptoRules);
+				defaultCryptoRules = CrySLRulesetSelector.makeFromPath(new File(defaultRulesDirectory), RuleFormat.SOURCE);
 				doAnalysis(observableDynamicICFG, defaultCryptoRules);
 			}
 		};
@@ -228,7 +232,7 @@ public class ProviderDetection {
 										boolean ifStmt = checkIfStmt(providerValue, body);
 										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
-										if((!ifStmt) && (!switchStmt) && (ruleExists(provider, declaringClassName))) {
+										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (ruleExists(provider, declaringClassName))) {
 											rulesDirectory = defaultRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);

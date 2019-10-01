@@ -23,12 +23,20 @@ public class CryptSLMethod implements Serializable, ICryptSLPredicateParameter {
 	}
 
 	/**
-	 * @return the methodName
+	 * @return the FQ methodName
 	 */
 	public String getMethodName() {
 		return methodName;
 	}
 
+	/**
+	 * @return the short methodName
+	 */
+	public String getShortMethodName() {
+		return methodName.substring(methodName.lastIndexOf(".") + 1);
+	}
+	
+	
 	/**
 	 * @return the parameters
 	 */
