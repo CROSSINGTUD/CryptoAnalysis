@@ -485,7 +485,7 @@ public class ProviderDetection {
 		File[] listFiles = new File(newRulesDirectory).listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
-				newCryptSLRules.add(CryptSLRuleReader.readFromFile(file));
+				newCryptSLRules.add(CryptSLRuleReader.readFromSourceFile(file));
 			}
 		}
 		return newCryptSLRules;
@@ -505,7 +505,7 @@ public class ProviderDetection {
 		File[] listFiles = directory.listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(CRYPTSLBIN)) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
+				rules.add(CryptSLRuleReader.readFromSourceFile(file));
 			}
 		}
 		if (rules.isEmpty())
