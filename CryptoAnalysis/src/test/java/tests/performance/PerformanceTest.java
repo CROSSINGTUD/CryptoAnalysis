@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
 import soot.G;
@@ -102,7 +103,7 @@ public class PerformanceTest{
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, rulesets);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
 			}
 
 			@Override
@@ -142,7 +143,7 @@ public class PerformanceTest{
 
 			@Override
 			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, rulesets);
+				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
 			}
 
 			@Override
