@@ -124,8 +124,7 @@ public class CrySLModelReader {
 		if (!cryslFileEnding.equals(extension)) {
 			return null;
 		}
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(),
-		// true), true);
+		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
 		EcoreUtil.resolveAll(resourceSet);
 		final EObject eObject = (EObject) resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
@@ -152,7 +151,6 @@ public class CrySLModelReader {
 		final List<ISLConstraint> constraints = (dm.getReqConstraints() != null) ? buildUpConstraints(dm.getReqConstraints().getReq()) : Lists.newArrayList();
 		constraints.addAll(((dm.getRequire() != null) ? collectRequiredPredicates(dm.getRequire().getPred()) : Lists.newArrayList()));
 		final List<Entry<String, String>> objects = getObjects(dm.getUsage());
-
 		final List<CryptSLPredicate> actPreds = Lists.newArrayList();
 
 		for (final ParEqualsPredicate pred : pre_preds.keySet()) {
@@ -258,12 +256,14 @@ public class CrySLModelReader {
 					firstPar = false;
 				}
 			}
+
+			final CryptSLPredicate ensPredCons = extractReqPred(cons.getPredLit());
 			final String meth = pred.getPredName();
 			final SuperType cond = cons.getLabelCond();
 			if (cond == null) {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false), null);
+				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), null);
 			} else {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false), cond);
+				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), cond);
 			}
 
 		}
@@ -618,8 +618,6 @@ public class CrySLModelReader {
 						variables.add(new CryptSLObject(variable, type, new CryptSLSplitter(Integer.parseInt(lit.getInd()), filterQuotes(lit.getSplit()))));
 					}else {
 						final String consPred = var.getVal().getConsPred();
-//						final String consPred = var.getVal().getPredLit().getPred().getPredName();	//TODO Grammar changes
-
 						int ind;
 						if(consPred != null) {
 							if(consPred.equals("alg(")) {
