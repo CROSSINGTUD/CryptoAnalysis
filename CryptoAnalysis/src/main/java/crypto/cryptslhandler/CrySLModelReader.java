@@ -553,6 +553,16 @@ public class CrySLModelReader {
 				final String typeL1 = ((ObjectDecl) objectL1.eContainer()).getObjectType().getQualifiedName();
 				variables1.add(new CryptSLObject(objectL1.getName(), typeL1));
 				slci = new CryptSLPredicate(null, pred, variables1, false);
+				break;
+			case "instanceOf":
+				final List<ICryptSLPredicateParameter> varInstOf = new ArrayList<>();
+				final Object objInstOf = (de.darmstadt.tu.crossing.cryptSL.Object) ((PreDefinedPredicates) lit.getCons()).getObj().get(0);
+				final String instOfType = ((ObjectDecl) objInstOf.eContainer()).getObjectType().getQualifiedName();
+				varInstOf.add(new CryptSLObject(objInstOf.getName(), instOfType));
+				final String typeName = ((PreDefinedPredicates) lit.getCons()).getType().getType().getQualifiedName();
+				varInstOf.add(new CryptSLObject(typeName, NULL));
+				slci = new CryptSLPredicate(null, pred, varInstOf, false);
+				break;
 			default:
 				new RuntimeException();
 		}
