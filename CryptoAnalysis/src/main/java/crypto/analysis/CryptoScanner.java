@@ -66,6 +66,7 @@ public abstract class CryptoScanner {
 	}
 
 	public void scan(List<CryptSLRule> specs) {
+		int processedSeeds = 0;
 		for (CryptSLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
@@ -80,6 +81,8 @@ public abstract class CryptoScanner {
 			IAnalysisSeed curr = worklist.poll();
 			listener.discoveredSeed(curr);
 			curr.execute();
+			processedSeeds++;
+			listener.addProgress(processedSeeds,worklist.size());
 			estimateAnalysisTime();
 		}
 

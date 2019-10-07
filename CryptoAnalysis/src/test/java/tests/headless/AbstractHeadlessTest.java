@@ -191,6 +191,12 @@ public abstract class AbstractHeadlessTest {
 				// TODO Auto-generated method stub
 
 			}
+
+			@Override
+			public void addProgress(int processedSeeds, int workListsize) {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 	}
 

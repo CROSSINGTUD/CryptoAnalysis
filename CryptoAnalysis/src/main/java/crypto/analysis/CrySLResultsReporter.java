@@ -162,5 +162,12 @@ public class CrySLResultsReporter  {
 			listen.onSecureObjectFound(seed);
 		}
 	}
+
+	public void addProgress(int processedSeeds, int workListsize) {
+		for (ICrySLResultsListener listen : listeners) {
+			listen.addProgress(processedSeeds,workListsize);
+		}
+		
+	}
 	
 }

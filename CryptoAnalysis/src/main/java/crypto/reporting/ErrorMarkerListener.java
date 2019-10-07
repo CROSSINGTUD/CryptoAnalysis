@@ -208,5 +208,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
+
+	@Override
+	public void addProgress(int processedSeeds, int workListsize) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
