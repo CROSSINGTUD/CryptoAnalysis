@@ -336,7 +336,20 @@ public class ConstraintSolver {
 							}
 						}
 					}
-					break;
+					return;
+				case "instanceOf":
+					varName = ((CryptSLObject) parameters.get(0)).getVarName();
+					for (CallSiteWithParamIndex cs : parameterAnalysisQuerySites) {
+						if (cs.getVarName().equals(varName)) {
+							Collection<Type> vals = propagatedTypes.get(cs);
+							if (!vals.parallelStream().anyMatch(e -> e.toQuotedString().equals(parameters.get(1).getName()))) {
+								for (ExtractedValue v : parsAndVals.get(cs)) {
+									errors.add(new InstanceOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
+								}
+							}
+						}
+					}
+					return;
 				default:
 					return;
 			}
