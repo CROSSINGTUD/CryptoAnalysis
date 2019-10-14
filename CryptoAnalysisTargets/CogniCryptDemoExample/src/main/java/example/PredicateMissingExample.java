@@ -20,7 +20,7 @@ public class PredicateMissingExample {
 		//CogniCryt_SAST reports an error in the next line saying that the key size is chosen inappropriately. 
 		keygen.init(46);
 		SecretKey key = keygen.generateKey();
-		Cipher c = Cipher.getInstance("AES/CBC/PKCS7Padding");
+		Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		
 		//CogniCryt_SAST reports an error in the next line as the key flowing to this Cipher usage was not generated securely. 
 		c.init(Cipher.ENCRYPT_MODE, key);
