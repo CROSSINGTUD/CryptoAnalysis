@@ -342,7 +342,7 @@ public class ConstraintSolver {
 					for (CallSiteWithParamIndex cs : parameterAnalysisQuerySites) {
 						if (cs.getVarName().equals(varName)) {
 							Collection<Type> vals = propagatedTypes.get(cs);
-							if (!vals.parallelStream().anyMatch(e -> e.toQuotedString().equals(parameters.get(1).getName()))) {
+							if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), parameters.get(1).getName()) || isSubType(parameters.get(1).getName(), e.toQuotedString()))) {
 								for (ExtractedValue v : parsAndVals.get(cs)) {
 									errors.add(new InstanceOfError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
@@ -622,6 +622,18 @@ public class ConstraintSolver {
 
 	public List<ISLConstraint> getRequiredPredicates() {
 		return requiredPredicates;
+	}
+
+	protected boolean isSubType(String typeOne, String typeTwo) {
+		boolean subTypes = typeOne.equals(typeTwo);
+		subTypes |= (typeOne + "[]").equals(typeTwo);
+		if (!subTypes) {
+			try {
+				subTypes = Class.forName(typeOne).isAssignableFrom(Class.forName(typeTwo));
+			}
+			catch (ClassNotFoundException e) {}
+		}
+		return subTypes;
 	}
 
 	public boolean isHardCoded(ExtractedValue val) {
