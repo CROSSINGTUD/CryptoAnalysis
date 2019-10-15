@@ -40,6 +40,27 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	protected Ruleset getRuleSet() {
 		return Ruleset.JavaCryptographicArchitecture;
 	}
+	
+	@Test
+	public void noInit() throws GeneralSecurityException {
+		Cipher c = Cipher.getInstance("trololo");
+		
+		Assertions.extValue(0);
+		Assertions.mustNotBeInAcceptingState(c);
+		Assertions.notHasEnsuredPredicate(c);
+	}
+	
+	@Test
+	public void yesInit() throws GeneralSecurityException {
+		Cipher c = Cipher.getInstance("trololo");
+		c.init(1, new SecretKeySpec(null, "trololo"));
+		
+		Assertions.extValue(0);
+		Assertions.mustNotBeInAcceptingState(c);
+		Assertions.notHasEnsuredPredicate(c);
+	}
+	
+	
 	@Test
 	public void useDoFinalInLoop() throws GeneralSecurityException{
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -1235,4 +1256,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(s); 
 		Assertions.mustNotBeInAcceptingState(s); 
 	}
+	
+	
 }
