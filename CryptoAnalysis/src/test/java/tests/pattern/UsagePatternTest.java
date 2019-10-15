@@ -191,7 +191,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 	private void wrongRebuild(SecretKey key) throws GeneralSecurityException {
 		SecretKey tmpKey = new SecretKeySpec(key.getEncoded(), "DES");
-		Assertions.notHasEnsuredPredicate(tmpKey);
+		Assertions.hasEnsuredPredicate(tmpKey);
 		encryptWrong(tmpKey);
 	}
 

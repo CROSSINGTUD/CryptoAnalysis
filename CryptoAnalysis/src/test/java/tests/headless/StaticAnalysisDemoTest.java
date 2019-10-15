@@ -99,7 +99,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 2);
 
 
-		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 2);
+		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 1);
 
 		setErrorsCount("<main.Main: void useWrongDoFinal()>", TypestateError.class, 1);
