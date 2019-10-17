@@ -500,7 +500,7 @@ public class ConstraintSolver {
 						else if(value.getKey().equals("false"))
 							valuesInt.put(0, value.getValue());
 						else
-							valuesInt.put(Integer.parseInt(s), value.getValue());
+							valuesInt.put(Integer.parseInt(value.getKey()), value.getValue());
 					}
 				}
 				catch (NumberFormatException ex1) {
