@@ -495,7 +495,12 @@ public class ConstraintSolver {
 				}
 				try {
 					for (Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
-						valuesInt.put(Integer.parseInt(value.getKey()), value.getValue());
+						if(value.getKey().equals("true"))
+							valuesInt.put(1, value.getValue());
+						else if(value.getKey().equals("false"))
+							valuesInt.put(0, value.getValue());
+						else
+							valuesInt.put(Integer.parseInt(value.getKey()), value.getValue());
 					}
 				}
 				catch (NumberFormatException ex1) {
@@ -599,6 +604,7 @@ public class ConstraintSolver {
 							varVal.put(retrieveConstantFromValue(invoker.getArg(wrappedCallSite.getIndex())), new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						} else if (allocSite instanceof AssignStmt) {
 							if (wrappedAllocSite.getValue() instanceof Constant) {
+//								varVal.put(retrieveConstantFromValue(wrappedAllocSite.getValue()), new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								String retrieveConstantFromValue = retrieveConstantFromValue(wrappedAllocSite.getValue());
 								int pos = -1;
 								for (int i = 0; i < invoker.getArgs().size(); i++) {
