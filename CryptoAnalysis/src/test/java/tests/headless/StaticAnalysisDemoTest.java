@@ -115,4 +115,20 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		scanner.exec();
 		assertErrors();
 	}
+	
+	@Test
+	public void predicateInstanceOfExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/PredicateInstanceOfExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.CipherExample: void cipherExampleOne()>")
+				.withTPs(ConstraintError.class, 1)
+				.withTPs(RequiredPredicateError.class, 1)
+				.build());
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.CipherExample: void cipherExampleTwo()>")
+				.withTPs(RequiredPredicateError.class, 1)
+				.build());
+		scanner.exec();
+		assertErrors();
+	}
 }
