@@ -5,16 +5,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
+import boomerang.ForwardQuery;
+import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -27,6 +36,7 @@ import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -42,9 +52,11 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import soot.Body;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Type;
+import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -54,6 +66,8 @@ import soot.jimple.LongConstant;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+import soot.jimple.internal.JNewArrayExpr;
+import wpds.impl.Weight.NoWeight;
 
 public class ConstraintSolver {
 
@@ -168,9 +182,9 @@ public class ConstraintSolver {
 
 	public EvaluableConstraint createConstraint(ISLConstraint con) {
 		if (con instanceof CryptSLComparisonConstraint) {
-			return new ComparisonConstraint((CryptSLComparisonConstraint) con);
+			return new ComparisonConstraint((CryptSLComparisonConstraint) con, ConstraintSolver.this.object.getCryptoScanner().icfg());
 		} else if (con instanceof CryptSLValueConstraint) {
-			return new ValueConstraint((CryptSLValueConstraint) con);
+			return new ValueConstraint((CryptSLValueConstraint) con, ConstraintSolver.this.object.getCryptoScanner().icfg());
 		} else if (con instanceof CryptSLPredicate) {
 			return new PredicateConstraint((CryptSLPredicate) con);
 		} else if (con instanceof CryptSLConstraint) {
@@ -358,8 +372,11 @@ public class ConstraintSolver {
 
 	public class ComparisonConstraint extends EvaluableConstraint {
 
-		public ComparisonConstraint(CryptSLComparisonConstraint c) {
+		ObservableICFG<Unit, SootMethod> icfg;
+		
+		public ComparisonConstraint(CryptSLComparisonConstraint c, ObservableICFG<Unit, SootMethod> icfg) {
 			super(c);
+			this.icfg = icfg;
 		}
 
 		@Override
@@ -489,7 +506,7 @@ public class ConstraintSolver {
 			catch (NumberFormatException ex) {
 				// 2. If not, it's a variable name.
 				// Get value of variable left from map
-				final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons);
+				final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons, icfg);
 				if (valueCollection.isEmpty()) {
 					return valuesInt;
 				}
@@ -515,8 +532,11 @@ public class ConstraintSolver {
 
 	public class ValueConstraint extends EvaluableConstraint {
 
-		public ValueConstraint(CryptSLValueConstraint c) {
+		private ObservableICFG<Unit, SootMethod> icfg;
+		
+		public ValueConstraint(CryptSLValueConstraint c, ObservableICFG<Unit, SootMethod> icfg) {
 			super(c);
+			this.icfg = icfg;
 		}
 
 		@Override
@@ -540,7 +560,7 @@ public class ConstraintSolver {
 
 		private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CryptSLObject var, ISLConstraint cons) {
 			final String varName = var.getVarName();
-			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
+			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons, icfg);
 			List<Entry<String, CallSiteWithExtractedValue>> vals = new ArrayList<>();
 			if (valueCollection.isEmpty()) {
 				return vals;
@@ -590,14 +610,13 @@ public class ConstraintSolver {
 			return !errors.isEmpty();
 		}
 
-		protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
+		protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons, ObservableICFG<Unit, SootMethod> dynICFG) {
 			Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 			for (CallSiteWithParamIndex wrappedCallSite : parsAndVals.keySet()) {
 				final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
 
 				for (ExtractedValue wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
 					final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
-
 					if (wrappedCallSite.getVarName().equals(varName)) {
 						InvokeExpr invoker = callSite.getInvokeExpr();
 						if (callSite.equals(allocSite)) {
@@ -617,12 +636,78 @@ public class ConstraintSolver {
 								} else {
 									varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								}
+							} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {								
+								BackwardBoomerangResults<NoWeight> backwardQueryResults = getBoomerangResults(invoker.getArg(wrappedCallSite.getIndex()), 
+										wrappedCallSite, 
+										wrappedAllocSite, 
+										dynICFG
+										);
+								
+								varVal.putAll(extractSootArray(backwardQueryResults, wrappedAllocSite.stmt().getMethod().getActiveBody(),
+											wrappedCallSite,
+											wrappedAllocSite)
+										);
 							}
 						}
 					}
 				}
 			}
 			return varVal;
+		}
+		
+		
+		/***
+		 * Function to fetch boomerang results for the received soot value.
+		 * @param sootValue value for which boomerang has to be run
+		 * @param callSite call site at which sootValue is involved
+		 * @param allocSite allocation site at which sootValue is involved
+		 * @param dynICFG ICFG on which boomerang is run
+		 * @return boomerang results
+		 */
+		private BackwardBoomerangResults<NoWeight> getBoomerangResults(Value sootValue, CallSiteWithParamIndex callSite, 
+				ExtractedValue allocSite, ObservableICFG<Unit, SootMethod> dynICFG){
+			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
+				@Override
+				public ObservableICFG<Unit, SootMethod> icfg() {
+					return dynICFG;
+				}
+			};
+			Val queryVal = new Val(sootValue, allocSite.stmt().getMethod());
+			Statement s = new Statement(callSite.stmt().getUnit().get(), callSite.stmt().getMethod());
+			BackwardQuery backQuery = new BackwardQuery(s, queryVal);
+			return boomerang.solve(backQuery);
+		}
+		
+		
+		/***
+		 * Function that finds the values assigned to a soot array.
+		 * @param backwardBoomerangResults results obtained from boomerang
+		 * @param methodBody soot body of the method
+		 * @param callSite call site at which sootValue is involved
+		 * @param allocSite allocation site at which sootValue is involved
+		 * @return extracted array values
+		 */
+		private Map<String, CallSiteWithExtractedValue> extractSootArray(BackwardBoomerangResults<NoWeight> backwardBoomerangResults, Body methodBody, 
+				CallSiteWithParamIndex callSite, ExtractedValue allocSite){
+			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
+			for (ForwardQuery v : backwardBoomerangResults.getAllocationSites().keySet()) {
+				soot.Value arrayLocal = ((AssignStmt) v.stmt().getUnit().get()).getLeftOp();
+				if (methodBody != null) {
+					Iterator<Unit> unitIterator = methodBody.getUnits().snapshotIterator();
+					while (unitIterator.hasNext()) {
+						final Unit unit = unitIterator.next();
+						if (unit instanceof AssignStmt) {
+							AssignStmt uStmt = (AssignStmt) (unit);
+							soot.Value leftValue = uStmt.getLeftOp();
+							soot.Value rightValue = uStmt.getRightOp();
+							if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
+								arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
+							}
+						}
+					}
+				}
+			}
+			return arrVal;
 		}
 	}
 
