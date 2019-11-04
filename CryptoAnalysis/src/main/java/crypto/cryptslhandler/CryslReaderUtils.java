@@ -85,12 +85,7 @@ public class CryslReaderUtils {
 		}
 		return new CryptSLMethod(qualifiedName, pars, new ArrayList<Boolean>(), returnObject);
 	}
-	public static void storeRuletoFile(final CryptSLRule rule, final String folderPath) throws IOException {
-		String className = rule.getClassName();
-		try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(folderPath + outerFileSeparator + className.substring(className.lastIndexOf(".") + 1) + ".cryptslbin"))) {
-			out.writeObject(rule);
-		}
-	}
+	
 	public static File getResourceFromWithin(final String inputPath) {
 		return new File(inputPath);
 	}

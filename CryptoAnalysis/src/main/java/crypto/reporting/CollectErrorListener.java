@@ -54,4 +54,10 @@ public class CollectErrorListener implements ICrySLResultsListener {
 	public Collection<AbstractError> getErrors(){
 		return errors;
 	}
+
+	@Override
+	public void addProgress(int processedSeeds, int workListsize) {
+		// TODO Auto-generated method stub
+		
+	}
 }
