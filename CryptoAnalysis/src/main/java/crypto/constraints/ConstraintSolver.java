@@ -633,6 +633,13 @@ public class ConstraintSolver {
 			return varVal;
 		}
 		
+		/***
+		 * Function that finds the values assigned to a soot array.
+		 * @param callSite call site at which sootValue is involved
+		 * @param allocSite allocation site at which sootValue is involved
+		 * @param arrayLocal soot array local variable for which values are to be found
+		 * @return extracted array values
+		 */
 		private Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite, soot.Value arrayLocal){
 			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
