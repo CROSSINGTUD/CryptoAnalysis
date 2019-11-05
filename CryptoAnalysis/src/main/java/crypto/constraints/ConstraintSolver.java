@@ -17,13 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
-import boomerang.ForwardQuery;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -36,7 +30,6 @@ import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
-import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -67,7 +60,6 @@ import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JNewArrayExpr;
-import wpds.impl.Weight.NoWeight;
 
 public class ConstraintSolver {
 
@@ -182,9 +174,9 @@ public class ConstraintSolver {
 
 	public EvaluableConstraint createConstraint(ISLConstraint con) {
 		if (con instanceof CryptSLComparisonConstraint) {
-			return new ComparisonConstraint((CryptSLComparisonConstraint) con, ConstraintSolver.this.object.getCryptoScanner().icfg());
+			return new ComparisonConstraint((CryptSLComparisonConstraint) con);
 		} else if (con instanceof CryptSLValueConstraint) {
-			return new ValueConstraint((CryptSLValueConstraint) con, ConstraintSolver.this.object.getCryptoScanner().icfg());
+			return new ValueConstraint((CryptSLValueConstraint) con);
 		} else if (con instanceof CryptSLPredicate) {
 			return new PredicateConstraint((CryptSLPredicate) con);
 		} else if (con instanceof CryptSLConstraint) {
@@ -372,11 +364,8 @@ public class ConstraintSolver {
 
 	public class ComparisonConstraint extends EvaluableConstraint {
 
-		ObservableICFG<Unit, SootMethod> icfg;
-		
-		public ComparisonConstraint(CryptSLComparisonConstraint c, ObservableICFG<Unit, SootMethod> icfg) {
+		public ComparisonConstraint(CryptSLComparisonConstraint c) {
 			super(c);
-			this.icfg = icfg;
 		}
 
 		@Override
@@ -506,7 +495,7 @@ public class ConstraintSolver {
 			catch (NumberFormatException ex) {
 				// 2. If not, it's a variable name.
 				// Get value of variable left from map
-				final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons, icfg);
+				final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons);
 				if (valueCollection.isEmpty()) {
 					return valuesInt;
 				}
@@ -532,11 +521,8 @@ public class ConstraintSolver {
 
 	public class ValueConstraint extends EvaluableConstraint {
 
-		private ObservableICFG<Unit, SootMethod> icfg;
-		
-		public ValueConstraint(CryptSLValueConstraint c, ObservableICFG<Unit, SootMethod> icfg) {
+		public ValueConstraint(CryptSLValueConstraint c) {
 			super(c);
-			this.icfg = icfg;
 		}
 
 		@Override
@@ -560,7 +546,7 @@ public class ConstraintSolver {
 
 		private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CryptSLObject var, ISLConstraint cons) {
 			final String varName = var.getVarName();
-			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons, icfg);
+			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
 			List<Entry<String, CallSiteWithExtractedValue>> vals = new ArrayList<>();
 			if (valueCollection.isEmpty()) {
 				return vals;
@@ -610,7 +596,7 @@ public class ConstraintSolver {
 			return !errors.isEmpty();
 		}
 
-		protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons, ObservableICFG<Unit, SootMethod> dynICFG) {
+		protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
 			Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 			for (CallSiteWithParamIndex wrappedCallSite : parsAndVals.keySet()) {
 				final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
@@ -637,16 +623,8 @@ public class ConstraintSolver {
 									varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								}
 							} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {								
-								BackwardBoomerangResults<NoWeight> backwardQueryResults = getBoomerangResults(invoker.getArg(wrappedCallSite.getIndex()), 
-										wrappedCallSite, 
-										wrappedAllocSite, 
-										dynICFG
-										);
-								
-								varVal.putAll(extractSootArray(backwardQueryResults, wrappedAllocSite.stmt().getMethod().getActiveBody(),
-											wrappedCallSite,
-											wrappedAllocSite)
-										);
+								soot.Value arrayLocal = ((AssignStmt) allocSite).getLeftOp();
+								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite, arrayLocal));
 							}
 						}
 					}
@@ -655,43 +633,9 @@ public class ConstraintSolver {
 			return varVal;
 		}
 		
-		
-		/***
-		 * Function to fetch boomerang results for the received soot value.
-		 * @param sootValue value for which boomerang has to be run
-		 * @param callSite call site at which sootValue is involved
-		 * @param allocSite allocation site at which sootValue is involved
-		 * @param dynICFG ICFG on which boomerang is run
-		 * @return boomerang results
-		 */
-		private BackwardBoomerangResults<NoWeight> getBoomerangResults(Value sootValue, CallSiteWithParamIndex callSite, 
-				ExtractedValue allocSite, ObservableICFG<Unit, SootMethod> dynICFG){
-			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
-				@Override
-				public ObservableICFG<Unit, SootMethod> icfg() {
-					return dynICFG;
-				}
-			};
-			Val queryVal = new Val(sootValue, allocSite.stmt().getMethod());
-			Statement s = new Statement(callSite.stmt().getUnit().get(), callSite.stmt().getMethod());
-			BackwardQuery backQuery = new BackwardQuery(s, queryVal);
-			return boomerang.solve(backQuery);
-		}
-		
-		
-		/***
-		 * Function that finds the values assigned to a soot array.
-		 * @param backwardBoomerangResults results obtained from boomerang
-		 * @param methodBody soot body of the method
-		 * @param callSite call site at which sootValue is involved
-		 * @param allocSite allocation site at which sootValue is involved
-		 * @return extracted array values
-		 */
-		private Map<String, CallSiteWithExtractedValue> extractSootArray(BackwardBoomerangResults<NoWeight> backwardBoomerangResults, Body methodBody, 
-				CallSiteWithParamIndex callSite, ExtractedValue allocSite){
+		private Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite, soot.Value arrayLocal){
+			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
-			for (ForwardQuery v : backwardBoomerangResults.getAllocationSites().keySet()) {
-				soot.Value arrayLocal = ((AssignStmt) v.stmt().getUnit().get()).getLeftOp();
 				if (methodBody != null) {
 					Iterator<Unit> unitIterator = methodBody.getUnits().snapshotIterator();
 					while (unitIterator.hasNext()) {
@@ -706,7 +650,6 @@ public class ConstraintSolver {
 						}
 					}
 				}
-			}
 			return arrVal;
 		}
 	}

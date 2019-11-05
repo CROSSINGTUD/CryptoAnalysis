@@ -30,10 +30,6 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 		return stmt().getMethod();
 	}
 	
-	public CryptoScanner getCryptoScanner() {
-		return this.cryptoScanner;
-	}
-	
 	public String getObjectId() {
 		if(objectId == null) {
 			MessageDigest md;
