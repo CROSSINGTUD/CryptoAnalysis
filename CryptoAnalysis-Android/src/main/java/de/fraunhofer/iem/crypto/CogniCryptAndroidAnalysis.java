@@ -42,6 +42,22 @@ public class CogniCryptAndroidAnalysis {
 	private final String rulesLocation;
 	private final Collection<String> applicationClassFilter;
 
+	public String getApkFile(){
+		return apkFile;
+	}
+
+	public String getPlatformsDirectory(){
+		return platformsDirectory;
+	}
+
+	public String getRulesLocation(){
+		return rulesLocation;
+	}
+
+	public Collection<String> getApplicationClassFilter(){
+		return applicationClassFilter;
+	}
+
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation,
 			Collection<String> applicationClassFilter) {
 		this.apkFile = apkFile;
@@ -55,22 +71,6 @@ public class CogniCryptAndroidAnalysis {
 		logger.info("with Android Platforms dir " + platformsDirectory);
 		constructCallGraph();
 		return runCryptoAnalysis();
-	}
-	
-	public String getApkFile(){
-		return apkFile;
-	}
-	
-	public String getPlatformsDirectory(){
-		return platformsDirectory;
-	}
-	
-	public String getRulesLocation(){
-		return rulesLocation;
-	}
-	
-	public Collection<String> getApplicationClassFilter(){
-		return applicationClassFilter;
 	}
 
 	private void constructCallGraph() {
