@@ -16,6 +16,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
+import crypto.cryptslhandler.CrySLModelReader;
 import crypto.reporting.CollectErrorListener;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
@@ -38,14 +39,14 @@ public class CogniCryptAndroidAnalysis {
 	private static final Logger logger = LoggerFactory.getLogger(CogniCryptAndroidAnalysis.class);
 	private final String apkFile;
 	private final String platformsDirectory;
-	private final String rulesDirectory;
+	private final String rulesLocation;
 	private final Collection<String> applicationClassFilter;
 
-	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesDirectory,
+	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation,
 			Collection<String> applicationClassFilter) {
 		this.apkFile = apkFile;
 		this.platformsDirectory = platformsDirectory;
-		this.rulesDirectory = rulesDirectory;
+		this.rulesLocation = rulesLocation;
 		this.applicationClassFilter = applicationClassFilter;
 	}
 
@@ -64,8 +65,8 @@ public class CogniCryptAndroidAnalysis {
 		return platformsDirectory;
 	}
 	
-	public String getRulesDirectory(){
-		return rulesDirectory;
+	public String getRulesLocation(){
+		return rulesLocation;
 	}
 	
 	public Collection<String> getApplicationClassFilter(){
@@ -145,11 +146,11 @@ public class CogniCryptAndroidAnalysis {
 
 	protected List<CryptSLRule> getRules() {
 		List<CryptSLRule> rules = Lists.newArrayList();
-		if (rulesDirectory == null) {
+		if (rulesLocation == null) {
 			
 			// TODO: Create a custom CryptoAnalysisException (or CogniCryptException)
 			throw new RuntimeException(
-					"Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
+					"Please specify a directory the CrySL rules (.cryptsl Files) are located in.");
 		}
 		
 		// TODO: Why iterate here through all files if CryptoAnalysis could do this
@@ -158,17 +159,17 @@ public class CogniCryptAndroidAnalysis {
 		// if (rules.isEmpty() {...}
 		// return rules;
 		
-		File[] listFiles = new File(rulesDirectory).listFiles();
+		File[] listFiles = new File(rulesLocation).listFiles();
 		for (File file : listFiles) {
 			
-			// TODO: Waiting for global constant in CryptAnalysis
-			if (file != null && file.getName().endsWith("cryptsl")) {
+			// TODO: Update when constant changed CryptoAnalysis
+			if (file != null && file.getName().endsWith(CrySLModelReader.cryslFileEnding)) {
 				rules.add(CryptSLRuleReader.readFromSourceFile(file));
 			}
 		}
 		if (rules.isEmpty())
 			System.out.println("CogniCrypt did not find any rules to start the analysis for. \n "
-					+ "It checked for rules in " + rulesDirectory);
+					+ "It checked for rules in " + rulesLocation);
 		return rules;
 	}
 
