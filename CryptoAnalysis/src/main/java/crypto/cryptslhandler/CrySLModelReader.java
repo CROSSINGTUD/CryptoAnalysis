@@ -74,8 +74,8 @@ import de.darmstadt.tu.crossing.cryptSL.ObjectDecl;
 import de.darmstadt.tu.crossing.cryptSL.Order;
 import de.darmstadt.tu.crossing.cryptSL.PreDefinedPredicates;
 import de.darmstadt.tu.crossing.cryptSL.Pred;
+import de.darmstadt.tu.crossing.cryptSL.PredLit;
 import de.darmstadt.tu.crossing.cryptSL.ReqPred;
-import de.darmstadt.tu.crossing.cryptSL.ReqPredLit;
 import de.darmstadt.tu.crossing.cryptSL.SimpleOrder;
 import de.darmstadt.tu.crossing.cryptSL.SuPar;
 import de.darmstadt.tu.crossing.cryptSL.SuParList;
@@ -124,8 +124,7 @@ public class CrySLModelReader {
 		if (!cryslFileEnding.equals(extension)) {
 			return null;
 		}
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(),
-		// true), true);
+		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
 		EcoreUtil.resolveAll(resourceSet);
 		final EObject eObject = (EObject) resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
@@ -152,7 +151,6 @@ public class CrySLModelReader {
 		final List<ISLConstraint> constraints = (dm.getReqConstraints() != null) ? buildUpConstraints(dm.getReqConstraints().getReq()) : Lists.newArrayList();
 		constraints.addAll(((dm.getRequire() != null) ? collectRequiredPredicates(dm.getRequire().getPred()) : Lists.newArrayList()));
 		final List<Entry<String, String>> objects = getObjects(dm.getUsage());
-
 		final List<CryptSLPredicate> actPreds = Lists.newArrayList();
 
 		for (final ParEqualsPredicate pred : pre_preds.keySet()) {
@@ -199,8 +197,7 @@ public class CrySLModelReader {
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : eList) {
-			final Pred pred = (Pred) cons;
-
+			final Pred pred = (Pred) cons.getPredLit().getPred();
 			final List<ICryptSLPredicateParameter> variables = new ArrayList<>();
 
 			if (pred.getParList() != null) {
@@ -220,7 +217,7 @@ public class CrySLModelReader {
 				}
 			}
 			final String meth = pred.getPredName();
-			final SuperType cond = pred.getLabelCond();
+			final SuperType cond = cons.getLabelCond();
 			if (cond == null) {
 				preds.put(new ParEqualsPredicate(null, meth, variables, true), null);
 			} else {
@@ -233,7 +230,7 @@ public class CrySLModelReader {
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getPredicates(final List<Constraint> predList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : predList) {
-			final Pred pred = (Pred) cons;
+			final Pred pred = (Pred) cons.getPredLit().getPred();
 			String curClass = ((DomainmodelImpl) cons.eContainer().eContainer()).getJavaType().getQualifiedName();
 			final List<ICryptSLPredicateParameter> variables = new ArrayList<>();
 
@@ -259,12 +256,14 @@ public class CrySLModelReader {
 					firstPar = false;
 				}
 			}
+
+			final CryptSLPredicate ensPredCons = extractReqPred(cons.getPredLit());
 			final String meth = pred.getPredName();
-			final SuperType cond = pred.getLabelCond();
+			final SuperType cond = cons.getLabelCond();
 			if (cond == null) {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false), null);
+				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), null);
 			} else {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false), cond);
+				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), cond);
 			}
 
 		}
@@ -462,7 +461,7 @@ public class CrySLModelReader {
 		final List<ISLConstraint> preds = new ArrayList<>();
 		for (final ReqPred pred : requiredPreds) {
 			ISLConstraint reqPred = null;
-			if (pred instanceof ReqPredLit) {
+			if (pred instanceof PredLit) {
 				reqPred = extractReqPred(pred);
 			} else {
 				final ReqPred left = pred.getLeftExpression();
@@ -483,7 +482,7 @@ public class CrySLModelReader {
 
 	private List<CryptSLPredicate> retrieveReqPredFromAltPreds(ReqPred left) {
 		List<CryptSLPredicate> preds = new ArrayList<CryptSLPredicate>();
-		if (left instanceof ReqPredLit) {
+		if (left instanceof PredLit) {
 			preds.add(extractReqPred(left));
 		} else {
 			preds.addAll(retrieveReqPredFromAltPreds(left.getLeftExpression()));
@@ -615,7 +614,7 @@ public class CrySLModelReader {
 	}
 	private CryptSLPredicate extractReqPred(final ReqPred pred) {
 		final List<ICryptSLPredicateParameter> variables = new ArrayList<>();
-		ReqPredLit innerPred = (ReqPredLit) pred;
+		PredLit innerPred = (PredLit) pred;			
 		final Constraint conditional = innerPred.getCons();
 		if (innerPred.getPred().getParList() != null) {
 			for (final SuPar var : innerPred.getPred().getParList().getParameters()) {

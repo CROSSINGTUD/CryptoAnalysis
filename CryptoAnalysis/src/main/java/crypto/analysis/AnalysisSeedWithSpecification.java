@@ -244,7 +244,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		}
 		boolean satisfiesConstraintSytem = checkConstraintSystem();
-
+		if(predToBeEnsured.getConstraint() != null) {
+			ArrayList<ISLConstraint> temp = new ArrayList<>();
+			temp.add(predToBeEnsured.getConstraint());
+			satisfiesConstraintSytem = !evaluatePredCond(predToBeEnsured);
+		}
+		
 		for (ICryptSLPredicateParameter predicateParam : predToBeEnsured.getParameters()) {
 			if (predicateParam.getName().equals("this")) {
 				expectPredicateWhenThisObjectIsInState(stateNode, currStmt, predToBeEnsured, satisfiesConstraintSytem);
@@ -579,8 +584,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean isPredicateGeneratingState(CryptSLPredicate ensPred, State stateNode) {
-		return ensPred instanceof CryptSLCondPredicate && isConditionalState(((CryptSLCondPredicate) ensPred).getConditionalMethods(), stateNode)
-				|| (!(ensPred instanceof CryptSLCondPredicate) && stateNode.isAccepting());
+		return ensPred instanceof CryptSLCondPredicate && isConditionalState(((CryptSLCondPredicate) ensPred).getConditionalMethods(), stateNode) || (!(ensPred instanceof CryptSLCondPredicate) && stateNode.isAccepting());
 	}
 
 	private boolean isConditionalState(Set<StateNode> conditionalMethods, State state) {
