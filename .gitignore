@@ -10,3 +10,5 @@ AndroidZooApps/
 shippable/
 *.class
 *.temp
+CryptoAnalysis/build/
+
