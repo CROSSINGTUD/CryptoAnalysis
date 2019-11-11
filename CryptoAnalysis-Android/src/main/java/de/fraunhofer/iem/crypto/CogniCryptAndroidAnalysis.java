@@ -167,9 +167,8 @@ public class CogniCryptAndroidAnalysis {
 			}
 		}
 		if (rules.isEmpty())
-			System.out
-					.println("CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ rulesDirectory);
+			System.out.println("CogniCrypt did not find any rules to start the analysis for. \n "
+					+ "It checked for rules in " + rulesDirectory);
 		return rules;
 	}
 
