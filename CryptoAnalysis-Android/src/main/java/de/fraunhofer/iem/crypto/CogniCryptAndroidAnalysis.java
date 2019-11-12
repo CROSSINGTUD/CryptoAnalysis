@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.inject.internal.util.$Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,10 +91,21 @@ public class CogniCryptAndroidAnalysis {
 	 */
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation,
 			Collection<String> applicationClassFilter) {
+		if (StringUtils.isBlank(apkFile))
+			throw new IllegalArgumentException("Argument 'apkFile' must not be null or empty.");
+		if (StringUtils.isBlank(platformsDirectory))
+			throw new IllegalArgumentException("Argument 'platformsDirectory' must not be null or empty.");
+		if (StringUtils.isBlank(rulesLocation))
+			throw new IllegalArgumentException("Argument 'rulesLocation' must not be null or empty.");
+
 		this.apkFile = apkFile;
 		this.platformsDirectory = platformsDirectory;
 		this.rulesLocation = rulesLocation;
-		this.applicationClassFilter = applicationClassFilter;
+
+		if (applicationClassFilter == null)
+			this.applicationClassFilter = Collections.EMPTY_LIST;
+		else
+			this.applicationClassFilter = applicationClassFilter;
 	}
 
 
