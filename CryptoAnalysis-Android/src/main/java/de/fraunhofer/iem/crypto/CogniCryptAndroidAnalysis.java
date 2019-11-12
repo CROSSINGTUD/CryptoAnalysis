@@ -1,21 +1,10 @@
 package de.fraunhofer.iem.crypto;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import com.google.inject.internal.util.$Strings;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-
 import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.preanalysis.BoomerangPretransformer;
+import com.google.common.collect.Lists;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
@@ -23,6 +12,9 @@ import crypto.cryptslhandler.CrySLModelReader;
 import crypto.reporting.CollectErrorListener;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -33,33 +25,56 @@ import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class CogniCryptAndroidAnalysis {
 
 	private static final Logger logger = LoggerFactory.getLogger(CogniCryptAndroidAnalysis.class);
-	private final String apkFile;
-	private final String platformsDirectory;
-	private final String rulesLocation;
+	private File apkFile;
+	private File platformsDirectory;
+	private File rulesLocation;
 	private final Collection<String> applicationClassFilter;
 
 	/**
 	 * @return The path to the .apk file that shall be analyzed.
 	 */
-	public String getApkFile(){
+	public File getApkFile(){
 		return apkFile;
+	}
+
+	private void setApkFile(File apkFile){
+		if (!apkFile.exists() || !apkFile.isFile())
+			throw new IllegalArgumentException("Argument 'apkFile' does not point to a file.");
+		this.apkFile = apkFile;
 	}
 
 	/**
 	 * @return The location of the Android platform which the .apk targets.
 	 */
-	public String getPlatformsDirectory(){
+	public File getPlatformsDirectory(){
 		return platformsDirectory;
+	}
+
+	private void setPlatformsDirectory(File platformsDirectory){
+		if (!platformsDirectory.exists() || !platformsDirectory.isDirectory())
+			throw new IllegalArgumentException("Argument 'platformsDirectory' is not a dictionary.");
+		this.platformsDirectory = platformsDirectory;
 	}
 
 	/**
 	 * @return The location of the CrySL rules.
 	 */
-	public String getRulesLocation(){
+	public File getRulesLocation(){
 		return rulesLocation;
+	}
+
+	private void setRulesLocation(File rulesLocation){
+		if (!rulesLocation.exists())
+			throw new IllegalArgumentException("Argument 'rulesLocation' is not valid.");
+		this.rulesLocation = rulesLocation;
 	}
 
 	/**
@@ -94,9 +109,9 @@ public class CogniCryptAndroidAnalysis {
 		if (StringUtils.isBlank(rulesLocation))
 			throw new IllegalArgumentException("Argument 'rulesLocation' must not be null or empty.");
 
-		this.apkFile = apkFile;
-		this.platformsDirectory = platformsDirectory;
-		this.rulesLocation = rulesLocation;
+		setApkFile(new File(apkFile));
+		setPlatformsDirectory(new File(platformsDirectory));
+		setRulesLocation(new File(rulesLocation));
 
 		if (applicationClassFilter == null)
 			this.applicationClassFilter = Collections.EMPTY_LIST;
@@ -121,8 +136,8 @@ public class CogniCryptAndroidAnalysis {
 		config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
 		config.getCallbackConfig().setEnableCallbacks(false);
 		config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
-		config.getAnalysisFileConfig().setAndroidPlatformDir(platformsDirectory);
-		config.getAnalysisFileConfig().setTargetAPKFile(apkFile);
+		config.getAnalysisFileConfig().setAndroidPlatformDir(platformsDirectory.getAbsolutePath());
+		config.getAnalysisFileConfig().setTargetAPKFile(apkFile.getAbsolutePath());
 		config.setMergeDexFiles(true);
 		SetupApplication flowDroid = new SetupApplication(config);
 		SootConfigForAndroid sootConfigForAndroid = new SootConfigForAndroid() {
@@ -192,8 +207,9 @@ public class CogniCryptAndroidAnalysis {
 		if (rulesLocation == null) {
 			
 			// TODO: Create a custom CryptoAnalysisException (or CogniCryptException)
+			// TODO: Update when constant changed CryptoAnalysis
 			throw new RuntimeException(
-					"Please specify a directory the CrySL rules (.cryptsl Files) are located in.");
+					"Please specify a directory the CrySL rules (" + CrySLModelReader.cryslFileEnding + " Files) are located in.");
 		}
 		
 		// TODO: Why iterate here through all files if CryptoAnalysis could do this
@@ -202,7 +218,7 @@ public class CogniCryptAndroidAnalysis {
 		// if (rules.isEmpty() {...}
 		// return rules;
 		
-		File[] listFiles = new File(rulesLocation).listFiles();
+		File[] listFiles = rulesLocation.listFiles();
 		for (File file : listFiles) {
 			
 			// TODO: Update when constant changed CryptoAnalysis
