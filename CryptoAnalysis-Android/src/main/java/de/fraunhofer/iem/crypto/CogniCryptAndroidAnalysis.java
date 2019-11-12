@@ -84,9 +84,44 @@ public class CogniCryptAndroidAnalysis {
 		return applicationClassFilter;
 	}
 
+    /**
+     * @param apkFile The Android platforms directory.
+     * @param platformsDirectory The Android platform which the .apk targets.
+     * @param rulesLocation The CrySL rules directory.
+     */
+    public CogniCryptAndroidAnalysis(File apkFile, File platformsDirectory, File rulesLocation) {
+        this(apkFile, platformsDirectory, rulesLocation, Collections.EMPTY_LIST);
+    }
+
+    /**
+     * @param apkFile The Android platforms directory.
+     * @param platformsDirectory The Android platform which the .apk targets.
+     * @param rulesLocation The CrySL rules directory.
+     * @param applicationClassFilter Collection of full qualified class names the analysis shall analyze explicitly.
+     *                               Settings this can increase analysis runtime. If null or empty this parameter gets ignored.
+     */
+    public CogniCryptAndroidAnalysis(File apkFile, File platformsDirectory, File rulesLocation,
+                                     Collection<String> applicationClassFilter) {
+        if (apkFile == null)
+            throw new IllegalArgumentException("Argument 'apkFile' must not be null.");
+        if (platformsDirectory == null)
+            throw new IllegalArgumentException("Argument 'platformsDirectory' must not be null.");
+        if (rulesLocation == null)
+            throw new IllegalArgumentException("Argument 'rulesLocation' must not be null.");
+
+        setApkFile(apkFile);
+        setPlatformsDirectory(platformsDirectory);
+        setRulesLocation(rulesLocation);
+
+        if (applicationClassFilter == null)
+            this.applicationClassFilter = Collections.EMPTY_LIST;
+        else
+            this.applicationClassFilter = applicationClassFilter;
+    }
+
 	/**
-	 * @param apkFile Absolute path of the Android platform which the .apk targets.
-	 * @param platformsDirectory Absolute path of the Android platforms directory.
+	 * @param apkFile Absolute path of the Android platforms directory.
+	 * @param platformsDirectory Absolute path of the Android platform which the .apk targets.
 	 * @param rulesLocation Absolute path of the CrySL rules directory.
 	 */
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation) {
@@ -95,7 +130,7 @@ public class CogniCryptAndroidAnalysis {
 
 	/**
 	 * @param apkFile Absolute path of the Android platform which the .apk targets.
-	 * @param platformsDirectory Absolute path of the Android platforms directory.
+	 * @param platformsDirectory Absolute path of the Android platform which the .apk targets.
 	 * @param rulesLocation Absolute path of the CrySL rules directory.
 	 * @param applicationClassFilter Collection of full qualified class names the analysis shall analyze explicitly.
 	 *                               Settings this can increase analysis runtime. If null or empty this parameter gets ignored.
