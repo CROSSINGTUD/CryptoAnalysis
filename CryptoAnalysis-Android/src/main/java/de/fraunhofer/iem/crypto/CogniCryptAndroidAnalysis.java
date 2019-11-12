@@ -2,6 +2,7 @@ package de.fraunhofer.iem.crypto;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -74,6 +75,15 @@ public class CogniCryptAndroidAnalysis {
 	 * @param apkFile Absolute path of the Android platform which the .apk targets.
 	 * @param platformsDirectory Absolute path of the Android platforms directory.
 	 * @param rulesLocation Absolute path of the CrySL rules directory.
+	 */
+	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation) {
+		this(apkFile, platformsDirectory, rulesLocation, Collections.EMPTY_LIST);
+	}
+
+	/**
+	 * @param apkFile Absolute path of the Android platform which the .apk targets.
+	 * @param platformsDirectory Absolute path of the Android platforms directory.
+	 * @param rulesLocation Absolute path of the CrySL rules directory.
 	 * @param applicationClassFilter Collection of full qualified class names the analysis shall analyze explicitly.
 	 *                               Settings this can increase analysis runtime. If null or empty this parameter gets ignored.
 	 */
@@ -84,6 +94,7 @@ public class CogniCryptAndroidAnalysis {
 		this.rulesLocation = rulesLocation;
 		this.applicationClassFilter = applicationClassFilter;
 	}
+
 
 	public Collection<AbstractError> run() {
 		logger.info("Running static analysis on APK file " + apkFile);
