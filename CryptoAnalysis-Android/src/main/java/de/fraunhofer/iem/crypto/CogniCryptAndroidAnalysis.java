@@ -34,10 +34,6 @@ import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
 public class CogniCryptAndroidAnalysis {
-	public static void main(String... args) {
-		CogniCryptAndroidAnalysis analysis = new CogniCryptAndroidAnalysis(args[0], args[1], args[2],Lists.<String>newArrayList());
-		analysis.run();
-	}
 
 	private static final Logger logger = LoggerFactory.getLogger(CogniCryptAndroidAnalysis.class);
 	private final String apkFile;
@@ -108,6 +104,10 @@ public class CogniCryptAndroidAnalysis {
 			this.applicationClassFilter = applicationClassFilter;
 	}
 
+	public static void main(String... args) {
+		CogniCryptAndroidAnalysis analysis = new CogniCryptAndroidAnalysis(args[0], args[1], args[2], Lists.newArrayList());
+		analysis.run();
+	}
 
 	public Collection<AbstractError> run() {
 		logger.info("Running static analysis on APK file " + apkFile);
