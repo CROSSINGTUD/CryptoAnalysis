@@ -42,22 +42,41 @@ public class CogniCryptAndroidAnalysis {
 	private final String rulesLocation;
 	private final Collection<String> applicationClassFilter;
 
+	/**
+	 * @return The path to the .apk file that shall be analyzed.
+	 */
 	public String getApkFile(){
 		return apkFile;
 	}
 
+	/**
+	 * @return The location of the Android platform which the .apk targets.
+	 */
 	public String getPlatformsDirectory(){
 		return platformsDirectory;
 	}
 
+	/**
+	 * @return The location of the CrySL rules.
+	 */
 	public String getRulesLocation(){
 		return rulesLocation;
 	}
 
+	/**
+	 * @return All full qualified class names that will be analyzed. If empty all classes of the Android App will be analyzed.
+	 */
 	public Collection<String> getApplicationClassFilter(){
 		return applicationClassFilter;
 	}
 
+	/**
+	 * @param apkFile Absolute path of the Android platform which the .apk targets.
+	 * @param platformsDirectory Absolute path of the Android platforms directory.
+	 * @param rulesLocation Absolute path of the CrySL rules directory.
+	 * @param applicationClassFilter Collection of full qualified class names the analysis shall analyze explicitly.
+	 *                               Settings this can increase analysis runtime. If null or empty this parameter gets ignored.
+	 */
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesLocation,
 			Collection<String> applicationClassFilter) {
 		this.apkFile = apkFile;
