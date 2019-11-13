@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class CryptSLRuleReader {
 	private static CrySLModelReader csmr;
 
-	private static CrySLModelReader GetReader(){
+	private static CrySLModelReader getReader(){
 		if (csmr == null)
 		{
 			try {
@@ -35,7 +35,7 @@ public class CryptSLRuleReader {
 	}
 
 	public static CryptSLRule readFromSourceFile(File file) {
-		return GetReader().readRule(file);
+		return getReader().readRule(file);
 	}
 
 	public static List<CryptSLRule> readFromDirectory(File directory) {
@@ -51,7 +51,7 @@ public class CryptSLRuleReader {
 		if (crypSLFiles.size() == 0)
 			return new ArrayList<>();
 
-		CrySLModelReader reader = GetReader();
+		CrySLModelReader reader = getReader();
 		List<CryptSLRule> rules = new ArrayList<>();
 		for (File file :crypSLFiles)
 			rules.add(reader.readRule(file));
