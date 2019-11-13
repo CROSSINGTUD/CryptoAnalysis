@@ -238,32 +238,19 @@ public class CogniCryptAndroidAnalysis {
     }
 
 	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();
+
 		if (rulesLocation == null) {
-			
 			// TODO: Create a custom CryptoAnalysisException (or CogniCryptException)
 			// TODO: Update when constant changed CryptoAnalysis
 			throw new RuntimeException(
 					"Please specify a directory the CrySL rules (" + CrySLModelReader.cryslFileEnding + " Files) are located in.");
 		}
-		
-		// TODO: Why iterate here through all files if CryptoAnalysis could do this
-		// Suggestion: 
-		// List<CryptSLRule> rules = CryptSLRuleReader.readFromSourceFolder(file, recursive: true)
-		// if (rules.isEmpty() {...}
-		// return rules;
-		
-		File[] listFiles = rulesLocation.listFiles();
-		for (File file : listFiles) {
-			
-			// TODO: Update when constant changed CryptoAnalysis
-			if (file != null && file.getName().endsWith(CrySLModelReader.cryslFileEnding)) {
-				rules.add(CryptSLRuleReader.readFromSourceFile(file));
-			}
-		}
+
+		// TODO: Add option for recursive check
+		List<CryptSLRule> rules =  CryptSLRuleReader.readFromDirectory(rulesLocation);
 		if (rules.isEmpty())
 			System.out.println("CogniCrypt did not find any rules to start the analysis for. \n "
-					+ "It checked for rules in " + rulesLocation);
+									   + "It checked for rules in " + rulesLocation);
 		return rules;
 	}
 
