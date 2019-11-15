@@ -73,6 +73,9 @@ public class CrySLModelReader {
 	}
 
 	public CryptSLRule readRule(InputStream stream, String virtualFileName) {
+		if (!virtualFileName.endsWith(cryslFileEnding))
+			return null;
+
 		URI uri = URI.createURI(virtualFileName);
 		Resource resource;
 		try {
