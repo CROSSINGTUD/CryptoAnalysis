@@ -1,89 +1,43 @@
 package crypto.cryptslhandler;
 
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.common.types.JvmExecutable;
-import org.eclipse.xtext.common.types.JvmFormalParameter;
-import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
-import org.eclipse.xtext.resource.XtextResource;
-import org.eclipse.xtext.resource.XtextResourceSet;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
 import crypto.interfaces.ICryptSLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLArithmeticConstraint;
+import crypto.rules.*;
 import crypto.rules.CryptSLArithmeticConstraint.ArithOp;
-import crypto.rules.CryptSLComparisonConstraint;
 import crypto.rules.CryptSLComparisonConstraint.CompOp;
-import crypto.rules.CryptSLCondPredicate;
-import crypto.rules.CryptSLConstraint;
 import crypto.rules.CryptSLConstraint.LogOps;
-import crypto.rules.CryptSLForbiddenMethod;
-import crypto.rules.CryptSLMethod;
-import crypto.rules.CryptSLObject;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLSplitter;
-import crypto.rules.CryptSLValueConstraint;
-import crypto.rules.ParEqualsPredicate;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
 import de.darmstadt.tu.crossing.CryptSLStandaloneSetup;
 import de.darmstadt.tu.crossing.constraints.CrySLArithmeticOperator;
 import de.darmstadt.tu.crossing.constraints.CrySLComparisonOperator;
 import de.darmstadt.tu.crossing.constraints.CrySLLogicalOperator;
-import de.darmstadt.tu.crossing.cryptSL.ArithmeticExpression;
-import de.darmstadt.tu.crossing.cryptSL.ArithmeticOperator;
-import de.darmstadt.tu.crossing.cryptSL.ArrayElements;
-import de.darmstadt.tu.crossing.cryptSL.ComparingOperator;
-import de.darmstadt.tu.crossing.cryptSL.ComparisonExpression;
-import de.darmstadt.tu.crossing.cryptSL.Constraint;
-import de.darmstadt.tu.crossing.cryptSL.DestroysBlock;
-import de.darmstadt.tu.crossing.cryptSL.Domainmodel;
-import de.darmstadt.tu.crossing.cryptSL.EnsuresBlock;
-import de.darmstadt.tu.crossing.cryptSL.Event;
-import de.darmstadt.tu.crossing.cryptSL.Expression;
-import de.darmstadt.tu.crossing.cryptSL.ForbMethod;
-import de.darmstadt.tu.crossing.cryptSL.ForbiddenBlock;
-import de.darmstadt.tu.crossing.cryptSL.Literal;
-import de.darmstadt.tu.crossing.cryptSL.LiteralExpression;
-import de.darmstadt.tu.crossing.cryptSL.LogicalImply;
-import de.darmstadt.tu.crossing.cryptSL.LogicalOperator;
 import de.darmstadt.tu.crossing.cryptSL.Object;
-import de.darmstadt.tu.crossing.cryptSL.ObjectDecl;
-import de.darmstadt.tu.crossing.cryptSL.Order;
-import de.darmstadt.tu.crossing.cryptSL.PreDefinedPredicates;
-import de.darmstadt.tu.crossing.cryptSL.Pred;
-import de.darmstadt.tu.crossing.cryptSL.PredLit;
-import de.darmstadt.tu.crossing.cryptSL.ReqPred;
-import de.darmstadt.tu.crossing.cryptSL.SimpleOrder;
-import de.darmstadt.tu.crossing.cryptSL.SuPar;
-import de.darmstadt.tu.crossing.cryptSL.SuParList;
-import de.darmstadt.tu.crossing.cryptSL.SuperType;
-import de.darmstadt.tu.crossing.cryptSL.UnaryPreExpression;
-import de.darmstadt.tu.crossing.cryptSL.UseBlock;
+import de.darmstadt.tu.crossing.cryptSL.*;
 import de.darmstadt.tu.crossing.cryptSL.impl.DomainmodelImpl;
 import de.darmstadt.tu.crossing.cryptSL.impl.ObjectImpl;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.xtext.common.types.JvmExecutable;
+import org.eclipse.xtext.common.types.JvmFormalParameter;
+import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.resource.XtextResourceSet;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.*;
+import java.util.Map.Entry;
 
 
 public class CrySLModelReader {
@@ -118,24 +72,47 @@ public class CrySLModelReader {
 
 	}
 
+	public CryptSLRule readRule(InputStream stream, String virtualFileName) {
+		URI uri = URI.createURI(virtualFileName);
+		Resource resource;
+		try {
+			resource = resourceSet.getURIResourceMap().get(uri);
+			if (resource == null){
+				resource = resourceSet.createResource(uri);
+				resource.load(stream, Collections.EMPTY_MAP);
+			}
+		}
+		catch (IOException e) {
+			return null;
+		}
+		
+		return createRuleFromResource(resource);
+	}
+
 	public CryptSLRule readRule(File ruleFile) {
 		final String fileName = ruleFile.getName();
 		final String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!cryslFileEnding.equals(extension)) {
+		if (!cryslFileEnding.equals(extension))
 			return null;
-		}
+
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
-		EcoreUtil.resolveAll(resourceSet);
-		final EObject eObject = (EObject) resource.getContents().get(0);
+		return createRuleFromResource(resource);
+	}
+
+	private CryptSLRule createRuleFromResource(Resource resource) {
+		if (resource == null)
+			return null;
+
+		final EObject eObject = resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
 		String curClass = dm.getJavaType().getQualifiedName();
 		final EnsuresBlock ensure = dm.getEnsure();
 		final Map<ParEqualsPredicate, SuperType> pre_preds = Maps.newHashMap();
 		final DestroysBlock destroys = dm.getDestroy();
-		
+
 		Expression order = dm.getOrder();
 		if (order instanceof Order) {
-				validateOrder((Order) order);
+			validateOrder((Order) order);
 		}
 		if (destroys != null) {
 			pre_preds.putAll(getKills(destroys.getPred()));
@@ -159,11 +136,13 @@ public class CrySLModelReader {
 				actPreds.add(pred.tobasicPredicate());
 			} else {
 				actPreds.add(new CryptSLCondPredicate(pred.getBaseObject(), pred.getPredName(), pred.getParameters(), pred.isNegated(),
-						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond))));
+													  getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond))));
 			}
 		}
 		return new CryptSLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 	}
+
+
 	private void validateOrder(Order order) {
 		List<String> collected = new ArrayList<String>();
 		collected.addAll(collectLabelsFromExpression(order.getLeft()));
