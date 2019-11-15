@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
 
+import crypto.cryptslhandler.CrySLModelReader;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.cryptslhandler.CryslReaderUtils;
@@ -15,7 +16,7 @@ public class CrySLRulesetSelector {
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
-				return".cryptsl";
+				return CrySLModelReader.cryslFileEnding;
 			}
 		},
 	}
