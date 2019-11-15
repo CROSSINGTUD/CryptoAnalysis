@@ -35,6 +35,8 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CryptSLRule;
 import crypto.rules.CryptSLRuleReader;
 import crypto.analysis.CrySLRulesetSelector;
@@ -492,14 +494,33 @@ public class ProviderDetection {
 		File[] listFiles = new File(newRulesDirectory).listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(CRYPTSL)) {
-				try {
-					newCryptSLRules.add(CryptSLRuleReader.readFromSourceFile(file));
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				newCryptSLRules.add(CryptSLRuleReader.readFromSourceFile(file));
 			}
 		}
 		return newCryptSLRules;
 	}
+	
+	
+	/**
+	 * This method is used to get all the default CryptSL rules
+	 * 
+	 * @param rulesDirectory
+	 * 
+	 * @param rules
+	 */
+	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
+		File directory = new File(rulesDirectory);
+		
+		File[] listFiles = directory.listFiles();
+		for (File file : listFiles) {
+			if (file != null && file.getName().endsWith(CRYPTSL)) {
+				rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			}
+		}
+		if (rules.isEmpty())
+			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
+		
+		return rules;
+	}
+	//-----------------------------------------------------------------------------------------------------------------
 }
