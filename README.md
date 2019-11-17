@@ -34,7 +34,7 @@ CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from E
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
       --rulesDir=<absolute-path-to-crysl-source-code-format-rules> \
       --applicationCp=<absolute-application-path>
 ```
@@ -42,7 +42,7 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypt
 Optionally you can also start CogniCrypt<sub>SAST</sub> with binary rule files contained in [JCA-CrySL-rulesets.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/2.3).
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
       --rulesDir=<absolute-path-to-crysl-binary-format-rules> \
       --applicationCp=<absolute-application-path>
       --rulesInBin
@@ -51,8 +51,8 @@ java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypt
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-  --rulesDir=$(pwd)/CryptoAnalysis/src/test/resources/JavaCryptographicArchitecture \
+java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+  --rulesDir=$(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture \
   --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
