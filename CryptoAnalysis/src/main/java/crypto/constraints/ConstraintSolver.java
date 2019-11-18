@@ -5,15 +5,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import boomerang.jimple.Statement;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -42,9 +45,11 @@ import crypto.rules.CryptSLPredicate;
 import crypto.rules.CryptSLSplitter;
 import crypto.rules.CryptSLValueConstraint;
 import crypto.typestate.CryptSLMethodToSootMethod;
+import soot.Body;
 import soot.IntType;
 import soot.SootMethod;
 import soot.Type;
+import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -54,6 +59,7 @@ import soot.jimple.LongConstant;
 import soot.jimple.NewExpr;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+import soot.jimple.internal.JNewArrayExpr;
 
 public class ConstraintSolver {
 
@@ -597,7 +603,6 @@ public class ConstraintSolver {
 
 				for (ExtractedValue wrappedAllocSite : parsAndVals.get(wrappedCallSite)) {
 					final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
-
 					if (wrappedCallSite.getVarName().equals(varName)) {
 						InvokeExpr invoker = callSite.getInvokeExpr();
 						if (callSite.equals(allocSite)) {
@@ -617,12 +622,42 @@ public class ConstraintSolver {
 								} else {
 									varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								}
+							} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {								
+								soot.Value arrayLocal = ((AssignStmt) allocSite).getLeftOp();
+								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite, arrayLocal));
 							}
 						}
 					}
 				}
 			}
 			return varVal;
+		}
+		
+		/***
+		 * Function that finds the values assigned to a soot array.
+		 * @param callSite call site at which sootValue is involved
+		 * @param allocSite allocation site at which sootValue is involved
+		 * @param arrayLocal soot array local variable for which values are to be found
+		 * @return extracted array values
+		 */
+		private Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite, soot.Value arrayLocal){
+			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
+			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
+				if (methodBody != null) {
+					Iterator<Unit> unitIterator = methodBody.getUnits().snapshotIterator();
+					while (unitIterator.hasNext()) {
+						final Unit unit = unitIterator.next();
+						if (unit instanceof AssignStmt) {
+							AssignStmt uStmt = (AssignStmt) (unit);
+							soot.Value leftValue = uStmt.getLeftOp();
+							soot.Value rightValue = uStmt.getRightOp();
+							if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
+								arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
+							}
+						}
+					}
+				}
+			return arrVal;
 		}
 	}
 
