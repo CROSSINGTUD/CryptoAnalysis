@@ -1,6 +1,7 @@
 package crypto;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -8,6 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -61,6 +66,7 @@ public abstract class HeadlessCryptoScanner {
 	private static boolean PRE_ANALYSIS = false;
 	private static List<CryptSLRule> rules;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	private static String tempDir = System.getProperty("java.io.tmpdir");
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -145,6 +151,52 @@ public abstract class HeadlessCryptoScanner {
 		return sourceCryptoScanner;
 	}
 	
+	/**
+	 * Method to create a read the input stream and write the contents into a temporary jar file.
+	 * @param jarInputStream Input stream with contents of the jar
+	 * @param jarName Name of the jar
+	 * @return location of the temporary jar file
+	 */
+	protected static String createTemporaryJar(JarInputStream jarInputStream, String jarName) {
+		ZipEntry jarEntry;
+		String temporaryDirectoryPath = tempDir + jarName;
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(new File(temporaryDirectoryPath));
+			JarOutputStream jos = new JarOutputStream(fos);
+			byte[] buffer = new byte[4096];
+			while((jarEntry = jarInputStream.getNextEntry()) != null) {
+				if (jarEntry.getMethod() == 0) {
+					jos.putNextEntry(new JarEntry(jarEntry));
+				} else {
+					jos.putNextEntry(new JarEntry(jarEntry.getName()));
+				}
+				int len = jarInputStream.read(buffer);
+				while (len != -1) {
+					jos.write(buffer, 0, len);
+					len = jarInputStream.read(buffer);
+				}
+				jos.closeEntry();
+			}
+			jos.close();
+			fos.close();
+			jarInputStream.close();
+		} catch (IOException e) {
+			System.out.println("Failed to create a temporary jar file with exception: " + e.getMessage());
+		}
+		return temporaryDirectoryPath;
+	}
+	
+	/**
+	 * Method to delete the temporary jar file created using {@link #createTemporaryJar(JarInputStream, String)} method.
+	 * @param jarName Name of the jar
+	 */
+	public void deleteTemporaryJar(String jarName) {
+		File f = new File(tempDir + File.separator + jarName);
+		if (f.exists()) {
+			f.delete();
+		}
+	}
 
 	protected String getCSVOutputFile(){
 		return null;
