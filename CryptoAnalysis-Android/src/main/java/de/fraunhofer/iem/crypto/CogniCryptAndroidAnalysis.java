@@ -17,8 +17,8 @@ import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
 import crypto.reporting.CollectErrorListener;
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -114,7 +114,7 @@ public class CogniCryptAndroidAnalysis {
 			}
 
 		};
-		List<CryptSLRule> rules = getRules();
+		List<CrySLRule> rules = getRules();
 		logger.info("Loaded " + rules.size() + " CrySL rules");
 		logger.info("Running CogniCrypt Analysis");
 		scanner.scan(rules);
@@ -143,16 +143,16 @@ public class CogniCryptAndroidAnalysis {
         logger.info("Library classes: "+ Scene.v().getLibraryClasses().size());
     }
 
-	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();
+	protected List<CrySLRule> getRules() {
+		List<CrySLRule> rules = Lists.newArrayList();
 		if (rulesDirectory == null) {
 			throw new RuntimeException(
-					"Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
+					"Please specify a directory the CrySL rules (.cryslbin Files) are located in.");
 		}
 		File[] listFiles = new File(rulesDirectory).listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith("cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
+			if (file != null && file.getName().endsWith("cryslbin")) {
+				rules.add(CrySLRuleReader.readFromSourceFile(file));
 			}
 		}
 		if (rules.isEmpty())

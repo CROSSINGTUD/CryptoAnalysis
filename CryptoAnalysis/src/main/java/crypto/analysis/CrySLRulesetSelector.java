@@ -6,16 +6,16 @@ import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
 
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
-import crypto.cryptslhandler.CryslReaderUtils;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
+import crypto.cryslhandler.CryslReaderUtils;
 import org.apache.commons.io.FilenameUtils;
 
 public class CrySLRulesetSelector {
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
-				return".cryptsl";
+				return".crysl";
 			}
 		},
 	}
@@ -24,8 +24,8 @@ public class CrySLRulesetSelector {
 		JavaCryptographicArchitecture, BouncyCastle, Tink
 	}
 
-	public static List<CryptSLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) {
-		List<CryptSLRule> rules = Lists.newArrayList();
+	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) {
+		List<CrySLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
 			rules.addAll(getRulesset(rulesBasePath, ruleFormat, s));
 		}
@@ -41,7 +41,7 @@ public class CrySLRulesetSelector {
 	 * @param rulesetString
 	 * @return
 	 */
-	public static List<CryptSLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
+	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
 			String rulesetString) {
 		String[] set = rulesetString.split(",");
 		List<Ruleset> ruleset = Lists.newArrayList();
@@ -62,32 +62,32 @@ public class CrySLRulesetSelector {
 		return makeFromRuleset(rulesBasePath, ruleFormat, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
 
-	private static List<CryptSLRule> getRulesset(String rulesBasePath, RuleFormat ruleFormat, Ruleset s) {
-		List<CryptSLRule> rules = Lists.newArrayList();
+	private static List<CrySLRule> getRulesset(String rulesBasePath, RuleFormat ruleFormat, Ruleset s) {
+		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
-			rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			rules.add(CrySLRuleReader.readFromSourceFile(file));
 		}
 		return rules;
 	}
 
-	public static CryptSLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
+	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
 			String rulename) {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
 		if (file.exists()) {
-			CryptSLRule rule = CryptSLRuleReader.readFromSourceFile(file);
+			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
 			return rule;
 		}
 		return null;
 	}
 
-	public static List<CryptSLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
+	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
 			throw new RuntimeException("The specified path is not a directory" + resourcesPath);
-		List<CryptSLRule> rules = Lists.newArrayList();
+		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
-			rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			rules.add(CrySLRuleReader.readFromSourceFile(file));
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found in " + resourcesPath);

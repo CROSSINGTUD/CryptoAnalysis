@@ -9,9 +9,9 @@ import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.rules.CryptSLForbiddenMethod;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLForbiddenMethod;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
@@ -23,12 +23,12 @@ import typestate.TransitionFunction;
 
 public class ClassSpecification {
 	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
-	private CryptSLRule cryptSLRule;
+	private CrySLRule crySLRule;
 	private final CryptoScanner cryptoScanner;
 	private final SootBasedStateMachineGraph fsm;
 
-	public ClassSpecification(final CryptSLRule rule, final CryptoScanner cScanner) {
-		this.cryptSLRule = rule;
+	public ClassSpecification(final CrySLRule rule, final CryptoScanner cScanner) {
+		this.crySLRule = rule;
 		this.cryptoScanner = cScanner;
 		this.fsm = new SootBasedStateMachineGraph(rule.getUsagePattern());
 		this.extendedIdealAnalysis = new ExtendedIDEALAnaylsis() {
@@ -55,7 +55,7 @@ public class ClassSpecification {
 	}
 
 	public boolean isLeafRule() {
-		return cryptSLRule.isLeafRule();
+		return crySLRule.isLeafRule();
 	}
 
 	
@@ -67,7 +67,7 @@ public class ClassSpecification {
 
 	@Override
 	public String toString() {
-		return cryptSLRule.getClassName().toString();
+		return crySLRule.getClassName().toString();
 	}
 
 	public void invokesForbiddenMethod(SootMethod m) {
@@ -81,22 +81,22 @@ public class ClassSpecification {
 					continue;
 				InvokeExpr invokeExpr = stmt.getInvokeExpr();
 				SootMethod method = invokeExpr.getMethod();
-				Optional<CryptSLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
+				Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
 				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CryptSLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
+					cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CrySLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
 				}
 			}
 		}
 	}
 
-	private Optional<CryptSLForbiddenMethod> isForbiddenMethod(SootMethod method) {
+	private Optional<CrySLForbiddenMethod> isForbiddenMethod(SootMethod method) {
 		// TODO replace by real specification once available.
-		List<CryptSLForbiddenMethod> forbiddenMethods = cryptSLRule.getForbiddenMethods();
+		List<CrySLForbiddenMethod> forbiddenMethods = crySLRule.getForbiddenMethods();
 //		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
-		for(CryptSLForbiddenMethod m : forbiddenMethods){
+		for(CrySLForbiddenMethod m : forbiddenMethods){
 			if(!m.getSilent()){
-				Collection<SootMethod> matchingMethod = CryptSLMethodToSootMethod.v().convert(m.getMethod());
+				Collection<SootMethod> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
 				if(matchingMethod.contains(method))
 					return Optional.of(m);
 				
@@ -106,15 +106,15 @@ public class ClassSpecification {
 	}
 
 
-	public CryptSLRule getRule() {
-		return cryptSLRule;
+	public CrySLRule getRule() {
+		return crySLRule;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((cryptSLRule == null) ? 0 : cryptSLRule.hashCode());
+		result = prime * result + ((crySLRule == null) ? 0 : crySLRule.hashCode());
 		return result;
 	}
 
@@ -127,10 +127,10 @@ public class ClassSpecification {
 		if (getClass() != obj.getClass())
 			return false;
 		ClassSpecification other = (ClassSpecification) obj;
-		if (cryptSLRule == null) {
-			if (other.cryptSLRule != null)
+		if (crySLRule == null) {
+			if (other.crySLRule != null)
 				return false;
-		} else if (!cryptSLRule.equals(other.cryptSLRule))
+		} else if (!crySLRule.equals(other.crySLRule))
 			return false;
 		return true;
 	}

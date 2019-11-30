@@ -4,7 +4,7 @@ import java.util.Set;
 
 import boomerang.jimple.Statement;
 
-public interface ISLConstraint extends java.io.Serializable, ICryptSLPredicateParameter {
+public interface ISLConstraint extends java.io.Serializable, ICrySLPredicateParameter {
 
 	public Set<String> getInvolvedVarNames(); 
 

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import boomerang.jimple.Statement;
 import crypto.interfaces.ISLConstraint;
 
-public abstract class CryptSLLiteral implements ISLConstraint, Serializable {
+public abstract class CrySLLiteral implements ISLConstraint, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private Statement location;

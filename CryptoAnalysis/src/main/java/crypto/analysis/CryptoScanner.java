@@ -17,8 +17,8 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.predicates.PredicateHandler;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import soot.MethodOrMethodContext;
@@ -62,12 +62,12 @@ public abstract class CryptoScanner {
 	};
 
 	public CryptoScanner() {
-		CryptSLMethodToSootMethod.reset();
+		CrySLMethodToSootMethod.reset();
 	}
 
-	public void scan(List<CryptSLRule> specs) {
+	public void scan(List<CrySLRule> specs) {
 		int processedSeeds = 0;
-		for (CryptSLRule rule : specs) {
+		for (CrySLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
 		CrySLResultsReporter listener = getAnalysisListener();

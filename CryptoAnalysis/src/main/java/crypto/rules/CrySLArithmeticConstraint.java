@@ -3,9 +3,9 @@ package crypto.rules;
 import java.util.HashSet;
 import java.util.Set;
 
-import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ICrySLPredicateParameter;
 
-public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.io.Serializable {
+public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,10 +16,10 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	 */
 	
 	private ArithOp operator;
-	private ICryptSLPredicateParameter  left;
-	private ICryptSLPredicateParameter  right;
+	private ICrySLPredicateParameter  left;
+	private ICrySLPredicateParameter  right;
 	
-	public CryptSLArithmeticConstraint(ICryptSLPredicateParameter l, ICryptSLPredicateParameter  r, ArithOp op) {
+	public CrySLArithmeticConstraint(ICrySLPredicateParameter l, ICrySLPredicateParameter  r, ArithOp op) {
 		left = l;
 		right = r;
 		operator = op;
@@ -35,14 +35,14 @@ public class CryptSLArithmeticConstraint extends CryptSLLiteral implements java.
 	/**
 	 * @return the left
 	 */
-	public ICryptSLPredicateParameter getLeft() {
+	public ICrySLPredicateParameter getLeft() {
 		return left;
 	}
 
 	/**
 	 * @return the right
 	 */
-	public ICryptSLPredicateParameter getRight() {
+	public ICrySLPredicateParameter getRight() {
 		return right;
 	}
 

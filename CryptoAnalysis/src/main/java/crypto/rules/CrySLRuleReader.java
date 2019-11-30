@@ -3,12 +3,12 @@ package crypto.rules;
 import java.io.File;
 import java.net.MalformedURLException;
 
-import crypto.cryptslhandler.CrySLModelReader;
+import crypto.cryslhandler.CrySLModelReader;
 
-public class CryptSLRuleReader {
+public class CrySLRuleReader {
 	private static CrySLModelReader csmr;
 	
-	public static CryptSLRule readFromSourceFile(File file) {
+	public static CrySLRule readFromSourceFile(File file) {
 		if(csmr == null)
 			try {
 				csmr = new CrySLModelReader();

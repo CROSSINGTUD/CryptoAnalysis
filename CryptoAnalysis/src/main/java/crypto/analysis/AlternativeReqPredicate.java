@@ -7,22 +7,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import boomerang.jimple.Statement;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
+import crypto.rules.CrySLPredicate;
 
 public class AlternativeReqPredicate implements ISLConstraint {
 
 	private static final long serialVersionUID = 9111353268603202392L;
-	private final List<CryptSLPredicate> alternatives;
+	private final List<CrySLPredicate> alternatives;
 	private Statement stmt;
 
-	public AlternativeReqPredicate(CryptSLPredicate alternativeOne,  Statement stmt) {
-		this.alternatives = new ArrayList<CryptSLPredicate>();
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne,  Statement stmt) {
+		this.alternatives = new ArrayList<CrySLPredicate>();
 		this.alternatives.add(alternativeOne);
 		this.stmt = stmt;	
 	}
 	
-	public AlternativeReqPredicate(CryptSLPredicate alternativeOne, CryptSLPredicate alternativeTwo, Statement stmt) {
-		this.alternatives = new ArrayList<CryptSLPredicate>();
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, Statement stmt) {
+		this.alternatives = new ArrayList<CrySLPredicate>();
 		this.alternatives.add(alternativeOne);
 		this.alternatives.add(alternativeTwo);
 		this.stmt = stmt;
@@ -76,7 +76,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 	@Override
 	public Set<String> getInvolvedVarNames() {
 		Set<String> involvedVarNames = new HashSet<>();
-		for (CryptSLPredicate alt : alternatives) {
+		for (CrySLPredicate alt : alternatives) {
 			involvedVarNames.addAll(alt.getInvolvedVarNames());
 		}
 		return involvedVarNames;
@@ -87,11 +87,11 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<CryptSLPredicate> getAlternatives() {
+	public List<CrySLPredicate> getAlternatives() {
 		return alternatives;
 	}
 	
-	public boolean addAlternative(CryptSLPredicate newAlt) {
+	public boolean addAlternative(CrySLPredicate newAlt) {
 		return alternatives.add(newAlt);
 	}
 

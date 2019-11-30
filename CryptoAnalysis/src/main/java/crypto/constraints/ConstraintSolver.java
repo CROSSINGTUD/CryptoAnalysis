@@ -22,7 +22,7 @@ import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
-import crypto.analysis.RequiredCryptSLPredicate;
+import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -33,18 +33,18 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLArithmeticConstraint;
-import crypto.rules.CryptSLComparisonConstraint;
-import crypto.rules.CryptSLConstraint;
-import crypto.rules.CryptSLConstraint.LogOps;
-import crypto.rules.CryptSLMethod;
-import crypto.rules.CryptSLObject;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLSplitter;
-import crypto.rules.CryptSLValueConstraint;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLArithmeticConstraint;
+import crypto.rules.CrySLComparisonConstraint;
+import crypto.rules.CrySLConstraint;
+import crypto.rules.CrySLConstraint.LogOps;
+import crypto.rules.CrySLMethod;
+import crypto.rules.CrySLObject;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLSplitter;
+import crypto.rules.CrySLValueConstraint;
+import crypto.typestate.CrySLMethodToSootMethod;
 import soot.Body;
 import soot.IntType;
 import soot.SootMethod;
@@ -91,14 +91,14 @@ public class ConstraintSolver {
 			}
 
 			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
-				if (cons instanceof CryptSLPredicate) {
-					RequiredCryptSLPredicate pred = retrieveValuesForPred(cons);
+				if (cons instanceof CrySLPredicate) {
+					RequiredCrySLPredicate pred = retrieveValuesForPred(cons);
 					relConstraints.add(pred.getPred());
 					requiredPredicates.add(pred);
-				} else if (cons instanceof CryptSLConstraint) {
-					ISLConstraint right = ((CryptSLConstraint) cons).getRight();
-					if (right instanceof CryptSLPredicate && !predefinedPreds.contains(((CryptSLPredicate) right).getPredName())) {
-						requiredPredicates.add(collectAlternativePredicates((CryptSLConstraint) cons, null));
+				} else if (cons instanceof CrySLConstraint) {
+					ISLConstraint right = ((CrySLConstraint) cons).getRight();
+					if (right instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) right).getPredName())) {
+						requiredPredicates.add(collectAlternativePredicates((CrySLConstraint) cons, null));
 					} else {
 						relConstraints.add(cons);
 					}
@@ -110,32 +110,32 @@ public class ConstraintSolver {
 		this.reporter = crySLResultsReporter;
 	}
 
-	private ISLConstraint collectAlternativePredicates(CryptSLConstraint cons, AlternativeReqPredicate alt) {
-		CryptSLPredicate right = (CryptSLPredicate) cons.getRight();
+	private ISLConstraint collectAlternativePredicates(CrySLConstraint cons, AlternativeReqPredicate alt) {
+		CrySLPredicate right = (CrySLPredicate) cons.getRight();
 		if (alt == null) {
 			alt = new AlternativeReqPredicate(right, right.getLocation());
 		} else {
 			alt.addAlternative(right);
 		}
 
-		if (cons.getLeft() instanceof CryptSLPredicate) {
-			alt.addAlternative((CryptSLPredicate) cons.getLeft());
+		if (cons.getLeft() instanceof CrySLPredicate) {
+			alt.addAlternative((CrySLPredicate) cons.getLeft());
 		} else {
-			return collectAlternativePredicates((CryptSLConstraint) cons.getLeft(), alt);
+			return collectAlternativePredicates((CrySLConstraint) cons.getLeft(), alt);
 		}
 
 		return alt;
 	}
 
-	private RequiredCryptSLPredicate retrieveValuesForPred(ISLConstraint cons) {
-		CryptSLPredicate pred = (CryptSLPredicate) cons;
+	private RequiredCrySLPredicate retrieveValuesForPred(ISLConstraint cons) {
+		CrySLPredicate pred = (CrySLPredicate) cons;
 		for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
-			for (ICryptSLPredicateParameter p : pred.getParameters()) {
+			for (ICrySLPredicateParameter p : pred.getParameters()) {
 				// TODO: FIX Cipher rule
 				if (p.getName().equals("transformation"))
 					continue;
 				if (cwpi.getVarName().equals(p.getName())) {
-					return new RequiredCryptSLPredicate(pred, cwpi.stmt());
+					return new RequiredCrySLPredicate(pred, cwpi.stmt());
 				}
 			}
 		}
@@ -173,14 +173,14 @@ public class ConstraintSolver {
 	}
 
 	public EvaluableConstraint createConstraint(ISLConstraint con) {
-		if (con instanceof CryptSLComparisonConstraint) {
-			return new ComparisonConstraint((CryptSLComparisonConstraint) con);
-		} else if (con instanceof CryptSLValueConstraint) {
-			return new ValueConstraint((CryptSLValueConstraint) con);
-		} else if (con instanceof CryptSLPredicate) {
-			return new PredicateConstraint((CryptSLPredicate) con);
-		} else if (con instanceof CryptSLConstraint) {
-			return new BinaryConstraint((CryptSLConstraint) con);
+		if (con instanceof CrySLComparisonConstraint) {
+			return new ComparisonConstraint((CrySLComparisonConstraint) con);
+		} else if (con instanceof CrySLValueConstraint) {
+			return new ValueConstraint((CrySLValueConstraint) con);
+		} else if (con instanceof CrySLPredicate) {
+			return new PredicateConstraint((CrySLPredicate) con);
+		} else if (con instanceof CrySLConstraint) {
+			return new BinaryConstraint((CrySLConstraint) con);
 		}
 		return null;
 	}
@@ -201,13 +201,13 @@ public class ConstraintSolver {
 
 	private class BinaryConstraint extends EvaluableConstraint {
 
-		public BinaryConstraint(CryptSLConstraint c) {
+		public BinaryConstraint(CrySLConstraint c) {
 			super(c);
 		}
 
 		@Override
 		public void evaluate() {
-			CryptSLConstraint binaryConstraint = (CryptSLConstraint) origin;
+			CrySLConstraint binaryConstraint = (CrySLConstraint) origin;
 			EvaluableConstraint left = createConstraint(binaryConstraint.getLeft());
 			EvaluableConstraint right = createConstraint(binaryConstraint.getRight());
 			left.evaluate();
@@ -251,33 +251,33 @@ public class ConstraintSolver {
 
 	public class PredicateConstraint extends EvaluableConstraint {
 
-		public PredicateConstraint(CryptSLPredicate c) {
+		public PredicateConstraint(CrySLPredicate c) {
 			super(c);
 		}
 
 		@Override
 		public void evaluate() {
-			CryptSLPredicate predicateConstraint = (CryptSLPredicate) origin;
+			CrySLPredicate predicateConstraint = (CrySLPredicate) origin;
 			String predName = predicateConstraint.getPredName();
 			if (predefinedPreds.contains(predName)) {
 				handlePredefinedNames(predicateConstraint);
 			}
 		}
 
-		private void handlePredefinedNames(CryptSLPredicate pred) {
+		private void handlePredefinedNames(CrySLPredicate pred) {
 
-			List<ICryptSLPredicateParameter> parameters = pred.getParameters();
+			List<ICrySLPredicateParameter> parameters = pred.getParameters();
 			switch (pred.getPredName()) {
 				case "callTo":
-					List<ICryptSLPredicateParameter> predMethods = parameters;
-					for (ICryptSLPredicateParameter predMethod : predMethods) {
+					List<ICrySLPredicateParameter> predMethods = parameters;
+					for (ICrySLPredicateParameter predMethod : predMethods) {
 						// check whether predMethod is in foundMethods, which type-state analysis has to figure out
-						CryptSLMethod reqMethod = (CryptSLMethod) predMethod;
+						CrySLMethod reqMethod = (CrySLMethod) predMethod;
 						for (Statement unit : collectedCalls) {
 							if (!(unit.isCallsite()))
 								continue;
 							SootMethod foundCall = ((Stmt) unit.getUnit().get()).getInvokeExpr().getMethod();
-							Collection<SootMethod> convert = CryptSLMethodToSootMethod.v().convert(reqMethod);
+							Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
 							if (convert.contains(foundCall)) {
 								return;
 							}
@@ -289,16 +289,16 @@ public class ConstraintSolver {
 					if (collectedCalls.isEmpty()) {
 						return;
 					}
-					List<ICryptSLPredicateParameter> predForbiddenMethods = parameters;
-					for (ICryptSLPredicateParameter predForbMethod : predForbiddenMethods) {
+					List<ICrySLPredicateParameter> predForbiddenMethods = parameters;
+					for (ICrySLPredicateParameter predForbMethod : predForbiddenMethods) {
 						// check whether predForbMethod is in foundForbMethods, which forbidden-methods analysis has to figure out
-						CryptSLMethod reqMethod = ((CryptSLMethod) predForbMethod);
+						CrySLMethod reqMethod = ((CrySLMethod) predForbMethod);
 
 						for (Statement call : collectedCalls) {
 							if (!call.isCallsite())
 								continue;
 							SootMethod foundCall = call.getUnit().get().getInvokeExpr().getMethod();
-							Collection<SootMethod> convert = CryptSLMethodToSootMethod.v().convert(reqMethod);
+							Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
 							if (convert.contains(foundCall)) {
 								errors.add(new ForbiddenMethodError(call, classSpec.getRule(), foundCall, convert));
 								return;
@@ -310,7 +310,7 @@ public class ConstraintSolver {
 					// pred looks as follows: neverTypeOf($varName, $type)
 					// -> first parameter is always the variable
 					// -> second parameter is always the type
-					String varName = ((CryptSLObject) parameters.get(0)).getVarName();
+					String varName = ((CrySLObject) parameters.get(0)).getVarName();
 					for (CallSiteWithParamIndex cs : parameterAnalysisQuerySites) {
 						if (cs.getVarName().equals(varName)) {
 							Collection<Type> vals = propagatedTypes.get(cs);
@@ -331,7 +331,7 @@ public class ConstraintSolver {
 					return;
 				case "notHardCoded":
 					// TODO: Add implementation for notHardCoded predicate
-					String arg = ((CryptSLObject) pred.getParameters().get(0)).getVarName();
+					String arg = ((CrySLObject) pred.getParameters().get(0)).getVarName();
 					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
 						if (cs.getVarName().equals(arg)) {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
@@ -344,7 +344,7 @@ public class ConstraintSolver {
 					}
 					return;
 				case "instanceOf":
-					varName = ((CryptSLObject) parameters.get(0)).getVarName();
+					varName = ((CrySLObject) parameters.get(0)).getVarName();
 					for (CallSiteWithParamIndex cs : parameterAnalysisQuerySites) {
 						if (cs.getVarName().equals(varName)) {
 							Collection<Type> vals = propagatedTypes.get(cs);
@@ -364,13 +364,13 @@ public class ConstraintSolver {
 
 	public class ComparisonConstraint extends EvaluableConstraint {
 
-		public ComparisonConstraint(CryptSLComparisonConstraint c) {
+		public ComparisonConstraint(CrySLComparisonConstraint c) {
 			super(c);
 		}
 
 		@Override
 		public void evaluate() {
-			CryptSLComparisonConstraint compConstraint = (CryptSLComparisonConstraint) origin;
+			CrySLComparisonConstraint compConstraint = (CrySLComparisonConstraint) origin;
 
 			Map<Integer, CallSiteWithExtractedValue> left = evaluate(compConstraint.getLeft());
 			Map<Integer, CallSiteWithExtractedValue> right = evaluate(compConstraint.getRight());
@@ -420,7 +420,7 @@ public class ConstraintSolver {
 			}
 		}
 
-		private Map<Integer, CallSiteWithExtractedValue> evaluate(CryptSLArithmeticConstraint arith) {
+		private Map<Integer, CallSiteWithExtractedValue> evaluate(CrySLArithmeticConstraint arith) {
 			Map<Integer, CallSiteWithExtractedValue> left = extractValueAsInt(arith.getLeft(), arith);
 			Map<Integer, CallSiteWithExtractedValue> right = extractValueAsInt(arith.getRight(), arith);
 			for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
@@ -460,9 +460,9 @@ public class ConstraintSolver {
 			return results;
 		}
 
-		private Map<Integer, CallSiteWithExtractedValue> extractValueAsInt(ICryptSLPredicateParameter par, CryptSLArithmeticConstraint arith) {
-			if (par instanceof CryptSLPredicate) {
-				PredicateConstraint predicateConstraint = new PredicateConstraint((CryptSLPredicate) par);
+		private Map<Integer, CallSiteWithExtractedValue> extractValueAsInt(ICrySLPredicateParameter par, CrySLArithmeticConstraint arith) {
+			if (par instanceof CrySLPredicate) {
+				PredicateConstraint predicateConstraint = new PredicateConstraint((CrySLPredicate) par);
 				predicateConstraint.evaluate();
 				if (!predicateConstraint.getErrors().isEmpty()) {
 					for (AbstractError err : predicateConstraint.getErrors()) {
@@ -521,15 +521,15 @@ public class ConstraintSolver {
 
 	public class ValueConstraint extends EvaluableConstraint {
 
-		public ValueConstraint(CryptSLValueConstraint c) {
+		public ValueConstraint(CrySLValueConstraint c) {
 			super(c);
 		}
 
 		@Override
 		public void evaluate() {
-			CryptSLValueConstraint valCons = (CryptSLValueConstraint) origin;
+			CrySLValueConstraint valCons = (CrySLValueConstraint) origin;
 
-			CryptSLObject var = valCons.getVar();
+			CrySLObject var = valCons.getVar();
 			final List<Entry<String, CallSiteWithExtractedValue>> vals = getValFromVar(var, valCons);
 			if (vals.isEmpty()) {
 				// TODO: Check whether this works as desired
@@ -544,7 +544,7 @@ public class ConstraintSolver {
 			return;
 		}
 
-		private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CryptSLObject var, ISLConstraint cons) {
+		private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CrySLObject var, ISLConstraint cons) {
 			final String varName = var.getVarName();
 			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
 			List<Entry<String, CallSiteWithExtractedValue>> vals = new ArrayList<>();
@@ -552,7 +552,7 @@ public class ConstraintSolver {
 				return vals;
 			}
 			for (Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
-				CryptSLSplitter splitter = var.getSplitter();
+				CrySLSplitter splitter = var.getSplitter();
 				final CallSiteWithExtractedValue location = e.getValue();
 				String val = e.getKey();
 				if (splitter != null) {
