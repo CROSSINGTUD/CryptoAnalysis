@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
+import crypto.cryslhandler.CrySLModelReader;
 import crypto.cryslhandler.CryslReaderUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -15,7 +16,7 @@ public class CrySLRulesetSelector {
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
-				return".crysl";
+				return CrySLModelReader.cryslFileEnding;
 			}
 		},
 	}

@@ -28,6 +28,7 @@ import soot.jimple.infoflow.android.InfoflowAndroidConfiguration;
 import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
+import crypto.cryslhandler.CrySLModelReader;
 
 public class CogniCryptAndroidAnalysis {
 	public static void main(String... args) {
@@ -147,11 +148,11 @@ public class CogniCryptAndroidAnalysis {
 		List<CrySLRule> rules = Lists.newArrayList();
 		if (rulesDirectory == null) {
 			throw new RuntimeException(
-					"Please specify a directory the CrySL rules (.cryslbin Files) are located in.");
+					"Please specify a directory the CrySL rules ( " + CrySLModelReader.cryslFileEnding +" Files) are located in.");
 		}
 		File[] listFiles = new File(rulesDirectory).listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith("cryslbin")) {
+			if (file != null && file.getName().endsWith(CrySLModelReader.cryslFileEnding)) {
 				rules.add(CrySLRuleReader.readFromSourceFile(file));
 			}
 		}
