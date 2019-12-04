@@ -5,7 +5,7 @@ import java.util.Set;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import sync.pds.solver.nodes.Node;
 
 public abstract class ErrorWithObjectAllocation extends AbstractError{

@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;

@@ -20,7 +20,7 @@ import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;

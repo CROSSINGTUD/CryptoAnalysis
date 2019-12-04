@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import crypto.typestate.SootBasedStateMachineGraph;
 import soot.SootMethod;

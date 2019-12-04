@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.interfaces.ISLConstraint;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 
 public class NeverTypeOfError extends ConstraintError {
 

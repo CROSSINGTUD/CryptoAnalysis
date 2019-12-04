@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 

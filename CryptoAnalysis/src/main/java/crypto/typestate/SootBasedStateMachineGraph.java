@@ -12,10 +12,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CrySLMethod;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLMethod;
+import de.darmstadt.tu.crossing.crysl.rules.StateMachineGraph;
+import de.darmstadt.tu.crossing.crysl.rules.StateNode;
+import de.darmstadt.tu.crossing.crysl.rules.TransitionEdge;
 import soot.SootMethod;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.MatcherTransition;

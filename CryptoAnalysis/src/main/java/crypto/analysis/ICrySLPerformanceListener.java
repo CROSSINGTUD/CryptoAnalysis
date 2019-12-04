@@ -8,7 +8,7 @@ import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import crypto.rules.CrySLPredicate;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLPredicate;
 
 public interface ICrySLPerformanceListener {
 

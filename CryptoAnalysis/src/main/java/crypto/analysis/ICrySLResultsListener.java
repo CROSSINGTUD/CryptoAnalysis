@@ -10,7 +10,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import de.darmstadt.tu.crossing.crysl.interfaces.ISLConstraint;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 

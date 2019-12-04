@@ -3,8 +3,8 @@ package crypto.analysis.errors;
 import java.util.Map.Entry;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLPredicate;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 
 public class PredicateContradictionError extends AbstractError {
 

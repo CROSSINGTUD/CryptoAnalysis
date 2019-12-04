@@ -21,7 +21,7 @@ import boomerang.jimple.Val;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
-import crypto.rules.CrySLMethod;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLMethod;
 import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.SootBasedStateMachineGraph;

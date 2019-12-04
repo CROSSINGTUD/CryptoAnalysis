@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import crypto.rules.CrySLMethod;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLMethod;
 import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import soot.SootClass;

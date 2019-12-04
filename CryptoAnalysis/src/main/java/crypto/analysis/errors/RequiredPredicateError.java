@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLPredicate;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 
 public class RequiredPredicateError extends AbstractError{
 

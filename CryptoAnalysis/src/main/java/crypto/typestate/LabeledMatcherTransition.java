@@ -2,7 +2,7 @@ package crypto.typestate;
 
 import java.util.List;
 
-import crypto.rules.CrySLMethod;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLMethod;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 

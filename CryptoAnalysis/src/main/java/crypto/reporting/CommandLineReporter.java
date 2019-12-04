@@ -15,7 +15,7 @@ import java.util.Set;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ErrorWithObjectAllocation;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import soot.Printer;
 import soot.SootClass;
 import soot.SootMethod;

@@ -7,7 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import soot.SootMethod;
 
 public class ForbiddenMethodError extends AbstractError {

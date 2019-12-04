@@ -1,7 +1,7 @@
 package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import soot.jimple.internal.JAssignStmt;
 
 public abstract class AbstractError implements IError{

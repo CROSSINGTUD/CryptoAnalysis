@@ -6,10 +6,10 @@ import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
 
-import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
-import crypto.cryslhandler.CrySLModelReader;
-import crypto.cryslhandler.CryslReaderUtils;
+import de.darmstadt.tu.crossing.crysl.reader.CrySLModelReader;
+import de.darmstadt.tu.crossing.crysl.reader.CryslReaderUtils;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
+import de.darmstadt.tu.crossing.crysl.rules.CrySLRuleReader;
 import org.apache.commons.io.FilenameUtils;
 
 public class CrySLRulesetSelector {

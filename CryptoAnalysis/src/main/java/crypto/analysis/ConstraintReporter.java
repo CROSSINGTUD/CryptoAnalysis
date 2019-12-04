@@ -3,7 +3,7 @@ package crypto.analysis;
 import java.util.Collection;
 
 import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import de.darmstadt.tu.crossing.crysl.interfaces.ISLConstraint;
 import soot.SootMethod;
 
 public interface ConstraintReporter {
