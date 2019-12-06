@@ -1,16 +1,12 @@
 package crypto.analysis;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
 
 import de.darmstadt.tu.crossing.crysl.reader.CrySLModelReader;
-import de.darmstadt.tu.crossing.crysl.reader.CryslReaderUtils;
 import de.darmstadt.tu.crossing.crysl.rules.CrySLRule;
 import de.darmstadt.tu.crossing.crysl.rules.CrySLRuleReader;
-import org.apache.commons.io.FilenameUtils;
 
 public class CrySLRulesetSelector {
 	public static enum RuleFormat {
