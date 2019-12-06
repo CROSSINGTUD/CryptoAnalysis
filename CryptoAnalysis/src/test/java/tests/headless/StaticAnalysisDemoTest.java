@@ -115,4 +115,24 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		scanner.exec();
 		assertErrors();
 	}
+	
+	@Test
+	public void sslExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/SSLMisuseExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.SSLExample: void MisuseOne()>")
+				.withTPs(ConstraintError.class, 1)
+				.build());
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.SSLExample: void MisuseTwo()>")
+				.withTPs(ConstraintError.class, 1)
+				.build());
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.SSLExample: void MisuseThree()>")
+				.withTPs(ConstraintError.class, 2)
+				.build());
+		
+		scanner.exec();
+		assertErrors();
+	}
 }
