@@ -216,7 +216,7 @@ public class ProviderDetection {
 										this.rulesDirectory = defaultRulesDirectory;
 										
 										if((this.provider != null) && (ruleExists(provider, declaringClassName))) {
-											this.rulesDirectory = defaultRulesDirectory+File.separator+provider;
+											this.rulesDirectory = rootRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
@@ -233,7 +233,7 @@ public class ProviderDetection {
 										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
 										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (ruleExists(provider, declaringClassName))) {
-											rulesDirectory = defaultRulesDirectory+File.separator+provider;
+											this.rulesDirectory = rootRulesDirectory+File.separator+provider;
 											
 											rules = chooseRules(rules, provider, declaringClassName);
 											break outerloop;
@@ -324,7 +324,7 @@ public class ProviderDetection {
 				
 				// In here are listed all the supported providers so far
 				if(valueTypeString.contains(BOUNCY_CASTLE)) {
-					provider = "BC";
+					provider = "BouncyCastle-JCA";
 				}
 			}
 		}
@@ -357,7 +357,7 @@ public class ProviderDetection {
 				if(assignStatement.getLeftOp().equals(providerValue)) {
 					String provider = assignStatement.getRightOp().toString().replaceAll("\"","");
 					if(provider.equals("BC") || provider.equals("BCPQC") || provider.equals("BCJSSE")) {
-						provider = "BC";
+						provider = "BouncyCastle-JCA";
 						return provider;
 					}
 				}
@@ -438,7 +438,7 @@ public class ProviderDetection {
 		boolean ruleExists = false;
 		String rule = declaringClassName;
 		
-		File rulesDirectory = new File(defaultRulesDirectory+File.separator+provider);
+		File rulesDirectory = new File(rootRulesDirectory+File.separator+provider);
 		if(rulesDirectory.exists()) {
 			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
 			for (File file : listRulesDirectoryFiles) {
@@ -465,7 +465,7 @@ public class ProviderDetection {
 	 */
 	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String declaringClassName) {
 		
-		String newRulesDirectory = defaultRulesDirectory+File.separator+provider;
+		String newRulesDirectory = rootRulesDirectory+File.separator+provider;
 		
 		// Forms a list of all the new CryptSL rules in the detected provider's directory.
 		// This list contains only String elements and it holds only the rule's names, i.e Cipher, MessageDigest, etc
