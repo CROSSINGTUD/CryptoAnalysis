@@ -499,28 +499,4 @@ public class ProviderDetection {
 		}
 		return newCryptSLRules;
 	}
-	
-	
-	/**
-	 * This method is used to get all the default CryptSL rules
-	 * 
-	 * @param rulesDirectory
-	 * 
-	 * @param rules
-	 */
-	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
-		File directory = new File(rulesDirectory);
-		
-		File[] listFiles = directory.listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYPTSL)) {
-				rules.add(CryptSLRuleReader.readFromSourceFile(file));
-			}
-		}
-		if (rules.isEmpty())
-			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
-		
-		return rules;
-	}
-	//-----------------------------------------------------------------------------------------------------------------
 }
