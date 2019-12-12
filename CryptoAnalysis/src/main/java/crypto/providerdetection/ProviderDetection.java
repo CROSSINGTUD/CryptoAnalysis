@@ -69,15 +69,12 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method does the Provider Detection analysis and returns the detected set 
-	 * of CryptSL rules after the analysis is finished. If no Provider is detected, 
-	 * it returns the default set of CryptSL rules. Otherwise it returns all CryptSL 
-	 * rules for that provider, plus additional default CryptSL rules that were not 
-	 * yet implemented for the detected provider
+	 * This method does the Provider Detection analysis and returns the detected 
+	 * provider after the analysis is finished. If no Provider is detected, 
+	 * then it will return null value, meaning that there was no provider used.
 	 * 
 	 * @param icfg
 	 *            
-	 * @param rules 
 	 */
 	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
 		
@@ -140,7 +137,7 @@ public class ProviderDetection {
 	
 	/**
 	 * This method returns the type of Provider detected, since
-	 * it can be either `java.security.Provider` or `java.lang.String`
+	 * it can be either `java.security.Provider` or `java.lang.String`.
 	 * 
 	 * @param providerValue
 	 */
@@ -151,7 +148,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method return the provider used when Provider detected is of type `java.security.Provider`
+	 * This method return the provider used when Provider detected is of type `java.security.Provider`.
 	 * 
 	 * @param statement
 	 *            
@@ -225,7 +222,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method return the provider used when Provider detected is of type `java.lang.String`
+	 * This method return the provider used when Provider detected is of type `java.lang.String`.
 	 * 
 	 * @param providerValue
 	 *            
@@ -308,26 +305,33 @@ public class ProviderDetection {
 		return false;
 	}
 	
+	/**
+	 * This method is used to check if the CryptSL rules from the detected Provider do exist and
+	 * should be called after the `doAnalysis()` method, but before the `chooseRules()` method.
+	 * 
+	 * @param providerRulesDirectory
+	 * 
+	 */
+	public boolean rulesExist(String providerRulesDirectory) {
+		File rulesDirectory = new File(providerRulesDirectory);
+		if(rulesDirectory.exists()) {
+			return true;
+		}
+		return false;
+	}
+	
 	
 	/**
-	 * This method is used to choose the CryptSL rules from the detected Provider
-	 * 
-	 * @param rules
+	 * This method is used to choose the CryptSL rules from the detected Provider and should
+	 * be called after the `doAnalysis()` and `rulesExist()` methods, in that respective order.
 	 *            
-	 * @param provider
-	 *            - i.e. BC
-	 * @param declaringClassName
-	 * 			  - i.e. MessageDigest
+	 * @param providerRulesDirectory
+	 *          
 	 */
 	public List<CryptSLRule> chooseRules(String providerRulesDirectory) {
 		List<CryptSLRule> rules = Lists.newArrayList();
-		rules = null;
-		File rulesDirectory = new File(providerRulesDirectory);
-		if(rulesDirectory.exists()) {
-			this.rulesDirectory = providerRulesDirectory;
-			rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
-			return rules;
-		}
+		this.rulesDirectory = providerRulesDirectory;
+		rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
 		return rules;
 	}
 		  
