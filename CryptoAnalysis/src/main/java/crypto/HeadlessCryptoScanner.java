@@ -257,11 +257,11 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
 				}
 				
-				if (providerDetection()) {
-					//create a new object to execute the Provider Detection analysis
-					ProviderDetection providerDetection = new ProviderDetection();
-					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
-				}
+//				if (providerDetection()) {
+//					//create a new object to execute the Provider Detection analysis
+//					ProviderDetection providerDetection = new ProviderDetection();
+//					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+//				}
 				
 				scanner.scan(rules);
 			}
