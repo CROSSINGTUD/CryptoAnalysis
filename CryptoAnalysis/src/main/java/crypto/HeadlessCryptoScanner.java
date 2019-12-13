@@ -260,12 +260,11 @@ public abstract class HeadlessCryptoScanner {
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
 					ProviderDetection providerDetection = new ProviderDetection();
-					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG);
-					String providerRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+
-													File.separator+"resources"+File.separator+detectedProvider;
-					if((detectedProvider != null) && (providerDetection.rulesExist(providerRulesDirectory))) {
+					String rootRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rootRulesDirectory);
+					if(detectedProvider != null) {
 						rules.clear();
-						rules.addAll(providerDetection.chooseRules(providerRulesDirectory));
+						rules.addAll(providerDetection.chooseRules(rootRulesDirectory+File.separator+detectedProvider));
 					}
 				}
 				

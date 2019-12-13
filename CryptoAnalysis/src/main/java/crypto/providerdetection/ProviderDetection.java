@@ -63,6 +63,7 @@ public class ProviderDetection {
 		return rulesDirectory;
 	}
 	
+	//This method is used for testing purposes.
 	protected void setRulesDirectory(String rulesDirectory) {
 		this.rulesDirectory = rulesDirectory;
 	}
@@ -73,10 +74,12 @@ public class ProviderDetection {
 	 * provider after the analysis is finished. If no Provider is detected, 
 	 * then it will return null value, meaning that there was no provider used.
 	 * 
-	 * @param icfg
-	 *            
+	 * @param observableDynamicICFG
+	 *       
+	 * @param rootRulesDirectory
+	 * 
 	 */
-	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
+	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, String rootRulesDirectory) {
 		
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
 			for(SootMethod sootMethod : sootClass.getMethods()) {
@@ -105,17 +108,22 @@ public class ProviderDetection {
 										
 									if(providerType.matches("java.security.Provider")) {
 										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, observableDynamicICFG);
-										return this.provider;
+										if((this.provider != null) && (rulesExist(rootRulesDirectory+File.separator+this.provider))) {
+											this.rulesDirectory = rootRulesDirectory+File.separator+this.provider;
+											return this.provider;
+										}
 									}
 										
 									else if (providerType.matches("java.lang.String")) {
+										this.provider = getProviderWhenTypeString(providerValue, body);
+										
 										// Gets the boolean value of whether the provider is passed
 										// using IF-ELSE, SWITCH statements or TERNARY operators
 										boolean ifStmt = checkIfStmt(providerValue, body);
 										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
-										if((!ifStmt) && (!switchStmt)) {
-											this.provider = getProviderWhenTypeString(providerValue, body);
+										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (rulesExist(rootRulesDirectory+File.separator+this.provider))) {
+											this.rulesDirectory = rootRulesDirectory+File.separator+this.provider;
 											return this.provider;
 										}
 									}
@@ -306,13 +314,12 @@ public class ProviderDetection {
 	}
 	
 	/**
-	 * This method is used to check if the CryptSL rules from the detected Provider do exist and
-	 * should be called after the `doAnalysis()` method, but before the `chooseRules()` method.
+	 * This method is used to check if the CryptSL rules from the detected Provider do exist.
 	 * 
 	 * @param providerRulesDirectory
 	 * 
 	 */
-	public boolean rulesExist(String providerRulesDirectory) {
+	private boolean rulesExist(String providerRulesDirectory) {
 		File rulesDirectory = new File(providerRulesDirectory);
 		if(rulesDirectory.exists()) {
 			return true;
@@ -323,7 +330,7 @@ public class ProviderDetection {
 	
 	/**
 	 * This method is used to choose the CryptSL rules from the detected Provider and should
-	 * be called after the `doAnalysis()` and `rulesExist()` methods, in that respective order.
+	 * be called after the `doAnalysis()` method.
 	 *            
 	 * @param providerRulesDirectory
 	 *          
