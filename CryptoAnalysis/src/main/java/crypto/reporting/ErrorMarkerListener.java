@@ -20,7 +20,7 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
@@ -36,7 +36,7 @@ import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
+import crypto.rules.CrySLPredicate;
 import soot.SootClass;
 import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
@@ -183,7 +183,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCryptSLPredicate>> arg0, final Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> arg1, final Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> arg2) {
+	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCrySLPredicate>> arg0, final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg1, final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
 		// Nothing
 	}
 

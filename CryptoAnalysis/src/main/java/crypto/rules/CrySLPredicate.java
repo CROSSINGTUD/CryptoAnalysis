@@ -5,23 +5,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import crypto.interfaces.ICryptSLPredicateParameter;
+import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 
-public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializable {
+public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
-	protected final ICryptSLPredicateParameter baseObject;
+	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
-	protected final List<ICryptSLPredicateParameter> parameters;
+	protected final List<ICrySLPredicateParameter> parameters;
 	protected final boolean negated;
 	protected final ISLConstraint optConstraint;
 	
-	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not) {
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not) {
 		this(baseObject, name, variables, not, null);
 	}
 	
-	public CryptSLPredicate(ICryptSLPredicateParameter baseObject, String name, List<ICryptSLPredicateParameter> variables, Boolean not, ISLConstraint constraint) {
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not, ISLConstraint constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
 		this.parameters = variables;
@@ -45,10 +45,10 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof CryptSLPredicate)) {
+		if (!(obj instanceof CrySLPredicate)) {
 			return false;
 		}
-		CryptSLPredicate other = (CryptSLPredicate) obj;
+		CrySLPredicate other = (CrySLPredicate) obj;
 		if (predName == null) {
 			if (other.predName != null) {
 				return false;
@@ -62,7 +62,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	/**
 	 * @return the baseObject
 	 */
-	public ICryptSLPredicateParameter getBaseObject() {
+	public ICrySLPredicateParameter getBaseObject() {
 		return baseObject;
 	}
 
@@ -83,7 +83,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 	/**
 	 * @return the parameters
 	 */
-	public List<ICryptSLPredicateParameter> getParameters() {
+	public List<ICrySLPredicateParameter> getParameters() {
 		return parameters;
 	}
 
@@ -102,7 +102,7 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		predSB.append(predName);
 		predSB.append("(");
 		
-		for (ICryptSLPredicateParameter parameter : parameters) {
+		for (ICrySLPredicateParameter parameter : parameters) {
 			predSB.append(parameter);
 			predSB.append(",");
 		}
@@ -119,8 +119,8 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		if (Arrays.asList(new String[] {"neverTypeOf", "instanceOf"}).contains(predName)) {
 			varNames.add(parameters.get(0).getName());
 		} else {
-		for (ICryptSLPredicateParameter var : parameters) {
-			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CryptSLMethod)) {
+		for (ICrySLPredicateParameter var : parameters) {
+			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
 				varNames.add(var.getName());
 			}
 		}
@@ -130,11 +130,11 @@ public class CryptSLPredicate extends CryptSLLiteral implements java.io.Serializ
 		return varNames;
 	}
 	
-	public CryptSLPredicate setNegated(boolean negated){
+	public CrySLPredicate setNegated(boolean negated){
 		if (negated == this.negated) {
 			return this;
 		} else {
-			return new CryptSLPredicate(baseObject, predName, parameters, negated);
+			return new CrySLPredicate(baseObject, predName, parameters, negated);
 		}
 	}
 

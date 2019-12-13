@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import crypto.interfaces.ISLConstraint;
 
-public class CryptSLRule implements java.io.Serializable {
+public class CrySLRule implements java.io.Serializable {
 
 	/**
 	 * 
@@ -17,15 +17,15 @@ public class CryptSLRule implements java.io.Serializable {
 	
 	private final List<Entry<String, String>> objects;  
 	
-	protected final List<CryptSLForbiddenMethod> forbiddenMethods;
+	protected final List<CrySLForbiddenMethod> forbiddenMethods;
 	
 	protected final StateMachineGraph usagePattern;
 	
 	protected final List<ISLConstraint> constraints;
 	
-	protected final List<CryptSLPredicate> predicates;
+	protected final List<CrySLPredicate> predicates;
 	
-	public CryptSLRule(String _className, List<Entry<String, String>> defObjects, List<CryptSLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CryptSLPredicate> _predicates) {
+	public CrySLRule(String _className, List<Entry<String, String>> defObjects, List<CrySLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CrySLPredicate> _predicates) {
 		className = _className;
 		objects = defObjects;
 		forbiddenMethods = _forbiddenMethods;
@@ -37,8 +37,8 @@ public class CryptSLRule implements java.io.Serializable {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof CryptSLRule) {
-			return ((CryptSLRule) obj).getClassName().equals(className);
+		if (obj instanceof CrySLRule) {
+			return ((CrySLRule) obj).getClassName().equals(className);
 		} 
 		return false;
 	}
@@ -46,7 +46,7 @@ public class CryptSLRule implements java.io.Serializable {
 
 	public boolean isLeafRule() {
 		for (ISLConstraint con : constraints) {
-			if (con instanceof CryptSLPredicate) {
+			if (con instanceof CrySLPredicate) {
 				return false;
 			}
 		}
@@ -77,7 +77,7 @@ public class CryptSLRule implements java.io.Serializable {
 	/**
 	 * @return the forbiddenMethods
 	 */
-	public List<CryptSLForbiddenMethod> getForbiddenMethods() {
+	public List<CrySLForbiddenMethod> getForbiddenMethods() {
 		return forbiddenMethods;
 	}
 	
@@ -98,17 +98,17 @@ public class CryptSLRule implements java.io.Serializable {
 	/**
 	 * @return the predicates
 	 */
-	public List<CryptSLPredicate> getPredicates() {
+	public List<CrySLPredicate> getPredicates() {
 		return predicates;
 	}
 	/**
 	 * @return the constraints
 	 */
-	public List<CryptSLPredicate> getRequiredPredicates() {
-		List<CryptSLPredicate> requires = new LinkedList<CryptSLPredicate>();
+	public List<CrySLPredicate> getRequiredPredicates() {
+		List<CrySLPredicate> requires = new LinkedList<CrySLPredicate>();
 		for (ISLConstraint con : constraints) {
-			if (con instanceof CryptSLPredicate) {
-				requires.add((CryptSLPredicate) con);
+			if (con instanceof CrySLPredicate) {
+				requires.add((CrySLPredicate) con);
 			}
 		}
 		return requires;
@@ -120,7 +120,7 @@ public class CryptSLRule implements java.io.Serializable {
 		outputSB.append(this.className);
 		
 		outputSB.append("\nforbiddenMethods:");
-		for (CryptSLForbiddenMethod forbMethSig : this.forbiddenMethods) {
+		for (CrySLForbiddenMethod forbMethSig : this.forbiddenMethods) {
 			
 			outputSB.append(forbMethSig);
 			outputSB.append(",");
@@ -137,7 +137,7 @@ public class CryptSLRule implements java.io.Serializable {
 
 		if (this.predicates != null) {
 			outputSB.append("\nPredicates:");
-			for (CryptSLPredicate predicate : this.predicates) {
+			for (CrySLPredicate predicate : this.predicates) {
 				outputSB.append(predicate);
 				outputSB.append(",");
 			}

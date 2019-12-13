@@ -20,8 +20,8 @@ import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
@@ -72,10 +72,10 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected CryptSLRule getRule() {
+	protected CrySLRule getRule() {
 		//return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
 		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
-		//CryptSLRuleReader.readFromFile(file);
+		//CrySLRuleReader.readFromFile(file);
 	}
 
 	protected abstract String getRulename();
@@ -133,7 +133,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> executeAnalysis() {
-		CryptSLMethodToSootMethod.reset();
+		CrySLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();
 	}

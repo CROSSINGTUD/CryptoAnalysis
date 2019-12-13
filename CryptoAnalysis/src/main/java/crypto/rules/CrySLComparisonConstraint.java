@@ -2,7 +2,7 @@ package crypto.rules;
 
 import java.util.Set;
 
-public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.io.Serializable {
+public class CrySLComparisonConstraint extends CrySLLiteral implements java.io.Serializable {
 
 	/**
 	 * 
@@ -13,10 +13,10 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 	
 	private CompOp operator;
 	
-	private CryptSLArithmeticConstraint left;
-	private CryptSLArithmeticConstraint right;
+	private CrySLArithmeticConstraint left;
+	private CrySLArithmeticConstraint right;
 	
-	public CryptSLComparisonConstraint(CryptSLArithmeticConstraint l, CryptSLArithmeticConstraint r, CompOp op) {
+	public CrySLComparisonConstraint(CrySLArithmeticConstraint l, CrySLArithmeticConstraint r, CompOp op) {
 		left = l;
 		right = r;
 		operator = op;
@@ -57,7 +57,7 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 	/**
 	 * @return the left
 	 */
-	public CryptSLArithmeticConstraint getLeft() {
+	public CrySLArithmeticConstraint getLeft() {
 		return left;
 	}
 
@@ -65,7 +65,7 @@ public class CryptSLComparisonConstraint extends CryptSLLiteral implements java.
 	/**
 	 * @return the right
 	 */
-	public CryptSLArithmeticConstraint getRight() {
+	public CrySLArithmeticConstraint getRight() {
 		return right;
 	}
 

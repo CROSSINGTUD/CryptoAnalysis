@@ -6,7 +6,7 @@ import java.util.Set;
 import boomerang.jimple.Statement;
 import crypto.interfaces.ISLConstraint;
 
-public class CryptSLConstraint implements ISLConstraint, Serializable{
+public class CrySLConstraint implements ISLConstraint, Serializable{
 	
 	/**
 	 * 
@@ -20,7 +20,7 @@ public class CryptSLConstraint implements ISLConstraint, Serializable{
 	private ISLConstraint right;
 	private Statement location;
 
-	public CryptSLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
+	public CrySLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
 		left = l;
 		right = r;
 		operator = op;

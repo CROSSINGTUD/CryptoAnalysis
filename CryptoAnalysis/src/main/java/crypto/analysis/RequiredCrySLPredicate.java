@@ -3,15 +3,15 @@ package crypto.analysis;
 import java.util.Set;
 import boomerang.jimple.Statement;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
+import crypto.rules.CrySLPredicate;
 
-public class RequiredCryptSLPredicate implements ISLConstraint {
+public class RequiredCrySLPredicate implements ISLConstraint {
 
 	private static final long serialVersionUID = 9111353268603202392L;
-	private final CryptSLPredicate predicate;
+	private final CrySLPredicate predicate;
 	private final Statement stmt;
 
-	public RequiredCryptSLPredicate(CryptSLPredicate predicate, Statement stmt) {
+	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement stmt) {
 		this.predicate = predicate;
 		this.stmt = stmt;
 	}
@@ -33,7 +33,7 @@ public class RequiredCryptSLPredicate implements ISLConstraint {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RequiredCryptSLPredicate other = (RequiredCryptSLPredicate) obj;
+		RequiredCrySLPredicate other = (RequiredCrySLPredicate) obj;
 		if (predicate == null) {
 			if (other.predicate != null)
 				return false;
@@ -47,7 +47,7 @@ public class RequiredCryptSLPredicate implements ISLConstraint {
 		return true;
 	}
 
-	public CryptSLPredicate getPred() {
+	public CrySLPredicate getPred() {
 		return predicate;
 	}
 

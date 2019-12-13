@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 
@@ -24,14 +24,14 @@ import soot.SootMethod;
 public class SARIFReporter extends ErrorMarkerListener {
 
 	private File outputFolder;
-	// private List<CryptSLRule> rules;
+	// private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 	private JSONObject files = new JSONObject(), resources = new JSONObject(), rules = new JSONObject();
 	private JSONArray results = new JSONArray();
 	private SARIFHelper sarifHelper;
 	private Map<String, Integer> errorCountMap;
 
-	public SARIFReporter(String string, List<CryptSLRule> rules) {
+	public SARIFReporter(String string, List<CrySLRule> rules) {
 		this.outputFolder = (string != null ? new File(string) : null);
 		this.sarifHelper = new SARIFHelper();
 		this.errorCountMap = new HashMap<String, Integer>();
@@ -39,7 +39,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		// this.rules = rules;
 	}
 	
-	public SARIFReporter(String string, List<CryptSLRule> rules, SourceCodeLocater sourceLocater) {
+	public SARIFReporter(String string, List<CrySLRule> rules, SourceCodeLocater sourceLocater) {
 		this(string, rules);
 		this.sarifHelper = new SARIFHelper(sourceLocater);
 	}

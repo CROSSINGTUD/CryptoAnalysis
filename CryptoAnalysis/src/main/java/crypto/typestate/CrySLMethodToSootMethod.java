@@ -11,18 +11,18 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import crypto.rules.CryptSLMethod;
+import crypto.rules.CrySLMethod;
 import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
 
-public class CryptSLMethodToSootMethod {
-	private static CryptSLMethodToSootMethod instance;
-	private DefaultValueMap<CryptSLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CryptSLMethod, Collection<SootMethod>>() {
+public class CrySLMethodToSootMethod {
+	private static CrySLMethodToSootMethod instance;
+	private DefaultValueMap<CrySLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CrySLMethod, Collection<SootMethod>>() {
 		@Override
-		protected Collection<SootMethod> createItem(CryptSLMethod key) {
+		protected Collection<SootMethod> createItem(CrySLMethod key) {
 			Collection<SootMethod> res = Sets.newHashSet();
 			try{
 				res = _convert(key);
@@ -35,17 +35,17 @@ public class CryptSLMethodToSootMethod {
 			return res;
 		}
 	};
-	private Multimap<SootMethod, CryptSLMethod> sootMethodToDescriptor = HashMultimap.create();
+	private Multimap<SootMethod, CrySLMethod> sootMethodToDescriptor = HashMultimap.create();
 
-	public Collection<CryptSLMethod> convert(SootMethod m) {
+	public Collection<CrySLMethod> convert(SootMethod m) {
 		return sootMethodToDescriptor.get(m);
 	}
 
-	public Collection<SootMethod> convert(CryptSLMethod label) {
+	public Collection<SootMethod> convert(CrySLMethod label) {
 		return descriptorToSootMethod.getOrCreate(label);
 	}
 
-	private Collection<SootMethod> _convert(CryptSLMethod label) {
+	private Collection<SootMethod> _convert(CrySLMethod label) {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
@@ -74,7 +74,7 @@ public class CryptSLMethodToSootMethod {
 			}
 		}
 		if(res.isEmpty()){
-			System.out.println("Warning: Couldn't find any method for CryptSLMethod: " + label);
+			System.out.println("Warning: Couldn't find any method for CrySLMethod: " + label);
 		}
 		return res;
 	}
@@ -119,9 +119,9 @@ public class CryptSLMethodToSootMethod {
 		return desc.substring(desc.lastIndexOf(".") + 1);
 	}
 
-	public Collection<SootMethod> convert(List<CryptSLMethod> list) {
+	public Collection<SootMethod> convert(List<CrySLMethod> list) {
 		Set<SootMethod> res = Sets.newHashSet();
-		for (CryptSLMethod l : list)
+		for (CrySLMethod l : list)
 			res.addAll(convert(l));
 		return res;
 	}
@@ -136,9 +136,9 @@ public class CryptSLMethodToSootMethod {
 		return label.substring(0, label.lastIndexOf("."));
 	}
 
-	public static CryptSLMethodToSootMethod v() {
+	public static CrySLMethodToSootMethod v() {
 		if (instance == null)
-			instance = new CryptSLMethodToSootMethod();
+			instance = new CrySLMethodToSootMethod();
 		return instance;
 	}
 

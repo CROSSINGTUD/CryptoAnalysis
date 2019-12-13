@@ -1,7 +1,7 @@
 /**
  * The ProviderDetection class helps in detecting the provider used when
  * coding with JCA's Cryptographic APIs and chooses the corresponding set of
- * CryptSL rules that are implemented for that provider.
+ * CrySL rules that are implemented for that provider.
  *
  * @author  Enri Ozuni
  * 
@@ -37,8 +37,8 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
@@ -74,7 +74,7 @@ public class ProviderDetection {
 	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
-	private static final String CRYPTSL = RuleFormat.SOURCE.toString();
+	private static final String CRYSL = RuleFormat.SOURCE.toString();
 	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
 	
 	
@@ -153,7 +153,7 @@ public class ProviderDetection {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CryptSLRule> defaultCryptoRules = Lists.newArrayList();
+				List<CrySLRule> defaultCryptoRules = Lists.newArrayList();
 				defaultCryptoRules = CrySLRulesetSelector.makeFromPath(new File(defaultRulesDirectory), RuleFormat.SOURCE);
 				doAnalysis(observableDynamicICFG, defaultCryptoRules);
 			}
@@ -163,16 +163,16 @@ public class ProviderDetection {
 	
 	/**
 	 * This method does the Provider Detection analysis and returns the detected set 
-	 * of CryptSL rules after the analysis is finished. If no Provider is detected, 
-	 * it returns the default set of CryptSL rules. Otherwise it returns all CryptSL 
-	 * rules for that provider, plus additional default CryptSL rules that were not 
+	 * of CrySL rules after the analysis is finished. If no Provider is detected, 
+	 * it returns the default set of CrySL rules. Otherwise it returns all CrySL 
+	 * rules for that provider, plus additional default CrySL rules that were not 
 	 * yet implemented for the detected provider
 	 * 
 	 * @param icfg
 	 *            
 	 * @param rules 
 	 */
-	public List<CryptSLRule> doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, List<CryptSLRule> rules) {
+	public List<CrySLRule> doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, List<CrySLRule> rules) {
 		
 		outerloop:
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
@@ -195,16 +195,16 @@ public class ProviderDetection {
 									
 								int methodParameterCount = method.getParameterCount();
 								
-								// List of all CryptSL rules
-								List<String> availableCryptSLRules = new ArrayList<String>();
+								// List of all CrySL rules
+								List<String> availableCrySLRules = new ArrayList<String>();
 								
-								for(CryptSLRule rule : rules) {
+								for(CrySLRule rule : rules) {
 									String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
-									availableCryptSLRules.add(ruleName);
+									availableCrySLRules.add(ruleName);
 								}
 									
-								// Checks if detected declaring class is implemented as a CryptSL rule
-								boolean ruleFound = availableCryptSLRules.contains(declaringClassName);
+								// Checks if detected declaring class is implemented as a CrySL rule
+								boolean ruleFound = availableCrySLRules.contains(declaringClassName);
 									
 								if((ruleFound) && (methodName.matches("getInstance")) && (methodParameterCount==2) ) {
 									// Gets the second parameter from getInstance() method, since it is the provider parameter
@@ -423,7 +423,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method is used to check if the CryptSL rule for the detected provider exists
+	 * This method is used to check if the CrySL rule for the detected provider exists
 	 * 
 	 * @param provider
 	 *            - i.e. BC
@@ -438,7 +438,7 @@ public class ProviderDetection {
 		if(rulesDirectory.exists()) {
 			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
 			for (File file : listRulesDirectoryFiles) {
-				if (file != null && file.getAbsolutePath().endsWith(rule+CRYPTSL)) {
+				if (file != null && file.getAbsolutePath().endsWith(rule+CRYSL)) {
 					ruleExists = true;
 					break;
 				}
@@ -450,7 +450,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method is used to choose the CryptSL rules from the detected Provider
+	 * This method is used to choose the CrySL rules from the detected Provider
 	 * 
 	 * @param rules
 	 *            
@@ -459,58 +459,58 @@ public class ProviderDetection {
 	 * @param declaringClassName
 	 * 			  - i.e. MessageDigest
 	 */
-	private List<CryptSLRule> chooseRules(List<CryptSLRule> rules, String provider, String declaringClassName) {
+	private List<CrySLRule> chooseRules(List<CrySLRule> rules, String provider, String declaringClassName) {
 		
 		String newRulesDirectory = defaultRulesDirectory+File.separator+provider;
 		
-		// Forms a list of all the new CryptSL rules in the detected provider's directory.
+		// Forms a list of all the new CrySL rules in the detected provider's directory.
 		// This list contains only String elements and it holds only the rule's names, i.e Cipher, MessageDigest, etc
 		List<String> newRules = new ArrayList<String>();
 		File[] files = new File(newRulesDirectory).listFiles();
 		for (File file : files) {
-		    if (file.isFile() && file.getName().endsWith(CRYPTSL)) {
+		    if (file.isFile() && file.getName().endsWith(CRYSL)) {
 		        newRules.add(StringUtils.substringBefore(file.getName(), "."));
 		    }
 		}
 		
-		// A new CryptSL rules list is created which will contain all the new rules.
+		// A new CrySL rules list is created which will contain all the new rules.
 		// Firstly, all the default rules that are not present in the detected provider's rules are added.
 		// e.g if Cipher rule is not present in the detected provider's directory, then the default Cipher rule
-		// is added to the new CryptSL rules list
-		List<CryptSLRule> newCryptSLRules = Lists.newArrayList();
-		for(CryptSLRule rule : rules) {
+		// is added to the new CrySL rules list
+		List<CrySLRule> newCrySLRules = Lists.newArrayList();
+		for(CrySLRule rule : rules) {
 			String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
 			if(!newRules.contains(ruleName)) {
-				newCryptSLRules.add(rule);
+				newCrySLRules.add(rule);
 			}
 		}
 		
-		// At the end, the remaining CryptSL rules from the detected provider's directory
-		// are added to the new CryptSL rules list
+		// At the end, the remaining CrySL rules from the detected provider's directory
+		// are added to the new CrySL rules list
 		File[] listFiles = new File(newRulesDirectory).listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYPTSL)) {
-				newCryptSLRules.add(CryptSLRuleReader.readFromSourceFile(file));
+			if (file != null && file.getName().endsWith(CRYSL)) {
+				newCrySLRules.add(CrySLRuleReader.readFromSourceFile(file));
 			}
 		}
-		return newCryptSLRules;
+		return newCrySLRules;
 	}
 	
 	
 	/**
-	 * This method is used to get all the default CryptSL rules
+	 * This method is used to get all the default CrySL rules
 	 * 
 	 * @param rulesDirectory
 	 * 
 	 * @param rules
 	 */
-	private List<CryptSLRule> getRules(String rulesDirectory, List<CryptSLRule> rules) {
+	private List<CrySLRule> getRules(String rulesDirectory, List<CrySLRule> rules) {
 		File directory = new File(rulesDirectory);
 		
 		File[] listFiles = directory.listFiles();
 		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYPTSL)) {
-				rules.add(CryptSLRuleReader.readFromSourceFile(file));
+			if (file != null && file.getName().endsWith(CRYSL)) {
+				rules.add(CrySLRuleReader.readFromSourceFile(file));
 			}
 		}
 		if (rules.isEmpty())
