@@ -40,7 +40,7 @@ public class TestDeterministicAEADCipher extends TestTinkPrimitives {
 		Assertions.hasEnsuredPredicate(kt); 
 		
 		final String plainText = "Just testing the encryption mode of DAEAD"; 
-		final String aad = "cryptsl";
+		final String aad = "crysl";
 		
 		DeterministicAead daead = DeterministicAeadFactory.getPrimitive(ksh);
 		byte[] out = daead.encryptDeterministically(plainText.getBytes(), aad.getBytes());

@@ -5,22 +5,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Serializable {
+public class CrySLValueConstraint extends CrySLLiteral implements java.io.Serializable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	CryptSLObject var;
+	CrySLObject var;
 	List<String> valueRange;
 	
-	public CryptSLValueConstraint(CryptSLObject name, String value) { 
+	public CrySLValueConstraint(CrySLObject name, String value) { 
 		var = name;
 		valueRange = new ArrayList<String>();
 		valueRange.add(value);
 	}
 	
-	public CryptSLValueConstraint(CryptSLObject name, List<String> values) {
+	public CrySLValueConstraint(CrySLObject name, List<String> values) {
 		var = name;
 		valueRange = values;
 	}
@@ -35,7 +35,7 @@ public class CryptSLValueConstraint extends CryptSLLiteral implements java.io.Se
 	/**
 	 * @return the varName
 	 */
-	public CryptSLObject getVar() {
+	public CrySLObject getVar() {
 		return var;
 	}
 	

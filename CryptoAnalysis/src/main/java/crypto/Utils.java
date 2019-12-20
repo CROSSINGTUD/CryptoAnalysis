@@ -5,14 +5,14 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import crypto.rules.CryptSLMethod;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLMethod;
+import crypto.rules.CrySLRule;
 import soot.SootMethod;
 
 public class Utils {
 
-	public static String getFullyQualifiedName(CryptSLRule r) {
-		for(CryptSLMethod l : r.getUsagePattern().getInitialTransition().getLabel()) {
+	public static String getFullyQualifiedName(CrySLRule r) {
+		for(CrySLMethod l : r.getUsagePattern().getInitialTransition().getLabel()) {
 			return l.toString().substring(0, l.toString().lastIndexOf("."));
 		}
 		

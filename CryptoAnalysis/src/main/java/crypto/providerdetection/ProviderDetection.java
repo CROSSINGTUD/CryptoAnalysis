@@ -1,7 +1,7 @@
 /**
  * The ProviderDetection class helps in detecting the provider used when
  * coding with JCA's Cryptographic APIs and chooses the corresponding set of
- * CryptSL rules that are implemented for that provider.
+ * CrySL rules that are implemented for that provider.
  *
  * @author  Enri Ozuni
  * 

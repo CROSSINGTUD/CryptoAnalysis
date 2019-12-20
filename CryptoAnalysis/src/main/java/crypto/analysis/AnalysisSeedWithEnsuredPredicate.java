@@ -25,7 +25,7 @@ import typestate.TransitionFunction;
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	private ForwardBoomerangResults<TransitionFunction> analysisResults;
-	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
+	private Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
 	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
 
@@ -39,13 +39,13 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
 		solver.run(this);
 		analysisResults = solver.getResults();
-		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
+		for(EnsuredCrySLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
 		analyzed = true;
 	}
 
-	protected void ensurePredicates(EnsuredCryptSLPredicate pred) {
+	protected void ensurePredicates(EnsuredCrySLPredicate pred) {
 		if(analysisResults == null)
 			return;
 
@@ -91,7 +91,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		return problem;
 	}
 
-	public void addEnsuredPredicate(EnsuredCryptSLPredicate pred) {
+	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {
 		if(ensuredPredicates.add(pred) && analyzed)
 			ensurePredicates(pred);
 	}

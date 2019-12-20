@@ -8,9 +8,9 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 	private static final long serialVersionUID = 1L;
 	private StateNode left = null;
 	private StateNode right = null;
-	private List<CryptSLMethod> methods = null;
+	private List<CrySLMethod> methods = null;
 
-	public TransitionEdge(List<CryptSLMethod> _methods, StateNode _left, StateNode _right) {
+	public TransitionEdge(List<CrySLMethod> _methods, StateNode _left, StateNode _right) {
 		left = _left;
 		right = _right;
 		methods = _methods;
@@ -24,7 +24,7 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 		return right;
 	}
 
-	public List<CryptSLMethod> getLabel() {
+	public List<CrySLMethod> getLabel() {
 		return methods;
 	}
 
