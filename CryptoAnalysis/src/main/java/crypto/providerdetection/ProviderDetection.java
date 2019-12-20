@@ -30,7 +30,7 @@ import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import crypto.analysis.CrySLRulesetSelector;
 import soot.Body;
 import soot.Scene;
@@ -335,8 +335,8 @@ public class ProviderDetection {
 	 * @param providerRulesDirectory
 	 *          
 	 */
-	public List<CryptSLRule> chooseRules(String providerRulesDirectory) {
-		List<CryptSLRule> rules = Lists.newArrayList();
+	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
+		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
 		rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
 		return rules;
