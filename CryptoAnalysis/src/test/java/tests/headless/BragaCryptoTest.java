@@ -435,8 +435,8 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<example.DoNotPrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<example.DoNotPrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.DoNotPrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<example.DoNotPrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<example.DoNotPrintECDSAPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<example.DoNotPrintECDSAPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.DoNotPrintPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
@@ -1117,8 +1117,8 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<cib.printPrivSecKey.PrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<cib.printPrivSecKey.PrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDSAPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDSAPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void main(java.lang.String[])>", TypestateError.class, 1);
