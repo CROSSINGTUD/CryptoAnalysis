@@ -4,19 +4,19 @@ import com.google.common.collect.Multimap;
 
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.CryptSLPredicate;
+import crypto.rules.CrySLPredicate;
 
-public class EnsuredCryptSLPredicate {
+public class EnsuredCrySLPredicate {
 
-	private final CryptSLPredicate predicate;
+	private final CrySLPredicate predicate;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues;
 
-	public EnsuredCryptSLPredicate(CryptSLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2) {
+	public EnsuredCrySLPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2) {
 		this.predicate = predicate;
 		parametersToValues = parametersToValues2;
 	}
 	
-	public CryptSLPredicate getPredicate(){
+	public CrySLPredicate getPredicate(){
 		return predicate;
 	}
 	
@@ -45,7 +45,7 @@ public class EnsuredCryptSLPredicate {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		EnsuredCryptSLPredicate other = (EnsuredCryptSLPredicate) obj;
+		EnsuredCrySLPredicate other = (EnsuredCrySLPredicate) obj;
 		if (predicate == null) {
 			if (other.predicate != null)
 				return false;

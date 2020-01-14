@@ -21,8 +21,8 @@ import boomerang.jimple.Val;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
-import crypto.rules.CryptSLMethod;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLMethod;
+import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
@@ -90,11 +90,11 @@ public class ExtractParameterAnalysis {
 		return querySites;
 	}
 	
-	private void injectQueryAtCallSite(List<CryptSLMethod> list, Statement callSite) {
+	private void injectQueryAtCallSite(List<CrySLMethod> list, Statement callSite) {
 		if(!callSite.isCallsite())
 			return;
-		for(CryptSLMethod matchingDescriptor : list){
-			for(SootMethod m : CryptSLMethodToSootMethod.v().convert(matchingDescriptor)){
+		for(CrySLMethod matchingDescriptor : list){
+			for(SootMethod m : CrySLMethodToSootMethod.v().convert(matchingDescriptor)){
 				SootMethod method = callSite.getUnit().get().getInvokeExpr().getMethod();
 				if (!m.equals(method))
 					continue;

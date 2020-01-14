@@ -117,7 +117,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 				}
 			}
 		}
-		List<CryptSLMethod> mergedMethods = new LinkedList<>();
+		List<CrySLMethod> mergedMethods = new LinkedList<>();
 		edges.removeAll(merge);
 		for (TransitionEdge e : merge) {
 			mergedMethods.addAll(e.getLabel());

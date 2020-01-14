@@ -37,7 +37,7 @@ import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.BodyTransformer;
@@ -59,7 +59,7 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static List<CryptSLRule> rules;
+	private static List<CrySLRule> rules;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
 	public static enum CG {
@@ -214,7 +214,7 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
+				List<CrySLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
 					fileReporter = new SARIFReporter(getOutputFolder(), rules);
@@ -273,7 +273,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 
-	protected List<CryptSLRule> getRules() {
+	protected List<CrySLRule> getRules() {
 		if (rules != null) {
 			return rules;
 		}
@@ -340,8 +340,8 @@ public abstract class HeadlessCryptoScanner {
 
 	private List<String> getExcludeList() {
 		List<String> exList = new LinkedList<String>();
-		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules) {
+		List<CrySLRule> rules = getRules();
+		for(CrySLRule r : rules) {
 			exList.add(Utils.getFullyQualifiedName(r));
 		}
 		return exList;

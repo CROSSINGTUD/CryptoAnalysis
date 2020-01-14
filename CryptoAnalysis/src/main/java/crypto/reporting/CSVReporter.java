@@ -28,7 +28,7 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
@@ -42,8 +42,8 @@ import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -59,7 +59,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 	private int seeds;
 	private List<String> headers = Lists.newArrayList();
 	private Map<String,String> headersToValues = Maps.newHashMap();
-	private List<CryptSLRule> rules;
+	private List<CrySLRule> rules;
 	private Set<SootMethod> dataflowReachableMethods = Sets.newHashSet();
 	private Stopwatch analysisTime = Stopwatch.createUnstarted();
 	private String csvReportFileName;
@@ -68,7 +68,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 		CallGraphReachableMethods_ActiveBodies,DataflowVisitedMethod
 	}
 
-	public CSVReporter(String csvReportFileName, String softwareId,  List<CryptSLRule> rules, long callGraphConstructionTime) {
+	public CSVReporter(String csvReportFileName, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime) {
 		this.csvReportFileName = csvReportFileName;
 		this.rules = rules;
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
@@ -102,7 +102,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 	
 	private void addDynamicHeader(String name) {
 		headers.add(name+"_sum");
-		for(CryptSLRule r : rules){
+		for(CrySLRule r : rules){
 			headers.add(name+"_"+r.getClassName());
 		}
 	}
@@ -119,7 +119,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 		put(Headers.CryptoAnalysisTime_ms, analysisTime.elapsed(TimeUnit.MILLISECONDS));
 		put(Headers.SeedObjectCount, seeds);
 		
-		Table<Class, CryptSLRule, Integer> errorTable = HashBasedTable.create(); 
+		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
 		for(AbstractError err : errors){
 			Integer integer = errorTable.get(err.getClass(), err.getRule());
 			if(integer == null){
@@ -130,12 +130,12 @@ public class CSVReporter extends CrySLAnalysisListener {
 		}
 
 
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
+		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
 			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
 		}
 		
 		Map<Class, Integer> errorsAccumulated = Maps.newHashMap(); 
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
+		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
 			Integer integer = errorsAccumulated.get(c.getRowKey());	
 			if(integer == null){
 				integer = 0;
@@ -233,9 +233,9 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 		
 	}
 

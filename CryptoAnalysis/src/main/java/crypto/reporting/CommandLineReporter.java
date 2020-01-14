@@ -15,7 +15,7 @@ import java.util.Set;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ErrorWithObjectAllocation;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.Printer;
 import soot.SootClass;
 import soot.SootMethod;
@@ -24,10 +24,10 @@ import soot.util.EscapedWriter;
 public class CommandLineReporter extends ErrorMarkerListener {
 
 	private File outputFolder;
-	private List<CryptSLRule> rules;
+	private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 
-	public CommandLineReporter(String string, List<CryptSLRule> rules) {
+	public CommandLineReporter(String string, List<CrySLRule> rules) {
 		this.outputFolder = (string != null ? new File(string) : null);
 		this.rules = rules;
 	}
@@ -41,7 +41,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		String s = "";
 
 		s += "Ruleset: \n";
-		for (CryptSLRule r : this.rules) {
+		for (CrySLRule r : this.rules) {
 			s += String.format("\t%s\n", r.getClassName());
 		}
 

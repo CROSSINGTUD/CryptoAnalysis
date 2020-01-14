@@ -5,13 +5,13 @@ import java.util.Set;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import sync.pds.solver.nodes.Node;
 
 public abstract class ErrorWithObjectAllocation extends AbstractError{
 	private final IAnalysisSeed objectAllocationLocation;
 
-	public ErrorWithObjectAllocation(Statement errorLocation, CryptSLRule rule, IAnalysisSeed objectAllocationLocation) {
+	public ErrorWithObjectAllocation(Statement errorLocation, CrySLRule rule, IAnalysisSeed objectAllocationLocation) {
 		super(errorLocation, rule);
 		this.objectAllocationLocation = objectAllocationLocation;
 	}

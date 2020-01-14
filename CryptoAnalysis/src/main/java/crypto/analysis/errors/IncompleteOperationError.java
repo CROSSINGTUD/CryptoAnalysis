@@ -11,7 +11,7 @@ import com.google.common.collect.Sets;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
@@ -23,7 +23,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public IncompleteOperationError(Statement errorLocation,
-			Val errorVariable, CryptSLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
+			Val errorVariable, CrySLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
 		super(errorLocation, rule, objectLocation);
 		this.errorVariable = errorVariable;
 		this.expectedMethodCalls = expectedMethodsToBeCalled;	
