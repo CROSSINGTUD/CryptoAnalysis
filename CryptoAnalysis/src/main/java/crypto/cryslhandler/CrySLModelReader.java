@@ -2,17 +2,15 @@ package crypto.cryslhandler;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -118,24 +116,49 @@ public class CrySLModelReader {
 
 	}
 
-	public CrySLRule readRule(File ruleFile) {
-		final String fileName = ruleFile.getName();
-		final String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!cryslFileEnding.equals(extension)) {
+	public CrySLRule readRule(InputStream stream, String virtualFileName) {
+		if (!virtualFileName.endsWith(cryslFileEnding))
+			return null;
+
+		URI uri = URI.createURI(virtualFileName);
+		Resource resource;
+		try {
+			resource = resourceSet.getURIResourceMap().get(uri);
+			if (resource == null){
+				resource = resourceSet.createResource(uri);
+				resource.load(stream, Collections.EMPTY_MAP);
+			}
+		}
+		catch (IOException e) {
 			return null;
 		}
+
+		return createRuleFromResource(resource);
+	}
+
+	public CrySLRule readRule(File ruleFile) {
+		final String fileName = ruleFile.getName();
+		if (!fileName.endsWith(cryslFileEnding))
+			return null;
+
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
-		EcoreUtil.resolveAll(resourceSet);
-		final EObject eObject = (EObject) resource.getContents().get(0);
+		return createRuleFromResource(resource);
+	}
+
+	private CrySLRule createRuleFromResource(Resource resource) {
+		if (resource == null)
+			return null;
+
+		final EObject eObject = resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
 		String curClass = dm.getJavaType().getQualifiedName();
 		final EnsuresBlock ensure = dm.getEnsure();
 		final Map<ParEqualsPredicate, SuperType> pre_preds = Maps.newHashMap();
 		final DestroysBlock destroys = dm.getDestroy();
-		
+
 		Expression order = dm.getOrder();
 		if (order instanceof Order) {
-				validateOrder((Order) order);
+			validateOrder((Order) order);
 		}
 		if (destroys != null) {
 			pre_preds.putAll(getKills(destroys.getPred()));
@@ -164,6 +187,7 @@ public class CrySLModelReader {
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 	}
+
 	private void validateOrder(Order order) {
 		List<String> collected = new ArrayList<String>();
 		collected.addAll(collectLabelsFromExpression(order.getLeft()));
