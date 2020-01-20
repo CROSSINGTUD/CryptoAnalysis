@@ -66,6 +66,7 @@ public class CrySLRuleReader {
 	}
 
 	// TODO: Discuss about .zip layout: Only Root or allow recursive.
+	// TODO: Discuss whether to throw IOExceptions or not
 	public static List<CrySLRule> readFromZipFile(File file) {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
 			return new ArrayList<>();
