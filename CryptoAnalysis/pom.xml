@@ -8,7 +8,7 @@
 	
 	<properties>
    	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<spdsVersion>2.4-SNAPSHOT</spdsVersion>
+   	 	<spdsVersion>2.4</spdsVersion>
 	</properties>
 	<build>
 		<pluginManagement>
