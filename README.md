@@ -1,4 +1,4 @@
-[![Build Status](https://soot-build.cs.uni-paderborn.de/jenkins/buildStatus/icon?job=boomerang%2FCryptoAnalysis-Multibranch%2Fmaster)](https://soot-build.cs.uni-paderborn.de/jenkins/job/boomerang/job/CryptoAnalysis-Multibranch/job/master/)
+[![Build Status](https://soot-build.cs.uni-paderborn.de/jenkins/buildStatus/icon?job=boomerang%2FCryptoAnalysis-Multibranch%2Fmaster)](https://soot-build.cs.uni-paderborn.de/jenkins/job/boomerang/job/CryptoAnalysis-Multibranch/job/develop/)
 
 # CogniCrypt<sub>SAST</sub>
 
