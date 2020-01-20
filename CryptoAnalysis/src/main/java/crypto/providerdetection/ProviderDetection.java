@@ -9,9 +9,12 @@
 package crypto.providerdetection;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +56,8 @@ public class ProviderDetection {
 	private String provider = null;
 	private String rulesDirectory = null;	
 	private static final String BOUNCY_CASTLE = "BouncyCastle";
+	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
+	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
 	
 	
 	public String getProvider() {
@@ -115,6 +120,11 @@ public class ProviderDetection {
 									}
 										
 									else if (providerType.matches("java.lang.String")) {
+										if(SUPPORTED_PROVIDERS.contains(providerValue.toString().replaceAll("\"",""))) {
+											if(providerValue.toString().replaceAll("\"","").contains("BC")) {
+												return "BouncyCastle-JCA";
+											}
+										}
 										this.provider = getProviderWhenTypeString(providerValue, body);
 										
 										// Gets the boolean value of whether the provider is passed
