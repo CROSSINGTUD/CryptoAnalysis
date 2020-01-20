@@ -22,7 +22,7 @@ public class AndroidAnalysisTest
     @Test
     public void runAnalysis()
     {
-        String apkPath = ".\\src\\resources\\app-debug.apk";
+        String apkPath = ".\\src\\test\\resources\\app-debug.apk";
         String platformPath = "C:\\Android\\platforms";
         String rulesPath = "D:\\CogniCrypt\\CrySL1.3\\JavaCryptographicArchitecture";
 
