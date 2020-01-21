@@ -67,7 +67,7 @@ public class ProviderDetectionTests {
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	// is given as a variable, and the rules for that provider do not exist => so it takes Default rules
+	// is given as a variable, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest5() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -77,11 +77,11 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
-	// is given directly, and the rules for that provider do not exist => so it takes Default rules
+	// is given directly, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest6() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -91,7 +91,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	// Checks if provider of type `java.lang.String` is detected when given as a variable
@@ -151,7 +151,7 @@ public class ProviderDetectionTests {
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	// is given as a variable, and the rules for that provider do not exist => so it takes Default rules
+	// is given as a variable, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest11() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -161,11 +161,11 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
-	// is given directly, and the rules for that provider do not exist => so it takes Default rules
+	// is given directly, and the rules for that provider exist
 	@Test
 	public void providerDetectionTest12() {
 		ProviderDetection providerDetection = new ProviderDetection();
@@ -175,7 +175,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("JavaCryptographicArchitecture"));
+		assertEquals(true, rulesDirectory.endsWith("BC"));
 	}
 	
 	// Checks if the default ruleset is chosen when provider of type `java.security.Provider`
