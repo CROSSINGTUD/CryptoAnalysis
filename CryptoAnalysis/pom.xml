@@ -83,6 +83,16 @@
 									<outputDirectory>src/main/resources</outputDirectory>
 									<includes>**</includes>
 								</artifactItem>
+								<artifactItem>
+									<groupId>de.upb.cs</groupId>
+  									<artifactId>BouncyCastle-JCA</artifactId>
+ 	 								<version>0.1</version>
+									<classifier>ruleset</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>src/main/resources</outputDirectory>
+									<includes>**</includes>
+								</artifactItem>
 							</artifactItems>
 						</configuration>
 					</execution>
@@ -184,6 +194,13 @@
 			          <followSymlinks>false</followSymlinks>
 			        </fileset>
 			      </filesets>
+			      <fileset>
+			          <directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+			          <includes>
+			            <include>**</include>
+			          </includes>
+			          <followSymlinks>false</followSymlinks>
+			        </fileset>
 			    </configuration>
   			</plugin>
 		</plugins>
