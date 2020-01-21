@@ -357,6 +357,7 @@ public class ProviderDetection {
 				if(assignStatement.getLeftOp().equals(providerValue)) {
 					String provider = assignStatement.getRightOp().toString().replaceAll("\"","");
 					if(provider.equals("BC") || provider.equals("BCPQC") || provider.equals("BCJSSE")) {
+						provider = "BC";
 						return provider;
 					}
 				}
