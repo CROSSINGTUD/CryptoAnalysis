@@ -67,7 +67,10 @@ public class CrySLRulesetSelector {
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
-			rules.add(CrySLRuleReader.readFromSourceFile(file));
+			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
+			if(rule != null) {
+				rules.add(rule);
+			}
 		}
 		return rules;
 	}
