@@ -17,7 +17,7 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String expected = "BC";
+		String expected = "BouncyCastle-JCA";
 		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
@@ -31,7 +31,7 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String expected = "BC";
+		String expected = "BouncyCastle-JCA";
 		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
@@ -48,7 +48,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	
@@ -63,7 +63,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
@@ -77,7 +77,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.security.Provider`,
@@ -91,7 +91,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if provider of type `java.lang.String` is detected when given as a variable
@@ -103,7 +103,7 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String expected = "BC";
+		String expected = "BouncyCastle-JCA";
 		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
@@ -117,7 +117,7 @@ public class ProviderDetectionTests {
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
-		String expected = "BC";
+		String expected = "BouncyCastle-JCA";
 		String actual = providerDetection.getProvider();
 		assertEquals(expected, actual);
 	}
@@ -133,7 +133,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -147,7 +147,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -161,7 +161,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if rules are correctly extracted, when provider is of type `java.lang.String`,
@@ -175,7 +175,7 @@ public class ProviderDetectionTests {
 		providerDetection.analyze();
 		
 		String rulesDirectory = providerDetection.getRulesDirectory();
-		assertEquals(true, rulesDirectory.endsWith("BC"));
+		assertEquals(true, rulesDirectory.endsWith("BouncyCastle-JCA"));
 	}
 	
 	// Checks if the default ruleset is chosen when provider of type `java.security.Provider`
