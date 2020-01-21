@@ -499,28 +499,4 @@ public class ProviderDetection {
 		}
 		return newCrySLRules;
 	}
-	
-	
-	/**
-	 * This method is used to get all the default CrySL rules
-	 * 
-	 * @param rulesDirectory
-	 * 
-	 * @param rules
-	 */
-	private List<CrySLRule> getRules(String rulesDirectory, List<CrySLRule> rules) {
-		File directory = new File(rulesDirectory);
-		
-		File[] listFiles = directory.listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYSL)) {
-				rules.add(CrySLRuleReader.readFromSourceFile(file));
-			}
-		}
-		if (rules.isEmpty())
-			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
-		
-		return rules;
-	}
-	//-----------------------------------------------------------------------------------------------------------------
 }
