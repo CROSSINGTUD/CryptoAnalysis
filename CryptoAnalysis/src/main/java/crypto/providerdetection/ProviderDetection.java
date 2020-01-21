@@ -75,7 +75,7 @@ public class ProviderDetection {
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	private static final String CRYSL = RuleFormat.SOURCE.toString();
-	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
+	private static final String BOUNCY_CASTLE = "BouncyCastle";
 	
 	
 	public String getProvider() {
@@ -355,7 +355,10 @@ public class ProviderDetection {
 			if(unit instanceof JAssignStmt) {
 				JAssignStmt assignStatement = (JAssignStmt) unit;
 				if(assignStatement.getLeftOp().equals(providerValue)) {
-					return assignStatement.getRightOp().toString().replaceAll("\"","");
+					String provider = assignStatement.getRightOp().toString().replaceAll("\"","");
+					if(provider.equals("BC") || provider.equals("BCPQC") || provider.equals("BCJSSE")) {
+						return provider;
+					}
 				}
 			}
 		}
