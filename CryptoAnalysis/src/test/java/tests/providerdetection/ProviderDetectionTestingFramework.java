@@ -5,15 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.preanalysis.BoomerangPretransformer;
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.providerdetection.ProviderDetection;
-import crypto.rules.CrySLRule;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
@@ -97,18 +92,10 @@ public class ProviderDetectionTestingFramework extends ProviderDetection {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				doAnalysis(observableDynamicICFG);
-				getRules();
+				setRulesDirectory(defaultRulesDirectory);
+				doAnalysis(observableDynamicICFG, rootRulesDirectory);
 			}
 		};
-	}
-	
-	private void getRules() {
-		super.setRulesDirectory(defaultRulesDirectory);
-		String detectedProvider = super.getProvider();
-		if(detectedProvider != null) {
-			super.chooseRules(rootRulesDirectory+File.separator+detectedProvider);
-		}
 	}
 	
 }
