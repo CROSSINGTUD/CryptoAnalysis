@@ -91,7 +91,10 @@ public class CrySLRulesetSelector {
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
-			rules.add(CrySLRuleReader.readFromSourceFile(file));
+			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
+			if(rule != null) {
+				rules.add(rule);
+			}
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found in " + resourcesPath);
