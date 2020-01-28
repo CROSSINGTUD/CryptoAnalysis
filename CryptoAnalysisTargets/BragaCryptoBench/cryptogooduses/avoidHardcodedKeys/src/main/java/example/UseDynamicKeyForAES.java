@@ -25,17 +25,12 @@ public final class UseDynamicKeyForAES {
             c.init(Cipher.ENCRYPT_MODE, k, aps);
             byte[] ct = c.doFinal(msg);
             
-            
-            //key may be recovered from a safe place as a byte array
             SecretKeySpec ks1 = new SecretKeySpec(k.getEncoded(), "AES");
             c.init(Cipher.DECRYPT_MODE, ks1, aps);
             byte[] pt = c.doFinal(ct);
-            System.out.println("Clear text : " + new String(pt));
         } catch (InvalidKeyException | NoSuchAlgorithmException |
                 NoSuchPaddingException | InvalidAlgorithmParameterException |
                 IllegalBlockSizeException | BadPaddingException |
-                NoSuchProviderException e) {
-            System.out.println(e);
-        }
+                NoSuchProviderException e) {}
     }
 }

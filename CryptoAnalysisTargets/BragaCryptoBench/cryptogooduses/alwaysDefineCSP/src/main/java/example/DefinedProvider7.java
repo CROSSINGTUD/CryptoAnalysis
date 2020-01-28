@@ -1,6 +1,5 @@
 package example;
 
-import org.alexmbraga.utils.U;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -17,31 +16,25 @@ public final class DefinedProvider7 {
 
   public static void main(String args[]) {
     try {
-      Security.addProvider(new BouncyCastleProvider()); // provedor BC
-      byte[] msgAna = ("Insecure default RSA.").getBytes();
-      KeyPairGenerator g = KeyPairGenerator.getInstance("RSA", "BC");
-      g.initialize(2048);
-      KeyPair kp = g.generateKeyPair();
-
-      U.println("Plaintext: " + new String(msgAna));
+      Security.addProvider(new BouncyCastleProvider());
+      byte[] msgA = ("Insecure default RSA.").getBytes();
+      KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
+      kpg.initialize(2048);
+      KeyPair kp = kpg.generateKeyPair();
 
       Cipher enc = Cipher.getInstance("RSA", "BC");
       enc.init(Cipher.ENCRYPT_MODE, kp.getPublic());
       Cipher dec = Cipher.getInstance("RSA", "BC");
       dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
 
-      U.println("Algorithm: " + enc.getAlgorithm());
       byte[][] ct = new byte[2][];
       for (int i = 0; i < 2; i++) {
-        ct[i] = enc.doFinal(msgAna);
-        byte[] ptBeto = dec.doFinal(ct[i]);
-        U.println("Ciphertext: " + U.b2x(ct[i]));
+        ct[i] = enc.doFinal(msgA);
+        byte[] ptB = dec.doFinal(ct[i]);
       }
 
     } catch (NoSuchAlgorithmException | NoSuchPaddingException |
             InvalidKeyException | IllegalBlockSizeException |
-            BadPaddingException | NoSuchProviderException e) {
-      System.out.println(e);
-    }
+            BadPaddingException | NoSuchProviderException e) {}
   }
 }

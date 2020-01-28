@@ -1,6 +1,5 @@
 package example;
 
-import org.alexmbraga.utils.U;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -26,8 +25,8 @@ public final class UseAES_CTR {
           IllegalBlockSizeException, NoSuchProviderException,
           InvalidAlgorithmParameterException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
-    byte[] ptAna = ("non-static CTR....").getBytes();
+    Security.addProvider(new BouncyCastleProvider());
+    byte[] ptA = ("non-static CTR").getBytes();
 
     byte[] prefixCTR = new byte[8];
     SecureRandom.getInstanceStrong().nextBytes(prefixCTR);
@@ -40,28 +39,21 @@ public final class UseAES_CTR {
 
     Cipher enc = Cipher.getInstance("AES/CTR/NoPadding", "BC");
     Cipher dec = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-    U.println("Encriptado com: " + enc.getAlgorithm());
     byte[] ct;
 
     enc.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(ictr));
-    ct = enc.doFinal(ptAna);
+    ct = enc.doFinal(ptA);
     byte[] ctr = enc.getIV();
     dec.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(ctr));
-    byte[] ptBeto = dec.doFinal(ct);
-    U.println("Ciphertext: " + U.b2x(ct));
-    U.println("Plaintext : " + new String(ptBeto));
-    U.println("counter   : " + U.b2x(ictr) + "\n");
+    byte[] ptB = dec.doFinal(ct);
     
     for (int i = 0; i < 10; i++) {
       ictr = CTR.increment();
       enc.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(ictr));
-      ct = enc.doFinal(ptAna);
+      ct = enc.doFinal(ptA);
       ctr = enc.getIV();
       dec.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(ctr));
-      ptBeto = dec.doFinal(ct);
-      U.println("Ciphertext: " + U.b2x(ct));
-      U.println("Plaintext : " + new String(ptBeto));
-      U.println("counter   : " + U.b2x(ictr) + "\n");
+      ptB = dec.doFinal(ct);
     }
   }
 }
@@ -69,13 +61,13 @@ public final class UseAES_CTR {
 class CTR {
 
   static byte[] prefixCTR = new byte[8];
-  static ByteBuffer sufixCTR = ByteBuffer.allocate(Long.BYTES);//8 bytes(64 bits)
+  static ByteBuffer sufixCTR = ByteBuffer.allocate(Long.BYTES);
   static byte[] currentCounter;
   static long l;
   
   static byte[] increment() throws NoSuchAlgorithmException {
-    sufixCTR = ByteBuffer.allocate(Long.BYTES); // 8 bytes (64 bit)
-    l =l +1;
+    sufixCTR = ByteBuffer.allocate(Long.BYTES);
+    l = l + 1;
     sufixCTR.putLong(l);
     currentCounter = Arrays.concatenate(prefixCTR, sufixCTR.array());
     return currentCounter;
@@ -85,7 +77,7 @@ class CTR {
     SecureRandom.getInstanceStrong().nextBytes(prefixCTR);
     l = SecureRandom.getInstanceStrong().nextLong();
     sufixCTR.putLong(l);
-    currentCounter = Arrays.concatenate(prefixCTR, sufixCTR.array());// 16 bytes
+    currentCounter = Arrays.concatenate(prefixCTR, sufixCTR.array());
     return currentCounter;
   }
   

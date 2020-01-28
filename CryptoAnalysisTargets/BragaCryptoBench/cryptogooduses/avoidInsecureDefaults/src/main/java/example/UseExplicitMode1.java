@@ -1,7 +1,6 @@
 
 package example;
 
-import org.alexmbraga.utils.U;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -24,8 +23,8 @@ public final class UseExplicitMode1 {
           IllegalBlockSizeException, NoSuchProviderException, 
           InvalidAlgorithmParameterException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
-    byte[] ptAna = ("Testing explicit operation modes").getBytes();
+    Security.addProvider(new BouncyCastleProvider());
+    byte[] ptA = ("Testing explicit operation modes").getBytes();
     
     KeyGenerator g = KeyGenerator.getInstance("AES", "BC");
     g.init(256);
@@ -41,17 +40,14 @@ public final class UseExplicitMode1 {
     for (int a = 0; a < aesOpModes.length; a++) {
       Cipher enc = Cipher.getInstance(aesOpModes[a], "BC");
       Cipher dec = Cipher.getInstance(aesOpModes[a], "BC");
-      U.println("\nAlgorithm: " + enc.getAlgorithm());
       
       for (int i = 0; i < 10; i++) {
         sr.nextBytes(iv);
         enc.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv));
-        byte[] ct = enc.doFinal(ptAna);
+        byte[] ct = enc.doFinal(ptA);
         dec.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(enc.getIV()));
-        byte[] ptBeto = dec.doFinal(ct);
-        U.println("Ciphertext: " + U.b2x(ct));
-        U.println("Plaintext : " + new String(ptBeto));
-        U.println("IV        : " + U.b2x(dec.getIV()));
+        byte[] ptB = dec.doFinal(ct);
+        
       }
     }
   }

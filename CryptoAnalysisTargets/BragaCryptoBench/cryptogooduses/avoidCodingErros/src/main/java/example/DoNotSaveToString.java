@@ -1,6 +1,5 @@
 package example;
 
-import org.alexmbraga.utils.U;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -25,33 +24,28 @@ public final class DoNotSaveToString {
           IllegalBlockSizeException, NoSuchProviderException,
           InvalidAlgorithmParameterException, UnsupportedEncodingException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
-    byte[] ptAna = ("Testing String..").getBytes("UTF-8");
+    Security.addProvider(new BouncyCastleProvider());
+    byte[] ptA = ("Testing String").getBytes("UTF-8");
 
     byte[] iv = new byte[16];
     SecureRandom.getInstanceStrong().nextBytes(iv);
 
-    KeyGenerator g = KeyGenerator.getInstance("AES", "BC");
-    g.init(128);
-    Key k = g.generateKey();
-    String aes = "AES/CTR/NoPadding";
+    KeyGenerator kg = KeyGenerator.getInstance("AES", "BC");
+    kg.init(128);
+    Key key = kg.generateKey();
+    String alg = "AES/CTR/NoPadding";
     
-    Cipher enc = Cipher.getInstance(aes,"BC");
-    Cipher dec = Cipher.getInstance(aes,"BC");
+    Cipher enc = Cipher.getInstance(alg,"BC");
+    Cipher dec = Cipher.getInstance(alg,"BC");
     byte[] ct;
 
-    enc.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv));
-    ct = enc.doFinal(ptAna);
+    enc.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+    ct = enc.doFinal(ptA);
     
-    dec.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
-    byte[] ptBeto = dec.doFinal(ct);
-    U.println("Ciphertext encoded  : " + U.b2x(ct));
-    U.println("Plain text   : " + new String(ptBeto));
-    U.println("");
-    dec.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
-    ptBeto = dec.doFinal(ct);
-    U.println("Ciphertext original : " + U.b2x(ct));
-    U.println("Plaintext   : " + new String(ptBeto));
+    dec.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+    byte[] ptB = dec.doFinal(ct);
+    dec.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+    ptB = dec.doFinal(ct);
     
   }
 }

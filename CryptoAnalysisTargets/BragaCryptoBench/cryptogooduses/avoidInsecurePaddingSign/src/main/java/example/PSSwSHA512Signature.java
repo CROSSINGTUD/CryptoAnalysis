@@ -14,7 +14,7 @@ public final class PSSwSHA512Signature {
 
   public static void main(String[] args) throws Exception {
     
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
+    Security.addProvider(new BouncyCastleProvider());
     
     KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA", "BC");
     kg.initialize(2048, new SecureRandom());
@@ -26,16 +26,12 @@ public final class PSSwSHA512Signature {
 
     byte[] m = "Testing RSA PSS w/ SHA512".getBytes("UTF-8");
     
-    // generate a signature
     sig.initSign(kp.getPrivate(), new SecureRandom());
     sig.update(m);
     byte[] s = sig.sign();
 
-    // verify a signature
     sig.initVerify(kp.getPublic());
     sig.update(m);
 
-    if (sig.verify(s)) { System.out.println("Verification succeeded.");}
-    else               { System.out.println("Verification failed.");   }
   }
 }

@@ -1,6 +1,5 @@
 package example;
 
-import org.alexmbraga.utils.U;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
@@ -12,39 +11,23 @@ public final class BC_128bits_DSA3072xSHA256 {
 
     public static void main(String[] args) throws Exception {
 
-        Security.addProvider(new BouncyCastleProvider()); // provedor BC
+        Security.addProvider(new BouncyCastleProvider());
  
-        // par de chaves de Ana e configurações do criptosistema
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA", "BC");
-        kpg.initialize(3072, new SecureRandom()); // 3072 com SHA256
-        Signature signerAna = Signature.getInstance("SHA256WithDSA", "BC");
+        kpg.initialize(3072, new SecureRandom());
+        Signature sign1 = Signature.getInstance("SHA256WithDSA", "BC");
 
-        KeyPair kpAna = kpg.generateKeyPair();
+        KeyPair kp1 = kpg.generateKeyPair();
 
-        //Ana assina o doc
-        signerAna.initSign(kpAna.getPrivate(), new SecureRandom());
-        byte[] doc = U.cancaoDoExilio.getBytes();
-        signerAna.update(doc);
-        byte[] assinatura = signerAna.sign();
+        sign1.initSign(kp1.getPrivate(), new SecureRandom());
+        byte[] doc = "this is a demo text".getBytes();
+        sign1.update(doc);
+        byte[] signed1 = sign1.sign();
 
-        // Beto configura seu criptosistema
-        Signature verifierBeto = Signature.getInstance("SHA256WithDSA", "BC");
+        Signature verfier1 = Signature.getInstance("SHA256WithDSA", "BC");
 
-        //Beto verifica a assinatura
-        verifierBeto.initVerify(kpAna.getPublic());
-        verifierBeto.update(doc);
-        boolean ok = verifierBeto.verify(assinatura);
-
-        if (ok) {
-            System.out.println("Signature OK!");
-        } else {
-            System.out.println("Signature not OK!");
-        }
-
-        //U.println("Public key " + kpAna.getPublic());
-        //U.println("Private key "+ U.b2x(kpAna.getPrivate().getEncoded()));
-        U.println("Algorithm: " + signerAna.getAlgorithm());
-        U.println("Signature size: " + assinatura.length + " bytes");
-        U.println("Signature: " + U.b2x(assinatura));
+        verfier1.initVerify(kp1.getPublic());
+        verfier1.update(doc);
+        boolean ok = verfier1.verify(signed1);
     }
 }

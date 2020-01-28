@@ -1,6 +1,5 @@
 package example;
 
-import org.alexmbraga.utils.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;
@@ -13,46 +12,31 @@ public final class UseAEADwAES_GCM {
           IllegalBlockSizeException, NoSuchProviderException,
           InvalidAlgorithmParameterException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
+    Security.addProvider(new BouncyCastleProvider());
 
-    // Random IV
     byte[] iv = new byte[128];
     SecureRandom.getInstanceStrong().nextBytes(iv);
     
-    // Random key
     KeyGenerator g = KeyGenerator.getInstance("AES", "BC");
-    g.init(256); // key size of 256 bits
+    g.init(256);
     Key k = g.generateKey();
     
-    GCMParameterSpec gps = new GCMParameterSpec(128, iv);//tag size + iv
+    GCMParameterSpec gps = new GCMParameterSpec(128, iv);
     Cipher c = Cipher.getInstance("AES/GCM/NoPadding", "BC");
 
-    // Encriptação pela Ana
-    c.init(Cipher.ENCRYPT_MODE, k, gps); //inicializa o AES para encriptacao
-    //byte[] textoclaroAna = "Testando o GCM..".getBytes();
-    byte[] PT_Ana = U.cancaoDoExilio.getBytes();
-    c.updateAAD("AAD not encripted.......".getBytes());
-    byte[] ciphertext = c.doFinal(PT_Ana);
-
-    //criptograma[0] = (byte)(criptograma[0]^(byte)0x01);
+    c.init(Cipher.ENCRYPT_MODE, k, gps);
+    byte[] ptA = "This is a demo text".getBytes();
+    c.updateAAD("AAD is not encripted".getBytes());
+    byte[] ciphertext = c.doFinal(ptA);
     
-    // decriptação pelo Beto
-    c.init(Cipher.DECRYPT_MODE, k, gps); //inicializa o AES para decriptacao
-    c.updateAAD("AAD not encripted.......".getBytes());
+    c.init(Cipher.DECRYPT_MODE, k, gps);
+    c.updateAAD("AAD is not encripted".getBytes());
     boolean ok = true;
-    byte[] PT_Beto = null;
+    byte[] ptB = null;
     try {
-      PT_Beto = c.doFinal(ciphertext);
+      ptB = c.doFinal(ciphertext);
     } catch (AEADBadTagException e) {
       ok = false;
-    }
-    if (ok) {
-      U.println("Algorithm : " + c.getAlgorithm());
-      U.println("tag size  : " + gps.getTLen() + " bits");
-      U.println("Ciphertext: " + U.b2x(ciphertext) + ", " + ciphertext.length);
-      U.println("Plaintext : " + new String(PT_Beto));
-    } else {
-      U.println("Tag not valid!");
     }
 
   }

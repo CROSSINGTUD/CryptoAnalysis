@@ -20,14 +20,11 @@ public final class DefinedProvider5 {
           IllegalBlockSizeException, NoSuchProviderException,
           InvalidAlgorithmParameterException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
+    Security.addProvider(new BouncyCastleProvider());
     
-    KeyGenerator g = KeyGenerator.getInstance("AES","BC");
-    System.out.println("KeyGenerator "+g.getProvider().getName());
+    KeyGenerator kg = KeyGenerator.getInstance("AES","BC");
     
     Cipher enc = Cipher.getInstance("AES/CTR/NoPadding","BC");
     Cipher dec = Cipher.getInstance("AES/CTR/NoPadding","BC");
-    System.out.println("Cipher "+enc.getProvider().getName());
-    System.out.println("Cipher "+dec.getProvider().getName()); 
   }  
 }

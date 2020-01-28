@@ -1,8 +1,6 @@
 
 package example;
 
-import org.alexmbraga.utils.U;
-import static org.alexmbraga.utils.U.cancaoDoExilio;
 import javax.crypto.*;
 import java.security.*;
 import org.bouncycastle.jce.provider.*;
@@ -14,19 +12,19 @@ public final class CompareHashesInConstantTime2 {
           NoSuchPaddingException, InvalidKeyException, BadPaddingException,
           IllegalBlockSizeException, NoSuchProviderException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
+    Security.addProvider(new BouncyCastleProvider());
 
     MessageDigest md = MessageDigest.getInstance("SHA-512", "BC");
     boolean ok;
     long t1, t2;
     long t[] = new long[64], tt[] = new long[64];
     md.reset();
-    byte[] hash1 = md.digest(cancaoDoExilio.getBytes());
+    byte[] hash1 = md.digest("demo text".getBytes());
     for (int j = 0; j < 1; j++) {
 
-      for (int i = 0; i < t.length; i++) { // 64 bytes
+      for (int i = 0; i < t.length; i++) {
         md.reset();
-        byte[] hash2 = md.digest(cancaoDoExilio.getBytes());
+        byte[] hash2 = md.digest("demo text".getBytes());
         hash2[i] = (byte) (hash2[i] ^ 0x01);
         t1 = System.nanoTime();
         ok = MessageDigest.isEqual(hash2, hash1);
@@ -34,19 +32,14 @@ public final class CompareHashesInConstantTime2 {
         t[i] = t2 - t1;
       }
 
-      for (int i = 0; i < t.length; i++) { // 64 bytes
+      for (int i = 0; i < t.length; i++) {
         md.reset();
-        byte[] hash2 = md.digest(cancaoDoExilio.getBytes());
+        byte[] hash2 = md.digest("demo text".getBytes());
         hash2[i] = (byte) (hash2[i] ^ 0x01);
         t1 = System.nanoTime();
         ok = Arrays.constantTimeAreEqual(hash2, hash1);
         t2 = System.nanoTime();
         tt[i] = t2 - t1;
-      }
-    
-      U.println("i;\t\tt[i];\t\ttt[i];");
-      for (int i = 0; i < t.length; i++) {
-        U.println(i + ";\t\t" + t[i] + ";\t\t" + tt[i]);
       }
     }
   }
