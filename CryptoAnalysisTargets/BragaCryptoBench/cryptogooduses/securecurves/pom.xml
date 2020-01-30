@@ -34,13 +34,5 @@
 			<artifactId>bcmail-jdk15on</artifactId>
 			<version>1.56</version>
 		</dependency>
-		<dependency>
-			<groupId>org.alexmbraga</groupId>
-			<artifactId>utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/alexmbraga-utils.jar</systemPath>
-		</dependency>
-
 	</dependencies>
 </project>
