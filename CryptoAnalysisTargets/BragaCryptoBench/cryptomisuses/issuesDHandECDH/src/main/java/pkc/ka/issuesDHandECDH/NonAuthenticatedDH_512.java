@@ -1,6 +1,5 @@
 package pkc.ka.issuesDHandECDH;
 
-import org.alexmbraga.utils.U;
 import java.security.*;
 import java.security.spec.*;
 import java.util.Arrays;
@@ -10,95 +9,48 @@ import javax.crypto.interfaces.*;
 
 public final class NonAuthenticatedDH_512 {
 
-    public static void main(String argv[]) {
-        try {
-            AlgorithmParameterGenerator apg 
-                    = AlgorithmParameterGenerator.getInstance("DH","SunJCE");
-            apg.init(512); // here is the size
-            AlgorithmParameters p = apg.generateParameters();
-            DHParameterSpec dhps
-                  = (DHParameterSpec) p.getParameterSpec(DHParameterSpec.class);
-            U.println("Algorithm : " + p.getAlgorithm());
-            U.println("Parameters: " + p.toString());
-            
-            //Alice creates her own DH key pair using the DH parameters from p
-            U.println("ALICE: Generate DH keypair ...");
-            KeyPairGenerator alice_kpg = KeyPairGenerator.getInstance("DH","SunJCE");
-            alice_kpg.initialize(dhps);
-            KeyPair alicekp = alice_kpg.generateKeyPair();
-            //U.println("Alice pub  key: " + alicekp.getPublic());
-            //U.println("Alice priv key: " + 
-            //        U.b2x(alicekp.getPrivate().getEncoded()));
-            // Alice creates and initializes her DH KeyAgreement object
-            U.println("ALICE: Initialization ...");
-            KeyAgreement aliceka = KeyAgreement.getInstance("DH","SunJCE");
-            aliceka.init(alicekp.getPrivate());
+	public static void main(String argv[]) {
+		try {
+			AlgorithmParameterGenerator apg = AlgorithmParameterGenerator.getInstance("DH", "SunJCE");
+			apg.init(512);
+			AlgorithmParameters p = apg.generateParameters();
+			DHParameterSpec dhps = (DHParameterSpec) p.getParameterSpec(DHParameterSpec.class);
 
-            // Alice encodes her public key, and sends it over to Bob.
-            byte[] alicePubk = alicekp.getPublic().getEncoded();
+			KeyPairGenerator kpg1 = KeyPairGenerator.getInstance("DH", "SunJCE");
+			kpg1.initialize(dhps);
+			KeyPair kp1 = kpg1.generateKeyPair();
+			KeyAgreement ka1 = KeyAgreement.getInstance("DH", "SunJCE");
+			ka1.init(kp1.getPrivate());
 
-            /* Let's turn over to Bob.
-             * Bob has received Alice's public key in encoded format.
-             * He instantiates a DH public key from the encoded key
-             * material. */
-            KeyFactory bobkf = KeyFactory.getInstance("DH","SunJCE");
-            X509EncodedKeySpec x509ks = new X509EncodedKeySpec(alicePubk);
-            PublicKey apk = bobkf.generatePublic(x509ks);
+			byte[] pubKey1 = kp1.getPublic().getEncoded();
 
-            /* Bob gets the DH parameters associated with Alice's
-             * public key.
-             * He must use the same parameters when he generates
-             * his own key pair. */
-            DHParameterSpec dhps2 = ((DHPublicKey) apk).getParams();
+			KeyFactory kf1 = KeyFactory.getInstance("DH", "SunJCE");
+			X509EncodedKeySpec x509ks = new X509EncodedKeySpec(pubKey1);
+			PublicKey apk1 = kf1.generatePublic(x509ks);
 
-            // Bob creates his own DH key pair
-            System.out.println("BOB: Generate DH keypair ...");
-            KeyPairGenerator bob_kpg = KeyPairGenerator.getInstance("DH","SunJCE");
-            bob_kpg.initialize(dhps2);
-            KeyPair bobkp = bob_kpg.generateKeyPair();
-            //U.println("Bob pub  key: " + bobkp.getPublic());
-            //U.println("Bob priv key: " + 
-            //        U.b2x(bobkp.getPrivate().getEncoded()));
-            // Bob creates and initializes his DH KeyAgreement object
-            System.out.println("BOB: Initialization ...");
-            KeyAgreement bobka = KeyAgreement.getInstance("DH","SunJCE");
-            bobka.init(bobkp.getPrivate());
+			DHParameterSpec dhps2 = ((DHPublicKey) apk1).getParams();
 
-            // Bob encodes his public key, and sends it over to Alice.
-            byte[] bobPubk = bobkp.getPublic().getEncoded();
+			KeyPairGenerator kpg2 = KeyPairGenerator.getInstance("DH", "SunJCE");
+			kpg2.initialize(dhps2);
+			KeyPair kp2 = kpg2.generateKeyPair();
+			KeyAgreement ka2 = KeyAgreement.getInstance("DH", "SunJCE");
+			ka2.init(kp2.getPrivate());
 
-            /* Alice uses Bob's public key for the first (and only)
-             * phase of her version of the DH protocol.
-             * Before she can do so, she has to instantiate a DH
-             * public key from Bob's encoded key material. */
-            KeyFactory alicekf = KeyFactory.getInstance("DH","SunJCE");
-            x509ks = new X509EncodedKeySpec(bobPubk);
-            PublicKey bobPubKey = alicekf.generatePublic(x509ks);
-            System.out.println("ALICE: Execute PHASE1 ...");
-            aliceka.doPhase(bobPubKey, true);
-            byte[] alice_ss = aliceka.generateSecret();
+			byte[] pubKey2 = kp2.getPublic().getEncoded();
 
+			KeyFactory kf2 = KeyFactory.getInstance("DH", "SunJCE");
+			x509ks = new X509EncodedKeySpec(pubKey2);
+			PublicKey apk2 = kf2.generatePublic(x509ks);
+			ka1.doPhase(apk2, true);
+			byte[] genSec1 = ka1.generateSecret();
 
-            /* Bob uses Alice's public key for the first (and only)
-             * phase of his version of the DH protocol. */
-            U.println("BOB: Execute PHASE1 ...");
-            bobka.doPhase(apk, true);
-            byte[] bob_ss = bobka.generateSecret();
+			ka2.doPhase(apk1, true);
+			byte[] genSec2 = ka2.generateSecret();
 
-            /* At this stage, both Alice and Bob have completed
-             * the DH key agreement protocol.
-             * Both generate the (same) shared secret. */
-            //System.out.println("Alice secret: " + U.b2x(alice_ss));
-            //System.out.println("Bob   secret: " + U.b2x(bob_ss));
-
-            if (!Arrays.equals(alice_ss, bob_ss)) {
-                throw new Exception("Shared secrets differ");
-            }
-            U.println("Shared secrets are the same and are "
-                    +bob_ss.length+" bytes long");        
-        } catch (Exception e) {
-            System.err.println("Error: " + e);
-            System.exit(1);
-        }
-    }
+			if (!Arrays.equals(genSec1, genSec2)) {
+				throw new Exception("Shared secrets differ");
+			}
+		} catch (Exception e) {
+		}
+	}
 }

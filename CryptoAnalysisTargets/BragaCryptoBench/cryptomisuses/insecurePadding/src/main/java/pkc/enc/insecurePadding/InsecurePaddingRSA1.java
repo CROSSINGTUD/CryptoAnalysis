@@ -1,6 +1,5 @@
 package pkc.enc.insecurePadding;
 
-import org.alexmbraga.utils.U;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -15,33 +14,27 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class InsecurePaddingRSA1 {
 
-  public static void main(String args[]) {
-    try {
-      Security.addProvider(new BouncyCastleProvider()); // provedor BC
-      byte[] msgAna = ("Cripto deterministica").getBytes();
-      KeyPairGenerator g = KeyPairGenerator.getInstance("RSA", "BC");
-      g.initialize(2048);
-      KeyPair kp = g.generateKeyPair();
+	public static void main(String args[]) {
+		try {
+			Security.addProvider(new BouncyCastleProvider());
+			byte[] msg1 = ("demo msg").getBytes();
+			KeyPairGenerator g = KeyPairGenerator.getInstance("RSA", "BC");
+			g.initialize(2048);
+			KeyPair kp = g.generateKeyPair();
 
-      U.println("Texto claro   : " + new String(msgAna));
+			Cipher enc = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
+			enc.init(Cipher.ENCRYPT_MODE, kp.getPublic());
+			Cipher dec = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
+			dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
 
-      Cipher enc = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
-      enc.init(Cipher.ENCRYPT_MODE, kp.getPublic());
-      Cipher dec = Cipher.getInstance("RSA/ECB/NoPadding", "BC");
-      dec.init(Cipher.DECRYPT_MODE, kp.getPrivate());
+			byte[][] ct = new byte[2][];
+			for (int i = 0; i < 2; i++) {
+				ct[i] = enc.doFinal(msg1);
+				byte[] deciphered = dec.doFinal(ct[i]);
+			}
 
-      U.println("Encriptado com: " + enc.getAlgorithm());
-      byte[][] ct = new byte[2][];
-      for (int i = 0; i < 2; i++) {
-        ct[i] = enc.doFinal(msgAna);
-        byte[] textoClaroBeto = dec.doFinal(ct[i]);
-        U.println("Criptograma   : " + U.b2x(ct[i]));
-      }
-
-    } catch (NoSuchAlgorithmException | NoSuchPaddingException |
-            InvalidKeyException | IllegalBlockSizeException |
-            BadPaddingException | NoSuchProviderException e) {
-      System.out.println(e);
-    }
-  }
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
+				| BadPaddingException | NoSuchProviderException e) {
+		}
+	}
 }

@@ -1,58 +1,53 @@
 
 package pdf.insecureComboHashEnc;
 
-import org.alexmbraga.utils.U;
 import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.Arrays;
 
-//Combinação de integridade e encriptação
 public final class ManualComboHashThenEncrypt {
 
-  public static void main(String args[]) throws NoSuchAlgorithmException,
-          NoSuchPaddingException, InvalidKeyException, BadPaddingException,
-          IllegalBlockSizeException, NoSuchProviderException, 
-          InvalidAlgorithmParameterException {
+	public static void main(String args[])
+			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, BadPaddingException,
+			IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException {
 
-    Security.addProvider(new BouncyCastleProvider()); // provedor BC
+		Security.addProvider(new BouncyCastleProvider());
 
-    // configurações do sistema criptográfico para Ana e Beto
-    byte[] iv = new byte[16];
-    KeyGenerator g = KeyGenerator.getInstance("AES", "BC");
-    g.init(256);
-    Key k = g.generateKey();
-    (new SecureRandom()).nextBytes(iv);
-    Cipher c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
-    MessageDigest md = MessageDigest.getInstance("SHA256", "BC");
-    byte[] ptAna = "De Ana para Beto".getBytes(), X, Y;
-    boolean ok, ivo = true;
+		byte[] iv = new byte[16];
+		KeyGenerator g = KeyGenerator.getInstance("AES", "BC");
+		g.init(256);
+		Key k = g.generateKey();
+		(new SecureRandom()).nextBytes(iv);
+		Cipher c = Cipher.getInstance("AES/CTR/NoPadding", "BC");
+		MessageDigest md = MessageDigest.getInstance("SHA256", "BC");
+		byte[] pt1 = "demo text".getBytes(), X, Y;
+		boolean ok, ivo = true;
 
-    // Hash entao encripta: Hash-then-Encrypt (HtE)
-    String s = "Hash-then-Encrypt(HtE):calcula o hash do texto claro e encripta a tag";
-    md.reset(); c.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv)); 
-    byte[] hash = md.digest(ptAna);// calcula a hash do texto claro
-    byte[] pacote = Arrays.concatenate(ptAna,hash);
-    byte[] ct = c.doFinal(pacote); // encrita texto e hash
+		String s = "Hash-then-Encrypt(HtE)";
+		md.reset();
+		c.init(Cipher.ENCRYPT_MODE, k, new IvParameterSpec(iv));
+		byte[] hash = md.digest(pt1);
+		byte[] concatArrays = Arrays.concatenate(pt1, hash);
+		byte[] ct = c.doFinal(concatArrays);
 
-    if (ivo){
-      X = U.x_or(ptAna, "De Ana para  Ivo".getBytes());
-      byte[] cripTexto = Arrays.copyOfRange(ct,0,16);
-      byte[] cripTag   = Arrays.copyOfRange(ct,16,ct.length);
-      md.reset(); byte[] t1 = md.digest("De Ana para Beto".getBytes());
-      md.reset(); byte[] t2 = md.digest("De Ana para  Ivo".getBytes());
-      Y = U.x_or(t1, t2);
-      ct = Arrays.concatenate(U.x_or(cripTexto, X),U.x_or(cripTag,Y));
-    }
-    // decriptação pelo Beto com verificação da hash 
-    md.reset(); c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv)); 
-    pacote = c.doFinal(ct); // decript texto e hash
-    byte[] ptBeto = Arrays.copyOfRange(pacote, 0, 16);
-    hash = Arrays.copyOfRange(pacote, 16, pacote.length);
-    ok = MessageDigest.isEqual(md.digest(ptBeto), hash); // verifica hash
-    if (ok) { U.p(s,hash,ptBeto,md,c,ok);}
-    else    { System.out.println("Verificação de integridade falhou!");}
-  }
-  
+		if (ivo) {
+			X = "demo text 2".getBytes();
+			byte[] cryptoText = Arrays.copyOfRange(ct, 0, 16);
+			byte[] cryptoTag = Arrays.copyOfRange(ct, 16, ct.length);
+			md.reset();
+			byte[] t1 = md.digest("digested1".getBytes());
+			md.reset();
+			byte[] t2 = md.digest("digested2".getBytes());
+			Y = "demo text 3".getBytes();
+			ct = Arrays.concatenate(cryptoText, cryptoTag);
+		}
+		md.reset();
+		c.init(Cipher.DECRYPT_MODE, k, new IvParameterSpec(iv));
+		concatArrays = c.doFinal(ct);
+		byte[] pt2 = Arrays.copyOfRange(concatArrays, 0, 16);
+		hash = Arrays.copyOfRange(concatArrays, 16, concatArrays.length);
+		ok = MessageDigest.isEqual(md.digest(pt2), hash);
+	}
 }
