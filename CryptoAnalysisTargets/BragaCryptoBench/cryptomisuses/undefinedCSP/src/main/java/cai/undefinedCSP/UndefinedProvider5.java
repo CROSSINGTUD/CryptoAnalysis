@@ -18,11 +18,10 @@ public final class UndefinedProvider5 {
 			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, BadPaddingException,
 			IllegalBlockSizeException, NoSuchProviderException, InvalidAlgorithmParameterException {
 
-		Security.addProvider(new BouncyCastleProvider());
-
 		KeyGenerator g = KeyGenerator.getInstance("AES");
 
 		Cipher enc = Cipher.getInstance("AES/CTR/NoPadding");
 		Cipher dec = Cipher.getInstance("AES/CTR/NoPadding");
+
 	}
 }

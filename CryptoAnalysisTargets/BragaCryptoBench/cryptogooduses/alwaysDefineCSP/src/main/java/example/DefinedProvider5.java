@@ -21,10 +21,14 @@ public final class DefinedProvider5 {
           InvalidAlgorithmParameterException {
 
     Security.addProvider(new BouncyCastleProvider());
-    
+
     KeyGenerator kg = KeyGenerator.getInstance("AES","BC");
-    
+    kg.getProvider().getName();
+
     Cipher enc = Cipher.getInstance("AES/CTR/NoPadding","BC");
+    enc.getProvider().getName();
     Cipher dec = Cipher.getInstance("AES/CTR/NoPadding","BC");
-  }  
+    dec.getProvider().getName();
+
+  }
 }
