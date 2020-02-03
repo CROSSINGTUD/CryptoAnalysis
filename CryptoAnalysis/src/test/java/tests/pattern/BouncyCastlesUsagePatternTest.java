@@ -6,6 +6,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Random;
 
+import org.apache.velocity.tools.config.SkipSetters;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -22,6 +23,7 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
@@ -76,8 +78,8 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		Random randomGenerator = SecureRandom.getInstance("SHA1PRNG");
 		Assertions.mustBeInAcceptingState(randomGenerator);
 		Assertions.hasEnsuredPredicate(randomGenerator);
-	    BigInteger p = new BigInteger(1024, randomGenerator);
-	    BigInteger q = new BigInteger(1024, randomGenerator);
+		BigInteger p = new BigInteger(1024, randomGenerator);
+		BigInteger q = new BigInteger(1024, randomGenerator);
 		BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
 		BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
 		BigInteger crtCoef = new BigInteger("dae7651ee...39", 16);
@@ -90,6 +92,7 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		Assertions.notHasEnsuredPredicate(randomParam2);
 	}
 	
+	@Ignore
 	@Test
 	public void testORingTwoPredicates2() throws GeneralSecurityException, IllegalStateException, InvalidCipherTextException {
 		SecureRandom random = new SecureRandom();
@@ -137,8 +140,8 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		Random randomGenerator = SecureRandom.getInstance("SHA1PRNG");
 		Assertions.mustBeInAcceptingState(randomGenerator);
 		Assertions.hasEnsuredPredicate(randomGenerator);
-	    BigInteger p = new BigInteger(1024, randomGenerator);
-	    BigInteger q = new BigInteger(1024, randomGenerator);
+		BigInteger p = new BigInteger(1024, randomGenerator);
+		BigInteger q = new BigInteger(1024, randomGenerator);
 		BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
 		BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
 		BigInteger crtCoef = new BigInteger("dae7651ee...39", 16);
@@ -162,6 +165,39 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		ParametersWithRandom randomParam3 = new ParametersWithRandom(pubKeyValid);
 		Assertions.mustBeInAcceptingState(randomParam3);
 		Assertions.hasEnsuredPredicate(randomParam3);
+	}
+	
+	@Test
+	public void testORingThreePredicates2() throws GeneralSecurityException {
+		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
+		BigInteger pub = new BigInteger("9f0783a49...da", 16);	
+		RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
+		Assertions.mustBeInAcceptingState(params);
+		Assertions.hasEnsuredPredicate(params);
+		byte[] message = new byte[100];
+		
+		RSAEngine engine1 = new RSAEngine();
+		engine1.init(false, params);
+		byte[] cipherText1 = engine1.processBlock(message, 0, message.length);
+		Assertions.mustBeInAcceptingState(engine1);
+		Assertions.hasEnsuredPredicate(cipherText1);
+		Assertions.hasEnsuredPredicate(engine1);
+		
+		BigInteger n = new BigInteger("62771017353866");
+		ECCurve.Fp curve = new ECCurve.Fp(new BigInteger("2343"), new BigInteger("2343"), new BigInteger("2343"), n, ECConstants.ONE);
+		ECDomainParameters ecParams = new ECDomainParameters(curve, curve.decodePoint(Hex.decode("03188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012")), n);
+		Assertions.mustBeInAcceptingState(ecParams);
+		Assertions.hasEnsuredPredicate(ecParams);
+		ECPublicKeyParameters pubKeyValid = new ECPublicKeyParameters( curve.decodePoint(Hex.decode("0262b12d")), ecParams);
+		Assertions.mustBeInAcceptingState(pubKeyValid);
+		Assertions.hasEnsuredPredicate(pubKeyValid);
+		
+		RSAEngine engine2 = new RSAEngine();
+		engine2.init(false, pubKeyValid);
+		byte[] cipherText2 = engine2.processBlock(message, 0, message.length);
+		Assertions.mustBeInAcceptingState(engine2);
+		Assertions.hasEnsuredPredicate(cipherText2);
+		Assertions.hasEnsuredPredicate(engine2);
 	}
 	
 	@Override
