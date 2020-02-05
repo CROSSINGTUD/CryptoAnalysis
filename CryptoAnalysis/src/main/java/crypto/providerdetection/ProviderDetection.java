@@ -121,9 +121,7 @@ public class ProviderDetection {
 										
 									else if (providerType.matches("java.lang.String")) {
 										if(SUPPORTED_PROVIDERS.contains(providerValue.toString().replaceAll("\"",""))) {
-											if(providerValue.toString().replaceAll("\"","").contains("BC")) {
-												return "BouncyCastle-JCA";
-											}
+											return "BouncyCastle-JCA";
 										}
 										this.provider = getProviderWhenTypeString(providerValue, body);
 										
