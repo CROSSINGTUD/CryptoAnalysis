@@ -177,11 +177,11 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		byte[] message = new byte[100];
 		
 		RSAEngine engine1 = new RSAEngine();
+		Assertions.hasEnsuredPredicate(engine1);
 		engine1.init(false, params);
 		byte[] cipherText1 = engine1.processBlock(message, 0, message.length);
 		Assertions.mustBeInAcceptingState(engine1);
 		Assertions.hasEnsuredPredicate(cipherText1);
-		Assertions.hasEnsuredPredicate(engine1);
 		
 		BigInteger n = new BigInteger("62771017353866");
 		ECCurve.Fp curve = new ECCurve.Fp(new BigInteger("2343"), new BigInteger("2343"), new BigInteger("2343"), n, ECConstants.ONE);
@@ -193,11 +193,12 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 		Assertions.hasEnsuredPredicate(pubKeyValid);
 		
 		RSAEngine engine2 = new RSAEngine();
+		Assertions.hasEnsuredPredicate(engine2);
 		engine2.init(false, pubKeyValid);
 		byte[] cipherText2 = engine2.processBlock(message, 0, message.length);
 		Assertions.mustBeInAcceptingState(engine2);
 		Assertions.hasEnsuredPredicate(cipherText2);
-		Assertions.hasEnsuredPredicate(engine2);
+		
 	}
 	
 	@Override
