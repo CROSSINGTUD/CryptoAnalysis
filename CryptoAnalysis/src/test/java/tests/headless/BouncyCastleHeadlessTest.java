@@ -111,7 +111,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.ECElGamalEncryptorTest: void testOne()>")
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.ECElGamalEncryptorTest: void testTwo()>")
 				.withTPs(TypestateError.class, 1)
@@ -135,6 +135,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
+				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>")
 				.withTPs(HardCodedError.class, 1)
@@ -190,12 +191,18 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testFive(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
+				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testTwo(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
+				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
+				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.build());
+		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testSix(java.lang.String)>")
+				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testThree(java.lang.String)>")
@@ -211,14 +218,15 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>")
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
+				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		
 		setErrorsCount(new ErrorSpecification.Builder("<generators.ECKeyPairGeneratorTest: void testTwo(java.lang.String)>")
