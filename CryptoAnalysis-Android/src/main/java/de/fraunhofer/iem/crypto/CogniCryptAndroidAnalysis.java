@@ -76,7 +76,7 @@ public class CogniCryptAndroidAnalysis {
 	private void constructCallGraph() {
 		InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
 		config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
-		config.getCallbackConfig().setEnableCallbacks(false);
+		config.getCallbackConfig().setEnableCallbacks(true);
 		config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
 		config.getAnalysisFileConfig().setAndroidPlatformDir(platformsDirectory);
 		config.getAnalysisFileConfig().setTargetAPKFile(apkFile);
