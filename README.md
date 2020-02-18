@@ -25,7 +25,7 @@ A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/
 
 ### Build in Eclipse
 
-Importing the porject into eclipse and compiling with m2e does not work. m2e cannot download and extract the rules from nexus. Please run a `mvn compile` from the *command line* within the project directory, from now on m2e can be used.
+Importing the project into eclipse and compiling with m2e does not work. m2e cannot download and extract the rules from nexus. Please run a `mvn compile` from the *command line* within the project directory, from now on m2e can be used.
 
 ## Usage
 
@@ -89,7 +89,3 @@ Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/Cogn
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 
 CogniCrypt<sub>SAST</sub> can also be run on Android Applications, checkout the repository [here](https://github.com/CROSSINGTUD/CryptoAnalysis-Android).
-
-## Contact
-
-If you have any questions regarding this project, feel free to contact [Johannes Spaeth](mailto:johannes.spaeth@iem.fraunhofer.de).
