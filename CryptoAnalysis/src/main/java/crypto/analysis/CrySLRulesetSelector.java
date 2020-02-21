@@ -87,7 +87,7 @@ public class CrySLRulesetSelector {
 
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
-			throw new RuntimeException("The specified path is not a directory" + resourcesPath);
+			System.out.println("The specified path is not a directory " + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
