@@ -67,6 +67,7 @@ public class ErrorSpecification {
 		int totalFindings = 0;
 		totalFindings += truePositives == null ? 0 : truePositives.size();
 		totalFindings += falsePositives == null ? 0 : falsePositives.size();
+		totalFindings += falseNegatives == null ? 0 : falseNegatives.size();
 		if (totalFindings == 0)
 			throw new IllegalArgumentException("Specify atleast one findings type.");
 		return totalFindings;
