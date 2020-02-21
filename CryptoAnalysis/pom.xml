@@ -5,10 +5,9 @@
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
 	<version>2.7.1-SNAPSHOT</version>
-	
 	<properties>
-   	 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
-   	 	<spdsVersion>2.4-SNAPSHOT</spdsVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spdsVersion>2.4-SNAPSHOT</spdsVersion>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -84,9 +83,9 @@
 									<includes>**</includes>
 								</artifactItem>
 								<artifactItem>
-									<groupId>de.upb.cs</groupId>
-  									<artifactId>BouncyCastle-JCA</artifactId>
- 	 								<version>0.1</version>
+									<groupId>de.paderborn.uni</groupId>
+									<artifactId>BouncyCastle-JCA</artifactId>
+									<version>0.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -167,42 +166,42 @@
 					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
-			<plugin>	
-			    <artifactId>maven-clean-plugin</artifactId>
-			    <version>3.1.0</version>
-			    <configuration>
-			      <filesets>
-			      	<fileset>
-			          <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture/RulesInBin</directory>
-			          <includes>
-			            <include>**</include>
-			          </includes>
-			          <followSymlinks>false</followSymlinks>
-			        </fileset>
-			        <fileset>
-			          <directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
-			          <includes>
-			            <include>**</include>
-			          </includes>
-			          <followSymlinks>false</followSymlinks>
-			        </fileset>
-			        <fileset>
-			          <directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
-			          <includes>
-			            <include>**</include>
-			          </includes>
-			          <followSymlinks>false</followSymlinks>
-			        </fileset>
-			      </filesets>
-			      <fileset>
-			          <directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
-			          <includes>
-			            <include>**</include>
-			          </includes>
-			          <followSymlinks>false</followSymlinks>
-			        </fileset>
-			    </configuration>
-  			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${basedir}/src/main/resources/JavaCryptographicArchitecture/RulesInBin</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+					<fileset>
+						<directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+						<includes>
+							<include>**</include>
+						</includes>
+						<followSymlinks>false</followSymlinks>
+					</fileset>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -263,9 +262,9 @@
 			<version>1.4</version>
 		</dependency>
 		<dependency>
-		    <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-		    <artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-		    <version>2.0.0-SNAPSHOT</version>
+			<groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+			<artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
@@ -274,22 +273,22 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.common -->
 		<dependency>
-		    <groupId>org.eclipse.emf</groupId>
-		    <artifactId>org.eclipse.emf.common</artifactId>
-		    <version>2.15.0</version>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.common</artifactId>
+			<version>2.15.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.eclipse.emf/org.eclipse.emf.ecore -->
 		<dependency>
-		    <groupId>org.eclipse.emf</groupId>
-		    <artifactId>org.eclipse.emf.ecore</artifactId>
-		    <version>2.15.0</version>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore</artifactId>
+			<version>2.15.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
- 		  <groupId>javax.servlet</groupId>
- 		  <artifactId>javax.servlet-api</artifactId>
- 		  <version>4.0.1</version>
-  		  <scope>provided</scope>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

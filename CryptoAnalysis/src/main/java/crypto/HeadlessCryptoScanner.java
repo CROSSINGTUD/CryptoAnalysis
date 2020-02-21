@@ -261,6 +261,7 @@ public abstract class HeadlessCryptoScanner {
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
 					ProviderDetection providerDetection = new ProviderDetection();
+
 					if(rootRulesDirForProvider == null) {
 						rootRulesDirForProvider = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
 					}
