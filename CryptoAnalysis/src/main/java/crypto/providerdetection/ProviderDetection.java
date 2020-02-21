@@ -9,14 +9,13 @@
 package crypto.providerdetection;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,30 +26,19 @@ import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
-import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import soot.Body;
-import soot.G;
-import soot.PackManager;
 import soot.Scene;
-import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Transform;
-import soot.Transformer;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
@@ -59,7 +47,6 @@ import soot.jimple.TableSwitchStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
-import soot.options.Options;
 import wpds.impl.Weight.NoWeight;
 
 public class ProviderDetection {
@@ -67,15 +54,10 @@ public class ProviderDetection {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
 	
 	private String provider = null;
-	private String rulesDirectory = null;
-	
-	private static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
-	private static final String rootRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
-	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
-	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
-	
-	private static final String CRYSL = RuleFormat.SOURCE.toString();
-	private static final String BOUNCY_CASTLE = "BouncyCastleProvider";
+	private String rulesDirectory = null;	
+	private static final String BOUNCY_CASTLE = "BouncyCastle";
+	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
+	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
 	
 	
 	public String getProvider() {
@@ -86,95 +68,24 @@ public class ProviderDetection {
 		return rulesDirectory;
 	}
 	
+	//This method is used for testing purposes.
+	protected void setRulesDirectory(String rulesDirectory) {
+		this.rulesDirectory = rulesDirectory;
+	}
+	
 	
 	/**
-	 * This method is used to get the Soot classpath from `src/test/java`
-	 * in order to run the JUnit test cases for Provider Detection
-	 */
-	public String getSootClassPath(){
-		//Assume target folder to be directly in user directory
-		File classPathDir = new File(sootClassPath);
-		if (!classPathDir.exists()){
-			throw new RuntimeException("Classpath for the test cases could not be found.");
-		}
-		return sootClassPath;
-	}
-	
-	/**
-	 * This method is used to setup Soot
-	 */
-	public void setupSoot(String sootClassPath, String mainClass) {
-		G.v().reset();
-		Options.v().set_whole_program(true);
-		Options.v().setPhaseOption("cg.cha", "on");
-//		Options.v().setPhaseOption("cg", "all-reachable:true");
-		Options.v().set_output_format(Options.output_format_none);
-		Options.v().set_no_bodies_for_excluded(true);
-		Options.v().set_allow_phantom_refs(true);
-		Options.v().set_keep_line_number(true);
-		Options.v().set_prepend_classpath(true);
-		Options.v().set_soot_classpath(sootClassPath);
-		SootClass c = Scene.v().forceResolve(mainClass, SootClass.BODIES);
-		if (c != null) {
-			c.setApplicationClass();
-		}
-
-		List<String> includeList = new LinkedList<String>();
-		includeList.add("java.lang.AbstractStringBuilder");
-		includeList.add("java.lang.Boolean");
-		includeList.add("java.lang.Byte");
-		includeList.add("java.lang.Class");
-		includeList.add("java.lang.Integer");
-		includeList.add("java.lang.Long");
-		includeList.add("java.lang.Object");
-		includeList.add("java.lang.String");
-		includeList.add("java.lang.StringCoding");
-		includeList.add("java.lang.StringIndexOutOfBoundsException");
-
-		Options.v().set_include(includeList);
-		Options.v().set_full_resolver(true);
-		Scene.v().loadNecessaryClasses();
-	}
-	
-	
-	public void analyze() {
-		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
-		PackManager.v().getPack("wjtp").add(transform);
-		PackManager.v().getPack("cg").apply();
-		PackManager.v().getPack("wjtp").apply();
-	}
-	
-	
-	private Transformer createAnalysisTransformer() {
-		return new SceneTransformer() {
-			
-			@Override
-			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				BoomerangPretransformer.v().reset();
-				BoomerangPretransformer.v().apply();
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CrySLRule> defaultCryptoRules = Lists.newArrayList();
-				defaultCryptoRules = CrySLRulesetSelector.makeFromPath(new File(defaultRulesDirectory), RuleFormat.SOURCE);
-				doAnalysis(observableDynamicICFG, defaultCryptoRules);
-			}
-		};
-	}
-
-	
-	/**
-	 * This method does the Provider Detection analysis and returns the detected set 
-	 * of CrySL rules after the analysis is finished. If no Provider is detected, 
-	 * it returns the default set of CrySL rules. Otherwise it returns all CrySL 
-	 * rules for that provider, plus additional default CrySL rules that were not 
-	 * yet implemented for the detected provider
+	 * This method does the Provider Detection analysis and returns the detected 
+	 * provider after the analysis is finished. If no Provider is detected, 
+	 * then it will return null value, meaning that there was no provider used.
 	 * 
-	 * @param icfg
-	 *            
-	 * @param rules 
+	 * @param observableDynamicICFG
+	 *       
+	 * @param rootRulesDirectory
+	 * 
 	 */
-	public List<CrySLRule> doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, List<CrySLRule> rules) {
+	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, String rootRulesDirectory) {
 		
-		outerloop:
 		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
 			for(SootMethod sootMethod : sootClass.getMethods()) {
 				if(sootMethod.hasActiveBody()) {
@@ -195,48 +106,33 @@ public class ProviderDetection {
 									
 								int methodParameterCount = method.getParameterCount();
 								
-								// List of all CrySL rules
-								List<String> availableCrySLRules = new ArrayList<String>();
-								
-								for(CrySLRule rule : rules) {
-									String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
-									availableCrySLRules.add(ruleName);
-								}
-									
-								// Checks if detected declaring class is implemented as a CrySL rule
-								boolean ruleFound = availableCrySLRules.contains(declaringClassName);
-									
-								if((ruleFound) && (methodName.matches("getInstance")) && (methodParameterCount==2) ) {
+								if((methodName.matches("getInstance")) && (methodParameterCount==2) ) {
 									// Gets the second parameter from getInstance() method, since it is the provider parameter
 									Value providerValue = expression.getArg(1);
 									String providerType = getProviderType(providerValue);
 										
 									if(providerType.matches("java.security.Provider")) {
 										this.provider = getProviderWhenTypeProvider(statement, sootMethod, providerValue, observableDynamicICFG);
-										this.rulesDirectory = defaultRulesDirectory;
-										
-										if((this.provider != null) && (ruleExists(provider, declaringClassName))) {
-											this.rulesDirectory = defaultRulesDirectory+File.separator+provider;
-											
-											rules = chooseRules(rules, provider, declaringClassName);
-											break outerloop;
+										if((this.provider != null) && (rulesExist(rootRulesDirectory+File.separator+this.provider))) {
+											this.rulesDirectory = rootRulesDirectory+File.separator+this.provider;
+											return this.provider;
 										}
 									}
 										
 									else if (providerType.matches("java.lang.String")) {
+										if(SUPPORTED_PROVIDERS.contains(providerValue.toString().replaceAll("\"",""))) {
+											return "BouncyCastle-JCA";
+										}
 										this.provider = getProviderWhenTypeString(providerValue, body);
-										rulesDirectory = defaultRulesDirectory;
 										
 										// Gets the boolean value of whether the provider is passed
 										// using IF-ELSE, SWITCH statements or TERNARY operators
 										boolean ifStmt = checkIfStmt(providerValue, body);
 										boolean switchStmt = checkSwitchStmt(providerValue, body);
 										
-										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (ruleExists(provider, declaringClassName))) {
-											rulesDirectory = defaultRulesDirectory+File.separator+provider;
-											
-											rules = chooseRules(rules, provider, declaringClassName);
-											break outerloop;
+										if((!ifStmt) && (!switchStmt) && (this.provider != null) && (rulesExist(rootRulesDirectory+File.separator+this.provider))) {
+											this.rulesDirectory = rootRulesDirectory+File.separator+this.provider;
+											return this.provider;
 										}
 									}
 								}
@@ -247,7 +143,7 @@ public class ProviderDetection {
 			}
 		}
 	 			
-		return rules;
+		return this.provider;
 	}
 	
 	
@@ -257,7 +153,7 @@ public class ProviderDetection {
 	
 	/**
 	 * This method returns the type of Provider detected, since
-	 * it can be either `java.security.Provider` or `java.lang.String`
+	 * it can be either `java.security.Provider` or `java.lang.String`.
 	 * 
 	 * @param providerValue
 	 */
@@ -268,7 +164,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method return the provider used when Provider detected is of type `java.security.Provider`
+	 * This method return the provider used when Provider detected is of type `java.security.Provider`.
 	 * 
 	 * @param statement
 	 *            
@@ -324,7 +220,7 @@ public class ProviderDetection {
 				
 				// In here are listed all the supported providers so far
 				if(valueTypeString.contains(BOUNCY_CASTLE)) {
-					provider = "BC";
+					provider = "BouncyCastle-JCA";
 				}
 			}
 		}
@@ -342,7 +238,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method return the provider used when Provider detected is of type `java.lang.String`
+	 * This method return the provider used when Provider detected is of type `java.lang.String`.
 	 * 
 	 * @param providerValue
 	 *            
@@ -355,7 +251,11 @@ public class ProviderDetection {
 			if(unit instanceof JAssignStmt) {
 				JAssignStmt assignStatement = (JAssignStmt) unit;
 				if(assignStatement.getLeftOp().equals(providerValue)) {
-					return assignStatement.getRightOp().toString().replaceAll("\"","");
+					String provider = assignStatement.getRightOp().toString().replaceAll("\"","");
+					if(provider.equals("BC") || provider.equals("BCPQC") || provider.equals("BCJSSE")) {
+						provider = "BouncyCastle-JCA";
+						return provider;
+					}
 				}
 			}
 		}
@@ -421,102 +321,33 @@ public class ProviderDetection {
 		return false;
 	}
 	
-	
 	/**
-	 * This method is used to check if the CrySL rule for the detected provider exists
+	 * This method is used to check if the CryptSL rules from the detected Provider do exist.
 	 * 
-	 * @param provider
-	 *            - i.e. BC
-	 * @param declaringClassName
-	 *            - i.e. MessageDigest
+	 * @param providerRulesDirectory
+	 * 
 	 */
-	private boolean ruleExists(String provider, String declaringClassName) {
-		boolean ruleExists = false;
-		String rule = declaringClassName;
-		
-		File rulesDirectory = new File(defaultRulesDirectory+File.separator+provider);
+	private boolean rulesExist(String providerRulesDirectory) {
+		File rulesDirectory = new File(providerRulesDirectory);
 		if(rulesDirectory.exists()) {
-			File[] listRulesDirectoryFiles = rulesDirectory.listFiles();
-			for (File file : listRulesDirectoryFiles) {
-				if (file != null && file.getAbsolutePath().endsWith(rule+CRYSL)) {
-					ruleExists = true;
-					break;
-				}
-			}
+			return true;
 		}
-		
-		return ruleExists;
+		return false;
 	}
 	
 	
 	/**
-	 * This method is used to choose the CrySL rules from the detected Provider
-	 * 
-	 * @param rules
+	 * This method is used to choose the CryptSL rules from the detected Provider and should
+	 * be called after the `doAnalysis()` method.
 	 *            
-	 * @param provider
-	 *            - i.e. BC
-	 * @param declaringClassName
-	 * 			  - i.e. MessageDigest
+	 * @param providerRulesDirectory
+	 *          
 	 */
-	private List<CrySLRule> chooseRules(List<CrySLRule> rules, String provider, String declaringClassName) {
-		
-		String newRulesDirectory = defaultRulesDirectory+File.separator+provider;
-		
-		// Forms a list of all the new CrySL rules in the detected provider's directory.
-		// This list contains only String elements and it holds only the rule's names, i.e Cipher, MessageDigest, etc
-		List<String> newRules = new ArrayList<String>();
-		File[] files = new File(newRulesDirectory).listFiles();
-		for (File file : files) {
-		    if (file.isFile() && file.getName().endsWith(CRYSL)) {
-		        newRules.add(StringUtils.substringBefore(file.getName(), "."));
-		    }
-		}
-		
-		// A new CrySL rules list is created which will contain all the new rules.
-		// Firstly, all the default rules that are not present in the detected provider's rules are added.
-		// e.g if Cipher rule is not present in the detected provider's directory, then the default Cipher rule
-		// is added to the new CrySL rules list
-		List<CrySLRule> newCrySLRules = Lists.newArrayList();
-		for(CrySLRule rule : rules) {
-			String ruleName = rule.getClassName().substring(rule.getClassName().lastIndexOf(".") + 1);
-			if(!newRules.contains(ruleName)) {
-				newCrySLRules.add(rule);
-			}
-		}
-		
-		// At the end, the remaining CrySL rules from the detected provider's directory
-		// are added to the new CrySL rules list
-		File[] listFiles = new File(newRulesDirectory).listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYSL)) {
-				newCrySLRules.add(CrySLRuleReader.readFromSourceFile(file));
-			}
-		}
-		return newCrySLRules;
-	}
-	
-	
-	/**
-	 * This method is used to get all the default CrySL rules
-	 * 
-	 * @param rulesDirectory
-	 * 
-	 * @param rules
-	 */
-	private List<CrySLRule> getRules(String rulesDirectory, List<CrySLRule> rules) {
-		File directory = new File(rulesDirectory);
-		
-		File[] listFiles = directory.listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith(CRYSL)) {
-				rules.add(CrySLRuleReader.readFromSourceFile(file));
-			}
-		}
-		if (rules.isEmpty())
-			System.out.println("Did not find any rules to start the analysis for. \n It checked for rules in "+ rulesDirectory);
-		
+	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
+		List<CrySLRule> rules = Lists.newArrayList();
+		this.rulesDirectory = providerRulesDirectory;
+		rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
 		return rules;
 	}
-	//-----------------------------------------------------------------------------------------------------------------
+		  
 }

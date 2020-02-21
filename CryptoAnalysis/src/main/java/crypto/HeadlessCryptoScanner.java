@@ -60,6 +60,7 @@ public abstract class HeadlessCryptoScanner {
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
 	private static List<CrySLRule> rules;
+	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
 	public static enum CG {
@@ -78,7 +79,7 @@ public abstract class HeadlessCryptoScanner {
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
 			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
-			
+			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
@@ -260,7 +261,14 @@ public abstract class HeadlessCryptoScanner {
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
 					ProviderDetection providerDetection = new ProviderDetection();
-					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+					if(rootRulesDirForProvider == null) {
+						rootRulesDirForProvider = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+					}
+					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rootRulesDirForProvider);
+					if(detectedProvider != null) {
+						rules.clear();
+						rules.addAll(providerDetection.chooseRules(rootRulesDirForProvider+File.separator+detectedProvider));
+					}
 				}
 				
 				scanner.scan(rules);
@@ -391,7 +399,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected boolean providerDetection() {
-		return false;
+		return true;
 	}
 	
 	private static String pathToJCE() {

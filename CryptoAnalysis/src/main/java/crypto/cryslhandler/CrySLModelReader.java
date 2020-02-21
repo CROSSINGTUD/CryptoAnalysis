@@ -120,8 +120,7 @@ public class CrySLModelReader {
 
 	public CrySLRule readRule(File ruleFile) {
 		final String fileName = ruleFile.getName();
-		final String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!cryslFileEnding.equals(extension)) {
+		if (!fileName.endsWith(cryslFileEnding)) {
 			return null;
 		}
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
