@@ -8,7 +8,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<cryptoAnalysisVersion>2.7-SNAPSHOT</cryptoAnalysisVersion>
+		<cryptoAnalysisVersion>2.7.1-SNAPSHOT</cryptoAnalysisVersion>
 		<flowDroidVersion>2.7.1</flowDroidVersion>
 	</properties>
 	<build>
