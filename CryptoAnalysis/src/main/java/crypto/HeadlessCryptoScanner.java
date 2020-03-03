@@ -67,14 +67,18 @@ public abstract class HeadlessCryptoScanner {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+	public static void main(String... args) {
 		HeadlessCryptoScanner scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+	public static HeadlessCryptoScanner createFromOptions(String... args) {
 		CommandLineParser parser = new DefaultParser();
-		options = parser.parse(new HeadlessCryptoScannerOptions(), args);
+		try {
+			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
+		} catch (ParseException e) {
+			LOGGER.error("An error occured while trying to parse the command line arguments", e);
+		}
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
@@ -242,7 +246,7 @@ public abstract class HeadlessCryptoScanner {
 					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
 						if(enableVisualization()) {
 							if(getOutputFolder() == null) {
-								throw new RuntimeException("The visualization requires the option --reportDir");
+								LOGGER.error("The visualization requires the --reportDir option.");
 							}
 							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
 							vizFile.getParentFile().mkdirs();
@@ -306,7 +310,7 @@ public abstract class HeadlessCryptoScanner {
 			Options.v().setPhaseOption("cg.spark", "on");
 			break;
 		default:
-			throw new RuntimeException("No call graph option selected!");
+			LOGGER.error("No call graph option selected!");
 		}
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
