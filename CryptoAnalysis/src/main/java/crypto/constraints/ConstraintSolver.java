@@ -511,7 +511,6 @@ public class ConstraintSolver {
 				}
 				catch (NumberFormatException ex1) {
 					// If that does not work either, I'm out of ideas ...
-					throw new RuntimeException();
 				}
 				return valuesInt;
 			}
