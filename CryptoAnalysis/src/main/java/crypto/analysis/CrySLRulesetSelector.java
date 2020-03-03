@@ -8,11 +8,17 @@ import com.google.common.collect.Lists;
 
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
+import crypto.HeadlessCryptoScanner;
 import crypto.cryslhandler.CrySLModelReader;
 import crypto.cryslhandler.CryslReaderUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CrySLRulesetSelector {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrySLRulesetSelector.class);
+	
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
@@ -31,7 +37,7 @@ public class CrySLRulesetSelector {
 			rules.addAll(getRulesset(rulesBasePath, ruleFormat, s));
 		}
 		if (rules.isEmpty()) {
-			System.out.println("No CrySL rules found for rulesset " + set);
+			LOGGER.info("No CrySL rules found for rulesset " + set);
 		}
 		return rules;
 	}
@@ -58,7 +64,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (ruleset.isEmpty()) {
-			throw new RuntimeException("Could not parse " + rulesetString + ". Was not able to find rulesets.");
+			LOGGER.error("Could not parse " + rulesetString + ". Was not able to find rulesets.");
 		}
 		return makeFromRuleset(rulesBasePath, ruleFormat, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
@@ -87,7 +93,7 @@ public class CrySLRulesetSelector {
 
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
-			System.out.println("The specified path is not a directory " + resourcesPath);
+			LOGGER.info("The specified path is not a directory " + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
@@ -97,7 +103,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (rules.isEmpty()) {
-			System.out.println("No CrySL rules found in " + resourcesPath);
+			LOGGER.info("No CrySL rules found in " + resourcesPath);
 		}
 		return rules;
 	}
