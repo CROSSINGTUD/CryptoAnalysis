@@ -12,6 +12,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -63,6 +66,8 @@ import soot.jimple.internal.JNewArrayExpr;
 
 public class ConstraintSolver {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintSolver.class);
+	
 	private final List<ISLConstraint> allConstraints;
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
@@ -511,6 +516,7 @@ public class ConstraintSolver {
 				}
 				catch (NumberFormatException ex1) {
 					// If that does not work either, I'm out of ideas ...
+					LOGGER.error("An exception occured when extracting value as Integer.", ex1);
 				}
 				return valuesInt;
 			}

@@ -42,6 +42,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -163,7 +164,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 				try {
 					Files.createDirectories(reportFile.getParentFile().toPath());
 				} catch (IOException e) {
-					LOGGER.error("Was not able to create directories for IDEViz output!");
+					throw new CryptoAnalysisException("Was not able to create directories for IDEViz output for given directory: "+reportFile.getAbsolutePath());
 				}
 			}
 			boolean fileExisted = reportFile.exists();

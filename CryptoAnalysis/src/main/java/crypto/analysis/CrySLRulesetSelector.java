@@ -1,17 +1,13 @@
 package crypto.analysis;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
-
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
-import crypto.HeadlessCryptoScanner;
 import crypto.cryslhandler.CrySLModelReader;
-import crypto.cryslhandler.CryslReaderUtils;
-import org.apache.commons.io.FilenameUtils;
+import crypto.exceptions.CryptoAnalysisException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +89,7 @@ public class CrySLRulesetSelector {
 
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
-			LOGGER.info("The specified path is not a directory " + resourcesPath);
+			throw new CryptoAnalysisException("The specified path is not a directory " + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
@@ -103,7 +99,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (rules.isEmpty()) {
-			LOGGER.info("No CrySL rules found in " + resourcesPath);
+			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
 		}
 		return rules;
 	}
