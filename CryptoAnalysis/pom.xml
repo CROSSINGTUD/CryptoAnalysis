@@ -157,6 +157,13 @@
 					</execution>
 				</executions>
 				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>
+								crypto.HeadlessCryptoScanner
+							</mainClass>
+						</manifest>
+					</archive>
 					<descriptors>
 						<!-- custom descriptor is copied from jar-with-dependencies -->
 						<!-- This also copies the rules from test resources as default rules 
