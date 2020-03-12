@@ -11,11 +11,12 @@ import java.util.Collection;
 public class AndroidAnalysisTest
 {
     @Test
-    public void runAnalysisWithCallbackDebug()
+    public void runAnalysisWithCallbackDebugAppCompatActivity()
     {
-        // API 28, Debug Build, unsigned
+        // API 28, Debug Build, unsigned, AppCompatActivity
         // CODE:
         /*
+            public class MainActivity extends AppCompatActivity {
                @Override
                 protected void onCreate(Bundle savedInstanceState)
                 {
@@ -31,8 +32,44 @@ public class AndroidAnalysisTest
                     } catch (GeneralSecurityException e){
                     }
                 }
+              }
          */
-        String apkPath = ".\\src\\test\\resources\\CallbackDebug.apk";
+        String apkPath = ".\\src\\test\\resources\\AppCompatActivityCallbackDebug.apk";
+        String platformPath = "C:\\Android\\platforms";
+        String rulesPath = "..\\CryptoAnalysis\\src\\main\\resources\\JavaCryptographicArchitecture";
+
+        Collection<String> filter = new ArrayList<>();
+        CogniCryptAndroidAnalysis analysis = new CogniCryptAndroidAnalysis(apkPath, platformPath, rulesPath, filter);
+        Collection<AbstractError> errors = analysis.run();
+
+        Assert.assertTrue(errors.size() >  0);
+    }
+
+    @Test
+    public void runAnalysisWithCallbackDebugNormalActivity()
+    {
+        // API 28, Debug Build, unsigned, normal Activity
+        // CODE:
+        /*
+            public class MainActivity extends Activity {
+               @Override
+                protected void onCreate(Bundle savedInstanceState)
+                {
+                    super.onCreate(savedInstanceState);
+                    setContentView(R.layout.activity_main);
+                }
+
+                public void sendMessage(View view)
+                {
+                    try {
+                        Cipher cipher = Cipher.getInstance("DES");
+                        cipher.doFinal();
+                    } catch (GeneralSecurityException e){
+                    }
+                }
+              }
+         */
+        String apkPath = ".\\src\\test\\resources\\NormalActivityCallbackDebug.apk";
         String platformPath = "C:\\Android\\platforms";
         String rulesPath = "..\\CryptoAnalysis\\src\\main\\resources\\JavaCryptographicArchitecture";
 
