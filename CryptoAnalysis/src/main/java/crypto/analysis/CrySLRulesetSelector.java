@@ -67,10 +67,7 @@ public class CrySLRulesetSelector {
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
-			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
-			if(rule != null) {
-				rules.add(rule);
-			}
+			rules.add(CrySLRuleReader.readFromSourceFile(file));
 		}
 		return rules;
 	}
@@ -87,14 +84,11 @@ public class CrySLRulesetSelector {
 
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
-			System.out.println("The specified path is not a directory " + resourcesPath);
+			throw new RuntimeException("The specified path is not a directory" + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
-			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
-			if(rule != null) {
-				rules.add(rule);
-			}
+			rules.add(CrySLRuleReader.readFromSourceFile(file));
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found in " + resourcesPath);
