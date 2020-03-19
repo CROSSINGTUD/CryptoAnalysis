@@ -80,7 +80,11 @@ public abstract class HeadlessCryptoScanner {
 			String resourcesPath = options.getOptionValue("rulesDir");
 			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
+		} else if(options.hasOption("rulesZip")) {
+			String resourcesPath = options.getOptionValue("rulesZip");
+			rules = CrySLRulesetSelector.makeFromZip(new File(resourcesPath));
 		}
+		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {

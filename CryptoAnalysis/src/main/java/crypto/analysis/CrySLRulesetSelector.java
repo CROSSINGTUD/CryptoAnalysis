@@ -1,16 +1,14 @@
 package crypto.analysis;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
-import com.google.common.collect.Lists;
 
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
+
+import crypto.cryslhandler.CrySLModelReader;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
-import crypto.cryslhandler.CrySLModelReader;
-import crypto.cryslhandler.CryslReaderUtils;
-import org.apache.commons.io.FilenameUtils;
 
 public class CrySLRulesetSelector {
 	public static enum RuleFormat {
@@ -19,6 +17,24 @@ public class CrySLRulesetSelector {
 				return CrySLModelReader.cryslFileEnding;
 			}
 		},
+	}
+	
+	public static enum ZipFormat {
+		ZIP("zip");
+//		TAR("tar"),
+//		SevenZIP("7z"),
+//		GZIP("gz"),
+//		RAR("rar");
+		
+		private String fileExtension;
+		private ZipFormat(String fileExtension) {
+			this.fileExtension = fileExtension;
+		}
+		
+		public String getFileExtension() {
+			return fileExtension;
+		}
+		
 	}
 
 	public static enum Ruleset {
@@ -98,6 +114,34 @@ public class CrySLRulesetSelector {
 		}
 		if (rules.isEmpty()) {
 			System.out.println("No CrySL rules found in " + resourcesPath);
+		}
+		return rules;
+	}
+	
+	public static List<CrySLRule> makeFromZip(File resource) {
+		List<CrySLRule> rules = Lists.newArrayList();	
+
+		if(resource.exists()) {
+			String resourceFileExtension = Files.getFileExtension(resource.getAbsolutePath());
+			boolean acceptedFormat = false;
+			
+			for(ZipFormat zipFormat : ZipFormat.values()) {
+				if(resourceFileExtension.equals(zipFormat.getFileExtension())) {
+					acceptedFormat = true;
+				}
+			}
+			if(!acceptedFormat) {
+				System.err.println("The format is not supported yet: " + resourceFileExtension);
+				return rules;
+			}
+		} else {
+			System.err.println("The specified path is not a file: " + resource);
+			return rules;
+		}
+	
+		rules = CrySLRuleReader.readFromZipFile(resource);	
+		if (rules.isEmpty()) {
+			System.out.println("No CrySL rules found in " + resource);
 		}
 		return rules;
 	}
