@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,7 +16,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.google.common.collect.Lists;
-import com.google.inject.internal.util.*;
 import crypto.cryslhandler.CrySLModelReader;
 
 
@@ -75,7 +75,7 @@ public class CrySLRuleReader {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
 			return new ArrayList<>();
 
-		Map<String, CrySLRule> ruleMap = Maps.newHashMap();
+		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		try {
 			ZipFile zip = new ZipFile(file);
 			for (Enumeration e = zip.entries(); e.hasMoreElements(); ) {
