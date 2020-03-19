@@ -9,9 +9,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.google.common.collect.Lists;
+import com.google.inject.internal.util.Maps;
 
 import crypto.cryslhandler.CrySLModelReader;
 
@@ -71,25 +75,28 @@ public class CrySLRuleReader {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
 			return new ArrayList<>();
 
-		List<CrySLRule> rules = new ArrayList<>();
-
+		Map<String, CrySLRule> ruleMap = Maps.newHashMap();
 		try {
 			ZipFile zip = new ZipFile(file);
 			for (Enumeration e = zip.entries(); e.hasMoreElements(); ) {
 				ZipEntry entry = (ZipEntry) e.nextElement();
 				if (!entry.isDirectory()) {
 					CrySLRule rule = getCrySLRuleFromZipEntry(entry, zip, file);
-					rules.add(rule);
-				}
+					if(rule != null) {
+						if(!ruleMap.containsKey(rule.getClassName())) {
+							ruleMap.put(rule.getClassName(), rule);
+						}
+					} else {
+
+					}
+				} 
 			}
 		}
 		catch (IOException e) {
 			return new ArrayList<>();
 		}
-
-		// TODO: Decide what happens with potential duplicates
-		return rules.stream().filter((x) -> x != null).collect(Collectors.toList());
-	}
+		return Lists.newArrayList(ruleMap.values());
+	}	
 
 	private static void findCryptSLFiles(File directory, boolean recursive, Collection<File> resultCollection) {
 		for (File file: directory.listFiles())
