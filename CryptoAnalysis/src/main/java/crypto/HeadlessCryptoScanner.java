@@ -67,7 +67,8 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	public static void main(String... args) {
-		HeadlessCryptoScanner scanner = createFromOptions(args);
+		HeadlessCryptoScanner scanner;
+		scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
@@ -81,7 +82,12 @@ public abstract class HeadlessCryptoScanner {
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
+			try {
+				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the"
+						+ "specified directory: "+resourcesPath, e);
+			}
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
 		PRE_ANALYSIS = options.hasOption("preanalysis");
@@ -158,14 +164,22 @@ public abstract class HeadlessCryptoScanner {
 	public void exec() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		if(PRE_ANALYSIS){
-			initializeSootWithEntryPointAllReachable(false);
+			try {
+				initializeSootWithEntryPointAllReachable(false);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
+			}
 			LOGGER.info("Pre-Analysis soot setup done in {} ",stopwatch);
 			checkIfUsesObject();
 			LOGGER.info("Pre-Analysis  finished in {}", stopwatch);
 		}
 		if (!PRE_ANALYSIS || hasSeeds()) {
 			LOGGER.info("Using call graph algorithm {}", callGraphAlogrithm());
-			initializeSootWithEntryPointAllReachable(true);
+			try {
+				initializeSootWithEntryPointAllReachable(true);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
+			}
 			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
@@ -245,8 +259,7 @@ public abstract class HeadlessCryptoScanner {
 					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
 						if(enableVisualization()) {
 							if(getOutputFolder() == null) {
-								throw new CryptoAnalysisException
-								("The visualization requires the --reportDir option.");
+								LOGGER.error("The visualization requires the --reportDir option.");
 							}
 							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
 							vizFile.getParentFile().mkdirs();
@@ -294,7 +307,7 @@ public abstract class HeadlessCryptoScanner {
 		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
 	}
 
-	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
+	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
 		G.v().reset();
 		Options.v().set_whole_program(wholeProgram);
 

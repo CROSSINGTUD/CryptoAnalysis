@@ -33,6 +33,7 @@ import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import crypto.analysis.CrySLRulesetSelector;
 import soot.Body;
@@ -348,7 +349,12 @@ public class ProviderDetection {
 	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
-		rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
+		try {
+			rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the"
+					+ "specified directory: "+providerRulesDirectory, e);
+		}
 		return rules;
 	}
 		  

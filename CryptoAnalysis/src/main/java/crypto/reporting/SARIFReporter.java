@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
@@ -135,7 +134,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 				writer.write(sarif.toString());
 				writer.close();
 			} catch (IOException e) {
-				throw new CryptoAnalysisException("Could not write to file: " + outputFolder);
+				LOGGER.error("Could not write to file: "+outputFolder, e);
 			}
 		}
 	}

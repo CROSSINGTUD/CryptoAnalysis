@@ -43,9 +43,10 @@ public class CrySLRulesetSelector {
 	 * 
 	 * @param rulesetString
 	 * @return
+	 * @throws CryptoAnalysisException 
 	 */
 	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
-			String rulesetString) {
+			String rulesetString) throws CryptoAnalysisException {
 		String[] set = rulesetString.split(",");
 		List<Ruleset> ruleset = Lists.newArrayList();
 		for (String s : set) {
@@ -87,7 +88,7 @@ public class CrySLRulesetSelector {
 		return null;
 	}
 
-	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
+	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) throws CryptoAnalysisException {
 		if (!resourcesPath.isDirectory())
 			throw new CryptoAnalysisException("The specified path is not a directory " + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
