@@ -164,7 +164,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 				try {
 					Files.createDirectories(reportFile.getParentFile().toPath());
 				} catch (IOException e) {
-					throw new CryptoAnalysisException("Was not able to create directories for IDEViz output for given directory: "+reportFile.getAbsolutePath());
+					LOGGER.error("Was not able to create directories for IDEViz output for given directory: "+reportFile.getAbsolutePath(), e);
 				}
 			}
 			boolean fileExisted = reportFile.exists();

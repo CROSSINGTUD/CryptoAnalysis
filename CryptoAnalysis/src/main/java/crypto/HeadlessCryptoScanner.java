@@ -76,7 +76,22 @@ public abstract class HeadlessCryptoScanner {
 		try {
 			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		} catch (ParseException e) {
-			LOGGER.error("An error occured while trying to parse the command line arguments", e);
+			LOGGER.error("An error occured while trying to parse the command line arguments: ", e);
+			LOGGER.error("\nThe default command for running CryptoAnalyis is: \n"
+					+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n" + 
+					"      --rulesDir=<absolute_path_to_crysl_source_code_format_rules> \\\r\n" + 
+					"      --applicationCp=<absolute_application_path>\n"
+					+ "\nAdditional arguments that can be used are:\n"
+					+ "--cg=<selection_of_call_graph_for_analysis (CHA, SPARK-LIBRARY, SPARK)>\n"
+					+ "--rulesInSrc (specifies that rules are in source format)\n"
+					+ "--sootCp=<absolute_path_of_whole_project>\n"
+					+ "--softwareIdentifier=<identifier_for_labelling_output_files>\n"
+					+ "--reportDir=<directory_location_for_cognicrypt_report>\n"
+					+ "--csvReportFile=<summary_report_for_finding_csv_files>\n"
+					+ "--preanalysis (enables pre-analysis)\n"
+					+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
+					+ "--sarifReport (enables sarif report)\n"
+					+ "--providerDetection (enables provider detection analysis)\n");
 		}
 
 		if (options.hasOption("rulesDir")) {

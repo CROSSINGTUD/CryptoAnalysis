@@ -60,7 +60,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (ruleset.isEmpty()) {
-			LOGGER.error("Could not parse " + rulesetString + ". Was not able to find rulesets.");
+			throw new CryptoAnalysisException("Could not parse " + rulesetString + ". Was not able to find rulesets.");
 		}
 		return makeFromRuleset(rulesBasePath, ruleFormat, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}

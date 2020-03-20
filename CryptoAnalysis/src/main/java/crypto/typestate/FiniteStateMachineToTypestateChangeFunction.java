@@ -78,8 +78,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 
 	@Override
 	protected State initialState() {
-		LOGGER.error("Should never be called!");
-		return null;
+		throw new UnsupportedOperationException("This method should never be called.");
 	}
 	
 	
