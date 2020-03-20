@@ -368,7 +368,7 @@ public abstract class HeadlessCryptoScanner {
 		List<String> exList = new LinkedList<String>();
 		List<CrySLRule> rules = getRules();
 		for(CrySLRule r : rules) {
-			exList.add(Utils.getFullyQualifiedName(r));
+			exList.add(r.getClassName());
 		}
 		return exList;
 	}

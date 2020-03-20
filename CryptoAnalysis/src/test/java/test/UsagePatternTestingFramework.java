@@ -363,7 +363,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
 		for(CrySLRule r : getRules()) {
-			excludedPackages.add(Utils.getFullyQualifiedName(r));
+			excludedPackages.add(r.getClassName());
 		}
 		return excludedPackages;
 	}

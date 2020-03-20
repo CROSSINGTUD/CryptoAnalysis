@@ -85,7 +85,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
+		excludedPackages.add(getRule().getClassName());
 		return excludedPackages;
 	}
 	
