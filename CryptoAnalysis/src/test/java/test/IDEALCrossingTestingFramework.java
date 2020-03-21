@@ -15,7 +15,6 @@ import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
