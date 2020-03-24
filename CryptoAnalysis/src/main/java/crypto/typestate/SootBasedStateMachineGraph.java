@@ -12,7 +12,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CryptSLMethod;
+import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
@@ -31,7 +31,7 @@ public class SootBasedStateMachineGraph {
 	private final StateMachineGraph stateMachineGraph;
 	private Multimap<State, SootMethod> outTransitions = HashMultimap.create();
 	private Collection<SootMethod> initialTransitonLabel;
-	private List<CryptSLMethod> crySLinitialTransitionLabel;
+	private List<CrySLMethod> crySLinitialTransitionLabel;
 	private LabeledMatcherTransition initialTransiton;
 
 	public SootBasedStateMachineGraph(StateMachineGraph fsm) {
@@ -82,8 +82,8 @@ public class SootBasedStateMachineGraph {
 		transition.add(trans);
 	}
 
-	private Collection<SootMethod> convert(List<CryptSLMethod> label) {
-		Collection<SootMethod> converted = CryptSLMethodToSootMethod.v().convert(label);
+	private Collection<SootMethod> convert(List<CrySLMethod> label) {
+		Collection<SootMethod> converted = CrySLMethodToSootMethod.v().convert(label);
 		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
@@ -107,7 +107,7 @@ public class SootBasedStateMachineGraph {
 	}
 
 
-	public List<CryptSLMethod> getInitialTransition() {
+	public List<CrySLMethod> getInitialTransition() {
 		return crySLinitialTransitionLabel;
 	}
 }

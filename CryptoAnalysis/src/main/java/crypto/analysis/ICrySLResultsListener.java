@@ -30,4 +30,6 @@ public interface ICrySLResultsListener {
 
 	void onSecureObjectFound(IAnalysisSeed analysisObject);
 
+	void addProgress(int processedSeeds, int workListsize);
+
 }

@@ -10,14 +10,14 @@ import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLArithmeticConstraint;
-import crypto.rules.CryptSLComparisonConstraint;
-import crypto.rules.CryptSLComparisonConstraint.CompOp;
-import crypto.rules.CryptSLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLSplitter;
-import crypto.rules.CryptSLValueConstraint;
+import crypto.rules.CrySLArithmeticConstraint;
+import crypto.rules.CrySLComparisonConstraint;
+import crypto.rules.CrySLComparisonConstraint.CompOp;
+import crypto.rules.CrySLConstraint;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLSplitter;
+import crypto.rules.CrySLValueConstraint;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
@@ -30,7 +30,7 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	private ISLConstraint brokenConstraint;
 	private CallSiteWithExtractedValue callSiteWithParamIndex;
 
-	public ConstraintError(CallSiteWithExtractedValue cs,  CryptSLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
+	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
 		super(cs.getCallSite().stmt(), rule, objectLocation);
 		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;
@@ -63,9 +63,9 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 
 	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint) {
 		StringBuilder msg = new StringBuilder();
-		if (brokenConstraint instanceof CryptSLPredicate) {
+		if (brokenConstraint instanceof CrySLPredicate) {
 
-			CryptSLPredicate brokenPred = (CryptSLPredicate) brokenConstraint;
+			CrySLPredicate brokenPred = (CrySLPredicate) brokenConstraint;
 
 			switch (brokenPred.getPredName()) {
 				case "neverTypeOf":
@@ -77,27 +77,27 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 					msg.append(" should never be hardcoded.");
 					break;
 			}
-		} else if (brokenConstraint instanceof CryptSLValueConstraint) {
-			return evaluateValueConstraint((CryptSLValueConstraint) brokenConstraint);
-		} else if (brokenConstraint instanceof CryptSLArithmeticConstraint) {
-			final CryptSLArithmeticConstraint brokenArthConstraint = (CryptSLArithmeticConstraint) brokenConstraint;
+		} else if (brokenConstraint instanceof CrySLValueConstraint) {
+			return evaluateValueConstraint((CrySLValueConstraint) brokenConstraint);
+		} else if (brokenConstraint instanceof CrySLArithmeticConstraint) {
+			final CrySLArithmeticConstraint brokenArthConstraint = (CrySLArithmeticConstraint) brokenConstraint;
 			msg.append(brokenArthConstraint.getLeft());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getOperator());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getRight());
-		} else if (brokenConstraint instanceof CryptSLComparisonConstraint) {
-			final CryptSLComparisonConstraint brokenCompCons = (CryptSLComparisonConstraint) brokenConstraint;
+		} else if (brokenConstraint instanceof CrySLComparisonConstraint) {
+			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) brokenConstraint;
 			msg.append("Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
 			msg.append("must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
 			msg.append(brokenCompCons.getRight().getLeft().getName());
-		} else if (brokenConstraint instanceof CryptSLConstraint) {
-			final CryptSLConstraint cryptSLConstraint = (CryptSLConstraint) brokenConstraint;
-			final ISLConstraint leftSide = cryptSLConstraint.getLeft();
-			final ISLConstraint rightSide = cryptSLConstraint.getRight();
-			switch (cryptSLConstraint.getOperator()) {
+		} else if (brokenConstraint instanceof CrySLConstraint) {
+			final CrySLConstraint crySLConstraint = (CrySLConstraint) brokenConstraint;
+			final ISLConstraint leftSide = crySLConstraint.getLeft();
+			final ISLConstraint rightSide = crySLConstraint.getRight();
+			switch (crySLConstraint.getOperator()) {
 				case and:
 					msg.append(evaluateBrokenConstraint(leftSide));
 					msg.append(" or ");
@@ -134,10 +134,10 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 		}
 	}
 
-	private String evaluateValueConstraint(final CryptSLValueConstraint brokenConstraint) {
+	private String evaluateValueConstraint(final CrySLValueConstraint brokenConstraint) {
 		StringBuilder msg = new StringBuilder();
 		msg.append(" should be any of ");
-		CryptSLSplitter splitter = brokenConstraint.getVar().getSplitter();
+		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
 			Stmt stmt = callSiteWithParamIndex.getVal().stmt().getUnit().get();
 			String[] splitValues = new String[] { "" };

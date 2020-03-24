@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -17,8 +17,8 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.predicates.PredicateHandler;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import soot.MethodOrMethodContext;
@@ -36,7 +36,7 @@ public abstract class CryptoScanner {
 	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
 
 	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
@@ -62,11 +62,12 @@ public abstract class CryptoScanner {
 	};
 
 	public CryptoScanner() {
-		CryptSLMethodToSootMethod.reset();
+		CrySLMethodToSootMethod.reset();
 	}
 
-	public void scan(List<CryptSLRule> specs) {
-		for (CryptSLRule rule : specs) {
+	public void scan(List<CrySLRule> specs) {
+		int processedSeeds = 0;
+		for (CrySLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
 		CrySLResultsReporter listener = getAnalysisListener();
@@ -80,6 +81,8 @@ public abstract class CryptoScanner {
 			IAnalysisSeed curr = worklist.poll();
 			listener.discoveredSeed(curr);
 			curr.execute();
+			processedSeeds++;
+			listener.addProgress(processedSeeds,worklist.size());
 			estimateAnalysisTime();
 		}
 

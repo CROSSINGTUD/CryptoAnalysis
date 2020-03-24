@@ -21,15 +21,16 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
@@ -47,7 +48,7 @@ public abstract class AbstractHeadlessTest {
 	 * argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
 	 */
 	
-	private static final String ruleFormat = "cryptsl";
+	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
@@ -73,7 +74,7 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			protected List<CryptSLRule> getRules() {
+			protected List<CrySLRule> getRules() {
 				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
 			}
 
@@ -127,9 +128,9 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-					Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-					Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 
 			}
 
@@ -189,6 +190,12 @@ public abstract class AbstractHeadlessTest {
 			public void onSecureObjectFound(IAnalysisSeed analysisObject) {
 				// TODO Auto-generated method stub
 
+			}
+
+			@Override
+			public void addProgress(int processedSeeds, int workListsize) {
+				// TODO Auto-generated method stub
+				
 			}
 		};
 	}

@@ -3,14 +3,14 @@ package crypto.analysis.errors;
 import java.util.Map.Entry;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 
 public class PredicateContradictionError extends AbstractError {
 
-	Entry<CryptSLPredicate, CryptSLPredicate> mismatchedPreds;
+	Entry<CrySLPredicate, CrySLPredicate> mismatchedPreds;
 
-	public PredicateContradictionError(Statement errorLocation, CryptSLRule rule, Entry<CryptSLPredicate, CryptSLPredicate> disPair) {
+	public PredicateContradictionError(Statement errorLocation, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
 		super(errorLocation, rule);
 		mismatchedPreds = disPair;
 	}
@@ -25,7 +25,7 @@ public class PredicateContradictionError extends AbstractError {
 		return "Predicate mismatch";
 	}
 
-	public Entry<CryptSLPredicate, CryptSLPredicate> getMismatchedPreds() {
+	public Entry<CrySLPredicate, CrySLPredicate> getMismatchedPreds() {
 		return mismatchedPreds;
 	}
 	

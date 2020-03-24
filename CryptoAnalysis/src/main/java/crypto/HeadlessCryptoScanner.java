@@ -27,6 +27,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
@@ -36,7 +37,7 @@ import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.BodyTransformer;
@@ -58,7 +59,8 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static List<CryptSLRule> rules;
+	private static List<CrySLRule> rules;
+	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
 	public static enum CG {
@@ -76,12 +78,8 @@ public abstract class HeadlessCryptoScanner {
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			if(options.hasOption("rulesInBin")) {
-				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), "cryptslbin");
-			}else {
-				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath),"cryptsl");
-			}
-			
+			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
+			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
@@ -217,7 +215,7 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CryptSLRule> rules = HeadlessCryptoScanner.this.getRules();
+				List<CrySLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
 				if (sarifReport()) {
 					fileReporter = new SARIFReporter(getOutputFolder(), rules);
@@ -263,7 +261,15 @@ public abstract class HeadlessCryptoScanner {
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
 					ProviderDetection providerDetection = new ProviderDetection();
-					rules = providerDetection.doAnalysis(observableDynamicICFG, rules);
+
+					if(rootRulesDirForProvider == null) {
+						rootRulesDirForProvider = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+					}
+					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rootRulesDirForProvider);
+					if(detectedProvider != null) {
+						rules.clear();
+						rules.addAll(providerDetection.chooseRules(rootRulesDirForProvider+File.separator+detectedProvider));
+					}
 				}
 				
 				scanner.scan(rules);
@@ -276,16 +282,12 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 
-	protected List<CryptSLRule> getRules() {
+	protected List<CrySLRule> getRules() {
 		if (rules != null) {
 			return rules;
 		}
-		if(options.hasOption("rulesInBin")) {
-			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptslbin",Ruleset.JavaCryptographicArchitecture);
-		}else {
-			return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", "cryptsl", Ruleset.JavaCryptographicArchitecture);
-		}
 		
+		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
@@ -347,9 +349,9 @@ public abstract class HeadlessCryptoScanner {
 
 	private List<String> getExcludeList() {
 		List<String> exList = new LinkedList<String>();
-		List<CryptSLRule> rules = getRules();
-		for(CryptSLRule r : rules) {
-			exList.add(Utils.getFullyQualifiedName(r));
+		List<CrySLRule> rules = getRules();
+		for(CrySLRule r : rules) {
+			exList.add(r.getClassName());
 		}
 		return exList;
 	}
@@ -398,7 +400,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected boolean providerDetection() {
-		return false;
+		return true;
 	}
 	
 	private static String pathToJCE() {

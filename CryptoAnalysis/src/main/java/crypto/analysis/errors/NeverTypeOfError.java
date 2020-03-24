@@ -3,11 +3,11 @@ package crypto.analysis.errors;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 
 public class NeverTypeOfError extends ConstraintError {
 
-	public NeverTypeOfError(CallSiteWithExtractedValue cs, CryptSLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
+	public NeverTypeOfError(CallSiteWithExtractedValue cs, CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
 		super(cs, rule, objectLocation, con);
 	}
 
