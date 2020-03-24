@@ -75,7 +75,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<ISLConstraint> missingPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintSatisfied;
-	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newHashMap();
+	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newLinkedHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
 	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
@@ -642,6 +642,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	@Override
 	public Set<Node<Statement, Val>> getDataFlowPath() {
 		return results.getDataFlowPath();
+	}
+
+	public Map<Statement, SootMethod> getAllCallsOnObject() {
+		return allCallsOnObject;
 	}
 
 }
