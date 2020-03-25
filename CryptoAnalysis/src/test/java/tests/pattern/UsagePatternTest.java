@@ -18,7 +18,10 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -80,6 +83,40 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 
 		System.out.println(v);
 		System.out.println(bytes);
+	}
+
+	@Test
+	public void predictablePassword() throws GeneralSecurityException {
+		char[] defaultKey = new char[] {'s', 'a', 'a', 'g', 'a', 'r'};
+		byte[] salt = new byte[16];
+		SecureRandom sr = new SecureRandom();
+		sr.nextBytes(salt);
+		PBEKeySpec pbeKeySpec = new PBEKeySpec(defaultKey, salt, 11010, 16);
+		Assertions.notHasEnsuredPredicate(pbeKeySpec);
+		pbeKeySpec.clearPassword();
+		Assertions.mustBeInAcceptingState(pbeKeySpec);
+	}
+	
+	@Test
+	public void unPredictablePassword() throws GeneralSecurityException {
+		char[] defaultKey = generateRandomPassword();
+		byte[] salt = new byte[16];
+		SecureRandom sr = new SecureRandom();
+		sr.nextBytes(salt);
+		
+		PBEKeySpec pbeKeySpec = new PBEKeySpec(defaultKey, salt, 11010, 16);
+		Assertions.hasEnsuredPredicate(pbeKeySpec);
+		pbeKeySpec.clearPassword();
+		Assertions.mustBeInAcceptingState(pbeKeySpec);
+	}
+
+	public char[] generateRandomPassword() {
+		SecureRandom rnd = new SecureRandom();
+		char[] defaultKey = new char[20];
+		for (int i = 0; i < 20; i++) {
+			defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
+		}
+		return defaultKey;
 	}
 
 	@Test
@@ -152,8 +189,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecretKey key = keygen.generateKey();
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
-		String string = "AES/";
-		string += "CBC/PKCS5Padding";
+		String string = "AES/CBC/PKCS5Padding";
 		Cipher cCipher = Cipher.getInstance(string);
 		Assertions.extValue(0);
 		cCipher.init(Cipher.ENCRYPT_MODE, key);
@@ -666,7 +702,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char[] corPwd = new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+		char[] corPwd = generateRandomPassword();;
 		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
 		Assertions.extValue(1);
 	}
@@ -676,9 +712,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char[] corPwd = new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+		char[] corPwd = generateRandomPassword();
 		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
-		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -686,7 +721,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		pbekeyspec.clearPassword();
 		pbekeyspec = new PBEKeySpec(corPwd, salt, 9999, 128);
-		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -751,10 +785,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char[] corPwd = new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+		char[] corPwd = generateRandomPassword();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
 		// Assertions.violatedConstraint(pbekeyspec);
-		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -793,10 +826,9 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		Assertions.hasEnsuredPredicate(salt);
-		char[] corPwd = new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+		char[] corPwd = generateRandomPassword();;
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
 		// Assertions.violatedConstraint(pbekeyspec);
-		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -810,8 +842,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p'}, salt, 65000, 128);
-		Assertions.extValue(0);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(generateRandomPassword(), salt, 65000, 128);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
@@ -834,8 +865,7 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 		Assertions.hasEnsuredPredicate(salt);
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'}, salt, 65000, 128);
-		Assertions.extValue(0);
+		final PBEKeySpec pbekeyspec = new PBEKeySpec(generateRandomPassword(), salt, 65000, 128);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);

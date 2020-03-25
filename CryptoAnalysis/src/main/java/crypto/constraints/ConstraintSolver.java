@@ -336,7 +336,7 @@ public class ConstraintSolver {
 						if (cs.getVarName().equals(arg)) {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
 							for (ExtractedValue v : values) {
-								if (isHardCoded(v)) {
+								if (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v))) {
 									errors.add(new HardCodedError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
 							}
@@ -359,6 +359,10 @@ public class ConstraintSolver {
 				default:
 					return;
 			}
+		}
+
+		private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {
+			return !(extractSootArray.keySet().size() == 1 && extractSootArray.containsKey(""));
 		}
 	}
 
@@ -623,8 +627,7 @@ public class ConstraintSolver {
 									varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								}
 							} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {								
-								soot.Value arrayLocal = ((AssignStmt) allocSite).getLeftOp();
-								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite, arrayLocal));
+								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite));
 							}
 						}
 					}
@@ -640,7 +643,8 @@ public class ConstraintSolver {
 		 * @param arrayLocal soot array local variable for which values are to be found
 		 * @return extracted array values
 		 */
-		private Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite, soot.Value arrayLocal){
+		protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite){
+			soot.Value arrayLocal = ((AssignStmt) allocSite.stmt().getUnit().get()).getLeftOp();
 			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
 				if (methodBody != null) {
@@ -678,10 +682,6 @@ public class ConstraintSolver {
 	}
 
 	public boolean isHardCoded(ExtractedValue val) {
-		if (val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant)
-			return true;
-		if (val.getValue() instanceof NewExpr && ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"))
-			return true;
-		return false;
+		return val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant || (val.getValue() instanceof NewExpr && ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"));
 	}
 }
