@@ -54,6 +54,29 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	public void corSeed() throws GeneralSecurityException {
+		SecureRandom r3 = SecureRandom.getInstanceStrong();
+		Assertions.hasEnsuredPredicate(r3);
+		
+		SecureRandom r4 = SecureRandom.getInstanceStrong();
+		Assertions.hasEnsuredPredicate(r4);
+		r4.setSeed(r3.nextInt());
+	}
+	
+	@Test
+	public void fixedSeed() throws GeneralSecurityException {
+		final int fixedSeed = 10;
+		SecureRandom r3 = SecureRandom.getInstanceStrong();
+		r3.setSeed(fixedSeed);
+		Assertions.notHasEnsuredPredicate(r3);
+		
+		SecureRandom r4 = SecureRandom.getInstanceStrong();
+		Assertions.notHasEnsuredPredicate(r4);
+		r4.setSeed(r3.nextInt());
+		
+	}
+
+	@Test
 	public void dynSeed() throws GeneralSecurityException {
 		SecureRandom srPrep = new SecureRandom();
 		byte[] bytes = new byte[32];
@@ -96,14 +119,14 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		pbeKeySpec.clearPassword();
 		Assertions.mustBeInAcceptingState(pbeKeySpec);
 	}
-	
+
 	@Test
 	public void unPredictablePassword() throws GeneralSecurityException {
 		char[] defaultKey = generateRandomPassword();
 		byte[] salt = new byte[16];
 		SecureRandom sr = new SecureRandom();
 		sr.nextBytes(salt);
-		
+
 		PBEKeySpec pbeKeySpec = new PBEKeySpec(defaultKey, salt, 11010, 16);
 		Assertions.hasEnsuredPredicate(pbeKeySpec);
 		pbeKeySpec.clearPassword();

@@ -330,7 +330,6 @@ public class ConstraintSolver {
 					// TODO Not implemented!
 					return;
 				case "notHardCoded":
-					// TODO: Add implementation for notHardCoded predicate
 					String arg = ((CrySLObject) pred.getParameters().get(0)).getVarName();
 					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
 						if (cs.getVarName().equals(arg)) {
