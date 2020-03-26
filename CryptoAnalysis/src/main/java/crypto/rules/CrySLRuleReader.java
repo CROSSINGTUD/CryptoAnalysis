@@ -20,7 +20,6 @@ import crypto.cryslhandler.CrySLModelReader;
 
 public class CrySLRuleReader {
 	
-	
 	private static CrySLModelReader csmr;
 	
 	private static CrySLModelReader getReader(){
@@ -45,7 +44,7 @@ public class CrySLRuleReader {
 	}
 
 	/**
-	 * Returns a {@link CrySLRule} read from single CrySL file.
+	 * Returns a {@link CrySLRule} read from a single CrySL file.
 	 * 
 	 * @param file the CrySL file
 	 * @return the {@link CrySLRule} object
