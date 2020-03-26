@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
+import javax.naming.InvalidNameException;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -121,34 +123,30 @@ public class CrySLModelReader {
 	}
 
 	/**
-	 * Reads the content of a CrySL file from an {@link InputStream}, afterwards the {@link CrySLRule} will be created
+	 * Reads the content of a CrySL file from an {@link InputStream}, afterwards the {@link CrySLRule} will be created.
 	 * 
 	 * @param stream the {@link InputStream} holds the CrySL file content
 	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
 	 * @return the {@link CrySLRule}
+	 * @throws IllegalArgumentException, IOException 
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) {
-		if (!virtualFileName.endsWith(cryslFileEnding))
-			return null;
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IllegalArgumentException, IOException{
+		if (!virtualFileName.endsWith(cryslFileEnding)) {
+			throw new IllegalArgumentException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
+		}
 
 		URI uri = URI.createURI(virtualFileName);
-		Resource resource;
-		try {
-			resource = resourceSet.getURIResourceMap().get(uri);
-			if (resource == null){
-				resource = resourceSet.createResource(uri);
-				resource.load(stream, Collections.EMPTY_MAP);
-			}
+		Resource resource= resourceSet.getURIResourceMap().get(uri);
+		if (resource == null){
+			resource = resourceSet.createResource(uri);
+			resource.load(stream, Collections.EMPTY_MAP);
 		}
-		catch (IOException e) {
-			return null;
-		}
-
+		
 		return createRuleFromResource(resource);
 	}
 
 	/**
-	 * Returns a {@link CrySLRule} read from a single CrySL file.
+	 * Reads the content of a CrySL file and returns a {@link CrySLRule} object.
 	 * 
 	 * @param file the CrySL file
 	 * @return the {@link CrySLRule} object

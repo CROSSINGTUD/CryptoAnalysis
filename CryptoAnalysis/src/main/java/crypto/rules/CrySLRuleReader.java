@@ -148,14 +148,17 @@ public class CrySLRuleReader {
 	{
 		if (entry.isDirectory() || !entry.getName().endsWith(CrySLModelReader.cryslFileEnding))
 			return null;
+		
+		CrySLRule rule = null;
 		try {
 			String name = createUniqueZipEntryName(zipFile, entry);
-			CrySLRule rule = getReader().readRule(zip.getInputStream(entry), name);
-			return rule;
+			rule = getReader().readRule(zip.getInputStream(entry), name);
 		}
-		catch (IOException ex) {
-			return null;
+		catch (IllegalArgumentException | IOException | NoSuchAlgorithmException ex) {
+			ex.printStackTrace();
 		}
+		return rule;
+
 	}
 
 	// For zip file entries there is no real URI. Using the raw absolute path of the zip file will cause a exception
@@ -165,20 +168,17 @@ public class CrySLRuleReader {
 	// This scheme has the properties that it still is unique system-wide,
 	// The hash will be the same for the same file, so you could know if two rules come from the same ruleset file
 	// and you still can get the information of the zipped file.
-	private static String createUniqueZipEntryName(File zipFile, ZipEntry zipEntry) {
+	private static String createUniqueZipEntryName(File zipFile, ZipEntry zipEntry) throws NoSuchAlgorithmException {
 		if (!zipFile.exists() || !zipFile.isFile() || zipEntry == null)
 			return null;
 		StringBuilder sb = new StringBuilder();
 
 		String partFileName;
-		try {
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			messageDigest.update(zipFile.getAbsolutePath().getBytes());
-			partFileName = bytesToHex(messageDigest.digest());
-		}
-		catch (NoSuchAlgorithmException e) {
-			partFileName = zipFile.getName();
-		}
+		
+		MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+		messageDigest.update(zipFile.getAbsolutePath().getBytes());
+		partFileName = bytesToHex(messageDigest.digest());
+	
 
 		sb.append(partFileName);
 		sb.append(File.separator);
