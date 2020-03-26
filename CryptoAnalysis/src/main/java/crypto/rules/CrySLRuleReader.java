@@ -11,7 +11,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -20,8 +19,10 @@ import crypto.cryslhandler.CrySLModelReader;
 
 
 public class CrySLRuleReader {
+	
+	
 	private static CrySLModelReader csmr;
-
+	
 	private static CrySLModelReader getReader(){
 		if (csmr == null)
 		{
@@ -43,34 +44,69 @@ public class CrySLRuleReader {
 		return csmr;
 	}
 
+	/**
+	 * Returns a {@link CrySLRule} read from single CrySL file.
+	 * 
+	 * @param file the CrySL file
+	 * @return the {@link CrySLRule} object
+	 */
 	public static CrySLRule readFromSourceFile(File file) {
 		return getReader().readRule(file);
 	}
 
+	/**
+	 * Returns a {@link List} of {@link CrySLRule} objects read from a directory
+	 * 
+	 * @param directory the {@link File} with the directory where the rules are located
+	 * @return the {@link List} with {@link CrySLRule} objects
+	 */
 	public static List<CrySLRule> readFromDirectory(File directory) {
 		return readFromDirectory(directory, false);
 	}
 
+	/**
+	 * Returns a {@link List} of {@link CrySLRule} objects read from a directory.
+	 * In the case the directory contains further sub directories, they can also searched 
+	 * if the recursive argument is <code>true</code>.
+	 * 
+	 * @param directory the {@link File} with the directory where the rules are located
+	 * @param recursive <code>true</code> the subfolders will be searched too
+	 * @return the {@link List} with {@link CrySLRule} objects
+	 */
 	public static List<CrySLRule> readFromDirectory(File directory, boolean recursive) {
+		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
+
 		if (!directory.exists() || !directory.isDirectory())
 			return new ArrayList<>();
 
 		List<File> cryptSLFiles = new ArrayList<>();
 		findCryptSLFiles(directory, recursive, cryptSLFiles);
+		
 		if (cryptSLFiles.size() == 0)
 			return new ArrayList<>();
 
 		CrySLModelReader reader = getReader();
 		List<CrySLRule> rules = new ArrayList<>();
-		for (File file :cryptSLFiles)
-			rules.add(reader.readRule(file));
+		for (File file : cryptSLFiles) {
+			CrySLRule rule = reader.readRule(file);
 
-		// TODO: Decide what happens with potential duplicates
-		return rules.stream().filter((x) -> x != null).collect(Collectors.toList());
+			if(rule != null) {
+				if(!ruleMap.containsKey(rule.getClassName())) {
+					ruleMap.put(rule.getClassName(), rule);
+				}
+			} else {
+
+			}
+		}
+		return Lists.newArrayList(ruleMap.values());
+
 	}
 
-	// TODO: Discuss about .zip layout: Only Root or allow recursive.
-	// TODO: Discuss whether to throw IOExceptions or not
+	/**
+	 * Returns a {@link List} of {@link CrySLRule} objects read from a Zip {@link File}.
+	 * @param file Zip that contains the CrySL files
+	 * @return the {@link List} with {@link CrySLRule} objects
+	 */
 	public static List<CrySLRule> readFromZipFile(File file) {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
 			return new ArrayList<>();

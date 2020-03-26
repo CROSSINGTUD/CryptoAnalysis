@@ -10,7 +10,12 @@ import crypto.cryslhandler.CrySLModelReader;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 
+
 public class CrySLRulesetSelector {
+	
+	/**
+	 * the supported rule formats
+	 */
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
@@ -19,6 +24,9 @@ public class CrySLRulesetSelector {
 		},
 	}
 	
+	/**
+	 * the supported Zip formats
+	 */
 	public static enum ZipFormat {
 		ZIP("zip");
 //		TAR("tar"),
@@ -37,11 +45,23 @@ public class CrySLRulesetSelector {
 		
 	}
 
+	/**
+	 * current RuleSets
+	 */
 	public static enum Ruleset {
 		JavaCryptographicArchitecture, BouncyCastle, Tink
 	}
 
+	/**
+	 * Creates {@link CrySLRule} objects and returns them as {@link List}.
+	 * 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL files.
+	 * @param ruleFormat the file extension of the CrySL files
+	 * @param set the {@link Ruleset} where the rules belongs to 
+	 * @return the {@link List} with {@link CrySLRule} objects from the rulesBasePath
+	 */
 	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) {
+		
 		List<CrySLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
 			rules.addAll(getRulesset(rulesBasePath, ruleFormat, s));
@@ -58,8 +78,7 @@ public class CrySLRulesetSelector {
 	 * @param rulesetString
 	 * @return
 	 */
-	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
-			String rulesetString) {
+	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat, String rulesetString) {
 		String[] set = rulesetString.split(",");
 		List<Ruleset> ruleset = Lists.newArrayList();
 		for (String s : set) {
@@ -91,6 +110,16 @@ public class CrySLRulesetSelector {
 		return rules;
 	}
 
+	
+	/**
+	 * Creates and returns a single {@link CrySLRule} object.
+	 * 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL file.
+	 * @param ruleFormat the file extension of the CrySL file
+	 * @param ruleset the {@link Ruleset} where the rule belongs to 
+	 * @param rulename the name of the rule
+	 * @return the {@link CrySLRule} object
+	 */
 	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
 			String rulename) {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
@@ -101,6 +130,13 @@ public class CrySLRulesetSelector {
 		return null;
 	}
 
+	/**
+	 * Creates {@link CrySLRule} objects and returns them as {@link List}.
+	 * 
+	 * @param 	resourcesPath a {@link File} with the path giving the location of the CrySL files
+	 * @param 	ruleFormat the {@link Ruleset} where the rules belongs to 
+	 * @return 	the {@link List} with {@link CrySLRule} objects from path of the {@link File}
+	 */
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
 			System.out.println("The specified path is not a directory " + resourcesPath);
@@ -118,6 +154,12 @@ public class CrySLRulesetSelector {
 		return rules;
 	}
 	
+	/**
+	 * Creates {@link CrySLRule} objects from a Zip file and returns them as {@link List}.
+	 * 
+	 * @param resource the Zip {@link File} which contains the CrySL files
+	 * @return the {@link List} with {@link CrySLRule} objects from the Zip file
+	 */
 	public static List<CrySLRule> makeFromZip(File resource) {
 		List<CrySLRule> rules = Lists.newArrayList();	
 
