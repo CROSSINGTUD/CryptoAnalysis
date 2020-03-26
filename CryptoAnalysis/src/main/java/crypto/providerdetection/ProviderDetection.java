@@ -1,11 +1,3 @@
-/**
- * The ProviderDetection class helps in detecting the provider used when
- * coding with JCA's Cryptographic APIs and chooses the corresponding set of
- * CrySL rules that are implemented for that provider.
- *
- * @author  Enri Ozuni
- * 
- */
 package crypto.providerdetection;
 
 import java.io.File;
@@ -50,6 +42,14 @@ import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import wpds.impl.Weight.NoWeight;
 
+/**
+ * The ProviderDetection class helps in detecting the provider used when
+ * coding with JCA's Cryptographic APIs and chooses the corresponding set of
+ * CrySL rules that are implemented for that provider.
+ *
+ * @author  Enri Ozuni
+ * 
+ */
 public class ProviderDetection {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
@@ -60,11 +60,18 @@ public class ProviderDetection {
 	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
 	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
 	
-	
+	/**
+	 * Returns the detected provider.
+	 *
+	 */
 	public String getProvider() {
 		return provider;
 	}
-
+	
+	/**
+	 * Returns the rules directory of the detected provider.
+	 *
+	 */
 	public String getRulesDirectory() {
 		return rulesDirectory;
 	}
@@ -149,10 +156,6 @@ public class ProviderDetection {
 		return this.provider;
 	}
 	
-	
-	
-	// Methods used from the `doAnalysis()` method
-	//-----------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * This method returns the type of Provider detected, since
