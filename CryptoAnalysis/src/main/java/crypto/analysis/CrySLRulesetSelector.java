@@ -53,13 +53,13 @@ public class CrySLRulesetSelector {
 	}
 
 	/**
-	 * Creates {@link CrySLRule} objects and returns them as {@link List}.
+	 * Creates {@link CrySLRule} objects for the given RuleSet argument and returns them as {@link List}.
 	 * 
-	 * @param rulesBasePath a {@link String} path giving the location of the CrySL files.
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
 	 * @param ruleFormat the file extension of the CrySL files
-	 * @param set the {@link Ruleset} where the rules belongs to 
-	 * @return the {@link List} with {@link CrySLRule} objects from the rulesBasePath
-	 */
+	 * @param set the {@link Ruleset} for which the {@link CrySLRule} objects should be created for
+	 * @return the {@link List} with {@link CrySLRule} objects
+	 */ 
 	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) {
 		
 		List<CrySLRule> rules = Lists.newArrayList();
@@ -111,17 +111,18 @@ public class CrySLRulesetSelector {
 	}
 
 	
+
+	
 	/**
-	 * Creates and returns a single {@link CrySLRule} object.
+	 * Creates and returns a single {@link CrySLRule} object for the given RuleSet argument.
 	 * 
-	 * @param rulesBasePath a {@link String} path giving the location of the CrySL file.
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
 	 * @param ruleFormat the file extension of the CrySL file
 	 * @param ruleset the {@link Ruleset} where the rule belongs to 
 	 * @param rulename the name of the rule
 	 * @return the {@link CrySLRule} object
 	 */
-	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
-			String rulename) {
+	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset, String rulename) {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
 		if (file.exists()) {
 			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
@@ -130,12 +131,13 @@ public class CrySLRulesetSelector {
 		return null;
 	}
 
+
 	/**
-	 * Creates {@link CrySLRule} objects and returns them as {@link List}.
+	 * Creates the {@link CrySLRule} objects for the given {@link File} argument and returns them as {@link List}.
 	 * 
-	 * @param 	resourcesPath a {@link File} with the path giving the location of the CrySL files
+	 * @param 	resourcesPath a {@link File} with the path giving the location of the CrySL file folder
 	 * @param 	ruleFormat the {@link Ruleset} where the rules belongs to 
-	 * @return 	the {@link List} with {@link CrySLRule} objects from path of the {@link File}
+	 * @return  the {@link List} with {@link CrySLRule} objects
 	 */
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
 		if (!resourcesPath.isDirectory())
