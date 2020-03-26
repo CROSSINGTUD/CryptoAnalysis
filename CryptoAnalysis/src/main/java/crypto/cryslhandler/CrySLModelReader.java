@@ -96,6 +96,10 @@ public class CrySLModelReader {
 	private static final String NULL = "null";
 	private static final String UNDERSCORE = "_";
 	
+	/**
+	 * Creates a CrySLModelReader 
+	 * @throws MalformedURLException
+	 */
 	public CrySLModelReader() throws MalformedURLException {
 		CrySLStandaloneSetup crySLStandaloneSetup = new CrySLStandaloneSetup();
 		final Injector injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
@@ -116,6 +120,13 @@ public class CrySLModelReader {
 
 	}
 
+	/**
+	 * Reads the content of a CrySL file from an {@link InputStream}, afterwards the {@link CrySLRule} will be created
+	 * 
+	 * @param stream the {@link InputStream} holds the CrySL file content
+	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
+	 * @return the {@link CrySLRule}
+	 */
 	public CrySLRule readRule(InputStream stream, String virtualFileName) {
 		if (!virtualFileName.endsWith(cryslFileEnding))
 			return null;
@@ -136,6 +147,12 @@ public class CrySLModelReader {
 		return createRuleFromResource(resource);
 	}
 
+	/**
+	 * Returns a {@link CrySLRule} read from a single CrySL file.
+	 * 
+	 * @param file the CrySL file
+	 * @return the {@link CrySLRule} object
+	 */
 	public CrySLRule readRule(File ruleFile) {
 		final String fileName = ruleFile.getName();
 		final String extension = fileName.substring(fileName.lastIndexOf("."));
@@ -221,6 +238,7 @@ public class CrySLModelReader {
 		}
 		return collected;
 	}
+	
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : eList) {
@@ -254,6 +272,7 @@ public class CrySLModelReader {
 		}
 		return preds;
 	}
+	
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getPredicates(final List<Constraint> predList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : predList) {
@@ -296,6 +315,7 @@ public class CrySLModelReader {
 		}
 		return preds;
 	}
+	
 	private List<ISLConstraint> buildUpConstraints(final List<Constraint> constraints) {
 		final List<ISLConstraint> slCons = new ArrayList<>();
 		for (final Constraint cons : constraints) {
@@ -306,6 +326,8 @@ public class CrySLModelReader {
 		}
 		return slCons;
 	}
+	
+	
 	private ISLConstraint getConstraint(final Constraint cons) {
 		if (cons == null) {
 			return null;
@@ -465,6 +487,7 @@ public class CrySLModelReader {
 
 		return slci;
 	}
+	
 	private List<CrySLForbiddenMethod> getForbiddenMethods(final EList<ForbMethod> methods) {
 		final List<CrySLForbiddenMethod> methodSignatures = new ArrayList<>();
 		for (final ForbMethod fm : methods) {
@@ -484,6 +507,7 @@ public class CrySLModelReader {
 		}
 		return methodSignatures;
 	}
+	
 	private List<ISLConstraint> collectRequiredPredicates(final EList<ReqPred> requiredPreds) {
 		final List<ISLConstraint> preds = new ArrayList<>();
 		for (final ReqPred pred : requiredPreds) {
@@ -527,6 +551,7 @@ public class CrySLModelReader {
 
 		return objects;
 	}
+	
 	private Set<StateNode> getStatesForMethods(final List<CrySLMethod> condMethods) {
 		final Set<StateNode> predGens = new HashSet<>();
 		if (condMethods.size() != 0) {
@@ -539,6 +564,7 @@ public class CrySLModelReader {
 		}
 		return predGens;
 	}
+	
 	private ISLConstraint getPredefinedPredicate(final LiteralExpression lit) {
 		final String pred = ((PreDefinedPredicates) lit.getCons()).getPredName();
 		ISLConstraint slci = null;
@@ -594,6 +620,7 @@ public class CrySLModelReader {
 		}
 		return slci;
 	}
+	
 	private CrySLArithmeticConstraint convertLiteralToArithmetic(final Constraint expression) {
 		final LiteralExpression cons = (LiteralExpression) ((LiteralExpression) expression).getCons();
 		ICrySLPredicateParameter name;
@@ -611,6 +638,7 @@ public class CrySLModelReader {
 
 		return new CrySLArithmeticConstraint(name, new CrySLObject("0", INT), crypto.rules.CrySLArithmeticConstraint.ArithOp.p);
 	}
+	
 	private CrySLArithmeticConstraint convertArithExpressionToArithmeticConstraint(final Constraint expression) {
 		CrySLArithmeticConstraint right;
 		final ArithmeticExpression ar = (ArithmeticExpression) expression;
@@ -639,6 +667,7 @@ public class CrySLModelReader {
 				operator);
 		return right;
 	}
+	
 	private CrySLPredicate extractReqPred(final ReqPred pred) {
 		final List<ICrySLPredicateParameter> variables = new ArrayList<>();
 		PredLit innerPred = (PredLit) pred;			
@@ -678,6 +707,7 @@ public class CrySLModelReader {
 		}
 		return new CrySLPredicate(null, innerPred.getPred().getPredName(), variables, (innerPred.getNot() != null ? true : false), getConstraint(conditional));
 	}
+	
 	private String getValueOfLiteral(final EObject name) {
 		String value = "";
 		if (name instanceof LiteralExpression) {
@@ -697,6 +727,7 @@ public class CrySLModelReader {
 		}
 		return filterQuotes(value);
 	}
+
 	private String getTypeName(final Constraint constraint, final String value) {
 		String typeName = "";
 		try {
@@ -709,11 +740,12 @@ public class CrySLModelReader {
 		return typeName;
 	}
 
-
 	private StateMachineGraph buildStateMachineGraph(final Expression order) {
 		final StateMachineGraphBuilder smgb = new StateMachineGraphBuilder(order);
 		return smgb.buildSMG();
 	}
+	
+	
 	private static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}	
