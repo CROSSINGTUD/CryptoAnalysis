@@ -59,7 +59,7 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static List<CrySLRule> rules;
+	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
@@ -78,11 +78,13 @@ public abstract class HeadlessCryptoScanner {
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
+			rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
-		} else if(options.hasOption("rulesZip")) {
+		}
+		
+		if(options.hasOption("rulesZip")) {
 			String resourcesPath = options.getOptionValue("rulesZip");
-			rules = CrySLRulesetSelector.makeFromZip(new File(resourcesPath));
+			rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
 		}
 		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
