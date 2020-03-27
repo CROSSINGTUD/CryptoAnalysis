@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -19,6 +23,9 @@ import soot.SootMethod;
 import soot.Type;
 
 public class CrySLMethodToSootMethod {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrySLMethodToSootMethod.class);
+	
 	private static CrySLMethodToSootMethod instance;
 	private DefaultValueMap<CrySLMethod, Collection<SootMethod>> descriptorToSootMethod = new DefaultValueMap<CrySLMethod, Collection<SootMethod>>() {
 		@Override
@@ -27,7 +34,7 @@ public class CrySLMethodToSootMethod {
 			try{
 				res = _convert(key);
 			} catch(Exception e){
-				System.err.println("Failed to convert method "  + key);
+				LOGGER.error("Failed to convert method "  + key);
 			}
 			for (SootMethod m : res) {
 				sootMethodToDescriptor.put(m, key);
@@ -74,7 +81,7 @@ public class CrySLMethodToSootMethod {
 			}
 		}
 		if(res.isEmpty()){
-			System.out.println("Warning: Couldn't find any method for CrySLMethod: " + label);
+			LOGGER.warn("Couldn't find any method for CrySLMethod: " + label);
 		}
 		return res;
 	}

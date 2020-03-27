@@ -73,7 +73,7 @@ public abstract class CryptoScanner {
 		CrySLResultsReporter listener = getAnalysisListener();
 		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
-		logger.info("Searching fo Seeds for analysis!");
+		logger.info("Searching for seeds for the analysis!");
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		logger.info("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");

@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
@@ -39,6 +42,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -53,7 +57,9 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
 public class CSVReporter extends CrySLAnalysisListener {
-
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
+	
 	private static final String CSV_SEPARATOR = ";";
 	private Set<AbstractError> errors = Sets.newHashSet();
 	private int seeds;
@@ -158,7 +164,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 				try {
 					Files.createDirectories(reportFile.getParentFile().toPath());
 				} catch (IOException e) {
-					throw new RuntimeException("Was not able to create directories for IDEViz output!");
+					LOGGER.error("Was not able to create directories for IDEViz output for given directory: "+reportFile.getAbsolutePath(), e);
 				}
 			}
 			boolean fileExisted = reportFile.exists();
@@ -183,7 +189,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 
 	private void put(String key, Object val) {
 		if (!headers.contains(key)) {
-			System.err.println("Did not create a header to this value " + key);
+			LOGGER.error("Did not create a header to this value " + key);
 		} else {
 			headersToValues.put(key, val.toString());
 		}
