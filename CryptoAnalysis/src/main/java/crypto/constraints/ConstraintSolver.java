@@ -335,12 +335,14 @@ public class ConstraintSolver {
 					// TODO Not implemented!
 					return;
 				case "notHardCoded":
-					String arg = ((CrySLObject) pred.getParameters().get(0)).getVarName();
+					CrySLObject varNotToBeHardCoded = (CrySLObject) pred.getParameters().get(0);
+					String name = varNotToBeHardCoded.getVarName();
+					String type = varNotToBeHardCoded.getJavaType();
 					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
-						if (cs.getVarName().equals(arg)) {
+						if (cs.getVarName().equals(name)) {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
 							for (ExtractedValue v : values) {
-								if (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v))) {
+								if (isSubType(type,  v.getValue().getType().toQuotedString()) && (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v)))) {
 									errors.add(new HardCodedError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
 							}
