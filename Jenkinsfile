@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        MAVEN_OPTS = ' -Xss100M -Xmx12g'
+        MAVEN_OPTS = ' -Xss128M -Xmx16g'
     }
 
     stages {
