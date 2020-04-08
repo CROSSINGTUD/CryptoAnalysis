@@ -1,8 +1,6 @@
 package crypto;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +29,7 @@ import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
@@ -67,24 +66,37 @@ public abstract class HeadlessCryptoScanner {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
-	public static void main(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
-		HeadlessCryptoScanner scanner = createFromOptions(args);
+	public static void main(String... args) {
+		HeadlessCryptoScanner scanner;
+		scanner = createFromOptions(args);
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) throws ParseException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+	public static HeadlessCryptoScanner createFromOptions(String... args) {
 		CommandLineParser parser = new DefaultParser();
-		options = parser.parse(new HeadlessCryptoScannerOptions(), args);
+		try {
+			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
+		} catch (ParseException e) {
+			commandLineParserErrorMessage(e);
+		}
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
-			rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
+			try {
+				rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+resourcesPath, e);
+			}
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
 		
 		if(options.hasOption("rulesZip")) {
 			String resourcesPath = options.getOptionValue("rulesZip");
-			rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
+			try {
+				rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+resourcesPath, e);
+			}
 		}
 		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
@@ -161,14 +173,22 @@ public abstract class HeadlessCryptoScanner {
 	public void exec() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		if(PRE_ANALYSIS){
-			initializeSootWithEntryPointAllReachable(false);
+			try {
+				initializeSootWithEntryPointAllReachable(false);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
+			}
 			LOGGER.info("Pre-Analysis soot setup done in {} ",stopwatch);
 			checkIfUsesObject();
 			LOGGER.info("Pre-Analysis  finished in {}", stopwatch);
 		}
 		if (!PRE_ANALYSIS || hasSeeds()) {
 			LOGGER.info("Using call graph algorithm {}", callGraphAlogrithm());
-			initializeSootWithEntryPointAllReachable(true);
+			try {
+				initializeSootWithEntryPointAllReachable(true);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
+			}
 			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
@@ -248,7 +268,7 @@ public abstract class HeadlessCryptoScanner {
 					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
 						if(enableVisualization()) {
 							if(getOutputFolder() == null) {
-								throw new RuntimeException("The visualization requires the option --reportDir");
+								LOGGER.error("The visualization requires the --reportDir option.");
 							}
 							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
 							vizFile.getParentFile().mkdirs();
@@ -291,12 +311,17 @@ public abstract class HeadlessCryptoScanner {
 	protected List<CrySLRule> getRules() {
 		if (rules != null) {
 			return rules;
+		} else {
+			try {
+				return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: src/main/resources/JavaCryptographicArchitecture", e);
+			}
 		}
-		
-		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
+		return null;
 	}
 
-	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) {
+	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
 		G.v().reset();
 		Options.v().set_whole_program(wholeProgram);
 
@@ -312,7 +337,7 @@ public abstract class HeadlessCryptoScanner {
 			Options.v().setPhaseOption("cg.spark", "on");
 			break;
 		default:
-			throw new RuntimeException("No call graph option selected!");
+			throw new CryptoAnalysisException("No call graph option selected out of: CHA, SPARK_LIBRARY and SPARK");
 		}
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
@@ -357,7 +382,7 @@ public abstract class HeadlessCryptoScanner {
 		List<String> exList = new LinkedList<String>();
 		List<CrySLRule> rules = getRules();
 		for(CrySLRule r : rules) {
-			exList.add(Utils.getFullyQualifiedName(r));
+			exList.add(r.getClassName());
 		}
 		return exList;
 	}
@@ -430,5 +455,24 @@ public abstract class HeadlessCryptoScanner {
 	    String moduleFile = dirName + File.separator + "module-info.class";
 	    boolean check = new File(moduleFile).exists();
 	    return check;
+	}
+	
+	private static void commandLineParserErrorMessage(ParseException e) {
+		LOGGER.error("An error occured while trying to parse the command line arguments: ", e);
+		LOGGER.error("\nThe default command for running CryptoAnalyis is: \n"
+				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n" + 
+				"      --rulesDir=<absolute_path_to_crysl_source_code_format_rules> \\\r\n" + 
+				"      --applicationCp=<absolute_application_path>\n"
+				+ "\nAdditional arguments that can be used are:\n"
+				+ "--cg=<selection_of_call_graph_for_analysis (CHA, SPARK-LIBRARY, SPARK)>\n"
+				+ "--rulesInSrc (specifies that rules are in source format)\n"
+				+ "--sootCp=<absolute_path_of_whole_project>\n"
+				+ "--softwareIdentifier=<identifier_for_labelling_output_files>\n"
+				+ "--reportDir=<directory_location_for_cognicrypt_report>\n"
+				+ "--csvReportFile=<summary_report_for_finding_csv_files>\n"
+				+ "--preanalysis (enables pre-analysis)\n"
+				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
+				+ "--sarifReport (enables sarif report)\n"
+				+ "--providerDetection (enables provider detection analysis)\n");
 	}
 }

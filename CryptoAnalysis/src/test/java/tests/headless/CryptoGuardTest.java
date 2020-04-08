@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -19,7 +20,6 @@ import tests.headless.FindingsType.TruePositives;
 /**
  * @author Enri Ozuni
  */
-@Ignore
 public class CryptoGuardTest extends AbstractHeadlessTest {
 	
 	/**
@@ -202,7 +202,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordBBCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordBBCase2: void key()>", HardCodedError.class, 1);
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABHCase2.java
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>", NeverTypeOfError.class, 1);	

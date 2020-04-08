@@ -7,7 +7,7 @@
 	<version>2.7.2-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spdsVersion>2.4-SNAPSHOT</spdsVersion>
+		<spdsVersion>2.4</spdsVersion>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -55,7 +55,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>JavaCryptographicArchitecture</artifactId>
-									<version>1.4</version>
+									<version>1.4.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -102,7 +102,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.17</version>
+				<version>2.20</version>
 				<configuration>
 					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>

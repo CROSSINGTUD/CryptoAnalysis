@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 
 import boomerang.WeightedForwardQuery;
@@ -15,11 +18,12 @@ import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
+import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
@@ -40,6 +44,9 @@ import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(IDEALCrossingTestingFramework.class);
+
 	protected JimpleBasedInterproceduralCFG staticIcfg;
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
@@ -73,9 +80,12 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected CrySLRule getRule() {
-		//return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
-		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
-		//CrySLRuleReader.readFromFile(file);
+		try {
+			return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+RULES_BASE_DIR, e);
+		}
+		return null;
 	}
 
 	protected abstract String getRulename();
@@ -85,7 +95,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
+		excludedPackages.add(getRule().getClassName());
 		return excludedPackages;
 	}
 	

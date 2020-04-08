@@ -23,11 +23,13 @@ import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.google.inject.Injector;
+
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -87,6 +89,7 @@ import de.darmstadt.tu.crossing.crySL.impl.ObjectImpl;
 
 
 public class CrySLModelReader {
+	
 	private List<CrySLForbiddenMethod> forbiddenMethods = null;
 	private StateMachineGraph smg = null;
 	private XtextResourceSet resourceSet;
@@ -129,10 +132,11 @@ public class CrySLModelReader {
 	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
 	 * @return the {@link CrySLRule}
 	 * @throws IllegalArgumentException, IOException 
+	 * @throws CryptoAnalysisException 
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IllegalArgumentException, IOException{
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IllegalArgumentException, IOException, CryptoAnalysisException{
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
-			throw new IllegalArgumentException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
+			throw new CryptoAnalysisException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
 		}
 
 		URI uri = URI.createURI(virtualFileName);
@@ -150,13 +154,14 @@ public class CrySLModelReader {
 	 * 
 	 * @param file the CrySL file
 	 * @return the {@link CrySLRule} object
+	 * @throws CryptoAnalysisException 
 	 */
-	public CrySLRule readRule(File ruleFile) {
+	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
 		final String fileName = ruleFile.getName();
-		final String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!cryslFileEnding.equals(extension)) {
-			if (!fileName.endsWith(cryslFileEnding))
-				return null;
+		final String extension = Files.getFileExtension(fileName);
+				
+		if (!extension.equals(cryslFileEnding)) {
+			throw new CryptoAnalysisException("The prefix of "+ fileName + "  does not correspond to "+ cryslFileEnding);
 		}
 
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);

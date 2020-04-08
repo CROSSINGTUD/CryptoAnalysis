@@ -13,6 +13,8 @@ import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -23,6 +25,8 @@ import soot.SootMethod;
 @SuppressWarnings("unchecked")
 public class SARIFReporter extends ErrorMarkerListener {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SARIFReporter.class);
+	
 	private File outputFolder;
 	// private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
@@ -130,7 +134,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 				writer.write(sarif.toString());
 				writer.close();
 			} catch (IOException e) {
-				throw new RuntimeException("Could not write to file " + outputFolder);
+				LOGGER.error("Could not write to file: "+outputFolder, e);
 			}
 		}
 	}

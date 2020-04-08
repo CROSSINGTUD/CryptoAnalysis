@@ -22,7 +22,6 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -43,6 +42,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -355,7 +355,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	private List<CrySLRule> getRules() {
 		if(rules == null) {
-			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			try {
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			} catch (CryptoAnalysisException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return rules;
 	}
@@ -363,7 +368,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
 		for(CrySLRule r : getRules()) {
-			excludedPackages.add(Utils.getFullyQualifiedName(r));
+			excludedPackages.add(r.getClassName());
 		}
 		return excludedPackages;
 	}
