@@ -104,7 +104,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.20</version>
 				<configuration>
-					<argLine>-Xmx16G -Xss128m -Dmaven.home="${maven.home}"</argLine>
+					<argLine>-Xmx8192m -Xss256m -XX:MaxPermSize=2048m -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 				</configuration>
 				<dependencies>

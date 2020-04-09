@@ -4,10 +4,6 @@ pipeline {
     tools { 
         jdk 'Oracle JDK 9' 
     }
-    
-    environment {
-        MAVEN_OPTS = ' -Xss128M -Xmx16g'
-    }
 
     stages {
 
