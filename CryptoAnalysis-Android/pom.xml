@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis-Android</artifactId>
-	<version>2.7.1</version>
+	<version>2.7.2</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<cryptoAnalysisVersion>2.7.1</cryptoAnalysisVersion>
+		<cryptoAnalysisVersion>2.7.2</cryptoAnalysisVersion>
 		<flowDroidVersion>2.7.1</flowDroidVersion>
 	</properties>
 	<build>
@@ -19,6 +19,34 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>
+								de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis
+							</mainClass>
+						</manifest>
+					</archive>
+					<descriptors>
+						<!-- custom descriptor is copied from jar-with-dependencies -->
+						<!-- This also copies the rules from test resources as default rules 
+							into the jar -->
+						<descriptor>build/descriptor.xml</descriptor>
+					</descriptors>
+					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
 
