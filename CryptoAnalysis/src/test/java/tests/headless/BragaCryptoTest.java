@@ -1,6 +1,8 @@
 package tests.headless;
 
 import java.io.File;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
@@ -1191,6 +1193,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/cai/undefinedCSP/
 	@Test
+	@Ignore
 	public void undefinedCSPExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/undefinedCSP").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
