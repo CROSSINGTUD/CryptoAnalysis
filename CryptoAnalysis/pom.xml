@@ -106,7 +106,6 @@
 				<configuration>
 					<argLine>-Xmx8192m -Xss256m -XX:MaxPermSize=2048m -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
-					<fork>true</fork>
 				</configuration>
 				<dependencies>
 					<dependency>
