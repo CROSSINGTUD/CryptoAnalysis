@@ -733,7 +733,6 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	@Ignore
 	public void UsagePatternMinPBEIterations() throws GeneralSecurityException, IOException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);

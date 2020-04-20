@@ -105,7 +105,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	@Ignore
 	public void testBCEllipticCurveExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);

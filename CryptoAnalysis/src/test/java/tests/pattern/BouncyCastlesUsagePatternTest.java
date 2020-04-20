@@ -51,7 +51,6 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
 	
 	
 	@Test
-	@Ignore
 	public void rsKeyParameters() {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
 		BigInteger pub = new BigInteger("9f0783a49...da", 16);	

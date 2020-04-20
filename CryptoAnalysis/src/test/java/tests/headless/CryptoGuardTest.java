@@ -127,7 +127,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	
 	
 	@Test
-	@Ignore
 	public void pbeIterationExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/pbeiteration").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -271,7 +270,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
-	@Ignore
 	public void staticSaltsExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticsalts").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
