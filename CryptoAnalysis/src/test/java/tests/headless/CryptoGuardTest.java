@@ -193,6 +193,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java
+		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", HardCodedError.class, 1);	
 		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 1);	
 		// ABH1, ABI2, BB1 are other similar test cases that were not included
 		
@@ -213,11 +214,13 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABHCase2.java
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>", NeverTypeOfError.class, 1);	
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void key(java.lang.String)>", HardCodedError.class, 1);	
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABHCase2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		
+
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordABICase1.java
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>", NeverTypeOfError.class, 1);	
+		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void key(java.lang.String)>", HardCodedError.class, 1);	
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		// ABHCase1, BBCase1 are similar to the case above
 		
