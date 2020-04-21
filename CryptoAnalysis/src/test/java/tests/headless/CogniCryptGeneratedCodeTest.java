@@ -33,7 +33,10 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 
 		//All the following errors are false positives
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 2);
-		
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", HardCodedError.class, 1);
+		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", HardCodedError.class, 1);
+
 		scanner.exec();
 		assertErrors();
 	}

@@ -49,6 +49,7 @@ public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework 
         Assertions.mustNotBeInAcceptingState(eng);
 	}
 	
+	
 	@Test
 	public void rsKeyParameters() {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);

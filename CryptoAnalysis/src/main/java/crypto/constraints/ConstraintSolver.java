@@ -650,7 +650,7 @@ public class ConstraintSolver {
 		 * @return extracted array values
 		 */
 		protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite){
-			soot.Value arrayLocal = ((AssignStmt) allocSite.stmt().getUnit().get()).getLeftOp();
+			Value arrayLocal = allocSite.getValue();
 			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
 				if (methodBody != null) {
@@ -659,8 +659,8 @@ public class ConstraintSolver {
 						final Unit unit = unitIterator.next();
 						if (unit instanceof AssignStmt) {
 							AssignStmt uStmt = (AssignStmt) (unit);
-							soot.Value leftValue = uStmt.getLeftOp();
-							soot.Value rightValue = uStmt.getRightOp();
+							Value leftValue = uStmt.getLeftOp();
+							Value rightValue = uStmt.getRightOp();
 							if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
 								arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
 							}
