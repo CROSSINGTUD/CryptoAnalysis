@@ -37,6 +37,9 @@ public class HeadlessCryptoScannerOptions extends Options {
 		Option reportFile = Option.builder().longOpt("reportDir").hasArg().desc("A folder for the CogniCrypt report and .jimple files.")
 				.build();
 		addOption(reportFile);
+		Option reportFormat = Option.builder().longOpt("reportFormat").hasArg().desc("The format of Cognicrypt report")
+				.build();
+		addOption(reportFormat);
 		Option csvReportFile = Option.builder().longOpt("csvReportFile").hasArg().desc("Generates a summary of the finding as a CSV file.")
 				.build();
 		addOption(csvReportFile);
@@ -44,9 +47,6 @@ public class HeadlessCryptoScannerOptions extends Options {
 		addOption(preanalysisOpt);
 		Option visualization = Option.builder().longOpt("visualization").hasArg(false).desc("Enables the visualization. This option requires that --reportFolder is also set. A folder /viz/ is created containing Json files that can be visualized by the visualization of WPDS.").build();
 		addOption(visualization);
-		
-		Option sarif = Option.builder().longOpt("sarifReport").hasArg(false).desc("Enable sarif report").build();
-		addOption(sarif);
 		
 		Option providerDetection = Option.builder().longOpt("providerDetection").hasArg(false).desc("Enable Provider Detection analysis").build();
 		addOption(providerDetection);
