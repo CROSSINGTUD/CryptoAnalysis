@@ -186,11 +186,17 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 						<fileset>
+							<directory>${basedir}/src/main/resources/JavaCryptographicArchitecture</directory>
+						</fileset>
+						<fileset>
 							<directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
 							<includes>
 								<include>**</include>
 							</includes>
 							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/BouncyCastle</directory>
 						</fileset>
 						<fileset>
 							<directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
@@ -199,14 +205,20 @@
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/Tink</directory>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/BouncyCastle-JCA</directory>
+						</fileset>
 					</filesets>
-					<fileset>
-						<directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
-						<includes>
-							<include>**</include>
-						</includes>
-						<followSymlinks>false</followSymlinks>
-					</fileset>
 				</configuration>
 			</plugin>
 		</plugins>
