@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ErrorWithObjectAllocation;
@@ -22,14 +26,16 @@ import soot.SootMethod;
 import soot.util.EscapedWriter;
 
 public class CommandLineReporter extends ErrorMarkerListener {
-
+	private static final Logger LOG = LoggerFactory.getLogger(CommandLineReporter.class);
+	private Format reportformat;
 	private File outputFolder;
 	private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 
-	public CommandLineReporter(String string, List<CrySLRule> rules) {
-		this.outputFolder = (string != null ? new File(string) : null);
+	public CommandLineReporter(String string, Format format, List<CrySLRule> rules) {
+		this.outputFolder = (string != null ? new File(string) : new File("."));
 		this.rules = rules;
+		this.reportformat = format;
 	}
 
 	@Override
@@ -91,7 +97,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		s += "=====================================================================";
 
 		System.out.println(s);
-		if (outputFolder != null) {
+		if(reportformat != null) {
 			try {
 				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
 				writer.write(s);
@@ -103,9 +109,10 @@ public class CommandLineReporter extends ErrorMarkerListener {
 					writerOut.flush();
 					streamOut.close();
 					writerOut.close();
+					LOG.info("Analysis Report generated to file : "+ outputFolder + File.separator+"CogniCrypt-Report.txt");
 				}
 			} catch (IOException e) {
-				throw new RuntimeException("Could not write to file " + outputFolder);
+				e.printStackTrace();
 			}
 		}
 	}

@@ -129,8 +129,8 @@ public abstract class HeadlessCryptoScanner {
 				reportFormat = Format.TXT;
 			}
 		}
-		else {
-			reportFormat = Format.TXT;
+		else{
+			reportFormat = null;
 		}
 		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
 
@@ -256,17 +256,22 @@ public abstract class HeadlessCryptoScanner {
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CrySLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
-				switch (reportFormat()) {
-				case JSON:
-					fileReporter = new JSONReporter(getOutputFolder(),rules);
-					break;
-				case SARIF:
-					fileReporter = new SARIFReporter(getOutputFolder(), rules);
-					break;			
-				default:
-					fileReporter = new CommandLineReporter(getOutputFolder(), rules);
+				if(reportFormat()!= null) {
+					switch (reportFormat()) {
+					case JSON:
+						fileReporter = new JSONReporter(getOutputFolder(),rules);
+						break;
+					case SARIF:
+						fileReporter = new SARIFReporter(getOutputFolder(), rules);
+						break;			
+					default:
+						fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
+					}
 				}
-
+				else {
+					fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
+				}
+					
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
@@ -435,7 +440,7 @@ public abstract class HeadlessCryptoScanner {
 	};
 	
 	protected Format reportFormat() {
-		return Format.TXT;
+		return null;
 	}
 	
 	protected boolean enableVisualization(){

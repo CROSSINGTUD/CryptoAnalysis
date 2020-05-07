@@ -15,6 +15,7 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
@@ -90,6 +91,11 @@ public abstract class AbstractHeadlessTest {
 				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputFolder();
 			}
 
+			@Override
+			protected Format reportFormat(){
+				return VISUALIZATION? Format.TXT : null;
+			}
+			
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;

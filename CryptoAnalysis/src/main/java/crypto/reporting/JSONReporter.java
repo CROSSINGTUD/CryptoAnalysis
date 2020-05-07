@@ -10,6 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -31,13 +35,13 @@ import soot.SootMethod;
  */
 
 public class JSONReporter extends ErrorMarkerListener{
-
+	private static final Logger LOG = LoggerFactory.getLogger(JSONReporter.class);
 	private File outputFolder;
 	private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 	
 	public JSONReporter(String reportDir,  List<CrySLRule> rules) {
-		this.outputFolder = (reportDir != null ? new File(reportDir) : null);
+		this.outputFolder = (reportDir != null ? new File(reportDir) : new File("."));
 		this.rules = rules;
 	}
 	
@@ -113,16 +117,15 @@ public class JSONReporter extends ErrorMarkerListener{
 		summary.put(JSONConfig.VIOLATIONS, violations);
 		json.put(JSONConfig.SUMMARY, summary);
 	
-		if (outputFolder != null) {
 		try {
 			 ObjectMapper mapper = new ObjectMapper();
 			 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
 			 writer.writeValue(Paths.get(outputFolder + File.separator+"CogniCrypt-JSON-Report.json").toFile(), json);
+			 LOG.info("JSON Report generated to file : "+ outputFolder + File.separator+"CogniCrypt-JSON-Report.json");
 	     } 
 		catch (IOException e) {
 	    	 e.printStackTrace();
 	     }
-		}
 	}
 }
 	
