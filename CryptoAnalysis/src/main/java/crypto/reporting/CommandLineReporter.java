@@ -29,10 +29,12 @@ public class CommandLineReporter extends ErrorMarkerListener {
 	private static final Logger LOG = LoggerFactory.getLogger(CommandLineReporter.class);
 	private Format reportformat;
 	private File outputFolder;
+	private String filePath;
 	private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 
 	public CommandLineReporter(String string, Format format, List<CrySLRule> rules) {
+		this.filePath = string;
 		this.outputFolder = (string != null ? new File(string) : new File("."));
 		this.rules = rules;
 		this.reportformat = format;
@@ -97,7 +99,8 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		s += "=====================================================================";
 
 		System.out.println(s);
-		if(reportformat != null) {
+	
+		if(reportformat != null || filePath!= null) {
 			try {
 				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
 				writer.write(s);
@@ -109,7 +112,7 @@ public class CommandLineReporter extends ErrorMarkerListener {
 					writerOut.flush();
 					streamOut.close();
 					writerOut.close();
-					LOG.info("Analysis Report generated to file : "+ outputFolder + File.separator+"CogniCrypt-Report.txt");
+					LOG.info("Analysis Report generated to location : "+ outputFolder.getAbsolutePath());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
