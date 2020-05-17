@@ -35,8 +35,8 @@ public class SARIFReporter extends ErrorMarkerListener {
 	private SARIFHelper sarifHelper;
 	private Map<String, Integer> errorCountMap;
 
-	public SARIFReporter(String string, List<CrySLRule> rules) {
-		this.outputFolder = (string != null ? new File(string) : new File("."));
+	public SARIFReporter(String reportDir, List<CrySLRule> rules) {
+		this.outputFolder = (reportDir != null ? new File(reportDir) : new File("."));
 		this.sarifHelper = new SARIFHelper();
 		this.errorCountMap = new HashMap<String, Integer>();
 		initializeMap();
@@ -132,7 +132,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 			FileWriter writer = new FileWriter(outputFolder + File.separator+"CogniCrypt-SARIF-Report.txt");
 			writer.write(sarif.toString());
 			writer.close();
-			LOGGER.info("SARIF Report generated to file : "+ outputFolder + File.separator+"CogniCrypt-SARIF-Report.txt");
+			LOGGER.info("SARIF Report generated to file : "+ outputFolder.getAbsolutePath());
 		}
 		catch (IOException e) {
 			LOGGER.error("Could not write to file: "+outputFolder, e);

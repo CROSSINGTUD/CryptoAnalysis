@@ -121,7 +121,7 @@ public class JSONReporter extends ErrorMarkerListener{
 			 ObjectMapper mapper = new ObjectMapper();
 			 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
 			 writer.writeValue(Paths.get(outputFolder + File.separator+"CogniCrypt-JSON-Report.json").toFile(), json);
-			 LOG.info("JSON Report generated to file : "+ outputFolder + File.separator+"CogniCrypt-JSON-Report.json");
+			 LOG.info("JSON Report generated to file : "+ outputFolder.getAbsolutePath());
 	     } 
 		catch (IOException e) {
 	    	 e.printStackTrace();

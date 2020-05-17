@@ -32,10 +32,10 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
-import crypto.reporting.CSVReporter;
-import crypto.reporting.JSONReporter;
+import crypto.reporting.CSVAGGReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
+import crypto.reporting.JSONReporter;
 import crypto.reporting.SARIFReporter;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
@@ -112,22 +112,27 @@ public abstract class HeadlessCryptoScanner {
 		
 		final Format reportFormat;
 		if (options.hasOption("reportFormat")) {
-			String format =  options.getOptionValue("reportFormat");
-			if(format.equalsIgnoreCase("csv")) {
+			String format =  options.getOptionValue("reportFormat").toLowerCase();
+			switch(format) {
+			case "csv":
 				reportFormat = Format.CSV;
-			}
-			else if(format.equalsIgnoreCase("csvagg")) {
+				break;
+			case "csvagg":
 				reportFormat = Format.CSVAGG;
-			}
-			else if(format.equalsIgnoreCase("json")) {
+				break;
+			case "json":
 				reportFormat = Format.JSON;
-			}
-			else if(format.equalsIgnoreCase("sarif")) {
+				break;
+			case "sarif":
 				reportFormat = Format.SARIF;
-			}
-			else {
+				break;
+			case "txt":
 				reportFormat = Format.TXT;
+				break;
+			default:
+				reportFormat = null;
 			}
+			
 		}
 		else{
 			reportFormat = null;
@@ -162,11 +167,6 @@ public abstract class HeadlessCryptoScanner {
 			@Override
 			protected Format reportFormat(){
 				return reportFormat;
-			}
-
-			@Override
-			protected String getCSVOutputFile(){
-				return options.getOptionValue("csvReportFile");
 			}
 			
 			@Override
@@ -263,7 +263,14 @@ public abstract class HeadlessCryptoScanner {
 						break;
 					case SARIF:
 						fileReporter = new SARIFReporter(getOutputFolder(), rules);
-						break;			
+						break;
+					case CSVAGG:
+						fileReporter = new CSVAGGReporter(getOutputFolder(), softwareIdentifier(), rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS));
+						break;
+					case CSV:
+						/*fileReporter = new CSVReporter(getOutputFolder(), rules);*/
+						fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
+						break;
 					default:
 						fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
 					}
@@ -302,10 +309,6 @@ public abstract class HeadlessCryptoScanner {
 				};
 				
 				reporter.addReportListener(fileReporter);
-				String csvOutputFile = getCSVOutputFile();
-				if(csvOutputFile != null){
-					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
-				}
 				
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
@@ -449,10 +452,6 @@ public abstract class HeadlessCryptoScanner {
 	
 	protected boolean providerDetection() {
 		return true;
-	}
-	
-	protected String getCSVOutputFile(){
-		return null;
 	}
 	
 	private static String pathToJCE() {
