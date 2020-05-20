@@ -2,7 +2,6 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -13,7 +12,6 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import tests.headless.FindingsType.FalseNegatives;
-import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.TruePositives;
 
 
