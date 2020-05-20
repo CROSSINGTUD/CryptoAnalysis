@@ -2,7 +2,6 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -19,7 +18,6 @@ import tests.headless.FindingsType.TruePositives;
 /**
  * @author Enri Ozuni
  */
-@Ignore
 public class CryptoGuardTest extends AbstractHeadlessTest {
 	
 	/**
