@@ -95,6 +95,36 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	}
 	
 	@Test
+	public void ecbCryptoExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/ecbcrypto").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoABICase1: void go(java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoABICase1: void go(java.lang.String)>", IncompleteOperationError.class, 1);
+		// ABICase3 not included as tests due to being similar to ABICase1 above
+		
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoABICase2: void go()>", IncompleteOperationError.class, 1);
+		// ABICase3 not included as tests due to being similar to ABICase2 above
+
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoBBCase1.java
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoBBCase1: void go()>", ConstraintError.class, 1);
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoBBCase1: void go()>", IncompleteOperationError.class, 1);
+
+		// This test case corresponds to the following project in CryptoGuard:
+		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoCorrected.java
+		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoCorrected: void go()>", IncompleteOperationError.class, 1);
+		
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
 	public void insecureAsymmetricCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/insecureasymmetriccrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);

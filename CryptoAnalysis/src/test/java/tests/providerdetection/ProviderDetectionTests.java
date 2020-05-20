@@ -1,10 +1,7 @@
 package tests.providerdetection;
 
 import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-
-import crypto.providerdetection.ProviderDetection;
 
 public class ProviderDetectionTests {
 	
@@ -13,7 +10,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest1() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample1"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample1"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -27,7 +24,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest2() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample2"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample2"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -43,7 +40,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest3() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample1"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample1"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -58,7 +55,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest4() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample2"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample2"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -72,7 +69,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest5() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample3"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample3"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -86,7 +83,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest6() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample4"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample4"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -99,7 +96,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest7() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample5"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample5"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -113,7 +110,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest8() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample6"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample6"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -128,7 +125,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest9() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample5"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample5"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -142,7 +139,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest10() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample6"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample6"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -156,7 +153,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest11() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample7"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample7"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -170,7 +167,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest12() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample8"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample8"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -184,7 +181,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest13() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample9"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample9"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -198,7 +195,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest14() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample10"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample10"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -212,7 +209,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest15() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample11"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample11"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -226,7 +223,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest16() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample12"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample12"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -240,7 +237,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest17() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample13"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample13"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		
@@ -254,7 +251,7 @@ public class ProviderDetectionTests {
 	public void providerDetectionTest18() {
 		ProviderDetectionTestingFramework providerDetection = new ProviderDetectionTestingFramework();
 		String sootClassPath = providerDetection.getSootClassPath();
-		String mainClass = "tests.providerdetection.ProviderDetectionExample14"; 
+		String mainClass = "tests.providerdetection.examples.ProviderDetectionExample14"; 
 		providerDetection.setupSoot(sootClassPath, mainClass);
 		providerDetection.analyze();
 		

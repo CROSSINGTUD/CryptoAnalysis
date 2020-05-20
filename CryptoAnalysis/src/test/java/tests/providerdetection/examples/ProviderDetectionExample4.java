@@ -1,14 +1,15 @@
-package tests.providerdetection;
+package tests.providerdetection.examples;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
-public class ProviderDetectionExample7 {
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+public class ProviderDetectionExample4 {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
-		String p1 = "BC";
-		MessageDigest md = MessageDigest.getInstance("AES", p1);
+		MessageDigest md = MessageDigest.getInstance("AES", new BouncyCastleProvider());
 		byte[] input = "message".getBytes();
 		md.digest(input);
 	}
