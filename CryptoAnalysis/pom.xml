@@ -106,6 +106,7 @@
 				<configuration>
 					<argLine>-Xmx16G -Xms256M -Xss128M -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
+					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 				<dependencies>
 					<dependency>
