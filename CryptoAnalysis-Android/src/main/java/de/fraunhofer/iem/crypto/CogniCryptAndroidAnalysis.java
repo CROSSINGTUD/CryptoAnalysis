@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.inject.internal.util.$Nullable;
+
 
 import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableICFG;
@@ -47,7 +49,7 @@ public class CogniCryptAndroidAnalysis {
 	private final String apkFile;
 	private final String platformsDirectory;
 	private final String rulesDirectory;
-	private final String outputDir;
+	@$Nullable private final String outputDir;
 	private final Collection<String> applicationClassFilter;
 
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesDirectory,
