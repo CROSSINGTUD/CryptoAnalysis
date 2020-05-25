@@ -4,13 +4,15 @@ import java.io.File;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import tests.headless.FindingsType.FalseNegatives;
+import tests.headless.FindingsType.FalsePositives;
+import tests.headless.FindingsType.TruePositives;
 
 /**
  * @author Enri Ozuni
@@ -121,7 +123,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidFixedPredictableSeed").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, ""), "<example.DoNotUseWeakSeed1: void main(java.lang.String[])>");
 		scanner.exec();
 		assertErrors();
 	}
@@ -362,10 +364,15 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<example.NonAuthenticatedDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<example.NonAuthenticatedDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<example.NonAuthenticatedEphemeralDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -380,7 +387,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<example.BC_128bits_DSA3072xSHA256: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.BC_128bits_DSA3072xSHA256: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", ConstraintError.class, 3);
@@ -534,28 +541,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/securecurves").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
-		setErrorsCount("<example.SecureCurve_secp224r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp521r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect163r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp192r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect239k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp256r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect233r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect283r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect409k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect163k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp384r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect283k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect571k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect233k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp256k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect409r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect163r2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_sect571r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp192k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-		setErrorsCount("<example.SecureCurve_secp224k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);				
-							
+								
 		scanner.exec();
 		assertErrors();
 	}
@@ -810,10 +796,12 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", TypestateError.class, 4);
-		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
 
+		setErrorsCount("<br.fixedSeed.FixedSeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<br.fixedSeed.FixedSeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		scanner.exec();
 		assertErrors();
 	}
@@ -901,15 +889,6 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_sect131r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurveECDH1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_secp160k1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_secp112r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_secp128r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_sect113r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_secp160r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_sect193r1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-
 		scanner.exec();
 		assertErrors();
 	}
@@ -996,7 +975,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", TypestateError.class, 2);
@@ -1014,11 +993,15 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_512: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_112: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_112: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_112: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 
 		scanner.exec();
 		assertErrors();
@@ -1038,7 +1021,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -1107,8 +1090,13 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<br.predictableSeed.ReusedSeed: void main(java.lang.String[])>", TypestateError.class, 1);
-
+		setErrorsCount("<br.predictableSeed.ReusedSeed: void main(java.lang.String[])>", TypestateError.class, 0);
+		setErrorsCount("<br.predictableSeed.ReusedSeed: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		
+		setErrorsCount("<br.predictableSeed.LowEntropySeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<br.predictableSeed.LowEntropySeed2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<br.predictableSeed.LowEntropySeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<br.predictableSeed.LowEntropySeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		scanner.exec();
 		assertErrors();
 	}
@@ -1213,6 +1201,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/cai/undefinedCSP/
 	@Test
+	@Ignore
 	public void undefinedCSPExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/undefinedCSP").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -1221,6 +1210,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider2: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider2: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, ""), "<cai.undefinedCSP.UndefinedProvider3: void main(java.lang.String[])>");
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider4: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider5: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider6: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -1284,17 +1274,17 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_4: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_4: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wNONE1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wNONE1: void main(java.lang.String[])>", ConstraintError.class, 5);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wNONE2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wNONE2: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wSHA1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.SUN_80bits_ECDSA112wSHA1: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_3: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
-
+		
 		scanner.exec();
 		assertErrors();
 	}

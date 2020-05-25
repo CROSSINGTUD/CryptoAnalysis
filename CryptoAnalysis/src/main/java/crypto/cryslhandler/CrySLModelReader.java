@@ -23,11 +23,11 @@ import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
-
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
+
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -87,6 +87,7 @@ import de.darmstadt.tu.crossing.crySL.impl.ObjectImpl;
 
 
 public class CrySLModelReader {
+	
 	private List<CrySLForbiddenMethod> forbiddenMethods = null;
 	private StateMachineGraph smg = null;
 	private XtextResourceSet resourceSet;

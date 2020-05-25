@@ -1,18 +1,19 @@
-package tests.providerdetection;
+package tests.providerdetection.examples;
 
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import javax.crypto.KeyGenerator;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public class ProviderDetectionExample1 {
+public class ProviderDetectionExample3 {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException {
 		Provider p1 = new BouncyCastleProvider();
-		KeyGenerator keygenerator = KeyGenerator.getInstance("AES", p1);
-		keygenerator.generateKey();
+		MessageDigest md = MessageDigest.getInstance("AES", p1);
+		byte[] input = "message".getBytes();
+		md.digest(input);
 	}
 
 }

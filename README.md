@@ -2,30 +2,26 @@
 
 # CogniCrypt<sub>SAST</sub>
 
-This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](https://www.cognicrypt.de). 
+This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](https://www.cognicrypt.org). 
 The static analysis CogniCrypt<sub>SAST</sub> takes rules written in the specification language CrySL as input, 
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
-libaries (the [JCA](https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html) in particular). More information on CrySL and the static analysis is found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
+libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/java-cryptography-architecture-jca-reference-guide.html) in particular). More information on CrySL and the static analysis may be found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
 ## Releases
 
 You can checkout a pre-compiled version of CogniCrypt<sub>SAST</sub> [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). 
 
 Download the two files:
-* CryptoAnalysis-2.0-jar-with-dependencies.jar
+* CryptoAnalysis-x.y.z-jar-with-dependencies.jar
 * JCA-CrySL-rules.zip
 
 ## Checkout and Build
 
-CogniCrypt<sub>SAST</sub> uses maven as build tool. You can compile and build this project via
+CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile and build this project via
 
 ```mvn package -DskipTests=true```.
 
-A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-2.0-jar-with-dependencies.jar` 
-
-### Build in Eclipse
-
-Importing the project into eclipse and compiling with m2e does not work. m2e cannot download and extract the rules from nexus. Please run a `mvn compile` from the *command line* within the project directory, from now on m2e can be used.
+A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar` 
 
 ## Usage
 
@@ -34,18 +30,8 @@ CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from E
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-      --rulesDir=<absolute-path-to-crysl-source-code-format-rules> \
+java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner --rulesDir=<absolute-path-to-crysl-source-code-format-rules> \
       --applicationCp=<absolute-application-path>
-```
-
-Optionally you can also start CogniCrypt<sub>SAST</sub> with binary rule files contained in [JCA-CrySL-rulesets.zip](https://github.com/CROSSINGTUD/CryptoAnalysis/releases/tag/2.3).
-
-```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-      --rulesDir=<absolute-path-to-crysl-binary-format-rules> \
-      --applicationCp=<absolute-application-path>
-      --rulesInBin
 ```
 
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
@@ -73,19 +59,29 @@ In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the consol
 
 When the option `--reportDir=<folder>` is chosen, CogniCrypt<sub>SAST</sub> writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
 
-## Visualization
+## Updating CrySL Rules
 
-When the `--reportDir` options is set, using the flag `--visualization` outputs visualizations for the data-flows. In the subfolder `viz`  of the `reportDir` Json files will be generated for each individual analyzed object. Download the folder [visualization](https://github.com/CROSSINGTUD/WPDS/tree/master/boomerangPDS/visualization) from the WPDS project, open the `index.html` in some browser (tested on Chrome) and drop any of the Json files in the lower right corner. This allows you to browse the generated data-flow graphs as shown below:
-
-![Visualization](https://github.com/CROSSINGTUD/WPDS/blob/master/boomerangPDS/visualization/example2.png)
-
-## Changing the CrySL Rules
-
-
-The tool takes CrySL rules in their source code formats (cryptsl). You can adapt the rules in any text editor.
-Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt) ships with a CrySL editor to modify the rules, upon changes to the rules the editor produces the cryptslbin files. 
+The tool takes CrySL rules in their source code formats (crysl). You can adapt the rules in any text editor.
+Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt) ships with a CrySL editor to modify the rules with IDE support (e.g., content assist, auto completion, etc.). A step-by-step-explanation on how edit CrySL rules is avialable at the tool's website [cognicrypt.org](https://www.eclipse.org/cognicrypt/documentation/crysl/). 
 
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 
-CogniCrypt<sub>SAST</sub> can also be run on Android Applications, checkout the repository [here](https://github.com/CROSSINGTUD/CryptoAnalysis-Android).
+CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android version for CogniCrypt<sub>SAST</sub> in `CryptoAnalysis-Android`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. CogniCrypt_SAST for Android can be started via the class `de.fraunhofer.iem.crypto.CogniCryptAndroid`. It requires three arguments in this order: 
+* The absolute path to the .apk file
+* The absolute path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/studio/releases/platforms). Under the Android SDK location you find a folder `platforms`. Supply CogniCrypt<sub>SAST</sub> with the path to this folder.
+* The absolute path to the directory of the CrySL rules.
+
+```
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+      <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules>
+```
+As an optional fourth parameter one can specify an output folder: 
+```
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+      <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules> <output-dir>
+```
+
+If specified, the analysis generates a report file `CogniCrypt-Report.txt` along with the `.jimple` output of the classes the analysis found misuses in. The format of the report file follows that described above.
+
+Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).

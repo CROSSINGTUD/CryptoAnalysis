@@ -1,18 +1,20 @@
 package crypto.analysis;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import com.google.common.collect.Lists;
-
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 import crypto.cryslhandler.CrySLModelReader;
-import crypto.cryslhandler.CryslReaderUtils;
-import org.apache.commons.io.FilenameUtils;
+import crypto.exceptions.CryptoAnalysisException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CrySLRulesetSelector {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrySLRulesetSelector.class);
+	
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
@@ -31,7 +33,7 @@ public class CrySLRulesetSelector {
 			rules.addAll(getRulesset(rulesBasePath, ruleFormat, s));
 		}
 		if (rules.isEmpty()) {
-			System.out.println("No CrySL rules found for rulesset " + set);
+			LOGGER.info("No CrySL rules found for rulesset " + set);
 		}
 		return rules;
 	}
@@ -41,9 +43,10 @@ public class CrySLRulesetSelector {
 	 * 
 	 * @param rulesetString
 	 * @return
+	 * @throws CryptoAnalysisException 
 	 */
 	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
-			String rulesetString) {
+			String rulesetString) throws CryptoAnalysisException {
 		String[] set = rulesetString.split(",");
 		List<Ruleset> ruleset = Lists.newArrayList();
 		for (String s : set) {
@@ -58,7 +61,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (ruleset.isEmpty()) {
-			throw new RuntimeException("Could not parse " + rulesetString + ". Was not able to find rulesets.");
+			throw new CryptoAnalysisException("Could not parse " + rulesetString + ". Was not able to find rulesets.");
 		}
 		return makeFromRuleset(rulesBasePath, ruleFormat, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
@@ -85,9 +88,9 @@ public class CrySLRulesetSelector {
 		return null;
 	}
 
-	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) {
+	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) throws CryptoAnalysisException {
 		if (!resourcesPath.isDirectory())
-			System.out.println("The specified path is not a directory " + resourcesPath);
+			throw new CryptoAnalysisException("The specified path is not a directory " + resourcesPath);
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
@@ -97,7 +100,7 @@ public class CrySLRulesetSelector {
 			}
 		}
 		if (rules.isEmpty()) {
-			System.out.println("No CrySL rules found in " + resourcesPath);
+			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
 		}
 		return rules;
 	}

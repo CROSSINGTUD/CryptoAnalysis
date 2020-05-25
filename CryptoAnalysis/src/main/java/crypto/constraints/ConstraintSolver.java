@@ -12,6 +12,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -63,6 +66,8 @@ import soot.jimple.internal.JNewArrayExpr;
 
 public class ConstraintSolver {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintSolver.class);
+	
 	private final List<ISLConstraint> allConstraints;
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
@@ -330,13 +335,14 @@ public class ConstraintSolver {
 					// TODO Not implemented!
 					return;
 				case "notHardCoded":
-					// TODO: Add implementation for notHardCoded predicate
-					String arg = ((CrySLObject) pred.getParameters().get(0)).getVarName();
+					CrySLObject varNotToBeHardCoded = (CrySLObject) pred.getParameters().get(0);
+					String name = varNotToBeHardCoded.getVarName();
+					String type = varNotToBeHardCoded.getJavaType();
 					for (CallSiteWithParamIndex cs : parsAndVals.keySet()) {
-						if (cs.getVarName().equals(arg)) {
+						if (cs.getVarName().equals(name)) {
 							Collection<ExtractedValue> values = parsAndVals.get(cs);
 							for (ExtractedValue v : values) {
-								if (isHardCoded(v)) {
+								if (isSubType(type,  v.getValue().getType().toQuotedString()) && (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v)))) {
 									errors.add(new HardCodedError(new CallSiteWithExtractedValue(cs, v), classSpec.getRule(), object, pred));
 								}
 							}
@@ -359,6 +365,10 @@ public class ConstraintSolver {
 				default:
 					return;
 			}
+		}
+
+		private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {
+			return !(extractSootArray.keySet().size() == 1 && extractSootArray.containsKey(""));
 		}
 	}
 
@@ -511,7 +521,7 @@ public class ConstraintSolver {
 				}
 				catch (NumberFormatException ex1) {
 					// If that does not work either, I'm out of ideas ...
-					throw new RuntimeException();
+					LOGGER.error("An exception occured when extracting value as Integer.", ex1);
 				}
 				return valuesInt;
 			}
@@ -623,8 +633,7 @@ public class ConstraintSolver {
 									varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 								}
 							} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {								
-								soot.Value arrayLocal = ((AssignStmt) allocSite).getLeftOp();
-								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite, arrayLocal));
+								varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite));
 							}
 						}
 					}
@@ -640,7 +649,8 @@ public class ConstraintSolver {
 		 * @param arrayLocal soot array local variable for which values are to be found
 		 * @return extracted array values
 		 */
-		private Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite, soot.Value arrayLocal){
+		protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite){
+			Value arrayLocal = allocSite.getValue();
 			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
 				if (methodBody != null) {
@@ -649,8 +659,8 @@ public class ConstraintSolver {
 						final Unit unit = unitIterator.next();
 						if (unit instanceof AssignStmt) {
 							AssignStmt uStmt = (AssignStmt) (unit);
-							soot.Value leftValue = uStmt.getLeftOp();
-							soot.Value rightValue = uStmt.getRightOp();
+							Value leftValue = uStmt.getLeftOp();
+							Value rightValue = uStmt.getRightOp();
 							if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
 								arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
 							}
@@ -678,10 +688,6 @@ public class ConstraintSolver {
 	}
 
 	public boolean isHardCoded(ExtractedValue val) {
-		if (val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant)
-			return true;
-		if (val.getValue() instanceof NewExpr && ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"))
-			return true;
-		return false;
+		return val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant || (val.getValue() instanceof NewExpr && ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"));
 	}
 }

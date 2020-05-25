@@ -230,7 +230,7 @@ public class PredicateHandler {
 
 	private void reportMissingPred(AnalysisSeedWithSpecification seed, RequiredCrySLPredicate missingPred) {
 		CrySLRule rule = seed.getSpec().getRule();
-		if (!rule.getPredicates().contains(missingPred.getPred())) {
+		if (!rule.getPredicates().parallelStream().anyMatch(e -> missingPred.getPred().getPredName().equals(e.getPredName()) && missingPred.getPred().getParameters().get(0).equals(e.getParameters().get(0)))) {
 			for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 				if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
 					cryptoScanner.getAnalysisListener().reportError(seed,

@@ -1,10 +1,15 @@
 package crypto.rules;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Sets;
+
 import crypto.interfaces.ISLConstraint;
+import soot.SootMethod;
 
 public class CrySLRule implements java.io.Serializable {
 
@@ -144,6 +149,14 @@ public class CrySLRule implements java.io.Serializable {
 		}
 		
 		return outputSB.toString();
+	}
+	
+	public static Collection<String> toSubSignatures(Collection<SootMethod> methods) {
+		Set<String> subSignatures = Sets.newHashSet();
+		for(SootMethod m : methods){
+			subSignatures.add(m.getName());
+		}
+		return subSignatures;
 	}
 	
 }

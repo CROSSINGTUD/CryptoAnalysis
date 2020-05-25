@@ -22,7 +22,6 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -363,7 +362,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
 		for(CrySLRule r : getRules()) {
-			excludedPackages.add(Utils.getFullyQualifiedName(r));
+			excludedPackages.add(r.getClassName());
 		}
 		return excludedPackages;
 	}
