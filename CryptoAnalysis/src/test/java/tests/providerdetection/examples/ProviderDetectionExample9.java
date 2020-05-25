@@ -1,4 +1,4 @@
-package tests.providerdetection;
+package tests.providerdetection.examples;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;

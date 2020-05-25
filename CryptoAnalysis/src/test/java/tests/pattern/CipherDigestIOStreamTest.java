@@ -39,6 +39,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 	  while (dis.read() != -1) {
 
 	  }
+	  dis.close();
 	  Assertions.mustBeInAcceptingState(dis);
 	}
 	
@@ -51,6 +52,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  dis.read("input".getBytes(), 0, "input".getBytes().length);
+	  dis.close();
 	  Assertions.mustBeInAcceptingState(dis);
 	}
 
@@ -117,6 +119,7 @@ public class CipherDigestIOStreamTest extends UsagePatternTestingFramework{
 	  Assertions.extValue(0);
 	  Assertions.extValue(1);
 	  dos.write("message".getBytes(), 0, "message".getBytes().length);
+	  dos.close();
 	  Assertions.mustBeInAcceptingState(dos);
 	}
 

@@ -27,9 +27,11 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", NeverTypeOfError.class, 1);
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", ConstraintError.class, 1);
+		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", HardCodedError.class, 1);
 
 		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
+		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", HardCodedError.class, 1);
 
 		setErrorsCount("<issuecognicrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", ConstraintError.class, 0);
 		setErrorsCount("<issuecognicrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
@@ -43,6 +45,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", NeverTypeOfError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 2);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", IncompleteOperationError.class, 1);
+		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", HardCodedError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: javax.crypto.SecretKeyFactory getFactory()>", ConstraintError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
 
