@@ -2,6 +2,7 @@ package crypto;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,16 +69,22 @@ public abstract class HeadlessCryptoScanner {
 
 	public static void main(String... args) {
 		HeadlessCryptoScanner scanner;
-		scanner = createFromOptions(args);
+		try {
+			scanner = createFromOptions(args);
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Analysis failed with error: " + e.getClass().toString(), e);
+			return;
+		}
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) {
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws CryptoAnalysisException {
 		CommandLineParser parser = new DefaultParser();
 		try {
 			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		} catch (ParseException e) {
 			commandLineParserErrorMessage(e);
+			throw new CryptoAnalysisException("", e);
 		}
 
 		if (options.hasOption("rulesDir")) {
@@ -85,7 +92,8 @@ public abstract class HeadlessCryptoScanner {
 			try {
 				rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
 			} catch (CryptoAnalysisException e) {
-				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+resourcesPath, e);
+				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + resourcesPath, e);
+				throw e;
 			}
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
@@ -96,6 +104,7 @@ public abstract class HeadlessCryptoScanner {
 				rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+resourcesPath, e);
+				throw e;
 			}
 		}
 		
@@ -318,7 +327,7 @@ public abstract class HeadlessCryptoScanner {
 				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: src/main/resources/JavaCryptographicArchitecture", e);
 			}
 		}
-		return null;
+		return Collections.emptyList();
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {

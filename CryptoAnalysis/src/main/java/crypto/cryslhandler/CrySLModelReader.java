@@ -138,7 +138,7 @@ public class CrySLModelReader {
 	 * @throws IllegalArgumentException, IOException 
 	 * @throws CryptoAnalysisException 
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IllegalArgumentException, IOException, CryptoAnalysisException{
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException{
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
 			throw new CryptoAnalysisException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
 		}
@@ -172,9 +172,9 @@ public class CrySLModelReader {
 		return createRuleFromResource(resource);
 	}
 
-	private CrySLRule createRuleFromResource(Resource resource) {
+	private CrySLRule createRuleFromResource(Resource resource) throws CryptoAnalysisException {
 		if (resource == null)
-			return null;
+			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
 
 		final EObject eObject = resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
