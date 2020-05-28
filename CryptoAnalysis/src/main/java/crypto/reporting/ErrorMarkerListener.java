@@ -2,6 +2,7 @@ package crypto.reporting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,24 +55,44 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
 	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
+	protected List<String> ignorePackagesList =  Collections.<String>emptyList();
 	
 	private void addMarker(AbstractError error) {
 		SootMethod method = error.getErrorLocation().getMethod();
 		SootClass sootClass = method.getDeclaringClass();
-		
 		Set<AbstractError> set = errorMarkers.get(sootClass, method);
+		Integer integer = errorMarkerCount.get(error.getClass());
 		if(set == null){
 			set = Sets.newHashSet();
 		}
-		if(set.add(error)){
-			Integer integer = errorMarkerCount.get(error.getClass());
-			if(integer == null){
-				integer = 0;
-			}
-			integer++;
-			errorMarkerCount.put(error.getClass(), integer);
+		if(integer == null){
+			integer = 0;
 		}
-		errorMarkers.put(sootClass, method, set);
+		if(!ignorePackagesList.isEmpty()) {
+			if(!ignorePackagesList.stream().anyMatch((s -> sootClass.getName().contains(s)))) {
+				if(set.add(error)){	
+					integer++;
+					errorMarkerCount.put(error.getClass(), integer);
+				}
+				errorMarkers.put(sootClass, method, set);
+			}
+		}
+		else {
+			if(set.add(error)){
+				integer++;
+				errorMarkerCount.put(error.getClass(), integer);
+			}
+			errorMarkers.put(sootClass, method, set);
+		}	
+	}
+	
+/**
+ * This method is used to set the list of packages to be ignored
+ * @param packageList This parameter provides the list of package names to be excluded
+ * @return void.
+*/
+	public void setIgnorePackages(List<String> packageList) {
+		this.ignorePackagesList = packageList;
 	}
 	
 	@Override

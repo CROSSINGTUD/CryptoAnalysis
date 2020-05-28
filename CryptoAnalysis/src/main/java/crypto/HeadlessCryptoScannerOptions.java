@@ -50,6 +50,11 @@ public class HeadlessCryptoScannerOptions extends Options {
 		
 		Option providerDetection = Option.builder().longOpt("providerDetection").hasArg(false).desc("Enable Provider Detection analysis").build();
 		addOption(providerDetection);
+		
+		Option ignorePackagesFilePath = Option.builder().longOpt("ignorePackagesFilePath").hasArg().desc("List the name of packages to be ignored during the analysis")
+				.build();
+		addOption(ignorePackagesFilePath);
+		
 	}
 
 }
