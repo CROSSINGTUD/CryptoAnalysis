@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -15,8 +17,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
 
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
@@ -38,6 +38,7 @@ import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
 import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
 import soot.Body;
 import soot.BodyTransformer;
@@ -87,25 +88,30 @@ public abstract class HeadlessCryptoScanner {
 			throw new CryptoAnalysisException("", e);
 		}
 
+		// TODO: Somehow optimize the rule getting because this has many code duplicates for no reason.
+		String resourcesPath = "No rules location given!";
 		if (options.hasOption("rulesDir")) {
-			String resourcesPath = options.getOptionValue("rulesDir");
+			resourcesPath = options.getOptionValue("rulesDir");
 			try {
-				rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
+				rules.addAll(CrySLRuleReader.readFromDirectory(new File(resourcesPath)));
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + resourcesPath, e);
 				throw e;
 			}
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
-		
 		if(options.hasOption("rulesZip")) {
-			String resourcesPath = options.getOptionValue("rulesZip");
+			resourcesPath = options.getOptionValue("rulesZip");
 			try {
-				rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
+				rules.addAll(CrySLRuleReader.readFromZipFile(new File(resourcesPath)));
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+resourcesPath, e);
 				throw e;
 			}
+		}
+
+		if (rules.isEmpty()) {
+			throw new CryptoAnalysisException("No CrySL rules found: " + resourcesPath);
 		}
 		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
@@ -315,7 +321,6 @@ public abstract class HeadlessCryptoScanner {
 	protected CrySLAnalysisListener getAdditionalListener() {
 		return null;
 	}
-	
 
 	protected List<CrySLRule> getRules() {
 		if (rules != null) {
