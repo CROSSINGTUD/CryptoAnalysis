@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 public class ZipCrySLTest
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ZipCrySLTest.class);
-    private static final String emptyZipFilePath = "src\\test\\resources\\crySL\\empty.zip";
-    private static final String jcaRulesetZipFilePath = "src\\test\\resources\\crySL\\JavaCryptographicArchitecture-1.5.1-ruleset.zip";
-    private static final String multipleRulesetZipFilePath = "src\\test\\resources\\crySL\\Multiple-rulesets.zip";
-    private static final String junkRuleSet = "src\\test\\resources\\crySL\\rulesetWithJunk.zip";
+    private static final String emptyZipFilePath = "src/test/resources/crySL/empty.zip";
+    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-1.5.1-ruleset.zip";
+    private static final String multipleRulesetZipFilePath = "src/test/resources/crySL/Multiple-rulesets.zip";
+    private static final String junkRuleSet = "src/test/resources/crySL/rulesetWithJunk.zip";
 
 
     @Test(expected = CryptoAnalysisException.class)
