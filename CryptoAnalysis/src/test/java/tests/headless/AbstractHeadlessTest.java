@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
@@ -24,6 +27,7 @@ import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.RequiredPredicateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -44,6 +48,7 @@ public abstract class AbstractHeadlessTest {
 	/**
 	 * To run these test cases in Eclipse, specify your maven home path as JVM argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
 	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeadlessTest.class);
 
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
@@ -70,7 +75,12 @@ public abstract class AbstractHeadlessTest {
 
 			@Override
 			protected List<CrySLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+				try {
+					return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+				} catch (CryptoAnalysisException e) {
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+				}
+				return null;
 			}
 
 			@Override

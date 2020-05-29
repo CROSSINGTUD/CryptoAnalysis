@@ -3,8 +3,11 @@ package crypto.analysis;
 import java.io.File;
 import java.util.List;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
+
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
+
 import crypto.cryslhandler.CrySLModelReader;
 import crypto.exceptions.CryptoAnalysisException;
 
@@ -15,6 +18,10 @@ public class CrySLRulesetSelector {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrySLRulesetSelector.class);
 	
+
+	/**
+	 * the supported rule formats
+	 */
 	public static enum RuleFormat {
 		SOURCE() {
 			public String toString() {
@@ -23,11 +30,24 @@ public class CrySLRulesetSelector {
 		},
 	}
 
+	/**
+	 * current RuleSets
+	 */
 	public static enum Ruleset {
 		JavaCryptographicArchitecture, BouncyCastle, Tink
 	}
 
-	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) {
+	/**
+	 * Creates {@link CrySLRule} objects for the given RuleSet argument and returns them as {@link List}.
+	 * 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
+	 * @param ruleFormat the file extension of the CrySL files
+	 * @param set the {@link Ruleset} for which the {@link CrySLRule} objects should be created for
+	 * @return the {@link List} with {@link CrySLRule} objects
+	 * @throws CryptoAnalysisException 
+	 */ 
+	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) throws CryptoAnalysisException {
+		
 		List<CrySLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
 			rules.addAll(getRulesset(rulesBasePath, ruleFormat, s));
@@ -66,7 +86,7 @@ public class CrySLRulesetSelector {
 		return makeFromRuleset(rulesBasePath, ruleFormat, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
 
-	private static List<CrySLRule> getRulesset(String rulesBasePath, RuleFormat ruleFormat, Ruleset s) {
+	private static List<CrySLRule> getRulesset(String rulesBasePath, RuleFormat ruleFormat, Ruleset s) throws CryptoAnalysisException {
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
 		for (File file : listFiles) {
@@ -75,22 +95,51 @@ public class CrySLRulesetSelector {
 				rules.add(rule);
 			}
 		}
+		
+		if (rules.isEmpty()) {
+			throw new CryptoAnalysisException("No CrySL rules found in " + rulesBasePath+s+"/");
+		}
+		
 		return rules;
 	}
 
-	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset,
-			String rulename) {
+	/**
+	 * Creates and returns a single {@link CrySLRule} object for the given RuleSet argument.
+	 * 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
+	 * @param ruleFormat the file extension of the CrySL file
+	 * @param ruleset the {@link Ruleset} where the rule belongs to 
+	 * @param rulename the name of the rule
+	 * @return the {@link CrySLRule} object
+	 * @throws CryptoAnalysisException 
+	 */
+	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset, String rulename) throws CryptoAnalysisException {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
-		if (file.exists()) {
+		if (file.exists() && file.isFile()) {
 			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
-			return rule;
+			if(rule != null) {
+			 return rule;
+			} else {
+				throw new CryptoAnalysisException("CrySL rule couldn't created from path " + file.getAbsolutePath());
+			}
+		} else {
+			throw new CryptoAnalysisException("The specified path is not a file " + file.getAbsolutePath());
 		}
-		return null;
 	}
 
+
+	/**
+	 * Creates the {@link CrySLRule} objects for the given {@link File} argument and returns them as {@link List}.
+	 * 
+	 * @param 	resourcesPath a {@link File} with the path giving the location of the CrySL file folder
+	 * @param 	ruleFormat the {@link Ruleset} where the rules belongs to 
+	 * @return  the {@link List} with {@link CrySLRule} objects
+	 * @throws CryptoAnalysisException 
+	 */
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) throws CryptoAnalysisException {
 		if (!resourcesPath.isDirectory())
 			throw new CryptoAnalysisException("The specified path is not a directory " + resourcesPath);
+		
 		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = resourcesPath.listFiles();
 		for (File file : listFiles) {
@@ -99,6 +148,27 @@ public class CrySLRulesetSelector {
 				rules.add(rule);
 			}
 		}
+		if (rules.isEmpty()) {
+			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
+		}
+		return rules;
+	}
+	
+	/**
+	 * Creates {@link CrySLRule} objects from a Zip file and returns them as {@link List}.
+	 * 
+	 * @param resourcesPath the Zip {@link File} which contains the CrySL files
+	 * @return the {@link List} with {@link CrySLRule} objects from the Zip file
+	 * @throws CryptoAnalysisException 
+	 */
+	public static List<CrySLRule> makeFromZip(File resourcesPath) throws CryptoAnalysisException {
+		List<CrySLRule> rules = Lists.newArrayList();	
+
+		if(!resourcesPath.exists() || !resourcesPath.isFile()) {
+			throw new CryptoAnalysisException("The specified path is not a file " + resourcesPath);
+		}
+	
+		rules = CrySLRuleReader.readFromZipFile(resourcesPath);	
 		if (rules.isEmpty()) {
 			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
 		}

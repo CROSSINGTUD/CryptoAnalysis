@@ -42,6 +42,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -354,7 +355,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	private List<CrySLRule> getRules() {
 		if(rules == null) {
-			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			try {
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			} catch (CryptoAnalysisException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return rules;
 	}

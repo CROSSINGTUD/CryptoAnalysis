@@ -2,6 +2,7 @@ package crypto;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
 	private static boolean PRE_ANALYSIS = false;
-	private static List<CrySLRule> rules;
+	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
@@ -68,28 +69,45 @@ public abstract class HeadlessCryptoScanner {
 
 	public static void main(String... args) {
 		HeadlessCryptoScanner scanner;
-		scanner = createFromOptions(args);
+		try {
+			scanner = createFromOptions(args);
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Analysis failed with error: " + e.getClass().toString(), e);
+			return;
+		}
 		scanner.exec();
 	}
 
-	public static HeadlessCryptoScanner createFromOptions(String... args) {
+	public static HeadlessCryptoScanner createFromOptions(String... args) throws CryptoAnalysisException {
 		CommandLineParser parser = new DefaultParser();
 		try {
 			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		} catch (ParseException e) {
 			commandLineParserErrorMessage(e);
+			throw new CryptoAnalysisException("", e);
 		}
 
 		if (options.hasOption("rulesDir")) {
 			String resourcesPath = options.getOptionValue("rulesDir");
 			try {
-				rules = CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE);
+				rules.addAll(CrySLRulesetSelector.makeFromPath(new File(resourcesPath), RuleFormat.SOURCE));
 			} catch (CryptoAnalysisException e) {
-				LOGGER.error("Error happened when getting the CrySL rules from the"
-						+ "specified directory: "+resourcesPath, e);
+				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + resourcesPath, e);
+				throw e;
 			}
 			rootRulesDirForProvider = resourcesPath.substring(0, resourcesPath.lastIndexOf(File.separator));
 		}
+		
+		if(options.hasOption("rulesZip")) {
+			String resourcesPath = options.getOptionValue("rulesZip");
+			try {
+				rules.addAll(CrySLRulesetSelector.makeFromZip(new File(resourcesPath)));
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+resourcesPath, e);
+				throw e;
+			}
+		}
+		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
 		final CG callGraphAlogrithm;
 		if (options.hasOption("cg")) {
@@ -302,9 +320,14 @@ public abstract class HeadlessCryptoScanner {
 	protected List<CrySLRule> getRules() {
 		if (rules != null) {
 			return rules;
+		} else {
+			try {
+				return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error("Error happened when getting the CrySL rules from the specified directory: src/main/resources/JavaCryptographicArchitecture", e);
+			}
 		}
-		
-		return rules = CrySLRulesetSelector.makeFromRuleset("src/main/resources/JavaCryptographicArchitecture", RuleFormat.SOURCE, Ruleset.JavaCryptographicArchitecture);
+		return Collections.emptyList();
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {

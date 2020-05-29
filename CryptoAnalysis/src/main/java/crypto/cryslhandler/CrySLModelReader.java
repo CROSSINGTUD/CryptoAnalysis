@@ -1,27 +1,38 @@
 package crypto.cryslhandler;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.io.Files;
+import com.google.inject.Injector;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.common.types.JvmExecutable;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
 import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
+
+
+import crypto.exceptions.CryptoAnalysisException;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -96,6 +107,10 @@ public class CrySLModelReader {
 	private static final String NULL = "null";
 	private static final String UNDERSCORE = "_";
 
+	/**
+	 * Creates a CrySLModelReader
+	 * @throws MalformedURLException
+	 */
 	public CrySLModelReader() throws MalformedURLException {
 		CrySLStandaloneSetup crySLStandaloneSetup = new CrySLStandaloneSetup();
 		final Injector injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
@@ -116,15 +131,54 @@ public class CrySLModelReader {
 
 	}
 
-	public CrySLRule readRule(File ruleFile) {
-		final String fileName = ruleFile.getName();
-		if (!fileName.endsWith(cryslFileEnding)) {
-			return null;
+	/**
+	 * Reads the content of a CrySL file from an {@link InputStream}, afterwards the {@link CrySLRule} will be created.
+	 *
+	 * @param stream the {@link InputStream} holds the CrySL file content
+	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
+	 * @return the {@link CrySLRule}
+	 * @throws IllegalArgumentException, IOException
+	 * @throws CryptoAnalysisException
+	 */
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException{
+		if (!virtualFileName.endsWith(cryslFileEnding)) {
+			throw new CryptoAnalysisException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
 		}
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(),
-																																																						// // true), true);
-		EcoreUtil.resolveAll(resourceSet);
-		final EObject eObject = (EObject) resource.getContents().get(0);
+
+		URI uri = URI.createURI(virtualFileName);
+		Resource resource= resourceSet.getURIResourceMap().get(uri);
+		if (resource == null){
+			resource = resourceSet.createResource(uri);
+			resource.load(stream, Collections.EMPTY_MAP);
+		}
+
+		return createRuleFromResource(resource);
+	}
+
+	/**
+	 * Reads the content of a CrySL file and returns a {@link CrySLRule} object.
+	 *
+	 * @param ruleFile the CrySL file
+	 * @return the {@link CrySLRule} object
+	 * @throws CryptoAnalysisException
+	 */
+	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
+		final String fileName = ruleFile.getName();
+		final String extension = Files.getFileExtension(fileName);
+
+		if (!extension.equals(cryslFileEnding)) {
+			throw new CryptoAnalysisException("The prefix of "+ fileName + "  does not correspond to "+ cryslFileEnding);
+		}
+
+		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
+		return createRuleFromResource(resource);
+	}
+
+	private CrySLRule createRuleFromResource(Resource resource) throws CryptoAnalysisException {
+		if (resource == null)
+			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
+
+		final EObject eObject = resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
 		String curClass = dm.getJavaType().getQualifiedName();
 		final EnsuresBlock ensure = dm.getEnsure();
@@ -629,7 +683,7 @@ public class CrySLModelReader {
 			conditional = getConstraint((Constraint) cons);
 		} else if (cons instanceof Pred) {
 			conditional = getPredicate((Pred) cons);
-		} 
+		}
 		if (innerPred.getPred().getParList() != null) {
 			for (final SuPar var : innerPred.getPred().getParList().getParameters()) {
 				if (var.getVal() != null) {
@@ -730,8 +784,7 @@ public class CrySLModelReader {
 		try {
 			Integer.parseInt(value);
 			typeName = "int";
-		}
-		catch (NumberFormatException ex) {
+		} catch (NumberFormatException ex) {
 			typeName = ((ObjectDecl) ((LiteralExpression) ((LiteralExpression) ((LiteralExpression) constraint).getCons()).getName()).getValue().eContainer()).getObjectType()
 					.getQualifiedName();
 		}
