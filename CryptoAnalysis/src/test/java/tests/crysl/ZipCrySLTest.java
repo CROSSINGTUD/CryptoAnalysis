@@ -1,9 +1,9 @@
 package tests.crysl;
 
-import crypto.HeadlessCryptoScanner;
-import crypto.exceptions.CryptoAnalysisException;
-import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
+import java.io.File;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -11,9 +11,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.stream.Collectors;
+
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 
 public class ZipCrySLTest
 {
