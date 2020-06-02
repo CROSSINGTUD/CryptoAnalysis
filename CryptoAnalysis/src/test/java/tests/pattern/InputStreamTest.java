@@ -209,8 +209,7 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 
 	@Override
 	protected Ruleset getRuleSet() {
-		// TODO Auto-generated method stub
-		return null;
+		return Ruleset.JavaCryptographicArchitecture;
 	}
 
 }
