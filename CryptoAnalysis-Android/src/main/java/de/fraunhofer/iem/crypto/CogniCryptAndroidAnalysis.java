@@ -18,6 +18,7 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.reporting.CollectErrorListener;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
@@ -171,7 +172,11 @@ public class CogniCryptAndroidAnalysis {
 		File[] listFiles = new File(rulesDirectory).listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(CrySLModelReader.cryslFileEnding)) {
-				rules.add(CrySLRuleReader.readFromSourceFile(file));
+				try {
+					rules.add(CrySLRuleReader.readFromSourceFile(file));
+				} catch (CryptoAnalysisException e) {
+					logger.error(e.getMessage(), e);
+				}
 			}
 		}
 		if (rules.isEmpty())

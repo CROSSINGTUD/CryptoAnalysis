@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>2.7.2-SNAPSHOT</version>
+	<version>2.7.3-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spdsVersion>2.4</spdsVersion>
@@ -104,7 +104,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-					<argLine>-Xmx16G -Xms256M -Xss128M -Dmaven.home="${maven.home}"</argLine>
+					<argLine>-Xmx10G -Xms256M -Xss128M -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
