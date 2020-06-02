@@ -40,7 +40,7 @@ public class CrySLRuleReader {
 	 * 
 	 * @param file the CrySL file
 	 * @return the {@link CrySLRule} object
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
 	public static CrySLRule readFromSourceFile(File file) throws CryptoAnalysisException {
 		return getReader().readRule(file);
@@ -50,8 +50,8 @@ public class CrySLRuleReader {
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a directory
 	 * 
 	 * @param directory the {@link File} with the directory where the rules are located
-	 * @return the {@link List} with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException 
+	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
+	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
 	public static List<CrySLRule> readFromDirectory(File directory) throws CryptoAnalysisException {
 		return readFromDirectory(directory, false);
@@ -64,8 +64,8 @@ public class CrySLRuleReader {
 	 * 
 	 * @param directory the {@link File} with the directory where the rules are located
 	 * @param recursive <code>true</code> the subfolders will be searched too
-	 * @return the {@link List} with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException 
+	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
+	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
 	public static List<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
@@ -75,9 +75,6 @@ public class CrySLRuleReader {
 
 		List<File> cryptSLFiles = new ArrayList<>();
 		findCryptSLFiles(directory, recursive, cryptSLFiles);
-		
-		if (cryptSLFiles.size() == 0)
-			throw new CryptoAnalysisException("The specified path doesn't contain files " + directory.getAbsolutePath());
 
 		CrySLModelReader reader = getReader();
 		for (File file : cryptSLFiles) {
@@ -90,18 +87,13 @@ public class CrySLRuleReader {
 			}
 		}
 		
-		if(ruleMap.values().isEmpty()) {
-			throw new CryptoAnalysisException("No CrySL rules found in " + directory.getAbsolutePath());
-		}
-		
-		return new ArrayList<CrySLRule>(ruleMap.values());
-
+		return new ArrayList<>(ruleMap.values());
 	}
 
 	/**
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a Zip {@link File}.
 	 * @param file Zip that contains the CrySL files
-	 * @return the {@link List} with {@link CrySLRule} objects
+	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
 	 * @throws CryptoAnalysisException 
 	 */
 	public static List<CrySLRule> readFromZipFile(File file) throws CryptoAnalysisException {
@@ -127,11 +119,7 @@ public class CrySLRuleReader {
 			throw new CryptoAnalysisException(e.getMessage());
 		}
 		
-		if(ruleMap.values().isEmpty()) {
-			throw new CryptoAnalysisException("No CrySL rules found in " + file.getAbsolutePath());
-		}
-		
-		return new ArrayList<CrySLRule>(ruleMap.values());
+		return new ArrayList<>(ruleMap.values());
 	}	
 
 	private static void findCryptSLFiles(File directory, boolean recursive, Collection<File> resultCollection) {

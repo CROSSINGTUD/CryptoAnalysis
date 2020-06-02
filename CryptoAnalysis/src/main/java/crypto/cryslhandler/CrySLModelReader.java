@@ -164,7 +164,14 @@ public class CrySLModelReader {
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
 		final String fileName = ruleFile.getName();
-		final String extension = Files.getFileExtension(fileName);
+
+		// Re-included this code because cryslFileEnding is dotted ".crysl".
+		// And because this is a public constant, I'm scared to change it, as it may cause massive versioning problems.
+		final String extension = fileName.substring(fileName.lastIndexOf("."));
+		if (!cryslFileEnding.equals(extension)) {
+			if (!fileName.endsWith(cryslFileEnding))
+				return null;
+		}
 
 		if (!extension.equals(cryslFileEnding)) {
 			throw new CryptoAnalysisException("The prefix of "+ fileName + "  does not correspond to "+ cryslFileEnding);

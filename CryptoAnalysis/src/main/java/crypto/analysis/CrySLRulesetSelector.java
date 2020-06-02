@@ -133,45 +133,24 @@ public class CrySLRulesetSelector {
 	 * 
 	 * @param 	resourcesPath a {@link File} with the path giving the location of the CrySL file folder
 	 * @param 	ruleFormat the {@link Ruleset} where the rules belongs to 
-	 * @return  the {@link List} with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException 
+	 * @return  the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
+	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
+	@Deprecated
 	public static List<CrySLRule> makeFromPath(File resourcesPath, RuleFormat ruleFormat) throws CryptoAnalysisException {
-		if (!resourcesPath.isDirectory())
-			throw new CryptoAnalysisException("The specified path is not a directory " + resourcesPath);
-		
-		List<CrySLRule> rules = Lists.newArrayList();
-		File[] listFiles = resourcesPath.listFiles();
-		for (File file : listFiles) {
-			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
-			if(rule != null) {
-				rules.add(rule);
-			}
-		}
-		if (rules.isEmpty()) {
-			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
-		}
-		return rules;
+		return CrySLRuleReader.readFromDirectory(resourcesPath);
 	}
 	
 	/**
 	 * Creates {@link CrySLRule} objects from a Zip file and returns them as {@link List}.
 	 * 
 	 * @param resourcesPath the Zip {@link File} which contains the CrySL files
-	 * @return the {@link List} with {@link CrySLRule} objects from the Zip file
-	 * @throws CryptoAnalysisException 
+	 * @return the {@link List} with {@link CrySLRule} objects from the Zip file.
+	 * 		If no rules are found it returns an empty list.
+	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
+	@Deprecated
 	public static List<CrySLRule> makeFromZip(File resourcesPath) throws CryptoAnalysisException {
-		List<CrySLRule> rules = Lists.newArrayList();	
-
-		if(!resourcesPath.exists() || !resourcesPath.isFile()) {
-			throw new CryptoAnalysisException("The specified path is not a file " + resourcesPath);
-		}
-	
-		rules = CrySLRuleReader.readFromZipFile(resourcesPath);	
-		if (rules.isEmpty()) {
-			throw new CryptoAnalysisException("No CrySL rules found in " + resourcesPath);
-		}
-		return rules;
+		return CrySLRuleReader.readFromZipFile(resourcesPath);
 	}
 }
