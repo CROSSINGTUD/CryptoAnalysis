@@ -18,6 +18,10 @@ public class HeadlessCryptoScannerOptions extends Options {
 		Option rulesDir = Option.builder().longOpt("rulesDir").hasArg().required()
 				.desc("Specify the directory for the CrySL rules").build();
 		addOption(rulesDir);
+		
+		Option zipPath = Option.builder().longOpt("rulesZip").hasArg().required()
+				.desc("Specify the path for the CrySL rule Zip file").build();
+		addOption(zipPath);
 
 		Option rulesFormat = Option.builder().longOpt("rulesInSrc").hasArg(false).desc("Specfiy that rules passed as parameter are in source format.").build();
 		addOption(rulesFormat);
