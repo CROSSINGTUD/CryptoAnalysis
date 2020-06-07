@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,6 @@ public abstract class HeadlessCryptoScanner {
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 	private static List<String> ignorePackageList;
-	private static boolean ignorePackagesflag;
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -110,16 +110,15 @@ public abstract class HeadlessCryptoScanner {
 		} else {
 			callGraphAlogrithm = CG.CHA;
 		}
-		if(options.hasOption("ignorePackagesFilePath")) {
-			final File ignorePackageFile;
+		if(options.hasOption("ignorePackages")) {
+			final File ignorePackage;
 			try {
-				ignorePackageFile = new File(options.getOptionValue("ignorePackagesFilePath"));
-				if(ignorePackageFile.exists()) {
-					ignorePackagesflag = true;
-					ignorePackageList = Files.readAllLines(Paths.get(ignorePackageFile.getAbsolutePath()), StandardCharsets.UTF_8);
+				ignorePackage = new File(options.getOptionValue("ignorePackages"));
+				if(ignorePackage.exists()) {
+					ignorePackageList = Files.readAllLines(Paths.get(ignorePackage.getAbsolutePath()), StandardCharsets.UTF_8);
 				}
 				else {
-					throw new CryptoAnalysisException("Unable to read file from path : " + ignorePackageFile.getAbsolutePath());
+					throw new CryptoAnalysisException("Unable to read file from path : " + ignorePackage.getAbsolutePath());
 				}	
 			} catch (IOException | CryptoAnalysisException e) {
 					LOGGER.error(e.getMessage());
@@ -174,13 +173,8 @@ public abstract class HeadlessCryptoScanner {
 			}
 			
 			@Override
-			protected List<String> getIgnorePackageList(){
+			protected List<String> getIgnoredPackages(){
 				return ignorePackageList;
-			}
-			
-			@Override
-			protected boolean ignorePackagesflag() {
-				return ignorePackagesflag;
 			}
 			
 		};
@@ -301,8 +295,8 @@ public abstract class HeadlessCryptoScanner {
 					}
 				};
 				
-				if(ignorePackagesflag()) {
-					fileReporter.setIgnorePackages(getIgnorePackageList());
+				if(!getIgnoredPackages().isEmpty()) {
+					fileReporter.setIgnorePackages(getIgnoredPackages());
 				}
 				reporter.addReportListener(fileReporter);
 				String csvOutputFile = getCSVOutputFile();
@@ -455,12 +449,8 @@ public abstract class HeadlessCryptoScanner {
 		return true;
 	}
 	
-	protected List<String> getIgnorePackageList() {
-		return null;
-	}
-	
-	protected boolean ignorePackagesflag() {
-		return false;
+	protected List<String> getIgnoredPackages() {
+		return Collections.<String>emptyList();
 	}
 	
 	private static String pathToJCE() {
@@ -503,6 +493,6 @@ public abstract class HeadlessCryptoScanner {
 				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
 				+ "--sarifReport (enables sarif report)\n"
 				+ "--providerDetection (enables provider detection analysis)\n"
-				+ "--ignorePackagesFilePath (List the name of packages to be ignored during the analysis)\n");
+				+ "--ignorePackages (List the name of packages to be ignored during the analysis)\n");
 	}
 }

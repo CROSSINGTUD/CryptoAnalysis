@@ -61,26 +61,26 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		SootMethod method = error.getErrorLocation().getMethod();
 		SootClass sootClass = method.getDeclaringClass();
 		Set<AbstractError> set = errorMarkers.get(sootClass, method);
-		Integer integer = errorMarkerCount.get(error.getClass());
+		Integer errorCount = errorMarkerCount.get(error.getClass());
 		if(set == null){
 			set = Sets.newHashSet();
 		}
-		if(integer == null){
-			integer = 0;
+		if(errorCount == null){
+			errorCount = 0;
 		}
 		if(!ignorePackagesList.isEmpty()) {
-			if(!ignorePackagesList.stream().anyMatch((s -> sootClass.getName().contains(s)))) {
+			if(!ignorePackagesList.stream().anyMatch((s -> sootClass.getName().startsWith(s)))) {
 				if(set.add(error)){	
-					integer++;
-					errorMarkerCount.put(error.getClass(), integer);
+					errorCount++;
+					errorMarkerCount.put(error.getClass(), errorCount);
 				}
 				errorMarkers.put(sootClass, method, set);
 			}
 		}
 		else {
 			if(set.add(error)){
-				integer++;
-				errorMarkerCount.put(error.getClass(), integer);
+				errorCount++;
+				errorMarkerCount.put(error.getClass(), errorCount);
 			}
 			errorMarkers.put(sootClass, method, set);
 		}	
