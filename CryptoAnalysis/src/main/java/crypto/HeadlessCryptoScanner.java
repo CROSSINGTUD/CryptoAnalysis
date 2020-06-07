@@ -66,7 +66,7 @@ public abstract class HeadlessCryptoScanner {
 	private static List<CrySLRule> rules;
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-	private static List<String> ignorePackageList;
+	private static List<String> ignorePackageList = Collections.<String>emptyList();
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
