@@ -219,9 +219,9 @@ public class PredicateHandler {
 			for (ISLConstraint pred : missingPredicates) {
 				if (pred instanceof RequiredCrySLPredicate) {
 					reportMissingPred(seed, (RequiredCrySLPredicate) pred);
-				} else if (pred instanceof CrySLConstraint) {
+				} else if (pred instanceof AlternativeReqPredicate) {
 					for (CrySLPredicate altPred : ((AlternativeReqPredicate) pred).getAlternatives()) {
-						reportMissingPred(seed, new RequiredCrySLPredicate(altPred, altPred.getLocation()));
+						reportMissingPred(seed, new RequiredCrySLPredicate(altPred, pred.getLocation()));
 					}
 				}
 			}

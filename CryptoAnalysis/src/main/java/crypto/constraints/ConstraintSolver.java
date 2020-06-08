@@ -118,7 +118,15 @@ public class ConstraintSolver {
 	private ISLConstraint collectAlternativePredicates(CrySLConstraint cons, AlternativeReqPredicate alt) {
 		CrySLPredicate right = (CrySLPredicate) cons.getRight();
 		if (alt == null) {
-			alt = new AlternativeReqPredicate(right, right.getLocation());
+			for (CallSiteWithParamIndex cwpi : this.parameterAnalysisQuerySites) {
+				for (ICrySLPredicateParameter p : right.getParameters()) {
+					if (p.getName().equals("transformation"))
+						continue;
+					if (cwpi.getVarName().equals(p.getName())) {
+						alt = new AlternativeReqPredicate(right, cwpi.stmt());
+					}
+				}
+			}
 		} else {
 			alt.addAlternative(right);
 		}
