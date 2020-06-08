@@ -1,5 +1,8 @@
 package crypto.analysis.errors;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
@@ -7,16 +10,16 @@ import crypto.rules.CrySLRule;
 
 public class RequiredPredicateError extends AbstractError{
 
-	private CrySLPredicate contradictedPredicate;
+	private List<CrySLPredicate> contradictedPredicate;
 	private CallSiteWithExtractedValue extractedValues;
 
-	public RequiredPredicateError(CrySLPredicate contradictedPredicate, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
+	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
 		super(location, rule);
-		this.contradictedPredicate = contradictedPredicate;
+		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = multimap;
 	}
 
-	public CrySLPredicate getContradictedPredicate() {
+	public List<CrySLPredicate> getContradictedPredicate() {
 		return contradictedPredicate;
 	}
 	
@@ -33,7 +36,7 @@ public class RequiredPredicateError extends AbstractError{
 	public String toErrorMarkerString() {
 		String msg = extractedValues.toString();
 		msg += " was not properly generated as ";
-		String predicateName = getContradictedPredicate().getPredName();
+		String predicateName = getContradictedPredicate().stream().map(e -> e.toString()).collect(Collectors.joining(" OR "));
 		String[] parts = predicateName.split("(?=[A-Z])");
 		msg += parts[0];
 		for(int i=1; i<parts.length; i++)
