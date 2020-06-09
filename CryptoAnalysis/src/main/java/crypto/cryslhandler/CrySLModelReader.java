@@ -158,7 +158,7 @@ public class CrySLModelReader {
 				actPreds.add(pred.tobasicPredicate());
 			} else {
 				actPreds.add(new CrySLCondPredicate(pred.getBaseObject(), pred.getPredName(), pred.getParameters(), pred.isNegated(),
-						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond))));
+						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond)), pred.getConstraint()));
 			}
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
@@ -669,7 +669,6 @@ public class CrySLModelReader {
 
 	private ISLConstraint getPredicate(Pred pred) {
 		final List<ICrySLPredicateParameter> variables = new ArrayList<>();
-//		PredLit innerPred = (PredLit) pred;
 		if (pred.getParList() != null) {
 			for (final SuPar var : pred.getParList().getParameters()) {
 				if (var.getVal() != null) {
