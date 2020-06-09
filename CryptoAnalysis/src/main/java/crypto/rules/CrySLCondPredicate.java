@@ -2,8 +2,8 @@ package crypto.rules;
 
 import java.util.List;
 import java.util.Set;
-
 import crypto.interfaces.ICrySLPredicateParameter;
+import crypto.interfaces.ISLConstraint;
 
 public class CrySLCondPredicate extends CrySLPredicate {
 	
@@ -14,7 +14,11 @@ public class CrySLCondPredicate extends CrySLPredicate {
 	private final Set<StateNode> conditionalNodes;
 	
 	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> variables, Boolean not, Set<StateNode> label) {
-		super(baseObj, name, variables, not);
+		this(baseObj, name, variables, not, label, null);
+	}
+	
+	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> variables, Boolean not, Set<StateNode> label, ISLConstraint cons) {
+		super(baseObj, name, variables, not, cons);
 		conditionalNodes = label;
 	}
 	
