@@ -4,12 +4,8 @@ import java.io.File;
 
 import org.junit.Test;
 
-
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
 import tests.headless.AbstractHeadlessTest;
 import tests.headless.MavenProject;
 
@@ -24,7 +20,6 @@ public class NullpointerPredicateForFields extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.Launcher: void <init>()>", ConstraintError.class, 1);
-
 
 		scanner.exec();
 		assertErrors();
