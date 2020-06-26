@@ -8,8 +8,26 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.google.common.collect.Lists;
+
 public class AndroidAnalysisTest
 {
+
+    @Test
+    public void testFalseCrypt()
+    {
+        // From https://github.com/secure-software-engineering/FalseCrypt
+        String apkPath = ".\\src\\test\\resources\\falsecrypt.apk";
+        String platformPath = "C:\\Android\\platforms";
+        String rulesPath = "..\\CryptoAnalysis\\src\\main\\resources\\JavaCryptographicArchitecture";
+
+        Collection<String> filter = Lists.newArrayList();
+        CogniCryptAndroidAnalysis analysis = new CogniCryptAndroidAnalysis(apkPath, platformPath, rulesPath, filter);
+        Collection<AbstractError> errors = analysis.run();
+
+        Assert.assertTrue(errors.size() >  0);
+    }
+
     @Test
     public void runAnalysisWithCallbackDebugAndroidXAppCompatActivity()
     {
