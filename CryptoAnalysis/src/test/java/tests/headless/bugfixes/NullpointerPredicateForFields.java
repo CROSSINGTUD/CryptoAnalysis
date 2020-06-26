@@ -21,6 +21,7 @@ public class NullpointerPredicateForFields extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.Launcher: void <init>()>", ConstraintError.class, 1);
 
+		// Must not throw NullPointerException in ConstraintSolver:init()!
 		scanner.exec();
 		assertErrors();
 	}
