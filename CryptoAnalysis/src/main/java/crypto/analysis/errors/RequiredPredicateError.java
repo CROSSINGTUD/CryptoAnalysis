@@ -40,7 +40,7 @@ public class RequiredPredicateError extends AbstractError{
 	public String toErrorMarkerString() {
 		String msg = extractedValues.toString();
 		msg += " was not properly generated as ";
-		String predicateName = getContradictedPredicates().stream().map(e -> e.toString()).collect(Collectors.joining(" OR "));
+		String predicateName = getContradictedPredicates().stream().map(e -> e.getPredName()).collect(Collectors.joining(" OR "));
 		String[] parts = predicateName.split("(?=[A-Z])");
 		msg += parts[0];
 		for(int i=1; i<parts.length; i++)
