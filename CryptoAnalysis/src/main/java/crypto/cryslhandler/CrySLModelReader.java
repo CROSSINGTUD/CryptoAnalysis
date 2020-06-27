@@ -218,7 +218,7 @@ public class CrySLModelReader {
 				actPreds.add(pred.tobasicPredicate());
 			} else {
 				actPreds.add(new CrySLCondPredicate(pred.getBaseObject(), pred.getPredName(), pred.getParameters(), pred.isNegated(),
-						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond))));
+						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond)), pred.getConstraint()));
 			}
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
@@ -258,10 +258,12 @@ public class CrySLModelReader {
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : eList) {
+			String curClass = ((DomainmodelImpl) cons.eContainer().eContainer()).getJavaType().getQualifiedName();
 			final Pred pred = (Pred) cons.getPredLit().getPred();
 			final List<ICrySLPredicateParameter> variables = new ArrayList<>();
 
 			if (pred.getParList() != null) {
+				boolean firstPar = true;
 				for (final SuPar var : pred.getParList().getParameters()) {
 					if (var.getVal() != null) {
 						final ObjectImpl object = (ObjectImpl) ((LiteralExpression) var.getVal().getLit().getName()).getValue();
@@ -269,12 +271,17 @@ public class CrySLModelReader {
 						String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
 						if (name == null) {
 							name = THIS;
-							type = "";// this.curClass;
+							type = curClass;
 						}
 						variables.add(new CrySLObject(name, type));
 					} else {
-						variables.add(new CrySLObject(UNDERSCORE, NULL));
+						if (firstPar) {
+							variables.add(new CrySLObject(THIS, curClass));
+						} else {
+							variables.add(new CrySLObject(UNDERSCORE, NULL));
+						}
 					}
+					firstPar = false;
 				}
 			}
 			final String meth = pred.getPredName();
@@ -729,7 +736,6 @@ public class CrySLModelReader {
 
 	private ISLConstraint getPredicate(Pred pred) {
 		final List<ICrySLPredicateParameter> variables = new ArrayList<>();
-//		PredLit innerPred = (PredLit) pred;
 		if (pred.getParList() != null) {
 			for (final SuPar var : pred.getParList().getParameters()) {
 				if (var.getVal() != null) {
