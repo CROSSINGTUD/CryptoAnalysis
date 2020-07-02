@@ -67,6 +67,10 @@ public abstract class HeadlessCryptoScanner {
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	
+	/**
+	 * List for storing the package names to be ignored
+	 */
 	private static List<String> ignorePackageList = Collections.<String>emptyList();
 
 	public static enum CG {
@@ -476,6 +480,10 @@ public abstract class HeadlessCryptoScanner {
 		return true;
 	}
 	
+	/**
+	 * This method is used to get the list containing the package names that needs to be ignored during the analysis
+	 * @return an empty list if there are no pages to be ignored. Else return the list with package names
+	 */
 	protected List<String> getIgnoredPackages() {
 		return Collections.<String>emptyList();
 	}

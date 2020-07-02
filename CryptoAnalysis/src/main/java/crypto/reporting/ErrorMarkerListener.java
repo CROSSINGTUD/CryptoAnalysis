@@ -55,6 +55,9 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
 	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
+	/**
+	 * List for storing the package names to be ignored
+	 */
 	protected List<String> ignorePackagesList =  Collections.<String>emptyList();
 	
 	private void addMarker(AbstractError error) {

@@ -1,7 +1,12 @@
 package tests.headless;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
@@ -54,7 +59,15 @@ public abstract class AbstractHeadlessTest {
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
-
+	/**
+	 * List for storing the package names to be ignored
+	 */
+	private static List<String> ignorePackageList = Collections.<String>emptyList();
+	/**
+	 * Flag to test the ignore package functionality
+	 */
+	private static boolean IGNORE_PACKAGE = false;
+	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
@@ -104,6 +117,26 @@ public abstract class AbstractHeadlessTest {
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
 			}
+			
+			@Override
+			protected List<String> getIgnoredPackages(){
+				if(IGNORE_PACKAGE == true) {
+					try {
+						
+						File ignorePackage = new File("../CryptoAnalysisTargets/IgnorePackages.txt");
+						if(ignorePackage.exists()) {
+							ignorePackageList = Files.readAllLines(Paths.get(ignorePackage.getAbsolutePath()), StandardCharsets.UTF_8);
+							}
+						else {
+							throw new CryptoAnalysisException("Unable to read file from path : " + ignorePackage.getAbsolutePath());
+						}	
+					} catch (IOException | CryptoAnalysisException e) {
+							LOGGER.error(e.getMessage());
+					}
+				
+				}
+				return ignorePackageList;
+			}
 		};
 		return scanner;
 	}
@@ -114,6 +147,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
+				String errorClassName = error.getErrorLocation().getMethod().getDeclaringClass().getName().toString();
 				String methodContainingError = error.getErrorLocation().getMethod().toString();
 				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
@@ -121,7 +155,9 @@ public abstract class AbstractHeadlessTest {
 					currCount = 0;
 				}
 				Integer newCount = --currCount;
-				errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
+				if(!ignorePackageList.stream().anyMatch((s -> errorClassName.startsWith(s)))) {
+					errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
+				}
 			}
 
 			@Override
