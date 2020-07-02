@@ -479,11 +479,12 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean providerDetection() {
 		return true;
 	}
-	
 	/**
-	 * This method is used to get the list containing the package names that needs to be ignored during the analysis
-	 * @return an empty list if there are no pages to be ignored. Else return the list with package names
-	 */
+	 * Initialize {@link String} objects the should contain the package names that needs to be ignored 
+	 * and returns them as {@link List}. 
+	 * @return empty {@link List} with package names to be ignored
+	 */ 
+	
 	protected List<String> getIgnoredPackages() {
 		return Collections.<String>emptyList();
 	}
