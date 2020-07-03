@@ -13,6 +13,7 @@ import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.preanalysis.BoomerangPretransformer;
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
@@ -118,7 +119,7 @@ public class CogniCryptAndroidAnalysis {
 		final CrySLResultsReporter reporter = new CrySLResultsReporter();
 		CollectErrorListener errorListener = new CollectErrorListener();
 		reporter.addReportListener(errorListener);
-		reporter.addReportListener(new CommandLineReporter(outputDir, rules));
+		reporter.addReportListener(new CommandLineReporter(outputDir, null, rules)); //null for analysis report format {Format}
 		CryptoScanner scanner = new CryptoScanner() {
 
 			@Override
