@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ErrorWithObjectAllocation;
@@ -26,10 +30,23 @@ public class CommandLineReporter extends ErrorMarkerListener {
 	private File outputFolder;
 	private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
+	private static final Logger LOG = LoggerFactory.getLogger(CommandLineReporter.class);
+	/**
+	 * format of CrytoAnalysis report
+	 */
+	private Format reportformat;
 
-	public CommandLineReporter(String string, List<CrySLRule> rules) {
-		this.outputFolder = (string != null ? new File(string) : null);
+	/**
+	 * Creates {@link CommandLineReporter} a constructor with reportDir, format and rules as parameter
+	 * 
+	 * @param reportDir a {@link String} path giving the location of the report directory
+	 * @param format {@link Format} the format of CryptoAnalysis report
+	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
+	 */
+	public CommandLineReporter(String reportDir, Format format, List<CrySLRule> rules) {
+		this.outputFolder = (reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir")));
 		this.rules = rules;
+		this.reportformat = format;
 	}
 
 	@Override
@@ -90,10 +107,9 @@ public class CommandLineReporter extends ErrorMarkerListener {
 		}
 		s += "=====================================================================";
 
-		System.out.println(s);
-		if (outputFolder != null) {
+		if (reportformat != null) {
 			try {
-				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
+				FileWriter writer = new FileWriter(outputFolder +"\\CryptoAnalysis-Report.txt");
 				writer.write(s);
 				writer.close();
 				for (SootClass c : this.errorMarkers.rowKeySet()) {
@@ -104,9 +120,13 @@ public class CommandLineReporter extends ErrorMarkerListener {
 					streamOut.close();
 					writerOut.close();
 				}
+				LOG.info("Text Report generated to file : "+ outputFolder.getAbsolutePath() + "\\CryptoAnalysis-Report.txt");
 			} catch (IOException e) {
 				throw new RuntimeException("Could not write to file " + outputFolder);
 			}
+		}
+		else {
+			System.out.println(s);
 		}
 	}
 }
