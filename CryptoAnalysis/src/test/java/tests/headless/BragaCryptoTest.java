@@ -36,7 +36,8 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	
 	
 	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/cai/alwaysDefineCSP/		
+	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/cai/alwaysDefineCSP/	
+	@Ignore
 	@Test
 	public void alwaysDefineCSPExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/alwaysDefineCSP").getAbsolutePath();
@@ -388,7 +389,6 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.BC_128bits_DSA3072xSHA256: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.BC_128bits_DSA3072xSHA256: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
-		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<example.SUN_192bits_ECDSA384wSHA384: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
@@ -446,12 +446,16 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<example.DoNotPrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<example.DoNotPrintECDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.DoNotPrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<example.DoNotPrintECDHSecret1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.DoNotPrintECDSAPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<example.DoNotPrintECDSAPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.DoNotPrintPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.DoNotPrintPrivKey1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.DoNotPrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotPrintDHSecret1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.DoNotPrintDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 
 		scanner.exec();
 		assertErrors();
@@ -799,9 +803,9 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
-
-		setErrorsCount("<br.fixedSeed.FixedSeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<br.fixedSeed.FixedSeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<br.fixedSeed.FixedSeed2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<br.fixedSeed.FixedSeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<br.fixedSeed.FixedSeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		scanner.exec();
 		assertErrors();
 	}
@@ -1110,12 +1114,17 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 4);
+		setErrorsCount("<cib.printPrivSecKey.PrintECDHSecret1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDSAPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDSAPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<cib.printPrivSecKey.PrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		
 
 		scanner.exec();
 		assertErrors();
