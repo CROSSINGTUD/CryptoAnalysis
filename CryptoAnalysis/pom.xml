@@ -85,7 +85,7 @@
 								<artifactItem>
 									<groupId>de.paderborn.uni</groupId>
 									<artifactId>BouncyCastle-JCA</artifactId>
-									<version>0.2</version>
+									<version>0.4</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
