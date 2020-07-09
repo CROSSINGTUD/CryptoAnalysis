@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
@@ -39,6 +38,12 @@ public class SARIFReporter extends ErrorMarkerListener {
 	private JSONArray results = new JSONArray();
 	private SARIFHelper sarifHelper;
 	private Map<String, Integer> errorCountMap;
+	/**
+	 * name of the analysis report
+	 */
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.json";
+	
+
 
 	/**
 	 * Creates {@link SARIFReporter} a constructor with reportDir and rules as parameter
@@ -141,11 +146,10 @@ public class SARIFReporter extends ErrorMarkerListener {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-			writer.writeValue(Paths.get(outputFolder + File.separator+"CryptoAnalysis-Report.json").toFile(), sarif);
-			LOGGER.info("SARIF Report generated to file : "+ outputFolder + File.separator+"CryptoAnalysis-Report.json");
-		} 
-		catch (IOException e) {
-			LOGGER.error("Could not write to file: "+outputFolder.getAbsolutePath() + File.separator+"CryptoAnalysis-Report.json", e);
+			writer.writeValue(Paths.get(outputFolder + File.separator + REPORT_NAME).toFile(), sarif);
+			LOGGER.info("SARIF Report generated to file : "+ outputFolder + File.separator + REPORT_NAME);
+		} catch (IOException e) {
+			LOGGER.error("Could not write to file: "+outputFolder.getAbsolutePath() + File.separator+ REPORT_NAME, e);
 		}
 	}
 }

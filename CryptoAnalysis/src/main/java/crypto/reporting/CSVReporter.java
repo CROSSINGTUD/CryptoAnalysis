@@ -74,6 +74,13 @@ public class CSVReporter extends ErrorMarkerListener {
 	 * Path of directory of analysis reports
 	 */
 	private File reportDir;
+	/**
+	 * name of the analysis report
+	 */
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
+	/**
+	 * the headers of CSV report
+	 */
 	private enum Headers{
 		SoftwareID,SeedObjectCount,CallGraphTime_ms,CryptoAnalysisTime_ms,CallGraphReachableMethods,
 		CallGraphReachableMethods_ActiveBodies,DataflowVisitedMethod
@@ -172,7 +179,7 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	private void writeToFile() {
 		try {
-			FileWriter writer = new FileWriter(reportDir + File.separator+"CryptoAnalysis-Report.csv");
+			FileWriter writer = new FileWriter(reportDir + File.separator+ REPORT_NAME);
 			writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
 			List<String> line = Lists.newArrayList();
 			for(String h : headers){
@@ -184,9 +191,9 @@ public class CSVReporter extends ErrorMarkerListener {
 			}
 			writer.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			writer.close();
-			LOGGER.info("CSV Report generated to file : "+ reportDir.getAbsolutePath() + File.separator+"CryptoAnalysis-Report.csv");
+			LOGGER.info("CSV Report generated to file : "+ reportDir.getAbsolutePath() + File.separator+ REPORT_NAME);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("Could not write to " + reportDir.getAbsolutePath() + File.separator+ REPORT_NAME, e);
 		}
 	}
 

@@ -119,7 +119,7 @@ public class CogniCryptAndroidAnalysis {
 		final CrySLResultsReporter reporter = new CrySLResultsReporter();
 		CollectErrorListener errorListener = new CollectErrorListener();
 		reporter.addReportListener(errorListener);
-		reporter.addReportListener(new CommandLineReporter(outputDir, null, rules)); //null for analysis report format {Format}
+		reporter.addReportListener(new CommandLineReporter(outputDir, rules));
 		CryptoScanner scanner = new CryptoScanner() {
 
 			@Override

@@ -55,10 +55,10 @@ public abstract class AbstractHeadlessTest {
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
-	public Format format = null;
+	private static Format reportFormat = null;
 	
-	public static boolean isVISUALIZATION() {
-		return VISUALIZATION;
+	public static void setReportFormat(Format reportFormat) {
+		AbstractHeadlessTest.reportFormat = reportFormat;
 	}
 
 	public static void setVISUALIZATION(boolean vISUALIZATION) {
@@ -117,10 +117,7 @@ public abstract class AbstractHeadlessTest {
 			
 			@Override
 			protected Format reportFormat(){
-				if(isVISUALIZATION()) {
-					format = Format.CSV;
-				}
-				return format;
+				return VISUALIZATION ? reportFormat : null;
 			}
 		};
 		return scanner;

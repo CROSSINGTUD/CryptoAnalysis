@@ -37,6 +37,7 @@ import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
+import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
@@ -136,28 +137,6 @@ public abstract class HeadlessCryptoScanner {
 			callGraphAlogrithm = CG.CHA;
 		}
 		
-		final Format reportFormat;
-		if (options.hasOption("reportFormat")) {
-			String format =  options.getOptionValue("reportFormat").toLowerCase();
-			switch(format) {
-			case "csv":
-				reportFormat = Format.CSV;
-				break;
-			case "sarif":
-				reportFormat = Format.SARIF;
-				break;
-			case "txt":
-				reportFormat = Format.TXT;
-				break;
-			default:
-				LOGGER.info("Incorrect report format '" +format+ "'. Available formats are: CSV, SARIF and TXT");
-				reportFormat = null;
-			}	
-		}
-		else{
-			reportFormat = null;
-		}
-		
 		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
 
 			@Override
@@ -197,7 +176,7 @@ public abstract class HeadlessCryptoScanner {
 			
 			@Override
 			protected Format reportFormat(){
-				return reportFormat;
+				return getReportFormat();
 			}
 			
 		};
@@ -286,11 +265,11 @@ public abstract class HeadlessCryptoScanner {
 						fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS));
 						break;
 					default:
-						fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
+						fileReporter = new TXTReporter(getOutputFolder(), rules);
 					}
 				}
 				else {
-					fileReporter = new CommandLineReporter(getOutputFolder(), reportFormat(), rules);
+					fileReporter = new CommandLineReporter(rules);
 				}
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
@@ -357,6 +336,36 @@ public abstract class HeadlessCryptoScanner {
 			}
 		}
 		return Collections.emptyList();
+	}
+	
+	/**
+	 * Get the report format specified in CLI --reportFormat option
+	 * Default report format is null
+	 * @return the {@link Format}}
+	 */
+	protected Format getReportFormat() {
+		final Format reportFormat;
+		if (options.hasOption("reportFormat")) {
+			String format =  options.getOptionValue("reportFormat").toLowerCase();
+			switch(format) {
+			case "csv":
+				reportFormat = Format.CSV;
+				break;
+			case "sarif":
+				reportFormat = Format.SARIF;
+				break;
+			case "txt":
+				reportFormat = Format.TXT;
+				break;
+			default:
+				LOGGER.info("Incorrect report format '" +format+ "'. Available formats are: CSV, SARIF and TXT");
+				reportFormat = null;
+			}	
+		}
+		else{
+			reportFormat = null;
+		}
+		return reportFormat;
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
