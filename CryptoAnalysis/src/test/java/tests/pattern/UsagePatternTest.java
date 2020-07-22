@@ -644,10 +644,8 @@ public class UsagePatternTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		hMacSHA256.init(keyMac);
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
-		Assertions.mustBeInAcceptingState(hMacSHA256);
-		Assertions.hasEnsuredPredicate(macced);
-		// TODO Why doesn't the analysis find the predicate contradiction?
-		Assertions.predicateContradiction();
+		Assertions.assertState(hMacSHA256, 0);
+		Assertions.notHasEnsuredPredicate(macced);
 	}
 
 	@Test
