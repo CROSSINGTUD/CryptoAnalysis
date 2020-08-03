@@ -37,9 +37,11 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.DefinedProvider1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
-		setErrorsCount("<example.DefinedProvider2: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
-		setErrorsCount("<example.DefinedProvider2: void main(java.lang.String[])>", ConstraintError.class, 2);
+		// DefinedProvider2 not included as test due to being similar to DefinedProvider1 above
 		setErrorsCount("<example.DefinedProvider3: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// The whole test cases based on the below link projects were not included due to being similar to the test above
+		// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/br/avoidStatisticPRNG/
+		// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/br/avoidFixedPredictableSeed/
 		setErrorsCount("<example.DefinedProvider4: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
 		setErrorsCount("<example.DefinedProvider5: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.DefinedProvider6: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -104,24 +106,9 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-
-		scanner.exec();
-		assertErrors();
-	}
-
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/br/avoidFixedPredictableSeed/
-	@Test
-	public void avoidFixedPredictableSeedExamples() {
-		String mavenProjectPath = new File(
-				"../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidFixedPredictableSeed").getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
-		setErrorsCount(RequiredPredicateError.class, new FalsePositives(1, ""), "<example.DoNotUseWeakSeed1: void main(java.lang.String[])>");
+		// UsePKCS1ForRSA not included as test due to being similar to UseOAEPForRSA above
+		// Also tests from the following project were not included due to being similar to project the test above is based
+		// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkc/ecc/securecurves/
 		
 		scanner.exec();
 		assertErrors();
@@ -139,7 +126,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.UseDynamicKeyForAES: void main(java.lang.String[])>", TypestateError.class, 1);
+		// UseDynamicKeyForAES not included as test due to being similar to UseDynamicKeyFor3DES
 		setErrorsCount("<example.UseDynamicKeyforMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
@@ -157,22 +144,14 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", TypestateError.class, 1);
+		// SecureConfig128bitsRSA_3072x384_1, SecureConfig128bitsRSA_4096x512_1 tests not included as being similar to above test
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// SecureConfig128bitsRSA_3072x384_2, SecureConfig128bitsRSA_4096x512_2 tests not included as being similar to above test
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// SecureConfig192bitsRSA_7680x512_1 test not included due to being similar to SecureConfig192bitsRSA_7680x384_1 above
 
 		scanner.exec();
 		assertErrors();
@@ -216,24 +195,11 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.UseSHA2_1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		// UseSHA3_2 test not included due to being similar to the test above
 		setErrorsCount("<example.UseSHA2_2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<example.UseSHA2_2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<example.UseSHA3_2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-
-		scanner.exec();
-		assertErrors();
-	}
-
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/wc/avoidInsecureMAC/
-	@Test
-	public void avoidInsecureMACExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidInsecureMAC")
-				.getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		scanner.exec();
 		assertErrors();
@@ -250,17 +216,11 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.OAEP_2048x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.OAEP_2048x256_1: void main(java.lang.String[])>", TypestateError.class, 1);
+		// OAEP_2048x384_1, OAEP_2048x512_1 tests not included due to being similar to above test
 		setErrorsCount("<example.OAEP_2048x256_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.OAEP_2048x256_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_2: void main(java.lang.String[])>", TypestateError.class, 1);
-
+		// OAEP_2048x384_2, OAEP_2048x512_2 tests not included due to being similar to above test
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -278,8 +238,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PSSwSHA256Signature: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.PSSwSHA384Signature: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.PSSwSHA384Signature: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.PSSwSHA512Signature: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PSSwSHA512Signature: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// PSSwSHA512Signature test not included due to being similar to above test
 
 		scanner.exec();
 		assertErrors();
@@ -302,8 +261,9 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		assertErrors();
 	}
 
-	// This test case corresponds to the following project in BragaCryptoBench:
+	// This test case corresponds to the following projects in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkm/avoidKeyReuseInStreams/
+	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pdf/avoidSideChannels/
 	@Test
 	public void avoidKeyReuseInStreamsExamples() {
 		String mavenProjectPath = new File(
@@ -313,39 +273,8 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// DoNotReuseKeyStreamCipher2, DoNotReuseKeyStreamCipher4, DoNotReuseKeyStreamCipher5 are similar to test above	
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher3: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
-
-		scanner.exec();
-		assertErrors();
-	}
-
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pdf/avoidSideChannels/
-	@Test
-	public void avoidSideChannelsExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidSideChannels")
-				.getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-
-		scanner.exec();
-		assertErrors();
-	}
-
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/br/avoidStatisticPRNG/
-	@Test
-	public void avoidStatisticPRNGExamples() {
-		String mavenProjectPath = new File(
-				"../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidStatisticPRNG").getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		scanner.exec();
 		assertErrors();
@@ -380,8 +309,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
-		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", ConstraintError.class, 4);
-		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		// NonAuthenticatedEphemeralECDH_256 test not included due to being similar to above test
 		setErrorsCount("<example.NonAuthenticatedDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 		setErrorsCount("<example.NonAuthenticatedEphemeralDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 
@@ -404,11 +332,8 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.RandomMessageNonceECDSA: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SUN_112bits_ECDSA224wSHA224: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<example.SUN_192bits_ECDSA384wSHA384: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.SUN_192bits_ECDSA384wSHA384: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<example.SUN_256bits_ECDSA571wSHA512: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.SUN_256bits_ECDSA571wSHA512: void main(java.lang.String[])>", ConstraintError.class, 3);
-
+		// SUN_192bits_ECDSA384wSHA384, SUN_256bits_ECDSA571wSHA512 tests not included due to being similar to test above
+		
 		scanner.exec();
 		assertErrors();
 	}
@@ -423,23 +348,17 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.PKCS1_112bitsSign2048xSHA256_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PKCS1_112bitsSign2048xSHA256_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PKCS1_128bitsSign3072xSHA256_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PKCS1_128bitsSign3072xSHA256_2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// PKCS1_112bitsSign2048xSHA256_2, PKCS1_128bitsSign3072xSHA256_1, PKCS1_128bitsSign3072xSHA256_2 are similar to above test
 		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.PKCS1_192bitsSign7680xSHA384_2: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// PKCS1_192bitsSign7680xSHA384_2 test not included due to being similar to above test
 		setErrorsCount("<example.PSS_112bitsSign2048xSHA256_1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.PSS_112bitsSign2048xSHA256_1: void main(java.lang.String[])>", TypestateError.class, 1);
+		// PSS_128bitsSign3072xSHA256_1 not included due to being similar to above test
 		setErrorsCount("<example.PSS_112bitsSign2048xSHA256_2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.PSS_112bitsSign2048xSHA256_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PSS_128bitsSign3072xSHA256_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.PSS_128bitsSign3072xSHA256_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PSS_128bitsSign3072xSHA256_2: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.PSS_128bitsSign3072xSHA256_2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// PSS_128bitsSign3072xSHA256_2 not included due to being similar to above test
 		setErrorsCount("<example.PSS_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.PSS_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.PSS_192bitsSign7680xSHA384_1: void main(java.lang.String[])>", ConstraintError.class, 2);
@@ -525,48 +444,26 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void main(java.lang.String[])>", TypestateError.class, 1);
+		// example.SecureConfig128bitsRSA_3072x384_1, SecureConfig128bitsRSA_4096x512_1 tests are similar to above test
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// SecureConfig128bitsRSA_3072x384_2, SecureConfig128bitsRSA_4096x512_2 tests are similar to above test
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// SecureConfig192bitsRSA_7680x512_1 test not included due to being similar to the test above
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void main(java.lang.String[])>", ConstraintError.class, 1);
-
+		// SecureConfig192bitsRSA_7680x512_2 test not included due to being similar to the test above
+		
 		scanner.exec();
 		assertErrors();
 	}
 
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkc/ecc/securecurves/
-	@Test
-	public void securecurvesExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/securecurves")
-				.getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-
-		scanner.exec();
-		assertErrors();
-	}
-
-	// This test case corresponds to the following project in BragaCryptoBench:
+	// This test case corresponds to the following projects in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pdf/secureStreamCipher/
+	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/wc/avoidInsecureMAC/
 	@Test
 	public void secureStreamCipherExamples() {
 		String mavenProjectPath = new File(
