@@ -40,10 +40,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// InsecureHashes4, InsecureHashes5 tests not included due to being similar to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -61,8 +58,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC4: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC4: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		// InsecureMAC4 test not included due to being similar to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -104,10 +100,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
-		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-
+		// BuggyIVGen2 test not included due to being similar to the test above
+	
 		scanner.exec();
 		assertErrors();
 	}
@@ -214,14 +208,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", TypestateError.class, 2);
+		// DeterministicEncryptionRSA2, DeterministicEncryptionRSA3 tests not included due to being similar to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -272,12 +259,9 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA4: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA5: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA6: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// ImproperKeySizeRSA1, ImproperKeySizeRSA2, ImproperKeySizeRSA4, ImproperKeySizeRSA5, ImproperKeySizeRSA6 are not 
+		// included due to being similar to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -307,10 +291,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptAndHash: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptAndHash: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptThenHash1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptThenHash1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptThenHash2: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptThenHash2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// ManualComboEncryptThenHash1, ManualComboEncryptThenHash2 not included due to being similar to the test above
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboHashThenEncrypt: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboHashThenEncrypt: void main(java.lang.String[])>", TypestateError.class, 1);
 
@@ -328,25 +309,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptAndMAC: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptAndMAC: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptThenMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptThenMAC1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptThenMAC2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptThenMAC2: void main(java.lang.String[])>", TypestateError.class, 1);
+		// ManualComboEncryptThenMAC1, ManualComboEncryptThenMAC2 tests not included due to being similar to the test above
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboMACThenEncrypt: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboMACThenEncrypt: void main(java.lang.String[])>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
-	}
-	
-	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/pkc/ecc/insecurecurves/
-	@Test
-	public void insecurecurvesExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecurecurves").getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
 		scanner.exec();
 		assertErrors();
 	}
@@ -365,8 +331,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultAES: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultAES: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// InsecureDefaultAES test not included due to being similar to the test above
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultOAEP: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultOAEP: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultOAEP: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -390,12 +355,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		// InsecurePaddingRSA2, InsecurePaddingRSA3 tests are not included due to being similar to the test above
 			
 		scanner.exec();
 		assertErrors();
@@ -411,10 +371,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PKCS1Signature: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PKCS1Signature: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.sign.insecurePaddingSign.PKCS1Signature1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.sign.insecurePaddingSign.PKCS1Signature2: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.sign.insecurePaddingSign.PSSwSHA1Signature: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.sign.insecurePaddingSign.PSSwSHA1Signature: void main(java.lang.String[])>", ConstraintError.class, 1);
+		// PKCS1Signature1, PKCS1Signature2, PSSwSHA1Signature tests are not included due to being similar to the test above	
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PSSwSHA1Signature1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PSSwSHA1Signature1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PSSwSHA1Signature2: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -452,14 +409,12 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_512: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		// NonAuthenticatedEphemeralDH_512 test not included due to being similar to the test above		
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_112: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_112: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", ConstraintError.class, 4);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		// NonAuthenticatedEphemeralECDH_80 test not included due to being similar to the test above
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		// NonAuthenticatedDH_1024 test not included due to being similart to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -531,10 +486,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", TypestateError.class, 1);
+		// PBEwSmallSalt test not included due to being similar to the test above
 
 		scanner.exec();
 		assertErrors();
@@ -554,6 +506,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<br.predictableSeed.LowEntropySeed2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.predictableSeed.LowEntropySeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.predictableSeed.LowEntropySeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		// Tests that could be based on the following project were not included due to being similar to the tests above
+		// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/br/statisticPRNG/
 		scanner.exec();
 		assertErrors();
 	}
@@ -644,18 +598,6 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	}
 	
 	// This test case corresponds to the following project in BragaCryptoBench:
-	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/br/statisticPRNG/
-	@Test
-	public void statisticPRNGExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/statisticPRNG").getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
-		scanner.exec();
-		assertErrors();
-	}
-	
-	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/cai/undefinedCSP/
 	@Test
 	@Ignore
@@ -690,34 +632,15 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/weakConfigsRSA").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+				
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		// ImproperConfigRSA_3072x160_1, ImproperConfigRSA_4096x160_1 tests not included as they are similar to the test above
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		// ImproperConfigRSA_512x160_1, ImproperConfigRSA_768x160_1, ImproperConfigRSA_768x256_1, ImproperConfigRSA_1024x160_1, 
+		// ImproperConfigRSA_1024x256_1, ImproperConfigRSA_1024x384_1 tests are similar to the test above
 			
 		scanner.exec();
 		assertErrors();

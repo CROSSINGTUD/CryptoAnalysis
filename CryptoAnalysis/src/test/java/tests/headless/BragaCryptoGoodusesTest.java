@@ -107,8 +107,9 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", TypestateError.class, 2);
 		// UsePKCS1ForRSA not included as test due to being similar to UseOAEPForRSA above
-		// Also tests from the following project were not included due to being similar to project the test above is based
+		// Also tests from the following projects were not included due to being similar to project the test above is based
 		// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkc/ecc/securecurves/
+		// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/pkc/ecc/insecurecurves/
 		
 		scanner.exec();
 		assertErrors();
