@@ -105,7 +105,7 @@
 				<version>2.22.2</version>
 				<configuration>
         			<reuseForks>true</reuseForks>
-					<argLine>-Xmx8G -Dmaven.home="${maven.home}"</argLine>
+					<argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>
