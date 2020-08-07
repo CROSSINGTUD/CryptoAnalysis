@@ -372,6 +372,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_256: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.NonAuthenticatedDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<example.NonAuthenticatedDH_2048: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.NonAuthenticatedEphemeralDH_2048: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		
 		scanner.exec();
@@ -1005,8 +1006,10 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralECDH_80: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_512: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_512: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
-
+		setErrorsCount(IncompleteOperationError.class, new FalsePositives(1, ""), "<pkc.ka.issuesDHandECDH.NonAuthenticatedDH_1024: void main(java.lang.String[])>");
+		
 		scanner.exec();
 		assertErrors();
 	}
