@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,6 +18,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
+import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
@@ -46,7 +50,10 @@ import crypto.typestate.WrappedState;
 import ideal.IDEALSeedSolver;
 import soot.IntType;
 import soot.Local;
+import soot.MethodOrMethodContext;
 import soot.RefType;
+import soot.Scene;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
@@ -56,9 +63,14 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.ThrowStmt;
+import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JStaticInvokeExpr;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
@@ -255,6 +267,51 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				expectPredicateWhenThisObjectIsInState(stateNode, currStmt, predToBeEnsured, satisfiesConstraintSytem);
 			}
 		}
+		
+		Stmt stmt1 = currStmt.getUnit().get();
+		if(stmt1 instanceof AssignStmt && ((AssignStmt) stmt1).getRightOp() instanceof StaticFieldRef) {
+			AssignStmt stmt = (AssignStmt) stmt1;
+			StaticFieldRef value = (StaticFieldRef) stmt.getRightOp();
+			SootClass dClass = value.getFieldRef().declaringClass();
+			ReachableMethods rm = Scene.v().getReachableMethods();
+			QueueReader<MethodOrMethodContext> listener = rm.listener();
+			while (listener.hasNext()) {
+				MethodOrMethodContext next = listener.next();
+				SootMethod m = next.method();
+				if(m.getDeclaringClass().equals(dClass) && m.getName().equals("<clinit>")) {
+					Collection<WeightedForwardQuery<TransitionFunction>> nestedSeeds = new HashSet<>();
+			        if (!m.hasActiveBody())
+			            return;
+			        SootMethod method;
+			        if((method = findSeedSource(m, value)) != null) {
+			        	Collection<CrySLMethod> convert = CrySLMethodToSootMethod.v().convert(method);
+
+						for (CrySLMethod crySLMethod : convert) {
+							Entry<String, String> retObject = crySLMethod.getRetObject();
+							if (!retObject.getKey().equals("_") && currStmt.getUnit().get() instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(), retObject.getKey())) {
+								Value leftOp = stmt.getLeftOp();
+								AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), stmt.getRightOp(), new Statement(stmt, currStmt.getMethod()));
+								expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
+							}
+							// This is useless because of absence of invoke expression in currStmt
+//							int i = 0;
+//							for (Entry<String, String> p : crySLMethod.getParameters()) {
+//								if (predicateParameterEquals(predToBeEnsured.getParameters(), p.getKey())) {
+////									Value param = ie.getArg(i);
+////									if (param instanceof Local) {
+////										Val val = new Val(param, currStmt.getMethod());
+////										expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
+////									}
+//								}
+//								i++;
+//							}
+
+						}
+			        }
+				}
+			}
+		}
+		
 		if (currStmt.isCallsite()) {
 			InvokeExpr ie = ((Stmt) currStmt.getUnit().get()).getInvokeExpr();
 			SootMethod invokedMethod = ie.getMethod();
@@ -281,8 +338,24 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 
 			}
-
 		}
+	}
+	
+	private SootMethod findSeedSource(SootMethod m, Value value) {
+		for (Unit u : m.getActiveBody().getUnits()) {
+        	if(u instanceof JAssignStmt) {
+        		Value val = ((AssignStmt) u).getLeftOp();
+        		if(val.toString().equals(value.toString())) {
+        			Value rval = ((AssignStmt) u).getRightOp();
+        			if(rval instanceof JStaticInvokeExpr) {
+        				SootMethod calledMethod = ((JStaticInvokeExpr) rval).getMethod();
+        				return calledMethod;
+        			}
+        			return findSeedSource(m, rval);
+        		}
+        	}
+		}
+		return null;
 	}
 
 	private boolean predicateParameterEquals(List<ICrySLPredicateParameter> parameters, String key) {

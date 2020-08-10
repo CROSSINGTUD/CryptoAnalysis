@@ -10,13 +10,22 @@ import org.slf4j.LoggerFactory;
 import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
+import soot.MethodOrMethodContext;
 import soot.RefType;
+import soot.Scene;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
+import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JStaticInvokeExpr;
+import soot.jimple.toolkits.callgraph.ReachableMethods;
+import soot.util.queue.QueueReader;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
@@ -49,10 +58,30 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		this.fsm = fsm;
 	}
 
-
 	@Override
 	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
+		
+		if(unit instanceof AssignStmt && ((AssignStmt) unit).getRightOp() instanceof StaticFieldRef) {
+			AssignStmt stmt = (AssignStmt) unit;
+			StaticFieldRef value = (StaticFieldRef) stmt.getRightOp();
+			SootClass dClass = value.getFieldRef().declaringClass();
+			ReachableMethods rm = Scene.v().getReachableMethods();
+			QueueReader<MethodOrMethodContext> listener = rm.listener();
+			while (listener.hasNext()) {
+				MethodOrMethodContext next = listener.next();
+				SootMethod m = next.method();
+				if(m.getDeclaringClass().equals(dClass) && m.getName().equals("<clinit>")) {
+					Collection<WeightedForwardQuery<TransitionFunction>> nestedSeeds = new HashSet<>();
+			        if (!m.hasActiveBody())
+			            return out;
+			        
+			        if(findSeedSource(m, value))
+			        	out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp(), new Statement(stmt,method))));
+				}
+			}
+		}
+		
 		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
 			return out;
 		InvokeExpr invokeExpr = ((Stmt) unit).getInvokeExpr();
@@ -69,6 +98,26 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 			out.add(createQuery(unit,method,new AllocVal(iie.getBase(), method,iie, new Statement((Stmt) unit,method))));
 		}
 		return out;
+	}
+
+	private boolean findSeedSource(SootMethod m, Value value) {
+		for (Unit u : m.getActiveBody().getUnits()) {
+        	if(u instanceof JAssignStmt) {
+        		Value val = ((AssignStmt) u).getLeftOp();
+        		if(val.toString().equals(value.toString())) {
+        			Value rval = ((AssignStmt) u).getRightOp();
+        			if(rval instanceof JStaticInvokeExpr) {
+        				SootMethod calledMethod = ((JStaticInvokeExpr) rval).getMethod();
+        				if (fsm.initialTransitonLabel().contains(calledMethod))
+            				return true;
+        				else
+        					return false;
+        			}
+        			return findSeedSource(m, rval);
+        		}
+        	}
+		}
+		return false;
 	}
 
 	private WeightedForwardQuery<TransitionFunction> createQuery(Unit unit, SootMethod method, AllocVal allocVal) {
