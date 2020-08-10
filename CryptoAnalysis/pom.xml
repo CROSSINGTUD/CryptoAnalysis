@@ -55,7 +55,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>JavaCryptographicArchitecture</artifactId>
-									<version>1.5.1</version>
+									<version>1.5.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -104,7 +104,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
 				<configuration>
-					<argLine>-Xmx10G -Xms256M -Xss128M -Dmaven.home="${maven.home}"</argLine>
+					<argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
 					<trimStackTrace>false</trimStackTrace>
 				</configuration>

@@ -1,11 +1,11 @@
 package tests.pattern;
+
 import javax.servlet.http.Cookie;
-
 import org.junit.Test;
-
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
+
 public class CookiesTest extends UsagePatternTestingFramework{
 
 	@Override
