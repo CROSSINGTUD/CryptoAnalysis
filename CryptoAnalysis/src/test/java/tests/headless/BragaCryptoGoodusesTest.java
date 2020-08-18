@@ -55,8 +55,8 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/cib/avoidCodingErros/
 	@Test
-	public void avoidCodingErrosExamples() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidCodingErros")
+	public void avoidCodingErrorsExamples() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/avoidCodingErrors")
 				.getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
