@@ -479,8 +479,10 @@ public class CipherTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		hMacSHA256.init(keyMac);
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
-		Assertions.mustNotBeInAcceptingState(hMacSHA256);
-		Assertions.notHasEnsuredPredicate(macced);
+		Assertions.mustBeInAcceptingState(hMacSHA256);
+		Assertions.hasEnsuredPredicate(macced);
+		// TODO Why doesn't the analysis find the predicate contradiction?
+		Assertions.predicateContradiction();
 	}
 
 	@Test
