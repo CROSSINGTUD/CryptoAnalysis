@@ -182,4 +182,8 @@ public abstract class CryptoScanner {
 	public Collection<AnalysisSeedWithSpecification> getAnalysisSeeds() {
 		return this.seedsWithSpec.values();
 	}
+
+	public List<String> forbiddenPredicates() {
+		return null;
+	}
 }

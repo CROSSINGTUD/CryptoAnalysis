@@ -65,7 +65,9 @@ public class CommandLineReporter extends ErrorMarkerListener {
 			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
 				s += String.format("\n\t in Method: %s\n", e.getKey().getSubSignature());
 				for (AbstractError marker : e.getValue()) {
-					s += String.format("\t\t%s violating CrySL rule for %s", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
+					if (marker.getRule() != null) {
+						s += String.format("\t\t%s violating CrySL rule for %s", marker.getClass().getSimpleName() ,marker.getRule().getClassName());
+					}
 					if(marker instanceof ErrorWithObjectAllocation) {
 						 s += String.format(" (on Object #%s)\n", ((ErrorWithObjectAllocation) marker).getObjectLocation().getObjectId());
 					} else {
