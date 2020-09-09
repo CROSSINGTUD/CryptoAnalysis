@@ -13,6 +13,7 @@ import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.preanalysis.BoomerangPretransformer;
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
