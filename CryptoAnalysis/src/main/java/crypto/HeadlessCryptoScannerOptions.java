@@ -1,6 +1,7 @@
 package crypto;
 
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 
 public class HeadlessCryptoScannerOptions extends Options {
@@ -14,14 +15,19 @@ public class HeadlessCryptoScannerOptions extends Options {
 		Option cg = Option.builder().longOpt("cg").hasArg()
 				.desc("Select the call graph for the analysis. (CHA, SPARK-LIBRARY, SPARK)").build();
 		addOption(cg);
-
-		Option rulesDir = Option.builder().longOpt("rulesDir").hasArg().required()
-				.desc("Specify the directory for the CrySL rules").build();
-		addOption(rulesDir);
 		
-		Option zipPath = Option.builder().longOpt("rulesZip").hasArg().required()
+		OptionGroup rulesSrc = new OptionGroup();
+		rulesSrc.setRequired(true);
+
+		Option rulesDir = Option.builder().longOpt("rulesDir").hasArg()
+				.desc("Specify the directory for the CrySL rules").build();
+		rulesSrc.addOption(rulesDir);
+		
+		Option zipPath = Option.builder().longOpt("rulesZip").hasArg()
 				.desc("Specify the path for the CrySL rule Zip file").build();
-		addOption(zipPath);
+		rulesSrc.addOption(zipPath);
+		
+		addOptionGroup(rulesSrc);
 
 		Option rulesFormat = Option.builder().longOpt("rulesInSrc").hasArg(false).desc("Specfiy that rules passed as parameter are in source format.").build();
 		addOption(rulesFormat);
