@@ -65,6 +65,7 @@ public class ReporterHelper{
 					}
 					report += String.format("\t\t\t%s\n", marker.toErrorMarkerString());
 					report += String.format("\t\t\tat statement: %s\n\n", marker.getErrorLocation().getUnit().get());
+					report += String.format("\t\t\tat line: %s\n\n", marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber());
 				}
 			}
 			report += "\n";

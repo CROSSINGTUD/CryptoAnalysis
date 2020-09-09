@@ -48,5 +48,25 @@ public class CommandLineReporter extends ErrorMarkerListener {
 	public void afterAnalysis() {
 		this.analysisReport = ReporterHelper.generateReport(this.rules, this.objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
 		System.out.println(analysisReport);
+
+		/*
+		if (outputFolder != null) {
+			try {
+				FileWriter writer = new FileWriter(outputFolder +"/CogniCrypt-Report.txt");
+				writer.write(s);
+				writer.close();
+				for (SootClass c : this.errorMarkers.rowKeySet()) {
+					FileOutputStream streamOut = new FileOutputStream(new File(outputFolder +"/"+c.toString()+".jimple"));
+					PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
+					Printer.v().printTo(c, writerOut);
+					writerOut.flush();
+					streamOut.close();
+					writerOut.close();
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("Could not write to file " + outputFolder);
+			}
+		}
+		*/
 	}
 }
