@@ -55,7 +55,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>JavaCryptographicArchitecture</artifactId>
-									<version>1.5.1</version>
+									<version>1.5.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -85,7 +85,7 @@
 								<artifactItem>
 									<groupId>de.paderborn.uni</groupId>
 									<artifactId>BouncyCastle-JCA</artifactId>
-									<version>0.2</version>
+									<version>0.4</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -97,7 +97,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Adding The Surefire Maven Plugin to The POM File so it can generate 
+			<!-- Adding The Surefire Maven Plugin to The POM File so it can generate
 				test reports -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -122,7 +122,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate 
+			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate
 				coverage reports -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -168,7 +168,7 @@
 					</archive>
 					<descriptors>
 						<!-- custom descriptor is copied from jar-with-dependencies -->
-						<!-- This also copies the rules from test resources as default rules 
+						<!-- This also copies the rules from test resources as default rules
 							into the jar -->
 						<descriptor>build/descriptor.xml</descriptor>
 					</descriptors>
