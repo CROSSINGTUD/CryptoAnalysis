@@ -1,7 +1,7 @@
 package crypto.reporting;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,33 +13,52 @@ import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 
 @SuppressWarnings("unchecked")
 public class SARIFReporter extends ErrorMarkerListener {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SARIFReporter.class);
+	
 	private File outputFolder;
-	// private List<CryptSLRule> rules;
+	// private List<CrySLRule> rules;
 	private Collection<IAnalysisSeed> objects = new HashSet<>();
 	private JSONObject files = new JSONObject(), resources = new JSONObject(), rules = new JSONObject();
 	private JSONArray results = new JSONArray();
 	private SARIFHelper sarifHelper;
 	private Map<String, Integer> errorCountMap;
+	/**
+	 * name of the analysis report
+	 */
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.json";
+	
 
-	public SARIFReporter(String string, List<CryptSLRule> rules) {
-		this.outputFolder = (string != null ? new File(string) : null);
+
+	/**
+	 * Creates {@link SARIFReporter} a constructor with reportDir and rules as parameter
+	 * 
+	 * @param reportDir a {@link String} path giving the location of the report directory
+	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
+	 */
+	public SARIFReporter(String reportDir, List<CrySLRule> rules) {
+		this.outputFolder = (reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir")));
 		this.sarifHelper = new SARIFHelper();
 		this.errorCountMap = new HashMap<String, Integer>();
 		initializeMap();
-		// this.rules = rules;
 	}
 	
-	public SARIFReporter(String string, List<CryptSLRule> rules, SourceCodeLocater sourceLocater) {
+	public SARIFReporter(String string, List<CrySLRule> rules, SourceCodeLocater sourceLocater) {
 		this(string, rules);
 		this.sarifHelper = new SARIFHelper(sourceLocater);
 	}
@@ -125,14 +144,13 @@ public class SARIFReporter extends ErrorMarkerListener {
 			}
 		}
 		JSONObject sarif = makeSARIF();
-		if (outputFolder != null) {
-			try {
-				FileWriter writer = new FileWriter(outputFolder + File.separator+"CogniCrypt-SARIF-Report.txt");
-				writer.write(sarif.toString());
-				writer.close();
-			} catch (IOException e) {
-				throw new RuntimeException("Could not write to file " + outputFolder);
-			}
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+			writer.writeValue(Paths.get(outputFolder + File.separator + REPORT_NAME).toFile(), sarif);
+			LOGGER.info("SARIF Report generated to file : "+ outputFolder + File.separator + REPORT_NAME);
+		} catch (IOException e) {
+			LOGGER.error("Could not write to file: "+outputFolder.getAbsolutePath() + File.separator+ REPORT_NAME, e);
 		}
 	}
 }

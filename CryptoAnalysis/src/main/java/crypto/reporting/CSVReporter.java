@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashBasedTable;
@@ -26,9 +29,10 @@ import boomerang.Query;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
@@ -39,11 +43,12 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -52,24 +57,45 @@ import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
-public class CSVReporter extends CrySLAnalysisListener {
-
+public class CSVReporter extends ErrorMarkerListener {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
+	
 	private static final String CSV_SEPARATOR = ";";
 	private Set<AbstractError> errors = Sets.newHashSet();
 	private int seeds;
 	private List<String> headers = Lists.newArrayList();
 	private Map<String,String> headersToValues = Maps.newHashMap();
-	private List<CryptSLRule> rules;
+	private List<CrySLRule> rules;
 	private Set<SootMethod> dataflowReachableMethods = Sets.newHashSet();
 	private Stopwatch analysisTime = Stopwatch.createUnstarted();
-	private String csvReportFileName;
+	
+	/**
+	 * Path of directory of analysis reports
+	 */
+	private File reportDir;
+	/**
+	 * name of the analysis report
+	 */
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
+	/**
+	 * the headers of CSV report
+	 */
 	private enum Headers{
 		SoftwareID,SeedObjectCount,CallGraphTime_ms,CryptoAnalysisTime_ms,CallGraphReachableMethods,
 		CallGraphReachableMethods_ActiveBodies,DataflowVisitedMethod
 	}
 
-	public CSVReporter(String csvReportFileName, String softwareId,  List<CryptSLRule> rules, long callGraphConstructionTime) {
-		this.csvReportFileName = csvReportFileName;
+	/**
+	 * Creates {@link CSVReporter} a constructor with reportDir, softwareId, rules and callGraphConstructionTime as parameter
+	 * 
+	 * @param reportDir a {@link String} path giving the location of the report directory
+	 * @param softwareId {@link Format} An identifier used to label output files in CSV report format
+	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
+	 * @param callGraphConstructionTime {@link long} call graph construction time in ms
+	 */
+	public CSVReporter(String reportDir, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime) {
+		this.reportDir = (reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir")));
 		this.rules = rules;
 		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
@@ -102,7 +128,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 	
 	private void addDynamicHeader(String name) {
 		headers.add(name+"_sum");
-		for(CryptSLRule r : rules){
+		for(CrySLRule r : rules){
 			headers.add(name+"_"+r.getClassName());
 		}
 	}
@@ -119,7 +145,7 @@ public class CSVReporter extends CrySLAnalysisListener {
 		put(Headers.CryptoAnalysisTime_ms, analysisTime.elapsed(TimeUnit.MILLISECONDS));
 		put(Headers.SeedObjectCount, seeds);
 		
-		Table<Class, CryptSLRule, Integer> errorTable = HashBasedTable.create(); 
+		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
 		for(AbstractError err : errors){
 			Integer integer = errorTable.get(err.getClass(), err.getRule());
 			if(integer == null){
@@ -130,12 +156,12 @@ public class CSVReporter extends CrySLAnalysisListener {
 		}
 
 
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
+		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
 			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
 		}
 		
 		Map<Class, Integer> errorsAccumulated = Maps.newHashMap(); 
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
+		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
 			Integer integer = errorsAccumulated.get(c.getRowKey());	
 			if(integer == null){
 				integer = 0;
@@ -153,19 +179,8 @@ public class CSVReporter extends CrySLAnalysisListener {
 
 	private void writeToFile() {
 		try {
-			File reportFile = new File(csvReportFileName).getAbsoluteFile();
-			if (!reportFile.getParentFile().exists()) {
-				try {
-					Files.createDirectories(reportFile.getParentFile().toPath());
-				} catch (IOException e) {
-					throw new RuntimeException("Was not able to create directories for IDEViz output!");
-				}
-			}
-			boolean fileExisted = reportFile.exists();
-			FileWriter writer = new FileWriter(reportFile, true);
-			if (!fileExisted) {
-				writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
-			}
+			FileWriter writer = new FileWriter(reportDir + File.separator+ REPORT_NAME);
+			writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
 			List<String> line = Lists.newArrayList();
 			for(String h : headers){
 				String string = headersToValues.get(h);
@@ -176,16 +191,22 @@ public class CSVReporter extends CrySLAnalysisListener {
 			}
 			writer.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			writer.close();
+			LOGGER.info("CSV Report generated to file : "+ reportDir.getAbsolutePath() + File.separator+ REPORT_NAME);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("Could not write to " + reportDir.getAbsolutePath() + File.separator+ REPORT_NAME, e);
 		}
 	}
 
 	private void put(String key, Object val) {
 		if (!headers.contains(key)) {
-			System.err.println("Did not create a header to this value " + key);
+			LOGGER.error("Did not create a header to this value " + key);
 		} else {
+			if(val == null){
+				LOGGER.info(key+" is null");
+			}
+			else {
 			headersToValues.put(key, val.toString());
+			}
 		}
 	}
 	private void put(Headers key, Object val) {
@@ -233,9 +254,9 @@ public class CSVReporter extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 		
 	}
 
@@ -268,6 +289,12 @@ public class CSVReporter extends CrySLAnalysisListener {
 
 	@Override
 	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addProgress(int processedSeeds, int workListsize) {
 		// TODO Auto-generated method stub
 		
 	}

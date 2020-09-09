@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -73,6 +74,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.CustomClass: void init(javax.crypto.SecretKey,java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", NeverTypeOfError.class, 1);
+		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", HardCodedError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -87,9 +89,11 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		  
 //
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
+		setErrorsCount("<main.Main: void keyStoreExample()>", HardCodedError.class, 1);
 		setErrorsCount("<main.Main: void cipherUsageExample()>", ConstraintError.class, 1);
 
 		setErrorsCount("<main.Main: void use(javax.crypto.Cipher)>", TypestateError.class, 1);
@@ -112,6 +116,16 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void sslExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/SSLMisuseExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
 		scanner.exec();
 		assertErrors();
 	}

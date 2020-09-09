@@ -22,7 +22,6 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -30,7 +29,7 @@ import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
@@ -43,11 +42,12 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import soot.Body;
 import soot.Local;
 import soot.SceneTransformer;
@@ -81,7 +81,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
 	private static final RuleFormat ruleFormat= RuleFormat.SOURCE;
-	List<CryptSLRule> rules;
+	List<CrySLRule> rules;
 	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
@@ -221,15 +221,15 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-									Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-								for(Cell<Statement, Val, Set<EnsuredCryptSLPredicate>> c : existingPredicates.cellSet()){
+							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
+								for(Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
 											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
 											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
-												for(EnsuredCryptSLPredicate pred : c.getValue()){
+												for(EnsuredCrySLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	
 											}
@@ -237,7 +237,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										if(e instanceof NotHasEnsuredPredicateAssertion){
 											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
 											if(assertion.getStmt().equals(c.getRowKey().getUnit().get())){
-												for(EnsuredCryptSLPredicate pred : c.getValue()){
+												for(EnsuredCrySLPredicate pred : c.getValue()){
 													assertion.reported(c.getColumnKey(),pred);
 												}	
 											}
@@ -314,6 +314,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								// TODO Auto-generated method stub
 								
 							}
+
+							@Override
+							public void addProgress(int processedSeeds, int workListsize) {
+								// TODO Auto-generated method stub
+								
+							}
 							
 
 						};
@@ -347,17 +353,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		};
 	}
 
-	private List<CryptSLRule> getRules() {
+	private List<CrySLRule> getRules() {
 		if(rules == null) {
-			rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			try {
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+			} catch (CryptoAnalysisException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return rules;
 	}
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		for(CryptSLRule r : getRules()) {
-			excludedPackages.add(Utils.getFullyQualifiedName(r));
+		for(CrySLRule r : getRules()) {
+			excludedPackages.add(r.getClassName());
 		}
 		return excludedPackages;
 	}

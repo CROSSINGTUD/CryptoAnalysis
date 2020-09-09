@@ -17,8 +17,8 @@ import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.predicates.PredicateHandler;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import soot.MethodOrMethodContext;
@@ -62,17 +62,18 @@ public abstract class CryptoScanner {
 	};
 
 	public CryptoScanner() {
-		CryptSLMethodToSootMethod.reset();
+		CrySLMethodToSootMethod.reset();
 	}
 
-	public void scan(List<CryptSLRule> specs) {
-		for (CryptSLRule rule : specs) {
+	public void scan(List<CrySLRule> specs) {
+		int processedSeeds = 0;
+		for (CrySLRule rule : specs) {
 			specifications.add(new ClassSpecification(rule, this));
 		}
 		CrySLResultsReporter listener = getAnalysisListener();
 		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
-		logger.info("Searching fo Seeds for analysis!");
+		logger.info("Searching for seeds for the analysis!");
 		initialize();
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
 		logger.info("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
@@ -80,6 +81,8 @@ public abstract class CryptoScanner {
 			IAnalysisSeed curr = worklist.poll();
 			listener.discoveredSeed(curr);
 			curr.execute();
+			processedSeeds++;
+			listener.addProgress(processedSeeds,worklist.size());
 			estimateAnalysisTime();
 		}
 

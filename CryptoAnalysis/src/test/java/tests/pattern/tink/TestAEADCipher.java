@@ -63,7 +63,7 @@ public class TestAEADCipher extends TestTinkPrimitives {
 		Assertions.hasEnsuredPredicate(kt); //this might look crazy, but sometimes Ok. in other executions, this line leads to a red bar.  
 		
 		final String plainText = "Just testing the encryption mode of AEAD"; 
-		final String aad = "cryptsl";
+		final String aad = "crysl";
 		
 		Aead aead = AeadFactory.getPrimitive(ksh);
 		byte[] out = aead.encrypt(plainText.getBytes(), aad.getBytes());
