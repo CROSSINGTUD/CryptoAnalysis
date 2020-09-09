@@ -6,7 +6,6 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import org.apache.velocity.tools.config.SkipSetters;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -30,7 +29,7 @@ import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class BouncyCastlesUsagePatternTest extends UsagePatternTestingFramework {
+public class BouncyCastleTest extends UsagePatternTestingFramework {
 
 	@Override
 	protected Ruleset getRuleSet() {

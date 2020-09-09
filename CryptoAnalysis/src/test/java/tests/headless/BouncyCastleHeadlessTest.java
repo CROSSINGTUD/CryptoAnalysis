@@ -13,7 +13,6 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import tests.headless.FindingsType.FalseNegatives;
-import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.TruePositives;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
