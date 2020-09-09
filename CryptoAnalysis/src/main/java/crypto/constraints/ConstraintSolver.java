@@ -12,13 +12,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import boomerang.jimple.Statement;
 import crypto.analysis.AlternativeReqPredicate;
@@ -67,7 +67,7 @@ import soot.jimple.internal.JNewArrayExpr;
 public class ConstraintSolver {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintSolver.class);
-	
+
 	private final List<ISLConstraint> allConstraints;
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
@@ -98,8 +98,13 @@ public class ConstraintSolver {
 			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
 				if (cons instanceof CrySLPredicate) {
 					RequiredCrySLPredicate pred = retrieveValuesForPred(cons);
-					relConstraints.add(pred.getPred());
-					requiredPredicates.add(pred);
+					if (pred != null) {
+						CrySLPredicate innerPred = pred.getPred();
+						if (innerPred != null) {
+							relConstraints.add(innerPred);
+							requiredPredicates.add(pred);
+						}
+					}
 				} else if (cons instanceof CrySLConstraint) {
 					ISLConstraint right = ((CrySLConstraint) cons).getRight();
 					if (right instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) right).getPredName())) {
