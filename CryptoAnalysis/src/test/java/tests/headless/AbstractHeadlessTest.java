@@ -18,6 +18,7 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
+import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
@@ -53,7 +54,16 @@ public abstract class AbstractHeadlessTest {
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	private static Format reportFormat = null;
+	
+	public static void setReportFormat(Format reportFormat) {
+		AbstractHeadlessTest.reportFormat = reportFormat;
+	}
 
+	public static void setVISUALIZATION(boolean vISUALIZATION) {
+		VISUALIZATION = vISUALIZATION;
+	}
+	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
@@ -102,6 +112,11 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
+			}
+			
+			@Override
+			protected Format reportFormat(){
+				return VISUALIZATION ? reportFormat : null;
 			}
 		};
 		return scanner;
