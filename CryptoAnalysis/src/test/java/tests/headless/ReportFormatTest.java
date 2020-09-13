@@ -1,12 +1,10 @@
 package tests.headless;
 
 import java.io.File;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import crypto.HeadlessCryptoScanner;
-import crypto.HeadlessCryptoScanner.Format;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 
 public class ReportFormatTest extends AbstractHeadlessTest{
 
@@ -21,7 +19,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(Format.TXT);
+		setReportFormat(ReportFormat.TXT);
 		setVISUALIZATION(true);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		scanner.exec();
@@ -36,7 +34,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(Format.CSV);
+		setReportFormat(ReportFormat.CSV);
 		setVISUALIZATION(true);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		scanner.exec();
@@ -51,7 +49,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(Format.SARIF);
+		setReportFormat(ReportFormat.SARIF);
 		setVISUALIZATION(true);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		scanner.exec();

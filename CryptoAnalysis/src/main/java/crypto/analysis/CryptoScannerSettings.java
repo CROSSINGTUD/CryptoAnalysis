@@ -8,9 +8,9 @@ public class CryptoScannerSettings {
 	private RulesetPathType rulesetPathType = null;
 	private String rulesetPathDir = null;
 	private String rulesetPathZip = null;
-	private String sootPath = null;
+	private String sootPath = "";
 	private String applicationPath = null;
-	private String softwareIdentifier = null;
+	private String softwareIdentifier = "";
 	private String reportDirectory = null;
 	private ReportFormat reportFormat = null;
 	private boolean preAnalysis;
@@ -19,7 +19,6 @@ public class CryptoScannerSettings {
 	
 	public CryptoScannerSettings() {
 		setControlGraph(ControlGraph.CHA);
-		setReportFormat(ReportFormat.TXT);
 		setPreAnalysis(false);
 		setVisualization(false);
 		setProviderDetectionAnalysis(true);
@@ -191,15 +190,15 @@ public class CryptoScannerSettings {
 		}
 	}
 	
-	private enum ControlGraph {
+	public enum ControlGraph {
 		CHA, SPARK, SPARKLIB,
 	}
 	
-	private enum ReportFormat {
+	public enum ReportFormat {
 		TXT, SARIF, CSV
 	}
 	
-	private enum RulesetPathType {
+	public enum RulesetPathType {
 		DIR, ZIP
 	}
 	

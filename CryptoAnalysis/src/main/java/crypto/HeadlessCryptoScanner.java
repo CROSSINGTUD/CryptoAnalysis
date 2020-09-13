@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.cli.CommandLine;
@@ -16,8 +15,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
@@ -29,6 +26,9 @@ import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.CryptoScannerSettings;
+import crypto.analysis.CryptoScannerSettings.ControlGraph;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.SeedFactory;
@@ -57,6 +57,7 @@ import soot.options.Options;
 import typestate.TransitionFunction;
 
 public abstract class HeadlessCryptoScanner {
+	private static CryptoScannerSettings settings = new CryptoScannerSettings();
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 	private static CommandLine options;
@@ -64,22 +65,18 @@ public abstract class HeadlessCryptoScanner {
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-
-	public static enum CG {
-		CHA, SPARK_LIBRARY, SPARK
-	}
-
-	/**
-	 * the supported analysis report formats
-	 */
-	public static enum Format{
-		TXT, SARIF, CSV
-	}
 	
 	public static void main(String... args) {
-		HeadlessCryptoScanner scanner;
+		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
+			
+			@Override
+			protected String applicationClassPath() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
 		try {
-			scanner = createFromOptions(args);
+			settings.parseSettingsFromCLI(args);
 		} catch (CryptoAnalysisException e) {
 			LOGGER.error("Analysis failed with error: " + e.getClass().toString(), e);
 			return;
@@ -92,7 +89,6 @@ public abstract class HeadlessCryptoScanner {
 		try {
 			options = parser.parse(new HeadlessCryptoScannerOptions(), args);
 		} catch (ParseException e) {
-			commandLineParserErrorMessage(e);
 			throw new CryptoAnalysisException("", e);
 		}
 
@@ -123,18 +119,18 @@ public abstract class HeadlessCryptoScanner {
 		}
 		
 		PRE_ANALYSIS = options.hasOption("preanalysis");
-		final CG callGraphAlogrithm;
+		final ControlGraph callGraphAlogrithm;
 		if (options.hasOption("cg")) {
 			String val = options.getOptionValue("cg");
 			if (val.equalsIgnoreCase("spark")) {
-				callGraphAlogrithm = CG.SPARK;
+				callGraphAlogrithm = ControlGraph.SPARK;
 			} else if (val.equalsIgnoreCase("spark-library")) {
-				callGraphAlogrithm = CG.SPARK_LIBRARY;
+				callGraphAlogrithm = ControlGraph.SPARKLIB;
 			} else {
-				callGraphAlogrithm = CG.CHA;
+				callGraphAlogrithm = ControlGraph.CHA;
 			}
 		} else {
-			callGraphAlogrithm = CG.CHA;
+			callGraphAlogrithm = ControlGraph.CHA;
 		}
 		
 		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
@@ -150,7 +146,7 @@ public abstract class HeadlessCryptoScanner {
 			}
 
 			@Override
-			protected CG callGraphAlogrithm() {
+			protected ControlGraph callGraphAlogrithm() {
 				return callGraphAlogrithm;
 			}
 
@@ -175,7 +171,7 @@ public abstract class HeadlessCryptoScanner {
 			}
 			
 			@Override
-			protected Format reportFormat(){
+			protected ReportFormat reportFormat(){
 				return getReportFormat();
 			}
 			
@@ -211,6 +207,7 @@ public abstract class HeadlessCryptoScanner {
 	public boolean hasSeeds(){
 		return hasSeeds;
 	}
+	
 	private void checkIfUsesObject() {
 		final SeedFactory seedFactory = new SeedFactory(getRules());
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
@@ -227,8 +224,6 @@ public abstract class HeadlessCryptoScanner {
 		PackManager.v().runPacks();
 		hasSeeds = seedFactory.hasSeeds();
 	}
-
-
 
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
@@ -248,7 +243,7 @@ public abstract class HeadlessCryptoScanner {
 
 	private Transformer createAnalysisTransformer() {
 		return new SceneTransformer() {
-
+			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
@@ -343,19 +338,19 @@ public abstract class HeadlessCryptoScanner {
 	 * Default report format is null
 	 * @return the {@link Format}}
 	 */
-	protected Format getReportFormat() {
-		final Format reportFormat;
+	protected ReportFormat getReportFormat() {
+		final ReportFormat reportFormat;
 		if (options.hasOption("reportFormat")) {
 			String format =  options.getOptionValue("reportFormat").toLowerCase();
 			switch(format) {
 			case "csv":
-				reportFormat = Format.CSV;
+				reportFormat = ReportFormat.CSV;
 				break;
 			case "sarif":
-				reportFormat = Format.SARIF;
+				reportFormat = ReportFormat.SARIF;
 				break;
 			case "txt":
-				reportFormat = Format.TXT;
+				reportFormat = ReportFormat.TXT;
 				break;
 			default:
 				LOGGER.info("Incorrect report format '" +format+ "'. Available formats are: CSV, SARIF and TXT");
@@ -371,12 +366,11 @@ public abstract class HeadlessCryptoScanner {
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
 		G.v().reset();
 		Options.v().set_whole_program(wholeProgram);
-
 		switch (callGraphAlogrithm()) {
 		case CHA:
 			Options.v().setPhaseOption("cg.cha", "on");
 			break;
-		case SPARK_LIBRARY:
+		case SPARKLIB:
 			Options.v().setPhaseOption("cg.spark", "on");
 			Options.v().setPhaseOption("cg", "library:any-subtype");
 			break;
@@ -390,7 +384,6 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
-		
 		// JAVA 8
 		if(getJavaVersion() < 9)
 		{
@@ -407,13 +400,11 @@ public abstract class HeadlessCryptoScanner {
 		{
 			Options.v().set_prepend_classpath(true);
 			Options.v().set_soot_modulepath(sootClassPath());
-		}	
-		
+		}
 		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
 		Options.v().set_include(getIncludeList());
 		Options.v().set_exclude(getExcludeList());
 		Options.v().set_full_resolver(true);
-		
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
 	}
@@ -449,9 +440,8 @@ public abstract class HeadlessCryptoScanner {
 		return includeList;
 	}
 
-
-	protected CG callGraphAlogrithm() {
-		return CG.CHA;
+	protected ControlGraph callGraphAlogrithm() {
+		return ControlGraph.CHA;
 	}
 
 	protected String sootClassPath() {
@@ -462,22 +452,18 @@ public abstract class HeadlessCryptoScanner {
 	
 	protected String softwareIdentifier(){
 		return "";
-	};
+	}
 	
 	protected String getOutputFolder(){
 		return null;
-	};
+	}
 	
 
 	protected boolean enableVisualization(){
 		return false;
-	};
-	
-	/**
-	 * Determines the analysis report {@link Format} 
-	 * @return null
-	 */ 
-	protected Format reportFormat() {
+	}
+	 
+	protected ReportFormat reportFormat() {
 		return null;
 	}
 	
@@ -507,22 +493,5 @@ public abstract class HeadlessCryptoScanner {
 	    boolean check = new File(moduleFile).exists();
 	    return check;
 	}
-	
-	private static void commandLineParserErrorMessage(ParseException e) {
-		LOGGER.error("An error occured while trying to parse the command line arguments: ", e);
-		LOGGER.error("\nThe default command for running CryptoAnalyis is: \n"
-				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n" + 
-				"      --rulesDir=<absolute_path_to_crysl_source_code_format_rules> \\\r\n" + 
-				"      --applicationCp=<absolute_application_path>\n"
-				+ "\nAdditional arguments that can be used are:\n"
-				+ "--cg=<selection_of_call_graph_for_analysis (CHA, SPARK-LIBRARY, SPARK)>\n"
-				+ "--rulesInSrc (specifies that rules are in source format)\n"
-				+ "--sootCp=<absolute_path_of_whole_project>\n"
-				+ "--softwareIdentifier=<identifier_for_labelling_output_files>\n"
-				+ "--reportDir=<directory_location_for_cognicrypt_report>\n"
-				+ "--preanalysis (enables pre-analysis)\n"
-				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
-				+ "--providerDetection (enables provider detection analysis)\n"
-				+ "--reportFormat=<format of cognicrypt_report>\n");
-	}
+
 }
