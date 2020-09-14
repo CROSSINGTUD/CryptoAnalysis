@@ -21,7 +21,7 @@ public class CryptoScannerSettings {
 		setControlGraph(ControlGraph.CHA);
 		setPreAnalysis(false);
 		setVisualization(false);
-		setProviderDetectionAnalysis(true);
+		setProviderDetectionAnalysis(false);
 	}
 	
 	public ControlGraph getControlGraph() {

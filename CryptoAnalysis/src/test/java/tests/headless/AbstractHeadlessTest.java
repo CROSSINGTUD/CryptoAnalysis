@@ -52,6 +52,7 @@ public abstract class AbstractHeadlessTest {
 
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
+	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 	private static ReportFormat reportFormat = null;
@@ -62,6 +63,10 @@ public abstract class AbstractHeadlessTest {
 
 	public static void setVISUALIZATION(boolean vISUALIZATION) {
 		VISUALIZATION = vISUALIZATION;
+	}
+	
+	public static void setProviderDetection(boolean providerDetection) {
+		PROVIDER_DETECTION = providerDetection;
 	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -112,6 +117,11 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
+			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return PROVIDER_DETECTION;
 			}
 			
 			@Override
