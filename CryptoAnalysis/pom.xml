@@ -8,6 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spdsVersion>2.5.1</spdsVersion>
+		<sootVersion>4.3.0-SNAPSHOT</sootVersion>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -235,6 +236,11 @@
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>idealPDS</artifactId>
 			<version>${spdsVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.soot-oss</groupId>
+			<artifactId>soot</artifactId>
+			<version>${sootVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
