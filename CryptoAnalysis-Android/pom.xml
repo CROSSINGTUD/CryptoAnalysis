@@ -9,7 +9,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cryptoAnalysisVersion>2.8.0-SNAPSHOT</cryptoAnalysisVersion>
-		<flowDroidVersion>2.7.1</flowDroidVersion>
+		<flowDroidVersion>2.8</flowDroidVersion>
 	</properties>
 	<build>
 		<plugins>
