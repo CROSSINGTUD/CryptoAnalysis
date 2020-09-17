@@ -198,10 +198,11 @@ public abstract class HeadlessCryptoScanner {
 				return options.hasOption("providerDetection");
 			}
 			
-			@Overrides
+			@Override
 			protected List<String> getIgnoredPackages(){
 				return ignorePackageList;
-
+			}
+			
 			protected Format reportFormat(){
 				return getReportFormat();
 			}
@@ -562,7 +563,7 @@ public abstract class HeadlessCryptoScanner {
 				+ "--preanalysis (enables pre-analysis)\n"
 				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
 				+ "--providerDetection (enables provider detection analysis)\n"
-				+ "--ignorePackages (List the name of packages to be ignored during the analysis)\n");
+				+ "--ignorePackages (List the name of packages to be ignored during the analysis)\n"
 				+ "--reportFormat=<format of cognicrypt_report>\n");
 	}
 }

@@ -83,6 +83,7 @@ public abstract class AbstractHeadlessTest {
 
 	public static void setIGNORE_PACKAGE(boolean iGNORE_PACKAGE) {
 		IGNORE_PACKAGE = iGNORE_PACKAGE;
+	}
 
 	
 	public static void setReportFormat(Format reportFormat) {
@@ -146,6 +147,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<String> getIgnoredPackages(){
 				return ignorePackages;
+			}
 
 			protected Format reportFormat(){
 				return VISUALIZATION ? reportFormat : null;
