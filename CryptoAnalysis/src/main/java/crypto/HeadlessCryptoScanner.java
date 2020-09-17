@@ -41,6 +41,7 @@ import crypto.reporting.CSVReporter;
 import crypto.reporting.CommandLineReporter;
 import crypto.reporting.ErrorMarkerListener;
 import crypto.reporting.SARIFReporter;
+import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
@@ -77,6 +78,13 @@ public abstract class HeadlessCryptoScanner {
 		CHA, SPARK_LIBRARY, SPARK
 	}
 
+	/**
+	 * the supported analysis report formats
+	 */
+	public static enum Format{
+		TXT, SARIF, CSV
+	}
+	
 	public static void main(String... args) {
 		HeadlessCryptoScanner scanner;
 		try {
@@ -137,6 +145,7 @@ public abstract class HeadlessCryptoScanner {
 		} else {
 			callGraphAlogrithm = CG.CHA;
 		}
+		
 		if(options.hasOption("ignorePackages")) {
 			final File ignorePackage;
 			try {
@@ -178,20 +187,10 @@ public abstract class HeadlessCryptoScanner {
 			protected String getOutputFolder(){
 				return options.getOptionValue("reportDir");
 			}
-
-			@Override
-			protected String getCSVOutputFile(){
-				return options.getOptionValue("csvReportFile");
-			}
 			
 			@Override
 			protected boolean enableVisualization(){
 				return options.hasOption("visualization");
-			}
-	
-			@Override
-			protected boolean sarifReport() {
-				return options.hasOption("sarifReport");
 			}
 			
 			@Override
@@ -199,20 +198,17 @@ public abstract class HeadlessCryptoScanner {
 				return options.hasOption("providerDetection");
 			}
 			
-			@Override
+			@Overrides
 			protected List<String> getIgnoredPackages(){
 				return ignorePackageList;
+
+			protected Format reportFormat(){
+				return getReportFormat();
 			}
 			
 		};
 		return sourceCryptoScanner;
 	}
-	
-
-	protected String getCSVOutputFile(){
-		return null;
-	}
-
 
 	public void exec() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
@@ -287,12 +283,21 @@ public abstract class HeadlessCryptoScanner {
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CrySLRule> rules = HeadlessCryptoScanner.this.getRules();
 				ErrorMarkerListener fileReporter;
-				if (sarifReport()) {
-					fileReporter = new SARIFReporter(getOutputFolder(), rules);
-				} else {
-					fileReporter = new CommandLineReporter(getOutputFolder(), rules);
+				if(reportFormat()!= null) {
+					switch (reportFormat()) {
+					case SARIF:
+						fileReporter = new SARIFReporter(getOutputFolder(), rules);
+						break;
+					case CSV:
+						fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS));
+						break;
+					default:
+						fileReporter = new TXTReporter(getOutputFolder(), rules);
+					}
 				}
-
+				else {
+					fileReporter = new CommandLineReporter(rules);
+				}
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
 				if(getAdditionalListener() != null)
 					reporter.addReportListener(getAdditionalListener());
@@ -326,10 +331,6 @@ public abstract class HeadlessCryptoScanner {
 					fileReporter.setIgnorePackages(getIgnoredPackages());
 				}
 				reporter.addReportListener(fileReporter);
-				String csvOutputFile = getCSVOutputFile();
-				if(csvOutputFile != null){
-					reporter.addReportListener(new CSVReporter(csvOutputFile,softwareIdentifier(),rules,callGraphWatch.elapsed(TimeUnit.MILLISECONDS)));
-				}
 				
 				if (providerDetection()) {
 					//create a new object to execute the Provider Detection analysis
@@ -365,6 +366,36 @@ public abstract class HeadlessCryptoScanner {
 			}
 		}
 		return Collections.emptyList();
+	}
+	
+	/**
+	 * Get the report format specified in CLI --reportFormat option
+	 * Default report format is null
+	 * @return the {@link Format}}
+	 */
+	protected Format getReportFormat() {
+		final Format reportFormat;
+		if (options.hasOption("reportFormat")) {
+			String format =  options.getOptionValue("reportFormat").toLowerCase();
+			switch(format) {
+			case "csv":
+				reportFormat = Format.CSV;
+				break;
+			case "sarif":
+				reportFormat = Format.SARIF;
+				break;
+			case "txt":
+				reportFormat = Format.TXT;
+				break;
+			default:
+				LOGGER.info("Incorrect report format '" +format+ "'. Available formats are: CSV, SARIF and TXT");
+				reportFormat = null;
+			}	
+		}
+		else{
+			reportFormat = null;
+		}
+		return reportFormat;
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
@@ -472,8 +503,12 @@ public abstract class HeadlessCryptoScanner {
 		return false;
 	};
 	
-	protected boolean sarifReport() {
-		return false;
+	/**
+	 * Determines the analysis report {@link Format} 
+	 * @return null
+	 */ 
+	protected Format reportFormat() {
+		return null;
 	}
 	
 	protected boolean providerDetection() {
@@ -524,11 +559,10 @@ public abstract class HeadlessCryptoScanner {
 				+ "--sootCp=<absolute_path_of_whole_project>\n"
 				+ "--softwareIdentifier=<identifier_for_labelling_output_files>\n"
 				+ "--reportDir=<directory_location_for_cognicrypt_report>\n"
-				+ "--csvReportFile=<summary_report_for_finding_csv_files>\n"
 				+ "--preanalysis (enables pre-analysis)\n"
 				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
-				+ "--sarifReport (enables sarif report)\n"
 				+ "--providerDetection (enables provider detection analysis)\n"
 				+ "--ignorePackages (List the name of packages to be ignored during the analysis)\n");
+				+ "--reportFormat=<format of cognicrypt_report>\n");
 	}
 }
