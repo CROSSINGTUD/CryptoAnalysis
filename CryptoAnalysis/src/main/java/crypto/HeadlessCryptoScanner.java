@@ -50,11 +50,12 @@ import soot.options.Options;
 import typestate.TransitionFunction;
 
 public abstract class HeadlessCryptoScanner {
+	
 	private static CryptoScannerSettings settings = new CryptoScannerSettings();
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
-	private static String rootRulesDirForProvider;
+	private static String rulesetRootPath;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 	
 	public static void main(String[] args) {
@@ -83,6 +84,7 @@ public abstract class HeadlessCryptoScanner {
 					case DIR:
 						try {
 							rules.addAll(CrySLRuleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
+							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+settings.getRulesetPathDir(), e);
 						}
@@ -90,6 +92,7 @@ public abstract class HeadlessCryptoScanner {
 					case ZIP:
 						try {
 							rules.addAll(CrySLRuleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
+							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+settings.getRulesetPathZip(), e);
 						}
@@ -223,13 +226,22 @@ public abstract class HeadlessCryptoScanner {
 				if (providerDetection()) {
 					ProviderDetection providerDetection = new ProviderDetection();
 
-					if(rootRulesDirForProvider == null) {
-						rootRulesDirForProvider = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+					if(rulesetRootPath == null) {
+						rulesetRootPath = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
 					}
-					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rootRulesDirForProvider);
+					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rulesetRootPath);
 					if(detectedProvider != null) {
 						rules.clear();
-						rules.addAll(providerDetection.chooseRules(rootRulesDirForProvider+File.separator+detectedProvider));
+						switch(settings.getRulesetPathType()) {
+							case DIR:
+								rules.addAll(providerDetection.chooseRulesDir(rulesetRootPath+File.separator+detectedProvider));
+								break;
+							case ZIP:
+								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath+File.separator+detectedProvider+".zip"));
+								break;
+							default: 
+								rules.addAll(providerDetection.chooseRulesDir(rulesetRootPath+File.separator+detectedProvider));
+						}
 					}
 				}
 				
