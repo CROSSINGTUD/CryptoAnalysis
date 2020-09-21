@@ -97,6 +97,8 @@ public abstract class HeadlessCryptoScanner {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+settings.getRulesetPathZip(), e);
 						}
 						break;
+					default:
+						LOGGER.error("Error happened when getting the CrySL rules from the specified file.");
 				}
 				return rules;
 			}
@@ -234,13 +236,13 @@ public abstract class HeadlessCryptoScanner {
 						rules.clear();
 						switch(settings.getRulesetPathType()) {
 							case DIR:
-								rules.addAll(providerDetection.chooseRulesDir(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
 								break;
 							case ZIP:
 								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath+File.separator+detectedProvider+".zip"));
 								break;
 							default: 
-								rules.addAll(providerDetection.chooseRulesDir(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
 						}
 					}
 				}

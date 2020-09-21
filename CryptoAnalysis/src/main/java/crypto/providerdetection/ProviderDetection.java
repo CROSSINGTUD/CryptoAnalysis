@@ -345,7 +345,7 @@ public class ProviderDetection {
 	 * @param providerRulesDirectory
 	 *          
 	 */
-	public List<CrySLRule> chooseRulesDir(String providerRulesDirectory) {
+	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
 		try {

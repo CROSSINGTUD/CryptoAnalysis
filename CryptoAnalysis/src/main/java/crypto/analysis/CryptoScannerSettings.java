@@ -19,6 +19,7 @@ public class CryptoScannerSettings {
 	
 	public CryptoScannerSettings() {
 		setControlGraph(ControlGraph.CHA);
+		setRulesetPathType(RulesetPathType.NONE);
 		setPreAnalysis(false);
 		setVisualization(false);
 		setProviderDetectionAnalysis(false);
@@ -132,7 +133,7 @@ public class CryptoScannerSettings {
 					i++;
 					break;
 				case "--rulesdir":
-					if(this.rulesetPathType != null) {
+					if(this.rulesetPathType != RulesetPathType.NONE) {
 						throw new CryptoAnalysisParserException("An error occured while parsing --rulesDir option. "
 								+ "There should be only one option between --rulesDir and --rulesZip.");
 					}
@@ -142,7 +143,7 @@ public class CryptoScannerSettings {
 					mandatorySettings++;
 					break;
 				case "--ruleszip":
-					if(this.rulesetPathType != null) {
+					if(this.rulesetPathType != RulesetPathType.NONE) {
 						throw new CryptoAnalysisParserException("An error occured while parsing --rulesDir option. "
 								+ "There should be only one option between --rulesDir and --rulesZip.");
 					}
@@ -199,7 +200,7 @@ public class CryptoScannerSettings {
 	}
 	
 	public enum RulesetPathType {
-		DIR, ZIP
+		DIR, ZIP, NONE
 	}
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
