@@ -42,7 +42,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<executions>
 					<execution>
 						<id>unpack</id>
@@ -102,21 +102,23 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.20</version>
+				<version>2.22.2</version>
 				<configuration>
-					<argLine>-Xmx8G -Xss128m -Dmaven.home="${maven.home}"</argLine>
+					<reuseForks>false</reuseForks>
+					<argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
 					<reportsDirectory>../shippable/testresults</reportsDirectory>
+					<trimStackTrace>false</trimStackTrace>
 				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
 						<artifactId>surefire-junit4</artifactId>
-						<version>2.17</version>
+						<version>2.22.2</version>
 					</dependency>
 					<dependency>
 						<groupId>junit</groupId>
 						<artifactId>junit</artifactId>
-						<version>4.12</version>
+						<version>4.13</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -140,7 +142,7 @@
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
