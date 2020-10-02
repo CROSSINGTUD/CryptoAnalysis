@@ -134,6 +134,7 @@
 						<format>xml</format>
 					</formats>
 					<outputDirectory>../shippable/codecoverage</outputDirectory>
+					<check/>
 				</configuration>
 			</plugin>
 
