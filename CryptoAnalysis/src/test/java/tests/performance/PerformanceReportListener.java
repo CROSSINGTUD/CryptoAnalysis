@@ -16,14 +16,14 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import soot.Scene;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -37,7 +37,7 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	private long MEGABYTE = 1024L * 1024L;
 	private Map<String, String> observations;
 
-	public PerformanceReportListener(List<CryptSLRule> rules,  Map<String, String> observations) {
+	public PerformanceReportListener(List<CrySLRule> rules,  Map<String, String> observations) {
 		this.observations = observations;
 		this.observations.put(SpreadSheetConstants.NO_OF_RULES, String.valueOf(rules.size()));
 	}
@@ -88,9 +88,9 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 	}
 
 	@Override
@@ -125,5 +125,9 @@ public class PerformanceReportListener extends CrySLAnalysisListener {
 	@Override
 	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
 		secureObjectsFound++;
+	}
+
+	@Override
+	public void addProgress(int processedSeeds, int workListsize) {
 	}
 }
