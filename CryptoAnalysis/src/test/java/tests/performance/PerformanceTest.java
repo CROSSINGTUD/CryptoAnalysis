@@ -20,6 +20,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -29,7 +31,8 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.rules.CryptSLRule;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.CrySLRule;
 import soot.G;
 import test.IDEALCrossingTestingFramework;
 import tests.headless.MavenProject;
@@ -56,6 +59,8 @@ import tests.headless.MavenProject;
 @RunWith(Parameterized.class)
 public class PerformanceTest{
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PerformanceTest.class);
+	
 	private static boolean VISUALIZATION = false;
 	private static final String GIT_DOWNLOAD_PATH = "../CryptoAnalysisTargets/PerformanceBenchmarkProjects/";
 	HeadlessCryptoScanner scanner;
@@ -102,8 +107,13 @@ public class PerformanceTest{
 			}
 
 			@Override
-			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
+			protected List<CrySLRule> getRules() {
+				try {
+					return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
+				} catch (CryptoAnalysisException e) {
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+				}
+				return null;
 			}
 
 			@Override
@@ -142,8 +152,13 @@ public class PerformanceTest{
 			}
 
 			@Override
-			protected List<CryptSLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
+			protected List<CrySLRule> getRules() {
+				try {
+					return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, RuleFormat.SOURCE, rulesets);
+				} catch (CryptoAnalysisException e) {
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+				}
+				return null;
 			}
 
 			@Override
