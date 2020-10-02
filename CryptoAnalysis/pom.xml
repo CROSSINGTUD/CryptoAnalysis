@@ -201,14 +201,14 @@
 							</includes>
 							<followSymlinks>false</followSymlinks>
 						</fileset>
+						<fileset>
+							<directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+							<includes>
+								<include>**</include>
+							</includes>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
 					</filesets>
-					<fileset>
-						<directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
-						<includes>
-							<include>**</include>
-						</includes>
-						<followSymlinks>false</followSymlinks>
-					</fileset>
 				</configuration>
 			</plugin>
 		</plugins>
