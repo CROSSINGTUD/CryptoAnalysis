@@ -14,6 +14,7 @@ public class EnsuredCrySLPredicate {
 	public EnsuredCrySLPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2) {
 		this.predicate = predicate;
 		parametersToValues = parametersToValues2;
+		
 	}
 	
 	public CrySLPredicate getPredicate(){

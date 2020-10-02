@@ -35,6 +35,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -210,6 +211,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 									@Override
 									public void visit(HardCodedError predicateError) {
+										
+									}
+
+									@Override
+									public void visit(ForbiddenPredicateError forbiddenPredicateError) {
 										
 									}
 								});

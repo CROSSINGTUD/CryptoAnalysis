@@ -1,6 +1,9 @@
 package crypto;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -10,10 +13,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +92,8 @@ public abstract class HeadlessCryptoScanner {
 		scanner.exec();
 	}
 
+
+
 	public static HeadlessCryptoScanner createFromOptions(String... args) throws CryptoAnalysisException {
 		CommandLineParser parser = new DefaultParser();
 		try {
@@ -136,6 +143,22 @@ public abstract class HeadlessCryptoScanner {
 		} else {
 			callGraphAlogrithm = CG.CHA;
 		}
+
+		final List<String> forbiddenPredicates = new ArrayList<String>();
+		if (options.hasOption("forbiddenPredicates")) {
+			File forbPredFile = new File(options.getOptionValue("forbiddenPredicates"));
+			if (forbPredFile.isFile() && forbPredFile.canRead()) {
+				try {
+					List<String> readLines = Files.readLines(forbPredFile, Charset.defaultCharset());
+					
+					forbiddenPredicates.addAll(readLines);
+				}
+				catch (IOException e) {
+					throw new CryptoAnalysisException("Unable to read forbidden proedicates from file: " + resourcesPath);
+				}
+			}
+		}
+
 		
 		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
 
@@ -175,6 +198,11 @@ public abstract class HeadlessCryptoScanner {
 			}
 			
 			@Override
+			protected List<String> getForbiddenPredicates() {
+				return forbiddenPredicates;
+      }
+      
+      @Override
 			protected Format reportFormat(){
 				return getReportFormat();
 			}
@@ -298,6 +326,12 @@ public abstract class HeadlessCryptoScanner {
 						}
 						return super.debugger(solver, seed);
 					}
+					
+					@Override
+					public List<String> forbiddenPredicates() {
+						return getForbiddenPredicates();
+					}
+					
 				};
 				
 				reporter.addReportListener(fileReporter);
@@ -449,6 +483,9 @@ public abstract class HeadlessCryptoScanner {
 		return includeList;
 	}
 
+	protected List<String> getForbiddenPredicates() {
+		return new ArrayList<String>();
+	}
 
 	protected CG callGraphAlogrithm() {
 		return CG.CHA;
