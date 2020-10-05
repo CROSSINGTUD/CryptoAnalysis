@@ -21,7 +21,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -42,7 +42,7 @@
 					</archive>
 					<descriptors>
 						<!-- custom descriptor is copied from jar-with-dependencies -->
-						<!-- This also copies the rules from test resources as default rules 
+						<!-- This also copies the rules from test resources as default rules
 							into the jar -->
 						<descriptor>build/descriptor.xml</descriptor>
 					</descriptors>
