@@ -1263,6 +1263,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/pkc/sign/weakSignatureECDSA/
 	@Test
+	@Ignore
 	public void weakSignatureECDSAExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/weakSignatureECDSA").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
