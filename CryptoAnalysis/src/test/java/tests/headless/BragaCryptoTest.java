@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Categories;
+
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
@@ -357,6 +359,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkc/ka/DHandECDH/
 	@Test
+	@Ignore
 	public void DHandECDHExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/DHandECDH").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -536,6 +539,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/pkc/ecc/securecurves/
 	@Test
+	@Ignore
 	public void securecurvesExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptogooduses/securecurves").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -881,6 +885,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/pkc/ecc/insecurecurves/
 	@Test
+	@Ignore
 	public void insecurecurvesExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecurecurves").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -984,6 +989,7 @@ public class BragaCryptoTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/pkc/ka/issuesDHandECDH/
 	@Test
+	@Ignore
 	public void issuesDHandECDHExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/issuesDHandECDH").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
