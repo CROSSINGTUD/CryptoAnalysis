@@ -115,11 +115,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		runTypestateAnalysis();
-		if (results == null)
+		if (results == null || results.isTimedout()) {
 			// Timeout occured.
+			cryptoScanner.getAnalysisListener().onSeedTimeout(super.asNode());
 			return;
+		}
 		allCallsOnObject = results.getInvokedMethodOnInstance();
 		runExtractParameterAnalysis();
+		if(parameterAnalysis.extractParameterAnalysisTimeout) {
+			cryptoScanner.getAnalysisListener().onSeedTimeout(super.asNode());
+			return;
+		}
 		checkInternalConstraints();
 
 		Multimap<Statement, State> unitToStates = HashMultimap.create();
