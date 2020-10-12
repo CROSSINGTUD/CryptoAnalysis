@@ -116,7 +116,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		runTypestateAnalysis();
 		if (results == null || results.isTimedout()) {
-			// Timeout occured.
+			// Timeout 
 			cryptoScanner.getAnalysisListener().onSeedTimeout(super.asNode());
 			return;
 		}
