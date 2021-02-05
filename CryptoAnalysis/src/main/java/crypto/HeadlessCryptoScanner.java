@@ -1,6 +1,10 @@
 package crypto;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -64,6 +68,11 @@ public abstract class HeadlessCryptoScanner {
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rootRulesDirForProvider;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	
+	/**
+	 * List for storing the package names to be ignored
+	 */
+	private static List<String> ignorePackageList = Collections.<String>emptyList();
 
 	public static enum CG {
 		CHA, SPARK_LIBRARY, SPARK
@@ -137,6 +146,21 @@ public abstract class HeadlessCryptoScanner {
 			callGraphAlogrithm = CG.CHA;
 		}
 		
+		if(options.hasOption("ignorePackages")) {
+			final File ignorePackage;
+			try {
+				ignorePackage = new File(options.getOptionValue("ignorePackages"));
+				if(ignorePackage.exists()) {
+					ignorePackageList = Files.readAllLines(Paths.get(ignorePackage.getAbsolutePath()), StandardCharsets.UTF_8);
+				}
+				else {
+					throw new CryptoAnalysisException("Unable to read file from path : " + ignorePackage.getAbsolutePath());
+				}	
+			} catch (IOException | CryptoAnalysisException e) {
+					LOGGER.error(e.getMessage());
+			}
+		}
+		
 		HeadlessCryptoScanner sourceCryptoScanner = new HeadlessCryptoScanner() {
 
 			@Override
@@ -175,6 +199,10 @@ public abstract class HeadlessCryptoScanner {
 			}
 			
 			@Override
+			protected List<String> getIgnoredPackages(){
+				return ignorePackageList;
+			}
+			
 			protected Format reportFormat(){
 				return getReportFormat();
 			}
@@ -300,6 +328,9 @@ public abstract class HeadlessCryptoScanner {
 					}
 				};
 				
+				if(!getIgnoredPackages().isEmpty()) {
+					fileReporter.setIgnorePackages(getIgnoredPackages());
+				}
 				reporter.addReportListener(fileReporter);
 				
 				if (providerDetection()) {
@@ -484,6 +515,15 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean providerDetection() {
 		return true;
 	}
+	/**
+	 * Initialize {@link String} objects the should contain the package names that needs to be ignored 
+	 * and returns them as {@link List}. 
+	 * @return empty {@link List} with package names to be ignored
+	 */ 
+	
+	protected List<String> getIgnoredPackages() {
+		return Collections.<String>emptyList();
+	}
 	
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
@@ -523,6 +563,7 @@ public abstract class HeadlessCryptoScanner {
 				+ "--preanalysis (enables pre-analysis)\n"
 				+ "--visualization (enables the visualization, but also requires --reportDir option to be set)\n"
 				+ "--providerDetection (enables provider detection analysis)\n"
+				+ "--ignorePackages (List the name of packages to be ignored during the analysis)\n"
 				+ "--reportFormat=<format of cognicrypt_report>\n");
 	}
 }

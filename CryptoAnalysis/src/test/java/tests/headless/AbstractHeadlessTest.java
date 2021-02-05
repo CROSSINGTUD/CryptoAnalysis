@@ -2,8 +2,10 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
@@ -54,7 +57,34 @@ public abstract class AbstractHeadlessTest {
 	private static boolean VISUALIZATION = false;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	
+	/**
+	 * List for storing the package names to be ignored
+	 */
+	private static List<String> ignorePackages = Collections.<String>emptyList();
+	
+	/**
+	 * Flag to test the ignore package functionality
+	 */
+	private static boolean IGNORE_PACKAGE = false;
+	
+	/**
+	 * Format of the analysis report
+	 */ 
 	private static Format reportFormat = null;
+	
+	public static void setIgnorePackages(List<String> ignorePackageList) {
+		ignorePackages = ignorePackageList;
+	}
+	
+	public static boolean isIGNORE_PACKAGE() {
+		return IGNORE_PACKAGE;
+	}
+
+	public static void setIGNORE_PACKAGE(boolean iGNORE_PACKAGE) {
+		IGNORE_PACKAGE = iGNORE_PACKAGE;
+	}
+
 	
 	public static void setReportFormat(Format reportFormat) {
 		AbstractHeadlessTest.reportFormat = reportFormat;
@@ -115,6 +145,10 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
+			protected List<String> getIgnoredPackages(){
+				return ignorePackages;
+			}
+
 			protected Format reportFormat(){
 				return VISUALIZATION ? reportFormat : null;
 			}
@@ -128,6 +162,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
+				String errorClassName = error.getErrorLocation().getMethod().getDeclaringClass().getName().toString();
 				String methodContainingError = error.getErrorLocation().getMethod().toString();
 				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
@@ -135,7 +170,14 @@ public abstract class AbstractHeadlessTest {
 					currCount = 0;
 				}
 				Integer newCount = --currCount;
-				errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
+				if(isIGNORE_PACKAGE()) {
+					if(!ignorePackages.stream().anyMatch((s -> errorClassName.startsWith(s)))) {
+						errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
+				}
+				}
+				else {
+					errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
+				}
 			}
 
 			@Override

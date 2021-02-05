@@ -55,6 +55,10 @@ public class HeadlessCryptoScannerOptions extends Options {
 		Option providerDetection = Option.builder().longOpt("providerDetection").hasArg(false).desc("Enable Provider Detection analysis").build();
 		addOption(providerDetection);
 		
+		Option ignorePackages = Option.builder().longOpt("ignorePackages").hasArg().desc("List the name of packages to be ignored during the analysis")
+				.build();
+		addOption(ignorePackages);
+		
 		Option reportFormat = Option.builder().longOpt("reportFormat").hasArg().desc("The format of Cognicrypt report")
 				.build();
 		addOption(reportFormat);
