@@ -50,8 +50,8 @@ public class SARIFHelper {
 	public JSONObject getToolInfo() {
 		JSONObject tool = new JSONObject();
 		tool.put(SARIFConfig.ANALYSISTOOL_NAME_KEY, SARIFConfig.ANALYSISTOOL_NAME_VALUE);
-		tool.put(SARIFConfig.VERSION, SARIFConfig.getVersionFromPom());
-		tool.put(SARIFConfig.SEMANTIC_VERSION_KEY,SARIFConfig.getVersionFromPom());
+		tool.put(SARIFConfig.VERSION, getClass().getPackage().getImplementationVersion());
+		tool.put(SARIFConfig.SEMANTIC_VERSION_KEY,getClass().getPackage().getImplementationVersion());
 		tool.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
 		return tool;
 	}

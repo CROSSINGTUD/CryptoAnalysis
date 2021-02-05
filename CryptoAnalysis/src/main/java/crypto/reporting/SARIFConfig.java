@@ -1,20 +1,6 @@
 package crypto.reporting;
 
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import crypto.HeadlessCryptoScanner;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class SARIFConfig {
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-	
 	public static final String VERSION = "version";
 	public static final String SARIF_VERSION = "sarifVersion";
 	public static final String SARIF_VERSION_NUMBER = "2.0.0";
@@ -75,19 +61,4 @@ public class SARIFConfig {
 	public static final String INCOMPLETE_OPERATION_ERROR_KEY = "IncompleteOperationError";
 	public static final String INCOMPLETE_OPERATION_ERROR_VALUE = "The usage of an object may be incomplete: For example a Cipherobject may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)";
 	
-	
-	//method to dynamically load CryptoAnalysis version from pom.xml
-	public static String getVersionFromPom() {
-		String pomVersion = "";
-		try {
-			MavenXpp3Reader reader = new MavenXpp3Reader();
-			Model model = reader.read(new FileReader(".."+ File.separator + "pom.xml"));
-			pomVersion = model.getVersion();
-		} catch (IOException ioe) {
-			LOGGER.error("Error happend when reading from pom.xml file",ioe);
-		} catch (XmlPullParserException xmle) {
-			LOGGER.error("Error happend when parsing from pom.xml file",xmle);
-		}
-		return pomVersion;
-	}
 }
