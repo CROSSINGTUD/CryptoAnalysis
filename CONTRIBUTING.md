@@ -14,7 +14,7 @@ Please do not:
 - **DON'T** make PRs for coding guidelines changes.
 - **DON'T** create a big pull requests with no related issue. Instead, first file an issue.
 - **DON'T** submit PRs that use licensed files we are not allowed to use.
-- **DON'T** add or change API related code without filing an issue and discussing with the project leads first
+- **DON'T** add or change API related code without filing an issue and discussing it with the project leads first
 
 ## Suggested Workflow
 
