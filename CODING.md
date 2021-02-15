@@ -12,7 +12,7 @@ Feature branches do not checked because we want to things getting done quickly. 
 they feel most familiar. A pull request will make sure `develop` and `master` branches are consistent.   
 
 The checkstyle config got confirmed by the core development team at UPB and IEM. Changes may only be made by the project leaders
-with serious reasons.
+for valid reasons.
 
 ### Tool Support
 
@@ -33,4 +33,3 @@ Unfortunately it does not support importing the Checkstyle Rules directly.
 for code refactoring tools of the IDE. 
 5. In the bottom right or left corner of the IDE there should be a Checkstyle Tool-Window. 
 Open it and let the plugin check your code.
-
