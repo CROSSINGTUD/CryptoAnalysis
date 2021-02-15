@@ -18,12 +18,12 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
-import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -52,16 +52,21 @@ public abstract class AbstractHeadlessTest {
 
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
+	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
-	private static Format reportFormat = null;
+	private static ReportFormat reportFormat = null;
 	
-	public static void setReportFormat(Format reportFormat) {
+	public static void setReportFormat(ReportFormat reportFormat) {
 		AbstractHeadlessTest.reportFormat = reportFormat;
 	}
 
 	public static void setVISUALIZATION(boolean vISUALIZATION) {
 		VISUALIZATION = vISUALIZATION;
+	}
+	
+	public static void setProviderDetection(boolean providerDetection) {
+		PROVIDER_DETECTION = providerDetection;
 	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -115,7 +120,12 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
-			protected Format reportFormat(){
+			protected boolean providerDetection() {
+				return PROVIDER_DETECTION;
+			}
+			
+			@Override
+			protected ReportFormat reportFormat(){
 				return VISUALIZATION ? reportFormat : null;
 			}
 		};

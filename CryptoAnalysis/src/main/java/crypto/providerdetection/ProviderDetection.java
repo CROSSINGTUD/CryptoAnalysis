@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
@@ -24,10 +21,9 @@ import boomerang.jimple.Val;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
-import crypto.analysis.CrySLRulesetSelector;
+import crypto.rules.CrySLRuleReader;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -343,7 +339,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method is used to choose the CryptSL rules from the detected Provider and should
+	 * This method is used to choose the CryptSL rules in a directory from the detected provider and should
 	 * be called after the `doAnalysis()` method.
 	 *            
 	 * @param providerRulesDirectory
@@ -353,10 +349,29 @@ public class ProviderDetection {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
 		try {
-			rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
+			rules.addAll(CrySLRuleReader.readFromDirectory(new File(providerRulesDirectory)));
 		} catch (CryptoAnalysisException e) {
-			LOGGER.error("Error happened when getting the CrySL rules from the"
+			LOGGER.error("Error happened when getting the CrySL rules from the "
 					+ "specified directory: "+providerRulesDirectory, e);
+		}
+		return rules;
+	}
+	
+	/**
+	 * This method is used to choose the CryptSL rules in a zip file from the detected provider and should
+	 * be called after the `doAnalysis()` method.
+	 *            
+	 * @param providerRulesZip
+	 *          
+	 */
+	public List<CrySLRule> chooseRulesZip(String providerRulesZip) {
+		List<CrySLRule> rules = Lists.newArrayList();
+		this.rulesDirectory = providerRulesZip;
+		try {
+			rules.addAll(CrySLRuleReader.readFromZipFile(new File(providerRulesZip)));
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the "
+					+ "specified zip file: "+providerRulesZip, e);
 		}
 		return rules;
 	}
