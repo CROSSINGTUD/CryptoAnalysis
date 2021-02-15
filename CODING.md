@@ -11,7 +11,7 @@ validation on the **master**, **develop** and **Pull Requests** branches.
 Feature branches are not automatically checked because we want to get development done quickly. To achieve this, everybody may codes as 
 they feel most familiar. A pull request will make sure `develop` and `master` branches are consistent.   
 
-The checkstyle config got confirmed by the core development team at UPB, TUD and Fraunhofer IEM. Changes may only be made by the project leaders
+The Checkstyle config got confirmed by the core development team at UPB, TUD and Fraunhofer IEM. Changes may only be made by the project leaders
 for valid reasons.
 
 ### Tool Support
@@ -19,17 +19,17 @@ for valid reasons.
 Checkstyle is available for various IDEs.
 
 ##### Eclipse
-1. Install checkstyle plugin from [here](https://checkstyle.org/eclipse-cs/)
-2. In your preferences window you can select the checkstyle configuration `checkstyle.xml` from the root of the
+1. Install Checkstyle plugin from [here](https://checkstyle.org/eclipse-cs/)
+2. In your preferences window you can select the Checkstyle configuration `checkstyle.xml` from the root of the
 repository.
-3. Configure the Eclipse Code Formatter to automatically format the code regarding the checkstyle rules. 
+3. Configure the Eclipse Code Formatter to automatically format the code regarding the Checkstyle rules. 
 Unfortunately it does not support importing the Checkstyle Rules directly.
 
 ##### IntelliJ
 1. Search for "Checkstyle-IDEA" in the `Settings->Plugin` window.
 2. Install and restart the IDE.
 3. Open settings again and select the `iem_checks.xml` file in `Settings-Checkstyle`.
-4. In `Settings->Editor->Code Style` from the Scheme combobox you can import that checkstyle file to apply all settings 
+4. In `Settings->Editor->Code Style` from the Scheme combobox you can import that Checkstyle file to apply all settings 
 for code refactoring tools of the IDE. 
 5. In the bottom right or left corner of the IDE there should be a Checkstyle Tool-Window. 
 Open it and let the plugin check your code.
