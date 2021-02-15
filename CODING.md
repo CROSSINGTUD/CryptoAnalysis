@@ -5,7 +5,7 @@ In general we aim for keeping the coding guidelines that are common for the Java
 as well as the usage of coding patterns. Exceptions have to get discussed and agreed with the project leads.
 
 ## Checkstyle Config
-This repository contains a `checkstyl.xml` Checkstyle config which gets automatically used by the CI Runner for code 
+This repository contains a `checkstyle.xml` Checkstyle config which gets automatically used by the CI Runner for code 
 validation on the **master**, **develop** and **Pull Requests** branches.
 
 Feature branches are not automatically checked because we want to get development done quickly. To achieve this, everybody may codes as 
