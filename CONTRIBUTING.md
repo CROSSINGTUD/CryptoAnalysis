@@ -31,6 +31,7 @@ We aim for the following workflow:
     - Keep changes as small as possible.
     - Try to follow the [Commit Messages](#commit-messages) guidance.
 4. Add new tests corresponding to your change, if applicable.
+  - Minor changes, like fixing typos, adding documentation or non-critical bugfixes may are excluded.
 5. Build the repository with your changes.
     - Make sure that the builds are clean.
     - Make sure that the tests are all passing, including your new tests.
