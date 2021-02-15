@@ -48,7 +48,7 @@ We aim for the following workflow:
 
 This repository contains two central branches. The **master** and the **develop** branch. The develop branch is default.
 Both branches are *protected* against direct write access thus Pull Requests are necessary to push into them. 
-Other branches are unprotected and can be created and deleted by an contributer
+Other branches are unprotected and can be created and deleted by a contributer
 
 The `master` branch holds the lastest stable release of the application.
 
