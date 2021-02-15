@@ -8,7 +8,7 @@ as well as the usage of coding patterns. Exceptions have to get discusses and ag
 This repository contains a `checkstyl.xml` Checkstyle config which gets automatically used by the CI Runner for code 
 validation on the **master**, **develop** and **Pull Requests** branches.
 
-Feature branches do not checked because we want to things getting done quickly. This can be done if everybody codes as 
+Feature branches are not automatically checked because we want to get development done quickly. To achieve this, everybody may codes as 
 they feel most familiar. A pull request will make sure `develop` and `master` branches are consistent.   
 
 The checkstyle config got confirmed by the core development team at UPB and IEM. Changes may only be made by the project leaders
