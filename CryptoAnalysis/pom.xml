@@ -163,6 +163,7 @@
 				<configuration>
 					<archive>
 						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<mainClass>
 								crypto.HeadlessCryptoScanner
 							</mainClass>

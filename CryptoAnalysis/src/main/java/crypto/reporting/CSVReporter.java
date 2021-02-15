@@ -190,6 +190,8 @@ public class CSVReporter extends ErrorMarkerListener {
 				line.add(string);
 			}
 			writer.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
+			writer.write("\n"+SARIFConfig.ANALYSISTOOL_NAME_VALUE+"\n");
+			writer.write(getClass().getPackage().getImplementationVersion());
 			writer.close();
 			LOGGER.info("CSV Report generated to file : "+ reportDir.getAbsolutePath() + File.separator+ REPORT_NAME);
 		} catch (IOException e) {

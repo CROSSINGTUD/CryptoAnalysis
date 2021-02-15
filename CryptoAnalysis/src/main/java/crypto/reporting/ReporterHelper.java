@@ -69,13 +69,13 @@ public class ReporterHelper{
 			}
 			report += "\n";
 		}
-		report += "======================= CogniCrypt Summary ==========================\n";
+		report += "======================= CryptoAnalysis Summary ==========================\n";
 		report += String.format("\tNumber of CrySL rules: %s\n", rules.size());
 		report += String.format("\tNumber of Objects Analyzed: %s\n", objects.size());
 		if(errorMarkers.rowKeySet().isEmpty()){
 			report += "No violation of any of the rules found.\n";
 		} else{
-			report += "\n\tCogniCrypt found the following violations. For details see description above.\n";
+			report += "\n\tCryptoAnalysis found the following violations. For details see description above.\n";
 			for(Entry<Class, Integer> e : errorMarkerCount.entrySet()){
 				report += String.format("\t%s: %s\n", e.getKey().getSimpleName(),e.getValue());
 			}
