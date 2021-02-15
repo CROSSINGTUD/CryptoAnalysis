@@ -1,7 +1,7 @@
 # Coding Guidelines
 
 ## General Notes
-In general we aim for keeping the coding guidelines that are common by the Java Language. This includes code style,
+In general we aim for keeping the coding guidelines that are common for the Java Language. This includes code style,
 as well as the usage of coding patterns. Exceptions have to get discussed and agreed with the project leads.
 
 ## Checkstyle Config
