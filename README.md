@@ -30,16 +30,30 @@ CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from E
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner --rulesDir=<absolute-path-to-crysl-source-code-format-rules> \
-      --applicationCp=<absolute-application-path>
+java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner \
+      --rulesDir <absolute-path-to-crysl-source-code-format-rules> \
+      --appPath <absolute-application-path>
 ```
 
-For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/master/CryptoAnalysisTargets/CogniCryptDemoExample/src/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
+For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
 java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-  --rulesDir=$(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture \
-  --applicationCp=$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
+  --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture \
+  --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
+```
+
+Other additional arguments that can be used are as follows:
+
+```
+--cg <selection_of_call_graph_for_analysis> (possible values are CHA, SPARK, SPARKLIB)
+--sootPath <absolute_path_of_whole_project>
+--identifier <identifier_for_labelling_output_files>
+--reportPath <directory_location_for_cognicrypt_report>
+--reportFormat <format of cognicrypt_report> (possible values are TXT, SARIF, CSV)
+--preanalysis (enables pre-analysis)
+--visualization (enables the visualization, but also requires --reportPath option to be set)
+--providerDetection (enables provider detection analysis)
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
@@ -57,7 +71,7 @@ In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the consol
 * **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
 * **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default).
 
-When the option `--reportDir=<folder>` is chosen, CogniCrypt<sub>SAST</sub> writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+When the option `--reportPath <directory_location_for_cognicrypt_report>` is chosen, CogniCrypt<sub>SAST</sub> writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
 
 ## Updating CrySL Rules
 

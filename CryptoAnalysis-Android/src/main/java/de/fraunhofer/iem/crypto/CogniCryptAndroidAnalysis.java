@@ -3,17 +3,13 @@ package de.fraunhofer.iem.crypto;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
-
 import boomerang.callgraph.BoomerangICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.callgraph.ObservableStaticICFG;
 import boomerang.preanalysis.BoomerangPretransformer;
-import crypto.HeadlessCryptoScanner.Format;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
@@ -31,7 +27,6 @@ import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 import crypto.cryslhandler.CrySLModelReader;
-
 import crypto.reporting.CommandLineReporter;
 
 public class CogniCryptAndroidAnalysis {
@@ -179,9 +174,8 @@ public class CogniCryptAndroidAnalysis {
 			}
 		}
 		if (rules.isEmpty())
-			System.out
-					.println("CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ rulesDirectory);
+			System.out.println("CogniCrypt did not find any rules to start the analysis for.\n"
+								+ "It checked for rules in "+rulesDirectory);
 		return rules;
 	}
 

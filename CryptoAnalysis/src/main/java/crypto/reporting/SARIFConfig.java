@@ -2,6 +2,7 @@ package crypto.reporting;
 
 public class SARIFConfig {
 	public static final String VERSION = "version";
+	public static final String SARIF_VERSION = "sarifVersion";
 	public static final String SARIF_VERSION_NUMBER = "2.0.0";
 	public static final String VERSION_NUMBER = "1.0.0";
 	public static final String RUNS_KEY = "runs";
@@ -15,6 +16,9 @@ public class SARIFConfig {
 	public static final String SEMANTIC_VERSION_VALUE = "1.0.0";
 	public static final String LANGUAGE_KEY = "language";
 	public static final String LANGUAGE_VALUE = "en-US";
+	
+	public static final String ANALYSISTOOL_NAME_KEY = "name";
+	public static final String ANALYSISTOOL_NAME_VALUE = "CryptoAnalysis";
 	
 	public static final String FILES_KEY = "files";
 	public static final String MIME_TYPE_KEY = "mimeType";
@@ -56,4 +60,5 @@ public class SARIFConfig {
 	public static final String REQUIRED_PREDICATE_ERROR_VALUE = "An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a Cipher object requires a SecretKey object to be correctly and securely generated.";
 	public static final String INCOMPLETE_OPERATION_ERROR_KEY = "IncompleteOperationError";
 	public static final String INCOMPLETE_OPERATION_ERROR_VALUE = "The usage of an object may be incomplete: For example a Cipherobject may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)";
+	
 }
