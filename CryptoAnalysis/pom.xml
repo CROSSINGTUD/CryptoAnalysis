@@ -9,6 +9,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spdsVersion>2.5.1</spdsVersion>
 		<sootVersion>4.2.1</sootVersion>
+		<java.version>11</java.version>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -145,8 +146,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 				</configuration>
 			</plugin>
 
