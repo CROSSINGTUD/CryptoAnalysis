@@ -184,7 +184,11 @@ public class CSVReporter extends ErrorMarkerListener {
 			}
 			writer.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
 			writer.write("\n"+SARIFConfig.ANALYSISTOOL_NAME_VALUE+"\n");
-			writer.write(getClass().getPackage().getImplementationVersion());
+			String version = getClass().getPackage().getImplementationVersion();
+			if(version == null) {
+				version = "Version is not known";
+			}
+			writer.write(version);
 			writer.close();
 			LOGGER.info("CSV Report generated to file : "+ reportDir.getAbsolutePath() + File.separator+ REPORT_NAME);
 		} catch (IOException e) {

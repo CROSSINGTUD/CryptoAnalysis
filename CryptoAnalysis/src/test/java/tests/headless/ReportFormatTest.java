@@ -11,6 +11,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	private static final String txtReportPath = "cognicrypt-output/CryptoAnalysis-Report.txt";
 	private static final String csvReportPath = "cognicrypt-output/CryptoAnalysis-Report.csv";
 	private static final String sarifReportPath = "cognicrypt-output/CryptoAnalysis-Report.json";
+	
 	@Test
 	public void TXTReportCreationTest() {
 		File report = new File(txtReportPath);
