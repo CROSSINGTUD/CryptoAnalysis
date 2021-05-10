@@ -30,16 +30,16 @@ CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from E
 * The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner \
-      --rulesDir <absolute-path-to-crysl-source-code-format-rules> \
+java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner 
+      --rulesDir <absolute-path-to-crysl-source-code-format-rules> 
       --appPath <absolute-application-path>
 ```
 
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
-  --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture \
+java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner 
+  --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture 
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
