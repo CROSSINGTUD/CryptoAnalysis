@@ -334,6 +334,12 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected abstract List<CrySLRule> getRules();
+	
+	// used to set the rules when they are loaded from headless
+	// tests and not from CLI
+	public static void setRules(List<CrySLRule> rules) {
+		HeadlessCryptoScanner.rules = rules;
+	}
 
 	protected abstract String applicationClassPath();
 
