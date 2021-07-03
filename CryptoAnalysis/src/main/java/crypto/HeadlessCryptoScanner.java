@@ -137,7 +137,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	private void checkIfUsesObject() {
-		final SeedFactory seedFactory = new SeedFactory(getRules());
+		final SeedFactory seedFactory = new SeedFactory(HeadlessCryptoScanner.rules);
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
 			protected void internalTransform(Body body, String phase, Map options) {
 				if (!body.getMethod().getDeclaringClass().isApplicationClass()) {
@@ -177,7 +177,7 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CrySLRule> rules = HeadlessCryptoScanner.this.getRules();
+				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
 				ErrorMarkerListener fileReporter;
 				if(reportFormat()!= null) {
 					switch (reportFormat()) {
