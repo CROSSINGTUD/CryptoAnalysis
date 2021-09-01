@@ -2,17 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis-Parent</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<name>CryptoAnalysis-parent</name>
+
 	<modules>
 		<module>CryptoAnalysis</module>
 		<module>CryptoAnalysis-Android</module>
 	</modules>
+
 	<properties>
+		<revision>2.8.0-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<build>
