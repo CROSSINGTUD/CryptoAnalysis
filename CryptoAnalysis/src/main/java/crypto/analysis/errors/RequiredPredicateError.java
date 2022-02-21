@@ -2,8 +2,17 @@ package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.reporting.SARIFReporter;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+
+/**
+ * Creates {@link RequiredPredicateError} for all Required Predicate error generates RequiredPredicateError
+ *
+ *
+ * contradictedPredicate a {@link CrySLPredicate} holds the contradicted required predicate or parameter
+ * extractedValues a {@link CallSiteWithExtractedValue} hold the location value of the missing required predicate or parameter
+ */
 
 public class RequiredPredicateError extends AbstractError{
 
@@ -37,7 +46,12 @@ public class RequiredPredicateError extends AbstractError{
 		String[] parts = predicateName.split("(?=[A-Z])");
 		msg += parts[0];
 		for(int i=1; i<parts.length; i++)
-			msg += " " + parts[i];
+			msg +=  parts[i];
+
+		if (predicateName.equals("preparedIV") && extractedValues.toString().equals("Third parameter"))
+		{
+			msg += " [ with CBC, It's required to use IVParameterSpec]";
+		}
 		return msg;
 	}
 	

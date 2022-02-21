@@ -1,7 +1,16 @@
 package crypto.extractparameter;
 
+import crypto.reporting.SARIFReporter;
+import crypto.rules.CrySLRule;
 import soot.Value;
 import soot.jimple.Constant;
+
+/**
+ * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
+ *
+ *  CallSiteWithParamIndex gives position of the location index of the error
+ *  ExtractedValue gives the value of the call site
+ */
 
 public class CallSiteWithExtractedValue {
 	private CallSiteWithParamIndex cs;

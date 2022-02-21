@@ -17,7 +17,7 @@ import soot.SootMethod;
 
 public class ReporterHelper{
 
-	/** Generates analysis report content for {@link CommandLineReporter} and {@link TXTReporter}
+	/** Generates analysis report content for {@link CommandLineReporter} CommandLineReporter and {@link TXTReporter} TXTReporter
 	 * @param rules a {@link List} with {@link CrySLRule} rules
 	 * @param objects a{@link Collection} with {@link IAnalysisSeed} objects
 	 * @param secureObjects a {@link List} with {@link IAnalysisSeed} secureObjects
