@@ -408,7 +408,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				
 				if (negatives.size() == alternatives.size()) {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> e.getPredName().equals(ensPred.getPredicate().getPredName()))) {
+						if (alternatives.parallelStream().allMatch(e -> e.getPredName().equals(ensPred.getPredicate().getPredName()))) {
 							return false;
 						}
 					}
