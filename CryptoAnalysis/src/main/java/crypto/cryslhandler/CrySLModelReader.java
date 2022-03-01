@@ -3,6 +3,7 @@ package crypto.cryslhandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -33,10 +34,6 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 
 
 import crypto.exceptions.CryptoAnalysisException;
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Injector;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -116,19 +113,19 @@ public class CrySLModelReader {
 		final Injector injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
 		this.resourceSet = injector.getInstance(XtextResourceSet.class);
 
-		String a = System.getProperty("java.class.path");
-		String[] l = a.split(";");
-
-		URL[] classpath = new URL[l.length];
-		for (int i = 0; i < classpath.length; i++) {
-			classpath[i] = new File(l[i]).toURI().toURL();
-		}
+		CrySLModelReaderClassPath.seal();
+		URL[] classpath = CrySLModelReaderClassPath.getClassPath().stream().map((it) -> {
+			try {
+				return it.toURL();
+			} catch (MalformedURLException e) {
+				throw new UncheckedIOException(e);
+			}
+		}).toArray(URL[]::new);
 
 		URLClassLoader ucl = new URLClassLoader(classpath);
 		this.resourceSet.setClasspathURIContext(new URLClassLoader(classpath));
 		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
 		this.resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
-
 	}
 
 	/**
