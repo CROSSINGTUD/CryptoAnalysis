@@ -62,6 +62,7 @@ import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
+import test.assertions.ErrorCountAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
@@ -213,6 +214,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										
 									}
 								});
+								
+								for(Assertion a : expectedResults){
+									if(a instanceof ErrorCountAssertion){
+										((ErrorCountAssertion) a).increase();
+									}
+								}
 							}
 
 							@Override
@@ -423,6 +430,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				Val val = new Val(queryVar,m);
 				queries.add(new InAcceptingStateAssertion(stmt, val));
 			}
+			if(invocationName.startsWith("errorCount")){
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant))
+					continue;
+				IntConstant queryVal = (IntConstant) param;
+				queries.add(new ErrorCountAssertion(queryVal.value));
+			}
 			
 //			if (invocationName.startsWith("violatedConstraint")) {
 //				queries.add(new ConstraintViolationAssertion(stmt));
@@ -458,6 +472,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			if(invocationName.startsWith("predicateContradiction")){
 				queries.add(new PredicateContradiction());
 			}
+			
 			if(invocationName.startsWith("missingTypestateChange")){
 				for(Unit pred : getPredecessorsNotBenchmark(stmt))
 					queries.add(new MissingTypestateChange((Stmt) pred));

@@ -46,6 +46,12 @@ public class Assertions {
 
 	public static void predicateContradiction() {
 	}
+	
+	public static void predicateContradiction(boolean shouldBeCondradicted) {
+	}
+	
+	public static void errorCount(int expectedCount) {
+	}
 
 	public static void predicateErrors(int i) {
 		
