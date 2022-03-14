@@ -34,7 +34,7 @@ public class CrySLRulesetSelector {
 	 * current RuleSets
 	 */
 	public static enum Ruleset {
-		JavaCryptographicArchitecture, BouncyCastle, Tink
+		JavaCryptographicArchitecture, BouncyCastle, Tink, CostumClasses
 	}
 
 	/**
