@@ -61,7 +61,8 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1(noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(1);
 	}
 	
 	@Test
@@ -73,7 +74,8 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1(pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(1);
 	}
 	
 	// AND
@@ -88,13 +90,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -106,13 +109,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -124,13 +128,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -142,13 +147,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 
 	// multi predicates
@@ -161,13 +167,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_pred2onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred2onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_pred2onP2(noPredOnA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -179,13 +186,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.pred1onP1_AND_notPred2onP2(noPredOnA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.pred1onP1_AND_notPred2onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -197,13 +205,14 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.notPred1onP1_AND_pred2onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.notPred1onP1_AND_pred2onP2(pred1onA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
 		r = new Requires();
 		r.notPred1onP1_AND_pred2onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	@Test
@@ -215,13 +224,12 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		r = new Requires();
 		r.notPred1onP1_AND_notPred2onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
 		r = new Requires();
 		r.notPred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
 		r = new Requires();
 		r.notPred1onP1_AND_notPred2onP2(noPredOnA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		
+		Assertions.predicateErrors(4);
 	}
 	
 	// OR
@@ -243,7 +251,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_OR_pred1onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -262,7 +270,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_OR_notPred1onP2(noPredOnA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -281,7 +289,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -300,8 +308,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
-		Assertions.notHasEnsuredPredicate(r);
-		
+		Assertions.predicateErrors(1);
 	}
 
 	// multi predicates
@@ -321,7 +328,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_OR_pred2onP2(noPredOnA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -340,7 +347,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.pred1onP1_OR_notPred2onP2(noPredOnA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -359,7 +366,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.notPred1onP1_OR_pred2onP2(pred1onA(), noPredOnA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 	@Test
@@ -378,7 +385,7 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		// assert false
 		r = new Requires();
 		r.notPred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
-		Assertions.notHasEnsuredPredicate(r);
+		Assertions.predicateErrors(1);
 	}
 		
 }
