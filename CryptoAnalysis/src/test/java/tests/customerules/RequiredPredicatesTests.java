@@ -2,10 +2,14 @@ package tests.customerules;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.inject.internal.util.Lists;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
@@ -21,58 +25,360 @@ import tests.headless.AbstractHeadlessTest;
 import tests.headless.MavenProject;
 
 public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCustomRules {
-	
-	@Test
-	public void test1() {
+
+	protected A pred1onA() {
 		A a = new A();
-		B b = new B();
-		Requires r = new Requires();
+		a.ensurePred1OnThis();
+		Assertions.hasEnsuredPredicate(a);
+		return a;
+	}
+	
+	protected A pred2onA() {
+		A a = new A();
+		a.ensurePred2OnThis();
+		Assertions.hasEnsuredPredicate(a);
+		return a;
+	}
+	
+	protected A noPredOnA() {
+		A a = new A();
 		Assertions.notHasEnsuredPredicate(a);
-		Assertions.notHasEnsuredPredicate(b);
+		return a;
+	}
+	
+	//
+	// OBJECTS OF SAME CLASS AS PARAMS
+	//
+	
+	// SIMPLE
+	
+	@Test
+	public void pred1onP1() {
+		Requires r; 
+		r = new Requires();
+		r.pred1onP1(pred1onA());
+		Assertions.hasEnsuredPredicate(r);
 		
-		r.pred1OnParam1AndNotPred1OnParam2(a, b);
-		Assertions.predicateErrors(1);
+		r = new Requires();
+		r.pred1onP1(noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
 	}
 	
 	@Test
-	public void test2() {
-		A a1 = new A();
-		A a2 = new A();
-		Requires r = new Requires();
-		Assertions.notHasEnsuredPredicate(a1);
-		Assertions.notHasEnsuredPredicate(a2);
+	public void notPred1onP1(){
+		Requires r; 
+		r = new Requires();
+		r.pred1onP1(noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
 		
-		a1.ensurePred1OnThis();
-		Assertions.hasEnsuredPredicate(a1);
-		Assertions.notHasEnsuredPredicate(a2);
+		r = new Requires();
+		r.pred1onP1(pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	// AND
+	
+	// same predicate
+	@Test
+	public void pred1onP1_AND_pred1onP2(){
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
 		
-		a2.ensurePred1OnAttr1();
-		
-		r.pred1OnParam1AndNotPred1OnParam2(a1, a2);
-		Assertions.predicateErrors(0);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
 	}
 	
 	@Test
-	public void test3() {
-		A a1 = new A();
-		A a2 = new A();
-		A a3 = new A();
-		Requires r = new Requires();
-		Assertions.notHasEnsuredPredicate(a1);
-		Assertions.notHasEnsuredPredicate(a2);
-		Assertions.notHasEnsuredPredicate(a3);
+	public void pred1onP1_AND_notPred1onP2(){
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
 		
-		a1.ensurePred1OnThis();
-		Assertions.hasEnsuredPredicate(a1);
-		
-		a2.ensurePred1OnThis();
-		Assertions.hasEnsuredPredicate(a2);
-		
-		a3.ensurePred1OnThis();
-		Assertions.hasEnsuredPredicate(a3);
-		
-		r.notPred1OnParam1OrNotPred1OnParam2OrNotPred1OnParam3(a1, a2, a3);
-		Assertions.predicateErrors(1);
-	}	
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
 	
+	@Test
+	public void notPred1onP1_AND_pred1onP2(){
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	@Test
+	public void notPred1onP1_AND_notPred1onP2(){
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+
+	// multi predicates
+	@Test
+	public void pred1onP1_AND_pred2onP2() {
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_pred2onP2(pred1onA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.pred1onP1_AND_pred2onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred2onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred2onP2(noPredOnA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	@Test
+	public void pred1onP1_AND_notPred2onP2() {
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_AND_notPred2onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.pred1onP1_AND_notPred2onP2(noPredOnA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_notPred2onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	@Test
+	public void notPred1onP1_AND_pred2onP2() {
+		Requires r;
+		r = new Requires();
+		r.notPred1onP1_AND_pred2onP2(noPredOnA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.notPred1onP1_AND_pred2onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_pred2onP2(pred1onA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_pred2onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	@Test
+	public void notPred1onP1_AND_notPred2onP2() {
+		Requires r;
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(noPredOnA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+	
+	// OR
+	
+	// same predicate
+	@Test
+	public void pred1onP1_OR_pred1onP2(){
+		//assert true
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_OR_pred1onP2(pred1onA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_OR_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void pred1onP1_OR_notPred1onP2(){
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_OR_notPred1onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_notPred1onP2(pred1onA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_notPred1onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_OR_notPred1onP2(noPredOnA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void notPred1onP1_OR_pred1onP2(){
+		Requires r;
+		// assert true
+		r = new Requires();
+		r.notPred1onP1_OR_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_pred1onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_pred1onP2(pred1onA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void notPred1onP1_OR_notPred1onP2(){
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.notPred1onP1_OR_notPred1onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(noPredOnA(), pred1onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_AND_pred1onP2(pred1onA(), pred1onA());
+		Assertions.notHasEnsuredPredicate(r);
+		
+	}
+
+	// multi predicates
+	@Test
+	public void pred1onP1_OR_pred2onP2() {
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_OR_pred2onP2(pred1onA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_pred2onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_pred2onP2(noPredOnA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_OR_pred2onP2(noPredOnA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void pred1onP1_OR_notPred2onP2() {
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.pred1onP1_OR_notPred2onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_notPred2onP2(pred1onA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_OR_notPred2onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.pred1onP1_OR_notPred2onP2(noPredOnA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void notPred1onP1_OR_pred2onP2() {
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.notPred1onP1_OR_pred2onP2(noPredOnA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_pred2onP2(pred1onA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_pred2onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.notPred1onP1_OR_pred2onP2(pred1onA(), noPredOnA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
+	@Test
+	public void notPred1onP1_OR_notPred2onP2() {
+		// assert true
+		Requires r;
+		r = new Requires();
+		r.notPred1onP1_OR_notPred2onP2(noPredOnA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(pred1onA(), noPredOnA());
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(noPredOnA(), pred2onA());
+		Assertions.hasEnsuredPredicate(r);
+		// assert false
+		r = new Requires();
+		r.notPred1onP1_AND_notPred2onP2(pred1onA(), pred2onA());
+		Assertions.notHasEnsuredPredicate(r);
+	}
+		
 }

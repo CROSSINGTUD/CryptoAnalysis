@@ -6,30 +6,47 @@ import main.prefined.C;
 
 public class Requires {
 	
+	// SIMPLE
+	
+	public void pred1onP1(A p1) {}
+	public void notPred1onP1(A p1) {}
+	
 	// AND
 	
-	public void pred1OnParam1AndNotPred1OnParam2(A param1, A param2) {
-		return;
-	}
+	// same predicate
+	public void pred1onP1_AND_pred1onP2(A p1, A p2) {}
+	public void pred1onP1_AND_notPred1onP2(A p1, A p2) {}
+	public void notPred1onP1_AND_pred1onP2(A p1, A p2) {}
+	public void notPred1onP1_AND_notPred1onP2(A p1, A p2) {}
 	
-	public void pred1OnParam1AndNotPred1OnParam2(A param1, B param2) {
-		return;
-	}
+	// multi predicates
+	public void pred1onP1_AND_pred2onP2(A p1, A p2) {}
+	public void pred1onP1_AND_notPred2onP2(A p1, A p2) {}
+	public void notPred1onP1_AND_pred2onP2(A p1, A p2) {}
+	public void notPred1onP1_AND_notPred2onP2(A p1, A p2) {}
 	
-	//
-	// ALTERNATIVES
-	//
+	// OR
 	
-	public void pred1OnParam1OrNotPred1OnParam2(A param1, A param2) {
-		return;
-	}
+	// same predicate
+	public void pred1onP1_OR_pred1onP2(A p1, A p2) {}
+	public void pred1onP1_OR_notPred1onP2(A p1, A p2) {}
+	public void notPred1onP1_OR_pred1onP2(A p1, A p2) {}
+	public void notPred1onP1_OR_notPred1onP2(A p1, A p2) {}
 	
-	public void notPred1OnParam1OrNotPred1OnParam2(A param1, A param2) {
-		return;
-	}
+	// multi predicates
+	public void pred1onP1_OR_pred2onP2(A p1, A p2) {}
+	public void pred1onP1_OR_notPred2onP2(A p1, A p2) {}
+	public void notPred1onP1_OR_pred2onP2(A p1, A p2) {}
+	public void notPred1onP1_OR_notPred2onP2(A p1, A p2) {}
 	
-	public void notPred1OnParam1OrNotPred1OnParam2OrNotPred1OnParam3(A param1, A param2, A param3) {
-		return;
-	}
+	// 3 cases same predicate
+	public void pred1onP1_OR_pred1onP2_OR_pred1onP3(A p1, A p2, A p3) {}
+	public void pred1onP1_OR_notPred1onP2_OR_pred1onP3(A p1, A p2, A p3) {}
+	public void notPred1onP1_OR_pred1onP2_OR_pred1onP3(A p1, A p2, A p3) {}
+	public void notPred1onP1_OR_notPred1onP2_OR_pred1onP3(A p1, A p2, A p3) {}
+	public void pred1onP1_OR_pred1onP2_OR_notPred1onP3(A p1, A p2, A p3) {}
+	public void pred1onP1_OR_notPred1onP2_OR_notPred1onP3(A p1, A p2, A p3) {}
+	public void notPred1onP1_OR_pred1onP2_OR_notPred1onP3(A p1, A p2, A p3) {}
+	public void notPred1onP1_OR_notPred1onP2_OR_notPred1onP3(A p1, A p2, A p3) {}
 	
 }

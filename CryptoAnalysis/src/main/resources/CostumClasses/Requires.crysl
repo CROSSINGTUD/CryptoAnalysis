@@ -1,45 +1,125 @@
 SPEC main.prefined.Requires
 
 OBJECTS	
-	main.prefined.A param1InR1;
-	main.prefined.A param2InR1;
-	
-	main.prefined.A param1InR2;
-	main.prefined.B param2InR2;
-	
-	main.prefined.A param1InA1;
-	main.prefined.A param2InA1;
-	
-	main.prefined.A param1InA2;
-	main.prefined.A param2InA2;
-	main.prefined.A param3InA2;
+	// SIMPLE
+	main.prefined.A p1inS1;
+	main.prefined.A p1inS2;
+	// AND
+	main.prefined.A p1inA1;
+	main.prefined.A p2inA1;
+	main.prefined.A p1inA2;
+	main.prefined.A p2inA2;
+	main.prefined.A p1inA3;
+	main.prefined.A p2inA3;
+	main.prefined.A p1inA4;
+	main.prefined.A p2inA4;
+	main.prefined.A p1inA5;
+	main.prefined.A p2inA5;
+	main.prefined.A p1inA6;
+	main.prefined.A p2inA6;
+	main.prefined.A p1inA7;
+	main.prefined.A p2inA7;
+	main.prefined.A p1inA8;
+	main.prefined.A p2inA8;
+	// OR
+	main.prefined.A p1inO1;
+	main.prefined.A p2inO1;
+	main.prefined.A p1inO2;
+	main.prefined.A p2inO2;
+	main.prefined.A p1inO3;
+	main.prefined.A p2inO3;
+	main.prefined.A p1inO4;
+	main.prefined.A p2inO4;
+	main.prefined.A p1inO5;
+	main.prefined.A p2inO5;
+	main.prefined.A p1inO6;
+	main.prefined.A p2inO6;
+	main.prefined.A p1inO7;
+	main.prefined.A p2inO7;
+	main.prefined.A p1inO8;
+	main.prefined.A p2inO8;
+
 	
 EVENTS
 	cons : Requires();
 	Cons := cons;
 	
-	r1: pred1OnParam1AndNotPred1OnParam2(param1InR1, param2InR1);
-	r2: pred1OnParam1AndNotPred1OnParam2(param1InR2, param2InR2);
-	Req:= r1 | r2;
+	// SIMPLE
 	
-	a1: pred1OnParam1OrNotPred1OnParam2(param1InA1, param2InA1);
-	a2: notPred1OnParam1OrNotPred1OnParam2OrNotPred1OnParam3(param1InA2, param2InA2, param3InA2); 
-	Alt:= a1 | a2;
+	s1: pred1onP1(p1inS1);
+	s2: notPred1onP1(p1inS2);
+	S := s1 | s2;
 	
-	All:= Req | Alt;
+	// AND
+	
+	// same predicate
+	a1: pred1onP1_AND_pred1onP2(p1inA1, p2inA1);
+	a2: pred1onP1_AND_notPred1onP2(p1inA2, p2inA2);
+	a3: notPred1onP1_AND_pred1onP2(p1inA3, p2inA3);
+	a4: notPred1onP1_AND_notPred1onP2(p1inA4, p2inA4);
+
+	// multi predicates
+	a5: pred1onP1_AND_pred2onP2(p1inA5, p2inA5);
+	a6: pred1onP1_AND_notPred2onP2(p1inA6, p2inA6);
+	a7: notPred1onP1_AND_pred2onP2(p1inA7, p2inA7);
+	a8: notPred1onP1_AND_notPred2onP2(p1inA8, p2inA8);
+	
+	A:= a1 | a2 | a3 | a4 | a5 | a6 | a7 | a8;
+	
+	// OR
+	
+	// same predicate
+	o1: pred1onP1_OR_pred1onP2(p1inO1, p2inO1);
+	o2: pred1onP1_OR_notPred1onP2(p1inO2, p2inO2);
+	o3: notPred1onP1_OR_pred1onP2(p1inO3, p2inO3);
+	o4: notPred1onP1_OR_notPred1onP2(p1inO4, p2inO4);
+	
+	// multi predicates
+	o5: pred1onP1_OR_pred2onP2(p1inO5, p2inO5);
+	o6: pred1onP1_OR_notPred2onP2(p1inO6, p2inO6);
+	o7: notPred1onP1_OR_pred2onP2(p1inO7, p2inO7);
+	o8: notPred1onP1_OR_notPred2onP2(p1inO8, p2inO8);
+	O:= o1 | o2 | o3 | o4 | o5 | o6 | o7 | o8;
+	
+	All:= S | A | O;
 	
 ORDER
-	Cons, All*
+	Cons, All
 	
 REQUIRES
-	pred1[param1InR1];
-	!pred1[param2InR1];
-	pred1[param1InR2];
-	!pred1[param2InR2];
-	pred1[param1InA1] || !pred1[param2InA1];
-	!pred1[param1InA2] || !pred1[param2InA2] || !pred1[param3InA2];
+	// SIMPLE
+	pred1[p1inS1];
+	!pred1[p1inS2];
+	
+	// AND
+	pred1[p1inA1];
+	pred1[p2inA1];
+	pred1[p1inA2];
+	!pred1[p2inA2];
+	!pred1[p1inA3];
+	pred1[p2inA3];
+	!pred1[p1inA4];
+	!pred1[p2inA4];
+	pred1[p1inA5];
+	pred2[p2inA5];
+	pred1[p1inA6];
+	!pred2[p2inA6];
+	!pred1[p1inA7];
+	pred2[p2inA7];
+	!pred1[p1inA8];
+	!pred2[p2inA8];
+	
+	//OR
+	pred1[p1inO1] || pred1[p2inO1];
+	pred1[p1inO2] || !pred1[p2inO2];
+	!pred1[p1inO3] || pred1[p2inO3];
+	!pred1[p1inO4] || !pred1[p2inO4];
+	pred1[p1inO5] || pred2[p2inO5];
+	pred1[p1inO6] || !pred2[p2inO6];
+	!pred1[p1inO7] || pred2[p2inO7];
+	!pred1[p1inO8] || !pred2[p2inO8];
 	
 ENSURES
-	withoutThisThatWontWork[this];
+	requiredPredicateWasEnsured[this];
 
 	
