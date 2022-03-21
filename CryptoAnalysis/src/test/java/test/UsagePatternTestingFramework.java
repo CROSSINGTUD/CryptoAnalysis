@@ -1,19 +1,5 @@
 package test;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
-
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.callgraph.ObservableDynamicICFG;
@@ -22,65 +8,38 @@ import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.CrySLResultsReporter;
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
+import crypto.analysis.*;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.analysis.CryptoScanner;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ErrorVisitor;
-import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.PredicateContradictionError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
+import crypto.analysis.errors.*;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
-import soot.Body;
-import soot.Local;
-import soot.SceneTransformer;
-import soot.SootMethod;
-import soot.Unit;
-import soot.Value;
+import soot.*;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 import sync.pds.solver.nodes.Node;
-import test.assertions.Assertions;
-import test.assertions.CallToForbiddenMethodAssertion;
-import test.assertions.ConstraintErrorCountAssertion;
-import test.assertions.ExtractedValueAssertion;
-import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.InAcceptingStateAssertion;
-import test.assertions.MissingTypestateChange;
-import test.assertions.NoMissingTypestateChange;
-import test.assertions.NotHasEnsuredPredicateAssertion;
-import test.assertions.NotInAcceptingStateAssertion;
-import test.assertions.PredicateContradiction;
-import test.assertions.PredicateErrorCountAssertion;
-import test.assertions.TypestateErrorCountAssertion;
+import test.assertions.*;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
+
+import java.util.*;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
-	private static final RuleFormat ruleFormat= RuleFormat.SOURCE;
 	List<CrySLRule> rules;
 	
 	@Override
@@ -356,7 +315,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	private List<CrySLRule> getRules() {
 		if(rules == null) {
 			try {
-				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
 			} catch (CryptoAnalysisException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

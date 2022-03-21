@@ -163,11 +163,12 @@ public class CogniCryptAndroidAnalysis {
 			throw new RuntimeException(
 					"Please specify a directory the CrySL rules ( " + CrySLModelReader.cryslFileEnding +" Files) are located in.");
 		}
+		CrySLRuleReader reader = new CrySLRuleReader();
 		File[] listFiles = new File(rulesDirectory).listFiles();
 		for (File file : listFiles) {
 			if (file != null && file.getName().endsWith(CrySLModelReader.cryslFileEnding)) {
 				try {
-					rules.add(CrySLRuleReader.readFromSourceFile(file));
+					rules.add(reader.readFromSourceFile(file));
 				} catch (CryptoAnalysisException e) {
 					logger.error(e.getMessage(), e);
 				}

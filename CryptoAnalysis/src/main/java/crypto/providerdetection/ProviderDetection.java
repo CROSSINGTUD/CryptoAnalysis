@@ -51,10 +51,22 @@ public class ProviderDetection {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
 	
 	private String provider = null;
-	private String rulesDirectory = null;	
+	private String rulesDirectory = null;
+	private final CrySLRuleReader reader;
 	private static final String BOUNCY_CASTLE = "BouncyCastle";
 	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
 	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
+
+	public ProviderDetection(){
+		this(new CrySLRuleReader());
+	}
+
+	public ProviderDetection(CrySLRuleReader reader){
+		if (reader == null){
+			throw new IllegalArgumentException("reader must not be null");
+		}
+		this.reader = reader;
+	}
 	
 	/**
 	 * Returns the detected provider.
@@ -173,9 +185,7 @@ public class ProviderDetection {
 	 * @param sootMethod
 	 *           
 	 * @param providerValue
-	 *            
-	 * @param icfg
-	 *            
+	 *
 	 */
 	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
 		String provider = null;
@@ -349,7 +359,7 @@ public class ProviderDetection {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
 		try {
-			rules.addAll(CrySLRuleReader.readFromDirectory(new File(providerRulesDirectory)));
+			rules.addAll(reader.readFromDirectory(new File(providerRulesDirectory)));
 		} catch (CryptoAnalysisException e) {
 			LOGGER.error("Error happened when getting the CrySL rules from the "
 					+ "specified directory: "+providerRulesDirectory, e);
@@ -368,7 +378,7 @@ public class ProviderDetection {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesZip;
 		try {
-			rules.addAll(CrySLRuleReader.readFromZipFile(new File(providerRulesZip)));
+			rules.addAll(reader.readFromZipFile(new File(providerRulesZip)));
 		} catch (CryptoAnalysisException e) {
 			LOGGER.error("Error happened when getting the CrySL rules from the "
 					+ "specified zip file: "+providerRulesZip, e);

@@ -1,32 +1,19 @@
 package tests.headless;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 import crypto.HeadlessCryptoScanner;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.analysis.*;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScannerSettings.ReportFormat;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -34,15 +21,19 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
-import tests.headless.FindingsType.FalseNegatives;
-import tests.headless.FindingsType.FalsePositives;
-import tests.headless.FindingsType.NoFalseNegatives;
-import tests.headless.FindingsType.NoFalsePositives;
-import tests.headless.FindingsType.TruePositives;
+import tests.headless.FindingsType.*;
 import typestate.TransitionFunction;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractHeadlessTest {
 
@@ -51,7 +42,6 @@ public abstract class AbstractHeadlessTest {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeadlessTest.class);
 
-	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
 	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
@@ -92,7 +82,7 @@ public abstract class AbstractHeadlessTest {
 			protected List<CrySLRule> getRules() {
 				try {
 					List<CrySLRule> rules = Lists.newArrayList();
-					rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
 					HeadlessCryptoScanner.setRules(rules);
 					return rules;
 				} catch (CryptoAnalysisException e) {
