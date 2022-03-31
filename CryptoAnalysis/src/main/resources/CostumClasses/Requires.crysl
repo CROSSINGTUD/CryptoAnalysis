@@ -38,6 +38,49 @@ OBJECTS
 	main.prefined.A p2inO7;
 	main.prefined.A p1inO8;
 	main.prefined.A p2inO8;
+		// 3 cases same predicate
+	main.prefined.A p1inO9;
+	main.prefined.A p2inO9;
+	main.prefined.A p3inO9;
+	main.prefined.A p1inO10;
+	main.prefined.A p2inO10;
+	main.prefined.A p3inO10;
+	main.prefined.A p1inO11;
+	main.prefined.A p2inO11;
+	main.prefined.A p3inO11;
+	main.prefined.A p1inO12;
+	main.prefined.A p2inO12;
+	main.prefined.A p3inO12;
+	main.prefined.A p1inO13;
+	main.prefined.A p2inO13;
+	main.prefined.A p3inO13;
+	main.prefined.A p1inO14;
+	main.prefined.A p2inO14;
+	main.prefined.A p3inO14;
+	main.prefined.A p1inO15;
+	main.prefined.A p2inO15;
+	main.prefined.A p3inO15;
+	main.prefined.A p1inO16;
+	main.prefined.A p2inO16;
+	main.prefined.A p3inO16;
+	// IMPLICATE
+	main.prefined.A p1inI1;
+	main.prefined.A p2inI1;
+	main.prefined.A p1inI2;
+	main.prefined.A p2inI2;
+	main.prefined.A p1inI3;
+	main.prefined.A p2inI3;
+	main.prefined.A p1inI4;
+	main.prefined.A p2inI4;
+	main.prefined.A p1inI5;
+	main.prefined.A p2inI5;
+	main.prefined.A p1inI6;
+	main.prefined.A p2inI6;
+	main.prefined.A p1inI7;
+	main.prefined.A p2inI7;
+	main.prefined.A p1inI8;
+	main.prefined.A p2inI8;
+	
 
 	
 EVENTS
@@ -79,9 +122,36 @@ EVENTS
 	o6: pred1onP1_OR_notPred2onP2(p1inO6, p2inO6);
 	o7: notPred1onP1_OR_pred2onP2(p1inO7, p2inO7);
 	o8: notPred1onP1_OR_notPred2onP2(p1inO8, p2inO8);
-	O:= o1 | o2 | o3 | o4 | o5 | o6 | o7 | o8;
 	
-	All:= S | A | O;
+	// 3 cases same predicate
+	o9: pred1onP1_OR_pred1onP2_OR_pred1onP3(p1inO9, p2inO9, p3inO9);
+	o10: pred1onP1_OR_notPred1onP2_OR_pred1onP3(p1inO10, p2inO10, p3inO10);
+	o11: notPred1onP1_OR_pred1onP2_OR_pred1onP3(p1inO11, p2inO11, p3inO11);
+	o12: notPred1onP1_OR_notPred1onP2_OR_pred1onP3(p1inO12, p2inO12, p3inO12);
+	o13: pred1onP1_OR_pred1onP2_OR_notPred1onP3(p1inO13, p2inO13, p3inO13);
+	o14: pred1onP1_OR_notPred1onP2_OR_notPred1onP3(p1inO14, p2inO14, p3inO14);
+	o15: notPred1onP1_OR_pred1onP2_OR_notPred1onP3(p1inO15, p2inO15, p3inO15);
+	o16: notPred1onP1_OR_notPred1onP2_OR_notPred1onP3(p1inO16, p2inO16, p3inO16);
+	
+	O:= o1 | o2 | o3 | o4 | o5 | o6 | o7 | o8 | o9 | o10 | o11 | o12 | o13 | o14 | o15 | o16;
+	
+	// IMPLICATE
+	
+	// same predicate
+	i1: pred1onP1_IMPL_pred1onP2(p1inI1, p2inI1);
+	i2: pred1onP1_IMPL_notPred1onP2(p1inI2, p2inI2);
+	i3: notPred1onP1_IMPL_pred1onP2(p1inI3, p2inI3);
+	i4: notPred1onP1_IMPL_notPred1onP2(p1inI4, p2inI4);
+	
+	// multi predicates
+	i5: pred1onP1_IMPL_pred2onP2(p1inI5, p2inI5);
+	i6: pred1onP1_IMPL_notPred2onP2(p1inI6, p2inI6);
+	i7: notPred1onP1_IMPL_pred2onP2(p1inI7, p2inI7);
+	i8: notPred1onP1_IMPL_notPred2onP2(p1inI8, p2inI8);
+	
+	I:= i1 | i2 | i3 | i4 | i5 | i6 | i7 | i8;
+	
+	All:= S | A | O | I;
 	
 ORDER
 	Cons, All
@@ -118,6 +188,24 @@ REQUIRES
 	pred1[p1inO6] || !pred2[p2inO6];
 	!pred1[p1inO7] || pred2[p2inO7];
 	!pred1[p1inO8] || !pred2[p2inO8];
+	
+	// 3 cases same predicate
+	pred1[p1inO9] || pred1[p2inO9] || pred1[p3inO9];
+	pred1[p1inO10] || !pred1[p2inO10] || pred1[p3inO10];
+	!pred1[p1inO11] || pred1[p2inO11] || pred1[p3inO11];
+	!pred1[p1inO12] || !pred1[p2inO12] || pred1[p3inO12];
+	pred1[p1inO13] || pred1[p2inO13] || !pred1[p3inO13];
+	pred1[p1inO14] || !pred1[p2inO14] || !pred1[p3inO14];
+	!pred1[p1inO15] || pred1[p2inO15] || !pred1[p3inO15];
+	!pred1[p1inO16] || !pred1[p2inO16] || !pred1[p3inO16];
+	
+	// IMPLICATE
+	// same predicate
+	pred1[p1inI1] => pred1[p2inI1];
+	pred1[p1inI2] => !pred1[p2inI2];
+	// multi predicates
+	pred1[p1inI5] => pred2[p2inI5];
+	pred1[p1inI6] => !pred2[p2inI6];
 	
 ENSURES
 	requiredPredicateWasEnsured[this];
