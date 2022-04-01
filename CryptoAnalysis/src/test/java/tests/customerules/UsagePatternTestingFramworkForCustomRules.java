@@ -14,7 +14,10 @@ import tests.headless.MavenProject;
 
 public class UsagePatternTestingFramworkForCustomRules extends UsagePatternTestingFramework {
 
-	//private static boolean buildJarWithCostumClasses = false;
+	//
+	// To run this test, make sure you have installed the maven project under /CustomClassesForSpecification/CustomClasses
+	//
+	
 	private URI jarWithCostumClassesUri;
 	
 	@Override

@@ -25,32 +25,7 @@ import tests.headless.AbstractHeadlessTest;
 import tests.headless.MavenProject;
 
 public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCustomRules {
-
-	protected A pred1onA() {
-		A a = new A();
-		a.ensurePred1OnThis();
-		Assertions.hasEnsuredPredicate(a);
-		return a;
-	}
 	
-	protected A pred2onA() {
-		A a = new A();
-		a.ensurePred2OnThis();
-		Assertions.hasEnsuredPredicate(a);
-		return a;
-	}
-	
-	protected A noPredOnA() {
-		A a = new A();
-		Assertions.notHasEnsuredPredicate(a);
-		return a;
-	}
-	
-	@Test
-	public void testTheTest() {
-		A a = pred1onA();
-		Assertions.hasEnsuredPredicate(a);
-	}
 	
 	//
 	// OBJECTS OF SAME CLASS AS PARAMS
@@ -399,15 +374,15 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		// assert true
 		Requires r;
-//		r = new Requires();
-//		r.notPred1onP1_OR_notPred1onP2(noPredOnA, noPredOnA);
-//		Assertions.hasEnsuredPredicate(r);
-//		r = new Requires();
-//		r.notPred1onP1_OR_notPred1onP2(noPredOnA, pred1onA);
-//		Assertions.hasEnsuredPredicate(r);
-//		r = new Requires();
-//		r.notPred1onP1_OR_notPred1onP2(pred1onA, noPredOnA);
-//		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_notPred1onP2(noPredOnA, noPredOnA);
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_notPred1onP2(noPredOnA, pred1onA);
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.notPred1onP1_OR_notPred1onP2(pred1onA, noPredOnA);
+		Assertions.hasEnsuredPredicate(r);
 		// assert false
 		r = new Requires();
 		r.notPred1onP1_OR_notPred1onP2(pred1onA, pred1onA2);
@@ -946,15 +921,15 @@ public class RequiredPredicatesTests extends UsagePatternTestingFramworkForCusto
 		
 		// assert true
 		Requires r;
-//		r = new Requires();
-//		r.pred1onP1_IMPL_pred2onP2(pred1onA, noPredOnA);
-//		Assertions.hasEnsuredPredicate(r);
-//		r = new Requires();
-//		r.pred1onP1_IMPL_notPred2onP2(noPredOnA, pred2onA);
-//		Assertions.hasEnsuredPredicate(r);
-//		r = new Requires();
-//		r.pred1onP1_IMPL_notPred2onP2(noPredOnA, noPredOnA);
-//		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_IMPL_pred2onP2(pred1onA, noPredOnA);
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_IMPL_notPred2onP2(noPredOnA, pred2onA);
+		Assertions.hasEnsuredPredicate(r);
+		r = new Requires();
+		r.pred1onP1_IMPL_notPred2onP2(noPredOnA, noPredOnA);
+		Assertions.hasEnsuredPredicate(r);
 		// assert false
 		r = new Requires();
 		r.pred1onP1_IMPL_notPred2onP2(pred1onA, pred2onA);
