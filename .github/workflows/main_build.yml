@@ -34,4 +34,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run maven command
-        run: mvn clean install
+        run: mvn clean verify
