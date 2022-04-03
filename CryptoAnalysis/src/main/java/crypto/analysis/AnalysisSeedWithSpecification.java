@@ -353,8 +353,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
 				EnsuredCrySLPredicate ensuredPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
-				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 				ensuredPred.addAnalysisSeedToParameter(this, 0); // by definition, "this" can only be at first position in parameter list
+				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 			}
 		}
 	}
@@ -390,84 +390,48 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				requiredPredicates.add(con);
 			}
 		}
-		Set<ISLConstraint> remainingPredicates = Sets.newHashSet(requiredPredicates);
-		missingPredicates.removeAll(remainingPredicates);
-
-		for (ISLConstraint pred : requiredPredicates) {
+		Set<ISLConstraint> remainingRequiredPredicates = Sets.newHashSet();
+		for(ISLConstraint pred: requiredPredicates) {
 			if (pred instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
-				if (reqPred.getPred().isNegated()) {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred())) {
-							return false;
+				if(!evaluatePredCond(reqPred.getPred())) {
+					// condition is satisfied, hence the pred has to be satisfied too
+					if(reqPred.getPred().isNegated()){
+						if(this.ensuredPredicates.parallelStream().anyMatch(ensPred -> ensPred.getPredicate().equals(reqPred.getPred()) && doPredsMatch(reqPred.getPred(), ensPred))) {
+							// predicate is ensured, but is required to be not ensured
+							remainingRequiredPredicates.add(reqPred);
 						}
 					}
-					remainingPredicates.remove(pred);
-				} else {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred()) && doPredsMatch(reqPred.getPred(), ensPred)) {
-							remainingPredicates.remove(pred);
+					else {
+						if(!this.ensuredPredicates.parallelStream().anyMatch(ensPred -> ensPred.getPredicate().equals(reqPred.getPred()) && doPredsMatch(reqPred.getPred(), ensPred))) {
+							// predicate is not ensured, but is required to be ensured
+							remainingRequiredPredicates.add(reqPred);
 						}
 					}
 				}
 			} else {
-				AlternativeReqPredicate alt = (AlternativeReqPredicate) pred;
-				List<CrySLPredicate> alternatives = alt.getAlternatives();
-				boolean satisfied = false;
-				List<CrySLPredicate> negatives = alternatives.parallelStream().filter(e -> e.isNegated()).collect(Collectors.toList());
-				
-				if (negatives.size() == alternatives.size()) {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> e.getPredName().equals(ensPred.getPredicate().getPredName()))) {
-							return false;
+				List<CrySLPredicate> alternatives = Lists.newArrayList(((AlternativeReqPredicate) pred).getAlternatives());
+				List<CrySLPredicate> negatives = alternatives.parallelStream().filter(e -> e.isNegated()).collect(Collectors.toList()); // holds all negated alternative preds
+			
+				if(alternatives.parallelStream().allMatch(p -> !evaluatePredCond(p))) {
+					// all conditions are satisfied
+					// TODO check if it is faster to first check positives and then negatives
+					if (!alternatives.isEmpty() && (negatives.isEmpty() || negatives.parallelStream().allMatch(e -> 
+						ensuredPredicates.parallelStream().anyMatch(ensPred -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))))) {
+						// all negative alternative preds are ensured
+						List<CrySLPredicate> positives = alternatives.parallelStream().filter(e -> !e.isNegated()).collect(Collectors.toList()); // now check the positives
+						if (positives.isEmpty() || !positives.parallelStream().anyMatch(e -> 
+						ensuredPredicates.parallelStream().anyMatch(ensPred -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred)))) {
+							// also no positiv alternative pred is ensured
+							// hence the alternative pred is not ensured
+							remainingRequiredPredicates.add(pred);
 						}
 					}
-					remainingPredicates.remove(pred);
-				} else if (negatives.isEmpty()) {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
-							remainingPredicates.remove(pred);
-							break;
-						}
-					}
-				} else {
-					boolean neg = true;
-
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (negatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()))) {
-							neg = false;
-						}
-
-						alternatives.removeAll(negatives);
-						if (alternatives.parallelStream().allMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
-							satisfied = true;
-						}
-
-						if (satisfied | neg) {
-							remainingPredicates.remove(pred);
-						}
-					}
-				}
-
-			}
-		}
-
-		for (ISLConstraint rem : Lists.newArrayList(remainingPredicates)) {
-			if (rem instanceof RequiredCrySLPredicate) {
-				RequiredCrySLPredicate singlePred = (RequiredCrySLPredicate) rem;
-				if (evaluatePredCond(singlePred.getPred())) {
-					remainingPredicates.remove(singlePred);
-				}
-			} else if (rem instanceof CrySLConstraint) {
-				List<CrySLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
-				if (altPred.parallelStream().anyMatch(e -> evaluatePredCond(e))) {
-					remainingPredicates.remove(rem);
 				}
 			}
 		}
-
-		this.missingPredicates.addAll(remainingPredicates);
-		return remainingPredicates.isEmpty();
+		this.missingPredicates = remainingRequiredPredicates;
+		return remainingRequiredPredicates.isEmpty();
 	}
 
 	private boolean evaluatePredCond(CrySLPredicate pred) {
