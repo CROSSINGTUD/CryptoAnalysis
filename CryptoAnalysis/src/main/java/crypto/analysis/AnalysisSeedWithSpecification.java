@@ -56,6 +56,7 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.ThrowStmt;
@@ -262,19 +263,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			for (CrySLMethod crySLMethod : convert) {
 				Entry<String, String> retObject = crySLMethod.getRetObject();
-				if (!retObject.getKey().equals("_") && currStmt.getUnit().get() instanceof AssignStmt && predicateParameterEquals(predToBeEnsured.getParameters(), retObject.getKey())) {
+				int paramEqualsAt = predicateParameterEqualsAt(predToBeEnsured.getParameters(), retObject.getKey());
+				if (!retObject.getKey().equals("_") && currStmt.getUnit().get() instanceof AssignStmt && paramEqualsAt > -1) {
 					AssignStmt as = (AssignStmt) currStmt.getUnit().get();
 					Value leftOp = as.getLeftOp();
 					AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), as.getRightOp(), new Statement(as, currStmt.getMethod()));
-					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
+					expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem, paramEqualsAt);
 				}
 				int i = 0;
 				for (Entry<String, String> p : crySLMethod.getParameters()) {
-					if (predicateParameterEquals(predToBeEnsured.getParameters(), p.getKey())) {
+					paramEqualsAt = predicateParameterEqualsAt(predToBeEnsured.getParameters(), p.getKey());
+					if (paramEqualsAt > -1) {
 						Value param = ie.getArg(i);
 						if (param instanceof Local) {
 							Val val = new Val(param, currStmt.getMethod());
-							expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem);
+							expectPredicateOnOtherObject(predToBeEnsured, currStmt, val, satisfiesConstraintSytem, paramEqualsAt);
 						}
 					}
 					i++;
@@ -285,16 +288,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private boolean predicateParameterEquals(List<ICrySLPredicateParameter> parameters, String key) {
-		for (ICrySLPredicateParameter predicateParam : parameters) {
+	private int predicateParameterEqualsAt(List<ICrySLPredicateParameter> parameters, String key) {
+		for(int i=0; i<parameters.size(); i++) {
+			ICrySLPredicateParameter predicateParam = parameters.get(i);
 			if (key.equals(predicateParam.getName())) {
-				return true;
+				return i;
 			}
 		}
-		return false;
+		return -1;
 	}
 
-	private void expectPredicateOnOtherObject(CrySLPredicate predToBeEnsured, Statement currStmt, Val accessGraph, boolean satisfiesConstraintSytem) {
+	private void expectPredicateOnOtherObject(CrySLPredicate predToBeEnsured, Statement currStmt, Val accessGraph, boolean satisfiesConstraintSytem, int paramMatchPosition) {
 		// TODO refactor this method.
 		boolean matched = false;
 		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
@@ -308,7 +312,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					if (satisfiesConstraintSytem) {
 						AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 						matched = true;
-						seed.addEnsuredPredicateFromOtherRule(new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
+						EnsuredCrySLPredicate ensPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
+						ensPred.addAnalysisSeedToParameter(seed, paramMatchPosition);
+						seed.addEnsuredPredicateFromOtherRule(ensPred);
 					}
 				}
 			}
@@ -318,7 +324,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<Statement, Val>(currStmt, accessGraph));
 		predicateHandler.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
-			seed.addEnsuredPredicate(new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
+			EnsuredCrySLPredicate ensPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
+			ensPred.addAnalysisSeedToParameter(seed, paramMatchPosition);
+			seed.addEnsuredPredicate(ensPred);
 		} else {
 			missingPredicates.add(new RequiredCrySLPredicate(predToBeEnsured, currStmt));
 		}
@@ -344,7 +352,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// TODO check for any reachable state that don't kill
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
-				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
+				EnsuredCrySLPredicate ensuredPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
+				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
+				ensuredPred.addAnalysisSeedToParameter(this, 0); // by definition, "this" can only be at first position in parameter list
 			}
 		}
 	}
@@ -473,49 +483,181 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean doPredsMatch(CrySLPredicate pred, EnsuredCrySLPredicate ensPred) {
-		boolean requiredPredicatesExist = true;
-		for (int i = 0; i < pred.getParameters().size(); i++) {
-			String var = pred.getParameters().get(i).getName();
-			if (isOfNonTrackableType(var)) {
+		if(pred.getParameters().size() != ensPred.getParameterToAnalysisSeed().length) {
+			return false;
+		}
+		for(int i=0; i<pred.getParameters().size(); i++) {
+			ICrySLPredicateParameter param = pred.getParameters().get(i);
+			if(param.getName().equals("_") || ensPred.getPredicate().getParameters().get(i).getName().equals("_")) {
+				// this can be anything
 				continue;
-			} else if (pred.getInvolvedVarNames().contains(var)) {
-
-				final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
-				Collection<String> actVals = Collections.emptySet();
-				Collection<String> expVals = Collections.emptySet();
-
-				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
-					if (cswpi.getVarName().equals(parameterI)) {
-						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
+			}
+			IAnalysisSeed seedAtParamI = ensPred.getParameterToAnalysisSeed()[i];
+			if(param.getName().equals("this")){
+				if((seedAtParamI == null || !seedAtParamI.equals(this))) {
+					// this is not this seed
+					return false;
+				}
+				else {
+					// this is also this seed
+					continue;
+				}
+			}
+			if(param instanceof CrySLMethod) {
+				// methods are only defined for prefined predicates (noCallTo etc.)
+				return false;
+			}
+			if(param instanceof CrySLObject) {
+				CrySLObject paramObj = (CrySLObject) param;
+				
+				if(!isOfNonTrackableType(param.getName())) {
+					// try to collect expected values for param
+					Collection<String> expVals = Collections.emptySet();
+					for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
+						if (cswpi.getVarName().equals(param.getName())) {
+							expVals = retrieveValueFromUnit(cswpi, parameterAnalysis.getCollectedValues().get(cswpi));
+						}
+					}
+					
+					if(!expVals.isEmpty()) {
+						// required predicate holds a value, not an object
+						Collection<String> actVals = Collections.emptySet();
+						for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
+							if (cswpi.getVarName().equals(ensPred.getPredicate().getParameters().get(i).getName())) {
+								actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
+							}
+						}
+						String splitter = "";
+						int index = -1;
+						if (paramObj.getSplitter() != null) {
+							splitter = paramObj.getSplitter().getSplitter();
+							index = paramObj.getSplitter().getIndex();
+						}
+						for (String foundVal : expVals) {
+							if (index > -1) {
+								foundVal = foundVal.split(splitter)[index];
+							}
+							actVals = actVals.parallelStream().map(e -> e.toLowerCase()).collect(Collectors.toList());
+							if(!actVals.contains(foundVal.toLowerCase())) {
+								return false;
+							}
+						}
+					}
+				} else {
+					// TODO Refactor
+					// required predicate could still be references to other objects
+					IAnalysisSeed ensSeed = ensPred.getParameterToAnalysisSeed()[i];
+					IAnalysisSeed reqSeed = null;
+					if(ensSeed != null) {
+						Stmt ensStmt = ensSeed.stmt().getUnit().get();
+						if(ensSeed instanceof AnalysisSeedWithSpecification) {
+							AnalysisSeedWithSpecification ensSeedWithSpec = (AnalysisSeedWithSpecification) ensSeed;
+							String ensClassName = ensSeedWithSpec.getSpec().getRule().getClassName();
+							
+							checkValues:
+							for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
+								if (cswpi.getVarName().equals(param.getName())) {
+									for(ExtractedValue q : parameterAnalysis.getCollectedValues().get(cswpi)) {
+										// q is a value, that matches 
+										
+										if(ensStmt instanceof AssignStmt && q.stmt().getUnit().get() instanceof AssignStmt) {
+											// important for classes such as SecretKey, where the seed statement is an assign statement
+											AssignStmt qStmt = (AssignStmt) q.stmt().getUnit().get();
+											RefType qRefType = (RefType) qStmt.getLeftOpBox().getValue().getType();
+											String qClassName = qRefType.getSootClass().getName();
+											String qShortClassName = qRefType.getSootClass().getShortName();
+											
+											if(!ensClassName.equals(qClassName) && !ensClassName.equals(qShortClassName)) {
+												// the required seed cannot match the ensured seed
+												// they must specify the same class
+												continue;
+											}
+											if(!ensStmt.toString().equals(qStmt.toString())) {
+												// the required seed cannot match the ensured seed
+												// they must be defined on the same statement
+												continue;
+											}
+											
+											for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
+												// check if refType is matching type of spec
+												if (spec.getRule().getClassName().equals(qClassName) || spec.getRule().getClassName().equals(qShortClassName)) {
+													AllocVal val = new AllocVal(qStmt.getLeftOp(), q.stmt().getMethod(), qStmt.getRightOp(), new Statement(qStmt, q.stmt().getMethod()));
+													reqSeed = this.cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this.cryptoScanner, q.stmt(), val, spec));
+													break checkValues;
+												}
+											}
+										}
+										else if(ensStmt instanceof InvokeStmt && q.stmt().getUnit().get() instanceof InvokeStmt) {
+											// important for classes such as SecretKey, where the seed statement is an assign statement
+											InvokeStmt qStmt = (InvokeStmt) q.stmt().getUnit().get();
+											Val val = new Val(q.getValue(), q.stmt().getMethod());
+											if(val.getType() instanceof RefType) {
+												RefType qRefType = (RefType) val.getType();
+												String qClassName = qRefType.getSootClass().getName();
+												String qShortClassName = qRefType.getSootClass().getShortName();
+											
+												if(!ensClassName.equals(qClassName) && !ensClassName.equals(qShortClassName)) {
+													// the required seed cannot match the ensured seed
+													// they must specify the same class
+													continue;
+												}
+												if(!ensStmt.toString().equals(qStmt.toString())) {
+													// the required seed cannot match the ensured seed
+													// they must be defined on the same statement
+													continue;
+												}
+												
+												for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
+													// check if refType is matching type of spec
+													if (spec.getRule().getClassName().equals(qClassName) || spec.getRule().getClassName().equals(qShortClassName)) {
+														reqSeed = this.cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this.cryptoScanner, q.stmt(), val, spec));
+														break checkValues;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						else {
+							AnalysisSeedWithEnsuredPredicate ensSeedWithEnsPred = (AnalysisSeedWithEnsuredPredicate) ensSeed;
+							checkValues:
+							for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
+								if (cswpi.getVarName().equals(param.getName())) {
+									for(ExtractedValue q : parameterAnalysis.getCollectedValues().get(cswpi)) {
+										if(ensStmt instanceof AssignStmt && q.stmt().getUnit().get() instanceof AssignStmt) {
+											AssignStmt as = (AssignStmt) q.stmt().getUnit().get();
+											Value leftOp = as.getLeftOp();
+											AllocVal val = new AllocVal(leftOp, q.stmt().getMethod(), as.getRightOp(), new Statement(as, q.stmt().getMethod()));
+											reqSeed = this.cryptoScanner.getOrCreateSeed(new Node<Statement, Val>(q.stmt(), val));
+											break checkValues;
+										}
+										else if(ensStmt instanceof InvokeStmt && q.stmt().getUnit().get() instanceof InvokeStmt) {
+											Val val = new Val(q.getValue(), q.stmt().getMethod());
+											reqSeed = this.cryptoScanner.getOrCreateSeed(new Node<Statement, Val>(q.stmt(), val));
+											break checkValues;
+										}
+										else {
+											// TODO this should be done better
+											if(q.stmt().getMethod().getActiveBody().getUnits().contains(ensStmt)) {
+												reqSeed = ensSeed;
+											}	
+										}
+									}
+								}
+							}
+							
+						}
+						
+					}
+					if(reqSeed == null || !reqSeed.equals(ensSeed)) {
+						return false;
 					}
 				}
-				for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
-					if (cswpi.getVarName().equals(var)) {
-						expVals = retrieveValueFromUnit(cswpi, parameterAnalysis.getCollectedValues().get(cswpi));
-					}
-				}
-
-				String splitter = "";
-				int index = -1;
-				if (pred.getParameters().get(i) instanceof CrySLObject) {
-					CrySLObject obj = (CrySLObject) pred.getParameters().get(i);
-					if (obj.getSplitter() != null) {
-						splitter = obj.getSplitter().getSplitter();
-						index = obj.getSplitter().getIndex();
-					}
-				}
-				for (String foundVal : expVals) {
-					if (index > -1) {
-						foundVal = foundVal.split(splitter)[index];
-					}
-					actVals = actVals.parallelStream().map(e -> e.toLowerCase()).collect(Collectors.toList());
-					requiredPredicatesExist &= actVals.contains(foundVal.toLowerCase());
-				}
-			} else {
-				requiredPredicatesExist = false;
 			}
 		}
-		return pred.isNegated() != requiredPredicatesExist;
+		return true;
 	}
 
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
