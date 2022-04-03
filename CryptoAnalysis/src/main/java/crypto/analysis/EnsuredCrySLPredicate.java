@@ -10,10 +10,22 @@ public class EnsuredCrySLPredicate {
 
 	private final CrySLPredicate predicate;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues;
+	private IAnalysisSeed[] seedsForParameters;
 
 	public EnsuredCrySLPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2) {
 		this.predicate = predicate;
 		parametersToValues = parametersToValues2;
+		seedsForParameters = new IAnalysisSeed[predicate.getParameters().size()];
+	}
+	
+	public void addAnalysisSeedToParameter(IAnalysisSeed seed, int paramPosition) {
+		if(paramPosition < predicate.getParameters().size()) {
+			seedsForParameters[paramPosition] = seed; 
+		}
+	}
+	
+	public IAnalysisSeed[] getParameterToAnalysisSeed() {
+		return seedsForParameters;
 	}
 	
 	public CrySLPredicate getPredicate(){
