@@ -353,8 +353,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
 				EnsuredCrySLPredicate ensuredPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
-				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 				ensuredPred.addAnalysisSeedToParameter(this, 0); // by definition, "this" can only be at first position in parameter list
+				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 			}
 		}
 	}
