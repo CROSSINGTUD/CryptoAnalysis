@@ -48,9 +48,32 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 		// Add new edges to newNode instead of Aggr Node 
 		edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.addEdge(new TransitionEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), newNode)));
 		// remove Aggr nodes and edges
-		edges.removeAll(edgesToAnyAggrNode);
-		nodes.removeAll(nodesToAggr);
+		nodesToAggr.remove(newNode);
+		removeNodesWithAllEdges(nodesToAggr);
 		return newNode;
+	}
+	
+	public Collection<StateNode> aggregateNodestoOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
+		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
+		// Add new edges to newNode instead of Aggr Node 
+		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.addEdge(new TransitionEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node))));
+		nodesToAggr.removeAll(startNodes);
+		removeNodesWithAllEdges(nodesToAggr);
+		return startNodes;
+	}
+	
+	private void removeNodesWithAllEdges(Collection<StateNode> nodesToRemove) {
+		nodesToRemove.forEach(node -> removeNodeWithAllEdges(node));
+	}
+	
+	private void removeNodeWithAllEdges(StateNode node) {
+		removeAllEdgesWithNode(node);
+		nodes.remove(node);
+	}
+	
+	private void removeAllEdgesWithNode(StateNode node) {
+		List<TransitionEdge> filteredEdges = edges.parallelStream().filter(e -> node.equals(e.to()) || node.equals(e.from())).collect(Collectors.toList());
+		edges.removeAll(filteredEdges);
 	}
 
 	private void updateHops(StateNode node) {

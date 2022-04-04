@@ -1,4 +1,5 @@
 package crypto.cryslhandler;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -48,9 +49,8 @@ public class NewStateMachineGraphBuilder {
 			// Primary ({SimpleOrder.left=current} orderop='|' right=Primary)*;
 			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), startNodes, false);
+			StateNode state = leftEndNodes.remove(0);
 			endNodes.addAll(leftEndNodes);
-			StateNode state = this.getNewNode();
-			this.result.addNode(state);
 			endNodes = Lists.newArrayList(this.result.aggregateNodesToOneNode(endNodes, state));
 		}
 		String elementop = order.getElementop();
@@ -66,8 +66,7 @@ public class NewStateMachineGraphBuilder {
 			else if(elementop.equals("*")){
 				// start --> start
 				// start = end node
-				endNodes.addAll(startNodes);
-				endNodes = Lists.newArrayList(this.result.aggregateNodesToOneNode(endNodes, this.getNewNode()));
+				endNodes = Lists.newArrayList(this.result.aggregateNodestoOtherNodes(endNodes, startNodes));
 			}
 			else if(elementop.equals("?")) {
 				// start --> end node
@@ -94,9 +93,16 @@ public class NewStateMachineGraphBuilder {
 	}
 
 	public StateMachineGraph buildSMG() {
+		StateNode initialNode = null;
+		for(StateNode s: this.result.getNodes()) {
+			initialNode = s;
+		}
 		if (this.head != null) {
 			List<StateNode> acceptingNodes = parseOrderAndGetEndStates(this.head, this.result.getNodes(), false);
 			acceptingNodes.parallelStream().forEach(node -> node.setAccepting(true));
+		}
+		if(this.result.getAllTransitions().isEmpty()) {
+			this.result.addEdge(new TransitionEdge(new ArrayList<CrySLMethod>(), initialNode, initialNode));
 		}
 		return this.result;
 	}
