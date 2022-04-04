@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import crypto.interfaces.FiniteStateMachine;
 
 public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {
@@ -39,6 +41,16 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 			e.setHopsToAccepting(0);
 			updateHops(e);
 		});
+	}
+	
+	public StateNode aggregateNodesToOneNode(List<StateNode> nodesToAggr, StateNode newNode) {
+		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
+		// Add new edges to newNode instead of Aggr Node 
+		edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.addEdge(new TransitionEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), newNode)));
+		// remove Aggr nodes and edges
+		edges.removeAll(edgesToAnyAggrNode);
+		nodes.removeAll(nodesToAggr);
+		return newNode;
 	}
 
 	private void updateHops(StateNode node) {

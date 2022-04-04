@@ -85,6 +85,7 @@ import de.darmstadt.tu.crossing.crySL.PreDefinedPredicates;
 import de.darmstadt.tu.crossing.crySL.Pred;
 import de.darmstadt.tu.crossing.crySL.PredLit;
 import de.darmstadt.tu.crossing.crySL.ReqPred;
+import de.darmstadt.tu.crossing.crySL.RequiredBlock;
 import de.darmstadt.tu.crossing.crySL.SimpleOrder;
 import de.darmstadt.tu.crossing.crySL.SuPar;
 import de.darmstadt.tu.crossing.crySL.SuParList;
@@ -188,6 +189,7 @@ public class CrySLModelReader {
 		final EObject eObject = resource.getContents().get(0);
 		final Domainmodel dm = (Domainmodel) eObject;
 		String curClass = dm.getJavaType().getQualifiedName();
+		final RequiredBlock events = dm.getReq_events(); 
 		final EnsuresBlock ensure = dm.getEnsure();
 		final Map<ParEqualsPredicate, SuperType> pre_preds = Maps.newHashMap();
 		final DestroysBlock destroys = dm.getDestroy();
@@ -203,7 +205,7 @@ public class CrySLModelReader {
 			pre_preds.putAll(getPredicates(ensure.getPred()));
 		}
 
-		this.smg = buildStateMachineGraph(order);
+		this.smg = (new NewStateMachineGraphBuilder(order)).buildSMG();
 		final ForbiddenBlock forbEvent = dm.getForbEvent();
 		this.forbiddenMethods = (forbEvent != null) ? getForbiddenMethods(forbEvent.getForb_methods()) : Lists.newArrayList();
 
