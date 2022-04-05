@@ -806,11 +806,6 @@ public class CrySLModelReader {
 		return typeName;
 	}
 
-	private StateMachineGraph buildStateMachineGraph(final Expression order) {
-		final StateMachineGraphBuilder smgb = new StateMachineGraphBuilder(order);
-		return smgb.buildSMG();
-	}
-
 	private static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}

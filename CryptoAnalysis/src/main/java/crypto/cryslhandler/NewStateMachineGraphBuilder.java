@@ -1,5 +1,5 @@
 package crypto.cryslhandler;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
 import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.Expression;
 
@@ -20,12 +19,11 @@ import de.darmstadt.tu.crossing.crySL.Expression;
 public class NewStateMachineGraphBuilder {
 	
 	private final Expression order;
-	private final StateMachineGraph result = new StateMachineGraph();
-	private int nodeNameCounter = 0;
-
+	private final StateMachineGraph result;
+	
 	public NewStateMachineGraphBuilder(final Expression order) {
 		this.order = order;
-		this.result.addNode(new StateNode("-1", true, true));
+		this.result = new StateMachineGraph();
 	}
 	
 	/**
@@ -86,8 +84,7 @@ public class NewStateMachineGraphBuilder {
 			// This must by of type Primary
 			if(!order.getOrderEv().isEmpty()) {
 				// That is actually the end of recursion or the deepest level.
-				StateNode endNode = this.getNewNode();
-				this.result.addNode(endNode);
+				StateNode endNode = this.result.createNewNode();
 				endNodes.add(endNode);
 				parseEvent(order.getOrderEv().get(0), startNodes, endNode);
 			} else {
@@ -127,24 +124,19 @@ public class NewStateMachineGraphBuilder {
 	
 	private void parseEvent(Event event, StateNode startNode, StateNode endNode) {
 		final List<CrySLMethod> label = CryslReaderUtils.resolveAggregateToMethodeNames(event);
-		this.result.addEdge(new TransitionEdge(label, startNode, endNode));
-	}
-	
-	private StateNode getNewNode() {
-		return new StateNode(String.valueOf(this.nodeNameCounter++), false, false);
+		this.result.createNewEdge(label, startNode, endNode);
 	}
 
 	public StateMachineGraph buildSMG() {
-		StateNode initialNode = null;
-		for(StateNode s: this.result.getNodes()) {
-			initialNode = s;
-		}
+		StateNode initialNode = new StateNode("-1", true, true);
+		this.result.addNode(initialNode);
 		if (this.order != null) {
 			List<StateNode> acceptingNodes = parseOrderAndGetEndStates(this.order, this.result.getNodes(), false);
 			acceptingNodes.parallelStream().forEach(node -> node.setAccepting(true));
 		}
 		if(this.result.getAllTransitions().isEmpty()) {
-			this.result.addEdge(new TransitionEdge(new ArrayList<CrySLMethod>(), initialNode, initialNode));
+			// to have an initial transition
+			this.result.createNewEdge(Lists.newArrayList(), initialNode, initialNode);
 		}
 		return this.result;
 	}
