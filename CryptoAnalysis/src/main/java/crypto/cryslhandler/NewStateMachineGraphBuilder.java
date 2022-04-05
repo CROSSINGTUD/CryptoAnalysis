@@ -84,10 +84,8 @@ public class NewStateMachineGraphBuilder {
 		List<StateNode> endNodes = Lists.newArrayList();
 		if(order.getOrderop() == null) {
 			// This must by of type Primary
-			// (orderEv+=[Event] elementop=('+' | '?' | '*')?) | ('(' Order ')' elementop=('+' | '?' | '*')?);
 			if(!order.getOrderEv().isEmpty()) {
 				// That is actually the end of recursion or the deepest level.
-				// 
 				StateNode endNode = this.getNewNode();
 				this.result.addNode(endNode);
 				endNodes.add(endNode);
@@ -97,12 +95,10 @@ public class NewStateMachineGraphBuilder {
 			}
 		} else if(order.getOrderop().equals(",")) {
 			// This must by of type Order
-			// SimpleOrder ({Order.left=current} orderop=',' right=SimpleOrder)* | '*';
 			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), leftEndNodes, false);
 		} else if(order.getOrderop().equals("|")) {
 			// This must by of type SimpleOrder
-			// Primary ({SimpleOrder.left=current} orderop='|' right=Primary)*;
 			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), startNodes, false);
 			endNodes.addAll(leftEndNodes);
