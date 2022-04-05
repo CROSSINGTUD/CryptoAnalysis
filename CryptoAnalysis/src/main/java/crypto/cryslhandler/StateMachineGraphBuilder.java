@@ -16,12 +16,12 @@ import de.darmstadt.tu.crossing.crySL.Expression;
  * @author marvinvogel
  *
  */
-public class NewStateMachineGraphBuilder {
+public class StateMachineGraphBuilder {
 	
 	private final Expression order;
 	private final StateMachineGraph result;
 	
-	public NewStateMachineGraphBuilder(final Expression order) {
+	public StateMachineGraphBuilder(final Expression order) {
 		this.order = order;
 		this.result = new StateMachineGraph();
 	}

@@ -205,7 +205,7 @@ public class CrySLModelReader {
 			pre_preds.putAll(getPredicates(ensure.getPred()));
 		}
 
-		this.smg = (new NewStateMachineGraphBuilder(order)).buildSMG();
+		this.smg = (new StateMachineGraphBuilder(order)).buildSMG();
 		final ForbiddenBlock forbEvent = dm.getForbEvent();
 		this.forbiddenMethods = (forbEvent != null) ? getForbiddenMethods(forbEvent.getForb_methods()) : Lists.newArrayList();
 
