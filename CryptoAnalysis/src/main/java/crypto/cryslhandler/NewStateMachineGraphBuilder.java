@@ -49,9 +49,7 @@ public class NewStateMachineGraphBuilder {
 			// Primary ({SimpleOrder.left=current} orderop='|' right=Primary)*;
 			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), startNodes, false);
-			StateNode state = leftEndNodes.remove(0);
 			endNodes.addAll(leftEndNodes);
-			endNodes = Lists.newArrayList(this.result.aggregateNodesToOneNode(endNodes, state));
 		}
 		String elementop = order.getElementop();
 		if(!(elementop == null || ignoreElementOp)) {
