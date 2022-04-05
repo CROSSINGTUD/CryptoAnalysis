@@ -105,9 +105,9 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseOAEPForRSA: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<example.UsePKCS1ForRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 
 		scanner.exec();
