@@ -2,12 +2,18 @@ package crypto.cryslhandler;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
 import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.Expression;
 
@@ -36,7 +42,7 @@ public class StateMachineGraphBuilder {
 	 * @param ignoreElementOp if true, it will ignore elementop (elementop=('+' | '?' | '*')). Default is false.
 	 * @return all accepting nodes, according to the order
 	 */
-	private List<StateNode> parseOrderAndGetEndStates(Expression order, Collection<StateNode> startNodes, boolean ignoreElementOp) {
+	private Set<StateNode> parseOrderAndGetEndStates(Expression order, Collection<StateNode> startNodes, boolean ignoreElementOp) {
 		/* Having a look at the Crysl Xtext definition for the Order section, we have
 		 * -----------
 		 *
@@ -79,7 +85,9 @@ public class StateMachineGraphBuilder {
 		 * 			We set the ignoreElementOp flag, to not end in infinity loop.
 		 * 			Then we apply same as on ()*.
 		 */
-		List<StateNode> endNodes = Lists.newArrayList();
+		Map<StateNode, Set<TransitionEdge>> initialEdgesOnStartNodes = Maps.newHashMap(); 
+		startNodes.parallelStream().forEach(n -> initialEdgesOnStartNodes.put(n, this.result.getAllOutgoingEdges(n)));
+		Set<StateNode> endNodes = Sets.newHashSet();
 		if(order.getOrderop() == null) {
 			// This must by of type Primary
 			if(!order.getOrderEv().isEmpty()) {
@@ -92,23 +100,51 @@ public class StateMachineGraphBuilder {
 			}
 		} else if(order.getOrderop().equals(",")) {
 			// This must by of type Order
-			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
+			Set<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), leftEndNodes, false);
 		} else if(order.getOrderop().equals("|")) {
 			// This must by of type SimpleOrder
-			List<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
+			Set<StateNode> leftEndNodes =  parseOrderAndGetEndStates(order.getLeft(), startNodes, false);
 			endNodes = parseOrderAndGetEndStates(order.getRight(), startNodes, false);
 			endNodes.addAll(leftEndNodes);
+			// TODO reduce all end nodes without outgoing edges to one node
+			Set<StateNode> nodesWithoutOutgoingEdges = endNodes.stream().filter(node -> !result.getAllTransitions().stream().map(edge -> edge.from()).anyMatch(e -> e.equals(node))).collect(Collectors.toSet());
+			if(!nodesWithoutOutgoingEdges.isEmpty()) {
+				endNodes.removeAll(nodesWithoutOutgoingEdges);
+				StateNode aggrNode = this.result.createNewNode();
+				endNodes.add(aggrNode);
+				this.result.aggregateNodesToOneNode(nodesWithoutOutgoingEdges, aggrNode);
+			}
 		}
 		
 		// modify graph such that it applies elementop.
 		String elementop = order.getElementop();
 		if(!(elementop == null || ignoreElementOp)) {
 			if(elementop.equals("+")) {
-				List<StateNode> endNotesToAggr = parseOrderAndGetEndStates(order, endNodes, true);
-				this.result.aggregateNodestoOtherNodes(endNotesToAggr, endNodes);
+				for(StateNode node: startNodes) {
+					Set<TransitionEdge> newEdges = this.result.getAllOutgoingEdges(node);
+					newEdges.removeAll(initialEdgesOnStartNodes.get(node));
+					for(TransitionEdge newEdge: newEdges) {
+						endNodes.forEach(endNode -> this.result.createNewEdge(newEdge.getLabel(), endNode, newEdge.getRight()));	
+					}
+				}
+				//Set<StateNode> endNotesToAggr = parseOrderAndGetEndStates(order, endNodes, true);
+				//this.result.aggregateNodestoOtherNodes(endNotesToAggr, endNodes);
 			} else if(elementop.equals("*")){
-				endNodes = Lists.newArrayList(this.result.aggregateNodestoOtherNodes(endNodes, startNodes));
+				// endNodes = Lists.newArrayList(this.result.aggregateNodestoOtherNodes(endNodes, startNodes));
+				// TODO this needs more logic
+				// a* => start--a--> end => start--a-->start
+				// shoud actually be converted to (a+)?
+				// start--a-->end , end--a-->end, endNodes=[start, end]
+				// otherwise a*|b* will be (a|b)*
+				for(StateNode node: startNodes) {
+					Set<TransitionEdge> newEdges = this.result.getAllOutgoingEdges(node);
+					newEdges.removeAll(initialEdgesOnStartNodes.get(node));
+					for(TransitionEdge newEdge: newEdges) {
+						endNodes.forEach(endNode -> this.result.createNewEdge(newEdge.getLabel(), endNode, newEdge.getRight()));	
+					}
+				}
+				endNodes.addAll(startNodes);
 			} else if(elementop.equals("?")) {
 				endNodes.addAll(startNodes);
 			}
@@ -131,7 +167,7 @@ public class StateMachineGraphBuilder {
 		StateNode initialNode = new StateNode("-1", true, true);
 		this.result.addNode(initialNode);
 		if (this.order != null) {
-			List<StateNode> acceptingNodes = parseOrderAndGetEndStates(this.order, this.result.getNodes(), false);
+			Set<StateNode> acceptingNodes = parseOrderAndGetEndStates(this.order, Sets.newHashSet(this.result.getNodes()), false);
 			acceptingNodes.parallelStream().forEach(node -> node.setAccepting(true));
 		}
 		if(this.result.getAllTransitions().isEmpty()) {

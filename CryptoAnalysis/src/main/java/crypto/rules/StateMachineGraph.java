@@ -55,15 +55,24 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 		});
 	}
 	
-	public StateNode aggregateNodesToOneNode(List<StateNode> nodesToAggr, StateNode newNode) {
-		this.aggregateNodestoOtherNodes(nodesToAggr, Lists.newArrayList(newNode));
+	public Set<TransitionEdge> getAllOutgoingEdges(StateNode node){
+		return edges.parallelStream().filter(edge -> edge.from().equals(node)).collect(Collectors.toSet());
+	}
+	
+	public void addAllOutgoingEdgesFromOneNodeToOtherNodes(StateNode node, Collection<StateNode> otherNodes) {
+		List<TransitionEdge> edgesFromNode = edges.parallelStream().filter(e -> node.equals(e.from())).collect(Collectors.toList());
+		otherNodes.forEach(otherNode -> edgesFromNode.forEach(edge -> this.createNewEdge(edge.getLabel(), otherNode, edge.getLeft())));
+	}
+	
+	public StateNode aggregateNodesToOneNode(Set<StateNode> endNodes, StateNode newNode) {
+		this.aggregateNodestoOtherNodes(endNodes, Lists.newArrayList(newNode));
 		return newNode;
 	}
 	
 	public Collection<StateNode> aggregateNodestoOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
 		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
 		// Add new edges to newNode instead of Aggr Node 
-		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.addEdge(new TransitionEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node))));
+		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.createNewEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node)));
 		nodesToAggr.removeAll(startNodes);
 		removeNodesWithAllEdges(nodesToAggr);
 		return startNodes;

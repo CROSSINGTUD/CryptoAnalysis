@@ -277,6 +277,8 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
+		Options.v().set_keep_offset(true);
+		Options.v().set_debug(true);
 		// JAVA 8
 		if(getJavaVersion() < 9)
 		{
