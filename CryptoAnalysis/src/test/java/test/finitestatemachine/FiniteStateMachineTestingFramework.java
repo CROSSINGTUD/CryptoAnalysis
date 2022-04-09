@@ -44,11 +44,15 @@ public class FiniteStateMachineTestingFramework{
 	}
 	
 	public void assertInSMG(String methods) {
-		assert isPathOfMethodsInSMG(methods);
+		if(!isPathOfMethodsInSMG(methods)) {
+			throw new AssertionError("Order of calls are not in SMG but should be: " + methods);
+		};
 	}
 	
 	public void assertNotInSMG(String methods) {
-		assert !isPathOfMethodsInSMG(methods);
+		if(isPathOfMethodsInSMG(methods)) {
+			throw new AssertionError("Order of calls are in SMG but should not be: " + methods);
+		};
 	}
 	
 	private boolean isPathOfMethodsInSMG(String methods) {
