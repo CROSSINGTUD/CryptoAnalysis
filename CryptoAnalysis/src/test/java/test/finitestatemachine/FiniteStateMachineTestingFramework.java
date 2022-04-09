@@ -32,15 +32,77 @@ import crypto.rules.TransitionEdge;
 import de.darmstadt.tu.crossing.crySL.Order;
 import test.IDEALCrossingTestingFramework;
 
-public class FiniteStateMachineTestingFramework{
+public abstract class FiniteStateMachineTestingFramework{
 
 	private StateMachineGraph smg;
 	private String crySLRule;
 	private Ruleset ruleset;
+	protected Order order;
+	private Set<String> validPathsWithMaxRepeat2;
+	private Set<String> validPathsWithMaxRepeat4;
 	
 	public FiniteStateMachineTestingFramework(String crySLRule, Ruleset ruleset) {
 		this.crySLRule = crySLRule;
 		this.ruleset = ruleset;
+		this.validPathsWithMaxRepeat2 = Sets.newHashSet();
+		this.validPathsWithMaxRepeat4 = Sets.newHashSet();
+	}
+	
+	/**
+	 * This test based on stochastic assumptions.
+	 */
+	@Test
+	public void test() {
+		if(order != null) {
+			benchmark();
+		}
+	}
+	
+	private void benchmark() {
+		benchmarkValidPaths(1000);
+		benchmarkNonValidPaths();
+	}
+	
+	public void benchmarkValidPaths(int rounds) {
+		Plus.maxRepeat = 2;
+		for(int i=0; i<rounds; i++) {
+			String randomPath = String.join(",", order.get());
+			validPathsWithMaxRepeat2.add(randomPath);
+			validPathsWithMaxRepeat4.add(randomPath);
+			assertInSMG(randomPath);
+		}
+		Plus.maxRepeat = 4;
+		for(int i=0; i<rounds*50; i++) {
+			String randomPath = String.join(",", order.get());
+			validPathsWithMaxRepeat4.add(randomPath);
+			assertInSMG(randomPath);
+		}
+	}
+	
+	public void benchmarkNonValidPaths() {
+		for(String path: validPathsWithMaxRepeat2) {
+			List<String> events = Lists.newArrayList(Arrays.asList(path.split(",")));
+			if(events.size()>1) {
+				switch((new Random()).nextInt(2)){
+					case 0:
+						// delete an event
+						int rand = (new Random()).nextInt(events.size());
+						events.remove(rand);
+						break;
+					case 1:
+						// switch two events
+						int rand1 = (new Random()).nextInt(events.size());
+						String event = events.remove(rand1);
+						int rand2 = (new Random()).nextInt(events.size());
+						events.add(rand2, event);
+						break;
+				}
+				String newPath = String.join(",", events);
+				if(!validPathsWithMaxRepeat4.contains(newPath)) {
+					assertNotInSMG(newPath);
+				}
+			}
+		}
 	}
 	
 	public void assertInSMG(String methods) {
@@ -50,7 +112,8 @@ public class FiniteStateMachineTestingFramework{
 	}
 	
 	public void assertNotInSMG(String methods) {
-		if(isPathOfMethodsInSMG(methods)) {
+		if(!methods.isEmpty() && isPathOfMethodsInSMG(methods)) {
+			// the initial state is always accepting.
 			throw new AssertionError("Order of calls are in SMG but should not be: " + methods);
 		};
 	}
@@ -115,8 +178,9 @@ public class FiniteStateMachineTestingFramework{
 		}
 	}
 	
-	public class Plus implements Order{
+	public static class Plus implements Order{
 		private Order order;
+		static int maxRepeat = 2;
 		
 		public Plus(Order order){
 			this.order = order;
@@ -124,7 +188,7 @@ public class FiniteStateMachineTestingFramework{
 		
 		public List<String> get() {
 			List<String> result = Lists.newArrayList();
-			for(int i=(new Random()).nextInt(5)+1; i>0; i--) {
+			for(int i=(new Random()).nextInt(maxRepeat)+1; i>0; i--) {
 				result.addAll(order.get());
 			}
 			return result;

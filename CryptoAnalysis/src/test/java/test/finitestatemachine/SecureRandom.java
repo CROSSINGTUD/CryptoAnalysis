@@ -6,8 +6,6 @@ import crypto.analysis.CrySLRulesetSelector.Ruleset;
 
 public class SecureRandom extends FiniteStateMachineTestingFramework{
 	
-	private Order order;
-
 	public SecureRandom() {
 		super("SecureRandom", Ruleset.JavaCryptographicArchitecture);
 		
@@ -15,11 +13,5 @@ public class SecureRandom extends FiniteStateMachineTestingFramework{
 
 	}
 	// Ins, (Seeds?, Ends*)*
-	
-	@Test
-	public void benchmark() {
-		for(int i=0; i<10000; i++) {
-			assertInSMG(String.join(",", order.get()));
-		}
-	}
+
 }

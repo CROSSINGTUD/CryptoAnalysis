@@ -1,12 +1,8 @@
 package test.finitestatemachine;
 
-import org.junit.Test;
-
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 
 public class SHA256DigestTest extends FiniteStateMachineTestingFramework{
-	
-	private Order order;
 
 	public SHA256DigestTest() {
 		super("SHA256Digest", Ruleset.BouncyCastle);
@@ -16,10 +12,4 @@ public class SHA256DigestTest extends FiniteStateMachineTestingFramework{
 	}
 	// Cons, (Updates+, Finals)*
 	
-	@Test
-	public void benchmark() {
-		for(int i=0; i<10000; i++) {
-			assertInSMG(String.join(",", order.get()));
-		}
-	}
 }
