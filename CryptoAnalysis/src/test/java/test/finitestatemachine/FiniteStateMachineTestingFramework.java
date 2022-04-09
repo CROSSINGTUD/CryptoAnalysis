@@ -9,12 +9,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.inject.internal.util.Lists;
 import com.google.inject.internal.util.Sets;
 
 import crypto.analysis.CrySLRulesetSelector;
@@ -74,6 +76,94 @@ public class FiniteStateMachineTestingFramework{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	public interface Order{
+		List<String> get();
+	}
+	
+	public class Simple implements Order{
+		private Order[] order;
+		
+		public Simple(Order... order){
+			this.order = order;
+		}
+		
+		public List<String> get() {
+			List<String> result = Lists.newArrayList();
+			for(Order o: order) {
+				result.addAll(o.get());
+			}
+			return result;
+		}
+	}
+	
+	public class Or implements Order{
+		private Order[] order;
+		
+		public Or(Order... order){
+			this.order = order;
+		}
+		
+		public List<String> get() {
+			return order[(new Random()).nextInt(order.length)].get();
+		}
+	}
+	
+	public class Plus implements Order{
+		private Order order;
+		
+		public Plus(Order order){
+			this.order = order;
+		}
+		
+		public List<String> get() {
+			List<String> result = Lists.newArrayList();
+			for(int i=(new Random()).nextInt(5)+1; i>0; i--) {
+				result.addAll(order.get());
+			}
+			return result;
+		}
+	}
+	
+	public class Opt implements Order{
+		private Order order;
+		
+		public Opt(Order order){
+			this.order = order;
+		}
+		
+		public List<String> get() {
+			List<String> result = Lists.newArrayList();
+			if((new Random()).nextInt(2)==0) {
+				result.addAll(order.get());
+			}
+			return result;
+		}
+	}
+	
+	public class Star implements Order{
+		private Order order;
+		
+		public Star(Order order){
+			this.order = new Opt(new Plus(order));
+		}
+		
+		public List<String> get() {
+			return order.get();
+		}
+	}
+	
+	public class E implements Order{
+		private String event;
+		
+		public E(String event){
+			this.event = event;
+		}
+		
+		public List<String> get() {
+			return Lists.newArrayList(event);
 		}
 	}
 
