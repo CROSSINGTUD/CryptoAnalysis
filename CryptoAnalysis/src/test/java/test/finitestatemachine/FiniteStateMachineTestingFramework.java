@@ -39,13 +39,13 @@ public abstract class FiniteStateMachineTestingFramework{
 	private Ruleset ruleset;
 	protected Order order;
 	private Set<String> validPathsWithMaxRepeat2;
-	private Set<String> validPathsWithMaxRepeat4;
+	private Set<String> validPathsWithMaxRepeat6;
 	
 	public FiniteStateMachineTestingFramework(String crySLRule, Ruleset ruleset) {
 		this.crySLRule = crySLRule;
 		this.ruleset = ruleset;
 		this.validPathsWithMaxRepeat2 = Sets.newHashSet();
-		this.validPathsWithMaxRepeat4 = Sets.newHashSet();
+		this.validPathsWithMaxRepeat6 = Sets.newHashSet();
 	}
 	
 	/**
@@ -64,42 +64,45 @@ public abstract class FiniteStateMachineTestingFramework{
 	}
 	
 	public void benchmarkValidPaths(int rounds) {
-		Plus.maxRepeat = 2;
-		for(int i=0; i<rounds; i++) {
+		Plus.maxRepeat = 1;
+		for(int i=0; i<rounds*10; i++) {
 			String randomPath = String.join(",", order.get());
 			validPathsWithMaxRepeat2.add(randomPath);
-			validPathsWithMaxRepeat4.add(randomPath);
+			validPathsWithMaxRepeat6.add(randomPath);
 			assertInSMG(randomPath);
 		}
-		Plus.maxRepeat = 4;
-		for(int i=0; i<rounds*50; i++) {
+		Plus.maxRepeat = 3;
+		for(int i=0; i<rounds*500; i++) {
 			String randomPath = String.join(",", order.get());
-			validPathsWithMaxRepeat4.add(randomPath);
+			validPathsWithMaxRepeat6.add(randomPath);
 			assertInSMG(randomPath);
 		}
 	}
 	
 	public void benchmarkNonValidPaths() {
 		for(String path: validPathsWithMaxRepeat2) {
-			List<String> events = Lists.newArrayList(Arrays.asList(path.split(",")));
-			if(events.size()>1) {
-				switch((new Random()).nextInt(2)){
-					case 0:
-						// delete an event
-						int rand = (new Random()).nextInt(events.size());
-						events.remove(rand);
-						break;
-					case 1:
-						// switch two events
-						int rand1 = (new Random()).nextInt(events.size());
-						String event = events.remove(rand1);
-						int rand2 = (new Random()).nextInt(events.size());
-						events.add(rand2, event);
-						break;
-				}
-				String newPath = String.join(",", events);
-				if(!validPathsWithMaxRepeat4.contains(newPath)) {
-					assertNotInSMG(newPath);
+			List<String> eventsForPath = Lists.newArrayList(Arrays.asList(path.split(",")));
+			if(eventsForPath.size()>1) {
+				for(int i=0; i<10; i++) {
+					List<String> events = Lists.newArrayList(eventsForPath);
+					switch((new Random()).nextInt(2)){
+						case 0:
+							// delete an event
+							int rand = (new Random()).nextInt(events.size());
+							events.remove(rand);
+							break;
+						case 1:
+							// switch two events
+							int rand1 = (new Random()).nextInt(events.size());
+							String event = events.remove(rand1);
+							int rand2 = (new Random()).nextInt(events.size());
+							events.add(rand2, event);
+							break;
+					}
+					String newPath = String.join(",", events);
+					if(!validPathsWithMaxRepeat6.contains(newPath)) {
+						assertNotInSMG(newPath);
+					}
 				}
 			}
 		}
