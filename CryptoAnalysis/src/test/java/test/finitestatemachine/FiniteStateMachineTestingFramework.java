@@ -52,7 +52,7 @@ public abstract class FiniteStateMachineTestingFramework{
 	 * This test based on stochastic assumptions.
 	 */
 	@Test
-	public void test() {
+	public void simulate() {
 		if(order != null) {
 			benchmark();
 		}
@@ -117,7 +117,7 @@ public abstract class FiniteStateMachineTestingFramework{
 	public void assertNotInSMG(String methods) {
 		if(!methods.isEmpty() && isPathOfMethodsInSMG(methods)) {
 			// the initial state is always accepting.
-			throw new AssertionError("Order of calls are in SMG but should not be: " + methods);
+			throw new AssertionError("Order of calls are in SMG but should probably not be: " + methods);
 		};
 	}
 	
