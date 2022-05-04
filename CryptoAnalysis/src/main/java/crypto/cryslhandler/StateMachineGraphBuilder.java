@@ -39,6 +39,7 @@ public class StateMachineGraphBuilder {
 
 	private StateNode addRegularEdge(final List<CrySLMethod> label, final StateNode prevNode, StateNode nextNode, final Boolean isStillAccepting) {
 		if (nextNode == null) {
+			// new node generated, accepting set to true by default
 			nextNode = getNewNode();
 			this.result.addNode(nextNode);
 		}
@@ -93,6 +94,16 @@ public class StateMachineGraphBuilder {
 		return isGeneric("?", level, leftOvers);
 	}
 
+	/**
+	 * called from an inner subtree, 
+	 * orderop represents the operator between a left and a right expression, 
+	 * elementop represents the operator that belongs to an expression, e.g. "*".
+	 * @param curLevel current level
+	 * @param level a level > 0 as called from processHead method
+	 * @param leftOvers the remaining tree elements to be parsed
+	 * @param prevNode the outgoing state
+	 * @return
+	 */
 	private StateNode process(final Expression curLevel, final int level, final Multimap<Integer, Map.Entry<String, StateNode>> leftOvers, StateNode prevNode) {
 		final Expression left = curLevel.getLeft();
 		final Expression right = curLevel.getRight();
@@ -106,7 +117,9 @@ public class StateMachineGraphBuilder {
 
 		if (left == null && right == null) {
 			addRegularEdge(curLevel, prevNode, null);
-		} else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 1 = left & right = non-leaf
+		else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
 			final StateNode leftPrev = prevNode;
 			prevNode = process(left, level + 1, leftOvers, prevNode);
 
@@ -148,7 +161,9 @@ public class StateMachineGraphBuilder {
 				addRegularEdge(right, leftPrev, prevNode, true);
 			}
 
-		} else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 2 = left = non-leaf & right = leaf
+		else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
 			StateNode leftPrev = prevNode;
 			
 			Optional<Entry<String, StateNode>> optionalOrLevel = leftOvers.get(level).stream().filter(e -> "|".equals(e.getKey())).findFirst();
@@ -171,12 +186,14 @@ public class StateMachineGraphBuilder {
 			} else {
 				prevNode = addRegularEdge(right, prevNode, null);
 			}
-			
+			// add an edge to the node itself
 			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
 				addRegularEdge(right, prevNode, prevNode, true);
 			}
 
-		} else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 3 = left = leaf & right = non-leaf
+		else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
 			StateNode leftPrev = prevNode;
 			prevNode = addRegularEdge(left, prevNode, null);
 
@@ -206,12 +223,16 @@ public class StateMachineGraphBuilder {
 				addRegularEdge(right, leftPrev, prevNode, true);
 			}
 
-		} else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 4 = left = leaf & right = leaf
+		else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
 			StateNode leftPrev = null;
 			leftPrev = prevNode;
 
 			boolean sameName = false;
 			List<TransitionEdge> orEdges = getOutgoingEdges(prevNode, null);
+			// check for remaining tree
+			// maybe there is a problem here that causes the Cipher rule to get a wrong accepting state, leftOvers could miss a check
 			Optional<Entry<String, StateNode>> alternative = leftOvers.get(level).stream().filter(e -> "|".equals(e.getKey())).findFirst();
 			if (alternative.isPresent()) {
 				Entry<String, StateNode> orLevel = alternative.get();
@@ -248,7 +269,8 @@ public class StateMachineGraphBuilder {
 				prevNode = addRegularEdge(right, prevNode, null);
 			}
 
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
+			// at this point, the statemachine of the Cipher rule becomes faulty, when the third node is parsed, accepting is still set to true
+			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) { 
 				addRegularEdge(right, prevNode, prevNode, true);
 			}
 
@@ -275,8 +297,17 @@ public class StateMachineGraphBuilder {
 			}
 		}
 		return false;
-	}
-
+	}	
+	
+	/**
+	 * called from an the head of the tree, 
+	 * orderop represents the operator between a left and a right expression, 
+	 * elementop represents the operator that belongs to an expression, e.g. "*".
+	 * @param curLevel current level
+	 * @param level 
+	 * @param leftOvers the remaining tree elements to be parsed
+	 * @param prevNode the outgoing state node
+	 */
 	private void processHead(final Expression curLevel, final int level, final Multimap<Integer, Map.Entry<String, StateNode>> leftOvers, StateNode prevNode) {
 		final Expression left = curLevel.getLeft();
 		final Expression right = curLevel.getRight();
@@ -294,7 +325,9 @@ public class StateMachineGraphBuilder {
 			if ("*".equals(elOp) || "+".equals(elOp)) {
 				addRegularEdge(curLevel, prevNode, prevNode, true);
 			}
-		} else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 1 = left & right = non-leaf
+		else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
 			final StateNode leftPrev = prevNode;
 			prevNode = process(left, level + 1, leftOvers, prevNode);
 			final StateNode rightPrev = prevNode;
@@ -331,7 +364,9 @@ public class StateMachineGraphBuilder {
 			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
 				addRegularEdge(right, leftPrev, prevNode, true);
 			}
-		} else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 2 = left = non-leaf & right = leaf
+		else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
 			final StateNode leftPrev = prevNode;
 			prevNode = process(left, level + 1, leftOvers, prevNode);
 			final StateNode rightPrev = prevNode;
@@ -369,7 +404,9 @@ public class StateMachineGraphBuilder {
 			if ((returnToNode = isQM(level, leftOvers)) != null) {
 				addRegularEdge(right, returnToNode, prevNode, true);
 			}
-		} else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 3 = left = leaf & right = non-leaf
+		else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
 			StateNode leftPrev = null;
 			leftPrev = prevNode;
 			prevNode = addRegularEdge(left, prevNode, null);
@@ -417,7 +454,9 @@ public class StateMachineGraphBuilder {
 				}
 			}
 
-		} else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
+		} 
+		// case 4 = left = leaf & right = leaf
+		else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
 			StateNode leftPrev = null;
 			leftPrev = prevNode;
 			StateNode returnToNode = isOr(level, leftOvers);
