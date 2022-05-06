@@ -12,29 +12,4 @@ public class CipherTest extends FiniteStateMachineTestingFramework{
 	}
 	// Gets, Inits+, WKB+ | (FINWOU | (Updates+, DOFINALS))+
 	
-	@Test
-	public void assertTrue() {
-		assertInSMG("getInstance,init,wrap");
-		assertInSMG("getInstance,init,doFinal");
-		assertInSMG("getInstance,init,update,doFinal");
-		
-		assertInSMG("getInstance,init,init,wrap");
-		assertInSMG("getInstance,init,init,doFinal");
-		assertInSMG("getInstance,init,init,update,doFinal");
-		
-		assertInSMG("getInstance,init,wrap,wrap");
-		assertInSMG("getInstance,init,update,update,doFinal");
-		
-		assertInSMG("getInstance,init,doFinal,doFinal");
-		assertInSMG("getInstance,init,update,doFinal,doFinal");
-		assertInSMG("getInstance,init,update,doFinal,update,doFinal");
-	}
-	
-	@Test
-	public void assertFalse() {
-		assertNotInSMG("init");
-		assertNotInSMG("getInstance,wrap");
-		assertNotInSMG("getInstance,init,wrap,doFinal");
-		assertNotInSMG("getInstance,init,wrap,init,doFinal");
-	}
 }

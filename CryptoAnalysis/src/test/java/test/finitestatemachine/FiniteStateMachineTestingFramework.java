@@ -38,14 +38,11 @@ public abstract class FiniteStateMachineTestingFramework{
 	private String crySLRule;
 	private Ruleset ruleset;
 	protected Order order;
-	private Set<String> validPathsWithMaxRepeat2;
-	private Set<String> validPathsWithMaxRepeat6;
+	protected static int maxRepeat;
 	
 	public FiniteStateMachineTestingFramework(String crySLRule, Ruleset ruleset) {
 		this.crySLRule = crySLRule;
 		this.ruleset = ruleset;
-		this.validPathsWithMaxRepeat2 = Sets.newHashSet();
-		this.validPathsWithMaxRepeat6 = Sets.newHashSet();
 	}
 	
 	/**
@@ -57,34 +54,25 @@ public abstract class FiniteStateMachineTestingFramework{
 			benchmark();
 		}
 	}
-	
-	private void benchmark() {
-		benchmarkValidPaths(1000);
-		benchmarkNonValidPaths();
+
+	public void benchmark() {
+		// valid paths
+		maxRepeat = 1;
+		List<List<String>> allPossiblePathsMaxRepeat1 = order.get();
+		maxRepeat = 3;
+		List<List<String>> allPossiblePathsMaxRepeat3 = order.get();
+		for(List<String> path: allPossiblePathsMaxRepeat3) {
+			assertInSMG(path);
+		}
+		// invalid paths
+		assertRandomInvalidPaths(allPossiblePathsMaxRepeat1, allPossiblePathsMaxRepeat3);
 	}
 	
-	public void benchmarkValidPaths(int rounds) {
-		Plus.maxRepeat = 1;
-		for(int i=0; i<rounds*10; i++) {
-			String randomPath = String.join(",", order.get());
-			validPathsWithMaxRepeat2.add(randomPath);
-			validPathsWithMaxRepeat6.add(randomPath);
-			assertInSMG(randomPath);
-		}
-		Plus.maxRepeat = 3;
-		for(int i=0; i<rounds*500; i++) {
-			String randomPath = String.join(",", order.get());
-			validPathsWithMaxRepeat6.add(randomPath);
-			assertInSMG(randomPath);
-		}
-	}
-	
-	public void benchmarkNonValidPaths() {
-		for(String path: validPathsWithMaxRepeat2) {
-			List<String> eventsForPath = Lists.newArrayList(Arrays.asList(path.split(",")));
-			if(eventsForPath.size()>1) {
+	public void assertRandomInvalidPaths(List<List<String>> pathsWithSmallRepeat, List<List<String>> pathsWithLargeRepeat) {
+		for(List<String> path: pathsWithSmallRepeat) {
+			if(path.size()>1) {
 				for(int i=0; i<10; i++) {
-					List<String> events = Lists.newArrayList(eventsForPath);
+					List<String> events = Lists.newArrayList(path);
 					switch((new Random()).nextInt(2)){
 						case 0:
 							// delete an event
@@ -99,33 +87,31 @@ public abstract class FiniteStateMachineTestingFramework{
 							events.add(rand2, event);
 							break;
 					}
-					String newPath = String.join(",", events);
-					if(!validPathsWithMaxRepeat6.contains(newPath)) {
-						assertNotInSMG(newPath);
+					if(!pathsWithLargeRepeat.contains(events)) {
+						assertNotInSMG(events);
 					}
 				}
 			}
 		}
 	}
 	
-	public void assertInSMG(String methods) {
-		if(!isPathOfMethodsInSMG(methods)) {
-			throw new AssertionError("Order of calls are not in SMG but should be: " + methods);
+	public void assertInSMG(List<String> methodPath) {
+		if(!isPathOfMethodsInSMG(methodPath)) {
+			throw new AssertionError("Order of calls are not in SMG but should be: " + methodPath.toString());
 		};
 	}
 	
-	public void assertNotInSMG(String methods) {
-		if(!methods.isEmpty() && isPathOfMethodsInSMG(methods)) {
+	public void assertNotInSMG(List<String> methodPath) {
+		if(!methodPath.isEmpty() && isPathOfMethodsInSMG(methodPath)) {
 			// the initial state is always accepting.
-			throw new AssertionError("Order of calls are in SMG but should probably not be: " + methods);
+			throw new AssertionError("Order of calls are in SMG but should probably not be: " + methodPath.toString());
 		};
 	}
 	
-	private boolean isPathOfMethodsInSMG(String methods) {
-		String[] events = methods.split(",");
+	private boolean isPathOfMethodsInSMG(List<String> methodPath) {
 		final Set<StateNode> current = Sets.newHashSet();
 		current.add(smg.getInitialTransition().getLeft());
-		for(String event: events) {
+		for(String event: methodPath) {
 			List<TransitionEdge> matchingEdges = smg.getAllTransitions().stream().filter(edge -> current.contains(edge.getLeft()) && edge.getLabel().stream().anyMatch(label -> label.getName().contains(event))).collect(Collectors.toList());
 			if(matchingEdges.size() == 0) {
 				// found no matching edge
@@ -149,8 +135,13 @@ public abstract class FiniteStateMachineTestingFramework{
 		}
 	}
 	
+	//
+	// Classes of type Order are able to generate all possible paths of events 
+	// up to a certain recursion depth for * and +
+	//
+	
 	public interface Order{
-		List<String> get();
+		List<List<String>> get();
 	}
 	
 	public class Simple implements Order{
@@ -160,10 +151,21 @@ public abstract class FiniteStateMachineTestingFramework{
 			this.order = order;
 		}
 		
-		public List<String> get() {
-			List<String> result = Lists.newArrayList();
+		public List<List<String>> get() {
+			List<List<String>> result = Lists.newArrayList();
+			result.add(Lists.newArrayList());
 			for(Order o: order) {
-				result.addAll(o.get());
+				List<List<String>> possibleNextSteps = o.get();
+				List<List<String>> possiblePathesWithNextSteps = Lists.newArrayList();
+				for(List<String> possiblePathesUpToThisOrderIteration: result) {
+					for(List<String> nextSteps: possibleNextSteps) {
+						List<String> tmp = Lists.newArrayList(possiblePathesUpToThisOrderIteration);
+						tmp.addAll(nextSteps);
+						possiblePathesWithNextSteps.add(tmp);
+					}
+					
+				}
+				result = possiblePathesWithNextSteps;
 			}
 			return result;
 		}
@@ -176,24 +178,37 @@ public abstract class FiniteStateMachineTestingFramework{
 			this.order = order;
 		}
 		
-		public List<String> get() {
-			return order[(new Random()).nextInt(order.length)].get();
+		public List<List<String>> get() {
+			List<List<String>> result = Lists.newArrayList();
+			for(Order o: order) {
+				result.addAll(o.get());
+			}
+			return result;
 		}
 	}
 	
 	public static class Plus implements Order{
 		private Order order;
-		static int maxRepeat = 2;
 		
 		public Plus(Order order){
 			this.order = order;
 		}
 		
-		public List<String> get() {
-			List<String> result = Lists.newArrayList();
-			for(int i=(new Random()).nextInt(maxRepeat)+1; i>0; i--) {
-				result.addAll(order.get());
+		public List<List<String>> get() {
+			List<List<String>> result = Lists.newArrayList();
+			result.add(Lists.newArrayList());
+			for(int i=0; i<FiniteStateMachineTestingFramework.maxRepeat; i++) {
+				List<List<String>> newPathes = Lists.newArrayList();
+				for(List<String> possibleStartPaths: result) {
+					for(List<String> possibleRepeats: order.get()) {
+						List<String> clone = Lists.newArrayList(possibleStartPaths);
+						clone.addAll(possibleRepeats);
+						newPathes.add(clone);
+					}
+				}
+				result.addAll(newPathes);
 			}
+			result.remove(0); // empty path should not be in result
 			return result;
 		}
 	}
@@ -205,11 +220,10 @@ public abstract class FiniteStateMachineTestingFramework{
 			this.order = order;
 		}
 		
-		public List<String> get() {
-			List<String> result = Lists.newArrayList();
-			if((new Random()).nextInt(2)==0) {
-				result.addAll(order.get());
-			}
+		public List<List<String>> get() {
+			List<List<String>> result = Lists.newArrayList();
+			result.add(Lists.newArrayList());
+			result.addAll(order.get());
 			return result;
 		}
 	}
@@ -221,7 +235,7 @@ public abstract class FiniteStateMachineTestingFramework{
 			this.order = new Opt(new Plus(order));
 		}
 		
-		public List<String> get() {
+		public List<List<String>> get() {
 			return order.get();
 		}
 	}
@@ -233,8 +247,10 @@ public abstract class FiniteStateMachineTestingFramework{
 			this.event = event;
 		}
 		
-		public List<String> get() {
-			return Lists.newArrayList(event);
+		public List<List<String>> get() {
+			List<List<String>> result = Lists.newArrayList();
+			result.add(Lists.newArrayList(event));
+			return result;
 		}
 	}
 
