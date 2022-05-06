@@ -26,6 +26,15 @@ import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 
+
+/**
+ *  This class creates {@link SARIFReporter} a constructor with reportDir and rules as parameter
+ *
+ * @param reportDir a {@link String} path giving the location of the report directory
+ * @param rules {@link CrySLRule} the rules with which the project is analyzed
+ */
+
+
 @SuppressWarnings("unchecked")
 public class SARIFReporter extends ErrorMarkerListener {
 
@@ -42,15 +51,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 	 * name of the analysis report
 	 */
 	private static final String REPORT_NAME = "CryptoAnalysis-Report.json";
-	
 
-
-	/**
-	 * Creates {@link SARIFReporter} a constructor with reportDir and rules as parameter
-	 * 
-	 * @param reportDir a {@link String} path giving the location of the report directory
-	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
-	 */
 	public SARIFReporter(String reportDir, List<CrySLRule> rules) {
 		this.outputFolder = (reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir")));
 		this.sarifHelper = new SARIFHelper();
