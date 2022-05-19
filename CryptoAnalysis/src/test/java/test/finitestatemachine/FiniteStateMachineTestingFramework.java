@@ -45,10 +45,10 @@ public abstract class FiniteStateMachineTestingFramework{
 		this.ruleset = ruleset;
 	}
 	
-	/**
-	 * This test based on stochastic assumptions.
-	 */
-	@Test
+	// uncomment "@Test" to test the StatemachineBuilder.
+	// These tests require a lot of memory and runtime and are thus excluded to not run each time.
+	// Further, the tests solely test the StatemachineBuilder and thereby only require to be executed when changing the Builder.
+	//@Test
 	public void simulate() {
 		if(order != null) {
 			benchmark();
