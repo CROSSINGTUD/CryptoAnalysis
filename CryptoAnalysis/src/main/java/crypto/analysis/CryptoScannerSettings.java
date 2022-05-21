@@ -160,10 +160,10 @@ public class CryptoScannerSettings implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("The popular git command");
-		System.out.println("Committing files in the staging area, how wonderful?");
+		System.out.println("Committing files from the picocli");
 		if (reportPath != null) {
 			setReportDirectory(reportPath);
-			System.out.println("The commit message is " + reportPath);
+			//System.out.println("The commit message is " + reportPath);
 		}
 		if (rulesDir != null) {
 			setRulesetPathType(RulesetPathType.DIR);
