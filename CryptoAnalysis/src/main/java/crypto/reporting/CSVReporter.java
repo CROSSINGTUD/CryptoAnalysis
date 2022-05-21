@@ -51,9 +51,9 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
 public class CSVReporter extends ErrorMarkerListener {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
-	
+
 	private static final String CSV_SEPARATOR = ";";
 	private Set<AbstractError> errors = Sets.newHashSet();
 	private int seeds;
@@ -62,7 +62,7 @@ public class CSVReporter extends ErrorMarkerListener {
 	private List<CrySLRule> rules;
 	private Set<SootMethod> dataflowReachableMethods = Sets.newHashSet();
 	private Stopwatch analysisTime = Stopwatch.createUnstarted();
-	
+
 	/**
 	 * Path of directory of analysis reports
 	 */
@@ -81,7 +81,7 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	/**
 	 * Creates {@link CSVReporter} a constructor with reportDir, softwareId, rules and callGraphConstructionTime as parameter
-	 * 
+	 *
 	 * @param reportDir a {@link String} path giving the location of the report directory
 	 * @param softwareId {@link Format} An identifier used to label output files in CSV report format
 	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
@@ -118,7 +118,7 @@ public class CSVReporter extends ErrorMarkerListener {
 		addDynamicHeader(ImpreciseValueExtractionError.class.getSimpleName());
 		addDynamicHeader(ForbiddenMethodError.class.getSimpleName());
 	}
-	
+
 	private void addDynamicHeader(String name) {
 		headers.add(name+"_sum");
 		for(CrySLRule r : rules){
@@ -137,8 +137,8 @@ public class CSVReporter extends ErrorMarkerListener {
 		put(Headers.DataflowVisitedMethod, dataflowReachableMethods.size());
 		put(Headers.CryptoAnalysisTime_ms, analysisTime.elapsed(TimeUnit.MILLISECONDS));
 		put(Headers.SeedObjectCount, seeds);
-		
-		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
+
+		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create();
 		for(AbstractError err : errors){
 			Integer integer = errorTable.get(err.getClass(), err.getRule());
 			if(integer == null){
@@ -150,12 +150,12 @@ public class CSVReporter extends ErrorMarkerListener {
 
 
 		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
-			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
+			put(c.getRowKey().getSimpleName() + " _in_ " + c.getColumnKey().getClassName(), c.getValue());
 		}
-		
-		Map<Class, Integer> errorsAccumulated = Maps.newHashMap(); 
+
+		Map<Class, Integer> errorsAccumulated = Maps.newHashMap();
 		for(Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()){
-			Integer integer = errorsAccumulated.get(c.getRowKey());	
+			Integer integer = errorsAccumulated.get(c.getRowKey());
 			if(integer == null){
 				integer = 0;
 			}
@@ -166,7 +166,7 @@ public class CSVReporter extends ErrorMarkerListener {
 		for(Entry<Class, Integer> c : errorsAccumulated.entrySet()){
 			put(c.getKey().getSimpleName() + "_sum", c.getValue());
 		}
-		
+
 		writeToFile();
 	}
 
@@ -204,7 +204,7 @@ public class CSVReporter extends ErrorMarkerListener {
 				LOGGER.info(key+" is null");
 			}
 			else {
-			headersToValues.put(key, val.toString());
+				headersToValues.put(key, val.toString());
 			}
 		}
 	}
@@ -214,28 +214,28 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	@Override
 	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
+
 	}
 
 	@Override
 	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
+
 	}
 
 	@Override
 	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
+
 	}
 
 	@Override
 	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
+
 	}
 
 	@Override
 	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	@Override
 	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		
+
 	}
 
 	@Override
@@ -254,19 +254,19 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	@Override
 	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
-			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-			Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
-		
+								  Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+								  Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
+
 	}
 
 	@Override
 	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-			Collection<ISLConstraint> relConstraints) {
+								   Collection<ISLConstraint> relConstraints) {
 	}
 
 	@Override
 	public void onSeedTimeout(Node<Statement, Val> seed) {
-		
+
 	}
 
 	@Override
@@ -277,8 +277,8 @@ public class CSVReporter extends ErrorMarkerListener {
 
 	@Override
 	public void collectedValues(AnalysisSeedWithSpecification seed,
-			Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-		
+								Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
+
 	}
 
 	@Override
@@ -289,13 +289,13 @@ public class CSVReporter extends ErrorMarkerListener {
 	@Override
 	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void addProgress(int processedSeeds, int workListsize) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

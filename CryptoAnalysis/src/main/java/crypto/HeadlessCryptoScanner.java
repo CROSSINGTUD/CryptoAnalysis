@@ -49,9 +49,9 @@ import soot.Unit;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
-public abstract class HeadlessCryptoScanner {
+public abstract class HeadlessCryptoScanner{
 	
-	private static CryptoScannerSettings settings = new CryptoScannerSettings();
+	private static CryptoScannerSettings settings;
 	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
@@ -64,14 +64,17 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	public static HeadlessCryptoScanner createFromCLISettings(String[] args) {
+		settings = new CryptoScannerSettings();
 		try {
 			settings.parseSettingsFromCLI(args);
-		} catch (CryptoAnalysisParserException e) {
+
+		}
+		catch (CryptoAnalysisParserException e) {
 			LOGGER.error("Parser failed with error: " + e.getClass().toString(), e);
 		}
 		
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
-			
+
 			@Override
 			protected String applicationClassPath() {
 				return settings.getApplicationPath();

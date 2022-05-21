@@ -128,6 +128,11 @@
 						<artifactId>junit</artifactId>
 						<version>4.13.1</version>
 					</dependency>
+					<dependency>
+						<groupId>info.picocli</groupId>
+						<artifactId>picocli</artifactId>
+						<version>3.9.6</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate
@@ -336,7 +341,12 @@
     		<artifactId>commons-io</artifactId>
     		<version>2.8.0</version>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>3.9.6</version>
+		</dependency>
+    </dependencies>
 
 	<distributionManagement>
 		<snapshotRepository>

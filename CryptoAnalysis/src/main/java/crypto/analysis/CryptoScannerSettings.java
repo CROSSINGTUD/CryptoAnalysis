@@ -1,9 +1,10 @@
 package crypto.analysis;
-
 import crypto.exceptions.CryptoAnalysisParserException;
+import picocli.CommandLine;
 
-public class CryptoScannerSettings {
-	
+@CommandLine.Command
+public class CryptoScannerSettings implements Runnable {
+
 	private ControlGraph controlGraph = null;
 	private RulesetPathType rulesetPathType = null;
 	private String rulesetPathDir = null;
@@ -16,15 +17,19 @@ public class CryptoScannerSettings {
 	private boolean preAnalysis;
 	private boolean visualization;
 	private boolean providerDetectionAnalysis;
-	
-	public CryptoScannerSettings() {
-		setControlGraph(ControlGraph.CHA);
-		setRulesetPathType(RulesetPathType.NONE);
-		setPreAnalysis(false);
-		setVisualization(false);
-		setProviderDetectionAnalysis(false);
+
+	public enum ControlGraph {
+		CHA, SPARK, SPARKLIB,
 	}
-	
+
+	public enum ReportFormat {
+		TXT, SARIF, CSV
+	}
+
+	public enum RulesetPathType {
+		DIR, ZIP, NONE
+	}
+
 	public ControlGraph getControlGraph() {
 		return controlGraph;
 	}
@@ -32,7 +37,7 @@ public class CryptoScannerSettings {
 	public void setControlGraph(ControlGraph controlGraph) {
 		this.controlGraph = controlGraph;
 	}
-	
+
 	public RulesetPathType getRulesetPathType() {
 		return rulesetPathType;
 	}
@@ -48,7 +53,7 @@ public class CryptoScannerSettings {
 	public void setRulesetPathDir(String rulesPath) {
 		this.rulesetPathDir = rulesPath;
 	}
-	
+
 	public String getRulesetPathZip() {
 		return rulesetPathZip;
 	}
@@ -120,88 +125,90 @@ public class CryptoScannerSettings {
 	public void setProviderDetectionAnalysis(boolean providerDetectionAnalysis) {
 		this.providerDetectionAnalysis = providerDetectionAnalysis;
 	}
-	
+
 	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
-		int mandatorySettings = 0;
-		if(settings == null) {
-			showErrorMessage();
+		setControlGraph(ControlGraph.CHA);
+		setRulesetPathType(RulesetPathType.NONE);
+		setPreAnalysis(false);
+		setVisualization(false);
+		setProviderDetectionAnalysis(false);
+		CommandLine.run(this, settings);
+	}
+
+	@CommandLine.Option(names = {"--reportPath"})
+	private String reportPath;
+	@CommandLine.Option(names = {"--appPath"}, required = true)
+	private String appPath;
+	@CommandLine.Option(names = {"--rulesDir"})
+	private String rulesDir;
+	@CommandLine.Option(names = {"--cg"})
+	private String cg;
+	@CommandLine.Option(names = {"--sootpath"})
+	private String sootpath;
+	@CommandLine.Option(names = {"--identifier"})
+	private String identifier;
+	@CommandLine.Option(names = {"--reportformat"})
+	private String reportformat;
+	@CommandLine.Option(names = {"--preanalysis"})
+	private boolean preanalysis;
+	@CommandLine.Option(names = {"--visualization"})
+	private boolean visualizations;
+	@CommandLine.Option(names = {"--providerdetection"})
+	private boolean providerdetection;
+
+
+	@Override
+	public void run() {
+		System.out.println("The popular git command");
+		System.out.println("Committing files in the staging area, how wonderful?");
+		if (reportPath != null) {
+			setReportDirectory(reportPath);
+			System.out.println("The commit message is " + reportPath);
 		}
-		for(int i=0; i<settings.length; i++) {
-			switch(settings[i].toLowerCase()) {
-				case "--cg":
-					parseControlGraphValue(settings[i+1]);
-					i++;
-					break;
-				case "--rulesdir":
-					if(this.rulesetPathType != RulesetPathType.NONE) {
-						throw new CryptoAnalysisParserException("An error occured while parsing --rulesDir option. "
-								+ "There should be only one option between --rulesDir and --rulesZip.");
-					}
-					setRulesetPathType(RulesetPathType.DIR);
-					setRulesetPathDir(settings[i+1]);
-					i++;
-					mandatorySettings++;
-					break;
-				case "--ruleszip":
-					if(this.rulesetPathType != RulesetPathType.NONE) {
-						throw new CryptoAnalysisParserException("An error occured while parsing --rulesDir option. "
-								+ "There should be only one option between --rulesDir and --rulesZip.");
-					}
-					setRulesetPathType(RulesetPathType.ZIP);
-					setRulesetPathZip(settings[i+1]);
-					mandatorySettings++;
-					i++;
-					break;
-				case "--apppath":
-					setApplicationPath(settings[i+1]);
-					i++;
-					mandatorySettings++;
-					break;
-				case "--sootpath":
-					setSootPath(settings[i+1]);
-					i++;
-					break;
-				case "--identifier":
-					setSoftwareIdentifier(settings[i+1]);
-					i++;
-					break;
-				case "--reportpath":
-					setReportDirectory(settings[i+1]);
-					i++;
-					break;
-				case "--reportformat":
-					parseReportFormatValue(settings[i+1]);
-					i++;
-					break;
-				case "--preanalysis":
-					setPreAnalysis(true);
-					break;
-				case "--visualization":
-					setVisualization(true);
-					break;
-				case "--providerdetection":
-					setProviderDetectionAnalysis(true);
-					break;
-				default:
-					showErrorMessage(settings[i]);		
+		if (rulesDir != null) {
+			setRulesetPathType(RulesetPathType.DIR);
+			setRulesetPathDir(rulesDir);
+		}
+
+		if (appPath != null) {
+			//setApplicationPath(appPath);
+			this.applicationPath = appPath;
+		}
+		if (sootpath != null) {
+			setSootPath(sootpath);
+		}
+
+		if (cg != null) {
+			try {
+				parseControlGraphValue(cg);
+			} catch (CryptoAnalysisParserException e) {
+				e.printStackTrace();
 			}
 		}
-		if(mandatorySettings != 2) {
-			showErrorMessage();
+		if (identifier != null) {
+			setSoftwareIdentifier(identifier);
 		}
+
+		if (reportformat != null) {
+			try {
+				parseReportFormatValue(reportformat);
+			} catch (CryptoAnalysisParserException e) {
+				System.out.println("Parser failed  wrong report format!");
+			}
+		}
+		if (preanalysis != false) {
+			setPreAnalysis(true);
+		}
+		if (visualizations != false) {
+			setVisualization(true);
+		}
+		if (providerdetection != false) {
+			setProviderDetectionAnalysis(true);
+		}
+
+
 	}
-	
-	public enum ControlGraph {
-		CHA, SPARK, SPARKLIB,
-	}
-	
-	public enum ReportFormat {
-		TXT, SARIF, CSV
-	}
-	
-	public enum RulesetPathType {
-		DIR, ZIP, NONE
-	}
+
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
 		String CGValue = value.toLowerCase();
