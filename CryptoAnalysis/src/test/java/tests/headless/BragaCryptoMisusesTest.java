@@ -209,19 +209,19 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", ConstraintError.class, 3);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.exec();
 		assertErrors();
@@ -373,7 +373,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultOAEP: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.exec();
 		assertErrors();
