@@ -58,6 +58,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue103.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		scanner.exec();
 		assertErrors();
 	}
