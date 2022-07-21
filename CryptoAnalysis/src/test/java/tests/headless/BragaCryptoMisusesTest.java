@@ -237,10 +237,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 12);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", TypestateError.class, 6);
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.exec();
 		assertErrors();
@@ -387,14 +387,14 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 
