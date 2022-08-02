@@ -13,7 +13,6 @@
 	</parent>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<flowDroidVersion>2.7.1</flowDroidVersion>
 	</properties>
 	<build>
@@ -45,16 +44,29 @@
 					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
-
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${versions.maven-jar-plugin}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
-
 
 	<dependencies>
 		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>CryptoAnalysis</artifactId>
-			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.tud.sse</groupId>

@@ -19,7 +19,9 @@
 	<properties>
 		<revision>2.7.3</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<versions.maven-jar-plugin>3.2.0</versions.maven-jar-plugin>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -69,6 +71,22 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>CryptoAnalysis</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>CryptoAnalysis-Android</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<repositories>
 		<repository>
 			<id>soot-snapshot</id>
