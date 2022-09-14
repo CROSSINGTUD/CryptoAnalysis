@@ -1,0 +1,12 @@
+maven-deploy:
+  image: maven:3-eclipse-temurin-11-alpine
+  tags:
+    - shared
+  stage: deploy
+  script:
+    - cd CryptoAnalysis
+    - mvn -B -ntp -s ../.gitlab-ci-settings.xml -DskipTests=true package
+    - mv ./build/CryptoAnalysis-2.8.0-SNAPSHOT-jar-with-dependencies.jar .
+  artifacts:
+    paths:
+      - CryptoAnalysis-2.7.2-jar-with-dependencies.jar

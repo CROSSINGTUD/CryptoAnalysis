@@ -368,5 +368,9 @@
 			<name>soot release</name>
 			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
 		</repository>
+		<repository>
+			<id>irb-gitlab-maven</id>
+			<url>https://git.cs.uni-paderborn.de/api/v4/groups/10825/-/packages/maven</url>
+		</repository>
 	</repositories>
 </project>

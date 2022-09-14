@@ -2,6 +2,7 @@
 .project
 .settings/
 target/
+build/
 AndroidZooAPKs.csv
 AndroidZooAPIKey.txt
 AndroidZooApps/
