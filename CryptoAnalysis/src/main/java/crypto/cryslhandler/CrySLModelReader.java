@@ -117,12 +117,11 @@ public class CrySLModelReader {
 		final Injector injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
 		this.resourceSet = injector.getInstance(XtextResourceSet.class);
 
-		String a = System.getProperty("java.class.path");
-		String[] l = a.split(";");
-
-		URL[] classpath = new URL[l.length];
+		String[] cp =
+			System.getProperty("java.class.path").split(File.pathSeparator);
+		URL[] classpath = new URL[cp.length];
 		for (int i = 0; i < classpath.length; i++) {
-			classpath[i] = new File(l[i]).toURI().toURL();
+			classpath[i] = new File(cp[i]).toURI().toURL();
 		}
 
 		URLClassLoader ucl = new URLClassLoader(classpath);
