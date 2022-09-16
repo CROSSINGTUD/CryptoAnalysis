@@ -3,9 +3,11 @@ package crypto.cryslhandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -33,10 +36,6 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 
 
 import crypto.exceptions.CryptoAnalysisException;
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.inject.Injector;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -57,43 +56,24 @@ import crypto.rules.ParEqualsPredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
+
 import de.darmstadt.tu.crossing.CrySLStandaloneSetup;
-import de.darmstadt.tu.crossing.constraints.CrySLArithmeticOperator;
-import de.darmstadt.tu.crossing.constraints.CrySLComparisonOperator;
-import de.darmstadt.tu.crossing.constraints.CrySLLogicalOperator;
-import de.darmstadt.tu.crossing.crySL.ArithmeticExpression;
-import de.darmstadt.tu.crossing.crySL.ArithmeticOperator;
-import de.darmstadt.tu.crossing.crySL.ArrayElements;
-import de.darmstadt.tu.crossing.crySL.ComparingOperator;
-import de.darmstadt.tu.crossing.crySL.ComparisonExpression;
 import de.darmstadt.tu.crossing.crySL.Constraint;
-import de.darmstadt.tu.crossing.crySL.DestroysBlock;
+import de.darmstadt.tu.crossing.crySL.ConstraintsBlock;
 import de.darmstadt.tu.crossing.crySL.Domainmodel;
 import de.darmstadt.tu.crossing.crySL.EnsuresBlock;
 import de.darmstadt.tu.crossing.crySL.Event;
-import de.darmstadt.tu.crossing.crySL.Expression;
-import de.darmstadt.tu.crossing.crySL.ForbMethod;
+import de.darmstadt.tu.crossing.crySL.EventsBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenBlock;
 import de.darmstadt.tu.crossing.crySL.Literal;
 import de.darmstadt.tu.crossing.crySL.LiteralExpression;
-import de.darmstadt.tu.crossing.crySL.LogicalImply;
-import de.darmstadt.tu.crossing.crySL.LogicalOperator;
+import de.darmstadt.tu.crossing.crySL.NegatesBlock;
 import de.darmstadt.tu.crossing.crySL.Object;
-import de.darmstadt.tu.crossing.crySL.ObjectDecl;
+import de.darmstadt.tu.crossing.crySL.ObjectsBlock;
 import de.darmstadt.tu.crossing.crySL.Order;
-import de.darmstadt.tu.crossing.crySL.PreDefinedPredicates;
-import de.darmstadt.tu.crossing.crySL.Pred;
-import de.darmstadt.tu.crossing.crySL.PredLit;
-import de.darmstadt.tu.crossing.crySL.ReqPred;
-import de.darmstadt.tu.crossing.crySL.RequiredBlock;
-import de.darmstadt.tu.crossing.crySL.SimpleOrder;
-import de.darmstadt.tu.crossing.crySL.SuPar;
-import de.darmstadt.tu.crossing.crySL.SuParList;
-import de.darmstadt.tu.crossing.crySL.SuperType;
-import de.darmstadt.tu.crossing.crySL.UnaryPreExpression;
-import de.darmstadt.tu.crossing.crySL.UseBlock;
-import de.darmstadt.tu.crossing.crySL.impl.DomainmodelImpl;
-import de.darmstadt.tu.crossing.crySL.impl.ObjectImpl;
+import de.darmstadt.tu.crossing.crySL.OrderBlock;
+import de.darmstadt.tu.crossing.crySL.RequiresBlock;
+import polyglot.ast.Do;
 
 public class CrySLModelReader {
 
@@ -128,7 +108,6 @@ public class CrySLModelReader {
 		this.resourceSet.setClasspathURIContext(new URLClassLoader(classpath));
 		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
 		this.resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
-
 	}
 
 	/**
@@ -137,12 +116,13 @@ public class CrySLModelReader {
 	 * @param stream the {@link InputStream} holds the CrySL file content
 	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
 	 * @return the {@link CrySLRule}
-	 * @throws IllegalArgumentException, IOException
+	 * @throws IllegalArgumentException
+	 * @throws IOException
 	 * @throws CryptoAnalysisException
 	 */
 	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException{
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
-			throw new CryptoAnalysisException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
+			throw new CryptoAnalysisException ("The extension of "+virtualFileName+" does not match "+cryslFileEnding);
 		}
 
 		URI uri = URI.createURI(virtualFileName);
@@ -164,20 +144,10 @@ public class CrySLModelReader {
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
 		final String fileName = ruleFile.getName();
+		if (!fileName.endsWith(cryslFileEnding))
+			throw new CryptoAnalysisException("The extension of "+ fileName + "  does not match "+ cryslFileEnding);
 
-		// Re-included this code because cryslFileEnding is dotted ".crysl".
-		// And because this is a public constant, I'm scared to change it, as it may cause massive versioning problems.
-		final String extension = fileName.substring(fileName.lastIndexOf("."));
-		if (!cryslFileEnding.equals(extension)) {
-			if (!fileName.endsWith(cryslFileEnding))
-				return null;
-		}
-
-		if (!extension.equals(cryslFileEnding)) {
-			throw new CryptoAnalysisException("The prefix of "+ fileName + "  does not correspond to "+ cryslFileEnding);
-		}
-
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);// URI.createPlatformResourceURI(ruleFile.getFullPath().toPortableString(), // true), true);
+		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
 		return createRuleFromResource(resource);
 	}
 
@@ -185,26 +155,30 @@ public class CrySLModelReader {
 		if (resource == null)
 			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
 
-		final EObject eObject = resource.getContents().get(0);
-		final Domainmodel dm = (Domainmodel) eObject;
-		String curClass = dm.getJavaType().getQualifiedName();
-		final RequiredBlock events = dm.getReq_events(); 
-		final EnsuresBlock ensure = dm.getEnsure();
-		final Map<ParEqualsPredicate, SuperType> pre_preds = Maps.newHashMap();
-		final DestroysBlock destroys = dm.getDestroy();
 
-		Expression order = dm.getOrder();
-		if (order instanceof Order) {
-			validateOrder((Order) order);
-		}
+		final Domainmodel dm = (Domainmodel) resource.getContents().get(0);
+		final ObjectsBlock objects = dm.getObjects();
+		final ForbiddenBlock forbidden = dm.getForbidden();
+		final EventsBlock events = dm.getEvents();
+		final OrderBlock order = dm.getOrder();
+		final ConstraintsBlock constraints = dm.getConstraints();
+		final RequiresBlock requires = dm.getRequires(); 
+		final EnsuresBlock ensures = dm.getEnsures();
+		final NegatesBlock destroys = dm.getNegates();
+
+		String curClass = dm.getJavaType().getQualifiedName();
+		final Map<ParEqualsPredicate, Event> pre_preds = Maps.newHashMap();
+
+
 		if (destroys != null) {
 			pre_preds.putAll(getKills(destroys.getPred()));
 		}
-		if (ensure != null) {
+		if (ensures != null) {
 			pre_preds.putAll(getPredicates(ensure.getPred()));
 		}
 
-		this.smg = (new StateMachineGraphBuilder(order, events)).buildSMG();
+		this.smg = (new StateMachineGraphBuilder(order.getOrder(), events.getEvents())).buildSMG();
+
 		final ForbiddenBlock forbEvent = dm.getForbEvent();
 		this.forbiddenMethods = (forbEvent != null) ? getForbiddenMethods(forbEvent.getForb_methods()) : Lists.newArrayList();
 
