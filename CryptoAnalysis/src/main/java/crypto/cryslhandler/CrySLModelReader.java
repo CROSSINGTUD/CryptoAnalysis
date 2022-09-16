@@ -199,37 +199,6 @@ public class CrySLModelReader {
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 	}
 
-	private void validateOrder(Order order) {
-		List<String> collected = new ArrayList<String>();
-		collected.addAll(collectLabelsFromExpression(order.getLeft()));
-		collected.addAll(collectLabelsFromExpression(order.getRight()));
-	}
-
-	private List<String> collectLabelsFromExpression(Expression exp) {
-		List<String> collected = new ArrayList<String>();
-		if (exp instanceof Order || exp instanceof SimpleOrder) {
-			collected.addAll(collectLabelsFromExpression(exp.getLeft()));
-			collected.addAll(collectLabelsFromExpression(exp.getRight()));
-		} else {
-			for (Event ev : exp.getOrderEv()) {
-				if (ev instanceof SuperType) {
-					if (ev instanceof de.darmstadt.tu.crossing.crySL.Aggregate) {
-						for (Event lab : ((de.darmstadt.tu.crossing.crySL.Aggregate) ev).getLab()) {
-							if (lab instanceof SuperType) {
-								collected.add(((SuperType) lab).getName());
-							} else {
-								throw new ClassCastException("Parser error in the line after definition of label " + collected.get(collected.size() - 1));
-							}
-						}
-					} else {
-						collected.add(((SuperType) ev).getName());
-					}
-				}
-			}
-		}
-		return collected;
-	}
-
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
 		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
 		for (final Constraint cons : eList) {
