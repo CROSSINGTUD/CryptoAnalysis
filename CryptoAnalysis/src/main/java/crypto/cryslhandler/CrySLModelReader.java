@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import com.google.common.base.CharMatcher;
@@ -196,6 +197,13 @@ public class CrySLModelReader {
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
 	}
+
+	private List<Entry<String, String>> getObjects(final ObjectsBlock objects) {
+		return objects.getDeclarations().parallelStream()
+			.map(CrySLReaderUtils::resolveObject)
+			.collect(Collectors.toList());
+	}
+
 
 	private List<CrySLForbiddenMethod> getForbiddenMethods(final ForbiddenBlock forbidden) {
 		List<CrySLForbiddenMethod> forbiddenMethods = Lists.newArrayList();
@@ -497,16 +505,6 @@ public class CrySLModelReader {
 			preds.add(extractReqPred(left.getRightExpression()));
 		}
 		return preds;
-	}
-
-	private List<Entry<String, String>> getObjects(final UseBlock usage) {
-		final List<Entry<String, String>> objects = new ArrayList<>();
-
-		for (final ObjectDecl obj : usage.getObjects()) {
-			objects.add(new SimpleEntry<>(obj.getObjectType().getIdentifier(), obj.getObjectName().getName()));
-		}
-
-		return objects;
 	}
 
 	private Set<StateNode> getStatesForMethods(final List<CrySLMethod> condMethods) {
