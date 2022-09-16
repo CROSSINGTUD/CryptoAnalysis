@@ -27,6 +27,7 @@ public class StateMachineGraphBuilder {
 	private final Order order;
 	private final StateMachineGraph result;
 	private final List<Event> events;
+	private final Set<CrySLMethod> allMethods = Sets.newHashSet();
 	
 	public StateMachineGraphBuilder(final Order order, final List<Event> events) {
 		this.order = order;
@@ -186,7 +187,7 @@ public class StateMachineGraphBuilder {
 			Event event = ((Primary) order).getEvent();
 			StateNode node = this.result.createNewNode();
 			List<CrySLMethod> label =
-				CryslReaderUtils.resolveAggregateToMethodeNames(event);
+				CrySLReaderUtils.resolveEventToCrySLMethod(event);
 			for(StateNode startNode: startNodes)
 				this.result.createNewEdge(label, startNode, node);
 			return new SubStateMachine(node, node);
@@ -247,10 +248,9 @@ public class StateMachineGraphBuilder {
 		return new SubStateMachine(start, end);
 	}
 	
-	private final Set<CrySLMethod> allMethods = Sets.newHashSet();
 	private Set<CrySLMethod> retrieveAllMethodsFromEvents(){
-		if(!this.allMethods.isEmpty()) return this.allMethods;
-		this.allMethods.addAll(this.events.parallelStream().flatMap(event -> CryslReaderUtils.resolveAggregateToMethodeNames(event).stream()).distinct().collect(Collectors.toList()));
+		if(this.allMethods.isEmpty())
+			this.allMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(this.events));
 		return this.allMethods;
 	}
 	

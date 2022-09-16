@@ -193,7 +193,7 @@ public class CrySLModelReader {
 				actPreds.add(pred.tobasicPredicate());
 			} else {
 				actPreds.add(new CrySLCondPredicate(pred.getBaseObject(), pred.getPredName(), pred.getParameters(), pred.isNegated(),
-						getStatesForMethods(CryslReaderUtils.resolveAggregateToMethodeNames(cond)), pred.getConstraint()));
+						getStatesForMethods(CrySLReaderUtils.resolveEventToCrySLMethod(cond)), pred.getConstraint()));
 			}
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
@@ -497,7 +497,7 @@ public class CrySLModelReader {
 
 			final Event alternative = fm.getRep();
 			if (alternative != null) {
-				crysl.addAll(CryslReaderUtils.resolveAggregateToMethodeNames(alternative));
+				crysl.addAll(CrySLReaderUtils.resolveEventToCrySLMethod(alternative));
 			}
 			methodSignatures.add(new CrySLForbiddenMethod(
 					new CrySLMethod(meth.getDeclaringType().getIdentifier() + "." + meth.getSimpleName(), pars, null, new SimpleEntry<>(UNDERSCORE, ANY_TYPE)), false, crysl));
@@ -568,12 +568,12 @@ public class CrySLModelReader {
 		switch (pred) {
 			case "callTo":
 				final List<ICrySLPredicateParameter> methodsToBeCalled = new ArrayList<>();
-				methodsToBeCalled.addAll(CryslReaderUtils.resolveAggregateToMethodeNames(((PreDefinedPredicates) lit.getCons()).getObj().get(0)));
+				methodsToBeCalled.addAll(CrySLReaderUtils.resolveEventToCrySLMethod(((PreDefinedPredicates) lit.getCons()).getObj().get(0)));
 				slci = new CrySLPredicate(null, pred, methodsToBeCalled, false);
 				break;
 			case "noCallTo":
 				final List<ICrySLPredicateParameter> methodsNotToBeCalled = new ArrayList<>();
-				final List<CrySLMethod> resolvedMethodNames = CryslReaderUtils.resolveAggregateToMethodeNames(((PreDefinedPredicates) lit.getCons()).getObj().get(0));
+				final List<CrySLMethod> resolvedMethodNames = CrySLReaderUtils.resolveEventToCrySLMethod(((PreDefinedPredicates) lit.getCons()).getObj().get(0));
 				for (final CrySLMethod csm : resolvedMethodNames) {
 					this.forbiddenMethods.add(new CrySLForbiddenMethod(csm, true));
 					methodsNotToBeCalled.add(csm);
