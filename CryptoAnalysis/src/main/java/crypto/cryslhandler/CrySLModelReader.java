@@ -65,6 +65,7 @@ import de.darmstadt.tu.crossing.crySL.EnsuresBlock;
 import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.EventsBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenBlock;
+import de.darmstadt.tu.crossing.crySL.ForbiddenMethod;
 import de.darmstadt.tu.crossing.crySL.Literal;
 import de.darmstadt.tu.crossing.crySL.LiteralExpression;
 import de.darmstadt.tu.crossing.crySL.NegatesBlock;
@@ -157,36 +158,33 @@ public class CrySLModelReader {
 
 
 		final Domainmodel dm = (Domainmodel) resource.getContents().get(0);
+		String curClass = dm.getJavaType().getQualifiedName();
+
 		final ObjectsBlock objects = dm.getObjects();
+		final List<Entry<String, String>> objects = getObjects(objects);
+
 		final ForbiddenBlock forbidden = dm.getForbidden();
+		this.forbiddenMethods = getForbiddenMethods(forbidden);
+
 		final EventsBlock events = dm.getEvents();
 		final OrderBlock order = dm.getOrder();
+		this.smg = StateMachineGraphBuilder.buildSMG(order.getOrder(), events.getEvents());
+
 		final ConstraintsBlock constraints = dm.getConstraints();
 		final RequiresBlock requires = dm.getRequires(); 
+		final List<ISLConstraint> constraints = Lists.newArrayList();
+		constraints.addAll(getConstraints(constraints));
+		constraints.addAll(getRequiredPredicates(requires));
+
 		final EnsuresBlock ensures = dm.getEnsures();
-		final NegatesBlock destroys = dm.getNegates();
+		final NegatesBlock negates = dm.getNegates();
+		final List<CrySLPredicate> predicates = Lists.newArrayList();
+		predicates.putAll(getEnsuredPredicates(ensures));
+		predicates.putAll(getNegatedPredicates(negates));
 
-		String curClass = dm.getJavaType().getQualifiedName();
-		final Map<ParEqualsPredicate, Event> pre_preds = Maps.newHashMap();
 
 
-		if (destroys != null) {
-			pre_preds.putAll(getKills(destroys.getPred()));
-		}
-		if (ensures != null) {
-			pre_preds.putAll(getPredicates(ensure.getPred()));
-		}
-
-		this.smg = (new StateMachineGraphBuilder(order.getOrder(), events.getEvents())).buildSMG();
-
-		final ForbiddenBlock forbEvent = dm.getForbEvent();
-		this.forbiddenMethods = (forbEvent != null) ? getForbiddenMethods(forbEvent.getForb_methods()) : Lists.newArrayList();
-
-		final List<ISLConstraint> constraints = (dm.getReqConstraints() != null) ? buildUpConstraints(dm.getReqConstraints().getReq()) : Lists.newArrayList();
-		constraints.addAll(((dm.getRequire() != null) ? collectRequiredPredicates(dm.getRequire().getPred()) : Lists.newArrayList()));
-		final List<Entry<String, String>> objects = getObjects(dm.getUsage());
 		final List<CrySLPredicate> actPreds = Lists.newArrayList();
-
 		for (final ParEqualsPredicate pred : pre_preds.keySet()) {
 			final SuperType cond = pre_preds.get(pred);
 			if (cond == null) {
@@ -197,6 +195,19 @@ public class CrySLModelReader {
 			}
 		}
 		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
+	}
+
+	private List<CrySLForbiddenMethod> getForbiddenMethods(final ForbiddenBlock forbidden) {
+		List<CrySLForbiddenMethod> forbiddenMethods = Lists.newArrayList();
+		if(forbidden == null)
+			return forbiddenMethods;
+		for (final ForbiddenMethod method : forbidden.getForbiddenMethods()) {
+			CrySLMethod cryslMethod = CrySLReaderUtils.toCrySLMethod(method);
+			List<CrySLMethod> alternatives =
+				CrySLReaderUtils.resolveEventToCryslMethods(method.getReplacement());
+			forbiddenMethods.add(new CrySLForbiddenMethod(cryslMethod, false, alternatives));
+		}
+		return forbiddenMethods;
 	}
 
 	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
@@ -452,26 +463,6 @@ public class CrySLModelReader {
 		}
 
 		return slci;
-	}
-
-	private List<CrySLForbiddenMethod> getForbiddenMethods(final EList<ForbMethod> methods) {
-		final List<CrySLForbiddenMethod> methodSignatures = new ArrayList<>();
-		for (final ForbMethod fm : methods) {
-			final JvmExecutable meth = fm.getJavaMeth();
-			final List<Entry<String, String>> pars = new ArrayList<>();
-			for (final JvmFormalParameter par : meth.getParameters()) {
-				pars.add(new SimpleEntry<>(par.getSimpleName(), par.getParameterType().getSimpleName()));
-			}
-			final List<CrySLMethod> crysl = new ArrayList<>();
-
-			final Event alternative = fm.getRep();
-			if (alternative != null) {
-				crysl.addAll(CrySLReaderUtils.resolveEventToCrySLMethod(alternative));
-			}
-			methodSignatures.add(new CrySLForbiddenMethod(
-					new CrySLMethod(meth.getDeclaringType().getIdentifier() + "." + meth.getSimpleName(), pars, null, new SimpleEntry<>(UNDERSCORE, ANY_TYPE)), false, crysl));
-		}
-		return methodSignatures;
 	}
 
 	private List<ISLConstraint> collectRequiredPredicates(final EList<ReqPred> requiredPreds) {

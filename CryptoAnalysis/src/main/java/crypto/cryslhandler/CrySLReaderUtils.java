@@ -13,6 +13,7 @@ import crypto.rules.CrySLMethod;
 import de.darmstadt.tu.crossing.crySL.Aggregate;
 import de.darmstadt.tu.crossing.crySL.AnyParameterType;
 import de.darmstadt.tu.crossing.crySL.Event;
+import de.darmstadt.tu.crossing.crySL.ForbiddenMethod;
 import de.darmstadt.tu.crossing.crySL.LabeledMethodCall;
 import de.darmstadt.tu.crossing.crySL.Method;
 import de.darmstadt.tu.crossing.crySL.Object;
@@ -50,6 +51,14 @@ public class CrySLReaderUtils {
 		return Stream.of(toCrySLMethod((event.getMethod())));
 	}
 	
+	protected static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
+		String name = method.getMethod().getSimpleName();
+		List<Entry<String,String>> parameters = method.getParameters().stream()
+			.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
+			.collect(Collectors.toList());
+		return new CrySLMethod(name, parameters, resolveObject(null));
+	}
+
 	protected static CrySLMethod toCrySLMethod(final Method method) {
 		String name = method.getMethod().getSimpleName();
 		List<Entry<String,String>> parameters = method.getParameters().stream()
