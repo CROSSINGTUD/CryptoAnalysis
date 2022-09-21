@@ -7,12 +7,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-
+import java.sql.Time;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,12 +26,12 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Injector;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.common.types.JvmExecutable;
 import org.eclipse.xtext.common.types.JvmFormalParameter;
+import org.eclipse.xtext.common.types.JvmTypeReference;
 import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
@@ -53,15 +54,18 @@ import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
-import crypto.rules.ParEqualsPredicate;
+import crypto.rules.ParameterAwarePredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 
 import de.darmstadt.tu.crossing.CrySLStandaloneSetup;
+import de.darmstadt.tu.crossing.crySL.AlternativeRequiredPredicates;
+import de.darmstadt.tu.crossing.crySL.ConditionalPredicate;
 import de.darmstadt.tu.crossing.crySL.Constraint;
 import de.darmstadt.tu.crossing.crySL.ConstraintsBlock;
 import de.darmstadt.tu.crossing.crySL.Domainmodel;
+import de.darmstadt.tu.crossing.crySL.EnsuredPredicate;
 import de.darmstadt.tu.crossing.crySL.EnsuresBlock;
 import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.EventsBlock;
@@ -71,16 +75,27 @@ import de.darmstadt.tu.crossing.crySL.Literal;
 import de.darmstadt.tu.crossing.crySL.LiteralExpression;
 import de.darmstadt.tu.crossing.crySL.NegatesBlock;
 import de.darmstadt.tu.crossing.crySL.Object;
+import de.darmstadt.tu.crossing.crySL.ObjectExpression;
+import de.darmstadt.tu.crossing.crySL.ObjectOperation;
+import de.darmstadt.tu.crossing.crySL.ObjectReference;
 import de.darmstadt.tu.crossing.crySL.ObjectsBlock;
 import de.darmstadt.tu.crossing.crySL.Order;
 import de.darmstadt.tu.crossing.crySL.OrderBlock;
+import de.darmstadt.tu.crossing.crySL.Predicate;
+import de.darmstadt.tu.crossing.crySL.PredicateParameter;
+import de.darmstadt.tu.crossing.crySL.RequiredPredicate;
 import de.darmstadt.tu.crossing.crySL.RequiresBlock;
+import de.darmstadt.tu.crossing.crySL.ThisPredicateParameter;
+import de.darmstadt.tu.crossing.crySL.TimedPredicate;
+import de.darmstadt.tu.crossing.crySL.WildcardPredicateParameter;
+import fj.P;
 import polyglot.ast.Do;
 
 public class CrySLModelReader {
 
 	private List<CrySLForbiddenMethod> forbiddenMethods = null;
 	private StateMachineGraph smg = null;
+	private JvmTypeReference currentClass;
 	private XtextResourceSet resourceSet;
 	public static final String cryslFileEnding = ".crysl";
 
@@ -159,43 +174,28 @@ public class CrySLModelReader {
 
 
 		final Domainmodel dm = (Domainmodel) resource.getContents().get(0);
-		String curClass = dm.getJavaType().getQualifiedName();
+		this.currentClass = dm.getJavaType();
+		String currentClass = this.currentClass.getQualifiedName();
 
-		final ObjectsBlock objects = dm.getObjects();
-		final List<Entry<String, String>> objects = getObjects(objects);
+		final List<Entry<String, String>> objects = getObjects(dm.getObjects());
 
-		final ForbiddenBlock forbidden = dm.getForbidden();
-		this.forbiddenMethods = getForbiddenMethods(forbidden);
+		this.forbiddenMethods = getForbiddenMethods(dm.getForbidden());
 
 		final EventsBlock events = dm.getEvents();
 		final OrderBlock order = dm.getOrder();
 		this.smg = StateMachineGraphBuilder.buildSMG(order.getOrder(), events.getEvents());
 
-		final ConstraintsBlock constraints = dm.getConstraints();
-		final RequiresBlock requires = dm.getRequires(); 
 		final List<ISLConstraint> constraints = Lists.newArrayList();
-		constraints.addAll(getConstraints(constraints));
-		constraints.addAll(getRequiredPredicates(requires));
+		constraints.addAll(getConstraints(dm.getConstraints()));
+		constraints.addAll(getRequiredPredicates(dm.getRequires()));
 
 		final EnsuresBlock ensures = dm.getEnsures();
 		final NegatesBlock negates = dm.getNegates();
 		final List<CrySLPredicate> predicates = Lists.newArrayList();
-		predicates.putAll(getEnsuredPredicates(ensures));
-		predicates.putAll(getNegatedPredicates(negates));
+		predicates.addAll(getEnsuredPredicates(ensures));
+		predicates.addAll(getNegatedPredicates(negates));
 
-
-
-		final List<CrySLPredicate> actPreds = Lists.newArrayList();
-		for (final ParEqualsPredicate pred : pre_preds.keySet()) {
-			final SuperType cond = pre_preds.get(pred);
-			if (cond == null) {
-				actPreds.add(pred.tobasicPredicate());
-			} else {
-				actPreds.add(new CrySLCondPredicate(pred.getBaseObject(), pred.getPredName(), pred.getParameters(), pred.isNegated(),
-						getStatesForMethods(CrySLReaderUtils.resolveEventToCrySLMethod(cond)), pred.getConstraint()));
-			}
-		}
-		return new CrySLRule(curClass, objects, this.forbiddenMethods, this.smg, constraints, actPreds);
+		return new CrySLRule(currentClass, objects, this.forbiddenMethods, this.smg, constraints, predicates);
 	}
 
 	private List<Entry<String, String>> getObjects(final ObjectsBlock objects) {
@@ -218,100 +218,147 @@ public class CrySLModelReader {
 		return forbiddenMethods;
 	}
 
-	private Map<? extends ParEqualsPredicate, ? extends SuperType> getKills(final EList<Constraint> eList) {
-		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
-		for (final Constraint cons : eList) {
-			String curClass = ((DomainmodelImpl) cons.eContainer().eContainer()).getJavaType().getQualifiedName();
-			final Pred pred = (Pred) cons.getPredLit().getPred();
-			final List<ICrySLPredicateParameter> variables = new ArrayList<>();
-
-			if (pred.getParList() != null) {
-				boolean firstPar = true;
-				for (final SuPar var : pred.getParList().getParameters()) {
-					if (var.getVal() != null) {
-						final ObjectImpl object = (ObjectImpl) ((LiteralExpression) var.getVal().getLit().getName()).getValue();
-						String name = object.getName();
-						String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
-						if (name == null) {
-							name = THIS;
-							type = curClass;
-						}
-						variables.add(new CrySLObject(name, type));
-					} else {
-						if (firstPar) {
-							variables.add(new CrySLObject(THIS, curClass));
-						} else {
-							variables.add(new CrySLObject(UNDERSCORE, NULL));
-						}
-					}
-					firstPar = false;
-				}
-			}
-			final String meth = pred.getPredName();
-			final SuperType cond = cons.getLabelCond();
-			if (cond == null) {
-				preds.put(new ParEqualsPredicate(null, meth, variables, true), null);
-			} else {
-				preds.put(new ParEqualsPredicate(null, meth, variables, true), cond);
-			}
-
-		}
-		return preds;
+	private List<CrySLPredicate> getEnsuredPredicates(final EnsuresBlock ensures) {
+		return getTimedPredicates(ensures.getEnsuredPRedicates(), false);
 	}
 
-	private Map<? extends ParEqualsPredicate, ? extends SuperType> getPredicates(final List<Constraint> predList) {
-		final Map<ParEqualsPredicate, SuperType> preds = new HashMap<>();
-		for (final Constraint cons : predList) {
-			final Pred pred = (Pred) cons.getPredLit().getPred();
-			String curClass = ((DomainmodelImpl) cons.eContainer().eContainer()).getJavaType().getQualifiedName();
-			final List<ICrySLPredicateParameter> variables = new ArrayList<>();
-
-			if (pred.getParList() != null) {
-				boolean firstPar = true;
-				for (final SuPar var : pred.getParList().getParameters()) {
-					if (var.getVal() != null) {
-						final ObjectImpl object = (ObjectImpl) ((LiteralExpression) var.getVal().getLit().getName()).getValue();
-						String type = ((ObjectDecl) object.eContainer()).getObjectType().getQualifiedName();
-						String name = object.getName();
-						if (name == null) {
-							name = THIS;
-							type = curClass;
-						}
-						variables.add(new CrySLObject(name, type));
-					} else {
-						if (firstPar) {
-							variables.add(new CrySLObject(THIS, curClass));
-						} else {
-							variables.add(new CrySLObject(UNDERSCORE, NULL));
-						}
-					}
-					firstPar = false;
-				}
-			}
-
-			final CrySLPredicate ensPredCons = extractReqPred(cons.getPredLit());
-			final String meth = pred.getPredName();
-			final SuperType cond = cons.getLabelCond();
-			if (cond == null) {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), null);
-			} else {
-				preds.put(new ParEqualsPredicate(null, meth, variables, false, ensPredCons.getConstraint()), cond);
-			}
-
-		}
-		return preds;
+	private List<CrySLPredicate> getNegatedPredicates(final NegatesBlock negates) {
+		return getTimedPredicates(negates.getNegatedPredicates(), true);
 	}
 
-	private List<ISLConstraint> buildUpConstraints(final List<Constraint> constraints) {
-		final List<ISLConstraint> slCons = new ArrayList<>();
-		for (final Constraint cons : constraints) {
-			final ISLConstraint constraint = getConstraint(cons);
-			if (constraint != null) {
-				slCons.add(constraint);
+	private List<CrySLPredicate> getTimedPredicates(final List<? extends TimedPredicate> timedPredicates, boolean negate) {
+		List<CrySLPredicate> predicates = new ArrayList(timedPredicates.size());
+		for(final TimedPredicate timed : timedPredicates) {
+			Predicate predicate = timed.getPredicate();
+			ISLConstraint constraint = timed instanceof ConditionalPredicate
+				? getPredicateCondition((ConditionalPredicate) timed) 
+				: null;
+			List<ICrySLPredicateParameter> parameters = resolvePredicateParameters(predicate);
+			String name = predicate.getName();
+			if(timed.getAfter() == null) {
+				predicates.add(new CrySLPredicate(null, name, parameters, negate, constraint));
+			}
+			else {
+				Set<StateNode> nodes =
+					getStatesForMethods(CrySLReaderUtils.resolveEventToCryslMethods(timed.getAfter()));
+				predicates.add(new CrySLCondPredicate(null, name, parameters, negate, nodes, constraint));
 			}
 		}
-		return slCons;
+		return predicates;
 	}
+
+	private List<ICrySLPredicateParameter> resolvePredicateParameters(Predicate predicate) {
+		return resolvePredicateParameters(predicate, false);
+	}
+
+	private List<ICrySLPredicateParameter> resolvePredicateParameters(Predicate predicate, boolean treatFirstParamAsThis) {
+		boolean isFirstParameter = true; // TODO: clarify
+		final List<ICrySLPredicateParameter> parameters = new ArrayList(predicate.getParameters().size());
+		for(PredicateParameter parameter : predicate.getParameters()) {
+			if(parameter instanceof WildcardPredicateParameter)
+				// If the Wildcard parameter '_' is used as first Parameter, it actually
+				// mean `this`. Is this documented somewhere? Why is this needed?
+				// Does it comply with developer expectations (not in my case)?
+				// This is in (no obvious) Contrast to required predicates or predicates
+				// used as conditiones, where `this` (due to not handling the case) and
+				// `_` actually always mean `_`.
+				// Since there is no obvious reason to not treat `this` as `this`,
+				// we will do it here.
+				// TODO: clarify
+				parameters.add(isFirstParameter && treatFirstParamAsThis
+					? new CrySLObject(THIS, this.currentClass.getQualifiedName())
+					: new CrySLObject(UNDERSCORE, NULL));
+			else if(parameter instanceof ThisPredicateParameter)
+				parameters.add(new CrySLObject("this", this.currentClass.getQualifiedName()));
+			else
+				parameters.add(getPredicateParameterValue(parameter));
+
+			isFirstParameter = false; // TODO: clarify
+		}
+		return parameters;
+	}
+
+	private CrySLObject getPredicateParameterValue(PredicateParameter parameter) {
+		if(parameter.getValue() instanceof ObjectReference)
+			return getPredicateParameterValue((ObjectReference) parameter.getValue());
+		if(parameter.getValue() instanceof ObjectOperation)
+			return getPredicateParameterValue((ObjectOperation) parameter.getValue());
+		return null;
+	}
+
+	private CrySLObject getPredicateParameterValue(ObjectReference reference) {
+		return CrySLReaderUtils.toCrySLObject(reference.getObject());
+	}
+
+	private CrySLObject getPredicateParameterValue(ObjectOperation operation) {
+		String type = operation.getObject().getType().getQualifiedName();
+		String name = operation.getObject().getName();
+		switch(operation.getFn()) {
+			case ALG:
+				return new CrySLObject(name, type, new CrySLSplitter(0, "/"));
+			case MODE:
+				return new CrySLObject(name, type, new CrySLSplitter(1, "/"));
+			case PAD:
+				return new CrySLObject(name, type, new CrySLSplitter(2, "/"));
+			case PART:
+				int index = Integer.parseInt(operation.getIndex());
+				String split = operation.getSplit();
+				return new CrySLObject(name, type, new CrySLSplitter(index, split));
+			default:
+				return null;
+		}
+	}
+
+	private ISLConstraint getPredicateCondition(ConditionalPredicate predicate) {
+		EObject condition = predicate.getCondition();
+		if (condition instanceof Constraint)
+			return getConstraint((Constraint) condition);
+		if (condition instanceof Predicate)
+			return getPredicate((Predicate) condition);
+		return null;
+	}
+
+	private CrySLPredicate getPredicate(Predicate predicate) {
+		return getPredicate(predicate, false, null);
+	}
+
+	private CrySLPredicate getPredicate(Predicate predicate, boolean negate, ISLConstraint constraint) {
+		final List<ICrySLPredicateParameter> variables =
+			resolvePredicateParameters(predicate);
+		return new CrySLPredicate(null, predicate.getName(), variables, negate, constraint);
+	}
+
+	List<ISLConstraint> getRequiredPredicates(RequiresBlock requiresBlock) {
+		final List<ISLConstraint> predicates = new ArrayList<>();
+		final List<AlternativeRequiredPredicates> requiredPredicates =
+			requiresBlock.getRequiredPredicates();
+		for(AlternativeRequiredPredicates alternativePredicates : requiredPredicates ) {
+			List<CrySLPredicate> alternatives =
+				alternativePredicates.getAlternatives().parallelStream()
+				.map(this::getRequiredPredicate)
+				.collect(Collectors.toList());
+			ISLConstraint predicate = alternatives.get(0);
+			for(int i = 1; i < alternatives.size(); i++)
+					predicate = new CrySLConstraint(alternatives.get(i), predicate, LogOps.or);
+			predicates.add(predicate);
+		}
+		return predicates;
+	}
+
+	private CrySLPredicate getRequiredPredicate(RequiredPredicate predicate) {
+		ISLConstraint constraint = getPredicateCondition(predicate);
+		boolean negate = predicate.isNot();
+		return getPredicate(predicate.getPredicate(), negate, constraint);
+	}
+
+	private List<ISLConstraint> getConstraints(ConstraintsBlock constraintsBlock) {
+		return constraintsBlock.getConstraints().parallelStream()
+			.map(this::getConstraint)
+			.collect(Collectors.toList());
+	}
+
+
+
 
 	private ISLConstraint getConstraint(final Constraint cons) {
 		if (cons == null) {
@@ -473,45 +520,14 @@ public class CrySLModelReader {
 		return slci;
 	}
 
-	private List<ISLConstraint> collectRequiredPredicates(final EList<ReqPred> requiredPreds) {
-		final List<ISLConstraint> preds = new ArrayList<>();
-		for (final ReqPred pred : requiredPreds) {
-			ISLConstraint reqPred = null;
-			if (pred instanceof PredLit) {
-				reqPred = extractReqPred(pred);
-			} else {
-				final ReqPred left = pred.getLeftExpression();
-				final ReqPred right = pred.getRightExpression();
-
-				List<CrySLPredicate> altPreds = retrieveReqPredFromAltPreds(left);
-				altPreds.add(extractReqPred(right));
-				reqPred = new CrySLConstraint(altPreds.get(0), altPreds.get(1), LogOps.or);
-				for (int i = 2; i < altPreds.size(); i++) {
-					reqPred = new CrySLConstraint(reqPred, altPreds.get(i), LogOps.or);
-				}
-			}
-			preds.add(reqPred);
-		}
-
-		return preds;
-	}
-
-	private List<CrySLPredicate> retrieveReqPredFromAltPreds(ReqPred left) {
-		List<CrySLPredicate> preds = new ArrayList<CrySLPredicate>();
-		if (left instanceof PredLit) {
-			preds.add(extractReqPred(left));
-		} else {
-			preds.addAll(retrieveReqPredFromAltPreds(left.getLeftExpression()));
-			preds.add(extractReqPred(left.getRightExpression()));
-		}
-		return preds;
-	}
-
 	private Set<StateNode> getStatesForMethods(final List<CrySLMethod> condMethods) {
 		final Set<StateNode> predGens = new HashSet<>();
 		if (condMethods.size() != 0) {
 			for (final TransitionEdge methTrans : this.smg.getAllTransitions()) {
 				final List<CrySLMethod> transLabel = methTrans.getLabel();
+				// Sure that this should not match, if condMethods is a subset of transLabel???
+				// ie. if( transLabel.containsAll(condMethods) {
+				// TODO: clarify
 				if (transLabel.size() > 0 && (transLabel.equals(condMethods) || (condMethods.size() == 1 && transLabel.contains(condMethods.get(0))))) {
 					predGens.add(methTrans.getRight());
 				}
