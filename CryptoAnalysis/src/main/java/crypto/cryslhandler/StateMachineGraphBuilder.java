@@ -29,13 +29,18 @@ public class StateMachineGraphBuilder {
 	private final List<Event> events;
 	private final Set<CrySLMethod> allMethods = Sets.newHashSet();
 	
-	public StateMachineGraphBuilder(final Order order, final List<Event> events) {
+	public static StateMachineGraph buildSMG(final Order order, final List<Event> events) {
+		return (new StateMachineGraphBuilder(order, events))
+				.buildSMG();
+	}
+
+	protected StateMachineGraphBuilder(final Order order, final List<Event> events) {
 		this.order = order;
 		this.events = events;
 		this.result = new StateMachineGraph();
 	}
 
-	public StateMachineGraph buildSMG() {
+	protected StateMachineGraph buildSMG() {
 		StateNode initialNode = new StateNode("-1", true, true);
 		this.result.addNode(initialNode);
 		SubStateMachine subSmg = buildSubSMG(this.order, Collections.singleton(initialNode));
@@ -187,14 +192,14 @@ public class StateMachineGraphBuilder {
 			Event event = ((Primary) order).getEvent();
 			StateNode node = this.result.createNewNode();
 			List<CrySLMethod> label =
-				CrySLReaderUtils.resolveEventToCrySLMethod(event);
+				CrySLReaderUtils.resolveEventToCryslMethods(event);
 			for(StateNode startNode: startNodes)
 				this.result.createNewEdge(label, startNode, node);
 			return new SubStateMachine(node, node);
 		}
 
-		Set<StateNode> end = Collections.synchronizedSet(Sets.newHashSet());
-		Set<StateNode> start = Collections.synchronizedSet(Sets.newHashSet());
+		Set<StateNode> end = Sets.newHashSet();
+		Set<StateNode> start = Sets.newHashSet();
 
 		final SubStateMachine left;
 		final SubStateMachine right;
@@ -209,12 +214,8 @@ public class StateMachineGraphBuilder {
 				end.addAll(right.getEndNodes());
 				break;
 			case ALTERNATIVE:
-				Stream.of(order.getLeft(), order.getRight()).parallel()
-					.map(o -> buildSubSMG(o, startNodes))
-					.forEach(smg -> {
-						start.addAll(smg.getStartNodes());
-						end.addAll(smg.getEndNodes());
-					});
+					left = buildSubSMG(order.getLeft(), startNodes);
+					right = buildSubSMG(order.getRight(), startNodes);
 					// reduce all end nodes without outgoing edges to one end node
 					Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
 						.map(edge -> edge.from()).filter(node -> end.contains(node)).collect(Collectors.toSet());
@@ -229,7 +230,7 @@ public class StateMachineGraphBuilder {
 			case ONE_OR_MORE:
 			case ZERO_OR_MORE:
 			case ZERO_OR_ONE:
-				left = buildSubSMG(order, startNodes);
+				left = buildSubSMG(order.getLeft(), startNodes);
 				start.addAll(left.getStartNodes());
 				end.addAll(left.getEndNodes());
 				if(order.getOp() == OrderOperator.ZERO_OR_ONE || order.getOp() == OrderOperator.ONE_OR_MORE) {

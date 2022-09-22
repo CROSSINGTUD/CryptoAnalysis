@@ -13,13 +13,13 @@ public class CrySLCondPredicate extends CrySLPredicate {
 	private static final long serialVersionUID = 1L;
 	private final Set<StateNode> conditionalNodes;
 	
-	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> variables, Boolean not, Set<StateNode> label) {
-		this(baseObj, name, variables, not, label, null);
+	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, Set<StateNode> nodes) {
+		this(baseObj, name, parameters, negated, nodes, null);
 	}
 	
-	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> variables, Boolean not, Set<StateNode> label, ISLConstraint cons) {
-		super(baseObj, name, variables, not, cons);
-		conditionalNodes = label;
+	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, Set<StateNode> nodes, ISLConstraint constraint) {
+		super(baseObj, name, parameters, negated, constraint);
+		this.conditionalNodes = nodes;
 	}
 	
 	/**

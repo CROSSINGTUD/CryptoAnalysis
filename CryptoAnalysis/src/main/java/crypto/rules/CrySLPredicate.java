@@ -8,24 +8,23 @@ import java.util.Set;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 
-public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable {
+public class CrySLPredicate extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
 	protected final boolean negated;
 	protected final ISLConstraint optConstraint;
 	
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not) {
-		this(baseObject, name, variables, not, null);
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated) {
+		this(baseObject, name, parameters, negated, null);
 	}
 	
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not, ISLConstraint constraint) {
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, ISLConstraint constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
-		this.parameters = variables;
-		this.negated = not;
+		this.parameters = parameters;
+		this.negated = negated;
 		this.optConstraint = constraint;
 	}
 

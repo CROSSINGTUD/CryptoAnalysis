@@ -7,23 +7,16 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Time;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 import com.google.inject.Injector;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -58,7 +51,6 @@ import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
-import crypto.rules.ParameterAwarePredicate;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
@@ -69,9 +61,7 @@ import de.darmstadt.tu.crossing.crySL.ConditionalPredicate;
 import de.darmstadt.tu.crossing.crySL.Constraint;
 import de.darmstadt.tu.crossing.crySL.ConstraintsBlock;
 import de.darmstadt.tu.crossing.crySL.Domainmodel;
-import de.darmstadt.tu.crossing.crySL.EnsuredPredicate;
 import de.darmstadt.tu.crossing.crySL.EnsuresBlock;
-import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.EventsBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenMethod;
@@ -79,13 +69,11 @@ import de.darmstadt.tu.crossing.crySL.Literal;
 import de.darmstadt.tu.crossing.crySL.LiteralExpression;
 import de.darmstadt.tu.crossing.crySL.LiteralList;
 import de.darmstadt.tu.crossing.crySL.NegatesBlock;
-import de.darmstadt.tu.crossing.crySL.Object;
 import de.darmstadt.tu.crossing.crySL.ObjectExpression;
 import de.darmstadt.tu.crossing.crySL.ObjectOperation;
 import de.darmstadt.tu.crossing.crySL.ObjectReference;
 import de.darmstadt.tu.crossing.crySL.ObjectsBlock;
 import de.darmstadt.tu.crossing.crySL.Operator;
-import de.darmstadt.tu.crossing.crySL.Order;
 import de.darmstadt.tu.crossing.crySL.OrderBlock;
 import de.darmstadt.tu.crossing.crySL.Predicate;
 import de.darmstadt.tu.crossing.crySL.PredicateParameter;
@@ -165,7 +153,6 @@ public class CrySLModelReader {
 	 * @throws CryptoAnalysisException
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
-		System.err.println("Reading " + ruleFile.getName());
 		final String fileName = ruleFile.getName();
 		if (!fileName.endsWith(cryslFileEnding))
 			throw new CryptoAnalysisException("The extension of "+ fileName + "  does not match "+ cryslFileEnding);
@@ -231,25 +218,25 @@ public class CrySLModelReader {
 		if(currentClass.equals("void"))
 			throw new CryptoAnalysisException("Class for the rule is not on the classpath.");
 
-		final List<Entry<String, String>> objects = getObjects(dm.getObjects());
+		final List<Entry<String, String>> objects = getObjects(model.getObjects());
 
-		this.forbiddenMethods = getForbiddenMethods(dm.getForbidden());
+		List<CrySLForbiddenMethod> forbiddenMethods = getForbiddenMethods(model.getForbidden());
 
-		final EventsBlock events = dm.getEvents();
-		final OrderBlock order = dm.getOrder();
+		final EventsBlock events = model.getEvents();
+		final OrderBlock order = model.getOrder();
 		this.smg = StateMachineGraphBuilder.buildSMG(order.getOrder(), events.getEvents());
 
 		final List<ISLConstraint> constraints = Lists.newArrayList();
-		constraints.addAll(getConstraints(dm.getConstraints()));
-		constraints.addAll(getRequiredPredicates(dm.getRequires()));
+		constraints.addAll(getConstraints(model.getConstraints()));
+		constraints.addAll(getRequiredPredicates(model.getRequires()));
 
-		final EnsuresBlock ensures = dm.getEnsures();
-		final NegatesBlock negates = dm.getNegates();
+		final EnsuresBlock ensures = model.getEnsures();
+		final NegatesBlock negates = model.getNegates();
 		final List<CrySLPredicate> predicates = Lists.newArrayList();
 		predicates.addAll(getEnsuredPredicates(ensures));
 		predicates.addAll(getNegatedPredicates(negates));
 
-		return new CrySLRule(currentClass, objects, this.forbiddenMethods, this.smg, constraints, predicates);
+		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates);
 	}
 
 	private List<Entry<String, String>> getObjects(final ObjectsBlock objects) {
@@ -455,18 +442,11 @@ public class CrySLModelReader {
 			case LESS_OR_EQUAL:
 				{
 					CompOp compOp = CrySLReaderUtils.compOpFromOperator(constraint.getOp()).get();
-					try {
-						CrySLArithmeticConstraint left = (CrySLArithmeticConstraint)
-							getConstraint(constraint.getLeft());
-						CrySLArithmeticConstraint right = (CrySLArithmeticConstraint)
-							getConstraint(constraint.getRight());
-						return new CrySLComparisonConstraint(left, right, compOp);
-					}
-					catch(ClassCastException e) {
-						System.err.println(getConstraint(constraint.getLeft()));
-						System.err.println(getConstraint(constraint.getRight()));
-						throw new IllegalArgumentException("Cant compare non Arithmetic Constraints.", e);
-					}
+					CrySLArithmeticConstraint left = coerceConstraintToArithmeticConstraint(
+						getConstraint(constraint.getLeft()));
+					CrySLArithmeticConstraint right = coerceConstraintToArithmeticConstraint(
+						getConstraint(constraint.getRight()));
+					return new CrySLComparisonConstraint(left, right, compOp);
 				}
 			/* Arithmetic Expressions */
 			case TIMES:
@@ -479,7 +459,7 @@ public class CrySLModelReader {
 			case MODULO:
 				{
 					ISLConstraint left = getConstraint(constraint.getLeft());
-					ISLConstraint right = getConstraint(constraint.getRight());
+					ISLConstraint right = getConstraint((Constraint) constraint.getRight());
 					ArithOp arithOp = CrySLReaderUtils.arithOpFromOperator(constraint.getOp()).get();
 					return new CrySLArithmeticConstraint(left, right, arithOp);
 				}
@@ -504,6 +484,14 @@ public class CrySLModelReader {
 		return null;
 	}
 
+	private CrySLArithmeticConstraint coerceConstraintToArithmeticConstraint(ISLConstraint constraint) {
+		if(constraint instanceof CrySLArithmeticConstraint)
+			return (CrySLArithmeticConstraint) constraint;
+		if(constraint instanceof CrySLPredicate)
+			return makeArithmeticConstraint((CrySLPredicate) constraint);
+		throw new ClassCastException("Cant coerce `" + constraint.toString() + "` into ArithmeticExpression");
+	}
+
 	private ISLConstraint getLiteralExpression(LiteralExpression expression) {
 		if(expression instanceof BuiltinPredicate)
 			return getBuiltinPredicate((BuiltinPredicate) expression);
@@ -517,7 +505,11 @@ public class CrySLModelReader {
 	/**
 	 * This is weird, but is taken from the original implementation.
 	 * */
-	private ISLConstraint makeConstraintFromObject(CrySLObject object) {
+	private ISLConstraint makeConstraintFromObject(ICrySLPredicateParameter object) {
+		return makeArithmeticConstraint(object);
+	}
+
+	private CrySLArithmeticConstraint makeArithmeticConstraint(ICrySLPredicateParameter object) {
 		CrySLObject zero = new CrySLObject("0", "int");
 		ArithOp plus = CrySLReaderUtils.arithOpFromOperator(Operator.PLUS).get();
 		return new CrySLArithmeticConstraint(object,zero, plus);
@@ -542,13 +534,11 @@ public class CrySLModelReader {
 		boolean negated = false;
 		switch(builtinPredicate.getPredicate()) {
 			case NO_CALL_TO:
-				negated = true;
 			case CALL_TO:
 				parameters = CrySLReaderUtils.resolveEventToPredicateParameters(builtinPredicate.getEvent());
 				break;
 
 			case INSTANCE_OF:
-				negated = true;
 			case NEVER_TYPE_OF:
 				String objectName = builtinPredicate.getObject().getName();
 				String type = builtinPredicate.getType().getQualifiedName();
@@ -560,6 +550,8 @@ public class CrySLModelReader {
 				CrySLObject object =
 					CrySLReaderUtils.toCrySLObject(builtinPredicate.getObject());
 				parameters = Collections.singletonList(object);
+				break;
+
 			default:
 				parameters = Collections.emptyList();
 		}

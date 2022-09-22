@@ -5,9 +5,7 @@ import java.util.Set;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 
-public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class CrySLArithmeticConstraint extends CrySLLiteral {
 
 	public enum ArithOp { p, n, m}
 	/* p = +
