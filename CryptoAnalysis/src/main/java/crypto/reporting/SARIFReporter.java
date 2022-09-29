@@ -66,6 +66,8 @@ public class SARIFReporter extends ErrorMarkerListener {
 	private void initializeMap() {
 		this.errorCountMap.put(SARIFConfig.CONSTRAINT_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.NEVER_TYPE_OF_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.HARDCODED_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.INSTANCE_OF_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.FORBIDDEN_METHOD_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.IMPRECISE_VALUE_EXTRACTION_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.TYPE_STATE_ERROR_KEY, 0);
