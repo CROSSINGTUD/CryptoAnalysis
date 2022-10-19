@@ -1,36 +1,21 @@
 package test.finitestatemachine;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import crypto.analysis.CrySLRulesetSelector;
+import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.StateMachineGraph;
+import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
+import org.junit.Before;
+import test.IDEALCrossingTestingFramework;
+
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.inject.internal.util.Lists;
-import com.google.inject.internal.util.Sets;
-
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.cryslhandler.CrySLModelReader;
-import crypto.cryslhandler.CryslReaderUtils;
-import crypto.exceptions.CryptoAnalysisException;
-import crypto.rules.CrySLRule;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
-import de.darmstadt.tu.crossing.crySL.Order;
-import test.IDEALCrossingTestingFramework;
 
 public abstract class FiniteStateMachineTestingFramework{
 
