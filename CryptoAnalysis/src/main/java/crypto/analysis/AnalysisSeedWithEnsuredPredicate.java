@@ -73,7 +73,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 					}
 				};
 				m.addNode(s);
-				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
+				m.createNewEdge(Lists.newLinkedList(), s,s);
 				return new SootBasedStateMachineGraph(m);
 			}
 			

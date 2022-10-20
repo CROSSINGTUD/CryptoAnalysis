@@ -1,11 +1,3 @@
-/**
- * The ProviderDetection class helps in detecting the provider used when
- * coding with JCA's Cryptographic APIs and chooses the corresponding set of
- * CrySL rules that are implemented for that provider.
- *
- * @author  Enri Ozuni
- * 
- */
 package crypto.providerdetection;
 
 import java.io.File;
@@ -15,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
@@ -32,9 +21,9 @@ import boomerang.jimple.Val;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
-import crypto.analysis.CrySLRulesetSelector;
+import crypto.rules.CrySLRuleReader;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -49,6 +38,14 @@ import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import wpds.impl.Weight.NoWeight;
 
+/**
+ * The ProviderDetection class helps in detecting the provider used when
+ * coding with JCA's Cryptographic APIs and chooses the corresponding set of
+ * CrySL rules that are implemented for that provider.
+ *
+ * @author  Enri Ozuni
+ * 
+ */
 public class ProviderDetection {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
@@ -59,11 +56,18 @@ public class ProviderDetection {
 	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
 	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
 	
-	
+	/**
+	 * Returns the detected provider.
+	 *
+	 */
 	public String getProvider() {
 		return provider;
 	}
-
+	
+	/**
+	 * Returns the rules directory of the detected provider.
+	 *
+	 */
 	public String getRulesDirectory() {
 		return rulesDirectory;
 	}
@@ -148,10 +152,6 @@ public class ProviderDetection {
 		return this.provider;
 	}
 	
-	
-	
-	// Methods used from the `doAnalysis()` method
-	//-----------------------------------------------------------------------------------------------------------------
 	
 	/**
 	 * This method returns the type of Provider detected, since
@@ -339,7 +339,7 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method is used to choose the CryptSL rules from the detected Provider and should
+	 * This method is used to choose the CryptSL rules in a directory from the detected provider and should
 	 * be called after the `doAnalysis()` method.
 	 *            
 	 * @param providerRulesDirectory
@@ -348,7 +348,31 @@ public class ProviderDetection {
 	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
-		rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
+		try {
+			rules.addAll(CrySLRuleReader.readFromDirectory(new File(providerRulesDirectory)));
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the "
+					+ "specified directory: "+providerRulesDirectory, e);
+		}
+		return rules;
+	}
+	
+	/**
+	 * This method is used to choose the CryptSL rules in a zip file from the detected provider and should
+	 * be called after the `doAnalysis()` method.
+	 *            
+	 * @param providerRulesZip
+	 *          
+	 */
+	public List<CrySLRule> chooseRulesZip(String providerRulesZip) {
+		List<CrySLRule> rules = Lists.newArrayList();
+		this.rulesDirectory = providerRulesZip;
+		try {
+			rules.addAll(CrySLRuleReader.readFromZipFile(new File(providerRulesZip)));
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the "
+					+ "specified zip file: "+providerRulesZip, e);
+		}
 		return rules;
 	}
 		  

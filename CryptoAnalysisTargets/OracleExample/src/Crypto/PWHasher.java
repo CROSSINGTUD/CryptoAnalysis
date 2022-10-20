@@ -6,7 +6,7 @@ import java.security.SecureRandom;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
+import java.util.Base64;
 
 /** @author CogniCrypt */
 public class PWHasher {
@@ -43,10 +43,10 @@ public class PWHasher {
 	}
 
 	private static String toBase64(byte[] array) {
-		return DatatypeConverter.printBase64Binary(array);
+		return Base64.getEncoder().encodeToString(array);
 	}
 
 	private static byte[] fromBase64(String hash) {
-		return DatatypeConverter.parseBase64Binary(hash);
+		return Base64.getDecoder().decode(hash);
 	}
 }

@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import boomerang.WeightedForwardQuery;
 import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
@@ -21,6 +24,8 @@ import typestate.finiteautomata.TypeStateMachineWeightFunctions;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(FiniteStateMachineToTypestateChangeFunction.class);
+	
 	private RefType analyzedType = null;
 
 	private SootBasedStateMachineGraph fsm;
@@ -36,11 +41,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				} else {
 					// This code was added to detect unidentified outlying cases affected by the changes made for issue #47.
 					if (analyzedType != m.getDeclaringClass().getType()){
-                        try {
-                            throw new Exception("The type of m.getDeclaringClass() does not appear to be consistent across fsm.initialTransitonLabel().");
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+						LOGGER.error("The type of m.getDeclaringClass() does not appear to be consistent across fsm.initialTransitonLabel().");
                     }
 				}
 			}
@@ -77,7 +78,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 
 	@Override
 	protected State initialState() {
-		throw new RuntimeException("Should never be called!");
+		throw new UnsupportedOperationException("This method should never be called.");
 	}
 	
 	

@@ -4,14 +4,15 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
@@ -23,9 +24,11 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -44,15 +47,28 @@ import typestate.TransitionFunction;
 public abstract class AbstractHeadlessTest {
 
 	/**
-	 * To run these test cases in Eclipse, specify your maven home path as JVM
-	 * argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
+	 * To run these test cases in Eclipse, specify your maven home path as JVM argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
 	 */
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeadlessTest.class);
+
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
+	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	private static ReportFormat reportFormat = null;
+	
+	public static void setReportFormat(ReportFormat reportFormat) {
+		AbstractHeadlessTest.reportFormat = reportFormat;
+	}
 
+	public static void setVISUALIZATION(boolean vISUALIZATION) {
+		VISUALIZATION = vISUALIZATION;
+	}
+	
+	public static void setProviderDetection(boolean providerDetection) {
+		PROVIDER_DETECTION = providerDetection;
+	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
@@ -69,13 +85,20 @@ public abstract class AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {
-				return mp.getBuildDirectory()
-						+ (mp.getFullClassPath().equals("") ? "" : File.pathSeparator + mp.getFullClassPath());
+				return mp.getBuildDirectory() + (mp.getFullClassPath().equals("") ? "" : File.pathSeparator + mp.getFullClassPath());
 			}
 
 			@Override
 			protected List<CrySLRule> getRules() {
-				return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+				try {
+					List<CrySLRule> rules = Lists.newArrayList();
+					rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					HeadlessCryptoScanner.setRules(rules);
+					return rules;
+				} catch (CryptoAnalysisException e) {
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+				}
+				return null;
 			}
 
 			@Override
@@ -99,6 +122,16 @@ public abstract class AbstractHeadlessTest {
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
 			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return PROVIDER_DETECTION;
+			}
+			
+			@Override
+			protected ReportFormat reportFormat(){
+				return VISUALIZATION ? reportFormat : null;
+			}
 		};
 		return scanner;
 	}
@@ -110,26 +143,23 @@ public abstract class AbstractHeadlessTest {
 			public void reportError(AbstractError error) {
 				Integer currCount;
 				String methodContainingError = error.getErrorLocation().getMethod().toString();
-				if (!errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
-					currCount = 0;
-				} else {
+				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
+				} else {
+					currCount = 0;
 				}
 				Integer newCount = --currCount;
 				errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
 			}
 
 			@Override
-			public void onSeedTimeout(Node<Statement, Val> seed) {
-			}
+			public void onSeedTimeout(Node<Statement, Val> seed) {}
 
 			@Override
-			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {
-			}
+			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {}
 
 			@Override
-			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
-					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
 					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 
 			}
@@ -140,22 +170,16 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			public void collectedValues(AnalysisSeedWithSpecification seed,
-					Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-			}
+			public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {}
 
 			@Override
-			public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-					Collection<ISLConstraint> relConstraints) {
-			}
+			public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {}
 
 			@Override
-			public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-			}
+			public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {}
 
 			@Override
-			public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-			}
+			public void boomerangQueryStarted(Query seed, BackwardQuery q) {}
 
 			@Override
 			public void boomerangQueryFinished(Query seed, BackwardQuery q) {
@@ -163,28 +187,22 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void beforeAnalysis() {
-			}
+			public void beforeAnalysis() {}
 
 			@Override
-			public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-			}
+			public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void afterAnalysis() {
-			}
+			public void afterAnalysis() {}
 
 			@Override
 			public void onSecureObjectFound(IAnalysisSeed analysisObject) {
@@ -195,20 +213,23 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void addProgress(int processedSeeds, int workListsize) {
 				// TODO Auto-generated method stub
-				
+
 			}
 		};
 	}
 
 	protected void assertErrors() {
 		for (Cell<String, Class<?>, Integer> c : errorMarkerCountPerErrorTypeAndMethod.cellSet()) {
-			if (c.getValue() != 0) {
-				if (c.getValue() > 0) {
-					throw new RuntimeException(
-							"Did not find all errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+			Integer value = c.getValue();
+			if (value != 0) {
+				if (value > 0) {
+//					System.out.println(
+							throw new RuntimeException(
+									"Found " + value + " too few errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				} else {
-					throw new RuntimeException(
-							"Found too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+//					System.out.println(
+							throw new RuntimeException(
+									"Found " + Math.abs(value) + " too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				}
 			}
 		}
@@ -230,29 +251,29 @@ public abstract class AbstractHeadlessTest {
 			errorMarkerCountPerErrorTypeAndMethod.put(methodSignature, errorType, tp.getNumberOfFindings() + fp.getNumberOfFindings());
 		}
 	}
-	
+
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, String methodSignature) {
-		setErrorsCount(errorType,tp, new NoFalsePositives(), new NoFalseNegatives(),  methodSignature);
+		setErrorsCount(errorType, tp, new NoFalsePositives(), new NoFalseNegatives(), methodSignature);
 	}
 
 	protected void setErrorsCount(Class<?> errorType, TruePositives tp, FalseNegatives fn, String methodSignature) {
-		setErrorsCount(errorType,tp, new NoFalsePositives(), fn, methodSignature);
+		setErrorsCount(errorType, tp, new NoFalsePositives(), fn, methodSignature);
 	}
 
 	protected void setErrorsCount(Class<?> errorType, FalsePositives fp, String methodSignature) {
-		setErrorsCount(errorType,new TruePositives(0), fp, new NoFalseNegatives(),  methodSignature);
+		setErrorsCount(errorType, new TruePositives(0), fp, new NoFalseNegatives(), methodSignature);
 	}
 
 	protected void setErrorsCount(Class<?> errorType, FalseNegatives fn, String methodSignature) {
-		setErrorsCount(errorType,new TruePositives(0), new NoFalsePositives(), fn,  methodSignature);
+		setErrorsCount(errorType, new TruePositives(0), new NoFalsePositives(), fn, methodSignature);
 	}
-	
+
 	protected void setErrorsCount(ErrorSpecification errorSpecification) {
 		if (errorSpecification.getTotalNumberOfFindings() > 0) {
-			for (TruePositives tp: errorSpecification.getTruePositives()) {
+			for (TruePositives tp : errorSpecification.getTruePositives()) {
 				setErrorsCount(tp.getErrorType(), tp, new NoFalsePositives(), new NoFalseNegatives(), errorSpecification.getMethodSignature());
 			}
-			for (FalsePositives fp: errorSpecification.getFalsePositives()) {
+			for (FalsePositives fp : errorSpecification.getFalsePositives()) {
 				setErrorsCount(fp.getErrorType(), new TruePositives(0), fp, new NoFalseNegatives(), errorSpecification.getMethodSignature());
 			}
 		}

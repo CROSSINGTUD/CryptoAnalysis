@@ -19,6 +19,7 @@ import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.assertions.Assertions;
 
+@SuppressWarnings("deprecation")
 @Ignore
 public class TestDigitalSignature extends TestTinkPrimitives {
 
@@ -28,7 +29,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	}
 	@Test
 	public void generateNewECDSA_P256() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);;
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -36,7 +37,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECDSA_P384() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER);
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.DER, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -44,7 +45,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECDSA_P521() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER);
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.DER, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -52,7 +53,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECDSA_P256_IEEE_P1363() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.IEEE_P1363);
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.IEEE_P1363, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -60,7 +61,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECDSA_P384_IEEE_P1363() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363);
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P384, EcdsaSignatureEncoding.IEEE_P1363, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -68,7 +69,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECDSA_P521_IEEE_P1363() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.IEEE_P1363);
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA512, EllipticCurveType.NIST_P521, EcdsaSignatureEncoding.IEEE_P1363, null);
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
@@ -76,12 +77,13 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void signUsingECDSA_P256() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);;
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER, null);;
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
 		
+		@SuppressWarnings("deprecation")
 		PublicKeySign pks = PublicKeySignFactory.getPrimitive(ksh);
 		
 		pks.sign("this is just a test using digital signatures using Google Tink".getBytes());
@@ -92,12 +94,13 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 	
 	@Test
 	public void signAndVerifyUsingECDSA_P256() throws GeneralSecurityException {
-		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER);;
+		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER, null);;
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		
 		Assertions.mustBeInAcceptingState(kt);
 		Assertions.mustBeInAcceptingState(ksh);
 		
+		@SuppressWarnings("deprecation")
 		PublicKeySign pks = PublicKeySignFactory.getPrimitive(ksh);
 		
 		String data = "this is just a test using digital signatures using Google Tink";
@@ -111,6 +114,7 @@ public class TestDigitalSignature extends TestTinkPrimitives {
 		Assertions.hasEnsuredPredicate(publicKsh);
 
 		
+		@SuppressWarnings("deprecation")
 		PublicKeyVerify pkv = PublicKeyVerifyFactory.getPrimitive(publicKsh);
 		Assertions.hasEnsuredPredicate(pkv);
 		
