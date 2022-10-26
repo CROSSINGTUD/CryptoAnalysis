@@ -40,13 +40,12 @@ public class StateMachineGraphBuilder {
 	}
 
 	protected StateMachineGraph buildSMG() {
-		StateNode initialNode = new StateNode("-1", true, true);
+		StateNode initialNode = new StateNode("-1", true, false);
 		this.result.addNode(initialNode);
 		SubStateMachine subSmg = buildSubSMG(this.order, Collections.singleton(initialNode));
 		subSmg.getEndNodes().parallelStream().forEach(StateNode::makeAccepting);
 		return this.result;
 	}
-
 
 	/**
 	 * Helper class to store a {@link Set} of endNodes and startNodes.
@@ -115,84 +114,95 @@ public class StateMachineGraphBuilder {
 	 * 	| '(' Order ')'
 	 * ;
 	 * </code>
-	 * -----------
+	 *         -----------
 	 *
-	 * Based on this definition, the method will build the StateMachine from
-	 * the Order section.
+	 *         Based on this definition, the method will build the StateMachine from
+	 *         the Order section.
 	 *
-	 * This is done by recursively building a sub-StateMachine and connecting
-	 * it with given start Nodes and returned end Nodes according to the specific OrderOperator.
+	 *         This is done by recursively building a sub-StateMachine and
+	 *         connecting
+	 *         it with given start Nodes and returned end Nodes according to the
+	 *         specific OrderOperator.
 	 *
-	 * Therefore, consider the following cases
+	 *         Therefore, consider the following cases
 	 *
-	 * 1. Order instanceof Primary:
-	 * 	In this case, we create a new Node and add an Transistion for the Event
-	 * 	from each start Node to the newly created Node.
-	 * 	Finally, we return a SubStateMachine where the newly created node is the
-	 * 	start and end Node.
+	 *         1. Order instanceof Primary:
+	 *         In this case, we create a new Node and add an Transistion for the
+	 *         Event
+	 *         from each start Node to the newly created Node.
+	 *         Finally, we return a SubStateMachine where the newly created node is
+	 *         the
+	 *         start and end Node.
 	 *
-	 * 2. OrderOperator == SEQUENCE:
-	 * 	The left-side should occur before the right-side.
-	 * 	We therefore recursively build the sub-StateMachine of the left-side
-	 * 	with the given start Nodes saving the returned end Nodes.
-	 * 	We then build the sub-StateMachine of the right-side giving it the
-	 * 	left-side's end Nodes as start Nodes.
-	 * 	Finally, we return the startNodes of the left-side's start Nodes as our
-	 * 	start Nodes and the end Nodes of the right-side's sub-StateMachine
-	 * 	as our end Nodes.
+	 *         2. OrderOperator == SEQUENCE:
+	 *         The left-side should occur before the right-side.
+	 *         We therefore recursively build the sub-StateMachine of the left-side
+	 *         with the given start Nodes saving the returned end Nodes.
+	 *         We then build the sub-StateMachine of the right-side giving it the
+	 *         left-side's end Nodes as start Nodes.
+	 *         Finally, we return the startNodes of the left-side's start Nodes as
+	 *         our
+	 *         start Nodes and the end Nodes of the right-side's sub-StateMachine
+	 *         as our end Nodes.
 	 *
-	 * 3. OrderOperator == ALTERNATIVE:
-	 * 	Either the left-side or the right-side should occur.
-	 * 	We therefore build both sub-StateMachines with our start Nodes as start
-	 * 	Nodes.
-	 * 	Finally, we return the aggregate of both start Nodes as our startNodes and
-	 * 	the aggregates of both end Nodes as our end Nodes.
+	 *         3. OrderOperator == ALTERNATIVE:
+	 *         Either the left-side or the right-side should occur.
+	 *         We therefore build both sub-StateMachines with our start Nodes as
+	 *         start
+	 *         Nodes.
+	 *         Finally, we return the aggregate of both start Nodes as our
+	 *         startNodes and
+	 *         the aggregates of both end Nodes as our end Nodes.
 	 *
-	 * 4. OrderOperator == ZERO_OR_ONE:
-	 * 	The Event can occur or be skipped.
-	 * 	We therefore build the sub-StateMachine (only the left-side is present)
-	 * 	with our start Nodes as start Nodes.
-	 * 	Finally, we return the returned start Nodes as our start
-	 * 	Nodes and the returned Nodes end Nodes (event occurs) and our start
-	 * 	nodes (event skipped) as end Nodes.
+	 *         4. OrderOperator == ZERO_OR_ONE:
+	 *         The Event can occur or be skipped.
+	 *         We therefore build the sub-StateMachine (only the left-side is
+	 *         present)
+	 *         with our start Nodes as start Nodes.
+	 *         Finally, we return the returned start Nodes as our start
+	 *         Nodes and the returned Nodes end Nodes (event occurs) and our start
+	 *         nodes (event skipped) as end Nodes.
 	 *
-	 * 5. OrderOperator == ONE_OR_MORE:
-	 * 	The Event can occur once or multiple times.
-	 * 	We therefore build the sub-StateMachine (only the left-side is present)
-	 * 	with our start Nodes as start Nodes and save the returned end Nodes.
-	 * 	We then duplicate the transitions from each given start Node to the start
-	 * 	node of the Sub-StateMachine, but not with the given start Node as origin,
-	 * 	but each end Node of the Sub-StateMachine, this creates the desired loop.
-	 * 	Finally, we return the returned start and end Nodes.
+	 *         5. OrderOperator == ONE_OR_MORE:
+	 *         The Event can occur once or multiple times.
+	 *         We therefore build the sub-StateMachine (only the left-side is
+	 *         present)
+	 *         with our start Nodes as start Nodes and save the returned end Nodes.
+	 *         We then duplicate the transitions from each given start Node to the
+	 *         start
+	 *         node of the Sub-StateMachine, but not with the given start Node as
+	 *         origin,
+	 *         but each end Node of the Sub-StateMachine, this creates the desired
+	 *         loop.
+	 *         Finally, we return the returned start and end Nodes.
 	 *
-	 * 5. OrderOperator == ZERO_OR_MORE:
-	 * 	This can be seen as (Order)*?.
-	 * 	We therefore proceed as in ONE_OR_MORE but additionally return
-	 * 	the given start Nodes as end Nodes aswell as in ZERO_OR_ONE.
+	 *         5. OrderOperator == ZERO_OR_MORE:
+	 *         This can be seen as (Order)*?.
+	 *         We therefore proceed as in ONE_OR_MORE but additionally return
+	 *         the given start Nodes as end Nodes aswell as in ZERO_OR_ONE.
 	 *
 	 */
 
 	private SubStateMachine buildSubSMG(final Order order, final Set<StateNode> startNodes) {
 
-		if(order == null) {
+		if (order == null) {
 			// This is the case if the ORDER section was ommited.
 			// It implies, that any method may be called in any sequence.
 			// We therefore create a Node and a Transistion from all startNodes
 			// to this node and a loop from the node to itself.
 			StateNode node = this.result.createNewNode();
 			List<CrySLMethod> label = new ArrayList<>(retrieveAllMethodsFromEvents());
-			for(StateNode startNode: startNodes)
+			for (StateNode startNode : startNodes)
 				this.result.createNewEdge(label, startNode, node);
 			this.result.createNewEdge(label, node, node);
-			return new SubStateMachine(node, node);
+			return new SubStateMachine(Collections.singleton(node), startNodes);
 		}
 
-		if(order instanceof Primary) {
+		if (order instanceof Primary) {
 			Event event = ((Primary) order).getEvent();
 			StateNode node = this.result.createNewNode();
-			List<CrySLMethod> label =
-				CrySLReaderUtils.resolveEventToCryslMethods(event);
-			for(StateNode startNode: startNodes)
+			List<CrySLMethod> label = CrySLReaderUtils.resolveEventToCryslMethods(event);
+			for (StateNode startNode : startNodes)
 				this.result.createNewEdge(label, startNode, node);
 			return new SubStateMachine(node, node);
 		}
@@ -203,28 +213,30 @@ public class StateMachineGraphBuilder {
 		final SubStateMachine left;
 		final SubStateMachine right;
 
-		switch(order.getOp()) {
+		switch (order.getOp()) {
 			case SEQUENCE:
 				left = buildSubSMG(order.getLeft(), startNodes);
 				right = buildSubSMG(order.getRight(), left.getEndNodes());
 				start.addAll(left.getStartNodes());
-				start.addAll(right.getStartNodes());
-				end.addAll(left.getEndNodes());
 				end.addAll(right.getEndNodes());
 				break;
 			case ALTERNATIVE:
-					left = buildSubSMG(order.getLeft(), startNodes);
-					right = buildSubSMG(order.getRight(), startNodes);
-					// reduce all end nodes without outgoing edges to one end node
-					Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
+				left = buildSubSMG(order.getLeft(), startNodes);
+				right = buildSubSMG(order.getRight(), startNodes);
+				start.addAll(left.getStartNodes());
+				start.addAll(right.getStartNodes());
+				end.addAll(left.getEndNodes());
+				end.addAll(right.getEndNodes());
+				// reduce all end nodes without outgoing edges to one end node
+				Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
 						.map(edge -> edge.from()).filter(node -> end.contains(node)).collect(Collectors.toSet());
-					if(endNodesWithOutgoingEdges.size() < end.size()-1) {
-						end.removeAll(endNodesWithOutgoingEdges);
-						StateNode aggrNode = this.result.aggregateNodesToOneNode(end, end.iterator().next());
-						end.clear();
-						end.add(aggrNode);
-						end.addAll(endNodesWithOutgoingEdges);
-					}
+				if (endNodesWithOutgoingEdges.size() < end.size() - 1) {
+					end.removeAll(endNodesWithOutgoingEdges);
+					StateNode aggrNode = this.result.aggregateNodesToOneNode(end, end.iterator().next());
+					end.clear();
+					end.add(aggrNode);
+					end.addAll(endNodesWithOutgoingEdges);
+				}
 				break;
 			case ONE_OR_MORE:
 			case ZERO_OR_MORE:
@@ -232,26 +244,25 @@ public class StateMachineGraphBuilder {
 				left = buildSubSMG(order.getLeft(), startNodes);
 				start.addAll(left.getStartNodes());
 				end.addAll(left.getEndNodes());
-				if(order.getOp() == OrderOperator.ZERO_OR_ONE || order.getOp() == OrderOperator.ONE_OR_MORE) {
-						startNodes.stream()
+				if (order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ONE_OR_MORE) {
+					startNodes.stream()
 							.map(this.result::getAllOutgoingEdges).flatMap(Set::stream)
 							.filter(edge -> left.getStartNodes().contains(edge.getRight()))
 							.forEach(edge -> left.getEndNodes().stream()
-									.map(endNode -> this.result.createNewEdge(edge.getLabel(), endNode, edge.getRight()))
-							);
+									.forEach(endNode -> this.result.createNewEdge(edge.getLabel(), endNode, edge.getRight())));
 				}
-				if(order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ZERO_OR_ONE) {
-						end.addAll(startNodes);
+				if (order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ZERO_OR_ONE) {
+					end.addAll(startNodes);
 				}
 				break;
 		}
 		return new SubStateMachine(start, end);
 	}
-	
-	private Set<CrySLMethod> retrieveAllMethodsFromEvents(){
-		if(this.allMethods.isEmpty())
+
+	private Set<CrySLMethod> retrieveAllMethodsFromEvents() {
+		if (this.allMethods.isEmpty())
 			this.allMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(this.events));
 		return this.allMethods;
 	}
-	
+
 }
