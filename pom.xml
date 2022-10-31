@@ -17,7 +17,7 @@
 	</modules>
 
 	<properties>
-		<revision>2.7.3</revision>
+		<revision>2.8.0-SNAPSHOT</revision>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<versions.maven-jar-plugin>3.3.0</versions.maven-jar-plugin>
 	</properties>
