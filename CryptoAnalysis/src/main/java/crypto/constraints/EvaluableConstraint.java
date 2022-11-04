@@ -18,6 +18,7 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLConstraint;
+import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLValueConstraint;
 import soot.Body;
@@ -46,6 +47,8 @@ public abstract class EvaluableConstraint {
 			return new PredicateConstraint((CrySLPredicate) con, context);
 		} else if (con instanceof CrySLConstraint) {
 			return new BinaryConstraint((CrySLConstraint) con, context);
+		} else if (con instanceof CrySLExceptionConstraint) {
+			return new ExceptionConstraint((CrySLExceptionConstraint) con, context);
 		}
 		return null;
 	}

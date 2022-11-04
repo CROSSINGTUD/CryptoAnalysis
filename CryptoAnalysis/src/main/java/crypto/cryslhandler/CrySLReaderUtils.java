@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import crypto.interfaces.ICrySLPredicateParameter;
+import crypto.rules.CrySLException;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLArithmeticConstraint.ArithOp;
@@ -20,6 +21,9 @@ import de.darmstadt.tu.crossing.crySL.AnyParameterType;
 import de.darmstadt.tu.crossing.crySL.BooleanLiteral;
 import de.darmstadt.tu.crossing.crySL.Constraint;
 import de.darmstadt.tu.crossing.crySL.Event;
+import de.darmstadt.tu.crossing.crySL.Exception;
+import de.darmstadt.tu.crossing.crySL.ExceptionAggregate;
+import de.darmstadt.tu.crossing.crySL.ExceptionDeclaration;
 import de.darmstadt.tu.crossing.crySL.ForbiddenMethod;
 import de.darmstadt.tu.crossing.crySL.IntLiteral;
 import de.darmstadt.tu.crossing.crySL.LabeledMethodCall;
@@ -45,7 +49,7 @@ public class CrySLReaderUtils {
 
 	protected static Stream<CrySLMethod> resolveEventsToCryslMethodsStream(final Collection<Event> events) {
 		return events.parallelStream()
-			.flatMap(CrySLReaderUtils::resolveEventToCryslMethodsStream);
+				.flatMap(CrySLReaderUtils::resolveEventToCryslMethodsStream);
 	}
 
 	protected static Stream<CrySLMethod> resolveEventToCryslMethodsStream(final Event event) {
@@ -58,28 +62,28 @@ public class CrySLReaderUtils {
 
 	protected static Stream<CrySLMethod> resolveEventToCryslMethodsStream(final Aggregate aggregate) {
 		return aggregate.getEvents().parallelStream()
-			.flatMap(CrySLReaderUtils::resolveEventToCryslMethodsStream);
+				.flatMap(CrySLReaderUtils::resolveEventToCryslMethodsStream);
 	}
 
 	protected static Stream<CrySLMethod> resolveEventToCryslMethodsStream(final LabeledMethodCall event) {
 		return Stream.of(toCrySLMethod((event.getMethod())));
 	}
-	
+
 	protected static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
 		String name = method.getMethod().getQualifiedName();
-		List<Entry<String,String>> parameters = method.getParameters().stream()
-			.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
-			.collect(Collectors.toList());
+		List<Entry<String, String>> parameters = method.getParameters().stream()
+				.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
+				.collect(Collectors.toList());
 		return new CrySLMethod(name, parameters, resolveObject(null));
 	}
 
 	protected static CrySLMethod toCrySLMethod(final Method method) {
 		String name = method.getMethod().getQualifiedName();
-		List<Entry<String,String>> parameters = method.getParameters().stream()
-			.map(parameter -> parameter instanceof AnyParameterType
-					? new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.ANY_TYPE)
-					: resolveObject((parameter.getValue())) )
-			.collect(Collectors.toList());
+		List<Entry<String, String>> parameters = method.getParameters().stream()
+				.map(parameter -> parameter instanceof AnyParameterType
+						? new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.ANY_TYPE)
+						: resolveObject((parameter.getValue())))
+				.collect(Collectors.toList());
 		return new CrySLMethod(name, parameters, resolveObject(method.getReturn()));
 	}
 
@@ -89,16 +93,40 @@ public class CrySLReaderUtils {
 
 	protected static CrySLObject toCrySLObject(Literal literal) {
 		String value = literal.getValue();
-		String type =
-			  literal instanceof IntLiteral     ? "int"
-			: literal instanceof BooleanLiteral ? "boolean"
-			: literal instanceof StringLiteral  ? String.class.getName()
-			: "void" ;
+		String type = literal instanceof IntLiteral ? "int"
+				: literal instanceof BooleanLiteral ? "boolean"
+						: literal instanceof StringLiteral ? String.class.getName()
+								: "void";
 		return new CrySLObject(value, type);
 	}
 
-	protected static Entry<String,String> resolveObject(final Object o) {
-		if(o == null)
+	public static Collection<CrySLException> resolveExceptions(final Exception exception) {
+		return resolveExceptionsStream(exception).collect(Collectors.toList());
+	}
+
+	public static Stream<CrySLException> resolveExceptionsStream(final Exception exception) {
+		if (exception instanceof ExceptionDeclaration)
+			return resolveExceptionsStream((ExceptionDeclaration) exception);
+		if (exception instanceof ExceptionAggregate)
+			return resolveExceptionsStream((ExceptionAggregate) exception);
+		return null;
+	}
+
+	protected static Stream<CrySLException> resolveExceptionsStream(final ExceptionAggregate exception) {
+		return exception.getExceptions().stream()
+				.flatMap(CrySLReaderUtils::resolveExceptionsStream);
+	}
+
+	protected static Stream<CrySLException> resolveExceptionsStream(final ExceptionDeclaration exception) {
+		return Stream.of(toCrySLException(exception));
+	}
+
+	public static CrySLException toCrySLException(final ExceptionDeclaration exception) {
+		return new CrySLException(exception.getException().getIdentifier());
+	}
+
+	protected static Entry<String, String> resolveObject(final Object o) {
+		if (o == null)
 			return new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.VOID);
 		return new SimpleEntry<>(o.getName(), o.getType().getQualifiedName());
 	}
@@ -108,36 +136,51 @@ public class CrySLReaderUtils {
 	}
 
 	public static Optional<ArithOp> arithOpFromOperator(Operator operator) {
-		switch(operator) {
-			case PLUS:   return Optional.of(ArithOp.p);
-			// case TIMES:  return Optional.of(ArithOp.t); /* Only in Syntax yet */
+		switch (operator) {
+			case PLUS:
+				return Optional.of(ArithOp.p);
+			// case TIMES: return Optional.of(ArithOp.t); /* Only in Syntax yet */
 			// case DIVIDE: return Optional.of(ArithOp.g); /* Only in Syntax yet */
-			case MINUS:  return Optional.of(ArithOp.n);
-			case MODULO: return Optional.of(ArithOp.m);
-			default:     return Optional.empty();
+			case MINUS:
+				return Optional.of(ArithOp.n);
+			case MODULO:
+				return Optional.of(ArithOp.m);
+			default:
+				return Optional.empty();
 		}
 	}
 
 	public static Optional<LogOps> logOpFromOperator(Operator operator) {
-		switch(operator) {
-			case AND:   return Optional.of(LogOps.and);
-			case OR:    return Optional.of(LogOps.or);
-			case IMPLY: return Optional.of(LogOps.implies);
+		switch (operator) {
+			case AND:
+				return Optional.of(LogOps.and);
+			case OR:
+				return Optional.of(LogOps.or);
+			case IMPLY:
+				return Optional.of(LogOps.implies);
 			// case NOT: return Optional.of(LogOps.not); /* Only in Syntax yet */
 			// case EQUAL: return Optional.of(LogOps.eq); /* unused enum item */
-			default:    return Optional.empty();
+			default:
+				return Optional.empty();
 		}
 	}
 
 	public static Optional<CompOp> compOpFromOperator(Operator operator) {
-		switch(operator) {
-			case EQUAL:            return Optional.of(CompOp.eq);
-			case UNEQUAL:          return Optional.of(CompOp.neq);
-			case LESS:             return Optional.of(CompOp.l);
-			case LESS_OR_EQUAL:    return Optional.of(CompOp.le);
-			case GREATER:          return Optional.of(CompOp.g);
-			case GREATER_OR_EQUAL: return Optional.of(CompOp.ge);
-			default:               return Optional.empty();
+		switch (operator) {
+			case EQUAL:
+				return Optional.of(CompOp.eq);
+			case UNEQUAL:
+				return Optional.of(CompOp.neq);
+			case LESS:
+				return Optional.of(CompOp.l);
+			case LESS_OR_EQUAL:
+				return Optional.of(CompOp.le);
+			case GREATER:
+				return Optional.of(CompOp.g);
+			case GREATER_OR_EQUAL:
+				return Optional.of(CompOp.ge);
+			default:
+				return Optional.empty();
 		}
 	}
 
@@ -154,4 +197,3 @@ public class CrySLReaderUtils {
 	}
 
 }
-

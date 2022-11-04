@@ -62,6 +62,7 @@ import de.darmstadt.tu.crossing.crySL.Constraint;
 import de.darmstadt.tu.crossing.crySL.ConstraintsBlock;
 import de.darmstadt.tu.crossing.crySL.Domainmodel;
 import de.darmstadt.tu.crossing.crySL.EnsuresBlock;
+import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.EventsBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenBlock;
 import de.darmstadt.tu.crossing.crySL.ForbiddenMethod;
@@ -74,6 +75,7 @@ import de.darmstadt.tu.crossing.crySL.ObjectOperation;
 import de.darmstadt.tu.crossing.crySL.ObjectReference;
 import de.darmstadt.tu.crossing.crySL.ObjectsBlock;
 import de.darmstadt.tu.crossing.crySL.Operator;
+import de.darmstadt.tu.crossing.crySL.Order;
 import de.darmstadt.tu.crossing.crySL.OrderBlock;
 import de.darmstadt.tu.crossing.crySL.Predicate;
 import de.darmstadt.tu.crossing.crySL.PredicateParameter;
@@ -208,6 +210,7 @@ public class CrySLModelReader {
 			return createRuleFromDomainmodel((Domainmodel) resource.getContents().get(0));
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			throw new CryptoAnalysisException("An error occured while reading the rule " + resource.getURI(), e);
 		}
 	}
@@ -222,19 +225,22 @@ public class CrySLModelReader {
 
 		List<CrySLForbiddenMethod> forbiddenMethods = getForbiddenMethods(model.getForbidden());
 
-		final EventsBlock events = model.getEvents();
-		final OrderBlock order = model.getOrder();
-		this.smg = StateMachineGraphBuilder.buildSMG(order.getOrder(), events.getEvents());
+		final EventsBlock eventsBlock = model.getEvents();
+		final OrderBlock orderBlock = model.getOrder();
+		final List<Event> events = eventsBlock == null ? null : eventsBlock.getEvents();
+		final Order order = orderBlock == null ? null : orderBlock.getOrder();
+		this.smg = StateMachineGraphBuilder.buildSMG(order, events);
 
 		final List<ISLConstraint> constraints = Lists.newArrayList();
 		constraints.addAll(getConstraints(model.getConstraints()));
 		constraints.addAll(getRequiredPredicates(model.getRequires()));
+		constraints.addAll(ExceptionsReader.getExceptionConstraints(eventsBlock));
 
-		final EnsuresBlock ensures = model.getEnsures();
-		final NegatesBlock negates = model.getNegates();
+		final EnsuresBlock ensuresBlock = model.getEnsures();
+		final NegatesBlock negatesBlock = model.getNegates();
 		final List<CrySLPredicate> predicates = Lists.newArrayList();
-		predicates.addAll(getEnsuredPredicates(ensures));
-		predicates.addAll(getNegatedPredicates(negates));
+		predicates.addAll(getEnsuredPredicates(ensuresBlock));
+		predicates.addAll(getNegatedPredicates(negatesBlock));
 
 		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates);
 	}
