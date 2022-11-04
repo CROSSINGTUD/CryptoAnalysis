@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,6 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
@@ -25,7 +27,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
-import crypto.constraints.ConstraintSolver.EvaluableConstraint;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -463,7 +465,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean evaluatePredCond(CrySLPredicate pred) {
 		final ISLConstraint conditional = pred.getConstraint();
 		if (conditional != null) {
-			EvaluableConstraint evalCons = constraintSolver.createConstraint(conditional);
+			EvaluableConstraint evalCons = EvaluableConstraint.getInstance(conditional, constraintSolver);
 			evalCons.evaluate();
 			if (evalCons.hasErrors()) {
 				return true;

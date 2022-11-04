@@ -11,9 +11,7 @@ import static java.util.AbstractMap.SimpleEntry;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 
-
 public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
-	
 
 	public static final String VOID = "void";
 	public static final String ANY_TYPE = "AnyType";
@@ -26,8 +24,8 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 	 * List of Parameters, where a Parameter is an {@link java.util.Map.Entry}
 	 * of Name and Type, both as {@link String}.
 	 */
-	private final List<Entry<String, String>> parameters; 
-	
+	private final List<Entry<String, String>> parameters;
+
 	public CrySLMethod(String methodName, List<Entry<String, String>> parameters, Entry<String, String> retObject) {
 		this.methodName = methodName;
 		this.parameters = parameters;
@@ -47,19 +45,18 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 	public String getShortMethodName() {
 		return methodName.substring(methodName.lastIndexOf(".") + 1);
 	}
-	
-	
+
 	/**
 	 * @return the parameters
 	 */
 	public List<Entry<String, String>> getParameters() {
 		return parameters;
 	}
-	
 
 	public Entry<String, String> getRetObject() {
 		return retObject;
 	}
+
 	public String toString() {
 		return getName();
 	}

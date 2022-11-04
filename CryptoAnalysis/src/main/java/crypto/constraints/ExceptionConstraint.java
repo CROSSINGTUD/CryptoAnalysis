@@ -11,14 +11,12 @@ import boomerang.jimple.Statement;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.typestate.CrySLMethodToSootMethod;
-import soot.Body;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Trap;
 import soot.Unit;
 import soot.UnitBox;
-import soot.coffi.method_info;
 import soot.jimple.Stmt;
 
 public class ExceptionConstraint extends EvaluableConstraint {
@@ -37,7 +35,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * Evaluates this contraint, by checking if for every invokation of
 	 * method, all the exception is caught.
-	 * */
+	 */
 	@Override
 	public void evaluate() {
 		for (Statement call : context.getCollectedCalls()) {
@@ -48,55 +46,76 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * Checks if a) the method that is called is the same as the method of
 	 * this constraint and b) if the specified exception is caught.
-	 * */
+	 */
 	public void evaluate(Statement call) {
 		try {
 			Stmt stmt = call.getUnit().get();
-			if(!isSameMethod(stmt.getInvokeExpr().getMethod()))
+			if (!isSameMethod(stmt.getInvokeExpr().getMethod()))
 				return;
-			if(!isTrapped(call.getMethod(), stmt))
+			if (!isTrapped(call.getMethod(), stmt))
 				errors.add(new UncaughtExceptionError(call, context.getClassSpec().getRule(), this.exception));
-		} catch(Exception e) {
+		} catch (Exception e) {
 		}
 	}
 
 	/**
 	 * Returns wheter the exception thrown by callee is caught in the method.
+	 * 
 	 * @param method
-	 * @param callee The called Methdo, emitting the 
+	 * @param callee The called Methdo, emitting the
 	 * @return Wheter the exception thrown by callee is caught in the method.
 	 */
 	public boolean isTrapped(SootMethod method, Unit callee) {
-		for(Trap trap : method.getActiveBody().getTraps()) {
-			if(!isCaughtAs(trap.getException()))
+		for (Trap trap : method.getActiveBody().getTraps()) {
+			if (!isCaughtAs(trap.getException()))
 				continue;
 			Collection<Unit> trapped = getUnitsBetween(method, trap.getBeginUnit(), trap.getEndUnit());
-			if(trapped.contains(callee))
+			if (trapped.contains(callee))
 				return true;
 		}
 		return false;
 	}
 
 	/**
+	 * Returns all units in a methods body, excluding exception handlers.
+	 */
+	public static Collection<Unit> getUnits(SootMethod method) {
+		Collection<Unit> units = new ArrayList<>();
+		for (Unit item : method.getActiveBody().getUnits())
+			getAllUnits(item, units);
+		return units;
+	}
+
+	private static Collection<Unit> getAllUnits(Unit unit, Collection<Unit> units) {
+		if (unit == null)
+			return units;
+		units.add(unit);
+		for (UnitBox item : unit.getUnitBoxes())
+			getAllUnits(item.getUnit(), units);
+		return units;
+	}
+
+	/**
 	 * Returns all units between end and begin in the method.
+	 * 
 	 * @param method The method from which to get the units.
-	 * @param begin First unit to include.
-	 * @param end Unit after Last Unit to include.
+	 * @param begin  First unit to include.
+	 * @param end    Unit after Last Unit to include.
 	 * @return All units in the body of method, between begin (inclusive) and
-	 * end (exclusive).
+	 *         end (exclusive).
 	 */
 	public Collection<Unit> getUnitsBetween(SootMethod method, Unit begin, Unit end) {
 		Collection<Unit> result = new ArrayList<>();
 		boolean beginningFound = false;
-		for(final UnitBox unit : method.getActiveBody().getAllUnitBoxes()) {
-			if(unit.getUnit().equals(begin))
+		for (final Unit unit : getUnits(method)) {
+			if (unit.equals(begin))
 				beginningFound = true;
-			if(!beginningFound)
+			if (!beginningFound)
 				continue;
-			if(unit.getUnit().equals(end))
+			if (unit.equals(end))
 				break;
 			else
-				result.add(unit.getUnit());
+				result.add(unit);
 		}
 		return result;
 	}
@@ -104,9 +123,10 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * Returns wheter a catch clause with the given catchClause, would catch
 	 * the exception of this constraint.
+	 * 
 	 * @param catchClause The type of the catch-clause.
 	 * @return Wheter a catch clause with the given catchClause, would catch
-	 * the exception of this constraint.
+	 *         the exception of this constraint.
 	 */
 	public boolean isCaughtAs(SootClass catchClause) {
 		return this.catchableAs.contains(catchClause);
@@ -115,7 +135,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * @param method The method to compare againts.
 	 * @return Wheter the methods represented in this constraint match the given
-	 * method.
+	 *         method.
 	 */
 	public boolean isSameMethod(SootMethod method) {
 		return this.method.contains(method);
@@ -126,14 +146,17 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * implented interfaces, classes and itself.
 	 */
 	private static Set<SootClass> fullHirachy(SootClass m) {
-		Set<SootClass> result = new HashSet<>();
-		result.add(m);
-    superTypes(m).forEach(result::add);
-		return result;
+		return superTypes(m).collect(Collectors.toSet());
 	}
+
 	private static Stream<SootClass> superTypes(SootClass m) {
-		if(!m.hasSuperclass()) return Stream.empty();
-		return Stream.concat(Stream.of(m.getSuperclass()), m.getInterfaces().stream())
-			.flatMap(ExceptionConstraint::superTypes);
+		if (!m.hasSuperclass())
+			return Stream.empty();
+		Stream<SootClass> self = Stream.of(m);
+		Stream<SootClass> supercls = Stream.of(m.getSuperclass());
+		Stream<SootClass> interfaces = m.getInterfaces().stream();
+		Stream<SootClass> supertypes = Stream.concat(supercls, interfaces)
+				.flatMap(ExceptionConstraint::superTypes);
+		return Stream.concat(self, supertypes);
 	}
 }
