@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.xtext.common.types.JvmTypeParameter;
+
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.rules.CrySLException;
 import crypto.rules.CrySLMethod;
@@ -109,7 +111,7 @@ public class CrySLReaderUtils {
 			return resolveExceptionsStream((ExceptionDeclaration) exception);
 		if (exception instanceof ExceptionAggregate)
 			return resolveExceptionsStream((ExceptionAggregate) exception);
-		return null;
+		return Stream.empty();
 	}
 
 	protected static Stream<CrySLException> resolveExceptionsStream(final ExceptionAggregate exception) {
@@ -128,7 +130,10 @@ public class CrySLReaderUtils {
 	protected static Entry<String, String> resolveObject(final Object o) {
 		if (o == null)
 			return new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.VOID);
-		return new SimpleEntry<>(o.getName(), o.getType().getQualifiedName());
+		if(o.getType().getType() instanceof JvmTypeParameter)
+			return new SimpleEntry<>(o.getName(), "java.lang.Object");
+		else
+			return new SimpleEntry<>(o.getName(), o.getType().getQualifiedName());
 	}
 
 	public static File getResourceFromWithin(final String inputPath) {

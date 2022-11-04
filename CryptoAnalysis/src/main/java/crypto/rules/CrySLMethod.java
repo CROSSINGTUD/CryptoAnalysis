@@ -72,13 +72,11 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 		
 		stmntBuilder.append(this.methodName);
 		stmntBuilder.append("(");
-		
-		
-		for (Entry<String, String> par: parameters) {
-			stmntBuilder.append(" ");
-			stmntBuilder.append(par.getKey());
-		}
-		
+
+		stmntBuilder.append(parameters.stream()
+				.map(param -> String.format("%s %s", param.getValue(), param.getKey()))
+				.collect(Collectors.joining(", ")));
+
 		stmntBuilder.append(");");
 		return stmntBuilder.toString();
 	}
