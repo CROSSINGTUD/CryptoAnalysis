@@ -37,24 +37,24 @@ import de.darmstadt.tu.crossing.crySL.StringLiteral;
 
 public class CrySLReaderUtils {
 
-	protected static List<CrySLMethod> resolveEventToCryslMethods(final Event event) {
+	public static List<CrySLMethod> resolveEventToCryslMethods(final Event event) {
 		return resolveEventToCryslMethodsStream(event).collect(Collectors.toList());
 	}
 
-	protected static List<ICrySLPredicateParameter> resolveEventToPredicateParameters(final Event event) {
+	public static List<ICrySLPredicateParameter> resolveEventToPredicateParameters(final Event event) {
 		return resolveEventToCryslMethodsStream(event).collect(Collectors.toList());
 	}
 
-	protected static List<CrySLMethod> resolveEventsToCryslMethods(final Collection<Event> events) {
+	public static List<CrySLMethod> resolveEventsToCryslMethods(final Collection<Event> events) {
 		return resolveEventsToCryslMethodsStream(events).collect(Collectors.toList());
 	}
 
-	protected static Stream<CrySLMethod> resolveEventsToCryslMethodsStream(final Collection<Event> events) {
+	public static Stream<CrySLMethod> resolveEventsToCryslMethodsStream(final Collection<Event> events) {
 		return events.parallelStream()
 				.flatMap(CrySLReaderUtils::resolveEventToCryslMethodsStream);
 	}
 
-	protected static Stream<CrySLMethod> resolveEventToCryslMethodsStream(final Event event) {
+	public static Stream<CrySLMethod> resolveEventToCryslMethodsStream(final Event event) {
 		if (event instanceof Aggregate)
 			return resolveEventToCryslMethodsStream((Aggregate) event);
 		if (event instanceof LabeledMethodCall)
@@ -71,7 +71,7 @@ public class CrySLReaderUtils {
 		return Stream.of(toCrySLMethod((event.getMethod())));
 	}
 
-	protected static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
+	public static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
 		String name = method.getMethod().getQualifiedName();
 		List<Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
@@ -79,7 +79,7 @@ public class CrySLReaderUtils {
 		return new CrySLMethod(name, parameters, resolveObject(null));
 	}
 
-	protected static CrySLMethod toCrySLMethod(final Method method) {
+	public static CrySLMethod toCrySLMethod(final Method method) {
 		String name = method.getMethod().getQualifiedName();
 		List<Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> parameter instanceof AnyParameterType
@@ -89,11 +89,11 @@ public class CrySLReaderUtils {
 		return new CrySLMethod(name, parameters, resolveObject(method.getReturn()));
 	}
 
-	protected static CrySLObject toCrySLObject(Object object) {
+	public static CrySLObject toCrySLObject(Object object) {
 		return new CrySLObject(object.getName(), object.getType().getQualifiedName());
 	}
 
-	protected static CrySLObject toCrySLObject(Literal literal) {
+	public static CrySLObject toCrySLObject(Literal literal) {
 		String value = literal.getValue();
 		String type = literal instanceof IntLiteral ? "int"
 				: literal instanceof BooleanLiteral ? "boolean"
@@ -127,7 +127,7 @@ public class CrySLReaderUtils {
 		return new CrySLException(exception.getException().getIdentifier());
 	}
 
-	protected static Entry<String, String> resolveObject(final Object o) {
+	public static Entry<String, String> resolveObject(final Object o) {
 		if (o == null)
 			return new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.VOID);
 		if(o.getType().getType() instanceof JvmTypeParameter)
