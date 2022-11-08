@@ -104,7 +104,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return All units in the body of method, between begin (inclusive) and
 	 *         end (exclusive).
 	 */
-	public Collection<Unit> getUnitsBetween(SootMethod method, Unit begin, Unit end) {
+	public static Collection<Unit> getUnitsBetween(SootMethod method, Unit begin, Unit end) {
 		Collection<Unit> result = new ArrayList<>();
 		boolean beginningFound = false;
 		for (final Unit unit : getUnits(method)) {

@@ -24,6 +24,7 @@ import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.preanalysis.ExceptionAwareTransformer;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
@@ -126,7 +127,8 @@ public abstract class HeadlessCryptoScanner {
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
-			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
+			ExceptionAwareTransformer.setup(rules);
+			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
 		}
