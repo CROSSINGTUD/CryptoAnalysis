@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
+import sync.pds.solver.nodes.Node;
 
 public class CommandLineReporter extends ErrorMarkerListener {
 
@@ -48,5 +51,9 @@ public class CommandLineReporter extends ErrorMarkerListener {
 	public void afterAnalysis() {
 		this.analysisReport = ReporterHelper.generateReport(this.rules, this.objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
 		System.out.println(analysisReport);
+	}
+	@Override
+	public void onSeedTimeout(final Node<Statement, Val> arg0) {
+		System.out.println("Seed time out at " + arg0.stmt().toString());
 	}
 }

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -13,6 +15,7 @@ import com.google.common.collect.Sets;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
+import boomerang.BoomerangTimeoutException;
 import boomerang.ForwardQuery;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.AllocVal;
@@ -39,6 +42,8 @@ import wpds.impl.Weight.NoWeight;
 
 public class ExtractParameterAnalysis {
 
+	Stopwatch analysisTime = Stopwatch.createUnstarted();
+	public boolean extractParameterAnalysisTimeout = false;
 	private Map<Statement,SootMethod> allCallsOnObject;
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
@@ -63,6 +68,7 @@ public class ExtractParameterAnalysis {
 	}
 
 	public void run() {
+		analysisTime.start();
 		for(Entry<Statement, SootMethod> callSiteWithCallee : allCallsOnObject.entrySet()) {
 			Statement callSite = callSiteWithCallee.getKey();
 			SootMethod declaredCallee = callSiteWithCallee.getValue();
@@ -76,6 +82,9 @@ public class ExtractParameterAnalysis {
 		}
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
 			q.solve();
+		}
+		if(analysisTime.isRunning()) {
+			analysisTime.stop();
 		}
 	}
 	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
@@ -175,12 +184,24 @@ public class ExtractParameterAnalysis {
 		protected boolean solved;
 		private List<QueryListener> listeners = Lists.newLinkedList();
 		private BackwardBoomerangResults<NoWeight> res;
-
+		protected CogniCryptIntAndStringBoomerangOptions options = new CogniCryptIntAndStringBoomerangOptions();
 		public void solve() {
-			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
+			Boomerang boomerang = new Boomerang(options) {
 				@Override
 				public ObservableICFG<Unit, SootMethod> icfg() {
 					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
+				}
+				
+				@Override
+				public void checkTimeout() {
+					if (options.analysisTimeoutMS() > 0) {
+			            long elapsed = analysisTime.elapsed(TimeUnit.MILLISECONDS);	            
+			            if (options.analysisTimeoutMS() < elapsed) {
+			                if (analysisTime.isRunning())
+			                	analysisTime.stop();
+			                throw new BoomerangTimeoutException(elapsed, options.statsFactory());
+			            }
+			        }
 				}
 			};
 			res = boomerang.solve(this);
@@ -188,6 +209,9 @@ public class ExtractParameterAnalysis {
 				l.solved(this, res);
 			}
 			solved = true;
+			if(res.isTimedout()) {
+				extractParameterAnalysisTimeout = true;
+			}
 		}
 
 		public void addListener(QueryListener q) {
