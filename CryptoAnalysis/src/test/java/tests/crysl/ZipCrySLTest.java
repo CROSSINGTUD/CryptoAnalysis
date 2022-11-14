@@ -35,7 +35,7 @@ public class ZipCrySLTest
         File zipFile = new File(jcaRulesetZipFilePath);
         Collection<CrySLRule> rules = null;
 		rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class ZipCrySLTest
         File zipFile = new File(jcaRulesetZipFilePath);
         Collection<CrySLRule> rules = CrySLRuleReader.readFromZipFile(zipFile);
         Collection<CrySLRule> notNullRules = rules.stream().filter(x -> x != null).collect(Collectors.toList());
-        Assert.assertEquals(46, notNullRules.size());
+        Assert.assertEquals(49, notNullRules.size());
     }
 
     @Test(expected = CryptoAnalysisException.class)
@@ -64,16 +64,16 @@ public class ZipCrySLTest
     public void TestFileContainsMultipleRulesets() throws CryptoAnalysisException {
         File zipFile = new File(multipleRulesetZipFilePath);
         Collection<CrySLRule> rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(102, rules.size());
+        Assert.assertEquals(108, rules.size());
     }
 
     @Test
     public void TestRunTwiceSameResult() throws CryptoAnalysisException {
         File zipFile = new File(jcaRulesetZipFilePath);
         Collection<CrySLRule> rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
         rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
     }
 
     @Test

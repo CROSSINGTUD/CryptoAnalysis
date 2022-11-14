@@ -11,6 +11,7 @@ import boomerang.jimple.Statement;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.typestate.CrySLMethodToSootMethod;
+import de.darmstadt.tu.crossing.crySL.ExceptionDeclaration;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;

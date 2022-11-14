@@ -21,7 +21,7 @@ public class ParameterAwarePredicate extends CrySLPredicate {
 	}
 
 	public CrySLPredicate toNormalPredicate() {
-		return new CrySLPredicate(baseObject, predName, parameters, negated, optConstraint);
+		return new CrySLPredicate(baseObject, predName, parameters, negated, constraint);
 	}
 	
 	@Override

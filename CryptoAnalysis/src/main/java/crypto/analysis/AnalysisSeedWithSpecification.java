@@ -247,8 +247,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 		boolean satisfiesConstraintSytem = checkConstraintSystem();
 		if(predToBeEnsured.getConstraint() != null) {
-			ArrayList<ISLConstraint> temp = new ArrayList<>();
-			temp.add(predToBeEnsured.getConstraint());
 			satisfiesConstraintSytem = !evaluatePredCond(predToBeEnsured);
 		}
 		
@@ -463,15 +461,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean evaluatePredCond(CrySLPredicate pred) {
-		final ISLConstraint conditional = pred.getConstraint();
-		if (conditional != null) {
+		return pred.getConstraint().map(conditional -> {
 			EvaluableConstraint evalCons = EvaluableConstraint.getInstance(conditional, constraintSolver);
 			evalCons.evaluate();
-			if (evalCons.hasErrors()) {
-				return true;
-			}
-		}
-		return false;
+			return evalCons.hasErrors();
+		}).orElse(false);
 	}
 
 	private boolean doPredsMatch(CrySLPredicate pred, EnsuredCrySLPredicate ensPred) {
