@@ -1,6 +1,7 @@
 package crypto.reporting;
 
 public class SARIFConfig {
+	
 	public static final String VERSION = "version";
 	public static final String SARIF_VERSION = "sarifVersion";
 	public static final String SARIF_VERSION_NUMBER = "2.0.0";
@@ -35,8 +36,9 @@ public class SARIFConfig {
 	public static final String URI_KEY = "uri";
 	public static final String REGION_KEY = "region";
 	public static final String START_LINE_KEY = "startLine";
+	public static final String METHOD_KEY = "method";
+	public static final String STATEMENT_KEY = "statement";
 	public static final String FULLY_QUALIFIED_LOGICAL_NAME_KEY = "fullyQualifiedLogicalName";
-//	public static final String 
 	
 	public static final String RESOURCES_KEY = "resources";
 	public static final String RULES_KEY = "rules";
@@ -62,5 +64,14 @@ public class SARIFConfig {
 	public static final String INCOMPLETE_OPERATION_ERROR_VALUE = "The usage of an object may be incomplete: For example a Cipherobject may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)";
 	public static final String INSTANCE_OF_ERROR_KEY = "InstanceOfError";
 	public static final String INSTANCE_OF_ERROR_VALUE = "Reported when a value was found to not be of a certain instance.";
+	
+	public static final String STATISTICS_KEY = "statistics";
+	public static final String SOFTWAREID_KEY = "SoftwareID";
+	public static final String SEEDOBJECTCOUNT_KEY = "SeedObjectCount";
+	public static final String ANALYSISTIME_KEY = "CryptoAnalysisTime";
+	public static final String CALLGRAPHTIME_KEY = "CallgraphConstructionTime";
+	public static final String CALLGRAPHREACHABLEMETHODS_KEY = "CallgraphReachableMethods";
+	public static final String CALLGRAPGREACHABLEMETHODSWITHACTIVEBODIES_KEY = "CallgraphRechableMethodsWithActiveBodies";
+	public static final String DATAFLOWVISITEDMETHODS_KEY = "DataflowVisitedMethods";
 	
 }

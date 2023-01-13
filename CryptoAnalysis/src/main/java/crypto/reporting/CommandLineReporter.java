@@ -1,24 +1,15 @@
 package crypto.reporting;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-
-import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 
-public class CommandLineReporter extends ErrorMarkerListener {
+public class CommandLineReporter extends Reporter {
 
-	private File outputFolder;
-	private List<CrySLRule> rules;
-	private Collection<IAnalysisSeed> objects = new HashSet<>();
-	
 	/**
 	 * The analysis report
 	 */
 	private String analysisReport;
-
 
 	/**
 	 * Creates {@link CommandLineReporter} a constructor with reportDir and rules as parameter
@@ -27,26 +18,29 @@ public class CommandLineReporter extends ErrorMarkerListener {
 	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
 	 */
 	public CommandLineReporter(String reportDir, List<CrySLRule> rules) {
-		this.outputFolder = (reportDir != null ? new File(reportDir) : null);
-		this.rules = rules;
+		super((reportDir != null ? new File(reportDir) : null), "", rules, -1, false);
 	}
 	
 	/**
-	 * Creates {@link CommandLineReporter} a constructor with reportDir and rules as parameter
+	 * Creates {@link CommandLineReporter} a constructor with the softwareID, the rules and the
+	 * callgraph construction time as parameter
 	 * 
+	 * @param softwareID Identifier for the software
 	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
+	 * @param callgraphConstructionTime Time for the callgraph construction in milliseconds
 	 */
-	public CommandLineReporter(List<CrySLRule> rules) {
-		this.rules = rules;
+	public CommandLineReporter(String softwareID, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
+		super(null, softwareID, rules, callgraphConstructionTime, includeStatistics);
 	}
 	
 	@Override
-	public void discoveredSeed(IAnalysisSeed object) {
-		this.objects.add(object);
-	}
-	@Override
-	public void afterAnalysis() {
-		this.analysisReport = ReporterHelper.generateReport(this.rules, this.objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
+	public void handleAnalysisResults() {
+		if (includeStatistics()) {
+			this.analysisReport = ReporterHelper.generateReport(getRules(), getObjects(), this.secureObjects, this.errorMarkers, this.errorMarkerCount, getStatistics());
+		} else {
+			this.analysisReport = ReporterHelper.generateReport(getRules(), getObjects(), this.secureObjects, this.errorMarkers, this.errorMarkerCount, null);
+		}
+		
 		System.out.println(analysisReport);
 	}
 }
