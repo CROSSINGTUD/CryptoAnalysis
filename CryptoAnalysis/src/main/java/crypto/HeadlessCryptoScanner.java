@@ -1,7 +1,6 @@
 package crypto;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +30,7 @@ import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CSVSummaryReporter;
 import crypto.reporting.CommandLineReporter;
-import crypto.reporting.ErrorMarkerListener;
+import crypto.reporting.Reporter;
 import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
@@ -165,7 +164,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	public String toString() {
-		String s = "HeadllessCryptoScanner: \n";
+		String s = "HeadlessCryptoScanner: \n";
 		s += "\tSoftwareIdentifier: " + softwareIdentifier() + "\n";
 		s += "\tApplicationClassPath: " + applicationClassPath() + "\n";
 		s += "\tSootClassPath: " + sootClassPath() + "\n\n";
@@ -185,8 +184,8 @@ public abstract class HeadlessCryptoScanner {
 				long callgraphConstructionTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
 				
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
-				ErrorMarkerListener fileReporter;
-
+				Reporter fileReporter;
+				
 				Set<ReportFormat> formats = reportFormats();
 				
 				if (formats.size() > 0) {
@@ -227,8 +226,6 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(getAdditionalListener());	
 				}
 				
-				//reporter.addReportListener(fileReporter);
-				
 				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
@@ -256,8 +253,6 @@ public abstract class HeadlessCryptoScanner {
 						return super.debugger(solver, seed);
 					}
 				};
-				
-				//reporter.addReportListener(fileReporter);
 				
 				if (providerDetection()) {
 					ProviderDetection providerDetection = new ProviderDetection();
@@ -401,10 +396,6 @@ public abstract class HeadlessCryptoScanner {
 
 	protected boolean enableVisualization(){
 		return settings.isVisualization();
-	}
-	
-	protected ReportFormat reportFormat() {
-		return null;
 	}
 	
 	protected Set<ReportFormat> reportFormats() {
