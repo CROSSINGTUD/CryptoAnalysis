@@ -217,7 +217,7 @@ public abstract class HeadlessCryptoScanner {
 						}
 					}
 				} else {
-					// default to command line reporter
+					// if the --reportformat flag is not set or no format is specified, use the command line reporter as default
 					fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
 					reporter.addReportListener(fileReporter);
 				}

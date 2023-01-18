@@ -1,5 +1,18 @@
 package crypto.reporting;
 
+/**
+ * This class is used by the class {@link Reporter} to store all statistics, which are relevant for the analysis.
+ * 
+ * Currently the following statistics are supported:
+ * - softwareID: Identifier of the analyzed software. This value can be set by using the --identifier flag.
+ * - seedObjectCount: Number of seed objects.
+ * - analysisTime: The time in milliseconds for the actual analysis (e.g. without the initialization of the analysis
+ *                 and the construction of the callgraph)
+ * - callgraphTime: The time in milliseconds to construct the callgraph.
+ * - callgraphReachableMethods: The number of reachable methods in the callgraph.
+ * - callgraphReachableMethodsWithActiveBodies: The number of reachable methods with active bodies in the callgraph.
+ * - dataflowVisitedMethods: The number of visited methods in the dataflows.
+ */
 public class ReportStatistics {
 	
 	private String softwareID;
@@ -10,8 +23,13 @@ public class ReportStatistics {
 	private int callgraphReachableMethodsWithActiveBodies;
 	private int dataflowVisitedMethods;
 	
+	/**
+	 * Creates an instance to store all relevant statistics for an analysis. The softwareID is initialized with
+	 * an empty string and all numeric variables are initialized with -1. The corresponding set methods should be
+	 * used to update the statistic values.
+	 */
 	public ReportStatistics() {
-		this.softwareID = "Unknown";
+		this.softwareID = "";
 		this.seedObjectCount = -1;
 		this.analysisTime = -1;
 		this.callgraphTime = -1;

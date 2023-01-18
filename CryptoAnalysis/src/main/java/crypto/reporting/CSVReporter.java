@@ -19,6 +19,15 @@ import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 
+/**
+ * This class extends the class {@link Reporter} by generating an analysis report and write it into a
+ * csv file.
+ * 
+ * Compared to the {@link CSVSummaryReporter}, this reporter writes each error from the analysis into
+ * a single line. If the statistics are enabled, each line is extended by the corresponding statistic
+ * fields. Since the statistics are computed for the whole analysis, each value for the different fields
+ * are the same in all lines.
+ */
 public class CSVReporter extends Reporter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
@@ -29,15 +38,33 @@ public class CSVReporter extends Reporter {
 	private List<String> headers;
 	private List<String> contents;
 	
+	/** Headers for the errors. These headers are always part of the analysis report. */
 	private enum Headers {
 		ErrorID, ErrorType, ViolatingClass, Class, Method, LineNumber, Statement, Message
 	}
 	
+	/** 
+	 * Headers for the  statistics. These headers are only part of the analysis report, if
+	 * the corresponding parameter in the constructor is set to true.
+	 */
 	private enum StatisticHeaders {
 		SoftwareID, SeedObjectCount, CryptoAnalysisTime_ms, CallGraphTime_ms, CallGraphReachableMethods,
 		CallGraphReachableMethods_ActiveBodies, DataflowVisitedMethod
 	}
 	
+	/**
+	 * Subclass of {@link Reporter}. Creates an instance of {@link CSVReporter}, which
+	 * can be used to create a csv file containing the analysis report.
+	 * 
+	 * @param reportDir A {@link String} path giving the location of the report directory.
+	 *                  The reportPath should end without an ending file separator.
+	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param includeStatistics Set this value to true, if the analysis report should contain some
+	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
+	 *                          to false, no statistics will be output. 
+	 */
 	public CSVReporter(String reportDir, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime, boolean includeStatistics) {
 		super((reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir"))), softwareId, rules, callGraphConstructionTime, includeStatistics);
 		
@@ -75,6 +102,14 @@ public class CSVReporter extends Reporter {
 					String line = idCount + CSV_SEPARATOR + errorType + CSV_SEPARATOR + violatingClass + CSV_SEPARATOR + className + 
 							CSV_SEPARATOR + methodName + CSV_SEPARATOR + lineNumber + CSV_SEPARATOR + statement + CSV_SEPARATOR + errorMessage;
 					
+					// Add the statistics to every single line of the report
+					if (includeStatistics()) {
+						line += CSV_SEPARATOR + getStatistics().getSoftwareID() + CSV_SEPARATOR + getStatistics().getSeedObjectCount() + CSV_SEPARATOR
+								+ getStatistics().getAnalysisTime() + CSV_SEPARATOR + getStatistics().getCallgraphTime()
+								+ CSV_SEPARATOR + getStatistics().getCallgraphReachableMethods() + CSV_SEPARATOR + getStatistics().getCallgraphReachableMethodsWithActiveBodies()
+								+ CSV_SEPARATOR + getStatistics().getDataflowVisitedMethods();
+					}
+					
 					contents.add(line);
 					
 					idCount++;
@@ -95,18 +130,6 @@ public class CSVReporter extends Reporter {
 			// write errors line by line
 			for (String line : this.contents) {
 				writer.write(line + "\n");
-			}
-			
-			if (includeStatistics()) {
-				// Additional analysis statistics
-				writer.write("\nAdditional analysis statistics:\n");
-				writer.write(String.format("SoftwareID: %s\n", statistics.getSoftwareID()));
-				writer.write(String.format("SeedObjectCount: %d\n", statistics.getSeedObjectCount()));
-				writer.write(String.format("CryptoAnalysisTime: %d\n", statistics.getAnalysisTime()));
-				writer.write(String.format("CallgraphConstructionTime: %d\n", statistics.getCallgraphTime()));
-				writer.write(String.format("CallgraphReachableMethods: %d\n", statistics.getCallgraphReachableMethods()));
-				writer.write(String.format("CallgraphReachableMethodsWithActiveBodies: %d\n", statistics.getCallgraphReachableMethodsWithActiveBodies()));
-				writer.write(String.format("DataflowVisitedMethods: %d\n", statistics.getDataflowVisitedMethods()));	
 			}
 			
 			writer.close();

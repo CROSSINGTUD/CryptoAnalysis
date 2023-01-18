@@ -27,6 +27,12 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.rules.CrySLRule;
 
+/**
+ * This class extends the class {@link Reporter} by generating a summary of the analysis and write it into a
+ * csv file. Compared to the {@link CSVReporter} this reporter will not output any information about the concrete
+ * errors found in the analysis. The summary will only contain the number of error types and in which classes from
+ * the rule set the errors were found.
+ */
 public class CSVSummaryReporter extends Reporter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSVSummaryReporter.class);
@@ -36,25 +42,27 @@ public class CSVSummaryReporter extends Reporter {
 	private List<String> headers = Lists.newArrayList();
 	private Map<String,String> headersToValues = Maps.newHashMap();
 	
-	/**
-	 * name of the analysis report
-	 */
+	/** Name of the analysis report */
 	private static final String REPORT_NAME = "CryptoAnalysis-Report-Summary.csv";
-	/**
-	 * the headers of CSV report
-	 */
+	
+	/** The headers of CSV report */
 	private enum Headers {
 		SoftwareID, SeedObjectCount, CryptoAnalysisTime_ms, CallGraphTime_ms, CallGraphReachableMethods,
 		CallGraphReachableMethods_ActiveBodies, DataflowVisitedMethod
 	}
 
 	/**
-	 * Creates {@link CSVSummaryReporter} a constructor with reportDir, softwareId, rules and callGraphConstructionTime as parameter
+	 * Subclass of {@link Reporter}. Creates an instance of {@link CSVSummaryReporter}, which
+	 * can be used to create a csv file containing a summary of the analysis.
 	 * 
-	 * @param reportDir a {@link String} path giving the location of the report directory
-	 * @param softwareId {@link Format} An identifier used to label output files in CSV report format
-	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
-	 * @param callGraphConstructionTime {@link long} call graph construction time in ms
+	 * @param reportDir A {@link String} path giving the location of the report directory.
+	 *                  The reportPath should end without an ending file separator.
+	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param includeStatistics Set this value to true, if the analysis report should contain some
+	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
+	 *                          to false, no statistics will be output. 
 	 */
 	public CSVSummaryReporter(String reportDir, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime, boolean includeStatistics) {
 		super((reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir"))), softwareId, rules, callGraphConstructionTime, includeStatistics);

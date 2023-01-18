@@ -65,6 +65,7 @@ public class SARIFConfig {
 	public static final String INSTANCE_OF_ERROR_KEY = "InstanceOfError";
 	public static final String INSTANCE_OF_ERROR_VALUE = "Reported when a value was found to not be of a certain instance.";
 	
+	// keys for the statistics
 	public static final String STATISTICS_KEY = "statistics";
 	public static final String SOFTWAREID_KEY = "SoftwareID";
 	public static final String SEEDOBJECTCOUNT_KEY = "SeedObjectCount";

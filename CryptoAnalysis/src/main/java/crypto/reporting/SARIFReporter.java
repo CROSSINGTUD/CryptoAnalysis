@@ -25,13 +25,9 @@ import soot.SootMethod;
 
 
 /**
- *  This class creates {@link SARIFReporter} a constructor with reportDir and rules as parameter
- *
- * @param reportDir a {@link String} path giving the location of the report directory
- * @param rules {@link CrySLRule} the rules with which the project is analyzed
+ *  This class extends the class {@link Reporter} by generating an analysis report and write it into a
+ *  JSON file in the SARIF format.
  */
-
-
 @SuppressWarnings("unchecked")
 public class SARIFReporter extends Reporter {
 
@@ -43,11 +39,22 @@ public class SARIFReporter extends Reporter {
 	private JSONArray results = new JSONArray();
 	private SARIFHelper sarifHelper;
 	private Map<String, Integer> errorCountMap;
-	/**
-	 * name of the analysis report
-	 */
+	/** name of the analysis report */
 	private static final String REPORT_NAME = "CryptoAnalysis-Report.json";
 
+	/**
+	 * Subclass of {@link Reporter}. Creates an instance of {@link SARIFReporter}, which
+	 * can be used to create a json file containing the analysis report in the SARIF format.
+	 * 
+	 * @param reportDir A {@link String} path giving the location of the report directory.
+	 *                  The reportPath should end without an ending file separator.
+	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param includeStatistics Set this value to true, if the analysis report should contain some
+	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
+	 *                          to false, no statistics will be output. 
+	 */
 	public SARIFReporter(String reportDir, String softwareId, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
 		super((reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir"))), softwareId, rules, callgraphConstructionTime, includeStatistics);
 		

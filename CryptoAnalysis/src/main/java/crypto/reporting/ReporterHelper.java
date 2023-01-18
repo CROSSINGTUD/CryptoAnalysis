@@ -15,17 +15,25 @@ import crypto.rules.CrySLRule;
 import soot.SootClass;
 import soot.SootMethod;
 
-public class ReporterHelper{
+/**
+ * This class is used to generate a report as a {@link String} for multiple other classes. This class is
+ * used by the {@link CommandLineReporter} and {@link TXTReporter}.
+ */
+public class ReporterHelper {
 
-	/** Generates analysis report content for {@link CommandLineReporter} CommandLineReporter and {@link TXTReporter} TXTReporter
-	 * @param rules a {@link List} with {@link CrySLRule} rules
-	 * @param objects a{@link Collection} with {@link IAnalysisSeed} objects
-	 * @param secureObjects a {@link List} with {@link IAnalysisSeed} secureObjects
-	 * @param errorMarkers a {@link Table} containing {@link SootClass},{@link SootMethod} 
-	 * and a {@link Set} of {@link AbstractError} of the errors found during analysis
-	 * @param errorMarkerCount a {@link Map} containing {@link Class} class of error and 
-	 * {@link Integer} number of errors
-	 * @return report {@link String} of the analysis
+	/** Generates an analysis report content for the {@link CommandLineReporter} and {@link TXTReporter}.
+	 * 
+	 * @param rules A {@link List} with {@link CrySLRule} rules, which were used in the analysis
+	 * @param objects A {@link Collection} with {@link IAnalysisSeed} objects
+	 * @param secureObjects A {@link List} with {@link IAnalysisSeed} secureObjects
+	 * @param errorMarkers A {@link Table} containing {@link SootClass}, {@link SootMethod} 
+	 *                     and a {@link Set} of {@link AbstractError} of the errors found during analysis
+	 * @param errorMarkerCount A {@link Map} containing {@link Class} class of error and 
+	 *                         {@link Integer} number of errors
+	 * @param statistics An instance of the class {@link ReportStatistics}, which holds all relevant statistics
+	 *                   for the analysis. If no statistics should be included in the analysis, the value null
+	 *                   should be passed.
+	 * @return report The formatted analysis report as {@link String}
 	 */
 	public static String generateReport(List<CrySLRule> rules, Collection<IAnalysisSeed> objects, 
 			List<IAnalysisSeed> secureObjects, Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers, 
@@ -90,8 +98,8 @@ public class ReporterHelper{
 			}
 		}
 		
+		// Only include the analysis statistics, if the passed instance is not null
 		if (statistics != null) {
-			// Additional analysis statistics
 			report += "\n\tAdditional analysis statistics:\n";
 			report += String.format("\t\tSoftwareID: %s\n", statistics.getSoftwareID());
 			report += String.format("\t\tSeedObjectCount: %d\n", statistics.getSeedObjectCount());

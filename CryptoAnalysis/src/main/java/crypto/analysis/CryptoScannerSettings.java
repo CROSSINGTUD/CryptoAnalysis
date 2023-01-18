@@ -239,13 +239,25 @@ public class CryptoScannerSettings {
 		}
 	}
 	
+	/**
+	 * This method parses the specified report formats and returns the number of given report formats until
+	 * the next flag from the command line is found (e.g. "--reportformat CMD TXT CSV --<new flag>" will store
+	 * the formats CMD, TXT and CSV and return the value 3).
+	 * 
+	 * @param settings The command line input.
+	 * @param position The position of the --reportformat flag in the command line input
+	 * @return numFormats The number of specified formats. If a format is given twice, it is also
+	 *                    counted twice.
+	 * @throws CryptoAnalysisParserException if a reportformat value is not supported
+	 */
+	
 	private int parseReportFormatValues(String[] settings, int position) throws CryptoAnalysisParserException {
 		// settings should be the command line input and position the index of --reportFormat
 		int numFormats = 0;
 		
 		for (int i = position + 1; i < settings.length; i++) {
 			
-			// new argument
+			// new argument is specified
 			if (settings[i].startsWith("-")) {
 				break;
 			}
