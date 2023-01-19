@@ -13,9 +13,10 @@ import crypto.analysis.CryptoScannerSettings.ReportFormat;
 public class ReportFormatTest extends AbstractHeadlessTest{
 
 	private static final String rootPath = "cognicrypt-output/";
-	private static final String txtReportPath = rootPath+"CryptoAnalysis-Report.txt";
-	private static final String csvReportPath = rootPath+"CryptoAnalysis-Report.csv";
-	private static final String sarifReportPath = rootPath+"CryptoAnalysis-Report.json";
+	private static final String txtReportPath = rootPath + "CryptoAnalysis-Report.txt";
+	private static final String csvReportPath = rootPath + "CryptoAnalysis-Report.csv";
+	private static final String csvSummaryReportPath = rootPath + "CryptoAnalysis-Report-Summary.csv";
+	private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
 	
 	@Test
 	public void TXTReportCreationTest() {
@@ -48,6 +49,24 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	}
 	
 	@Test
+	public void CSVSummaryCreationTest() {
+		File report = new File(csvSummaryReportPath);
+		
+		if (report.exists()) {
+			report.delete();
+		}
+		
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		setReportFormat(ReportFormat.CSV_SUMMARY);
+		setVISUALIZATION(true);
+		
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		scanner.exec();
+		Assert.assertTrue(report.exists());
+	}
+	
+	@Test
 	public void SARIFReportCreationTest() {
 		File report = new File(sarifReportPath);
 		if(report.exists()) {
@@ -60,6 +79,47 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		scanner.exec();
 		Assert.assertTrue(report.exists());
+	}
+	
+	@Test
+	public void multipleFormatsCreationTest() {
+		File txtReport = new File(txtReportPath);
+		
+		if (txtReport.exists()) {
+			txtReport.delete();
+		}
+		
+		File csvReport = new File(csvReportPath);
+		
+		if (csvReport.exists()) {
+			csvReport.delete();
+		}
+		
+		File csvSummaryReport = new File(csvSummaryReportPath);
+		
+		if (csvSummaryReport.exists()) {
+			csvSummaryReport.delete();
+		}
+		
+		File sarifReport = new File(sarifReportPath);
+		
+		if (sarifReport.exists()) {
+			sarifReport.delete();
+		}
+		
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		
+		setReportFormat(ReportFormat.CMD, ReportFormat.TXT, ReportFormat.CSV, ReportFormat.CSV_SUMMARY, ReportFormat.SARIF);
+		setVISUALIZATION(true);
+		
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		scanner.exec();
+		
+		Assert.assertTrue(txtReport.exists());
+		Assert.assertTrue(csvReport.exists());
+		Assert.assertTrue(csvSummaryReport.exists());
+		Assert.assertTrue(sarifReport.exists());
 	}
 	
 	@After

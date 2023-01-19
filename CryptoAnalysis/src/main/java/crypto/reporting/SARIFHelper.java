@@ -49,17 +49,21 @@ public class SARIFHelper {
 	
 	public JSONObject getToolInfo() {
 		JSONObject tool = new JSONObject();
+		
 		tool.put(SARIFConfig.ANALYSISTOOL_NAME_KEY, SARIFConfig.ANALYSISTOOL_NAME_VALUE);
 		tool.put(SARIFConfig.VERSION, getClass().getPackage().getImplementationVersion());
-		tool.put(SARIFConfig.SEMANTIC_VERSION_KEY,getClass().getPackage().getImplementationVersion());
+		tool.put(SARIFConfig.SEMANTIC_VERSION_KEY, getClass().getPackage().getImplementationVersion());
 		tool.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
+		
 		return tool;
 	}
 	
 	public JSONObject getMessage(String text, String richText) {
 		JSONObject message = new JSONObject();
+		
 		message.put(SARIFConfig.TEXT_KEY, text);
 		message.put(SARIFConfig.RICH_TEXT_KEY, richText);
+		
 		return message;
 	}
 	
@@ -67,27 +71,48 @@ public class SARIFHelper {
 		return sourceLocater == null ? c.getName().replace(".", "/") + ".java" : sourceLocater.getAbsolutePath(c);
 	}
 	
-	public JSONArray getLocations(SootClass c, String methodName, int lineNumber) {
+	public JSONArray getLocations(SootClass c, String methodName, int lineNumber, String method, String statement) {
 		JSONArray locations = new JSONArray();
 		JSONObject location = new JSONObject();
 		
-		JSONObject startLine = new JSONObject();
-		startLine.put(SARIFConfig.START_LINE_KEY, lineNumber);
+		JSONObject region = new JSONObject();
+		region.put(SARIFConfig.START_LINE_KEY, lineNumber);
+		region.put(SARIFConfig.METHOD_KEY, method);
+		region.put(SARIFConfig.STATEMENT_KEY, statement);
+		
 		JSONObject uri = new JSONObject();
 		uri.put(SARIFConfig.URI_KEY, getFileName(c));
+		
 		JSONObject physicalLocation = new JSONObject();
 		physicalLocation.put(SARIFConfig.FILE_LOCATION_KEY, uri);
-		physicalLocation.put(SARIFConfig.REGION_KEY, startLine);
+		physicalLocation.put(SARIFConfig.REGION_KEY, region);
 		
 		location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
+		
 		String fullyQualifiedLogicalName = c.getName().replace(".", "::") + "::" + methodName;
 		location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
 		
 		locations.add(location);
+		
 		return locations;
 	}
 	
 	public String getRuleDescription(String ruleId) {
 		return this.rulesMap.get(ruleId);
 	}
+	
+	public JSONObject getStatisticsInfo(ReportStatistics statistics) {
+		JSONObject statisticField = new JSONObject();
+		
+		statisticField.put(SARIFConfig.SOFTWAREID_KEY, statistics.getSoftwareID());
+		statisticField.put(SARIFConfig.SEEDOBJECTCOUNT_KEY, statistics.getSeedObjectCount());
+		statisticField.put(SARIFConfig.ANALYSISTIME_KEY, statistics.getAnalysisTime());
+		statisticField.put(SARIFConfig.CALLGRAPHTIME_KEY, statistics.getCallgraphTime());
+		statisticField.put(SARIFConfig.CALLGRAPHREACHABLEMETHODS_KEY, statistics.getCallgraphReachableMethods());
+		statisticField.put(SARIFConfig.CALLGRAPGREACHABLEMETHODSWITHACTIVEBODIES_KEY, statistics.getCallgraphReachableMethodsWithActiveBodies());
+		statisticField.put(SARIFConfig.DATAFLOWVISITEDMETHODS_KEY, statistics.getDataflowVisitedMethods());
+		
+		return statisticField;
+	}
+	
 }
