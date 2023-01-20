@@ -90,7 +90,7 @@ import de.darmstadt.tu.crossing.crySL.WildcardPredicateParameter;
 
 public class CrySLModelReader {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(CrySLModelReader.class);
+	private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CrySLModelReader.class);
 
 	private StateMachineGraph smg = null;
 	private JvmTypeReference currentClass;
