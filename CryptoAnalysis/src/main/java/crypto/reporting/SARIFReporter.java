@@ -82,20 +82,19 @@ public class SARIFReporter extends ErrorMarkerListener {
 	}
 
 	private String addRules(String errorType) {
-		String finalErrorType = errorType;
 		if (this.rules.containsKey(errorType)) {
 			int count = this.errorCountMap.get(errorType);
-			count++;
-			finalErrorType = errorType.concat("-".concat(Integer.toString(count)));
-			this.errorCountMap.put(errorType, count);
+			this.errorCountMap.put(errorType, count + 1);
+			JSONObject ruleInfo = new JSONObject();
+			JSONObject fullDescription = new JSONObject();
+			fullDescription.put(SARIFConfig.TEXT_KEY, this.sarifHelper.getRuleDescription(errorType));
+			ruleInfo.put(SARIFConfig.RULES_ID_KEY, errorType);
+			ruleInfo.put(SARIFConfig.FULL_DESCRIPTION_KEY, fullDescription);
+			if (count == 0) {
+				this.rules.put(errorType, ruleInfo);
+			}
 		}
-		JSONObject ruleInfo = new JSONObject();
-		JSONObject fullDescription = new JSONObject();
-		fullDescription.put(SARIFConfig.TEXT_KEY, this.sarifHelper.getRuleDescription(errorType));
-		ruleInfo.put(SARIFConfig.RULES_ID_KEY, errorType);
-		ruleInfo.put(SARIFConfig.FULL_DESCRIPTION_KEY, fullDescription);
-		this.rules.put(finalErrorType, ruleInfo);
-		return finalErrorType;
+		return errorType;
 	}
 
 	private void addResults(String errorType, SootClass c, String methodName, int lineNumber, String text,
