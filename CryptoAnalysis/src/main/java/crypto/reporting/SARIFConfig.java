@@ -60,5 +60,7 @@ public class SARIFConfig {
 	public static final String REQUIRED_PREDICATE_ERROR_VALUE = "An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a Cipher object requires a SecretKey object to be correctly and securely generated.";
 	public static final String INCOMPLETE_OPERATION_ERROR_KEY = "IncompleteOperationError";
 	public static final String INCOMPLETE_OPERATION_ERROR_VALUE = "The usage of an object may be incomplete: For example a Cipherobject may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)";
+	public static final String UNCAUGHT_EXCEPTION_ERROR_KEY = "UncaughtExceptionError";
+	public static final String UNCAUGHT_EXCEPTION_ERROR_VALUE = "The called method might throw an Exception, that is not caught.";
 	
 }

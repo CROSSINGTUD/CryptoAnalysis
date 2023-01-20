@@ -71,6 +71,7 @@ public class SARIFReporter extends ErrorMarkerListener {
 		this.errorCountMap.put(SARIFConfig.TYPE_STATE_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.REQUIRED_PREDICATE_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.INCOMPLETE_OPERATION_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.UNCAUGHT_EXCEPTION_ERROR_KEY, 0);
 	}
 
 	private void addFile(SootClass c) {
