@@ -8,6 +8,7 @@ import java.util.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import crypto.constraints.ExceptionConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
@@ -20,14 +21,12 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
-import soot.Trap;
 import soot.Unit;
 import soot.UnitPatchingChain;
 import soot.jimple.NullConstant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JEqExpr;
 import soot.jimple.internal.JIfStmt;
-import soot.util.Chain;
 
 /**
  * This transformer adds a branch after each statement, that may throw an
@@ -46,13 +45,15 @@ public class ExceptionAwareTransformer extends BodyTransformer {
 		PackManager.v().runPacks();
 	}
 
+	private final SootClass spec;
+
 	private final Multimap<SootMethod, SootClass> exceptions;
 
 	private final Map<SootMethod, SootMethod> lookupCache = new HashMap<>();
 
 	public ExceptionAwareTransformer(final CrySLRule rule) {
 		this.exceptions = HashMultimap.create();
-
+		this.spec = Scene.v().getSootClass(rule.getClassName());
 		rule.getConstraints().stream()
 				.filter(constraint -> constraint instanceof CrySLExceptionConstraint)
 				.map(constraint -> (CrySLExceptionConstraint) constraint)
@@ -75,9 +76,13 @@ public class ExceptionAwareTransformer extends BodyTransformer {
 				return;
 
 			final SootMethod called = ((Stmt) unit).getInvokeExpr().getMethod();
+
+			if (!called.getDeclaringClass().equals(this.spec))
+				return;
+
 			lookup(called).ifPresent(declared -> {
 				for (final SootClass exception : exceptions.get(declared))
-					getTrap(body, unit, exception)
+					ExceptionConstraint.getTrap(body, unit, exception)
 							.ifPresent(trap -> addBranch(units, unit, trap.getHandlerUnit()));
 			});
 		});
@@ -88,36 +93,11 @@ public class ExceptionAwareTransformer extends BodyTransformer {
 		units.insertOnEdge(new JIfStmt(condition, to), after, null);
 	}
 
-	private boolean matches(final SootMethod callee, final SootMethod declared) {
-		return LabeledMatcherTransition.matches(callee, declared);
-	}
-
-	private boolean trapsUnit(final Body body, final Trap trap, final Unit trapped) {
-		boolean begun = false;
-		for (final Unit unit : body.getUnits()) {
-			if (unit.equals(trap.getEndUnit()))
-				break;
-			if (unit.equals(trap.getBeginUnit()))
-				begun = true;
-			if (begun && unit.equals(trapped))
-				return true;
-		}
-		return false;
-	}
-
-	private Optional<Trap> getTrap(final Body body, final Unit unit, final SootClass exception) {
-		final Chain<Trap> traps = body.getTraps();
-		for (final Trap trap : traps)
-			if (trapsUnit(body, trap, unit))
-				return Optional.of(trap);
-		return Optional.empty();
-	}
-
 	private Optional<SootMethod> lookup(final SootMethod called) {
 		if (lookupCache.containsKey(called))
 			return Optional.of(lookupCache.get(called));
 		for (final SootMethod declared : exceptions.keySet()) {
-			if (matches(called, declared)) {
+			if (LabeledMatcherTransition.matches(called, declared)) {
 				lookupCache.put(called, declared);
 				return Optional.of(declared);
 			}
