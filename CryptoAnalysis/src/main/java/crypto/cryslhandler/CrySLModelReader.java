@@ -139,6 +139,13 @@ public class CrySLModelReader {
 		final DestroysBlock destroys = dm.getDestroy();
 
 		Expression order = dm.getOrder();
+		
+		if (order == null) {
+			throw new CryptoAnalysisException("An error occurred while parsing the ORDER section from the ruleset for "
+					+ "class " + curClass + ". Please make sure that the expression is valid "
+					+ "(see https://github.com/CROSSINGTUD/CryptoAnalysis/issues/365 for more information).");
+		}
+		
 		if (order instanceof Order) {
 			validateOrder((Order) order);
 		}

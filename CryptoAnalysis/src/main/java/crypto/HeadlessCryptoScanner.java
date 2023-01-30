@@ -88,7 +88,8 @@ public abstract class HeadlessCryptoScanner {
 							rules.addAll(CrySLRuleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
 							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+settings.getRulesetPathDir(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
+							e.printStackTrace();
 						}
 						break;
 					case ZIP:
@@ -96,7 +97,7 @@ public abstract class HeadlessCryptoScanner {
 							rules.addAll(CrySLRuleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
 							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+settings.getRulesetPathZip(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathZip(), e);
 						}
 						break;
 					default:
