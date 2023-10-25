@@ -5,12 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CrySLValueConstraint extends CrySLLiteral implements java.io.Serializable {
+public class CrySLValueConstraint extends CrySLLiteral {
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	CrySLObject var;
 	List<String> valueRange;
 	

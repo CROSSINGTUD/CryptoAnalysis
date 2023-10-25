@@ -3,6 +3,7 @@ package crypto.extractparameter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -22,7 +23,6 @@ import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.rules.CrySLMethod;
-import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
@@ -39,7 +39,7 @@ import wpds.impl.Weight.NoWeight;
 
 public class ExtractParameterAnalysis {
 
-	private Map<Statement,SootMethod> allCallsOnObject;
+	private Map<Statement, SootMethod> allCallsOnObject;
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
 	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
@@ -52,32 +52,33 @@ public class ExtractParameterAnalysis {
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject, SootBasedStateMachineGraph fsm) {
+	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject,
+			SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
-		for(MatcherTransition m : fsm.getAllTransitions()) {
-			if(m instanceof LabeledMatcherTransition) {
-				this.events.add((LabeledMatcherTransition) m );
+		for (MatcherTransition m : fsm.getAllTransitions()) {
+			if (m instanceof LabeledMatcherTransition) {
+				this.events.add((LabeledMatcherTransition) m);
 			}
 		}
 	}
 
 	public void run() {
-		for(Entry<Statement, SootMethod> callSiteWithCallee : allCallsOnObject.entrySet()) {
-			Statement callSite = callSiteWithCallee.getKey();
-			SootMethod declaredCallee = callSiteWithCallee.getValue();
-			if(callSite.isCallsite()){
-				for(LabeledMatcherTransition e : events) {
-					if(e.matches(declaredCallee)) {
-						injectQueryAtCallSite(e.label(),callSite);
-					}
-				}
+		for (Map.Entry<Statement,SootMethod> stmt : allCallsOnObject.entrySet()) {
+			if (!stmt.getKey().isCallsite())
+				continue;
+
+			for (LabeledMatcherTransition e : events) {
+				e.getMatching(stmt.getValue())
+					.ifPresent(method -> injectQueryAtCallSite(method, stmt.getKey()));
 			}
 		}
+
 		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
 			q.solve();
 		}
 	}
+
 	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
 		return collectedValues;
 	}
@@ -85,55 +86,37 @@ public class ExtractParameterAnalysis {
 	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
 		return propagatedTypes;
 	}
-	
+
 	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
 		return querySites;
 	}
-	
-	private void injectQueryAtCallSite(List<CrySLMethod> list, Statement callSite) {
-		if(!callSite.isCallsite())
-			return;
-		for(CrySLMethod matchingDescriptor : list){
-			for(SootMethod m : CrySLMethodToSootMethod.v().convert(matchingDescriptor)){
-				SootMethod method = callSite.getUnit().get().getInvokeExpr().getMethod();
-				if (!m.equals(method))
-					continue;
-				{
-					int index = 0;
-					for(Entry<String, String> param : matchingDescriptor.getParameters()){
-						if(!param.getKey().equals("_")){
-							soot.Type parameterType = method.getParameterType(index);
-							if(parameterType.toString().equals(param.getValue())){
-								addQueryAtCallsite(param.getKey(), callSite, index);
-							}
-						}
-						index++;
-					}
-				}
-			}
-		}
+
+	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
+		int index = 0;
+		for (Entry<String, String> param : match.getParameters())
+			addQueryAtCallsite(param.getKey(), callSite, index++);
 	}
 
 	public void addQueryAtCallsite(final String varNameInSpecification, final Statement stmt, final int index) {
-		if(!stmt.isCallsite())
+		if (!stmt.isCallsite())
 			return;
 		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
 		if (!(parameter instanceof Local)) {
 			Val parameterVal = new Val(parameter, stmt.getMethod());
 			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameterVal, index, varNameInSpecification);
-			Set<Node<Statement,Val>> dataFlowPath = Sets.newHashSet();
+			Set<Node<Statement, Val>> dataFlowPath = Sets.newHashSet();
 			dataFlowPath.add(new Node<Statement, Val>(stmt, parameterVal));
-			collectedValues.put(cs
-					, new ExtractedValue(stmt,parameter, dataFlowPath));
+			collectedValues.put(cs, new ExtractedValue(stmt, parameter, dataFlowPath));
 			querySites.add(cs);
 			return;
 		}
 		Val queryVal = new Val((Local) parameter, stmt.getMethod());
-		
-		for(Unit pred : cryptoScanner.icfg().getPredsOf(stmt.getUnit().get())) {
+
+		for (Unit pred : cryptoScanner.icfg().getPredsOf(stmt.getUnit().get())) {
 			AdditionalBoomerangQuery query = additionalBoomerangQuery
-					.getOrCreate(new AdditionalBoomerangQuery(new Statement((Stmt)pred, stmt.getMethod()), queryVal));
-			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index, varNameInSpecification);
+					.getOrCreate(new AdditionalBoomerangQuery(new Statement((Stmt) pred, stmt.getMethod()), queryVal));
+			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index,
+					varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
 			query.addListener(new QueryListener() {
 				@Override
@@ -141,18 +124,19 @@ public class ExtractParameterAnalysis {
 					propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
 					for (ForwardQuery v : res.getAllocationSites().keySet()) {
 						ExtractedValue extractedValue = null;
-						if(v.var() instanceof AllocVal) {
+						if (v.var() instanceof AllocVal) {
 							AllocVal allocVal = (AllocVal) v.var();
-							extractedValue = new ExtractedValue(allocVal.allocationStatement(),allocVal.allocationValue(), res.getDataFlowPath(v));
+							extractedValue = new ExtractedValue(allocVal.allocationStatement(), allocVal.allocationValue(),
+									res.getDataFlowPath(v));
 						} else {
-							extractedValue = new ExtractedValue(v.stmt(),v.var().value(), res.getDataFlowPath(v));
+							extractedValue = new ExtractedValue(v.stmt(), v.var().value(), res.getDataFlowPath(v));
 						}
 						collectedValues.put(callSiteWithParamIndex,
 								extractedValue);
-						//Special handling for toCharArray method (required for NeverTypeOf constraint)
-						if(v.stmt().isCallsite()) {
+						// Special handling for toCharArray method (required for NeverTypeOf constraint)
+						if (v.stmt().isCallsite()) {
 							String calledMethodSignature = v.stmt().getUnit().get().getInvokeExpr().getMethod().getSignature();
-							if(calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")){
+							if (calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")) {
 								propagatedTypes.put(callSiteWithParamIndex, Scene.v().getType("java.lang.String"));
 							}
 						}
@@ -203,8 +187,5 @@ public class ExtractParameterAnalysis {
 	private static interface QueryListener {
 		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
 	}
-	
-	
-
 
 }

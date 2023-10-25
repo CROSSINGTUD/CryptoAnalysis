@@ -3,30 +3,35 @@ package crypto.rules;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 
-public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable {
+public class CrySLPredicate extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
 	protected final boolean negated;
-	protected final ISLConstraint optConstraint;
+	protected final Optional<ISLConstraint> constraint;
 	
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not) {
-		this(baseObject, name, variables, not, null);
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated) {
+		this(baseObject, name, parameters, negated, Optional.empty());
 	}
 	
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean not, ISLConstraint constraint) {
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, ISLConstraint constraint) {
+		this(baseObject, name, parameters, negated, Optional.ofNullable(constraint));
+	}
+
+	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, Optional<ISLConstraint> constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
-		this.parameters = variables;
-		this.negated = not;
-		this.optConstraint = constraint;
+		this.parameters = parameters;
+		this.negated = negated;
+		this.constraint = constraint;
 	}
 
 	@Override
@@ -34,28 +39,30 @@ public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((predName == null) ? 0 : predName.hashCode());
+		result = prime * result + this.getConstraint().hashCode();
+		result = prime * result + this.getParameters().hashCode();
 		return result;
+	
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+
+		if (!(obj instanceof CrySLPredicate))
 			return false;
-		}
-		if (!(obj instanceof CrySLPredicate)) {
-			return false;
-		}
+
 		CrySLPredicate other = (CrySLPredicate) obj;
-		if (predName == null) {
-			if (other.predName != null) {
+		if(!getPredName().equals(other.getPredName()))
 				return false;
-			}
-		} else if (!predName.equals(other.predName)) {
+
+		if(!this.getConstraint().equals(other.getConstraint()))
 			return false;
-		}
+
+		if(!this.getParameters().equals(other.getParameters()))
+			return false;
+
 		return true;
 	}
 
@@ -76,8 +83,8 @@ public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable
 	/**
 	 * @return the optConstraint
 	 */
-	public ISLConstraint getConstraint() {
-		return optConstraint;
+	public Optional<ISLConstraint> getConstraint() {
+		return this.constraint;
 	}
 
 	/**
@@ -96,17 +103,11 @@ public class CrySLPredicate extends CrySLLiteral implements java.io.Serializable
 	
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
-		if (negated) {
+		if (negated)
 			predSB.append("!");
-		}
 		predSB.append(predName);
 		predSB.append("(");
-		
-		for (ICrySLPredicateParameter parameter : parameters) {
-			predSB.append(parameter);
-			predSB.append(",");
-		}
-		predSB.reverse().deleteCharAt(0).reverse();
+		predSB.append(parameters.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
 		predSB.append(")");
 		
 		

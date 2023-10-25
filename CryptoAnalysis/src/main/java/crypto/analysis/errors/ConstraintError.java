@@ -88,10 +88,11 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 			msg.append(brokenArthConstraint.getRight());
 		} else if (brokenConstraint instanceof CrySLComparisonConstraint) {
 			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) brokenConstraint;
-			msg.append("Variable ");
+			msg.append(" Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append("must be ");
+			msg.append(" must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
+			msg.append(" ");
 			msg.append(brokenCompCons.getRight().getLeft().getName());
 		} else if (brokenConstraint instanceof CrySLConstraint) {
 			final CrySLConstraint crySLConstraint = (CrySLConstraint) brokenConstraint;
@@ -122,16 +123,19 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	private String evaluateCompOp(CompOp operator) {
 		switch (operator) {
 			case ge:
-				return " at least ";
+				return "at least";
 			case g:
-				return " greater than ";
+				return "greater than";
 			case l:
-				return " lesser than ";
+				return "lesser than";
 			case le:
-				return " at most ";
-			default:
+				return "at most";
+			case eq:
 				return "equal to";
+			case neq:
+				return "not equal to";
 		}
+		return "";
 	}
 
 	private String evaluateValueConstraint(final CrySLValueConstraint brokenConstraint) {
