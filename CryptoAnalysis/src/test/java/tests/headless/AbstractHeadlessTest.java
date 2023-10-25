@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
@@ -56,10 +57,21 @@ public abstract class AbstractHeadlessTest {
 	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
-	private static ReportFormat reportFormat = null;
+	private static Set<ReportFormat> reportFormats = new HashSet<>();
 	
 	public static void setReportFormat(ReportFormat reportFormat) {
-		AbstractHeadlessTest.reportFormat = reportFormat;
+		// use this method to add exactly one report format
+		AbstractHeadlessTest.reportFormats.clear();
+		AbstractHeadlessTest.reportFormats.add(reportFormat);
+	}
+	
+	public static void setReportFormat(ReportFormat ...formats) {
+		// use this method to add multiple report formats
+		AbstractHeadlessTest.reportFormats.clear();
+		
+		for (ReportFormat format : formats) {
+			AbstractHeadlessTest.reportFormats.add(format);
+		}
 	}
 
 	public static void setVISUALIZATION(boolean vISUALIZATION) {
@@ -129,8 +141,8 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
-			protected ReportFormat reportFormat(){
-				return VISUALIZATION ? reportFormat : null;
+			protected Set<ReportFormat> reportFormats(){
+				return VISUALIZATION ? reportFormats : new HashSet<>();
 			}
 		};
 		return scanner;

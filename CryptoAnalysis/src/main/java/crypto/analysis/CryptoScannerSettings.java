@@ -1,5 +1,8 @@
 package crypto.analysis;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import crypto.exceptions.CryptoAnalysisParserException;
 
 public class CryptoScannerSettings {
@@ -12,10 +15,11 @@ public class CryptoScannerSettings {
 	private String applicationPath = null;
 	private String softwareIdentifier = "";
 	private String reportDirectory = null;
-	private ReportFormat reportFormat = null;
+	private Set<ReportFormat> reportFormats;
 	private boolean preAnalysis;
 	private boolean visualization;
 	private boolean providerDetectionAnalysis;
+	private boolean includeStatistics;
 	
 	public CryptoScannerSettings() {
 		setControlGraph(ControlGraph.CHA);
@@ -23,6 +27,9 @@ public class CryptoScannerSettings {
 		setPreAnalysis(false);
 		setVisualization(false);
 		setProviderDetectionAnalysis(false);
+		setIncludeStatistics(true);
+		
+		reportFormats = new HashSet<>();
 	}
 	
 	public ControlGraph getControlGraph() {
@@ -88,13 +95,9 @@ public class CryptoScannerSettings {
 	public void setReportDirectory(String reportDirectory) {
 		this.reportDirectory = reportDirectory;
 	}
-
-	public ReportFormat getReportFormat() {
-		return reportFormat;
-	}
-
-	public void setReportFormat(ReportFormat reportFormat) {
-		this.reportFormat = reportFormat;
+	
+	public Set<ReportFormat> getReportFormats() {
+		return reportFormats;
 	}
 
 	public boolean isPreAnalysis() {
@@ -121,12 +124,22 @@ public class CryptoScannerSettings {
 		this.providerDetectionAnalysis = providerDetectionAnalysis;
 	}
 	
+	public boolean isIncludeStatistics() {
+		return includeStatistics;
+	}
+	
+	public void setIncludeStatistics(boolean includeStatistics) {
+		this.includeStatistics = includeStatistics;
+	}
+	
 	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
 		int mandatorySettings = 0;
+		
 		if(settings == null) {
 			showErrorMessage();
 		}
-		for(int i=0; i<settings.length; i++) {
+		
+		for(int i = 0; i < settings.length; i++) {
 			switch(settings[i].toLowerCase()) {
 				case "--cg":
 					parseControlGraphValue(settings[i+1]);
@@ -170,8 +183,8 @@ public class CryptoScannerSettings {
 					i++;
 					break;
 				case "--reportformat":
-					parseReportFormatValue(settings[i+1]);
-					i++;
+					int formats = parseReportFormatValues(settings, i);
+					i += formats;
 					break;
 				case "--preanalysis":
 					setPreAnalysis(true);
@@ -182,10 +195,14 @@ public class CryptoScannerSettings {
 				case "--providerdetection":
 					setProviderDetectionAnalysis(true);
 					break;
+				case "--dstats":
+					setIncludeStatistics(false);
+					break;
 				default:
 					showErrorMessage(settings[i]);		
 			}
 		}
+		
 		if(mandatorySettings != 2) {
 			showErrorMessage();
 		}
@@ -196,7 +213,7 @@ public class CryptoScannerSettings {
 	}
 	
 	public enum ReportFormat {
-		TXT, SARIF, CSV
+		CMD, TXT, SARIF, CSV, CSV_SUMMARY
 	}
 	
 	public enum RulesetPathType {
@@ -205,6 +222,7 @@ public class CryptoScannerSettings {
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
 		String CGValue = value.toLowerCase();
+		
 		switch(CGValue) {
 			case "cha":
 				setControlGraph(ControlGraph.CHA);
@@ -216,53 +234,88 @@ public class CryptoScannerSettings {
 				setControlGraph(ControlGraph.SPARKLIB);
 				break;
 			default:
-				throw new CryptoAnalysisParserException("Incorrect value "+CGValue+" for --cg option. "
+				throw new CryptoAnalysisParserException("Incorrect value " + CGValue + " for --cg option. "
 						+ "Available options are: CHA, SPARK and SPARKLIB.\n");
 		}
 	}
 	
-	private void parseReportFormatValue(String value) throws CryptoAnalysisParserException {
-		String reportFormatValue = value.toLowerCase();
-		switch(reportFormatValue) {
-			case "txt":
-				setReportFormat(ReportFormat.TXT);
+	/**
+	 * This method parses the specified report formats and returns the number of given report formats until
+	 * the next flag from the command line is found (e.g. "--reportformat CMD TXT CSV --<new flag>" will store
+	 * the formats CMD, TXT and CSV and return the value 3).
+	 * 
+	 * @param settings The command line input.
+	 * @param position The position of the --reportformat flag in the command line input
+	 * @return numFormats The number of specified formats. If a format is given twice, it is also
+	 *                    counted twice.
+	 * @throws CryptoAnalysisParserException if a reportformat value is not supported
+	 */
+	
+	private int parseReportFormatValues(String[] settings, int position) throws CryptoAnalysisParserException {
+		// settings should be the command line input and position the index of --reportFormat
+		int numFormats = 0;
+		
+		for (int i = position + 1; i < settings.length; i++) {
+			
+			// new argument is specified
+			if (settings[i].startsWith("-")) {
 				break;
-			case "sarif":
-				setReportFormat(ReportFormat.SARIF);
-				break;
-			case "csv":
-				setReportFormat(ReportFormat.CSV);
-				break;
-			default:
-				throw new CryptoAnalysisParserException("Incorrect value "+reportFormatValue+" for --reportFormat option. "
-						+ "Available options are: TXT, SARIF and CSV.\n");
+			}
+			
+			String reportFormatValue = settings[i].toLowerCase();
+			
+			switch (reportFormatValue) {
+				case "cmd":
+					reportFormats.add(ReportFormat.CMD);
+					break;
+				case "txt":
+					reportFormats.add(ReportFormat.TXT);
+					break;
+				case "sarif":
+					reportFormats.add(ReportFormat.SARIF);
+					break;
+				case "csv":
+					reportFormats.add(ReportFormat.CSV);
+					break;
+				case "csv_summary":
+					reportFormats.add(ReportFormat.CSV_SUMMARY);
+					break;
+				default:
+					throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
+							+ "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
+			}
+			
+			numFormats++;
 		}
+		
+		return numFormats;
 	}
 	
 	private static void showErrorMessage() throws CryptoAnalysisParserException {
 		String errorMessage = "An error occurred while trying to parse the CLI arguments.\n"
-				+"The default command for running CryptoAnalysis is: \n"+
-				"java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"+ 
-				" 		--rulesDir <absolute_path_to_crysl_source_code_format_rules> \\\r\n" + 
-				"       --appPath <absolute_application_path>\n";
+				+ "The default command for running CryptoAnalysis is: \n"
+				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"
+				+ " 	  --rulesDir <absolute_path_to_crysl_source_code_format_rules> \\\r\n"
+				+ "       --appPath <absolute_application_path>\n";
 		throw new CryptoAnalysisParserException(errorMessage);
 	}
 		
 	private static void showErrorMessage(String arg) throws CryptoAnalysisParserException {
-		String errorMessage = "An error occured while trying to parse the CLI argument: "+arg+".\n"
-				+"The default command for running CryptoAnalysis is: \n"
-				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n" + 
-				"      --rulesDir <absolute_path_to_crysl_rules> \\\r\n" + 
-				"      --appPath <absolute_application_path>\n"
+		String errorMessage = "An error occured while trying to parse the CLI argument: " + arg + ".\n"
+				+ "The default command for running CryptoAnalysis is: \n"
+				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"
+				+ "      --rulesDir <absolute_path_to_crysl_rules> \\\r\n"
+				+ "      --appPath <absolute_application_path>\n"
 				+ "\nAdditional arguments that can be used are:\n"
 				+ "--cg <selection_of_call_graph_for_analysis (CHA, SPARK, SPARKLIB)>\n"
 				+ "--sootPath <absolute_path_of_whole_project>\n"
 				+ "--identifier <identifier_for_labelling_output_files>\n"
 				+ "--reportPath <directory_location_for_cognicrypt_report>\n"
-				+ "--reportFormat <format of cognicrypt_report (TXT, SARIF, CSV)>\n"
+				+ "--reportFormat <format of cognicrypt_report (CMD, TXT, SARIF, CSV, CSV_SUMMARY)>\n"
 				+ "--preanalysis (enables pre-analysis)\n"
 				+ "--visualization (enables the visualization, but also requires --reportPath option to be set)\n"
-				+ "--providerDetection (enables provider detection analysis)\n";
+				+ "--providerDetection (enables provider detection analysis)\n"
+				+ "--dstats (disable the statistic information in the reports)\n";
 		throw new CryptoAnalysisParserException(errorMessage);
 	}
 	

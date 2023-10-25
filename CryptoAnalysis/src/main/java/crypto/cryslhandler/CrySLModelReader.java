@@ -99,7 +99,6 @@ public class CrySLModelReader {
 	public static final String cryslFileEnding = ".crysl";
 
 	private static final String THIS = "this";
-	private static final String ANY_TYPE = "AnyType";
 	private static final String NULL = "null";
 	private static final String UNDERSCORE = "_";
 
@@ -113,9 +112,9 @@ public class CrySLModelReader {
 		this.injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
 		this.resourceSet = injector.getInstance(XtextResourceSet.class);
 
-		String[] cp =
-			System.getProperty("java.class.path").split(File.pathSeparator);
+		String[] cp = System.getProperty("java.class.path").split(File.pathSeparator);
 		URL[] classpath = new URL[cp.length];
+		
 		for (int i = 0; i < classpath.length; i++) {
 			classpath[i] = new File(cp[i]).toURI().toURL();
 		}
@@ -146,6 +145,7 @@ public class CrySLModelReader {
 
 		URI uri = URI.createURI(virtualFileName);
 		Resource resource = resourceSet.getURIResourceMap().get(uri);
+		
 		if (resource == null) {
 			resource = resourceSet.createResource(uri);
 			resource.load(stream, Collections.EMPTY_MAP);
@@ -163,9 +163,11 @@ public class CrySLModelReader {
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
 		final String fileName = ruleFile.getName();
-		if (!fileName.endsWith(cryslFileEnding))
+		
+		if (!fileName.endsWith(cryslFileEnding)) {
 			throw new CryptoAnalysisException("The extension of " + fileName + "  does not match " + cryslFileEnding);
-
+		}
+		
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
 
 		try {
@@ -180,6 +182,7 @@ public class CrySLModelReader {
 		IResourceValidator validator = injector.getInstance(IResourceValidator.class);
 		List<Issue> issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
 		boolean errorFound = false;
+		
 		for (Issue issue : issues) {
 			switch (issue.getSeverity()) {
 				case ERROR:
@@ -204,12 +207,14 @@ public class CrySLModelReader {
 	}
 
 	private CrySLRule createRuleFromResource(Resource resource) throws CryptoAnalysisException {
-		if (resource == null)
+		if (resource == null) {
 			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
-
-		if (runValidator(resource, Severity.WARNING))
+		}
+		
+		if (runValidator(resource, Severity.WARNING)) {
 			throw new CryptoAnalysisException("Skipping rule since it contains errors: " + resource.getURI());
-
+		}
+		
 		try {
 			return createRuleFromDomainmodel((Domainmodel) resource.getContents().get(0));
 		} catch (Exception e) {
@@ -221,8 +226,10 @@ public class CrySLModelReader {
 	private CrySLRule createRuleFromDomainmodel(Domainmodel model) throws CryptoAnalysisException {
 		this.currentClass = model.getJavaType();
 		String currentClass = this.currentClass.getQualifiedName();
-		if (currentClass.equals("void"))
+		
+		if (currentClass.equals("void")) {
 			throw new CryptoAnalysisException("Class for the rule is not on the classpath.");
+		}
 
 		final List<Entry<String, String>> objects = getObjects(model.getObjects());
 
@@ -249,8 +256,10 @@ public class CrySLModelReader {
 	}
 
 	private List<Event> changeDeclaringClass(JvmTypeReference currentClass, EventsBlock eventsBlock) {
-		if(eventsBlock == null)
+		if(eventsBlock == null) {
 			return Collections.emptyList();
+		}
+		
 		return eventsBlock.getEvents().stream().map(event -> event instanceof LabeledMethodCall
 				? changeDeclaringClass(currentClass, (LabeledMethodCall) event)
 				: event
@@ -263,17 +272,21 @@ public class CrySLModelReader {
 	}
 
 	private List<Entry<String, String>> getObjects(final ObjectsBlock objects) {
-		if (objects == null)
+		if (objects == null) {
 			return Collections.emptyList();
+		}
 		return objects.getDeclarations().parallelStream()
 				.map(CrySLReaderUtils::resolveObject)
 				.collect(Collectors.toList());
 	}
 
 	private List<CrySLForbiddenMethod> getForbiddenMethods(final ForbiddenBlock forbidden) {
-		if (forbidden == null)
+		if (forbidden == null) {
 			return Collections.emptyList();
+		}
+		
 		List<CrySLForbiddenMethod> forbiddenMethods = Lists.newArrayList();
+		
 		for (final ForbiddenMethod method : forbidden.getForbiddenMethods()) {
 			CrySLMethod cryslMethod = CrySLReaderUtils.toCrySLMethod(method);
 			List<CrySLMethod> alternatives = CrySLReaderUtils.resolveEventToCryslMethods(method.getReplacement());
@@ -283,20 +296,23 @@ public class CrySLModelReader {
 	}
 
 	private List<CrySLPredicate> getEnsuredPredicates(final EnsuresBlock ensures) {
-		if (ensures == null)
+		if (ensures == null) {
 			return Collections.emptyList();
+		}
+		
 		return getTimedPredicates(ensures.getEnsuredPredicates(), false);
 	}
 
 	private List<CrySLPredicate> getNegatedPredicates(final NegatesBlock negates) {
-		if (negates == null)
+		if (negates == null) {
 			return Collections.emptyList();
+		}
 		return getTimedPredicates(negates.getNegatedPredicates(), true);
 	}
 
-	private List<CrySLPredicate> getTimedPredicates(final List<? extends TimedPredicate> timedPredicates,
-			boolean negate) {
+	private List<CrySLPredicate> getTimedPredicates(final List<? extends TimedPredicate> timedPredicates, boolean negate) {
 		List<CrySLPredicate> predicates = new ArrayList<>(timedPredicates.size());
+		
 		for (final TimedPredicate timed : timedPredicates) {
 			Predicate predicate = timed.getPredicate();
 			ISLConstraint constraint = timed instanceof ConditionalPredicate
@@ -304,6 +320,7 @@ public class CrySLModelReader {
 					: null;
 			List<ICrySLPredicateParameter> parameters = resolvePredicateParameters(predicate);
 			String name = predicate.getName();
+			
 			if (timed.getAfter() == null) {
 				predicates.add(new CrySLPredicate(null, name, parameters, negate, constraint));
 			} else {
@@ -316,22 +333,26 @@ public class CrySLModelReader {
 
 	private List<ICrySLPredicateParameter> resolvePredicateParameters(Predicate predicate) {
 		final List<ICrySLPredicateParameter> parameters = new ArrayList<>(predicate.getParameters().size());
+		
 		for (PredicateParameter parameter : predicate.getParameters()) {
-			if (parameter instanceof WildcardPredicateParameter)
+			if (parameter instanceof WildcardPredicateParameter) {
 				parameters.add(new CrySLObject(UNDERSCORE, NULL));
-			else if (parameter instanceof ThisPredicateParameter)
+			} else if (parameter instanceof ThisPredicateParameter) {
 				parameters.add(new CrySLObject(THIS, this.currentClass.getQualifiedName()));
-			else
+			} else {
 				parameters.add(getObjectExpressionValue(parameter.getValue()));
+			}
 		}
 		return parameters;
 	}
 
 	private CrySLObject getObjectExpressionValue(ObjectExpression expression) {
-		if (expression instanceof ObjectReference)
+		if (expression instanceof ObjectReference) {
 			return getObjectExpressionValue((ObjectReference) expression);
-		if (expression instanceof ObjectOperation)
+		}
+		if (expression instanceof ObjectOperation) {
 			return getObjectExpressionValue((ObjectOperation) expression);
+		}
 		return null;
 	}
 
@@ -362,10 +383,12 @@ public class CrySLModelReader {
 
 	private ISLConstraint getPredicateCondition(ConditionalPredicate predicate) {
 		EObject condition = predicate.getCondition();
-		if (condition instanceof Constraint)
+		if (condition instanceof Constraint) {
 			return getConstraint((Constraint) condition);
-		if (condition instanceof Predicate)
+		}
+		if (condition instanceof Predicate) {
 			return getPredicate((Predicate) condition);
+		}
 		return null;
 	}
 
@@ -378,16 +401,20 @@ public class CrySLModelReader {
 		return new CrySLPredicate(null, predicate.getName(), variables, negate, constraint);
 	}
 
-	List<ISLConstraint> getRequiredPredicates(RequiresBlock requiresBlock) {
-		if (requiresBlock == null)
+	private List<ISLConstraint> getRequiredPredicates(RequiresBlock requiresBlock) {
+		if (requiresBlock == null) {
 			return Collections.emptyList();
+		}
+		
 		final List<ISLConstraint> predicates = new ArrayList<>();
 		final List<AlternativeRequiredPredicates> requiredPredicates = requiresBlock.getRequiredPredicates();
+		
 		for (AlternativeRequiredPredicates alternativePredicates : requiredPredicates) {
 			List<CrySLPredicate> alternatives = alternativePredicates.getAlternatives().parallelStream()
 					.map(this::getRequiredPredicate)
 					.collect(Collectors.toList());
 			ISLConstraint predicate = alternatives.get(0);
+			
 			for (int i = 1; i < alternatives.size(); i++)
 				predicate = new CrySLConstraint(alternatives.get(i), predicate, LogOps.or);
 			predicates.add(predicate);
@@ -402,8 +429,9 @@ public class CrySLModelReader {
 	}
 
 	private List<ISLConstraint> getConstraints(ConstraintsBlock constraintsBlock) {
-		if (constraintsBlock == null)
+		if (constraintsBlock == null) {
 			return Collections.emptyList();
+		}
 		return constraintsBlock.getConstraints().parallelStream()
 				.map(this::getConstraint)
 				.collect(Collectors.toList());
@@ -411,8 +439,9 @@ public class CrySLModelReader {
 
 	private ISLConstraint getConstraint(final Constraint constraint) {
 
-		if (constraint instanceof LiteralExpression)
+		if (constraint instanceof LiteralExpression) {
 			return getLiteralExpression((LiteralExpression) constraint);
+		}
 
 		switch (constraint.getOp()) {
 			/* Logical Expressions */
@@ -477,20 +506,25 @@ public class CrySLModelReader {
 	}
 
 	private CrySLArithmeticConstraint coerceConstraintToArithmeticConstraint(ISLConstraint constraint) {
-		if (constraint instanceof CrySLArithmeticConstraint)
+		if (constraint instanceof CrySLArithmeticConstraint) {
 			return (CrySLArithmeticConstraint) constraint;
-		if (constraint instanceof CrySLPredicate)
+		}
+		if (constraint instanceof CrySLPredicate) {
 			return makeArithmeticConstraint((CrySLPredicate) constraint);
+		}
 		throw new ClassCastException("Cant coerce `" + constraint.toString() + "` into ArithmeticExpression");
 	}
 
 	private ISLConstraint getLiteralExpression(LiteralExpression expression) {
-		if (expression instanceof BuiltinPredicate)
+		if (expression instanceof BuiltinPredicate) {
 			return getBuiltinPredicate((BuiltinPredicate) expression);
-		if (expression instanceof Literal)
+		}
+		if (expression instanceof Literal) {
 			return makeConstraintFromObject(CrySLReaderUtils.toCrySLObject((Literal) expression));
-		if (expression instanceof ObjectExpression)
+		}
+		if (expression instanceof ObjectExpression) {
 			return makeConstraintFromObject(getObjectExpressionValue((ObjectExpression) expression));
+		}
 		return null;
 	}
 
@@ -509,11 +543,15 @@ public class CrySLModelReader {
 
 	private Set<StateNode> getStatesForMethods(final List<CrySLMethod> condition) {
 		final Set<StateNode> predicateGenerationNodes = new HashSet<>();
-		if (condition.size() == 0)
+		if (condition.size() == 0) {
 			return predicateGenerationNodes;
-		for (final TransitionEdge transition : this.smg.getAllTransitions())
-			if(transition.getLabel().containsAll(condition))
+		}
+		
+		for (final TransitionEdge transition : this.smg.getAllTransitions()) {
+			if(transition.getLabel().containsAll(condition)) {
 				predicateGenerationNodes.add(transition.getRight());
+			}
+		}
 		return predicateGenerationNodes;
 	}
 
@@ -521,6 +559,7 @@ public class CrySLModelReader {
 		String name = builtinPredicate.getPredicate().getLiteral();
 		List<ICrySLPredicateParameter> parameters;
 		boolean negated = false;
+		
 		switch (builtinPredicate.getPredicate()) {
 			case NO_CALL_TO:
 			case CALL_TO:
@@ -545,7 +584,7 @@ public class CrySLModelReader {
 		return new CrySLPredicate(null, name, parameters, negated);
 	}
 
-	private static String filterQuotes(final String dirty) {
+	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
 
