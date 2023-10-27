@@ -62,7 +62,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>JavaCryptographicArchitecture</artifactId>
-									<version>1.5.2</version>
+									<version>3.0.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -72,7 +72,7 @@
 								<artifactItem>
 									<groupId>de.fraunhofer.iem</groupId>
 									<artifactId>BouncyCastle</artifactId>
-									<version>0.7.1</version>
+									<version>3.0.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -82,7 +82,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>Tink</artifactId>
-									<version>0.3</version>
+									<version>3.0.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -92,7 +92,7 @@
 								<artifactItem>
 									<groupId>de.paderborn.uni</groupId>
 									<artifactId>BouncyCastle-JCA</artifactId>
-									<version>0.4</version>
+									<version>3.0.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -342,37 +342,12 @@
 
 	<distributionManagement>
 		<snapshotRepository>
-			<id>soot-snapshot</id>
-			<name>Soot snapshot repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
 		</snapshotRepository>
 		<repository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>soot-release</id>
-			<name>Soot release repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>soot-snapshot</id>
-			<name>soot snapshots</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>soot-release</id>
-			<name>soot release</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-		</repository>
-		<repository>
-			<id>irb-gitlab-maven</id>
-			<url>https://git.cs.uni-paderborn.de/api/v4/groups/10825/-/packages/maven</url>
-		</repository>
-	</repositories>
 </project>

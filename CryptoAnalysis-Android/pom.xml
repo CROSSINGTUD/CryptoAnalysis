@@ -13,8 +13,9 @@
 	</parent>
 
 	<properties>
-		<flowDroidVersion>2.7.1</flowDroidVersion>
+		<flowDroidVersion>2.12.0</flowDroidVersion>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -69,53 +70,30 @@
 			<artifactId>CryptoAnalysis</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.tud.sse</groupId>
-			<artifactId>soot-infoflow</artifactId>
-			<version>${flowDroidVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.tud.sse</groupId>
-			<artifactId>soot-infoflow-android</artifactId>
-			<version>${flowDroidVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>de.tud.sse</groupId>
-			<artifactId>soot-infoflow-cmd</artifactId>
-			<version>${flowDroidVersion}</version>
-		</dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow-summaries</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow-android</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
 	</dependencies>
 
 	<distributionManagement>
 		<snapshotRepository>
-			<id>soot-snapshot</id>
-			<name>Soot snapshot repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
 		</snapshotRepository>
 		<repository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>soot-release</id>
-			<name>Soot release repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-			<layout>default</layout>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>soot-snapshot</id>
-			<name>soot snapshots</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-
-		<repository>
-			<id>soot-release</id>
-			<name>soot release</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-		</repository>
-	</repositories>
-
 </project>
