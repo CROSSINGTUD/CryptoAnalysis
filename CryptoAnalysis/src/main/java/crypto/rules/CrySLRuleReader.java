@@ -103,7 +103,7 @@ public class CrySLRuleReader {
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		try {
 			ZipFile zip = new ZipFile(file);
-			for (Enumeration e = zip.entries(); e.hasMoreElements(); ) {
+			for (Enumeration<?> e = zip.entries(); e.hasMoreElements(); ) {
 				ZipEntry entry = (ZipEntry) e.nextElement();
 				if (!entry.isDirectory()) {
 					CrySLRule rule = getCrySLRuleFromZipEntry(entry, zip, file);

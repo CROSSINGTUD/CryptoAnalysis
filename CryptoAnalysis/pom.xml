@@ -279,7 +279,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.3</version>
+			<version>1.7.30</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.crypto.tink</groupId>
@@ -296,7 +296,7 @@
 		<dependency>
 			<groupId>de.darmstadt.tu.crossing.CrySL</groupId>
 			<artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-			<version>3.0.1</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
@@ -331,6 +331,12 @@
     		<groupId>commons-io</groupId>
     		<artifactId>commons-io</artifactId>
     		<version>2.11.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
+		<dependency>
+    		<groupId>org.ow2.asm</groupId>
+    		<artifactId>asm</artifactId>
+    		<version>9.3</version>
 		</dependency>
 	</dependencies>
 

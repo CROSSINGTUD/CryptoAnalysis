@@ -33,17 +33,17 @@ public class CrySLCondPredicate extends CrySLPredicate {
 
 	@Override
 	public boolean equals(Object obj) {
-			if(!super.equals(obj))
-				return false;
+		if(!super.equals(obj))
+			return false;
 
-			if(!(obj instanceof CrySLCondPredicate))
+		if(!(obj instanceof CrySLCondPredicate))
 				return false;
 			
-			CrySLCondPredicate other = (CrySLCondPredicate) obj;
-			if(!getConditionalMethods().equals(other.getConditionalMethods()))
-				return false;
+		CrySLCondPredicate other = (CrySLCondPredicate) obj;
+		if(!getConditionalMethods().equals(other.getConditionalMethods()))
+			return false;
 
-			return true;
+		return true;
 	}
 
 	public String toString() {

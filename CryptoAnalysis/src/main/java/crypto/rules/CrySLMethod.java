@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
-
-import static java.util.AbstractMap.SimpleEntry;
-
 import crypto.interfaces.ICrySLPredicateParameter;
 
 public class CrySLMethod implements Serializable, ICrySLPredicateParameter {

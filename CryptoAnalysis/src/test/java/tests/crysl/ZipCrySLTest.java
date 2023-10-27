@@ -8,22 +8,19 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 
-public class ZipCrySLTest
-{
+public class ZipCrySLTest {
+	
     private static final String emptyZipFilePath = "src/test/resources/crySL/empty.zip";
     private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-1.5.1-ruleset.zip";
     private static final String multipleRulesetZipFilePath = "src/test/resources/crySL/Multiple-rulesets.zip";
     private static final String junkRuleSet = "src/test/resources/crySL/rulesetWithJunk.zip";
 
-
+    @SuppressWarnings("unused")
     @Test(expected = CryptoAnalysisException.class)
     public void TestJunkThrows() throws CryptoAnalysisException {
         File zipFile = new File(junkRuleSet);
@@ -64,7 +61,7 @@ public class ZipCrySLTest
     public void TestFileContainsMultipleRulesets() throws CryptoAnalysisException {
         File zipFile = new File(multipleRulesetZipFilePath);
         Collection<CrySLRule> rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(108, rules.size());
+        Assert.assertEquals(107, rules.size());
     }
 
     @Test

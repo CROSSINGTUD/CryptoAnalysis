@@ -12,6 +12,7 @@ import crypto.interfaces.ISLConstraint;
 
 public class CrySLPredicate extends CrySLLiteral {
 
+	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
@@ -57,11 +58,7 @@ public class CrySLPredicate extends CrySLLiteral {
 		if(!getPredName().equals(other.getPredName()))
 				return false;
 
-		if(!this.getConstraint().equals(other.getConstraint()))
-			return false;
-
-		if(!this.getParameters().equals(other.getParameters()))
-			return false;
+		// TODO Do also compare the parameter types (and not just the predicate names)
 
 		return true;
 	}

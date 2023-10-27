@@ -128,12 +128,15 @@ public class CrySLReaderUtils {
 	}
 
 	public static Entry<String, String> resolveObject(final Object o) {
-		if (o == null)
+		if (o == null) {
 			return new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.VOID);
-		if(o.getType().getType() instanceof JvmTypeParameter)
+		}
+			
+		if(o.getType().getType() instanceof JvmTypeParameter) {
 			return new SimpleEntry<>(o.getName(), "java.lang.Object");
-		else
+		} else {
 			return new SimpleEntry<>(o.getName(), o.getType().getQualifiedName());
+		}
 	}
 
 	public static File getResourceFromWithin(final String inputPath) {

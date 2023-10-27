@@ -131,8 +131,8 @@ public class ConstraintSolver {
 						}
 					}
 				} else if (cons instanceof CrySLConstraint) {
-					ISLConstraint right = ((CrySLConstraint) cons).getRight();
-					if (right instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) right).getPredName())) {
+					ISLConstraint left = ((CrySLConstraint) cons).getLeft();
+					if (left instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
 						requiredPredicates.add(collectAlternativePredicates((CrySLConstraint) cons, null));
 					} else {
 						relConstraints.add(cons);
@@ -145,17 +145,17 @@ public class ConstraintSolver {
 	}
 
 	private ISLConstraint collectAlternativePredicates(CrySLConstraint cons, AlternativeReqPredicate alt) {
-		CrySLPredicate right = (CrySLPredicate) cons.getRight();
+		CrySLPredicate left = (CrySLPredicate) cons.getLeft();
 		if (alt == null) {
-			alt = new AlternativeReqPredicate(right, right.getLocation());
+			alt = new AlternativeReqPredicate(left, left.getLocation());
 		} else {
-			alt.addAlternative(right);
+			alt.addAlternative(left);
 		}
 
-		if (cons.getLeft() instanceof CrySLPredicate) {
-			alt.addAlternative((CrySLPredicate) cons.getLeft());
+		if (cons.getRight() instanceof CrySLPredicate) {
+			alt.addAlternative((CrySLPredicate) cons.getRight());
 		} else {
-			return collectAlternativePredicates((CrySLConstraint) cons.getLeft(), alt);
+			return collectAlternativePredicates((CrySLConstraint) cons.getRight(), alt);
 		}
 
 		return alt;
@@ -166,8 +166,15 @@ public class ConstraintSolver {
 		for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 			for (ICrySLPredicateParameter p : pred.getParameters()) {
 				// TODO: FIX Cipher rule
-				if (p.getName().equals("transformation"))
+				if (p.getName().equals("transformation")) {
 					continue;
+				}
+				
+				// Predicates with _ can have any type
+				if (cwpi.getVarName().equals("_")) {
+					continue;
+				}
+				
 				if (cwpi.getVarName().equals(p.getName())) {
 					return new RequiredCrySLPredicate(pred, cwpi.stmt());
 				}

@@ -6,6 +6,7 @@
 bin/
 tmp/
 *.tmp
+*.temp
 *.bak
 *.swp
 *~.nib

@@ -1,7 +1,6 @@
 package crypto.rules;
 
 import java.io.Serializable;
-import java.util.Optional;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 

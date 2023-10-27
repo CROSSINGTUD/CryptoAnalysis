@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 
@@ -192,8 +191,11 @@ public class StateMachineGraphBuilder {
 			// to this node and a loop from the node to itself.
 			StateNode node = this.result.createNewNode();
 			List<CrySLMethod> label = new ArrayList<>(retrieveAllMethodsFromEvents());
-			for (StateNode startNode : startNodes)
+			
+			for (StateNode startNode : startNodes) {
 				this.result.createNewEdge(label, startNode, node);
+			}
+			
 			this.result.createNewEdge(label, node, node);
 			return new SubStateMachine(Collections.singleton(node), startNodes);
 		}
@@ -227,16 +229,17 @@ public class StateMachineGraphBuilder {
 				start.addAll(right.getStartNodes());
 				end.addAll(left.getEndNodes());
 				end.addAll(right.getEndNodes());
+				// TODO For some reason, this part removes loops in accepting states
 				// reduce all end nodes without outgoing edges to one end node
-				Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
-						.map(edge -> edge.from()).filter(node -> end.contains(node)).collect(Collectors.toSet());
-				if (endNodesWithOutgoingEdges.size() < end.size() - 1) {
-					end.removeAll(endNodesWithOutgoingEdges);
-					StateNode aggrNode = this.result.aggregateNodesToOneNode(end, end.iterator().next());
-					end.clear();
-					end.add(aggrNode);
-					end.addAll(endNodesWithOutgoingEdges);
-				}
+//				Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
+//						.map(edge -> edge.from()).filter(node -> end.contains(node)).collect(Collectors.toSet());
+//				if (endNodesWithOutgoingEdges.size() < end.size() - 1) {
+//					end.removeAll(endNodesWithOutgoingEdges);
+//					StateNode aggrNode = this.result.aggregateNodesToOneNode(end, end.iterator().next());
+//					end.clear();
+//					end.add(aggrNode);
+//					end.addAll(endNodesWithOutgoingEdges);
+//				}
 				break;
 			case ONE_OR_MORE:
 			case ZERO_OR_MORE:

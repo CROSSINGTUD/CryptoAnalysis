@@ -12,6 +12,8 @@ import crypto.interfaces.ISLConstraint;
  */
 public class ParameterAwarePredicate extends CrySLPredicate {
 
+	private static final long serialVersionUID = 1L;
+
 	public ParameterAwarePredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> variables, Boolean negated) {
 		this(baseObject, name, variables, negated, null);
 	}

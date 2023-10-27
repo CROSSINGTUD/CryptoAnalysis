@@ -12,6 +12,8 @@ import crypto.interfaces.ISLConstraint;
  * */
 public class CrySLExceptionConstraint implements ISLConstraint {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The Method throwing the Exception.
 	 * */

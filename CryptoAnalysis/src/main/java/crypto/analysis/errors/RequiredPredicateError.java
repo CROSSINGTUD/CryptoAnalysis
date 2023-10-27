@@ -2,7 +2,6 @@ package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.reporting.SARIFReporter;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 

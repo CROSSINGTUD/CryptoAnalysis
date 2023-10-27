@@ -80,9 +80,6 @@ public class CrySLMethodToSootMethod {
 				}
 			}
 		}
-		if(res.isEmpty()){
-			LOGGER.warn("Couldn't find any method for CrySLMethod: " + label);
-		}
 		return res;
 	}
 

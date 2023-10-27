@@ -42,7 +42,6 @@ public class ExceptionAwareTransformer extends BodyTransformer {
 			PackManager.v().getPack("jap").add(new Transform(phaseName, new ExceptionAwareTransformer(rule)));
 			PhaseOptions.v().setPhaseOption(phaseName, "on");
 		}
-		PackManager.v().runPacks();
 	}
 
 	private final SootClass spec;

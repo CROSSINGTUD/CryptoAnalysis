@@ -53,7 +53,7 @@ import typestate.TransitionFunction;
 public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create();
-	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
+	protected final Map<Class<?>, Integer> errorMarkerCount = new HashMap<Class<?>, Integer>();
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
 
 	private void addMarker(AbstractError error) {

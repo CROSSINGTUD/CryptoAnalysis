@@ -37,7 +37,6 @@ public abstract class ExtendedIDEALAnaylsis {
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
-	private HashSet seeds;
 
 	public ExtendedIDEALAnaylsis() {
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
@@ -129,6 +128,7 @@ public abstract class ExtendedIDEALAnaylsis {
 				.newHashMap();
 		for (Query s : seeds) {
 			if (s instanceof WeightedForwardQuery) {
+				@SuppressWarnings("unchecked")
 				WeightedForwardQuery<TransitionFunction> seed = (WeightedForwardQuery<TransitionFunction>) s;
 				run((WeightedForwardQuery<TransitionFunction>) seed);
 				if (getResults() != null) {

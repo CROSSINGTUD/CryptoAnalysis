@@ -7,6 +7,8 @@ import crypto.interfaces.ICrySLPredicateParameter;
 
 public class CrySLArithmeticConstraint extends CrySLLiteral {
 
+	private static final long serialVersionUID = 1L;
+
 	public enum ArithOp { p, n, m}
 	/* p = +
 	 * n = -

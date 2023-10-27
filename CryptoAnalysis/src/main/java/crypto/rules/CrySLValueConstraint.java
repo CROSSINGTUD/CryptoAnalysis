@@ -7,6 +7,7 @@ import java.util.Set;
 
 public class CrySLValueConstraint extends CrySLLiteral {
 	
+	private static final long serialVersionUID = 1L;
 	CrySLObject var;
 	List<String> valueRange;
 	

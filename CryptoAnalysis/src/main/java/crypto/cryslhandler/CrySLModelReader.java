@@ -34,6 +34,8 @@ import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.validation.Issue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.interfaces.ICrySLPredicateParameter;
@@ -90,7 +92,7 @@ import de.darmstadt.tu.crossing.crySL.WildcardPredicateParameter;
 
 public class CrySLModelReader {
 
-	private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CrySLModelReader.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(CrySLModelReader.class);
 
 	private StateMachineGraph smg = null;
 	private JvmTypeReference currentClass;
