@@ -93,7 +93,7 @@ public abstract class AbstractHeadlessTest {
 	}
 
 	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
-		G.v().reset();
+		G.reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {

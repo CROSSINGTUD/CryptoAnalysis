@@ -43,7 +43,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), new FalseNegatives(1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216"), "<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>");
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 
 		scanner.exec();
 	  	assertErrors();

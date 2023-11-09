@@ -89,7 +89,7 @@ public class ReporterHelper {
 		report += String.format("\tNumber of Objects Analyzed: %s\n", objects.size());
 		
 		if (errorMarkers.rowKeySet().isEmpty()) {
-			report += "\tNo violation of any of the rules found.\n";
+			report += "\n\tNo violation of any of the rules found.\n";
 		} else {
 			report += "\n\tCryptoAnalysis found the following violations. For details see description above.\n";
 			

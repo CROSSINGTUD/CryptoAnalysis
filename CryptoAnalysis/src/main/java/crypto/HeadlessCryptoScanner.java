@@ -164,10 +164,10 @@ public abstract class HeadlessCryptoScanner {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
 		callGraphWatch = Stopwatch.createStarted();
-		// Soot doesn't allow to run the "jap" pack alone, hence all packs are executed
-		// PackManager.v().getPack("cg").apply();
-		// PackManager.v().getPack("wjtp").apply();
-		PackManager.v().runPacks();
+		
+		PackManager.v().getPack("cg").apply();
+		PackManager.v().getPack("wjtp").apply();
+		// PackManager.v().runPacks();
 	}
 	
 	public String toString() {

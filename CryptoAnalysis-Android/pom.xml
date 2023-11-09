@@ -70,20 +70,20 @@
 			<artifactId>CryptoAnalysis</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-summaries</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-android</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-summaries</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-android</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>
