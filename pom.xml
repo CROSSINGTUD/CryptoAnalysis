@@ -9,7 +9,10 @@
 	<artifactId>CryptoAnalysis-Parent</artifactId>
 	<version>2.8.0</version>
 	<packaging>pom</packaging>
-	<name>CryptoAnalysis-parent</name>
+	
+	<name>CryptoAnalysis</name>
+	<description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler</description>
+	<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
 
 	<licenses>
 		<license>
@@ -17,6 +20,7 @@
 			<url>https://www.eclipse.org/legal/epl-2.0/</url>
 		</license>
 	</licenses>
+
 	<developers>
 		<developer>
 			<id>CogniCrypt</id>
@@ -24,14 +28,12 @@
 			<email>cognicrypt@eim.upb.de</email>
 		</developer>
 	</developers>
+	
 	<scm>
 		<connection>scm:git:git@github.com:CROSSINGTUD/CryptoAnalysis.git</connection>
 		<developerConnection>scm:git:ssh://github.com:CROSSINGTUD/CryptoAnalysis.git</developerConnection>
 		<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
 	</scm>
-
-	<description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler</description>
-	<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
 
 	<modules>
 		<module>CryptoAnalysis</module>
