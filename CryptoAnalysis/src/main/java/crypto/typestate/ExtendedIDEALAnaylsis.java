@@ -114,7 +114,8 @@ public abstract class ExtendedIDEALAnaylsis {
 
     /**
      * Only use this method for testing
-     * @return
+     * 
+     * @return map with the forward query
      */
 	public Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> run() {
 		Set<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();

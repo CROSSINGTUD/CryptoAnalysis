@@ -54,7 +54,7 @@ public class CrySLModelReader {
 
 	/**
 	 * Creates a CrySLModelReader
-	 * @throws MalformedURLException
+	 * @throws MalformedURLException If there is a problem with the URL
 	 */
 	public CrySLModelReader() throws MalformedURLException {
 		CrySLStandaloneSetup crySLStandaloneSetup = new CrySLStandaloneSetup();
@@ -82,10 +82,11 @@ public class CrySLModelReader {
 	 * @param stream the {@link InputStream} holds the CrySL file content
 	 * @param virtualFileName the name needs following structure [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
 	 * @return the {@link CrySLRule}
-	 * @throws IllegalArgumentException, IOException
-	 * @throws CryptoAnalysisException
+	 * @throws IllegalArgumentException If the file for the rule cannot be found
+	 * @throws IOException If there is a problem with reading the file
+	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException{
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException {
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
 			throw new CryptoAnalysisException ("The prefix of "+virtualFileName+" does not correspond to "+cryslFileEnding);
 		}
@@ -105,7 +106,7 @@ public class CrySLModelReader {
 	 *
 	 * @param ruleFile the CrySL file
 	 * @return the {@link CrySLRule} object
-	 * @throws CryptoAnalysisException
+	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
 		final String fileName = ruleFile.getName();
