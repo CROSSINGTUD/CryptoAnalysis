@@ -6,6 +6,7 @@
 bin/
 tmp/
 *.tmp
+*.temp
 *.bak
 *.swp
 *~.nib
@@ -203,3 +204,4 @@ buildNumber.properties
 # End of https://www.toptal.com/developers/gitignore/api/java,maven,eclipse,intellij+all
 
 .flattened-pom.xml
+/shippable/testresults/

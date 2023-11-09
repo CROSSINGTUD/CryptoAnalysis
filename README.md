@@ -49,18 +49,19 @@ Other additional arguments that can be used are as follows:
 --cg <selection_of_call_graph_for_analysis> (possible values are CHA, SPARK, SPARKLIB)
 --sootPath <absolute_path_of_whole_project>
 --identifier <identifier_for_labelling_output_files>
---reportPath <directory_location_for_cognicrypt_report>
---reportFormat <format of cognicrypt_report> (possible values are TXT, SARIF, CSV)
+--reportPath <directory_location_for_cryptoanalysis_report>
+--reportFormat <format of cryptoanalysis_report> (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
 --preanalysis (enables pre-analysis)
 --visualization (enables the visualization, but also requires --reportPath option to be set)
 --providerDetection (enables provider detection analysis)
+--dstats (disable the output of the analysis statistics in the reports)
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
 
 ## Report and Error Types
 
-In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the console. CogniCrypt<sub>SAST</sub> reporst misuses when the code is not compliant with the CrySL rules. For each misuse CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
+CogniCrypt<sub>SAST</sub> reports misuses when the code is not compliant with the CrySL rules. For each misuse CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
 
 * **ConstraintError**: A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.
 * **NeverTypeOfError**: Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a `String`. (see `KeyStore` rule [here](https://github.com/CROSSINGTUD/Crypto-API-Rules/blob/master/src/de/darmstadt/tu/crossing/KeyStore.cryptsl)).
@@ -71,7 +72,14 @@ In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the consol
 * **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
 * **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default).
 
-When the option `--reportPath <directory_location_for_cognicrypt_report>` is chosen, CogniCrypt<sub>SAST</sub> writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+CogniCrypt<sub>SAST</sub> supports different report formats, which can be set by using `--reportformat` option. The supported formats are:
+- `CMD`: The report is printed to the command line. The content is equivalent to the format from the `TXT` option.
+- `TXT`: The report is written to the text file `CryptoAnalysis-Report.txt`. The content is equivalent to the format from the `CMD` option.  Additionally, the .jimple files of the classes, where misuses were found in, are output. Jimple is an intermediate representation close to the syntax of Java.
+- `SARIF`: The report is written to the JSON file `CryptoAnalysis-Report.json`. The content is formatted in the SARIF format.
+- `CSV`: The report is written to the CSV file `CryptoAnalysis-Report.csv`. The content is formatted in the CSV format.
+- `CSV_SUMMARY`: The report is written to the file `CryptoAnalysis-Report-Summary.csv` and contains a summary of the analysis results. Compared to the `CSV` format, this format does not provide concrete information about the errors, it only lists the amount of each misuse type. This option was previously implemented by the `CSV` option, which has been changed to provide more detailed information about the errors in the CSV format.
+
+If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD TXT CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
 
 ## Updating CrySL Rules
 
