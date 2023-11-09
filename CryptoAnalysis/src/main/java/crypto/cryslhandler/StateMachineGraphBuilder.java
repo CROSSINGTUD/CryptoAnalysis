@@ -20,7 +20,7 @@ import de.darmstadt.tu.crossing.crySL.Expression;
 import de.darmstadt.tu.crossing.crySL.RequiredBlock;
 
 /**
- * This class will build a {@FiniteStateMachine} for a given ORDER expression from crysl rules.
+ * This class will build a {@link crypto.interfaces.FiniteStateMachine} for a given ORDER expression from crysl rules.
  * @author marvinvogel
  *
  */

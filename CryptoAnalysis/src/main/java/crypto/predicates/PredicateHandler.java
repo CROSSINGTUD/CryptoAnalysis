@@ -144,10 +144,7 @@ public class PredicateHandler {
 		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
 		return added;
 	}
-
-	/**
-	 * @return the existingPredicates
-	 */
+	
 	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
