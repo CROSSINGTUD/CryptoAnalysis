@@ -69,30 +69,19 @@
 			<artifactId>CryptoAnalysis</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-summaries</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-android</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-summaries</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-android</artifactId>
+			<version>${flowDroidVersion}</version>
+		</dependency>
 	</dependencies>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 </project>
