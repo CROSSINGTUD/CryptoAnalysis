@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -27,8 +28,9 @@ import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
+import crypto.reporting.CSVSummaryReporter;
 import crypto.reporting.CommandLineReporter;
-import crypto.reporting.ErrorMarkerListener;
+import crypto.reporting.Reporter;
 import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
@@ -162,10 +164,10 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	public String toString() {
-		String s = "HeadllessCryptoScanner: \n";
-		s += "\tSoftwareIdentifier: "+ softwareIdentifier() +"\n";
-		s += "\tApplicationClassPath: "+ applicationClassPath() +"\n";
-		s += "\tSootClassPath: "+ sootClassPath() +"\n\n";
+		String s = "HeadlessCryptoScanner: \n";
+		s += "\tSoftwareIdentifier: " + softwareIdentifier() + "\n";
+		s += "\tApplicationClassPath: " + applicationClassPath() + "\n";
+		s += "\tSootClassPath: " + sootClassPath() + "\n\n";
 		return s;
 	}
 
@@ -178,25 +180,52 @@ public abstract class HeadlessCryptoScanner {
 				BoomerangPretransformer.v().apply();
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
-				ErrorMarkerListener fileReporter;
-				if(reportFormat()!= null) {
-					switch (reportFormat()) {
-					case SARIF:
-						fileReporter = new SARIFReporter(getOutputFolder(), rules);
-						break;
-					case CSV:
-						fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules, callGraphWatch.elapsed(TimeUnit.MILLISECONDS));
-						break;
-					default:
-						fileReporter = new TXTReporter(getOutputFolder(), rules);
-					}
-				}
-				else {
-					fileReporter = new CommandLineReporter(rules);
-				}
+				
+				long callgraphConstructionTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
+				
 				final CrySLResultsReporter reporter = new CrySLResultsReporter();
-				if(getAdditionalListener() != null)
-					reporter.addReportListener(getAdditionalListener());
+				Reporter fileReporter;
+				
+				Set<ReportFormat> formats = reportFormats();
+				
+				if (formats.size() > 0) {
+					for (ReportFormat format : formats) {
+						switch (format) {
+							case CMD:
+								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							case TXT:
+								fileReporter = new TXTReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							case SARIF:
+								fileReporter = new SARIFReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							case CSV:
+								fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							case CSV_SUMMARY:
+								fileReporter = new CSVSummaryReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							default:
+								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+						}
+					}
+				} else {
+					// if the --reportformat flag is not set or no format is specified, use the command line reporter as default
+					fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+					reporter.addReportListener(fileReporter);
+				}
+				
+				if(getAdditionalListener() != null) {
+					reporter.addReportListener(getAdditionalListener());	
+				}
+				
 				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
@@ -215,23 +244,25 @@ public abstract class HeadlessCryptoScanner {
 							if(getOutputFolder() == null) {
 								LOGGER.error("The visualization requires the --reportDir option.");
 							}
-							File vizFile = new File(getOutputFolder()+"/viz/ObjectId#"+seed.getObjectId()+".json");
+							
+							File vizFile = new File(getOutputFolder() + "/viz/ObjectId#" + seed.getObjectId() + ".json");
 							vizFile.getParentFile().mkdirs();
+							
 							return new IDEVizDebugger<>(vizFile, icfg());
 						}
 						return super.debugger(solver, seed);
 					}
 				};
 				
-				reporter.addReportListener(fileReporter);
-				
 				if (providerDetection()) {
 					ProviderDetection providerDetection = new ProviderDetection();
 
 					if(rulesetRootPath == null) {
-						rulesetRootPath = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
 					}
+					
 					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rulesetRootPath);
+					
 					if(detectedProvider != null) {
 						rules.clear();
 						switch(settings.getRulesetPathType()) {
@@ -366,13 +397,17 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean enableVisualization(){
 		return settings.isVisualization();
 	}
-	 
-	protected ReportFormat reportFormat() {
-		return settings.getReportFormat();
+	
+	protected Set<ReportFormat> reportFormats() {
+		return settings.getReportFormats();
 	}
 	
 	protected boolean providerDetection() {
 		return settings.isProviderDetectionAnalysis();
+	}
+	
+	protected boolean includeStatistics() {
+		return settings.isIncludeStatistics();
 	}
 	
 	private static String pathToJCE() {
