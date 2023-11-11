@@ -20,10 +20,24 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	protected Ruleset getRuleSet() {
 		return Ruleset.JavaCryptographicArchitecture;
 	}
+
+	@Test
+	public void positiveRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+		int keySize = 4096;
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(parameters);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.hasEnsuredPredicate(keyPair);
+	}
 	
 	@Test
 	public void negativeRsaParameterSpecTest() throws GeneralSecurityException, IOException {
-		Integer keySize = new Integer(102);
+		// Since 3.0.0: key size of 2048 is not allowed
+		int keySize = 2048;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
 		Assertions.notHasEnsuredPredicate(parameters);
@@ -34,21 +48,8 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void positiveRsaParameterSpecTest() throws GeneralSecurityException, IOException {
-		Integer keySize = new Integer(2048);
-		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
-		Assertions.hasEnsuredPredicate(parameters);
-		generator.initialize(parameters, new SecureRandom());
-		KeyPair keyPair = generator.generateKeyPair();
-		Assertions.hasEnsuredPredicate(keyPair);
-	}
-
-	@Test
 	public void positiveRsaParameterSpecTestBigInteger() throws GeneralSecurityException, IOException {
-		Integer keySize = new Integer(2048);
+		int keySize = 4096;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, BigInteger.valueOf(65537));
 		Assertions.extValue(0);
@@ -57,6 +58,20 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 		generator.initialize(parameters, new SecureRandom());
 		KeyPair keyPair = generator.generateKeyPair();
 		Assertions.hasEnsuredPredicate(keyPair);
+	}
+	
+	@Test
+	public void negativeRsaParameterSpecTestBigInteger() throws GeneralSecurityException, IOException {
+		// Since 3.0.0: key size of 2048 is not allowed
+		int keySize = 2048;
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, BigInteger.valueOf(65537));
+		Assertions.extValue(0);
+		Assertions.extValue(1);
+		Assertions.notHasEnsuredPredicate(parameters);
+		generator.initialize(parameters, new SecureRandom());
+		KeyPair keyPair = generator.generateKeyPair();
+		Assertions.notHasEnsuredPredicate(keyPair);
 	}
 
 }
