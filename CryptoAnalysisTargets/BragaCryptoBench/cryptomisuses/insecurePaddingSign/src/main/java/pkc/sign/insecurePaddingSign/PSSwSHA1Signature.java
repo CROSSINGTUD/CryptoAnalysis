@@ -9,11 +9,37 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public final class PSSwSHA1Signature {
 
-	public static void main(String[] args) throws Exception {
-
+	/**
+	 * Original test with updated constraints:
+	 * 	kg.initialize(2048, ...) -> kg.initialize(4096, ...)
+	 */
+	public void positiveTestCase() throws Exception {
 		Security.addProvider(new BouncyCastleProvider());
 
 		KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA", "BC");
+		kg.initialize(4096, new SecureRandom());
+		KeyPair kp = kg.generateKeyPair();
+		Signature sig = Signature.getInstance("SHA1withRSAandMGF1", "BC");
+
+		byte[] m = "Testing RSA PSS w/ SHA1".getBytes("UTF-8");
+
+		sig.initSign(kp.getPrivate(), new SecureRandom());
+		sig.update(m);
+		byte[] s = sig.sign();
+
+		sig.initVerify(kp.getPublic());
+		sig.update(m);
+	}
+
+	/**
+	 * Original test without updates
+	 */
+	public void negativeTestCase() throws Exception {
+		Security.addProvider(new BouncyCastleProvider());
+
+		KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA", "BC");
+		
+		// Since 3.0.0: key size of 2048 is not allowed
 		kg.initialize(2048, new SecureRandom());
 		KeyPair kp = kg.generateKeyPair();
 		Signature sig = Signature.getInstance("SHA1withRSAandMGF1", "BC");
@@ -26,6 +52,5 @@ public final class PSSwSHA1Signature {
 
 		sig.initVerify(kp.getPublic());
 		sig.update(m);
-
 	}
 }
