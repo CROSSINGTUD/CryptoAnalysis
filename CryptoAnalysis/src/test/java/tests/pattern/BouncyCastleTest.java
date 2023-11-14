@@ -203,7 +203,7 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 	
 	@Override
 	protected String getSootClassPath() {
-		String bouncyCastleJarPath = new File("src/test/resources/bcprov-jdk15on-1.60.jar").getAbsolutePath();
+		String bouncyCastleJarPath = new File("src/test/resources/bcprov-jdk18on-1.76.jar").getAbsolutePath();
 		return super.getSootClassPath() +File.pathSeparator +bouncyCastleJarPath;
 	}
 }
