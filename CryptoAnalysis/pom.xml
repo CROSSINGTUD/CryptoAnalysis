@@ -256,7 +256,7 @@
 			any newer version of maven-invoker-plugin than 3.2.1, causes tests to crash with runtime exceptions. -->
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
-			<version>5.1.0</version>
+			<version>7.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
