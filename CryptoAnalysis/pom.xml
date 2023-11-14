@@ -266,15 +266,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.70</version>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.76</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk15on -->
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bctls-jdk15on</artifactId>
-			<version>1.70</version>
+			<artifactId>bctls-jdk18on</artifactId>
+			<version>1.76</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
