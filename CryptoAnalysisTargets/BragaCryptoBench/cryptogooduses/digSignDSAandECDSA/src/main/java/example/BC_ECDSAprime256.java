@@ -18,7 +18,7 @@ public final class BC_ECDSAprime256 {
 
         ECGenParameterSpec ec = new ECGenParameterSpec("prime256v1");
         kpg.initialize(ec, new SecureRandom());
-        Signature signer = Signature.getInstance("SHA256WithECDSA", "BC");
+        Signature signer = Signature.getInstance("SHA256withECDSA", "BC");
 
         KeyPair kp = kpg.generateKeyPair();
 
@@ -27,7 +27,7 @@ public final class BC_ECDSAprime256 {
         signer.update(doc);
         byte[] signature = signer.sign();
 
-        Signature verifier = Signature.getInstance("SHA256WithECDSA", "BC");
+        Signature verifier = Signature.getInstance("SHA256withECDSA", "BC");
 
         verifier.initVerify(kp.getPublic());
         verifier.update(doc);

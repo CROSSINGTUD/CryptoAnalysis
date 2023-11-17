@@ -573,7 +573,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		// TODO size should be 1024, not 1048
+		// TODO size should be 2048, not 1048
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void main(java.lang.String[])>", RequiredPredicateError.class, 8);
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_512: void main(java.lang.String[])>", ConstraintError.class, 2);
