@@ -330,7 +330,7 @@
 		<dependency>
 			<groupId>de.darmstadt.tu.crossing.CrySL</groupId>
 			<artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-			<version>2.0.2</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
