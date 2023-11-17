@@ -655,7 +655,7 @@ public class ConstraintSolver {
 		 * @return extracted array values
 		 */
 		protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite){
-			Value arrayLocal = allocSite.getValue();
+			Value arrayLocal = allocSite.stmt().getUnit().get().getDefBoxes().get(0).getValue();
 			Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 			Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
 				if (methodBody != null) {
