@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -103,6 +104,12 @@ public class CrySLModelReader {
 	private static final String THIS = "this";
 	private static final String NULL = "null";
 	private static final String UNDERSCORE = "_";
+	
+	/**
+	 * For some reason, xtext is not able to resolve a call to 'getEncoded()' for the class java.security.key
+	 * and its subclasses. In these cases, we have to manually resolve the call
+	 */
+	private static final Set<String> buggedKeyRules = new HashSet<>(Arrays.asList("java.security.Key", "javax.crypto.SecretKey", "java.security.PublicKey", "java.security.PrivateKey"));
 
 	/**
 	 * Creates a CrySLModelReader
@@ -213,8 +220,14 @@ public class CrySLModelReader {
 			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
 		}
 		
+		String currentClass = ((Domainmodel)resource.getContents().get(0)).getJavaType().getQualifiedName();
+		
 		if (runValidator(resource, Severity.WARNING)) {
-			throw new CryptoAnalysisException("Skipping rule since it contains errors: " + resource.getURI());
+			if (buggedKeyRules.contains(currentClass)) {
+				LOGGER.info("Class " + currentClass + " is of type java.security.key. The call to 'getEncoded()' will be resolved manually.");
+			} else {
+				throw new CryptoAnalysisException("Skipping rule since it contains errors: " + resource.getURI());
+			}
 		}
 		
 		try {
@@ -584,6 +597,10 @@ public class CrySLModelReader {
 				parameters = Collections.emptyList();
 		}
 		return new CrySLPredicate(null, name, parameters, negated);
+	}
+	
+	public static Set<String> getBuggedKeyRules() {
+		return buggedKeyRules;
 	}
 
 	public static String filterQuotes(final String dirty) {

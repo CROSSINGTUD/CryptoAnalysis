@@ -56,10 +56,10 @@ public class CrySLMethodToSootMethod {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
-//		Scene.v().forceResolve(declaringClass, SootClass.BODIES);
 		if (!Scene.v().containsClass(declaringClass)){
 			return res;
 		}
+		Scene.v().forceResolve(declaringClass, SootClass.BODIES);
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		List<SootClass> classes = Lists.newArrayList(sootClass);
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
