@@ -57,9 +57,9 @@ public class CSVSummaryReporter extends Reporter {
 	 * 
 	 * @param reportDir A {@link String} path giving the location of the report directory.
 	 *                  The reportPath should end without an ending file separator.
-	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param softwareId A {@link String} for the analyzed software.
 	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
-	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param callGraphConstructionTime The time in milliseconds for the construction of the callgraph.
 	 * @param includeStatistics Set this value to true, if the analysis report should contain some
 	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
 	 *                          to false, no statistics will be output. 

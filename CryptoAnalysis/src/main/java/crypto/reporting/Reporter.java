@@ -23,7 +23,7 @@ import typestate.TransitionFunction;
  * Superclass for all reporters.
  * 
  * This class is used to define and implement the basic parts, which all reporter should be able to support. This includes
- * the computation of all statistics for the analysis and the basic logic for methods defined in the {@link ICrySLResultsListener}.
+ * the computation of all statistics for the analysis and the basic logic for methods defined in the {@link crypto.analysis.ICrySLResultsListener}.
  * 
  * This class is abstract. Subclasses have to call the constructor and overwrite the method handleAnalysisResults(), which is called
  * after the analysis is finished.
@@ -50,7 +50,7 @@ public abstract class Reporter extends ErrorMarkerListener {
 	 * The constructor to initialize all attributes. Since this class is abstract, all subclasses
 	 * have to call this constructor.
 	 * 
-	 * @param reportDir A {@link String} path giving the location of the report directory.
+	 * @param outputFolder A {@link File} for the location of the report directory.
 	 *                  The reportPath should end without an ending file separator.
 	 * @param softwareID A {@link String} for the analyzed software.
 	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.

@@ -43,7 +43,7 @@ public class CrySLRulesetSelector {
 	 * @param ruleFormat the file extension of the CrySL files
 	 * @param set the {@link Ruleset} for which the {@link CrySLRule} objects should be created for
 	 * @return the {@link List} with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If there is an error reading a ruleset
 	 */ 
 	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, RuleFormat ruleFormat, Ruleset... set) throws CryptoAnalysisException {
 		
@@ -58,11 +58,13 @@ public class CrySLRulesetSelector {
 	}
 
 	/**
-	 * Computes the ruleset from a string. The sting
+	 * Computes the ruleset from a string.
 	 * 
-	 * @param rulesetString
-	 * @return
-	 * @throws CryptoAnalysisException 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
+	 * @param ruleFormat the file extension of the CrySL file
+	 * @param rulesetString String 
+	 * @return a list of the rules from the ruleset
+	 * @throws CryptoAnalysisException If there is no ruleset
 	 */
 	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, RuleFormat ruleFormat,
 			String rulesetString) throws CryptoAnalysisException {
@@ -110,7 +112,7 @@ public class CrySLRulesetSelector {
 	 * @param ruleset the {@link Ruleset} where the rule belongs to 
 	 * @param rulename the name of the rule
 	 * @return the {@link CrySLRule} object
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If the rule cannot be found
 	 */
 	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset, String rulename) throws CryptoAnalysisException {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);

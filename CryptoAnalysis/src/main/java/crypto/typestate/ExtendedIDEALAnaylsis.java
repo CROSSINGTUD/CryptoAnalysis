@@ -111,11 +111,12 @@ public abstract class ExtendedIDEALAnaylsis {
 		return seeds;
 	}
 
-	/**
-	 * Only use this method for testing
-	 * 
-	 * @return
-	 */
+
+    /**
+     * Only use this method for testing
+     * 
+     * @return map with the forward query
+     */
 	public Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> run() {
 		Set<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
 		ReachableMethods rm = Scene.v().getReachableMethods();
