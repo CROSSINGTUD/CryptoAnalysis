@@ -11,6 +11,8 @@ public class CrySLException  {
 	/**
 	 * Construct a {@link CrySLException} from the fully qualified classname
 	 * of the {@link Exception} to store.
+	 * 
+	 * @param exception	the exception's name
 	 */
 	public CrySLException(String exception) {
 		this.exception = exception;

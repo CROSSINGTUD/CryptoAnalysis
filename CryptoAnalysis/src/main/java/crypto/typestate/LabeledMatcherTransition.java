@@ -34,6 +34,11 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	/**
 	 * Match the called method against a declared method and checker whether
 	 * the called method could actually be the declared one.
+	 * 
+	 * @param called	the called method
+	 * @param declared	the declared method
+	 * 
+	 * @return true, if called and declared method match
 	 */
 	public static boolean matches(SootMethod called, SootMethod declared) {
 		// Name is equal
@@ -53,8 +58,13 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	}
 
 	/**
-	 * Returns whether parent is a supertype of child, i.e. if they
-	 * are the same, child implements or extends parent transitivly.
+	 * Returns whether parent is a super type of child, i.e. if they
+	 * are the same, child implements or extends parent transitively.
+	 * 
+	 * @param child		the child to check
+	 * @param parent	the parent to check against
+	 * 
+	 * @return true, if parent is a super type of child
 	 */
 	public static boolean isSubtype(SootClass child, SootClass parent) {
 		if (child.equals(parent))
@@ -118,7 +128,7 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	 * defined here, to get the {@link CrySLMethod}s that were resolved to the
 	 * matching {@link SootMethod}s.
 	 *
-	 * @param method
+	 * @param method	the given method
 	 * @return The {@link CrySLMethod}'s matching the given soot method.
 	 */
 	public Optional<CrySLMethod> getMatching(SootMethod method) {

@@ -121,7 +121,6 @@ public abstract class EvaluableConstraint {
 	 * 
 	 * @param callSite   call site at which sootValue is involved
 	 * @param allocSite  allocation site at which sootValue is involved
-	 * @param arrayLocal soot array local variable for which values are to be found
 	 * @return extracted array values
 	 */
 	protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite,

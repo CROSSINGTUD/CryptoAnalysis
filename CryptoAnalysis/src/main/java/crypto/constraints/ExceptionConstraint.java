@@ -45,6 +45,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * Checks if a) the method that is called is the same as the method of
 	 * this constraint and b) if the specified exception is caught.
+	 * 
+	 * @param call	the called statement
 	 */
 	public void evaluate(Statement call) {
 		try {
@@ -58,12 +60,12 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	}
 
 	/**
-	 * Returns whether the `trapped` unit ins trapped in the method body.
+	 * Returns whether the `trapped` unit is trapped in the method body.
 	 *
-	 * @param body
-	 * @param trap
-	 * @param trapped
-	 * @return Returns whether the `trapped` unit ins trapped in the method body.
+	 * @param body	the method's body
+	 * @param trap	the trap
+	 * @param trapped	the trapped unit
+	 * @return Returns whether the `trapped` unit is trapped in the method body.
 	 */
 	public static boolean trapsUnit(final Body body, final Trap trap, final Unit trapped) {
 		boolean begun = false;
@@ -81,8 +83,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * Returns the handler, that catches the exception thrown by callee in the method.
 	 *
-	 * @param method in which callee is called.
-	 * @param callee The called Method, throwing the exception.
+	 * @param body The called Method, throwing the exception.
+	 * @param unit Unit where callee is called.
 	 * @param exception The called Method, throwing the exception.
 	 * @return Returns the handler, that catches the exception thrown by callee in the method.
 	 */
@@ -96,6 +98,10 @@ public class ExceptionConstraint extends EvaluableConstraint {
 
 	/**
 	* Returns all units in the method body, excluding exception handlers.
+	* 
+	* @param body	the method's body
+	* 
+	* @return units	all collected units
 	*/
 	public static Collection<Unit> getUnits(Body body) {
 		Collection<Unit> units = new ArrayList<>();
