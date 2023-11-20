@@ -40,6 +40,7 @@
 	<properties>
 		<flowDroidVersion>2.12.0</flowDroidVersion>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>

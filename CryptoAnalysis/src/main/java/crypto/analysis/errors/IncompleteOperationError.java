@@ -122,6 +122,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
 		Set<String> expectedMethodCallsSet = Sets.newHashSet();
 		for (SootMethod method : expectedMethodCalls) {

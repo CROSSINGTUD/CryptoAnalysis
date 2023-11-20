@@ -183,7 +183,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>

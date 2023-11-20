@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
+
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
@@ -25,6 +28,7 @@ import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.preanalysis.ExceptionAwareTransformer;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
@@ -128,7 +132,8 @@ public abstract class HeadlessCryptoScanner {
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
-			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
+			ExceptionAwareTransformer.setup(rules);
+			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
 		}
@@ -141,7 +146,7 @@ public abstract class HeadlessCryptoScanner {
 	private void checkIfUsesObject() {
 		final SeedFactory seedFactory = new SeedFactory(HeadlessCryptoScanner.rules);
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
-			protected void internalTransform(Body body, String phase, Map options) {
+			protected void internalTransform(Body body, String phase, Map<String, String> options) {
 				if (!body.getMethod().getDeclaringClass().isApplicationClass()) {
 					return;
 				}
@@ -158,9 +163,11 @@ public abstract class HeadlessCryptoScanner {
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
-		callGraphWatch = Stopwatch.createStarted();        
+		callGraphWatch = Stopwatch.createStarted();
+		
 		PackManager.v().getPack("cg").apply();
-        PackManager.v().getPack("wjtp").apply();
+		PackManager.v().getPack("wjtp").apply();
+		// PackManager.v().runPacks();
 	}
 	
 	public String toString() {
@@ -288,7 +295,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
-		G.v().reset();
+		G.reset();
 		Options.v().set_whole_program(wholeProgram);
 		switch (callGraphAlgorithm()) {
 		case CHA:

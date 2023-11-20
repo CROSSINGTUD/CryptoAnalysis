@@ -2,17 +2,16 @@ package crypto.analysis;
 
 import java.io.File;
 import java.util.List;
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
-
-import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
-
-import crypto.cryslhandler.CrySLModelReader;
-import crypto.exceptions.CryptoAnalysisException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+
+import crypto.cryslhandler.CrySLModelReader;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 
 public class CrySLRulesetSelector {
 	

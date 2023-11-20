@@ -15,7 +15,7 @@ public final class BC_128bits_DSA3072xSHA256 {
  
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA", "BC");
         kpg.initialize(3072, new SecureRandom());
-        Signature sign1 = Signature.getInstance("SHA256WithDSA", "BC");
+        Signature sign1 = Signature.getInstance("SHA256withDSA", "BC");
 
         KeyPair kp1 = kpg.generateKeyPair();
 
@@ -24,7 +24,7 @@ public final class BC_128bits_DSA3072xSHA256 {
         sign1.update(doc);
         byte[] signed1 = sign1.sign();
 
-        Signature verfier1 = Signature.getInstance("SHA256WithDSA", "BC");
+        Signature verfier1 = Signature.getInstance("SHA256withDSA", "BC");
 
         verfier1.initVerify(kp1.getPublic());
         verfier1.update(doc);

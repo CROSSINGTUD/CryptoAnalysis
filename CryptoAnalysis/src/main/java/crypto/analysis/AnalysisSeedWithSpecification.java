@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,6 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
@@ -25,7 +27,7 @@ import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
-import crypto.constraints.ConstraintSolver.EvaluableConstraint;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -51,7 +53,6 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
@@ -244,9 +245,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		}
 		boolean satisfiesConstraintSytem = checkConstraintSystem();
-		if(predToBeEnsured.getConstraint() != null) {
-			ArrayList<ISLConstraint> temp = new ArrayList<>();
-			temp.add(predToBeEnsured.getConstraint());
+		if(predToBeEnsured.getConstraint().isPresent()) {
 			satisfiesConstraintSytem = !evaluatePredCond(predToBeEnsured);
 		}
 		
@@ -395,7 +394,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					remainingPredicates.remove(pred);
 				} else {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred()) && doPredsMatch(reqPred.getPred(), ensPred)) {
+						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
 							remainingPredicates.remove(pred);
 						}
 					}
@@ -461,15 +460,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean evaluatePredCond(CrySLPredicate pred) {
-		final ISLConstraint conditional = pred.getConstraint();
-		if (conditional != null) {
-			EvaluableConstraint evalCons = constraintSolver.createConstraint(conditional);
+		return pred.getConstraint().map(conditional -> {
+			EvaluableConstraint evalCons = EvaluableConstraint.getInstance(conditional, constraintSolver);
 			evalCons.evaluate();
-			if (evalCons.hasErrors()) {
-				return true;
-			}
-		}
-		return false;
+			return evalCons.hasErrors();
+		}).orElse(false);
 	}
 
 	private boolean doPredsMatch(CrySLPredicate pred, EnsuredCrySLPredicate ensPred) {
@@ -533,7 +528,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (rightSide instanceof Constant) {
 					values.add(retrieveConstantFromValue(rightSide));
 				} else {
-					final List<ValueBox> useBoxes = rightSide.getUseBoxes();
+					// final List<ValueBox> useBoxes = rightSide.getUseBoxes();
 
 					// varVal.put(callSite.getVarName(),
 					// retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
@@ -565,7 +560,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean isOfNonTrackableType(String varName) {
 		for (Entry<String, String> object : spec.getRule().getObjects()) {
-			if (object.getValue().equals(varName) && trackedTypes.contains(object.getKey())) {
+			if (object.getKey().equals(varName) && trackedTypes.contains(object.getValue())) {
 				return false;
 			}
 		}

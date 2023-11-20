@@ -159,7 +159,6 @@ public class PredicateHandler {
 			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
-				SootMethod method = iie.getMethod();
 				SootMethod callerMethod = statement.getMethod();
 				Value base = iie.getBase();
 				boolean paramMatch = false;

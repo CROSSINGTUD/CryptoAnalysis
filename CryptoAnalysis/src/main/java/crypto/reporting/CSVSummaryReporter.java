@@ -130,7 +130,7 @@ public class CSVSummaryReporter extends Reporter {
 		}
 		
 		// Count the number of each error class
-		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
+		Table<Class<?>, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
 		
 		for (AbstractError err : errors) {
 			Integer integer = errorTable.get(err.getClass(), err.getRule());
@@ -144,13 +144,13 @@ public class CSVSummaryReporter extends Reporter {
 		}
 
 		// Set the corresponding error headers to the number of occurred errors
-		for (Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()) {
+		for (Cell<Class<?>, CrySLRule, Integer> c : errorTable.cellSet()) {
 			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
 		}
 		
-		Map<Class, Integer> errorsAccumulated = Maps.newHashMap();
+		Map<Class<?>, Integer> errorsAccumulated = Maps.newHashMap();
 		
-		for (Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()) {
+		for (Cell<Class<?>, CrySLRule, Integer> c : errorTable.cellSet()) {
 			Integer integer = errorsAccumulated.get(c.getRowKey());
 			
 			if(integer == null) {
@@ -161,7 +161,7 @@ public class CSVSummaryReporter extends Reporter {
 			errorsAccumulated.put(c.getRowKey(), integer);
 		}
 
-		for (Entry<Class, Integer> c : errorsAccumulated.entrySet()) {
+		for (Entry<Class<?>, Integer> c : errorsAccumulated.entrySet()) {
 			put(c.getKey().getSimpleName() + "_sum", c.getValue());
 		}
 		
