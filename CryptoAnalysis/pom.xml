@@ -265,6 +265,7 @@
 			<version>32.1.3-jre</version>
 		</dependency>
 		<dependency>
+			<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
     		<version>9.3</version>
@@ -376,6 +377,5 @@
     		<artifactId>commons-io</artifactId>
     		<version>2.15.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
 	</dependencies>
 </project>
