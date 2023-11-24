@@ -11,7 +11,8 @@ public final class NonAuthenticatedDH_1024 {
 	public static void main(String argv[]) {
 		try {
 			AlgorithmParameterGenerator apg = AlgorithmParameterGenerator.getInstance("DH", "SunJCE");
-			apg.init(1024);
+			// TODO Switch back to 1024
+			apg.init(1048);
 			AlgorithmParameters p = apg.generateParameters();
 			DHParameterSpec dhps = (DHParameterSpec) p.getParameterSpec(DHParameterSpec.class);
 

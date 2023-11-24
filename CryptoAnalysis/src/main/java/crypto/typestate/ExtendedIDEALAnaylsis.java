@@ -37,9 +37,8 @@ public abstract class ExtendedIDEALAnaylsis {
 	private FiniteStateMachineToTypestateChangeFunction changeFunction;
 	private final IDEALAnalysis<TransitionFunction> analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
-	private HashSet seeds;
-	
-	public ExtendedIDEALAnaylsis(){
+
+	public ExtendedIDEALAnaylsis() {
 		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
 			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt) {
@@ -65,6 +64,7 @@ public abstract class ExtendedIDEALAnaylsis {
 			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 				return ExtendedIDEALAnaylsis.this.debugger(solver);
 			}
+
 			@Override
 			public BoomerangOptions boomerangOptions() {
 				return new CogniCryptBoomerangOptions();
@@ -84,15 +84,15 @@ public abstract class ExtendedIDEALAnaylsis {
 		CrySLResultsReporter reports = analysisListener();
 		try {
 			results = analysis.run(query);
-		} catch (IDEALSeedTimeout e){
+		} catch (IDEALSeedTimeout e) {
 			if (reports != null && query instanceof IAnalysisSeed) {
-				reports.onSeedTimeout(((IAnalysisSeed)query).asNode());
+				reports.onSeedTimeout(((IAnalysisSeed) query).asNode());
 			}
 		}
 	}
 
-
 	protected abstract ObservableICFG<Unit, SootMethod> icfg();
+
 	protected abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver);
 
 	public void log(String string) {
@@ -101,20 +101,21 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	public abstract CrySLResultsReporter analysisListener();
 
-    public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
-    	Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
-        if (!method.hasActiveBody())
-            return seeds;
-        for (Unit u : method.getActiveBody().getUnits()) {
-            seeds.addAll( getOrCreateTypestateChangeFunction().generateSeed(method, u));
-        }
-        return seeds;
-    }
+	public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
+		Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
+		if (!method.hasActiveBody())
+			return seeds;
+		for (Unit u : method.getActiveBody().getUnits()) {
+			seeds.addAll(getOrCreateTypestateChangeFunction().generateSeed(method, u));
+		}
+		return seeds;
+	}
 
 
     /**
      * Only use this method for testing
-     * @return
+     * 
+     * @return map with the forward query
      */
 	public Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> run() {
 		Set<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
@@ -124,12 +125,14 @@ public abstract class ExtendedIDEALAnaylsis {
 			MethodOrMethodContext next = listener.next();
 			seeds.addAll(computeSeeds(next.method()));
 		}
-		Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolver = Maps.newHashMap();
+		Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolver = Maps
+				.newHashMap();
 		for (Query s : seeds) {
-			if(s instanceof WeightedForwardQuery){
+			if (s instanceof WeightedForwardQuery) {
+				@SuppressWarnings("unchecked")
 				WeightedForwardQuery<TransitionFunction> seed = (WeightedForwardQuery<TransitionFunction>) s;
-				run((WeightedForwardQuery<TransitionFunction>)seed);
-				if(getResults() != null){
+				run((WeightedForwardQuery<TransitionFunction>) seed);
+				if (getResults() != null) {
 					seedToSolver.put(seed, getResults());
 				}
 			}

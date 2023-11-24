@@ -42,6 +42,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -208,6 +209,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										}
 									}
 
+									@Override
+									public void visit(UncaughtExceptionError uncaughtExceptionError) {
+										
+									}
 									@Override
 									public void visit(HardCodedError predicateError) {
 										

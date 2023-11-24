@@ -146,10 +146,7 @@ public class PredicateHandler {
 		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
 		return added;
 	}
-
-	/**
-	 * @return the existingPredicates
-	 */
+	
 	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
@@ -164,7 +161,6 @@ public class PredicateHandler {
 			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
-				SootMethod method = iie.getMethod();
 				SootMethod callerMethod = statement.getMethod();
 				Value base = iie.getBase();
 				boolean paramMatch = false;

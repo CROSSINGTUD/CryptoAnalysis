@@ -7,7 +7,7 @@ package crypto.exceptions;
  */
 public class CryptoAnalysisException extends Exception {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -4977113204413613078L;
 
 	/**
 	 * Constructs a new exception with the specified detail message.

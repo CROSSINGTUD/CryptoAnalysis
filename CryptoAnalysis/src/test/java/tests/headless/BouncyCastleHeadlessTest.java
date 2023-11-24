@@ -12,7 +12,6 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import tests.headless.FindingsType.FalseNegatives;
 import tests.headless.FindingsType.TruePositives;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
@@ -43,31 +42,37 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 
 		scanner.exec();
 	  	assertErrors();
 	}
 	
 	@Test
-	@SuppressWarnings("serial")
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
-
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
 		
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
-		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testEncryptTwo()>");
-		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+
+		// These two errors occur because AsymmetricCipherKeyPair ensures the predicate only after the constructor call
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_nomisuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_nomisuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
 		
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), new FalseNegatives(1, "Fifth parameter not randomized! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/140"),  "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
-		setErrorsCount(TypestateError.class,  new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
-		setErrorsCount(IncompleteOperationError.class, new TruePositives(1),  "<generators.RSAKeyPairGeneratorTest: void testFour()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testEncryptTwo()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+
+		// Since version 3.0.0: Predicates with same name in the same statement are distinguished
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testFour()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<generators.RSAKeyPairGeneratorTest: void testTwo()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ParametersWithRandomTest: void testTwo()>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
 		
 		scanner.exec();
 	  	assertErrors();

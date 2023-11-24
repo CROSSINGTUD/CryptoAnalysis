@@ -30,13 +30,13 @@ public class CrySLRule implements java.io.Serializable {
 	
 	protected final List<CrySLPredicate> predicates;
 	
-	public CrySLRule(String _className, List<Entry<String, String>> defObjects, List<CrySLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CrySLPredicate> _predicates) {
-		className = _className;
-		objects = defObjects;
-		forbiddenMethods = _forbiddenMethods;
-		usagePattern = _usagePattern;
-		constraints = _constraints;
-		predicates = _predicates;
+	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates) {
+		this.className = className;
+		this.objects = objects;
+		this.forbiddenMethods =forbiddenMethods;
+		this.usagePattern = usagePattern;
+		this.constraints = constraints;
+		this.predicates = predicates;
 	}
 	
 	

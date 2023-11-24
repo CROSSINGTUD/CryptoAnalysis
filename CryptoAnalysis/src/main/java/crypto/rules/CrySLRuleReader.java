@@ -94,7 +94,7 @@ public class CrySLRuleReader {
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a Zip {@link File}.
 	 * @param file Zip that contains the CrySL files
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If the directory is not a zip file
 	 */
 	public static List<CrySLRule> readFromZipFile(File file) throws CryptoAnalysisException {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
@@ -103,7 +103,7 @@ public class CrySLRuleReader {
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		try {
 			ZipFile zip = new ZipFile(file);
-			for (Enumeration e = zip.entries(); e.hasMoreElements(); ) {
+			for (Enumeration<?> e = zip.entries(); e.hasMoreElements(); ) {
 				ZipEntry entry = (ZipEntry) e.nextElement();
 				if (!entry.isDirectory()) {
 					CrySLRule rule = getCrySLRuleFromZipEntry(entry, zip, file);

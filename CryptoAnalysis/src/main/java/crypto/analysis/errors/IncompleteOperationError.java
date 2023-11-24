@@ -16,6 +16,16 @@ import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 
+
+/** This class defines-IncompleteOperationError:
+ *
+ *Found when the usage of an object may be incomplete
+ *
+ *For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
+ *This error heavily depends on the computed call graph (CHA by default)
+ *
+ * */
+
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
 	private Val errorVariable;
@@ -112,6 +122,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
 		Set<String> expectedMethodCallsSet = Sets.newHashSet();
 		for (SootMethod method : expectedMethodCalls) {

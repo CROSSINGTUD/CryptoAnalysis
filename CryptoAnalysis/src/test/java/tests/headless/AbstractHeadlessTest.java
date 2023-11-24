@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
@@ -23,6 +25,7 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -51,9 +54,34 @@ public abstract class AbstractHeadlessTest {
 
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
+	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	private static Set<ReportFormat> reportFormats = new HashSet<>();
+	
+	public static void setReportFormat(ReportFormat reportFormat) {
+		// use this method to add exactly one report format
+		AbstractHeadlessTest.reportFormats.clear();
+		AbstractHeadlessTest.reportFormats.add(reportFormat);
+	}
+	
+	public static void setReportFormat(ReportFormat ...formats) {
+		// use this method to add multiple report formats
+		AbstractHeadlessTest.reportFormats.clear();
+		
+		for (ReportFormat format : formats) {
+			AbstractHeadlessTest.reportFormats.add(format);
+		}
+	}
 
+	public static void setVISUALIZATION(boolean vISUALIZATION) {
+		VISUALIZATION = vISUALIZATION;
+	}
+	
+	public static void setProviderDetection(boolean providerDetection) {
+		PROVIDER_DETECTION = providerDetection;
+	}
+	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
@@ -65,7 +93,7 @@ public abstract class AbstractHeadlessTest {
 	}
 
 	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
-		G.v().reset();
+		G.reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {
@@ -75,7 +103,10 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					List<CrySLRule> rules = Lists.newArrayList();
+					rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					HeadlessCryptoScanner.setRules(rules);
+					return rules;
 				} catch (CryptoAnalysisException e) {
 					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
 				}
@@ -102,6 +133,16 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
+			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return PROVIDER_DETECTION;
+			}
+			
+			@Override
+			protected Set<ReportFormat> reportFormats(){
+				return VISUALIZATION ? reportFormats : new HashSet<>();
 			}
 		};
 		return scanner;

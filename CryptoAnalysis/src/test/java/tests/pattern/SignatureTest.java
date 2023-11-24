@@ -51,18 +51,18 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	
 	private static PrivateKey getPrivateKey() throws GeneralSecurityException {
 		KeyPairGenerator kpgen = KeyPairGenerator.getInstance("RSA");
-		kpgen.initialize(2048);
+		kpgen.initialize(4096);
 		KeyPair gp = kpgen.generateKeyPair();
 		return gp.getPrivate();
 	}
 	
 	@Test
-	public void signUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void positiveSignUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
-		keyGen.initialize(2048);
+		keyGen.initialize(3072);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
@@ -80,12 +80,37 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void signUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void negativeSignUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
+
+		// Since 3.0.0: key size of 2048 is not allowed
 		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.notHasEnsuredPredicate(kp);
+
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privKey);
+		Signature sign = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
+
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.notHasEnsuredPredicate(signature);
+	}
+	
+	@Test
+	public void positiveSignUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		keyGen.initialize(3072);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
@@ -107,12 +132,41 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void signUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void negativeSignUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
 		String input = "TESTITESTiTEsTI";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
+
+		// Since 3.0.0: key size of 2048 is not allowed
 		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.notHasEnsuredPredicate(kp);
+
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privKey);
+		String algorithm = "SHA256withDSA";
+		if (Math.random() % 2 == 0) {
+			algorithm = "SHA256withECDSA";
+		}
+		Signature sign = Signature.getInstance(algorithm);
+		Assertions.extValue(0);
+
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.notHasEnsuredPredicate(signature);
+	}
+	
+	@Test
+	public void positiveSignUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		keyGen.initialize(3072);
 		KeyPair kp = keyGen.generateKeyPair();
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
@@ -135,7 +189,43 @@ public class SignatureTest extends UsagePatternTestingFramework {
 
 		Signature ver = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
-		//
+
+		ver.initVerify(pubKey);
+		ver.update(input.getBytes("UTF-8"));
+		ver.verify(signature);
+		Assertions.mustBeInAcceptingState(ver);
+	}
+	
+	@Test
+	public void negativeSignUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
+		String input = "TESTITESTiTEsTI";
+
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+		Assertions.extValue(0);
+		
+		// Since 3.0.0: key size of 2048 is not allowed
+		keyGen.initialize(2048);
+		KeyPair kp = keyGen.generateKeyPair();
+		Assertions.mustBeInAcceptingState(keyGen);
+		Assertions.notHasEnsuredPredicate(kp);
+
+		final PrivateKey privKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privKey);
+		Signature sign = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
+
+		sign.initSign(privKey);
+		sign.update(input.getBytes("UTF-8"));
+		byte[] signature = sign.sign();
+		Assertions.mustBeInAcceptingState(sign);
+		Assertions.notHasEnsuredPredicate(signature);
+
+		final PublicKey pubKey = kp.getPublic();
+		Assertions.notHasEnsuredPredicate(pubKey);
+
+		Signature ver = Signature.getInstance("SHA256withDSA");
+		Assertions.extValue(0);
+
 		ver.initVerify(pubKey);
 		ver.update(input.getBytes("UTF-8"));
 		ver.verify(signature);
