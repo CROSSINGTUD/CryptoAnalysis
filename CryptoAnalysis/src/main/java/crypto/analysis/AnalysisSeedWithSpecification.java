@@ -34,7 +34,6 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLCondPredicate;
-import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
@@ -387,7 +386,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
 				if (reqPred.getPred().isNegated()) {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred())) {
+						if (reqPred.getPred().equals(ensPred.getPredicate())) {
 							return false;
 						}
 					}
@@ -414,7 +413,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					remainingPredicates.remove(pred);
 				} else if (negatives.isEmpty()) {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
+						if (alternatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
 							remainingPredicates.remove(pred);
 							break;
 						}
@@ -428,7 +427,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						}
 
 						alternatives.removeAll(negatives);
-						if (alternatives.parallelStream().allMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
+						if (alternatives.parallelStream().allMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
 							satisfied = true;
 						}
 
@@ -447,7 +446,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (evaluatePredCond(singlePred.getPred())) {
 					remainingPredicates.remove(singlePred);
 				}
-			} else if (rem instanceof CrySLConstraint) {
+			} else if (rem instanceof AlternativeReqPredicate) {
 				List<CrySLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
 				if (altPred.parallelStream().anyMatch(e -> evaluatePredCond(e))) {
 					remainingPredicates.remove(rem);

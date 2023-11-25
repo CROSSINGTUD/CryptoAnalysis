@@ -58,8 +58,6 @@ public class CrySLPredicate extends CrySLLiteral {
 		if(!getPredName().equals(other.getPredName()))
 				return false;
 
-		// TODO Do also compare the parameter types (and not just the predicate names)
-
 		return true;
 	}
 
