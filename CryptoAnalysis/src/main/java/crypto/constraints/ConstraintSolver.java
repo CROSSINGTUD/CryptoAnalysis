@@ -122,9 +122,11 @@ public class ConstraintSolver {
 
 			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
 				if (cons instanceof CrySLPredicate) {
-					RequiredCrySLPredicate pred = retrieveValuesForPred(cons);
-					if (pred != null) {
+					List<RequiredCrySLPredicate> preds = retrieveValuesForPred(cons);
+					
+					for (RequiredCrySLPredicate pred : preds) {
 						CrySLPredicate innerPred = pred.getPred();
+						
 						if (innerPred != null) {
 							relConstraints.add(innerPred);
 							requiredPredicates.add(pred);
@@ -132,8 +134,9 @@ public class ConstraintSolver {
 					}
 				} else if (cons instanceof CrySLConstraint) {
 					ISLConstraint left = ((CrySLConstraint) cons).getLeft();
+					
 					if (left instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
-						requiredPredicates.add(collectAlternativePredicates((CrySLConstraint) cons, null));
+						requiredPredicates.addAll(collectAlternativePredicates((CrySLConstraint) cons, Lists.newArrayList()));
 					} else {
 						relConstraints.add(cons);
 					}
@@ -144,33 +147,40 @@ public class ConstraintSolver {
 		}
 	}
 
-	private ISLConstraint collectAlternativePredicates(CrySLConstraint cons, AlternativeReqPredicate alt) {
+	private List<AlternativeReqPredicate> collectAlternativePredicates(CrySLConstraint cons, List<AlternativeReqPredicate> alts) {
 		CrySLPredicate left = (CrySLPredicate) cons.getLeft();
-		if (alt == null) {
+		
+		if (alts.isEmpty()) {
 			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 				for (ICrySLPredicateParameter p : left.getParameters()) {
 					if (p.getName().equals("transformation"))
 						continue;
 					if (cwpi.getVarName().equals(p.getName())) {
-						alt = new AlternativeReqPredicate(left, cwpi.stmt());
+						alts.add(new AlternativeReqPredicate(left, cwpi.stmt()));
 					}
 				}
 			}
 		} else {
-			alt.addAlternative(left);
+			for (AlternativeReqPredicate alt : alts) {
+				alt.addAlternative(left);
+			}
 		}
 
 		if (cons.getRight() instanceof CrySLPredicate) {
-			alt.addAlternative((CrySLPredicate) cons.getRight());
+			for (AlternativeReqPredicate alt : alts) {
+				alt.addAlternative((CrySLPredicate) cons.getRight());
+			}
 		} else {
-			return collectAlternativePredicates((CrySLConstraint) cons.getRight(), alt);
+			return collectAlternativePredicates((CrySLConstraint) cons.getRight(), alts);
 		}
 
-		return alt;
+		return alts;
 	}
 
-	private RequiredCrySLPredicate retrieveValuesForPred(ISLConstraint cons) {
+	private List<RequiredCrySLPredicate> retrieveValuesForPred(ISLConstraint cons) {
 		CrySLPredicate pred = (CrySLPredicate) cons;
+		List<RequiredCrySLPredicate> result = Lists.newArrayList();
+		
 		for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 			for (ICrySLPredicateParameter p : pred.getParameters()) {
 				// TODO: FIX Cipher rule
@@ -184,10 +194,11 @@ public class ConstraintSolver {
 				}
 				
 				if (cwpi.getVarName().equals(p.getName())) {
-					return new RequiredCrySLPredicate(pred, cwpi.stmt());
+					result.add(new RequiredCrySLPredicate(pred, cwpi.stmt()));
 				}
 			}
 		}
-		return null;
+		
+		return result;
 	}
 }

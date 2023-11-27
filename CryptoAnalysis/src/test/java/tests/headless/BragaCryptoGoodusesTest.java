@@ -64,7 +64,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
@@ -85,7 +85,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", ConstraintError.class, 1);
 
@@ -155,7 +155,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.UseDynamicKeyFor3DES: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseDynamicKeyForAES: void main(java.lang.String[])>", TypestateError.class, 1);
 		
@@ -183,7 +183,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 				
 		// negative test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -193,7 +193,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 				
 		// negative test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -231,7 +231,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -241,7 +241,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 				
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", TypestateError.class, 1);
 
 		scanner.exec();
@@ -257,7 +257,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -275,7 +275,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.UseQualifiedNameForRSAOAEP: void negativeTestCase()>", TypestateError.class, 1);
-		setErrorsCount("<example.UseQualifiedNameForRSAOAEP: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.UseQualifiedNameForRSAOAEP: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.UseQualifiedNameForRSAOAEP: void negativeTestCase()>", ConstraintError.class, 1);
 		
 		// positive test case
@@ -285,7 +285,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", TypestateError.class, 1);
-		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", ConstraintError.class, 1);
 
 		scanner.exec();
@@ -341,7 +341,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x256_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.OAEP_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.OAEP_2048x256_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -351,7 +351,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x256_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.OAEP_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.OAEP_2048x256_2: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -361,7 +361,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x384_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.OAEP_2048x384_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.OAEP_2048x384_1: void negativeTestCase()>", TypestateError.class, 1);
 
 		// positive test case
@@ -371,7 +371,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x384_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.OAEP_2048x384_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.OAEP_2048x384_2: void negativeTestCase()>", TypestateError.class, 1);
 
 		// positive test case
@@ -381,7 +381,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x512_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.OAEP_2048x512_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.OAEP_2048x512_1: void negativeTestCase()>", TypestateError.class, 1);
 
 		// positive test case
@@ -391,7 +391,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", TypestateError.class, 1);
 
 		scanner.exec();
@@ -449,7 +449,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.UseAEADwAES_GCM: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseAES_CTR: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.UseAES_CTR: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
+		setErrorsCount("<example.UseAES_CTR: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 
 		scanner.exec();
 		assertErrors();
@@ -464,14 +464,14 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher3: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
 
 		scanner.exec();
@@ -689,7 +689,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.DoNotPrintPrivKey1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.DoNotPrintPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.DoNotPrintPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.DoNotPrintPrivKey1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		setErrorsCount("<example.DoNotPrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -716,7 +716,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.EncryptThenHashCiphertextAndIV: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.EncryptThenHashCiphertextAndIV: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.EncryptThenMacCiphertextAndIV: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.EncryptThenMacCiphertextAndIV: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.EncryptThenMacCiphertextAndIV: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 
 		scanner.exec();
 		assertErrors();
@@ -762,7 +762,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -772,7 +772,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_2: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -789,10 +789,12 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
 		
 		// positive test case
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", ConstraintError.class, 0);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", ConstraintError.class, 0);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", TypestateError.class, 1);
 		
@@ -806,7 +808,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -816,7 +818,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_2: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -826,7 +828,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
@@ -836,7 +838,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		// negative test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", TypestateError.class, 1);
 
 		scanner.exec();
@@ -925,7 +927,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<example.UseMacWithMaleableStream: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.UseMacWithMaleableStream: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.UseMacWithMaleableStream: void main(java.lang.String[])>", TypestateError.class, 2);
 
 		scanner.exec();
