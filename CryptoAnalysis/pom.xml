@@ -341,7 +341,7 @@
 		<dependency>
 			<groupId>de.darmstadt.tu.crossing.CrySL</groupId>
 			<artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.xtext</groupId>
