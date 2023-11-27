@@ -13,9 +13,6 @@ import soot.SootMethod;
 
 public class CrySLRule implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private final String className;
@@ -30,13 +27,16 @@ public class CrySLRule implements java.io.Serializable {
 	
 	protected final List<CrySLPredicate> predicates;
 	
-	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates) {
+	protected final List<CrySLPredicate> negatedPredicates;
+	
+	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates, List<CrySLPredicate> negatedPredicates) {
 		this.className = className;
 		this.objects = objects;
 		this.forbiddenMethods =forbiddenMethods;
 		this.usagePattern = usagePattern;
 		this.constraints = constraints;
 		this.predicates = predicates;
+		this.negatedPredicates = negatedPredicates;
 	}
 	
 	
@@ -106,6 +106,14 @@ public class CrySLRule implements java.io.Serializable {
 	public List<CrySLPredicate> getPredicates() {
 		return predicates;
 	}
+	
+	/**
+	 * @return the negated predicates
+	 */
+	public List<CrySLPredicate> getNegatedPredicates() {
+		return negatedPredicates;
+	}
+	
 	/**
 	 * @return the constraints
 	 */
@@ -143,6 +151,14 @@ public class CrySLRule implements java.io.Serializable {
 		if (this.predicates != null) {
 			outputSB.append("\nPredicates:");
 			for (CrySLPredicate predicate : this.predicates) {
+				outputSB.append(predicate);
+				outputSB.append(",");
+			}
+		}
+		
+		if (this.negatedPredicates != null) {
+			outputSB.append("\nNegated predicates:");
+			for (CrySLPredicate predicate : this.negatedPredicates) {
 				outputSB.append(predicate);
 				outputSB.append(",");
 			}

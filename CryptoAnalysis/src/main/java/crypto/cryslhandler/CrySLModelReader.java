@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -261,11 +262,13 @@ public class CrySLModelReader {
 
 		final EnsuresBlock ensuresBlock = model.getEnsures();
 		final NegatesBlock negatesBlock = model.getNegates();
+		
 		final List<CrySLPredicate> predicates = Lists.newArrayList();
+		final List<CrySLPredicate> negatedPredicates = Lists.newArrayList();
 		predicates.addAll(getEnsuredPredicates(ensuresBlock));
-		predicates.addAll(getNegatedPredicates(negatesBlock));
+		negatedPredicates.addAll(getNegatedPredicates(negatesBlock));
 
-		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates);
+		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates, negatedPredicates);
 	}
 
 	private List<Event> changeDeclaringClass(JvmTypeReference currentClass, EventsBlock eventsBlock) {
@@ -562,10 +565,27 @@ public class CrySLModelReader {
 		
 		for (final TransitionEdge transition : this.smg.getAllTransitions()) {
 			if(transition.getLabel().containsAll(condition)) {
-				predicateGenerationNodes.add(transition.getRight());
+				Set<StateNode> reachableNodes = getAllReachableNodes(transition.getRight(), Sets.newHashSet());
+				
+				predicateGenerationNodes.addAll(reachableNodes);
 			}
 		}
 		return predicateGenerationNodes;
+	}
+	
+	private Set<StateNode> getAllReachableNodes(final StateNode startNode, Set<StateNode> visited) {
+		if (visited.contains(startNode)) {
+			return visited;
+		}
+		
+		visited.add(startNode);
+		
+		for (TransitionEdge edge : this.smg.getAllOutgoingEdges(startNode)) {
+			Set<StateNode> reachableNodes = getAllReachableNodes(edge.getRight(), visited);
+			
+			visited.addAll(reachableNodes);
+		}
+		return visited;
 	}
 
 	private ISLConstraint getBuiltinPredicate(BuiltinPredicate builtinPredicate) {
