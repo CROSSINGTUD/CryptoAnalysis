@@ -85,14 +85,13 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected List<CrySLRule> getRules() {
-				// TODO: Somehow optimize the rule getting because this has many code duplicates for no reason.
 				switch(settings.getRulesetPathType()) {
 					case DIR:
 						try {
 							rules.addAll(CrySLRuleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
 							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+settings.getRulesetPathDir(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
 						}
 						break;
 					case ZIP:
@@ -100,7 +99,7 @@ public abstract class HeadlessCryptoScanner {
 							rules.addAll(CrySLRuleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
 							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+settings.getRulesetPathZip(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathZip(), e);
 						}
 						break;
 					default:
@@ -274,13 +273,13 @@ public abstract class HeadlessCryptoScanner {
 						rules.clear();
 						switch(settings.getRulesetPathType()) {
 							case DIR:
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
 								break;
 							case ZIP:
-								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath+File.separator+detectedProvider+".zip"));
+								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath + File.separator + detectedProvider + ".zip"));
 								break;
 							default: 
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
 						}
 					}
 				}

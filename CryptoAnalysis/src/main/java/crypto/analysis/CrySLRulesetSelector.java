@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -88,14 +89,10 @@ public class CrySLRulesetSelector {
 	}
 
 	private static List<CrySLRule> getRulesset(String rulesBasePath, RuleFormat ruleFormat, Ruleset s) throws CryptoAnalysisException {
-		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
-		for (File file : listFiles) {
-			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
-			if(rule != null) {
-				rules.add(rule);
-			}
-		}
+		List<File> files = Arrays.asList(listFiles);
+		
+		List<CrySLRule> rules = CrySLRuleReader.readFromSourceFiles(files);
 		
 		if (rules.isEmpty()) {
 			throw new CryptoAnalysisException("No CrySL rules found in " + rulesBasePath+s+"/");
@@ -116,10 +113,12 @@ public class CrySLRulesetSelector {
 	 */
 	public static CrySLRule makeSingleRule(String rulesBasePath, RuleFormat ruleFormat, Ruleset ruleset, String rulename) throws CryptoAnalysisException {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + RuleFormat.SOURCE);
+		
 		if (file.exists() && file.isFile()) {
 			CrySLRule rule = CrySLRuleReader.readFromSourceFile(file);
+			
 			if(rule != null) {
-			 return rule;
+				return rule;
 			} else {
 				throw new CryptoAnalysisException("CrySL rule couldn't created from path " + file.getAbsolutePath());
 			}

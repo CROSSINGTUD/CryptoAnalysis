@@ -205,27 +205,8 @@ public class StateMachineGraphBuilder {
 			StateNode node = this.result.createNewNode();
 			List<CrySLMethod> label = CrySLReaderUtils.resolveEventToCryslMethods(event);
 			
-			/**
-			 * In some scenarios, xtext is not able to resolve the JVMExecutable 'getEncoded()' from the 
-			 * class java.security.Key or its subclasses. In these cases, xtext defaults to the constructor.
-			 * However, these classes have no constructors, since they are interfaces. To deal with the problem,
-			 * we manually change the constructor call to the 'getEncoded()' call.
-			 */
-			List<CrySLMethod> updatedLabels = new ArrayList<>(label);
-			
-			for (CrySLMethod method : label) {
-				if (CrySLModelReader.getBuggedKeyRules().contains(method.getMethodName())) {
-					String updatedLabel = method.getMethodName() + ".getEncoded";
-					CrySLMethod updatedMethod = new CrySLMethod(updatedLabel, method.getParameters(), method.getRetObject());
-					
-					updatedLabels.add(updatedMethod);
-				} else {
-					updatedLabels.add(method);
-				}
-			}
-			
 			for (StateNode startNode : startNodes) {
-				this.result.createNewEdge(updatedLabels, startNode, node);
+				this.result.createNewEdge(label, startNode, node);
 			}
 			
 			return new SubStateMachine(node, node);
