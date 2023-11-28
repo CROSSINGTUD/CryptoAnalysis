@@ -7,7 +7,7 @@
 
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis-Parent</artifactId>
-	<version>3.0.1</version>
+	<version>3.0.2</version>
 	<packaging>pom</packaging>
 	
 	<name>CryptoAnalysis-Parent</name>
