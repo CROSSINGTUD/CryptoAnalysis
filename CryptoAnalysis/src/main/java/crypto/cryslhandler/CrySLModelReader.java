@@ -1,36 +1,31 @@
 package crypto.cryslhandler;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.inject.Injector;
-
 import org.apache.commons.lang3.NotImplementedException;
-
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
-import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.common.types.JvmDeclaredType;
 import org.eclipse.xtext.common.types.JvmTypeReference;
-import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.common.types.access.impl.ClasspathTypeProvider;
+import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.linking.lazy.LazyLinkingResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
@@ -38,6 +33,11 @@ import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.validation.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.inject.Injector;
 
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.interfaces.ICrySLPredicateParameter;
@@ -59,7 +59,7 @@ import crypto.rules.CrySLValueConstraint;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-
+import de.darmstadt.tu.crossing.CrySLStandaloneSetup;
 import de.darmstadt.tu.crossing.crySL.AlternativeRequiredPredicates;
 import de.darmstadt.tu.crossing.crySL.BuiltinPredicate;
 import de.darmstadt.tu.crossing.crySL.ConditionalPredicate;
@@ -87,7 +87,6 @@ import de.darmstadt.tu.crossing.crySL.Predicate;
 import de.darmstadt.tu.crossing.crySL.PredicateParameter;
 import de.darmstadt.tu.crossing.crySL.RequiredPredicate;
 import de.darmstadt.tu.crossing.crySL.RequiresBlock;
-import de.darmstadt.tu.crossing.CrySLStandaloneSetup;
 import de.darmstadt.tu.crossing.crySL.ThisPredicateParameter;
 import de.darmstadt.tu.crossing.crySL.TimedPredicate;
 import de.darmstadt.tu.crossing.crySL.WildcardPredicateParameter;
@@ -107,12 +106,6 @@ public class CrySLModelReader {
 	private static final String UNDERSCORE = "_";
 	
 	/**
-	 * For some reason, xtext is not able to resolve a call to 'getEncoded()' for the class java.security.key
-	 * and its subclasses. In these cases, we have to manually resolve the call
-	 */
-	private static final Set<String> buggedKeyRules = new HashSet<>(Arrays.asList("java.security.Key", "javax.crypto.SecretKey", "java.security.PublicKey", "java.security.PrivateKey"));
-
-	/**
 	 * Creates a CrySLModelReader
 	 * @throws MalformedURLException If there is a problem with the URL
 	 */
@@ -131,7 +124,41 @@ public class CrySLModelReader {
 		URLClassLoader ucl = new URLClassLoader(classpath);
 		this.resourceSet.setClasspathURIContext(new URLClassLoader(classpath));
 		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
-		this.resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
+	}
+	
+	/**
+	 * Read the crysl rules from all given files.
+	 * 
+	 * @param files	a list of files to read from
+	 * @return	the list with the parsed CrySLRules
+	 * @throws CryptoAnalysisException If a file cannot be read or there is a problem with a rule
+	 */
+	public List<CrySLRule> readRulesFromFiles(List<File> files) throws CryptoAnalysisException {
+		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
+		
+		for (File file : files) {
+			resourceSet.getResource(URI.createFileURI(file.getAbsolutePath()), true);
+		}
+		
+		EcoreUtil.resolveAll(resourceSet);
+		
+		for (Resource resource : resourceSet.getResources()) {
+			if (resource == null) {
+				continue;
+			}
+			
+			if (!(resource instanceof LazyLinkingResource)) {
+				continue;
+			}
+			
+			CrySLRule rule = createRuleFromResource(resource);
+			
+			if (!ruleMap.containsKey(rule.getClassName())) {
+				ruleMap.put(rule.getClassName(), rule);
+			}
+		}
+		
+		return new ArrayList<>(ruleMap.values());
 	}
 
 	/**
@@ -219,20 +246,13 @@ public class CrySLModelReader {
 			throw new CryptoAnalysisException("Internal error creating a CrySL rule: 'resource parameter was null'.");
 		}
 		
-		String currentClass = ((Domainmodel)resource.getContents().get(0)).getJavaType().getQualifiedName();
-		
 		if (runValidator(resource, Severity.WARNING)) {
-			if (buggedKeyRules.contains(currentClass)) {
-				LOGGER.info("Class " + currentClass + " is of type java.security.key. The call to 'getEncoded()' will be resolved manually.");
-			} else {
-				throw new CryptoAnalysisException("Skipping rule since it contains errors: " + resource.getURI());
-			}
+			throw new CryptoAnalysisException("Skipping rule since it contains errors: " + resource.getURI());
 		}
 		
 		try {
 			return createRuleFromDomainmodel((Domainmodel) resource.getContents().get(0));
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new CryptoAnalysisException("An error occured while reading the rule " + resource.getURI(), e);
 		}
 	}
@@ -615,10 +635,6 @@ public class CrySLModelReader {
 				parameters = Collections.emptyList();
 		}
 		return new CrySLPredicate(null, name, parameters, negated);
-	}
-	
-	public static Set<String> getBuggedKeyRules() {
-		return buggedKeyRules;
 	}
 
 	public static String filterQuotes(final String dirty) {

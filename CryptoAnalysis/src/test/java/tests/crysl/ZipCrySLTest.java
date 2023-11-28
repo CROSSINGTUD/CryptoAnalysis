@@ -16,7 +16,7 @@ import crypto.rules.CrySLRuleReader;
 public class ZipCrySLTest {
 	
     private static final String emptyZipFilePath = "src/test/resources/crySL/empty.zip";
-    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-1.5.1-ruleset.zip";
+    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-3.0.1-ruleset.zip";
     private static final String multipleRulesetZipFilePath = "src/test/resources/crySL/Multiple-rulesets.zip";
     private static final String junkRuleSet = "src/test/resources/crySL/rulesetWithJunk.zip";
 
@@ -61,7 +61,7 @@ public class ZipCrySLTest {
     public void TestFileContainsMultipleRulesets() throws CryptoAnalysisException {
         File zipFile = new File(multipleRulesetZipFilePath);
         Collection<CrySLRule> rules = CrySLRuleReader.readFromZipFile(zipFile);
-        Assert.assertEquals(107, rules.size());
+        Assert.assertEquals(108, rules.size());
     }
 
     @Test
