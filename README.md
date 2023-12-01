@@ -96,12 +96,12 @@ CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Andr
 * The absolute path to the directory of the CrySL rules.
 
 ```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
       <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules>
 ```
 As an optional fourth parameter one can specify an output folder: 
 ```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
       <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules> <output-dir>
 ```
 
