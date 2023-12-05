@@ -54,26 +54,32 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 	@Override
 	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
-		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr())
+		
+		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr()) {
 			return out;
+		}
+		
 		InvokeExpr invokeExpr = ((Stmt) unit).getInvokeExpr();
 		SootMethod calledMethod = invokeExpr.getMethod();
-		if (!fsm.initialTransitonLabel().contains(calledMethod))
+		
+		if (!fsm.initialTransitonLabel().contains(calledMethod)) {
 			return out;
+		}
+		
 		if (calledMethod.isStatic()) {
-			if(unit instanceof AssignStmt){
+			if (unit instanceof AssignStmt) {
 				AssignStmt stmt = (AssignStmt) unit;
-				out.add(createQuery(stmt,method,new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp(), new Statement(stmt,method))));
+				out.add(createQuery(stmt, method, new AllocVal(stmt.getLeftOp(), method, stmt.getRightOp(), new Statement(stmt, method))));
 			}
 		} else if (invokeExpr instanceof InstanceInvokeExpr && !(invokeExpr instanceof InterfaceInvokeExpr)){
 			InstanceInvokeExpr iie = (InstanceInvokeExpr) invokeExpr;
-			out.add(createQuery(unit,method,new AllocVal(iie.getBase(), method,iie, new Statement((Stmt) unit,method))));
+			out.add(createQuery(unit, method, new AllocVal(iie.getBase(), method, iie, new Statement((Stmt) unit, method))));
 		}
 		return out;
 	}
 
 	private WeightedForwardQuery<TransitionFunction> createQuery(Unit unit, SootMethod method, AllocVal allocVal) {
-		return new WeightedForwardQuery<TransitionFunction>(new Statement((Stmt)unit,method), allocVal, fsm.getInitialWeight(new Statement((Stmt)unit,method)));
+		return new WeightedForwardQuery<TransitionFunction>(new Statement((Stmt) unit, method), allocVal, fsm.getInitialWeight(new Statement((Stmt) unit, method)));
 	}
 
 

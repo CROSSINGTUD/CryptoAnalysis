@@ -111,7 +111,10 @@ public class CrySLMethodToSootMethod {
 		for (Type t : parameterTypes) {
 			if (parameters.get(i).getValue().equals("AnyType"))
 				continue;
-			if (!t.toString().equals(parameters.get(i).getValue())) {
+			
+			// Soot does not track generic types, so we are required to remove <...> from the parameter
+			String adaptedParameter = parameters.get(i).getValue().replaceAll("[<].*?[>]", "");
+			if (!t.toString().equals(adaptedParameter)) {
 				return false;
 			}
 			i++;
