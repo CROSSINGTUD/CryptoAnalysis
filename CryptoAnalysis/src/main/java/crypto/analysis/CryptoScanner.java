@@ -131,9 +131,7 @@ public abstract class CryptoScanner {
 			}
 			for (ClassSpecification spec : getClassSpecifictions()) {
 				spec.invokesForbiddenMethod(method);
-				if (spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
-					continue;
-				}
+				
 				for (Query seed : spec.getInitialSeeds(method)) {
 					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
 				}

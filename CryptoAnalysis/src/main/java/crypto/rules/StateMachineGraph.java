@@ -12,17 +12,17 @@ import com.google.common.collect.Lists;
 import crypto.interfaces.FiniteStateMachine;
 
 public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private final Set<StateNode> nodes;
 	private final List<TransitionEdge> edges;
+	private final List<TransitionEdge> initialEdges;
 	private int nodeNameCounter = 0;
 
 	public StateMachineGraph() {
 		nodes = new HashSet<StateNode>();
 		edges = new ArrayList<TransitionEdge>();
+		initialEdges = new ArrayList<TransitionEdge>();
 	}
 	
 	public StateNode createNewNode() {
@@ -45,6 +45,11 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 			return false;
 		}
 		edges.add(edge);
+		
+		if (left.isInitialState()) {
+			initialEdges.add(edge);
+		}
+		
 		return true;
 	}
 
@@ -132,6 +137,10 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 
 	public TransitionEdge getInitialTransition() {
 		return edges.get(0);
+	}
+	
+	public Collection<TransitionEdge> getInitialTransitions() {
+		return initialEdges;
 	}
 
 	public Collection<StateNode> getAcceptingStates() {

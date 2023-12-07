@@ -1,7 +1,5 @@
 package crypto.extractparameter;
 
-import crypto.reporting.SARIFReporter;
-import crypto.rules.CrySLRule;
 import soot.Value;
 import soot.jimple.Constant;
 
@@ -50,6 +48,9 @@ public class CallSiteWithExtractedValue {
 				break;
 			case 5: 
 				res = "Sixth ";
+				break;
+			default:
+				res = (cs.getIndex()+1) + "th ";
 				break;
 		}
 		res += "parameter";

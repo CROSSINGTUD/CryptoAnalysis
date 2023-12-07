@@ -2,11 +2,8 @@ package crypto.rules;
 
 import java.util.Set;
 
-public class CrySLComparisonConstraint extends CrySLLiteral implements java.io.Serializable {
+public class CrySLComparisonConstraint extends CrySLLiteral {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public enum CompOp { l, g, le, ge, eq, neq}

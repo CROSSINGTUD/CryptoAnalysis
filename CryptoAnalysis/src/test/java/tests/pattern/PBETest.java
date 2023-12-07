@@ -53,6 +53,7 @@ public class PBETest extends UsagePatternTestingFramework {
 		char[] corPwd = generateRandomPassword();;
 		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
 		Assertions.extValue(1);
+		Assertions.hasEnsuredPredicate(pbekeyspec);
 	}
 	
 	@Test
@@ -116,7 +117,9 @@ public class PBETest extends UsagePatternTestingFramework {
 		Assertions.extValue(3);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
+		
 		pbekeyspec.clearPassword();
+		Assertions.mustBeInAcceptingState(pbekeyspec);
 		Assertions.notHasEnsuredPredicate(pbekeyspec);
 	}
 	
@@ -134,6 +137,7 @@ public class PBETest extends UsagePatternTestingFramework {
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
 		Assertions.callToForbiddenMethod();
+		Assertions.notHasEnsuredPredicate(pbekeyspec);
 	}
 
 }

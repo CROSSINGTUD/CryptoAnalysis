@@ -1,16 +1,12 @@
 package crypto.rules;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import boomerang.jimple.Statement;
 import crypto.interfaces.ISLConstraint;
 
-public class CrySLConstraint implements ISLConstraint, Serializable{
+public class CrySLConstraint implements ISLConstraint {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public enum LogOps { and , or , implies , eq}

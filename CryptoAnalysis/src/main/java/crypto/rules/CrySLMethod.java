@@ -3,23 +3,29 @@ package crypto.rules;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 
-
 public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
-	
+
+	public static final String VOID = "void";
+	public static final String ANY_TYPE = "AnyType";
+	public static final String NO_NAME = "_";
+
 	private static final long serialVersionUID = 1L;
 	private final String methodName;
 	private final Entry<String, String> retObject;
-	private final List<Entry<String, String>> parameters; 
-	private final List<Boolean> backward;
-	
-	public CrySLMethod(String methName, List<Entry<String, String>> pars, List<Boolean> backw, Entry<String, String> returnObject) {
-		methodName = methName;
-		parameters = pars;
-		backward = backw;
-		retObject = returnObject;
+	/**
+	 * List of Parameters, where a Parameter is an {@link java.util.Map.Entry}
+	 * of Name and Type, both as {@link String}.
+	 */
+	private final List<Entry<String, String>> parameters;
+
+	public CrySLMethod(String methodName, List<Entry<String, String>> parameters, Entry<String, String> retObject) {
+		this.methodName = methodName;
+		this.parameters = parameters;
+		this.retObject = retObject;
 	}
 
 	/**
@@ -35,26 +41,18 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 	public String getShortMethodName() {
 		return methodName.substring(methodName.lastIndexOf(".") + 1);
 	}
-	
-	
+
 	/**
 	 * @return the parameters
 	 */
 	public List<Entry<String, String>> getParameters() {
 		return parameters;
 	}
-	
-	/**
-	 * @return the backward
-	 */
-	public List<Boolean> getBackward() {
-		return backward;
-	}
-	
-	
+
 	public Entry<String, String> getRetObject() {
 		return retObject;
 	}
+
 	public String toString() {
 		return getName();
 	}
@@ -70,18 +68,11 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 		
 		stmntBuilder.append(this.methodName);
 		stmntBuilder.append("(");
-		
-		
-		for (Entry<String, String> par: parameters) {
-			stmntBuilder.append(" ");
-			stmntBuilder.append(par.getKey());
-//			if (backward != null && backward.size() == parameters.size()) {
-//				stmntBuilder.append(" (");
-//				stmntBuilder.append(backward.get(parameters.indexOf(par)));
-//				stmntBuilder.append("),");
-//			}
-		}
-		
+
+		stmntBuilder.append(parameters.stream()
+				.map(param -> String.format("%s %s", param.getValue(), param.getKey()))
+				.collect(Collectors.joining(", ")));
+
 		stmntBuilder.append(");");
 		return stmntBuilder.toString();
 	}
@@ -90,7 +81,6 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((backward == null) ? 0 : backward.hashCode());
 		result = prime * result + ((methodName == null) ? 0 : methodName.hashCode());
 		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		return result;

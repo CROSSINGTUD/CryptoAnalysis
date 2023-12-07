@@ -26,8 +26,6 @@ public class CommandLineReporter extends Reporter {
 	 * Subclass of {@link Reporter}. Creates an instance of {@link CommandLineReporter}, which
 	 * can be used to print an analysis report to stdout.
 	 * 
-	 * @param reportDir A {@link String} path giving the location of the report directory.
-	 *                  The reportPath should end without an ending file separator.
 	 * @param softwareID A {@link String} for the analyzed software.
 	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
 	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
