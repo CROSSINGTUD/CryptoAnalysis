@@ -37,7 +37,7 @@ public class ReporterHelper {
 	 */
 	public static String generateReport(List<CrySLRule> rules, Collection<IAnalysisSeed> objects, 
 			List<IAnalysisSeed> secureObjects, Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers, 
-			Map<Class, Integer> errorMarkerCount, ReportStatistics statistics) {
+			Map<Class<?>, Integer> errorMarkerCount, ReportStatistics statistics) {
 		String report = "";
 
 		report += "Ruleset: \n";
@@ -89,11 +89,11 @@ public class ReporterHelper {
 		report += String.format("\tNumber of Objects Analyzed: %s\n", objects.size());
 		
 		if (errorMarkers.rowKeySet().isEmpty()) {
-			report += "No violation of any of the rules found.\n";
+			report += "\n\tNo violation of any of the rules found.\n";
 		} else {
 			report += "\n\tCryptoAnalysis found the following violations. For details see description above.\n";
 			
-			for (Entry<Class, Integer> e : errorMarkerCount.entrySet()) {
+			for (Entry<Class<?>, Integer> e : errorMarkerCount.entrySet()) {
 				report += String.format("\t%s: %s\n", e.getKey().getSimpleName(), e.getValue());
 			}
 		}

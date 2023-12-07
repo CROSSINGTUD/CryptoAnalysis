@@ -57,9 +57,9 @@ public class CSVSummaryReporter extends Reporter {
 	 * 
 	 * @param reportDir A {@link String} path giving the location of the report directory.
 	 *                  The reportPath should end without an ending file separator.
-	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param softwareId A {@link String} for the analyzed software.
 	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
-	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param callGraphConstructionTime The time in milliseconds for the construction of the callgraph.
 	 * @param includeStatistics Set this value to true, if the analysis report should contain some
 	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
 	 *                          to false, no statistics will be output. 
@@ -130,7 +130,7 @@ public class CSVSummaryReporter extends Reporter {
 		}
 		
 		// Count the number of each error class
-		Table<Class, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
+		Table<Class<?>, CrySLRule, Integer> errorTable = HashBasedTable.create(); 
 		
 		for (AbstractError err : errors) {
 			Integer integer = errorTable.get(err.getClass(), err.getRule());
@@ -144,13 +144,13 @@ public class CSVSummaryReporter extends Reporter {
 		}
 
 		// Set the corresponding error headers to the number of occurred errors
-		for (Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()) {
+		for (Cell<Class<?>, CrySLRule, Integer> c : errorTable.cellSet()) {
 			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
 		}
 		
-		Map<Class, Integer> errorsAccumulated = Maps.newHashMap();
+		Map<Class<?>, Integer> errorsAccumulated = Maps.newHashMap();
 		
-		for (Cell<Class, CrySLRule, Integer> c : errorTable.cellSet()) {
+		for (Cell<Class<?>, CrySLRule, Integer> c : errorTable.cellSet()) {
 			Integer integer = errorsAccumulated.get(c.getRowKey());
 			
 			if(integer == null) {
@@ -161,7 +161,7 @@ public class CSVSummaryReporter extends Reporter {
 			errorsAccumulated.put(c.getRowKey(), integer);
 		}
 
-		for (Entry<Class, Integer> c : errorsAccumulated.entrySet()) {
+		for (Entry<Class<?>, Integer> c : errorsAccumulated.entrySet()) {
 			put(c.getKey().getSimpleName() + "_sum", c.getValue());
 		}
 		

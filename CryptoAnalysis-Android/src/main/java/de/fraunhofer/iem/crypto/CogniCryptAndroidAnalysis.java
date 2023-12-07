@@ -132,7 +132,7 @@ public class CogniCryptAndroidAnalysis {
 		logger.info("Loaded " + rules.size() + " CrySL rules");
 		logger.info("Running CogniCrypt Analysis");
 		scanner.scan(rules);
-		logger.info("Terminated CogniCrypt Analysis");
+		logger.info("Finished CogniCrypt Analysis");
 		System.gc();
 		return errorListener.getErrors();
 	}

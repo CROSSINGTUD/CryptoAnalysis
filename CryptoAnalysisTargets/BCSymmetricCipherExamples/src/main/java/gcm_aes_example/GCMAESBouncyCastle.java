@@ -20,7 +20,7 @@ public class GCMAESBouncyCastle {
     public byte[] processing(byte[] input, boolean encrypt)
             throws DataLengthException, InvalidCipherTextException {
          byte[] nonce = new byte[16];
-         GCMBlockCipher cipher = new GCMBlockCipher(new AESEngine());
+         GCMBlockCipher cipher = (GCMBlockCipher) GCMBlockCipher.newInstance(AESEngine.newInstance());
          AEADParameters parameters = new AEADParameters(new KeyParameter(key), 0, nonce);
          cipher.init(false, parameters);
 
@@ -40,7 +40,7 @@ public class GCMAESBouncyCastle {
          byte[] keyParam = new byte[16]; 
          secRand.nextBytes(keyParam);
          key = keyParam;
-         GCMBlockCipher cipher = new GCMBlockCipher(new AESEngine());
+         GCMBlockCipher cipher = (GCMBlockCipher) GCMBlockCipher.newInstance(AESEngine.newInstance());
          AEADParameters parameters = new AEADParameters(new KeyParameter(key), 0, nonce);
          cipher.init(false, parameters);
 

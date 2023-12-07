@@ -16,7 +16,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 // Copied from https://github.com/p120ph37/cbc-aes-example/
 public class CBCAESBouncyCastle {
 
-    private final CBCBlockCipher cbcBlockCipher = new CBCBlockCipher(new AESEngine());
+    private final CBCBlockCipher cbcBlockCipher = (CBCBlockCipher) CBCBlockCipher.newInstance(AESEngine.newInstance());
     private final SecureRandom random = new SecureRandom();
 
     private KeyParameter key;

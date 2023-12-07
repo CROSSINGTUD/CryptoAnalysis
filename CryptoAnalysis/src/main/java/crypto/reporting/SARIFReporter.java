@@ -48,7 +48,7 @@ public class SARIFReporter extends Reporter {
 	 * 
 	 * @param reportDir A {@link String} path giving the location of the report directory.
 	 *                  The reportPath should end without an ending file separator.
-	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param softwareId A {@link String} for the analyzed software.
 	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
 	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
 	 * @param includeStatistics Set this value to true, if the analysis report should contain some
@@ -73,6 +73,7 @@ public class SARIFReporter extends Reporter {
 		this.errorCountMap.put(SARIFConfig.TYPE_STATE_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.REQUIRED_PREDICATE_ERROR_KEY, 0);
 		this.errorCountMap.put(SARIFConfig.INCOMPLETE_OPERATION_ERROR_KEY, 0);
+		this.errorCountMap.put(SARIFConfig.UNCAUGHT_EXCEPTION_ERROR_KEY, 0);
 	}
 
 	private void addFile(SootClass c) {
@@ -83,24 +84,19 @@ public class SARIFReporter extends Reporter {
 	}
 
 	private String addRules(String errorType) {
-		String finalErrorType = errorType;
-		
 		if (this.rules.containsKey(errorType)) {
 			int count = this.errorCountMap.get(errorType);
-			count++;
-			finalErrorType = errorType.concat("-".concat(Integer.toString(count)));
-			this.errorCountMap.put(errorType, count);
+			this.errorCountMap.put(errorType, count + 1);
+			JSONObject ruleInfo = new JSONObject();
+			JSONObject fullDescription = new JSONObject();
+			fullDescription.put(SARIFConfig.TEXT_KEY, this.sarifHelper.getRuleDescription(errorType));
+			ruleInfo.put(SARIFConfig.RULES_ID_KEY, errorType);
+			ruleInfo.put(SARIFConfig.FULL_DESCRIPTION_KEY, fullDescription);
+			if (count == 0) {
+				this.rules.put(errorType, ruleInfo);
+			}
 		}
-		
-		JSONObject ruleInfo = new JSONObject();
-		JSONObject fullDescription = new JSONObject();
-		
-		fullDescription.put(SARIFConfig.TEXT_KEY, this.sarifHelper.getRuleDescription(errorType));
-		ruleInfo.put(SARIFConfig.RULES_ID_KEY, errorType);
-		ruleInfo.put(SARIFConfig.FULL_DESCRIPTION_KEY, fullDescription);
-		this.rules.put(finalErrorType, ruleInfo);
-		
-		return finalErrorType;
+		return errorType;
 	}
 
 	private void addResults(String errorType, SootClass c, String methodName, int lineNumber, String method, String statement, String text,
