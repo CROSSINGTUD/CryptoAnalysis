@@ -87,7 +87,7 @@
 								<artifactItem>
 									<groupId>de.darmstadt.tu.crossing</groupId>
 									<artifactId>JavaCryptographicArchitecture</artifactId>
-									<version>3.0.1</version>
+									<version>3.0.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -97,7 +97,7 @@
 								<artifactItem>
 									<groupId>de.fraunhofer.iem</groupId>
 									<artifactId>BouncyCastle</artifactId>
-									<version>3.0.0</version>
+									<version>3.1.0</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>
@@ -117,7 +117,7 @@
 								<artifactItem>
 									<groupId>de.paderborn.uni</groupId>
 									<artifactId>BouncyCastle-JCA</artifactId>
-									<version>3.0.1</version>
+									<version>3.0.2</version>
 									<classifier>ruleset</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>

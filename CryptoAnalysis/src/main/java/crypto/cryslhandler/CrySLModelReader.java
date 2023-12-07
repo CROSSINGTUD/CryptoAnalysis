@@ -278,7 +278,11 @@ public class CrySLModelReader {
 		final List<ISLConstraint> constraints = Lists.newArrayList();
 		constraints.addAll(getConstraints(model.getConstraints()));
 		constraints.addAll(getRequiredPredicates(model.getRequires()));
-		constraints.addAll(ExceptionsReader.getExceptionConstraints(eventsBlock));
+		
+		// Since 3.0.0: All sections are optional
+		if (eventsBlock != null) {
+			constraints.addAll(ExceptionsReader.getExceptionConstraints(eventsBlock));
+		}
 
 		final EnsuresBlock ensuresBlock = model.getEnsures();
 		final NegatesBlock negatesBlock = model.getNegates();
