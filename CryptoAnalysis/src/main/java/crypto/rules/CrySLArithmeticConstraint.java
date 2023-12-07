@@ -5,7 +5,7 @@ import java.util.Set;
 
 import crypto.interfaces.ICrySLPredicateParameter;
 
-public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.Serializable {
+public class CrySLArithmeticConstraint extends CrySLLiteral {
 
 	private static final long serialVersionUID = 1L;
 

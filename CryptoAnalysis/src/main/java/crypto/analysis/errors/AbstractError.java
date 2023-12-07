@@ -4,6 +4,7 @@ import boomerang.jimple.Statement;
 import crypto.rules.CrySLRule;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JReturnVoidStmt;
 
 public abstract class AbstractError implements IError{
 	private Statement errorLocation;
@@ -21,7 +22,8 @@ public abstract class AbstractError implements IError{
 		if(errorLocation.getUnit().get().containsInvokeExpr()) {
 			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
 		}
-		else if(errorLocation.getUnit().get() instanceof JReturnStmt) {
+		else if(errorLocation.getUnit().get() instanceof JReturnStmt
+			|| errorLocation.getUnit().get() instanceof JReturnVoidStmt) {
 			this.invokeMethod = errorLocation.getUnit().get().toString();
 		}
 		else {
@@ -81,8 +83,11 @@ public abstract class AbstractError implements IError{
 		if (rule == null) {
 			if (other.rule != null)
 				return false;
-		} else if (!rule.equals(other.rule))
+		} else if (!rule.equals(other.rule)) {
 			return false;
+		} else if (!errorLocation.equals(other.getErrorLocation())) {
+			return false;
+		}
 		return true;
 	}
 }

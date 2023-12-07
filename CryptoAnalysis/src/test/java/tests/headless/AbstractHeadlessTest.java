@@ -2,8 +2,10 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.jimple.Statement;
@@ -23,10 +26,10 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.RequiredPredicateError;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -52,9 +55,34 @@ public abstract class AbstractHeadlessTest {
 
 	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
+	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	private static Set<ReportFormat> reportFormats = new HashSet<>();
+	
+	public static void setReportFormat(ReportFormat reportFormat) {
+		// use this method to add exactly one report format
+		AbstractHeadlessTest.reportFormats.clear();
+		AbstractHeadlessTest.reportFormats.add(reportFormat);
+	}
+	
+	public static void setReportFormat(ReportFormat ...formats) {
+		// use this method to add multiple report formats
+		AbstractHeadlessTest.reportFormats.clear();
+		
+		for (ReportFormat format : formats) {
+			AbstractHeadlessTest.reportFormats.add(format);
+		}
+	}
 
+	public static void setVISUALIZATION(boolean vISUALIZATION) {
+		VISUALIZATION = vISUALIZATION;
+	}
+	
+	public static void setProviderDetection(boolean providerDetection) {
+		PROVIDER_DETECTION = providerDetection;
+	}
+	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
 		mi.compile();
@@ -66,7 +94,7 @@ public abstract class AbstractHeadlessTest {
 	}
 
 	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
-		G.v().reset();
+		G.reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
 			protected String sootClassPath() {
@@ -76,9 +104,11 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					return CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					List<CrySLRule> rules= CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					HeadlessCryptoScanner.setRules(rules);
+					return rules;
 				} catch (CryptoAnalysisException e) {
-					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
 				}
 				return null;
 			}
@@ -103,6 +133,16 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected boolean enableVisualization() {
 				return VISUALIZATION;
+			}
+			
+			@Override
+			protected boolean providerDetection() {
+				return PROVIDER_DETECTION;
+			}
+			
+			@Override
+			protected Set<ReportFormat> reportFormats(){
+				return VISUALIZATION ? reportFormats : new HashSet<>();
 			}
 		};
 		return scanner;
@@ -132,14 +172,10 @@ public abstract class AbstractHeadlessTest {
 
 			@Override
 			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
-
-			}
+					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {}
 
 			@Override
-			public void discoveredSeed(IAnalysisSeed curr) {
-
-			}
+			public void discoveredSeed(IAnalysisSeed curr) {}
 
 			@Override
 			public void collectedValues(AnalysisSeedWithSpecification seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {}
@@ -154,9 +190,7 @@ public abstract class AbstractHeadlessTest {
 			public void boomerangQueryStarted(Query seed, BackwardQuery q) {}
 
 			@Override
-			public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-
-			}
+			public void boomerangQueryFinished(Query seed, BackwardQuery q) {}
 
 			@Override
 			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
@@ -177,16 +211,10 @@ public abstract class AbstractHeadlessTest {
 			public void afterAnalysis() {}
 
 			@Override
-			public void onSecureObjectFound(IAnalysisSeed analysisObject) {
-				// TODO Auto-generated method stub
-
-			}
+			public void onSecureObjectFound(IAnalysisSeed analysisObject) {}
 
 			@Override
-			public void addProgress(int processedSeeds, int workListsize) {
-				// TODO Auto-generated method stub
-
-			}
+			public void addProgress(int processedSeeds, int workListsize) {}
 		};
 	}
 

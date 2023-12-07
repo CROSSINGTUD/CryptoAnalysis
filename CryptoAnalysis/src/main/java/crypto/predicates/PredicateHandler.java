@@ -1,14 +1,17 @@
 package crypto.predicates;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -25,7 +28,6 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import soot.SootMethod;
@@ -144,10 +146,7 @@ public class PredicateHandler {
 		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
 		return added;
 	}
-
-	/**
-	 * @return the existingPredicates
-	 */
+	
 	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
@@ -162,7 +161,6 @@ public class PredicateHandler {
 			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
 				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
-				SootMethod method = iie.getMethod();
 				SootMethod callerMethod = statement.getMethod();
 				Value base = iie.getBase();
 				boolean paramMatch = false;
@@ -219,10 +217,8 @@ public class PredicateHandler {
 			for (ISLConstraint pred : missingPredicates) {
 				if (pred instanceof RequiredCrySLPredicate) {
 					reportMissingPred(seed, (RequiredCrySLPredicate) pred);
-				} else if (pred instanceof CrySLConstraint) {
-					for (CrySLPredicate altPred : ((AlternativeReqPredicate) pred).getAlternatives()) {
-						reportMissingPred(seed, new RequiredCrySLPredicate(altPred, altPred.getLocation()));
-					}
+				} else if (pred instanceof AlternativeReqPredicate) {
+					reportMissingPred(seed, (AlternativeReqPredicate) pred);
 				}
 			}
 		}
@@ -234,7 +230,19 @@ public class PredicateHandler {
 			for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 				if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
 					cryptoScanner.getAnalysisListener().reportError(seed,
-							new RequiredPredicateError(missingPred.getPred(), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
+							new RequiredPredicateError(Arrays.asList(missingPred.getPred()), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
+				}
+			}
+		}
+	}
+	
+	private void reportMissingPred(AnalysisSeedWithSpecification seed, AlternativeReqPredicate missingPred) {
+		CrySLRule rule = seed.getSpec().getRule();
+		if (!rule.getPredicates().parallelStream().anyMatch(e -> missingPred.getAlternatives().stream().anyMatch(e1 -> e1.getPredName().equals(e.getPredName())) && missingPred.getAlternatives().stream().anyMatch(e2 -> e2.getParameters().get(0).equals(e.getParameters().get(0))))) {
+			for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
+				if (missingPred.getAlternatives().parallelStream().anyMatch(e4 -> e4.getInvolvedVarNames().contains(v.getVarName())) && v.stmt().equals(missingPred.getLocation())) {
+					cryptoScanner.getAnalysisListener().reportError(seed, 
+							new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null)));
 				}
 			}
 		}

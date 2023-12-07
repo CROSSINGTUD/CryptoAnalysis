@@ -1,6 +1,5 @@
 package tests.headless;
 
-import java.awt.image.RescaleOp;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;

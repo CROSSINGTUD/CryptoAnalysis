@@ -13,7 +13,6 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
@@ -67,13 +66,15 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			public SootBasedStateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
 				StateNode s = new StateNode("0", true, true){
+					private static final long serialVersionUID = 1L;
+
 					@Override
 					public String toString() {
 						return "";
 					}
 				};
 				m.addNode(s);
-				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
+				m.createNewEdge(Lists.newLinkedList(), s,s);
 				return new SootBasedStateMachineGraph(m);
 			}
 			
