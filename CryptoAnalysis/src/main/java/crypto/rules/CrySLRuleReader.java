@@ -21,13 +21,13 @@ public class CrySLRuleReader {
 	
 	private final CrySLModelReader reader;
 
-	public CrySLRuleReader(){
+	public CrySLRuleReader() {
 		reader = new CrySLModelReader();
 	}
 
-	public CrySLRuleReader(CrySLModelReader reader){
+	public CrySLRuleReader(CrySLModelReader reader) {
 		if (reader == null){
-			throw new IllegalArgumentException("reader must not be null");
+			throw new IllegalArgumentException("CrySLModelReader must not be null");
 		}
 		this.reader = reader;
 	}
@@ -41,6 +41,17 @@ public class CrySLRuleReader {
 	 */
 	public CrySLRule readFromSourceFile(File file) throws CryptoAnalysisException {
 		return reader.readRule(file);
+	}
+	
+	/**
+	 * Returns a list with {@link CrySLRule} objects from the files.
+	 * 
+	 * @param files	The files to read from
+	 * @return The list with {@link CrySLRule} objects
+	 * @throws CryptoAnalysisException	If a file could not get processed to a {@link CrySLRule}
+	 */
+	public List<CrySLRule> readFromSourceFiles(List<File> files) throws CryptoAnalysisException {
+		return reader.readRulesFromFiles(files);
 	}
 
 	/**
@@ -65,32 +76,20 @@ public class CrySLRuleReader {
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
 	public List<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
-		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
-
 		if (!directory.exists() || !directory.isDirectory())
 			throw new CryptoAnalysisException("The specified path is not a directory " + directory.getAbsolutePath());
 
-		List<File> cryptSLFiles = new ArrayList<>();
-		findCryptSLFiles(directory, recursive, cryptSLFiles);
+		List<File> crySLFiles = new ArrayList<>();
+		findCrySLFiles(directory, recursive, crySLFiles);
 
-		for (File file : cryptSLFiles) {
-			CrySLRule rule = reader.readRule(file);
-
-			if(rule != null) {
-				if(!ruleMap.containsKey(rule.getClassName())) {
-					ruleMap.put(rule.getClassName(), rule);
-				}
-			}
-		}
-		
-		return new ArrayList<>(ruleMap.values());
+		return reader.readRulesFromFiles(crySLFiles);
 	}
 
 	/**
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a Zip {@link File}.
 	 * @param file Zip that contains the CrySL files
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If the directory is not a zip file
 	 */
 	public List<CrySLRule> readFromZipFile(File file) throws CryptoAnalysisException {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
@@ -118,26 +117,24 @@ public class CrySLRuleReader {
 		return new ArrayList<>(ruleMap.values());
 	}	
 
-	private static void findCryptSLFiles(File directory, boolean recursive, Collection<File> resultCollection) {
-		for (File file: directory.listFiles())
-		{
+	private static void findCrySLFiles(File directory, boolean recursive, Collection<File> resultCollection) {
+		for (File file: directory.listFiles()) {
 			if (file.isFile() && file.getName().endsWith(CrySLModelReader.cryslFileEnding))
 				resultCollection.add(file);
 
 			if (recursive && file.isDirectory())
-				findCryptSLFiles(file, recursive, resultCollection);
+				findCrySLFiles(file, recursive, resultCollection);
 		}
 	}
 
-	private CrySLRule getCrySLRuleFromZipEntry(ZipEntry entry, ZipFile zip, File zipFile) throws CryptoAnalysisException
-	{
+	private CrySLRule getCrySLRuleFromZipEntry(ZipEntry entry, ZipFile zip, File zipFile) throws CryptoAnalysisException {
 		if (entry.isDirectory() || !entry.getName().endsWith(CrySLModelReader.cryslFileEnding))
 			throw new CryptoAnalysisException("ZIP entry is a directory or not a CrySL file");
 		
 		CrySLRule rule = null;
 		try {
 			String name = createUniqueZipEntryName(zipFile, entry);
-			rule = reader.readRule(zip.getInputStream(entry), name);
+			rule = new CrySLModelReader().readRule(zip.getInputStream(entry), name);
 		}
 		catch (IllegalArgumentException | IOException | NoSuchAlgorithmException ex) {
 			ex.printStackTrace();

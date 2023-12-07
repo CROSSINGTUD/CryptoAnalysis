@@ -1,17 +1,19 @@
 package crypto.analysis;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
+
 import crypto.cryslhandler.CrySLModelReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.List;
-
-@Deprecated
 public class CrySLRulesetSelector {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrySLRulesetSelector.class);
@@ -29,7 +31,7 @@ public class CrySLRulesetSelector {
 	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
 	 * @param set the {@link Ruleset} for which the {@link CrySLRule} objects should be created for
 	 * @return the {@link List} with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If there is an error reading a ruleset
 	 */ 
 	public static List<CrySLRule> makeFromRuleset(String rulesBasePath, Ruleset... set) throws CryptoAnalysisException {
 		
@@ -44,11 +46,12 @@ public class CrySLRulesetSelector {
 	}
 
 	/**
-	 * Computes the ruleset from a string. The sting
+	 * Computes the ruleset from a string.
 	 * 
-	 * @param rulesetString
-	 * @return
-	 * @throws CryptoAnalysisException 
+	 * @param rulesBasePath a {@link String} path giving the location of the CrySL ruleset base folder
+	 * @param rulesetString String 
+	 * @return a list of the rules from the ruleset
+	 * @throws CryptoAnalysisException If there is no ruleset
 	 */
 	public static List<CrySLRule> makeFromRulesetString(String rulesBasePath, String rulesetString) throws CryptoAnalysisException {
 		String[] set = rulesetString.split(",");
@@ -71,18 +74,13 @@ public class CrySLRulesetSelector {
 	}
 
 	private static List<CrySLRule> getRulesset(String rulesBasePath, Ruleset s) throws CryptoAnalysisException {
-		List<CrySLRule> rules = Lists.newArrayList();
 		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
-		CrySLRuleReader reader = new CrySLRuleReader();
-		for (File file : listFiles) {
-			CrySLRule rule = reader.readFromSourceFile(file);
-			if(rule != null) {
-				rules.add(rule);
-			}
-		}
+		List<File> files = Arrays.asList(listFiles);
+		
+		List<CrySLRule> rules = new CrySLRuleReader().readFromSourceFiles(files);
 		
 		if (rules.isEmpty()) {
-			throw new CryptoAnalysisException("No CrySL rules found in " + rulesBasePath+s+"/");
+			throw new CryptoAnalysisException("No CrySL rules found in " + rulesBasePath + s + "/");
 		}
 		
 		return rules;
@@ -95,14 +93,16 @@ public class CrySLRulesetSelector {
 	 * @param ruleset the {@link Ruleset} where the rule belongs to 
 	 * @param rulename the name of the rule
 	 * @return the {@link CrySLRule} object
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If the rule cannot be found
 	 */
 	public static CrySLRule makeSingleRule(String rulesBasePath, Ruleset ruleset, String rulename) throws CryptoAnalysisException {
 		File file = new File(rulesBasePath + "/" + ruleset + "/" + rulename + CrySLModelReader.cryslFileEnding);
+		
 		if (file.exists() && file.isFile()) {
 			CrySLRule rule = new CrySLRuleReader().readFromSourceFile(file);
+			
 			if(rule != null) {
-			 return rule;
+				return rule;
 			} else {
 				throw new CryptoAnalysisException("CrySL rule couldn't created from path " + file.getAbsolutePath());
 			}

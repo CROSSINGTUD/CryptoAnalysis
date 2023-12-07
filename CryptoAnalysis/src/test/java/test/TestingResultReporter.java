@@ -19,6 +19,7 @@ import typestate.finiteautomata.State;
 public class TestingResultReporter {
 	private Multimap<Unit, ComparableResult<State, Val>> allExpectedTypestateResults = HashMultimap.create();
 
+	@SuppressWarnings("unchecked")
 	public TestingResultReporter(Set<Assertion> expectedResults) {
 		for (Assertion e : expectedResults) {
 			if (e instanceof ComparableResult)

@@ -1,5 +1,15 @@
 package test;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
+
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
@@ -8,7 +18,6 @@ import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import com.google.common.collect.Lists;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
@@ -18,9 +27,12 @@ import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import soot.*;
+import soot.Body;
+import soot.Local;
+import soot.SceneTransformer;
+import soot.SootMethod;
+import soot.Unit;
+import soot.Value;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
@@ -28,11 +40,6 @@ import test.assertions.MustBeInState;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
 	

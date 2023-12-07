@@ -83,8 +83,11 @@ public abstract class AbstractError implements IError{
 		if (rule == null) {
 			if (other.rule != null)
 				return false;
-		} else if (!rule.equals(other.rule))
+		} else if (!rule.equals(other.rule)) {
 			return false;
+		} else if (!errorLocation.equals(other.getErrorLocation())) {
+			return false;
+		}
 		return true;
 	}
 }

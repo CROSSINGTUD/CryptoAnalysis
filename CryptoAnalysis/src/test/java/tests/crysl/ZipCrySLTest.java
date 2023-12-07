@@ -1,25 +1,26 @@
 package tests.crysl;
 
-import crypto.exceptions.CryptoAnalysisException;
-import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
+import java.io.File;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 
-public class ZipCrySLTest
-{
+public class ZipCrySLTest {
+	
     private static final String emptyZipFilePath = "src/test/resources/crySL/empty.zip";
-    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-1.5.1-ruleset.zip";
+    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-3.0.1-ruleset.zip";
     private static final String multipleRulesetZipFilePath = "src/test/resources/crySL/Multiple-rulesets.zip";
     private static final String junkRuleSet = "src/test/resources/crySL/rulesetWithJunk.zip";
 
-
+    @SuppressWarnings("unused")
     @Test(expected = CryptoAnalysisException.class)
     public void TestJunkThrows() throws CryptoAnalysisException {
         File zipFile = new File(junkRuleSet);
@@ -31,7 +32,7 @@ public class ZipCrySLTest
         File zipFile = new File(jcaRulesetZipFilePath);
         Collection<CrySLRule> rules = null;
 		rules = new CrySLRuleReader().readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
     }
 
     @Test
@@ -39,7 +40,7 @@ public class ZipCrySLTest
         File zipFile = new File(jcaRulesetZipFilePath);
         Collection<CrySLRule> rules = new CrySLRuleReader().readFromZipFile(zipFile);
         Collection<CrySLRule> notNullRules = rules.stream().filter(x -> x != null).collect(Collectors.toList());
-        Assert.assertEquals(46, notNullRules.size());
+        Assert.assertEquals(49, notNullRules.size());
     }
 
     @Test(expected = CryptoAnalysisException.class)
@@ -60,7 +61,7 @@ public class ZipCrySLTest
     public void TestFileContainsMultipleRulesets() throws CryptoAnalysisException {
         File zipFile = new File(multipleRulesetZipFilePath);
         Collection<CrySLRule> rules = new CrySLRuleReader().readFromZipFile(zipFile);
-        Assert.assertEquals(102, rules.size());
+        Assert.assertEquals(108, rules.size());
     }
 
     @Test
@@ -68,9 +69,9 @@ public class ZipCrySLTest
         File zipFile = new File(jcaRulesetZipFilePath);
         CrySLRuleReader reader = new CrySLRuleReader();
         Collection<CrySLRule> rules = reader.readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
         rules = reader.readFromZipFile(zipFile);
-        Assert.assertEquals(46, rules.size());
+        Assert.assertEquals(49, rules.size());
     }
 
     @Test
