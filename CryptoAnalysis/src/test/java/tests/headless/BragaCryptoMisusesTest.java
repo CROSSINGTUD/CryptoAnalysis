@@ -2,7 +2,6 @@ package tests.headless;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -578,7 +577,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void positiveTestCase()>", ConstraintError.class, 0);
-		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void positiveTestCase()>", RequiredPredicateError.class, 6);
+		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void positiveTestCase()>", RequiredPredicateError.class, 0);
 
 		// negative test case
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void negativeTestCase()>", ConstraintError.class, 2);
@@ -702,7 +701,6 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/cib/printPrivSecKey/
 	@Test
-	@Ignore
 	public void printPrivSecKeyExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/printPrivSecKey").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
@@ -718,33 +716,30 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void positiveTestCase()>", ConstraintError.class, 0);
-		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void positiveTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void positiveTestCase()>", RequiredPredicateError.class, 0);
 
 		// negative test case
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void negativeTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void negativeTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 2);
 		
 		setErrorsCount("<cib.printPrivSecKey.PrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
 		
 		// positive test case
-		// TODO This is not right: Rule for PublicKey is missing
-		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void positiveTestCase()>", RequiredPredicateError.class, 6);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void positiveTestCase()>", ConstraintError.class, 0);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		
 		// negative test case
 		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void negativeTestCase()>", ConstraintError.class, 2);
-		// TODO This is not right: Rule for PublicKey is missing
 		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void negativeTestCase()>", RequiredPredicateError.class, 8);
 
 		// positive test case
-		// TODO This is not right: Rule for PublicKey is missing
-		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void positiveTestCase()>", RequiredPredicateError.class, 6);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void positiveTestCase()>", ConstraintError.class, 0);
+		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		
 		// negative test case
 		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void negativeTestCase()>", ConstraintError.class, 2);
-		// TODO This is not right: Rule for PublicKey is missing
 		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 8);
-
 
 		scanner.exec();
 		assertErrors();

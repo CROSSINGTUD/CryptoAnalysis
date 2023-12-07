@@ -530,7 +530,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", ConstraintError.class, 0);
-		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_128: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<example.NonAuthenticatedEphemeralECDH_192: void main(java.lang.String[])>", RequiredPredicateError.class, 8);

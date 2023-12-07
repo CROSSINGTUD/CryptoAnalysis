@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-import javax.xml.bind.ValidationException;
-
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequenceGenerator;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
@@ -29,11 +27,11 @@ public class ECKeyPair {
 	private BigInteger priv;
 	@SuppressWarnings("unused")
 	private byte[] pub;
-	public byte[] sign (byte[] hash) throws ValidationException
+	public byte[] sign (byte[] hash) throws IllegalArgumentException
 	{
 		if ( priv == null )
 		{
-			throw new ValidationException ("Need private key to sign");
+			throw new IllegalArgumentException("Need private key to sign");
 		}
 		ECDSASigner signer = new ECDSASigner (new HMacDSAKCalculator (new SHA256Digest ()));
 		signer.init (true, new ECPrivateKeyParameters (priv, domain));
