@@ -63,6 +63,7 @@ public abstract class HeadlessCryptoScanner {
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
 	
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
@@ -88,7 +89,7 @@ public abstract class HeadlessCryptoScanner {
 				switch(settings.getRulesetPathType()) {
 					case DIR:
 						try {
-							rules.addAll(CrySLRuleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
+							rules.addAll(ruleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
 							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
@@ -96,7 +97,7 @@ public abstract class HeadlessCryptoScanner {
 						break;
 					case ZIP:
 						try {
-							rules.addAll(CrySLRuleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
+							rules.addAll(ruleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
 							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathZip(), e);
@@ -261,7 +262,7 @@ public abstract class HeadlessCryptoScanner {
 				};
 				
 				if (providerDetection()) {
-					ProviderDetection providerDetection = new ProviderDetection();
+					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
 
 					if(rulesetRootPath == null) {
 						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";

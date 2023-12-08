@@ -24,7 +24,6 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
@@ -53,7 +52,6 @@ public abstract class AbstractHeadlessTest {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeadlessTest.class);
 
-	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
 	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
@@ -104,7 +102,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					List<CrySLRule> rules= CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					List<CrySLRule> rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
 					HeadlessCryptoScanner.setRules(rules);
 					return rules;
 				} catch (CryptoAnalysisException e) {

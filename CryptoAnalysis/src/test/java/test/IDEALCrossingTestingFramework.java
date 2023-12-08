@@ -20,7 +20,6 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
@@ -51,7 +50,6 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
-	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
@@ -80,7 +78,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 
 	protected CrySLRule getRule() {
 		try {
-			return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
+			return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
 		} catch (CryptoAnalysisException e) {
 			LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+RULES_BASE_DIR, e);
 		}

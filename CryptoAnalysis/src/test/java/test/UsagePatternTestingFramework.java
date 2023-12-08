@@ -26,7 +26,6 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCrySLPredicate;
@@ -81,7 +80,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
-	private static final RuleFormat ruleFormat= RuleFormat.SOURCE;
 	List<CrySLRule> rules;
 	
 	@Override
@@ -361,7 +359,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	private List<CrySLRule> getRules() {
 		if(rules == null) {
 			try {
-				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
 			} catch (CryptoAnalysisException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -3,7 +3,6 @@ package crypto.cryslhandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -106,21 +105,22 @@ public class CrySLModelReader {
 	private static final String UNDERSCORE = "_";
 	
 	/**
-	 * Creates a CrySLModelReader
-	 * @throws MalformedURLException If there is a problem with the URL
+	 * Creates a CrySLModelReader which creates rules from classes on the runtime's classpath.
 	 */
-	public CrySLModelReader() throws MalformedURLException {
+	public CrySLModelReader() {
+		this(CrySLModelReaderClassPath.JAVA_CLASS_PATH);
+	}
+
+	/**
+	 * Creates a CrySLModelReader which creates rules from classes on the runtime's classpath and a given virtual classpath.
+	 *
+	 * @param classPath Contains additional classpath elements which are not present on the current runtime's classpath.
+	 */
+	public CrySLModelReader(CrySLModelReaderClassPath classPath) {
 		CrySLStandaloneSetup crySLStandaloneSetup = new CrySLStandaloneSetup();
 		this.injector = crySLStandaloneSetup.createInjectorAndDoEMFRegistration();
 		this.resourceSet = injector.getInstance(XtextResourceSet.class);
-
-		String[] cp = System.getProperty("java.class.path").split(File.pathSeparator);
-		URL[] classpath = new URL[cp.length];
-		
-		for (int i = 0; i < classpath.length; i++) {
-			classpath[i] = new File(cp[i]).toURI().toURL();
-		}
-
+		URL[] classpath = classPath.getClassPath();
 		URLClassLoader ucl = new URLClassLoader(classpath);
 		this.resourceSet.setClasspathURIContext(new URLClassLoader(classpath));
 		new ClasspathTypeProvider(ucl, this.resourceSet, null, null);
@@ -205,12 +205,7 @@ public class CrySLModelReader {
 		
 		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
 
-		try {
-			return createRuleFromResource(resource);
-		} catch (Exception e) {
-			System.err.println(e);
-			return null;
-		}
+		return createRuleFromResource(resource);
 	}
 
 	private boolean runValidator(Resource resource, Severity report) {
