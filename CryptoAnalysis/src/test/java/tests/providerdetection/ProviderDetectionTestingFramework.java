@@ -43,7 +43,7 @@ public class ProviderDetectionTestingFramework extends ProviderDetection {
 	 * This method is used to setup Soot
 	 */
 	public void setupSoot(String sootClassPath, String mainClass) {
-		G.v().reset();
+		G.reset();
 		Options.v().set_whole_program(true);
 		Options.v().setPhaseOption("cg.cha", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");

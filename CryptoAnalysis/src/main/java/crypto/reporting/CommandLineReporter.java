@@ -1,52 +1,50 @@
 package crypto.reporting;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-
-import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 
-public class CommandLineReporter extends ErrorMarkerListener {
+/**
+ * This class extends the class {@link Reporter} by generating an analysis report and print it to the command line.
+ */
+public class CommandLineReporter extends Reporter {
 
-	private File outputFolder;
-	private List<CrySLRule> rules;
-	private Collection<IAnalysisSeed> objects = new HashSet<>();
-	
-	/**
-	 * The analysis report
-	 */
+	/**The analysis report */
 	private String analysisReport;
 
-
 	/**
-	 * Creates {@link CommandLineReporter} a constructor with reportDir and rules as parameter
+	 * Subclass of {@link Reporter}. Creates an instance of {@link CommandLineReporter} with reportDir and rules as parameter
 	 * 
 	 * @param reportDir a {@link String} path giving the location of the report directory
 	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
 	 */
 	public CommandLineReporter(String reportDir, List<CrySLRule> rules) {
-		this.outputFolder = (reportDir != null ? new File(reportDir) : null);
-		this.rules = rules;
+		super((reportDir != null ? new File(reportDir) : null), "", rules, -1, false);
 	}
 	
 	/**
-	 * Creates {@link CommandLineReporter} a constructor with reportDir and rules as parameter
+	 * Subclass of {@link Reporter}. Creates an instance of {@link CommandLineReporter}, which
+	 * can be used to print an analysis report to stdout.
 	 * 
-	 * @param rules {@link CrySLRule} the rules with which the project is analyzed
+	 * @param softwareID A {@link String} for the analyzed software.
+	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+	 * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param includeStatistics Set this value to true, if the analysis report should contain some
+	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
+	 *                          to false, no statistics will be output. 
 	 */
-	public CommandLineReporter(List<CrySLRule> rules) {
-		this.rules = rules;
+	public CommandLineReporter(String softwareID, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
+		super(null, softwareID, rules, callgraphConstructionTime, includeStatistics);
 	}
 	
 	@Override
-	public void discoveredSeed(IAnalysisSeed object) {
-		this.objects.add(object);
-	}
-	@Override
-	public void afterAnalysis() {
-		this.analysisReport = ReporterHelper.generateReport(this.rules, this.objects, this.secureObjects, this.errorMarkers, this.errorMarkerCount);
+	public void handleAnalysisResults() {
+		if (includeStatistics()) {
+			this.analysisReport = ReporterHelper.generateReport(getRules(), getObjects(), this.secureObjects, this.errorMarkers, this.errorMarkerCount, getStatistics());
+		} else {
+			this.analysisReport = ReporterHelper.generateReport(getRules(), getObjects(), this.secureObjects, this.errorMarkers, this.errorMarkerCount, null);
+		}
+		
 		System.out.println(analysisReport);
 	}
 }

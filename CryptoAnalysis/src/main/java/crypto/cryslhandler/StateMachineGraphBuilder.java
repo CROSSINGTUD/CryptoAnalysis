@@ -1,508 +1,274 @@
 package crypto.cryslhandler;
-import java.util.AbstractMap.SimpleEntry;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
-import de.darmstadt.tu.crossing.crySL.Expression;
+import de.darmstadt.tu.crossing.crySL.Event;
 import de.darmstadt.tu.crossing.crySL.Order;
-import de.darmstadt.tu.crossing.crySL.SimpleOrder;
+import de.darmstadt.tu.crossing.crySL.OrderOperator;
+import de.darmstadt.tu.crossing.crySL.Primary;
 
+/**
+ * This class will build a {@link crypto.interfaces.FiniteStateMachine} for a given ORDER expression from crysl rules.
+ * @author marvinvogel
+ *
+ */
 public class StateMachineGraphBuilder {
 	
-	private final Expression head;
-	private final StateMachineGraph result = new StateMachineGraph();
-	private int nodeNameCounter = 0;
-
-	public StateMachineGraphBuilder(final Expression order) {
-		this.head = order;
-		this.result.addNode(new StateNode("-1", true, true));
+	private final Order order;
+	private final StateMachineGraph result;
+	private final List<Event> events;
+	private final Set<CrySLMethod> allMethods = Sets.newHashSet();
+	
+	public static StateMachineGraph buildSMG(final Order order, final List<Event> events) {
+		return (new StateMachineGraphBuilder(order, events))
+				.buildSMG();
 	}
 
-	private StateNode addRegularEdge(final Expression leaf, final StateNode prevNode, final StateNode nextNode) {
-		return addRegularEdge(leaf, prevNode, nextNode, false);
+	protected StateMachineGraphBuilder(final Order order, final List<Event> events) {
+		this.order = order;
+		this.events = events;
+		this.result = new StateMachineGraph();
 	}
 
-	private StateNode addRegularEdge(final Expression leaf, final StateNode prevNode, final StateNode nextNode, final Boolean isStillAccepting) {
-		final List<CrySLMethod> label = CryslReaderUtils.resolveAggregateToMethodeNames(leaf.getOrderEv().get(0));
-		return addRegularEdge(label, prevNode, nextNode, isStillAccepting);
-	}
-
-	private StateNode addRegularEdge(final List<CrySLMethod> label, final StateNode prevNode, StateNode nextNode, final Boolean isStillAccepting) {
-		if (nextNode == null) {
-			// new node generated, accepting set to true by default
-			nextNode = getNewNode();
-			this.result.addNode(nextNode);
-		}
-		if (!isStillAccepting) {
-			prevNode.setAccepting(false);
-		}
-		boolean added = this.result.addEdge(new TransitionEdge(label, prevNode, nextNode));
-		return nextNode;
-	}
-
-	public StateMachineGraph buildSMG() {
-		StateNode initialNode = null;
-		for (final StateNode n : this.result.getNodes()) {
-			initialNode = n;
-		}
-		if (this.head != null) {
-			processHead(this.head, 0, HashMultimap.create(), initialNode);
-		} else {
-			this.result.addEdge(new TransitionEdge(new ArrayList<CrySLMethod>(), initialNode, initialNode));
-		}
+	protected StateMachineGraph buildSMG() {
+		StateNode initialNode = new StateNode("-1", true, false);
+		this.result.addNode(initialNode);
+		SubStateMachine subSmg = buildSubSMG(this.order, Collections.singleton(initialNode));
+		subSmg.getEndNodes().parallelStream().forEach(StateNode::makeAccepting);
 		return this.result;
 	}
 
-	private StateNode getNewNode() {
-		return new StateNode(String.valueOf(this.nodeNameCounter++), false, true);
-	}
-
-	private List<TransitionEdge> getOutgoingEdges(final StateNode curNode, final StateNode notTo) {
-		final List<TransitionEdge> outgoingEdges = new ArrayList<>();
-		for (final TransitionEdge comp : this.result.getAllTransitions()) {
-			if (comp.getLeft().equals(curNode) && !(comp.getRight().equals(curNode) || comp.getRight().equals(notTo))) {
-				outgoingEdges.add(comp);
-			}
-		}
-		return outgoingEdges;
-	}
-
-	private StateNode isGeneric(final String el, final int level, final Multimap<Integer, Entry<String, StateNode>> leftOvers) {
-		for (final Entry<String, StateNode> entry : leftOvers.get(level)) {
-			if (el.equals(entry.getKey())) {
-				return entry.getValue();
-			}
-		}
-		return null;
-	}
-
-	private StateNode isOr(final int level, final Multimap<Integer, Entry<String, StateNode>> leftOvers) {
-		return isGeneric("|", level, leftOvers);
-	}
-
-	private StateNode isQM(final int level, final Multimap<Integer, Entry<String, StateNode>> leftOvers) {
-		return isGeneric("?", level, leftOvers);
-	}
-
 	/**
-	 * called from an inner subtree, 
-	 * orderop represents the operator between a left and a right expression, 
-	 * elementop represents the operator that belongs to an expression, e.g. "*".
-	 * @param curLevel current level
-	 * @param level a level > 0 as called from processHead method
-	 * @param leftOvers the remaining tree elements to be parsed
-	 * @param prevNode the outgoing state
-	 * @return
+	 * Helper class to store a {@link Set} of endNodes and startNodes.
 	 */
-	private StateNode process(final Expression curLevel, final int level, final Multimap<Integer, Map.Entry<String, StateNode>> leftOvers, StateNode prevNode) {
-		final Expression left = curLevel.getLeft();
-		final Expression right = curLevel.getRight();
-		final String leftElOp = (left != null) ? left.getElementop() : "";
-		final String rightElOp = (right != null) ? right.getElementop() : "";
-		final String orderOp = curLevel.getOrderop();
-		// case 1 = left & right = non-leaf
-		// case 2 = left = non-leaf & right = leaf
-		// case 3 = left = leaf & right = non-leaf
-		// case 4 = left = leaf & right = leaf
+	private static class SubStateMachine {
 
-		if (left == null && right == null) {
-			addRegularEdge(curLevel, prevNode, null);
-		} 
-		// case 1 = left & right = non-leaf
-		else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
-			final StateNode leftPrev = prevNode;
-			prevNode = process(left, level + 1, leftOvers, prevNode);
+		private final Set<StateNode> startNodes;
+		private final Set<StateNode> endNodes;
 
-			final StateNode rightPrev = prevNode;
-			StateNode returnToNode = null;
-			if ("|".equals(orderOp)) {
-				leftOvers.put(level + 1, new HashMap.SimpleEntry<>(orderOp, prevNode));
-				prevNode = process(right, level + 1, leftOvers, leftPrev);
-			} else if ((returnToNode = isOr(level, leftOvers)) != null) {
-				prevNode = process(right, level + 1, leftOvers, returnToNode);
-			} else {
-				prevNode = process(right, level + 1, leftOvers, prevNode);
-			}
-
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				final List<TransitionEdge> outgoingEdges = new ArrayList<TransitionEdge>();
-				if ("|".equals(orderOp)) {
-					final List<TransitionEdge> tmpOutgoingEdges = getOutgoingEdges(leftPrev, null);
-					for (final TransitionEdge outgoingEdge : tmpOutgoingEdges) {
-						if (isReachable(outgoingEdge.to(), prevNode, new ArrayList<StateNode>())) {
-							outgoingEdges.addAll(getOutgoingEdges(outgoingEdge.to(), prevNode));
-						}
-					}
-					for (final TransitionEdge outgoingEdge : outgoingEdges) {
-						if (isReachable(prevNode, outgoingEdge.from(), new ArrayList<StateNode>())) {
-							addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.from(), true);
-						}
-					}
-
-				} else {
-					outgoingEdges.addAll(getOutgoingEdges(rightPrev, prevNode));
-					for (final TransitionEdge outgoingEdge : outgoingEdges) {
-						addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.to(), true);
-					}
-				}
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(right, leftPrev, prevNode, true);
-			}
-
-		} 
-		// case 2 = left = non-leaf & right = leaf
-		else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
-			StateNode leftPrev = prevNode;
-			
-			Optional<Entry<String, StateNode>> optionalOrLevel = leftOvers.get(level).stream().filter(e -> "|".equals(e.getKey())).findFirst();
-			if (optionalOrLevel.isPresent()) {
-				Entry<String, StateNode> orLevel = optionalOrLevel.get();
-				StateNode p = orLevel.getValue();
-				List<TransitionEdge> orEdges = getOutgoingEdges(prevNode, null);
-				if (!orEdges.isEmpty()) {
-					Optional<TransitionEdge> edge = orEdges.stream().filter(e -> e.getRight().equals(p)).findFirst();
-					if (edge.isPresent() && edge.get().getLabel().equals(CryslReaderUtils.resolveAggregateToMethodeNames(getLeftMostChild(left).getOrderEv().get(0)))) {
-						leftOvers.put(level + 1, orLevel);
-					}
-				}
-			}
-			prevNode = process(left, level + 1, leftOvers, prevNode);
-
-			if (rightElOp != null && ("?".equals(rightElOp) || "*".equals(rightElOp))) {
-				leftOvers.put(level - 1, new HashMap.SimpleEntry<>(rightElOp, prevNode));
-				prevNode = addRegularEdge(right, prevNode, null, true);
-			} else {
-				prevNode = addRegularEdge(right, prevNode, null);
-			}
-			// add an edge to the node itself
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				addRegularEdge(right, prevNode, prevNode, true);
-			}
-
-		} 
-		// case 3 = left = leaf & right = non-leaf
-		else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
-			StateNode leftPrev = prevNode;
-			prevNode = addRegularEdge(left, prevNode, null);
-
-			if (leftElOp != null && ("+".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(left, prevNode, prevNode, true);
-			}
-
-			if (rightElOp != null && ("?".equals(rightElOp) || "*".equals(rightElOp))) {
-				leftOvers.put(level - 1, new HashMap.SimpleEntry<>(rightElOp, prevNode));
-			}
-			final StateNode rightPrev = prevNode;
-			if ("|".equals(orderOp)) {
-				leftOvers.put(level + 1, new HashMap.SimpleEntry<>(orderOp, prevNode));
-				prevNode = process(right, level + 1, leftOvers, leftPrev);
-			} else {
-				prevNode = process(right, level + 1, leftOvers, prevNode);
-			}
-
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				final List<TransitionEdge> outgoingEdges = getOutgoingEdges(rightPrev, prevNode);
-				for (final TransitionEdge outgoingEdge : outgoingEdges) {
-					addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.to(), true);
-				}
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(right, leftPrev, prevNode, true);
-			}
-
-		} 
-		// case 4 = left = leaf & right = leaf
-		else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
-			StateNode leftPrev = null;
-			leftPrev = prevNode;
-
-			boolean sameName = false;
-			List<TransitionEdge> orEdges = getOutgoingEdges(prevNode, null);
-			// check for remaining tree
-			// maybe there is a problem here that causes the Cipher rule to get a wrong accepting state, leftOvers could miss a check
-			Optional<Entry<String, StateNode>> alternative = leftOvers.get(level).stream().filter(e -> "|".equals(e.getKey())).findFirst();
-			if (alternative.isPresent()) {
-				Entry<String, StateNode> orLevel = alternative.get();
-				StateNode p = orLevel.getValue();
-				if (!orEdges.isEmpty()) {
-					Optional<TransitionEdge> edge = orEdges.stream().filter(e -> e.getRight().equals(p)).findFirst();
-					if (edge.isPresent() && edge.get().getLabel().equals(CryslReaderUtils.resolveAggregateToMethodeNames(getLeftMostChild(left).getOrderEv().get(0)))) {
-						sameName = true;
-						prevNode = p;
-						leftOvers.remove(level, orLevel);
-					}
-				}
-			}
-			if (!sameName) {
-				prevNode = addRegularEdge(left, prevNode, null);
-			}
-
-			StateNode returnToNode = isOr(level, leftOvers);
-			if (leftElOp != null && ("+".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(left, prevNode, prevNode, true);
-			}
-
-			if (rightElOp != null && ("?".equals(rightElOp) || "*".equals(rightElOp))) {
-				leftOvers.put(level - 1, new HashMap.SimpleEntry<>(rightElOp, prevNode));
-			}
-			if (returnToNode != null || "|".equals(orderOp)) {
-				if ("|".equals(orderOp)) {
-					addRegularEdge(right, leftPrev, prevNode);
-				}
-				if ((returnToNode = isOr(level, leftOvers)) != null) {
-					prevNode = addRegularEdge(right, prevNode, returnToNode);
-				}
-			} else {
-				prevNode = addRegularEdge(right, prevNode, null);
-			}
-
-			// at this point, the statemachine of the Cipher rule becomes faulty, when the third node is parsed, accepting is still set to true
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) { 
-				addRegularEdge(right, prevNode, prevNode, true);
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(right, leftPrev, prevNode, true);
-			}
-			
-			if (sameName) {
-				setAcceptingState(alternative.get().getValue());
-			}
-			
+		public SubStateMachine(final StateNode startNode, final StateNode endNode) {
+			this(Collections.singleton(startNode), Collections.singleton(endNode));
 		}
-		leftOvers.removeAll(level);
-		return prevNode;
+
+		public SubStateMachine(final Set<StateNode> startNodes, final Set<StateNode> endNodes) {
+			this.startNodes = Collections.unmodifiableSet(startNodes);
+			this.endNodes = Collections.unmodifiableSet(endNodes);
+		}
+
+		public Set<StateNode> getStartNodes() {
+			return this.startNodes;
+		}
+		public Set<StateNode> getEndNodes() {
+			return this.endNodes;
+		}
 	}
-
-	private boolean isReachable(final StateNode stateNode, final StateNode prevNode, final List<StateNode> skippable) {
-		for (final TransitionEdge edge : getOutgoingEdges(stateNode, stateNode)) {
-			if (edge.to().equals(prevNode)) {
-				return true;
-			} else if (!skippable.contains(edge.to())) {
-				skippable.add(edge.to());
-				return isReachable(edge.to(), prevNode, skippable);
-			}
-		}
-		return false;
-	}	
 	
 	/**
-	 * called from an the head of the tree, 
-	 * orderop represents the operator between a left and a right expression, 
-	 * elementop represents the operator that belongs to an expression, e.g. "*".
-	 * @param curLevel current level
-	 * @param level 
-	 * @param leftOvers the remaining tree elements to be parsed
-	 * @param prevNode the outgoing state node
+	 * This method builds a {@link SubStateMachine} equivalent to the given {@link Order}.
+	 *
+	 * It is called recursively For a collection of start nodes,
+	 * which must already be added to the {@link StateMachineGraph} result.
+	 * 
+	 * @param order The CrySL {@link Order} Expression to build the {@link SubStateMachine} for.
+	 * @param startNodes Set of nodes used as the startNodes of this {@link SubStateMachine}.
+	 * @return the {@link SubStateMachine} representing this {@link Order} Expression
+	 *
+	 * Having a look at the Crysl Xtext definition for the Order section, we have
+	 * -----------
+	 * <code>
+	 * Sequence returns Order:
+	 * 	Alternative ({Order.left=current} op=SequenceOperator right=Alternative)*
+	 * ;
+	 * 
+	 * enum SequenceOperator returns OrderOperator:
+	 * 	SEQUENCE = ','
+	 * ;
+	 * 
+	 * Alternative returns Order:
+	 * 	Cardinality ({Order.left=current} op=AlternativeOperator right=Cardinality)*
+	 * ;
+	 * 
+	 * enum AlternativeOperator returns OrderOperator:
+	 * 	ALTERNATIVE = '|'
+	 * ;
+	 * 
+	 * Cardinality returns Order:
+	 * 	Primary ({Order.left=current} op = CardinalityOperator)?
+	 * ;
+	 * 
+	 * enum CardinalityOperator returns OrderOperator:
+	 * 	ZERO_OR_MORE = '*' | ONE_OR_MORE = '+' | ZERO_OR_ONE = '?'
+	 * ;
+	 * 
+	 * Primary returns Order:
+	 * 	{Primary} event = [Event]
+	 * 	| '(' Order ')'
+	 * ;
+	 * </code>
+	 *         -----------
+	 *
+	 *         Based on this definition, the method will build the StateMachine from
+	 *         the Order section.
+	 *
+	 *         This is done by recursively building a sub-StateMachine and
+	 *         connecting
+	 *         it with given start Nodes and returned end Nodes according to the
+	 *         specific OrderOperator.
+	 *
+	 *         Therefore, consider the following cases
+	 *
+	 *         1. Order instanceof Primary:
+	 *         In this case, we create a new Node and add an Transistion for the
+	 *         Event
+	 *         from each start Node to the newly created Node.
+	 *         Finally, we return a SubStateMachine where the newly created node is
+	 *         the
+	 *         start and end Node.
+	 *
+	 *         2. OrderOperator == SEQUENCE:
+	 *         The left-side should occur before the right-side.
+	 *         We therefore recursively build the sub-StateMachine of the left-side
+	 *         with the given start Nodes saving the returned end Nodes.
+	 *         We then build the sub-StateMachine of the right-side giving it the
+	 *         left-side's end Nodes as start Nodes.
+	 *         Finally, we return the startNodes of the left-side's start Nodes as
+	 *         our
+	 *         start Nodes and the end Nodes of the right-side's sub-StateMachine
+	 *         as our end Nodes.
+	 *
+	 *         3. OrderOperator == ALTERNATIVE:
+	 *         Either the left-side or the right-side should occur.
+	 *         We therefore build both sub-StateMachines with our start Nodes as
+	 *         start
+	 *         Nodes.
+	 *         Finally, we return the aggregate of both start Nodes as our
+	 *         startNodes and
+	 *         the aggregates of both end Nodes as our end Nodes.
+	 *
+	 *         4. OrderOperator == ZERO_OR_ONE:
+	 *         The Event can occur or be skipped.
+	 *         We therefore build the sub-StateMachine (only the left-side is
+	 *         present)
+	 *         with our start Nodes as start Nodes.
+	 *         Finally, we return the returned start Nodes as our start
+	 *         Nodes and the returned Nodes end Nodes (event occurs) and our start
+	 *         nodes (event skipped) as end Nodes.
+	 *
+	 *         5. OrderOperator == ONE_OR_MORE:
+	 *         The Event can occur once or multiple times.
+	 *         We therefore build the sub-StateMachine (only the left-side is
+	 *         present)
+	 *         with our start Nodes as start Nodes and save the returned end Nodes.
+	 *         We then duplicate the transitions from each given start Node to the
+	 *         start
+	 *         node of the Sub-StateMachine, but not with the given start Node as
+	 *         origin,
+	 *         but each end Node of the Sub-StateMachine, this creates the desired
+	 *         loop.
+	 *         Finally, we return the returned start and end Nodes.
+	 *
+	 *         5. OrderOperator == ZERO_OR_MORE:
+	 *         This can be seen as (Order)*?.
+	 *         We therefore proceed as in ONE_OR_MORE but additionally return
+	 *         the given start Nodes as end Nodes aswell as in ZERO_OR_ONE.
+	 *
 	 */
-	private void processHead(final Expression curLevel, final int level, final Multimap<Integer, Map.Entry<String, StateNode>> leftOvers, StateNode prevNode) {
-		final Expression left = curLevel.getLeft();
-		final Expression right = curLevel.getRight();
-		final String leftElOp = (left != null) ? left.getElementop() : "";
-		final String rightElOp = (right != null) ? right.getElementop() : "";
-		final String orderOp = curLevel.getOrderop();
 
-		if (left == null && right == null) {
-			final String elOp = curLevel.getElementop();
-			if ("*".equals(elOp) || "?".equals(elOp)) {
-				prevNode = addRegularEdge(curLevel, prevNode, null, true);
-			} else {
-				addRegularEdge(curLevel, prevNode, null);
-			}
-			if ("*".equals(elOp) || "+".equals(elOp)) {
-				addRegularEdge(curLevel, prevNode, prevNode, true);
-			}
-		} 
-		// case 1 = left & right = non-leaf
-		else if ((left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
-			final StateNode leftPrev = prevNode;
-			prevNode = process(left, level + 1, leftOvers, prevNode);
-			final StateNode rightPrev = prevNode;
-			if ("|".equals(orderOp)) {
-				prevNode = process(right, level + 1, leftOvers, leftPrev);
-			} else {
-				prevNode = process(right, level + 1, leftOvers, prevNode);	
-			}
-			for (Entry<String, StateNode> a : leftOvers.get(level).stream().filter(e -> "?".equals(e.getKey())).collect(Collectors.toList())) {
-				if ("*".equals(rightElOp) || "?".equals(rightElOp)) {
-					setAcceptingState(a.getValue());
-					for (TransitionEdge l : getOutgoingEdges(rightPrev, null)) {
-						addRegularEdge(l.getLabel(), a.getValue(), l.getRight(), true); 
-					}
-				}
-			}
+	private SubStateMachine buildSubSMG(final Order order, final Set<StateNode> startNodes) {
 
-			if ("*".equals(rightElOp) || "?".equals(rightElOp)) {
-				setAcceptingState(rightPrev);
-			}
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				final String orderop = right.getOrderop();
-				List<TransitionEdge> outgoingEdges = null;
-				if (orderop != null && "|".equals(orderop)) {
-					outgoingEdges = getOutgoingEdges(rightPrev, null);
-				} else {
-					outgoingEdges = getOutgoingEdges(rightPrev, prevNode);
-				}
-				for (final TransitionEdge outgoingEdge : outgoingEdges) {
-					addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.to(), true);
-				}
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(right, leftPrev, prevNode, true);
-			}
-		} 
-		// case 2 = left = non-leaf & right = leaf
-		else if ((left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
-			final StateNode leftPrev = prevNode;
-			prevNode = process(left, level + 1, leftOvers, prevNode);
-			final StateNode rightPrev = prevNode;
-			if ("|".equals(orderOp)) {
-				prevNode = addRegularEdge(right, leftPrev, prevNode);
-			} else {
-				prevNode = addRegularEdge(right, prevNode, null);
-			}
-			for (Entry<String, StateNode> a : leftOvers.get(level).stream().filter(e -> "*".equals(e.getKey())).collect(Collectors.toList())) {
-				addRegularEdge(right, a.getValue(), prevNode, true);
-			}
-			boolean isOptional = "*".equals(rightElOp) || "?".equals(rightElOp);
-			if (isOptional) {
-				setAcceptingState(rightPrev);
-				if ("?".equals(left.getRight().getElementop()) || "*".equals(left.getRight().getElementop())) {
-					final List<TransitionEdge> outgoingEdges = getOutgoingEdges(leftPrev, null);
-					for (final TransitionEdge outgoingEdge : outgoingEdges) {
-						setAcceptingState(outgoingEdge.to());
-					}
-				}
+		if (order == null) {
+			// This is the case if the ORDER section was ommited.
+			// It implies, that any method may be called in any sequence.
+			// We therefore create a Node and a Transistion from all startNodes
+			// to this node and a loop from the node to itself.
+			StateNode node = this.result.createNewNode();
+			List<CrySLMethod> label = new ArrayList<>(retrieveAllMethodsFromEvents());
+			
+			for (StateNode startNode : startNodes) {
+				this.result.createNewEdge(label, startNode, node);
 			}
 			
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				final List<TransitionEdge> outgoingEdges = getOutgoingEdges(rightPrev, null);
-				for (final TransitionEdge outgoingEdge : outgoingEdges) {
-					addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.to(), true);
-				}
-			}
-			if (leftOvers.containsKey(level)) {
-				for (Entry<String, StateNode> entry : leftOvers.get(level).stream().filter(e -> "*".equals(e.getKey()) || "?".equals(e.getKey())).collect(Collectors.toList())) {
-					addRegularEdge(right, entry.getValue(), prevNode, isOptional);
-				}
-			}
-			StateNode returnToNode = null;
-			if ((returnToNode = isQM(level, leftOvers)) != null) {
-				addRegularEdge(right, returnToNode, prevNode, true);
-			}
-		} 
-		// case 3 = left = leaf & right = non-leaf
-		else if (!(left instanceof Order || left instanceof SimpleOrder) && (right instanceof Order || right instanceof SimpleOrder)) {
-			StateNode leftPrev = null;
-			leftPrev = prevNode;
-			prevNode = addRegularEdge(left, prevNode, null);
-
-			if (leftElOp != null && ("+".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(left, prevNode, prevNode);
-			}
-
-			final StateNode rightPrev = prevNode;
-			StateNode returnToNode = null;
-			if (rightElOp != null && ("?".equals(rightElOp) || "*".equals(rightElOp))) {
-				setAcceptingState(rightPrev);
-			}
-			if ("|".equals(orderOp)) {
-				setAcceptingState(prevNode);
-				SimpleEntry<String, StateNode> entry = new HashMap.SimpleEntry<>(orderOp, prevNode);
-				leftOvers.put(level + 1, entry);
-				prevNode = process(right, level + 1, leftOvers, leftPrev);
-
-			} else if ((returnToNode = isOr(level, leftOvers)) != null) {
-				prevNode = process(right, level + 1, leftOvers, returnToNode);
-			} else {
-				prevNode = process(right, level + 1, leftOvers, prevNode);
-			}
-
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				final List<TransitionEdge> outgoingEdges = getOutgoingEdges(rightPrev, null);
-				for (final TransitionEdge outgoingEdge : outgoingEdges) {
-					addRegularEdge(outgoingEdge.getLabel(), prevNode, outgoingEdge.to(), true);
-				}
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				setAcceptingState(leftPrev);
-				final List<TransitionEdge> outgoingEdges = getOutgoingEdges(rightPrev, null);
-				for (final TransitionEdge outgoingEdge : outgoingEdges) {
-					setAcceptingState(outgoingEdge.to());
-					addRegularEdge(outgoingEdge.getLabel(), leftPrev, outgoingEdge.to(), true);
-				}
-			}
-			if (rightElOp != null && ("?".equals(rightElOp) || "*".equals(rightElOp))) {
-				setAcceptingState(rightPrev);
-				if (leftOvers.containsKey(level)) {
-					leftOvers.get(level).stream().filter(e -> "*".equals(e.getKey()) || "?".equals(e.getKey())).forEach(e -> setAcceptingState(e.getValue()));
-				}
-			}
-
-		} 
-		// case 4 = left = leaf & right = leaf
-		else if (!(left instanceof Order || left instanceof SimpleOrder) && !(right instanceof Order || right instanceof SimpleOrder)) {
-			StateNode leftPrev = null;
-			leftPrev = prevNode;
-			StateNode returnToNode = isOr(level, leftOvers);
-
-			final boolean leftOptional = "?".equals(leftElOp) || "*".equals(leftElOp);
-			prevNode = addRegularEdge(left, prevNode, null, leftOptional);
-
-			if (leftElOp != null && ("+".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(left, prevNode, prevNode, true);
-			}
-
-			final boolean rightoptional = "?".equals(rightElOp) || "*".equals(rightElOp);
-			if (returnToNode != null || "|".equals(orderOp)) {
-				if ("|".equals(orderOp)) {
-					addRegularEdge(right, leftPrev, prevNode, rightoptional);
-				}
-				if ((returnToNode = isOr(level, leftOvers)) != null) {
-					prevNode = addRegularEdge(right, prevNode, returnToNode, rightoptional);
-				}
-			} else {
-				prevNode = addRegularEdge(right, prevNode, null, rightoptional);
-			}
-
-			if (rightElOp != null && ("+".equals(rightElOp) || "*".equals(rightElOp))) {
-				addRegularEdge(right, prevNode, prevNode, true);
-			}
-
-			if (leftElOp != null && ("?".equals(leftElOp) || "*".equals(leftElOp))) {
-				addRegularEdge(right, leftPrev, prevNode, true);
-			}
+			this.result.createNewEdge(label, node, node);
+			return new SubStateMachine(Collections.singleton(node), startNodes);
 		}
+
+		if (order instanceof Primary) {
+			Event event = ((Primary) order).getEvent();
+			StateNode node = this.result.createNewNode();
+			List<CrySLMethod> label = CrySLReaderUtils.resolveEventToCryslMethods(event);
+			
+			for (StateNode startNode : startNodes) {
+				this.result.createNewEdge(label, startNode, node);
+			}
+			
+			return new SubStateMachine(node, node);
+		}
+
+		Set<StateNode> end = Sets.newHashSet();
+		Set<StateNode> start = Sets.newHashSet();
+
+		final SubStateMachine left;
+		final SubStateMachine right;
+
+		switch (order.getOp()) {
+			case SEQUENCE:
+				left = buildSubSMG(order.getLeft(), startNodes);
+				right = buildSubSMG(order.getRight(), left.getEndNodes());
+				start.addAll(left.getStartNodes());
+				end.addAll(right.getEndNodes());
+				break;
+			case ALTERNATIVE:
+				left = buildSubSMG(order.getLeft(), startNodes);
+				right = buildSubSMG(order.getRight(), startNodes);
+				start.addAll(left.getStartNodes());
+				start.addAll(right.getStartNodes());
+				end.addAll(left.getEndNodes());
+				end.addAll(right.getEndNodes());
+				// TODO For some reason, this part removes loops in accepting states
+				// reduce all end nodes without outgoing edges to one end node
+//				Set<StateNode> endNodesWithOutgoingEdges = this.result.getEdges().parallelStream()
+//						.map(edge -> edge.from()).filter(node -> end.contains(node)).collect(Collectors.toSet());
+//				if (endNodesWithOutgoingEdges.size() < end.size() - 1) {
+//					end.removeAll(endNodesWithOutgoingEdges);
+//					StateNode aggrNode = this.result.aggregateNodesToOneNode(end, end.iterator().next());
+//					end.clear();
+//					end.add(aggrNode);
+//					end.addAll(endNodesWithOutgoingEdges);
+//				}
+				break;
+			case ONE_OR_MORE:
+			case ZERO_OR_MORE:
+			case ZERO_OR_ONE:
+				left = buildSubSMG(order.getLeft(), startNodes);
+				start.addAll(left.getStartNodes());
+				end.addAll(left.getEndNodes());
+				if (order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ONE_OR_MORE) {
+					startNodes.stream()
+							.map(this.result::getAllOutgoingEdges).flatMap(Set::stream)
+							.filter(edge -> left.getStartNodes().contains(edge.getRight()))
+							.forEach(edge -> left.getEndNodes().stream()
+									.forEach(endNode -> this.result.createNewEdge(edge.getLabel(), endNode, edge.getRight())));
+				}
+				if (order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ZERO_OR_ONE) {
+					end.addAll(startNodes);
+				}
+				break;
+		}
+		return new SubStateMachine(start, end);
 	}
 
-	private void setAcceptingState(final StateNode prevNode) {
-		prevNode.setAccepting(true);
+	private Set<CrySLMethod> retrieveAllMethodsFromEvents() {
+		if (this.allMethods.isEmpty())
+			this.allMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(this.events));
+		return this.allMethods;
 	}
-
-	private Expression getLeftMostChild(Expression ex) {
-		if (ex.getOrderEv().size() > 0) {
-			return ex;
-		}
-		if (ex.getLeft() != null) {
-			return getLeftMostChild(ex.getLeft());
-		}
-		return null;
-	}
-
 
 }

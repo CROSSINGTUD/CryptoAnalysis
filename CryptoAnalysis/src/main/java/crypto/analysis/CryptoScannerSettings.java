@@ -1,275 +1,276 @@
 package crypto.analysis;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import crypto.exceptions.CryptoAnalysisParserException;
 import picocli.CommandLine;
 
-@CommandLine.Command
+@CommandLine.Command(mixinStandardHelpOptions = true)
 public class CryptoScannerSettings implements Runnable {
 
-	private ControlGraph controlGraph = null;
-	private RulesetPathType rulesetPathType = null;
-	private String rulesetPathDir = null;
-	private String rulesetPathZip = null;
+	@CommandLine.Option(names = {"--appPath"}, required = true)
+	private String appPath = "";
+	
+	@CommandLine.Option(names = {"--rulesDir"}, required = true)
+	private String rulesDir = "";
+	
+	@CommandLine.Option(names = {"--cg"})
+	private String cg = "";
+	
+	@CommandLine.Option(names = {"--sootPath"})
 	private String sootPath = "";
-	private String applicationPath = null;
-	private String softwareIdentifier = "";
-	private String reportDirectory = null;
-	private ReportFormat reportFormat = null;
-	private boolean preAnalysis;
-	private boolean visualization;
-	private boolean providerDetectionAnalysis;
+	
+	@CommandLine.Option(names = {"--identifier"})
+	private String identifier = "";
+
+	@CommandLine.Option(names = {"--reportPath"})
+	private String reportPath = "";
+	
+	@CommandLine.Option(names = {"--reportFormat"}, split = ",")
+	private String[] reportFormat;
+	
+	@CommandLine.Option(names = {"--preanalysis"})
+	private boolean preanalysis = false;
+	
+	@CommandLine.Option(names = {"--visualization"})
+	private boolean visualization = false;
+	
+	@CommandLine.Option(names = {"--providerdetection"})
+	private boolean providerdetection = false;
+	
+	@CommandLine.Option(names = {"--dstats"})
+	private boolean includeStatistics = true;
+	
+	private ControlGraph controlGraph;
+	private RulesetPathType rulesetPathType;
+	private Set<ReportFormat> reportFormats;
 
 	public enum ControlGraph {
 		CHA, SPARK, SPARKLIB,
 	}
 
 	public enum ReportFormat {
-		TXT, SARIF, CSV
+		CMD, TXT, SARIF, CSV, CSV_SUMMARY
 	}
 
 	public enum RulesetPathType {
 		DIR, ZIP, NONE
+	}
+	
+	public CryptoScannerSettings() {
+		controlGraph = ControlGraph.CHA;
+		rulesetPathType = RulesetPathType.NONE;
+		reportFormats = new HashSet<>(List.of(ReportFormat.CMD));
+	}
+
+	public void parseSettingsFromCLI(String[] settings) {
+		CommandLine parser = new CommandLine(this);
+		parser.setCaseInsensitiveEnumValuesAllowed(true);
+		parser.execute(settings);
 	}
 
 	public ControlGraph getControlGraph() {
 		return controlGraph;
 	}
 
-	public void setControlGraph(ControlGraph controlGraph) {
-		this.controlGraph = controlGraph;
-	}
-
 	public RulesetPathType getRulesetPathType() {
 		return rulesetPathType;
 	}
 
-	public void setRulesetPathType(RulesetPathType rulesetPathType) {
-		this.rulesetPathType = rulesetPathType;
-	}
-
 	public String getRulesetPathDir() {
-		return rulesetPathDir;
-	}
-
-	public void setRulesetPathDir(String rulesPath) {
-		this.rulesetPathDir = rulesPath;
-	}
-
-	public String getRulesetPathZip() {
-		return rulesetPathZip;
-	}
-
-	public void setRulesetPathZip(String rulesetPathZip) {
-		this.rulesetPathZip = rulesetPathZip;
+		return rulesDir;
 	}
 
 	public String getSootPath() {
 		return sootPath;
 	}
 
-	public void setSootPath(String sootClasspath) {
-		this.sootPath = sootClasspath;
-	}
-
 	public String getApplicationPath() {
-		return applicationPath;
+		return appPath;
 	}
 
-	public void setApplicationPath(String applicationClasspath) {
-		this.applicationPath = applicationClasspath;
-	}
-
-	public String getSoftwareIdentifier() {
-		return softwareIdentifier;
-	}
-
-	public void setSoftwareIdentifier(String softwareIdentifier) {
-		this.softwareIdentifier = softwareIdentifier;
+	public String getIdentifier() {
+		return identifier;
 	}
 
 	public String getReportDirectory() {
-		return reportDirectory;
+		return reportPath;
 	}
-
-	public void setReportDirectory(String reportDirectory) {
-		this.reportDirectory = reportDirectory;
-	}
-
-	public ReportFormat getReportFormat() {
-		return reportFormat;
-	}
-
-	public void setReportFormat(ReportFormat reportFormat) {
-		this.reportFormat = reportFormat;
+	
+	public Set<ReportFormat> getReportFormats() {
+		return reportFormats;
 	}
 
 	public boolean isPreAnalysis() {
-		return preAnalysis;
-	}
-
-	public void setPreAnalysis(boolean preAnalysis) {
-		this.preAnalysis = preAnalysis;
+		return preanalysis;
 	}
 
 	public boolean isVisualization() {
 		return visualization;
 	}
 
-	public void setVisualization(boolean visualization) {
-		this.visualization = visualization;
-	}
-
 	public boolean isProviderDetectionAnalysis() {
-		return providerDetectionAnalysis;
+		return providerdetection;
 	}
-
-	public void setProviderDetectionAnalysis(boolean providerDetectionAnalysis) {
-		this.providerDetectionAnalysis = providerDetectionAnalysis;
+	
+	public boolean isIncludeStatistics() {
+		return includeStatistics;
 	}
-
-	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
-		setControlGraph(ControlGraph.CHA);
-		setRulesetPathType(RulesetPathType.NONE);
-		setPreAnalysis(false);
-		setVisualization(false);
-		setProviderDetectionAnalysis(false);
-		CommandLine.run(this, settings);
-	}
-
-	@CommandLine.Option(names = {"--reportPath"})
-	private String reportPath;
-	@CommandLine.Option(names = {"--appPath"}, required = true)
-	private String appPath;
-	@CommandLine.Option(names = {"--rulesDir"})
-	private String rulesDir;
-	@CommandLine.Option(names = {"--cg"})
-	private String cg;
-	@CommandLine.Option(names = {"--sootpath"})
-	private String sootpath;
-	@CommandLine.Option(names = {"--identifier"})
-	private String identifier;
-	@CommandLine.Option(names = {"--reportformat"})
-	private String reportformat;
-	@CommandLine.Option(names = {"--preanalysis"})
-	private boolean preanalysis;
-	@CommandLine.Option(names = {"--visualization"})
-	private boolean visualizations;
-	@CommandLine.Option(names = {"--providerdetection"})
-	private boolean providerdetection;
-
 
 	@Override
 	public void run() {
-		System.out.println("The popular git command");
-		System.out.println("Committing files from the picocli");
-		if (reportPath != null) {
-			setReportDirectory(reportPath);
-			//System.out.println("The commit message is " + reportPath);
-		}
-		if (rulesDir != null) {
-			setRulesetPathType(RulesetPathType.DIR);
-			setRulesetPathDir(rulesDir);
-		}
-
-		if (appPath != null) {
-			//setApplicationPath(appPath);
-			this.applicationPath = appPath;
-		}
-		if (sootpath != null) {
-			setSootPath(sootpath);
-		}
-
-		if (cg != null) {
+		if (!cg.equals("")) {
 			try {
 				parseControlGraphValue(cg);
 			} catch (CryptoAnalysisParserException e) {
-				e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 		}
-		if (identifier != null) {
-			setSoftwareIdentifier(identifier);
-		}
 
-		if (reportformat != null) {
+		if (reportFormat != null) {
 			try {
-				parseReportFormatValue(reportformat);
+				parseReportFormatValues(reportFormat);
 			} catch (CryptoAnalysisParserException e) {
-				System.out.println("Parser failed  wrong report format!");
+				System.out.println(e.getMessage());
 			}
 		}
-		if (preanalysis != false) {
-			setPreAnalysis(true);
+		
+		if (!rulesDir.equals("")) {
+			if (this.isZipFile(rulesDir)) {
+				this.rulesetPathType = RulesetPathType.ZIP;
+			} else {
+				this.rulesetPathType = RulesetPathType.DIR;
+			}
 		}
-		if (visualizations != false) {
-			setVisualization(true);
-		}
-		if (providerdetection != false) {
-			setProviderDetectionAnalysis(true);
-		}
-
-
 	}
-
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
 		String CGValue = value.toLowerCase();
+		
 		switch(CGValue) {
 			case "cha":
-				setControlGraph(ControlGraph.CHA);
+				controlGraph = ControlGraph.CHA;
 				break;
 			case "spark":
-				setControlGraph(ControlGraph.SPARK);
+				controlGraph = ControlGraph.SPARK;
 				break;
 			case "sparklib":
-				setControlGraph(ControlGraph.SPARKLIB);
+				controlGraph = ControlGraph.SPARKLIB;
 				break;
 			default:
-				throw new CryptoAnalysisParserException("Incorrect value "+CGValue+" for --cg option. "
+				throw new CryptoAnalysisParserException("Incorrect value " + CGValue + " for --cg option. "
 						+ "Available options are: CHA, SPARK and SPARKLIB.\n");
 		}
 	}
 	
-	private void parseReportFormatValue(String value) throws CryptoAnalysisParserException {
-		String reportFormatValue = value.toLowerCase();
-		switch(reportFormatValue) {
-			case "txt":
-				setReportFormat(ReportFormat.TXT);
-				break;
-			case "sarif":
-				setReportFormat(ReportFormat.SARIF);
-				break;
-			case "csv":
-				setReportFormat(ReportFormat.CSV);
-				break;
-			default:
-				throw new CryptoAnalysisParserException("Incorrect value "+reportFormatValue+" for --reportFormat option. "
-						+ "Available options are: TXT, SARIF and CSV.\n");
+	/**
+	 * This method parses the specified report formats and returns the number of given report formats until
+	 * the next flag from the command line is found (e.g. "--reportformat CMD TXT CSV --<new flag>" will store
+	 * the formats CMD, TXT and CSV and return the value 3).
+	 * 
+	 * @param settings The command line input.
+	 * @param position The position of the --reportformat flag in the command line input
+	 * @return numFormats The number of specified formats. If a format is given twice, it is also
+	 *                    counted twice.
+	 * @throws CryptoAnalysisParserException if a reportformat value is not supported
+	 */
+	
+	private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
+		for (int i = 0; i < settings.length; i++) {
+			String reportFormatValue = settings[i].toLowerCase();
+			
+			switch (reportFormatValue) {
+				case "cmd":
+					reportFormats.add(ReportFormat.CMD);
+					break;
+				case "txt":
+					reportFormats.add(ReportFormat.TXT);
+					break;
+				case "sarif":
+					reportFormats.add(ReportFormat.SARIF);
+					break;
+				case "csv":
+					reportFormats.add(ReportFormat.CSV);
+					break;
+				case "csv_summary":
+					reportFormats.add(ReportFormat.CSV_SUMMARY);
+					break;
+				default:
+					throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
+							+ "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
+			}
 		}
 	}
 	
+	private boolean isZipFile(String path) {
+		return false;
+	}
+		
+//		// settings should be the command line input and position the index of --reportFormat
+//		int numFormats = 0;
+//		
+//		for (int i = position + 1; i < settings.length; i++) {
+//			
+//			// new argument is specified
+//			if (settings[i].startsWith("-")) {
+//				break;
+//			}
+//			
+//			String reportFormatValue = settings[i].toLowerCase();
+//			
+//			switch (reportFormatValue) {
+//				case "cmd":
+//					reportFormats.add(ReportFormat.CMD);
+//					break;
+//				case "txt":
+//					reportFormats.add(ReportFormat.TXT);
+//					break;
+//				case "sarif":
+//					reportFormats.add(ReportFormat.SARIF);
+//					break;
+//				case "csv":
+//					reportFormats.add(ReportFormat.CSV);
+//					break;
+//				case "csv_summary":
+//					reportFormats.add(ReportFormat.CSV_SUMMARY);
+//					break;
+//				default:
+//					throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
+//							+ "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
+//			}
+//			
+//			numFormats++;
+//		}
+//		
+//		return numFormats;
+//	}
+	
 	private static void showErrorMessage() throws CryptoAnalysisParserException {
 		String errorMessage = "An error occurred while trying to parse the CLI arguments.\n"
-				+"The default command for running CryptoAnalysis is: \n"+
-				"java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"+ 
-				" 		--rulesDir <absolute_path_to_crysl_source_code_format_rules> \\\r\n" + 
-				"       --appPath <absolute_application_path>\n";
+				+ "The default command for running CryptoAnalysis is: \n"
+				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"
+				+ " 	  --rulesDir <absolute_path_to_crysl_source_code_format_rules> \\\r\n"
+				+ "       --appPath <absolute_application_path>\n";
 		throw new CryptoAnalysisParserException(errorMessage);
 	}
 		
 	private static void showErrorMessage(String arg) throws CryptoAnalysisParserException {
-		String errorMessage = "An error occured while trying to parse the CLI argument: "+arg+".\n"
-				+"The default command for running CryptoAnalysis is: \n"
-				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n" + 
-				"      --rulesDir <absolute_path_to_crysl_rules> \\\r\n" + 
-				"      --appPath <absolute_application_path>\n"
+		String errorMessage = "An error occured while trying to parse the CLI argument: " + arg + ".\n"
+				+ "The default command for running CryptoAnalysis is: \n"
+				+ "java -cp <jar_location_of_cryptoanalysis> crypto.HeadlessCryptoScanner \\\r\n"
+				+ "      --rulesDir <absolute_path_to_crysl_rules> \\\r\n"
+				+ "      --appPath <absolute_application_path>\n"
 				+ "\nAdditional arguments that can be used are:\n"
 				+ "--cg <selection_of_call_graph_for_analysis (CHA, SPARK, SPARKLIB)>\n"
 				+ "--sootPath <absolute_path_of_whole_project>\n"
 				+ "--identifier <identifier_for_labelling_output_files>\n"
 				+ "--reportPath <directory_location_for_cognicrypt_report>\n"
-				+ "--reportFormat <format of cognicrypt_report (TXT, SARIF, CSV)>\n"
+				+ "--reportFormat <format of cognicrypt_report (CMD, TXT, SARIF, CSV, CSV_SUMMARY)>\n"
 				+ "--preanalysis (enables pre-analysis)\n"
 				+ "--visualization (enables the visualization, but also requires --reportPath option to be set)\n"
-				+ "--providerDetection (enables provider detection analysis)\n";
+				+ "--providerDetection (enables provider detection analysis)\n"
+				+ "--dstats (disable the statistic information in the reports)\n";
 		throw new CryptoAnalysisParserException(errorMessage);
 	}
 	

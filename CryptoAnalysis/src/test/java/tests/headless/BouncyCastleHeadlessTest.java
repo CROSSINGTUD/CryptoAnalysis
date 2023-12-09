@@ -7,29 +7,38 @@ import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import tests.headless.FindingsType.FalseNegatives;
 import tests.headless.FindingsType.TruePositives;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
-	@Ignore
+	
 	@Test
 	public void testBCMacExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCMacExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
-		setErrorsCount("<pattern.AESTest: void testAESEngine2()>", IncompleteOperationError.class, 1);
-		setErrorsCount("<pattern.AESTest: void testAESLightEngine2()>", TypestateError.class, 1);
+		setErrorsCount("<animamea.AmAESCrypto: byte[] getMACOne(byte[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<animamea.AmAESCrypto: byte[] getMACTwo(byte[],byte[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<animamea.AmAESCrypto: byte[] getMACTwo(byte[],byte[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<animamea.AmAESCrypto: void <init>()>", RequiredPredicateError.class, 1);
 		
-		// Ignored
-		setErrorsCount("<pattern.AESTest: void testAESEngine1()>", ImpreciseValueExtractionError.class, 2);
-		setErrorsCount("<pattern.AESTest: void testAESEngine2()>", ImpreciseValueExtractionError.class, 1);
-		setErrorsCount("<pattern.AESTest: void testMonteCarloAndVector()>", ImpreciseValueExtractionError.class, 2);
+		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", NeverTypeOfError.class, 2);
+		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", RequiredPredicateError.class, 4);
+		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.SkeinMacTest: void performTestOne()>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", TypestateError.class, 1);
+		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", IncompleteOperationError.class, 2);
+		
+		setErrorsCount("<pattern.MacTest: void testMac1()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<pattern.MacTest: void testMac2()>", RequiredPredicateError.class, 3);
 
 		scanner.exec();
 	  	assertErrors();
@@ -41,52 +50,65 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), new FalseNegatives(1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216"), "<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>");
+		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
+		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processingCorrect(byte[],boolean)>", RequiredPredicateError.class, 0);
+		
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 
 		scanner.exec();
 	  	assertErrors();
 	}
 	
 	@Test
-	@SuppressWarnings("serial")
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
-
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
 		
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
-		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testEncryptTwo()>");
-		setErrorsCount(TypestateError.class, new TruePositives(1),"<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+
+		// These two errors occur because AsymmetricCipherKeyPair ensures the predicate only after the constructor call
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_nomisuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_nomisuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
 		
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), new FalseNegatives(1, "Fifth parameter not randomized! //Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/140"),  "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
-		setErrorsCount(TypestateError.class,  new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
-		setErrorsCount(IncompleteOperationError.class, new TruePositives(1),  "<generators.RSAKeyPairGeneratorTest: void testFour()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testEncryptTwo()>");
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+
+		// Since version 3.0.0: Predicates with same name in the same statement are distinguished
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
+		
+		setErrorsCount(TypestateError.class, new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
+		setErrorsCount(IncompleteOperationError.class, new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testFour()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<generators.RSAKeyPairGeneratorTest: void testTwo()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ParametersWithRandomTest: void testTwo()>");
-		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
 		
 		scanner.exec();
 	  	assertErrors();
 	}
 	
-	@Ignore
 	@Test
 	public void testBCDigestExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCDigestExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
-		setErrorsCount("<DigestTest: void digestWithoutUpdate()>", TypestateError.class, 1);
+		setErrorsCount("<pattern.DigestTest: void digestWithoutUpdate()>", TypestateError.class, 1);
+		setErrorsCount("<pattern.DigestTest: void digestWithMultipleUpdates()>", TypestateError.class, 1);
 		
-		// False Positives due to issue #129
-		setErrorsCount("<DigestTest: void digestDefaultUsage()>", TypestateError.class, 1);
-		setErrorsCount("<DigestTest: void digestWithMultipleUpdates()>", IncompleteOperationError.class, 1);
-		setErrorsCount("<DigestTest: void multipleDigests()>", IncompleteOperationError.class, 2);
-		setErrorsCount("<DigestTest: void digestWithReset()>", TypestateError.class, 1);
+		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: java.util.Optional unwrapAES(byte[],byte[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: java.util.Optional unwrapAES(byte[],byte[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: byte[] wrapAES(byte[],byte[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: byte[] wrapAES(byte[],byte[])>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<fabric_api_archieve.Crypto: byte[] sign(byte[],byte[])>", HardCodedError.class, 1);
+		setErrorsCount("<fabric_api_archieve.Crypto: byte[] sign(byte[],byte[])>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void TestSHA256DigestOne()>", TypestateError.class, 2);
+		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", TypestateError.class, 3);
 		
 		scanner.exec();
 	  	assertErrors();
@@ -99,6 +121,35 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
+		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,int,boolean)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void updateWithRecoveredMessage(byte[])>", IncompleteOperationError.class, 2);
+		setErrorsCount("<org.bouncycastle.crypto.signers.PSSSigner: void init(boolean,org.bouncycastle.crypto.CipherParameters)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<org.bouncycastle.crypto.signers.PSSSigner: void init(boolean,org.bouncycastle.crypto.CipherParameters)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<org.bouncycastle.crypto.signers.X931Signer: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,boolean)>", IncompleteOperationError.class, 3);
+		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2Signer: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,boolean)>", IncompleteOperationError.class, 1);
+		
+		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doShortPartialTest()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", HardCodedError.class, 1);
+		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestOne()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestTwo()>", RequiredPredicateError.class, 2);
+		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestTwo()>", IncompleteOperationError.class, 2);
+		
+		setErrorsCount("<iso9796_signer_verifier.Main: byte[] sign()>", IncompleteOperationError.class, 1);
+		
+		setErrorsCount("<diqube.TicketSignatureService: void signTicket()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<diqube.TicketSignatureService: boolean isValidTicketSignature(byte[])>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<bop_bitcoin_client.ECKeyPair: bop_bitcoin_client.ECKeyPair createNew(boolean)>", RequiredPredicateError.class, 3);
+		setErrorsCount("<bop_bitcoin_client.ECKeyPair: byte[] sign(byte[])>", RequiredPredicateError.class, 1);
+		
+		setErrorsCount("<pattern.SignerTest: void testSignerGenerate()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<pattern.SignerTest: void testSignerVerify()>", RequiredPredicateError.class, 3);
+		
 		scanner.exec();
 	  	assertErrors();
 	}
@@ -110,7 +161,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.BouncyCastle);
 		
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.ECElGamalEncryptorTest: void testOne()>")
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 1)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.ECElGamalEncryptorTest: void testTwo()>")
 				.withTPs(TypestateError.class, 1)
@@ -134,7 +185,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ECPrivateKeyParametersTest: void testOne(java.lang.String)>")
 				.withTPs(HardCodedError.class, 1)
@@ -143,12 +193,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.withTPs(HardCodedError.class, 1)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ParametersWithRandomTest: void testOne(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ParametersWithRandomTest: void testThree(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 3)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<params.ECDomainParametersTest: void testThree(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 1)
@@ -185,23 +233,19 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testFour(java.lang.String)>")
 				.withTPs(IncompleteOperationError.class, 1)
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testFive(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testTwo(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testOne(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testSix(java.lang.String)>")
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 2)
 				.build());
 		
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testThree(java.lang.String)>")
@@ -209,23 +253,19 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>")
 				.withTPs(IncompleteOperationError.class, 1)
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testSix(java.lang.String)>")
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 2)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testTwo(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 2, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testOne(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.withFNs(RequiredPredicateError.class, 1, "https://github.com/CROSSINGTUD/CryptoAnalysis/issues/216")
+				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		
 		setErrorsCount(new ErrorSpecification.Builder("<generators.ECKeyPairGeneratorTest: void testTwo(java.lang.String)>")

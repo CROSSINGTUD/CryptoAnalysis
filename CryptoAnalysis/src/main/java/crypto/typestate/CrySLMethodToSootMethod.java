@@ -56,10 +56,10 @@ public class CrySLMethodToSootMethod {
 		Set<SootMethod> res = Sets.newHashSet();
 		String methodName = label.getMethodName();
 		String declaringClass = getDeclaringClass(methodName);
-//		Scene.v().forceResolve(declaringClass, SootClass.BODIES);
 		if (!Scene.v().containsClass(declaringClass)){
 			return res;
 		}
+		Scene.v().forceResolve(declaringClass, SootClass.BODIES);
 		SootClass sootClass = Scene.v().getSootClass(declaringClass);
 		List<SootClass> classes = Lists.newArrayList(sootClass);
 		String methodNameWithoutDeclaringClass = getMethodNameWithoutDeclaringClass(methodName);
@@ -79,9 +79,6 @@ public class CrySLMethodToSootMethod {
 					}
 				}
 			}
-		}
-		if(res.isEmpty()){
-			LOGGER.warn("Couldn't find any method for CrySLMethod: " + label);
 		}
 		return res;
 	}
@@ -114,7 +111,10 @@ public class CrySLMethodToSootMethod {
 		for (Type t : parameterTypes) {
 			if (parameters.get(i).getValue().equals("AnyType"))
 				continue;
-			if (!t.toString().equals(parameters.get(i).getValue())) {
+			
+			// Soot does not track generic types, so we are required to remove <...> from the parameter
+			String adaptedParameter = parameters.get(i).getValue().replaceAll("[<].*?[>]", "");
+			if (!t.toString().equals(adaptedParameter)) {
 				return false;
 			}
 			i++;
