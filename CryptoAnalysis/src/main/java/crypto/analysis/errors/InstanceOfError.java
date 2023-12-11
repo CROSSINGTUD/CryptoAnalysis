@@ -3,11 +3,11 @@ package crypto.analysis.errors;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 
 public class InstanceOfError extends ConstraintError {
 
-	public InstanceOfError(CallSiteWithExtractedValue cs, CryptSLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
+	public InstanceOfError(CallSiteWithExtractedValue cs, CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
 		super(cs, rule, objectLocation, con);
 	}
 

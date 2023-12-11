@@ -1,17 +1,19 @@
 package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.JReturnVoidStmt;
 
 public abstract class AbstractError implements IError{
 	private Statement errorLocation;
-	private CryptSLRule rule;
+	private CrySLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
 	private final String declaringClass;
 
-	public AbstractError(Statement errorLocation, CryptSLRule rule) {
+	public AbstractError(Statement errorLocation, CrySLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
 		this.outerMethod = errorLocation.getMethod().getSignature();
@@ -19,6 +21,10 @@ public abstract class AbstractError implements IError{
 
 		if(errorLocation.getUnit().get().containsInvokeExpr()) {
 			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
+		}
+		else if(errorLocation.getUnit().get() instanceof JReturnStmt
+			|| errorLocation.getUnit().get() instanceof JReturnVoidStmt) {
+			this.invokeMethod = errorLocation.getUnit().get().toString();
 		}
 		else {
 			this.invokeMethod = ((JAssignStmt) errorLocation.getUnit().get()).getLeftOp().toString();
@@ -29,7 +35,7 @@ public abstract class AbstractError implements IError{
 		return errorLocation;
 	}
 
-	public CryptSLRule getRule() {
+	public CrySLRule getRule() {
 		return rule;
 	}
 	public abstract String toErrorMarkerString();
@@ -77,8 +83,11 @@ public abstract class AbstractError implements IError{
 		if (rule == null) {
 			if (other.rule != null)
 				return false;
-		} else if (!rule.equals(other.rule))
+		} else if (!rule.equals(other.rule)) {
 			return false;
+		} else if (!errorLocation.equals(other.getErrorLocation())) {
+			return false;
+		}
 		return true;
 	}
 }

@@ -1,6 +1,7 @@
 package de.fraunhofer.iem.crypto;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,9 +17,12 @@ import boomerang.preanalysis.BoomerangPretransformer;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.errors.AbstractError;
+import crypto.cryslhandler.CrySLModelReader;
+import crypto.exceptions.CryptoAnalysisException;
 import crypto.reporting.CollectErrorListener;
-import crypto.rules.CryptSLRule;
-import crypto.rules.CryptSLRuleReader;
+import crypto.reporting.CommandLineReporter;
+import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -30,8 +34,14 @@ import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
 public class CogniCryptAndroidAnalysis {
-	public static void main(String... args) {
-		CogniCryptAndroidAnalysis analysis = new CogniCryptAndroidAnalysis(args[0], args[1], args[2],Lists.<String>newArrayList());
+	
+	public static void main(String... args) throws CryptoAnalysisException {
+		CogniCryptAndroidAnalysis analysis;
+		if (args[3] != null) {
+			analysis = new CogniCryptAndroidAnalysis(args[0], args[1], args[2], args[3], Lists.<String>newArrayList());
+		} else {
+			analysis = new CogniCryptAndroidAnalysis(args[0], args[1], args[2], Lists.<String>newArrayList());
+		}
 		analysis.run();
 	}
 
@@ -39,17 +49,24 @@ public class CogniCryptAndroidAnalysis {
 	private final String apkFile;
 	private final String platformsDirectory;
 	private final String rulesDirectory;
+	private final String outputDir;
 	private final Collection<String> applicationClassFilter;
 
 	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesDirectory,
+			Collection<String> applicationClassFilter) {
+		this(apkFile, platformsDirectory, rulesDirectory, null, applicationClassFilter);
+	}
+
+	public CogniCryptAndroidAnalysis(String apkFile, String platformsDirectory, String rulesDirectory, String outputDir,
 			Collection<String> applicationClassFilter) {
 		this.apkFile = apkFile;
 		this.platformsDirectory = platformsDirectory;
 		this.rulesDirectory = rulesDirectory;
 		this.applicationClassFilter = applicationClassFilter;
+		this.outputDir = outputDir;
 	}
 
-	public Collection<AbstractError> run() {
+	public Collection<AbstractError> run() throws CryptoAnalysisException {
 		logger.info("Running static analysis on APK file " + apkFile);
 		logger.info("with Android Platforms dir " + platformsDirectory);
 		constructCallGraph();
@@ -93,14 +110,16 @@ public class CogniCryptAndroidAnalysis {
 		logger.info("Done constructing call graph");
 	}
 
-	private Collection<AbstractError> runCryptoAnalysis() {
+	private Collection<AbstractError> runCryptoAnalysis() throws CryptoAnalysisException {
 		prepareAnalysis();
 
 		final ObservableStaticICFG icfg = new ObservableStaticICFG(new BoomerangICFG(false));
-
+		List<CrySLRule> rules = getRules();
+		
 		final CrySLResultsReporter reporter = new CrySLResultsReporter();
 		CollectErrorListener errorListener = new CollectErrorListener();
 		reporter.addReportListener(errorListener);
+		reporter.addReportListener(new CommandLineReporter(outputDir, rules));
 		CryptoScanner scanner = new CryptoScanner() {
 
 			@Override
@@ -114,11 +133,11 @@ public class CogniCryptAndroidAnalysis {
 			}
 
 		};
-		List<CryptSLRule> rules = getRules();
+		
 		logger.info("Loaded " + rules.size() + " CrySL rules");
 		logger.info("Running CogniCrypt Analysis");
 		scanner.scan(rules);
-		logger.info("Terminated CogniCrypt Analysis");
+		logger.info("Finished CogniCrypt Analysis");
 		System.gc();
 		return errorListener.getErrors();
 	}
@@ -143,22 +162,20 @@ public class CogniCryptAndroidAnalysis {
         logger.info("Library classes: "+ Scene.v().getLibraryClasses().size());
     }
 
-	protected List<CryptSLRule> getRules() {
-		List<CryptSLRule> rules = Lists.newArrayList();
+	protected List<CrySLRule> getRules() throws CryptoAnalysisException {
 		if (rulesDirectory == null) {
 			throw new RuntimeException(
-					"Please specify a directory the CrySL rules (.cryptslbin Files) are located in.");
+					"Please specify a directory the CrySL rules ( " + CrySLModelReader.cryslFileEnding +" Files) are located in.");
 		}
 		File[] listFiles = new File(rulesDirectory).listFiles();
-		for (File file : listFiles) {
-			if (file != null && file.getName().endsWith("cryptslbin")) {
-				rules.add(CryptSLRuleReader.readFromFile(file));
-			}
+		List<File> files = Arrays.asList(listFiles);
+
+		CrySLRuleReader reader = new CrySLRuleReader();
+		List<CrySLRule> rules = reader.readFromSourceFiles(files);
+		
+		if (rules.isEmpty()) {
+			throw new CryptoAnalysisException("No CrySL rules found in " + rulesDirectory);
 		}
-		if (rules.isEmpty())
-			System.out
-					.println("CogniCrypt did not find any rules to start the analysis for. \n It checked for rules in "
-							+ rulesDirectory);
 		return rules;
 	}
 

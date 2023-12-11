@@ -17,7 +17,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
+import crypto.rules.CrySLPredicate;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -49,7 +49,7 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 		for (ICrySLResultsListener listen : listeners) {
 			if (listen instanceof CrySLAnalysisListener) {
 				((CrySLAnalysisListener) listen).ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);

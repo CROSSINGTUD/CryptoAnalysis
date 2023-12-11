@@ -1,22 +1,37 @@
 package crypto.analysis.errors;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import boomerang.jimple.Statement;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
+
+/**
+ * Creates {@link RequiredPredicateError} for all Required Predicate error generates RequiredPredicateError
+ *
+ *
+ * contradictedPredicate a {@link CrySLPredicate} holds the contradicted required predicate or parameter
+ * extractedValues a {@link CallSiteWithExtractedValue} hold the location value of the missing required predicate or parameter
+ */
 
 public class RequiredPredicateError extends AbstractError{
 
-	private CryptSLPredicate contradictedPredicate;
+	private List<CrySLPredicate> contradictedPredicate;
 	private CallSiteWithExtractedValue extractedValues;
 
-	public RequiredPredicateError(CryptSLPredicate contradictedPredicate, Statement location, CryptSLRule rule, CallSiteWithExtractedValue multimap) {
+	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
 		super(location, rule);
-		this.contradictedPredicate = contradictedPredicate;
+		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = multimap;
 	}
 
-	public CryptSLPredicate getContradictedPredicate() {
+	/**
+	 * This method returns a list of contradicting predicates
+	 * @return list of contradicting predicates
+	 */
+	public List<CrySLPredicate> getContradictedPredicates() {
 		return contradictedPredicate;
 	}
 	
@@ -33,11 +48,16 @@ public class RequiredPredicateError extends AbstractError{
 	public String toErrorMarkerString() {
 		String msg = extractedValues.toString();
 		msg += " was not properly generated as ";
-		String predicateName = getContradictedPredicate().getPredName();
+		String predicateName = getContradictedPredicates().stream().map(e -> e.getPredName()).collect(Collectors.joining(" OR "));
 		String[] parts = predicateName.split("(?=[A-Z])");
 		msg += parts[0];
 		for(int i=1; i<parts.length; i++)
-			msg += " " + parts[i];
+			msg +=  parts[i];
+
+		if (predicateName.equals("preparedIV") && extractedValues.toString().equals("Third parameter"))
+		{
+			msg += " [ with CBC, It's required to use IVParameterSpec]";
+		}
 		return msg;
 	}
 	

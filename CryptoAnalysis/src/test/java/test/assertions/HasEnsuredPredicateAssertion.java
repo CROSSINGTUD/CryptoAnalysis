@@ -1,7 +1,7 @@
 package test.assertions;
 
 import boomerang.jimple.Val;
-import crypto.analysis.EnsuredCryptSLPredicate;
+import crypto.analysis.EnsuredCrySLPredicate;
 import soot.jimple.Stmt;
 import test.Assertion;
 
@@ -35,7 +35,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 		return stmt;
 	}
 
-	public void reported(Val seed, EnsuredCryptSLPredicate pred) {
+	public void reported(Val seed, EnsuredCrySLPredicate pred) {
 		if(seed.equals(val))
 			satisfied = true;
 	}

@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import crypto.typestate.FiniteStateMachineToTypestateChangeFunction;
 import crypto.typestate.SootBasedStateMachineGraph;
 import soot.SootMethod;
@@ -21,8 +21,8 @@ public class SeedFactory {
 	private List<FiniteStateMachineToTypestateChangeFunction> idealAnalysisDefs = Lists.newLinkedList();
 	private Set<Query> seeds = Sets.newHashSet();
 
-	public SeedFactory(List<CryptSLRule> rules) {
-		for(CryptSLRule rule : rules){
+	public SeedFactory(List<CrySLRule> rules) {
+		for(CrySLRule rule : rules){
 			idealAnalysisDefs.add(new FiniteStateMachineToTypestateChangeFunction(new SootBasedStateMachineGraph(rule.getUsagePattern())));
 		}
 	}

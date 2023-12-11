@@ -12,10 +12,10 @@ public class Main {
 	public static void main(String[] args) throws GeneralSecurityException {
 		byte[] seed = { 1, 2, 3 };
 
-		new SecureRandom(seed); // No error
+		new SecureRandom(seed); //Static Seed
 
 		SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-		random.setSeed(seed); // No error
+		random.setSeed(seed); //Static Seed
 
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(256, random); // "Second parameter was not properly randomized"

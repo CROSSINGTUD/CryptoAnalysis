@@ -11,10 +11,20 @@ import com.google.common.collect.Sets;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CryptSLRule;
+import crypto.rules.CrySLRule;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+
+
+/** This class defines-IncompleteOperationError:
+ *
+ *Found when the usage of an object may be incomplete
+ *
+ *For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
+ *This error heavily depends on the computed call graph (CHA by default)
+ *
+ * */
 
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
@@ -23,7 +33,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
 	public IncompleteOperationError(Statement errorLocation,
-			Val errorVariable, CryptSLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
+			Val errorVariable, CrySLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
 		super(errorLocation, rule, objectLocation);
 		this.errorVariable = errorVariable;
 		this.expectedMethodCalls = expectedMethodsToBeCalled;	
@@ -112,6 +122,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
 		Set<String> expectedMethodCallsSet = Sets.newHashSet();
 		for (SootMethod method : expectedMethodCalls) {

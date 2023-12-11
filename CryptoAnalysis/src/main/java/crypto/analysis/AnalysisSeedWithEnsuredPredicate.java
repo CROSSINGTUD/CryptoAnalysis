@@ -13,7 +13,6 @@ import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
@@ -25,7 +24,7 @@ import typestate.TransitionFunction;
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	private ForwardBoomerangResults<TransitionFunction> analysisResults;
-	private Set<EnsuredCryptSLPredicate> ensuredPredicates = Sets.newHashSet();
+	private Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
 	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
 
@@ -39,13 +38,13 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		ExtendedIDEALAnaylsis solver = getOrCreateAnalysis();
 		solver.run(this);
 		analysisResults = solver.getResults();
-		for(EnsuredCryptSLPredicate pred : ensuredPredicates)
+		for(EnsuredCrySLPredicate pred : ensuredPredicates)
 			ensurePredicates(pred);
 		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
 		analyzed = true;
 	}
 
-	protected void ensurePredicates(EnsuredCryptSLPredicate pred) {
+	protected void ensurePredicates(EnsuredCrySLPredicate pred) {
 		if(analysisResults == null)
 			return;
 
@@ -67,13 +66,15 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			public SootBasedStateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
 				StateNode s = new StateNode("0", true, true){
+					private static final long serialVersionUID = 1L;
+
 					@Override
 					public String toString() {
 						return "";
 					}
 				};
 				m.addNode(s);
-				m.addEdge(new TransitionEdge(Lists.newLinkedList(), s,s));
+				m.createNewEdge(Lists.newLinkedList(), s,s);
 				return new SootBasedStateMachineGraph(m);
 			}
 			
@@ -91,7 +92,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		return problem;
 	}
 
-	public void addEnsuredPredicate(EnsuredCryptSLPredicate pred) {
+	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {
 		if(ensuredPredicates.add(pred) && analyzed)
 			ensurePredicates(pred);
 	}

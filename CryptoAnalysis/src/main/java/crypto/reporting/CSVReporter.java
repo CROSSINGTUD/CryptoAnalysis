@@ -3,279 +3,140 @@ package crypto.reporting;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 
-import boomerang.BackwardQuery;
-import boomerang.Query;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import boomerang.results.ForwardBoomerangResults;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.EnsuredCryptSLPredicate;
-import crypto.analysis.IAnalysisSeed;
+import java.util.Set;
+
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ISLConstraint;
-import crypto.rules.CryptSLPredicate;
-import crypto.rules.CryptSLRule;
-import soot.MethodOrMethodContext;
-import soot.Scene;
+import crypto.rules.CrySLRule;
+import soot.SootClass;
 import soot.SootMethod;
-import soot.jimple.toolkits.callgraph.ReachableMethods;
-import soot.util.queue.QueueReader;
-import sync.pds.solver.nodes.Node;
-import typestate.TransitionFunction;
 
-public class CSVReporter extends CrySLAnalysisListener {
-
+/**
+ * This class extends the class {@link Reporter} by generating an analysis report and write it into a
+ * csv file.
+ * 
+ * Compared to the {@link CSVSummaryReporter}, this reporter writes each error from the analysis into
+ * a single line. If the statistics are enabled, each line is extended by the corresponding statistic
+ * fields. Since the statistics are computed for the whole analysis, each value for the different fields
+ * are the same in all lines.
+ */
+public class CSVReporter extends Reporter {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
+	
 	private static final String CSV_SEPARATOR = ";";
-	private Set<AbstractError> errors = Sets.newHashSet();
-	private int seeds;
-	private List<String> headers = Lists.newArrayList();
-	private Map<String,String> headersToValues = Maps.newHashMap();
-	private List<CryptSLRule> rules;
-	private Set<SootMethod> dataflowReachableMethods = Sets.newHashSet();
-	private Stopwatch analysisTime = Stopwatch.createUnstarted();
-	private String csvReportFileName;
-	private enum Headers{
-		SoftwareID,SeedObjectCount,CallGraphTime_ms,CryptoAnalysisTime_ms,CallGraphReachableMethods,
-		CallGraphReachableMethods_ActiveBodies,DataflowVisitedMethod
-	}
-
-	public CSVReporter(String csvReportFileName, String softwareId,  List<CryptSLRule> rules, long callGraphConstructionTime) {
-		this.csvReportFileName = csvReportFileName;
-		this.rules = rules;
-		ReachableMethods reachableMethods = Scene.v().getReachableMethods();
-		QueueReader<MethodOrMethodContext> listener = reachableMethods.listener();
-		Set<SootMethod> visited = Sets.newHashSet();
-		int callgraphReachableMethodsWithActiveBodies = 0;
-		while (listener.hasNext()) {
-			MethodOrMethodContext next = listener.next();
-			visited.add(next.method());
-			if (next.method().hasActiveBody()) {
-				callgraphReachableMethodsWithActiveBodies++;
-			}
-		}
-		int callgraphReachableMethods = visited.size();
-		for(Headers h : Headers.values()){
-			headers.add(h.toString());
-		}
-		put(Headers.SoftwareID,softwareId);
-		put(Headers.CallGraphTime_ms,callGraphConstructionTime);
-		put(Headers.CallGraphReachableMethods,callgraphReachableMethods);
-		put(Headers.CallGraphReachableMethods_ActiveBodies,callgraphReachableMethodsWithActiveBodies);
-		addDynamicHeader(ConstraintError.class.getSimpleName());
-		addDynamicHeader(NeverTypeOfError.class.getSimpleName());
-		addDynamicHeader(HardCodedError.class.getSimpleName());
-		addDynamicHeader(TypestateError.class.getSimpleName());
-		addDynamicHeader(RequiredPredicateError.class.getSimpleName());
-		addDynamicHeader(IncompleteOperationError.class.getSimpleName());
-		addDynamicHeader(ImpreciseValueExtractionError.class.getSimpleName());
-		addDynamicHeader(ForbiddenMethodError.class.getSimpleName());
+	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
+	
+	private List<String> headers;
+	private List<String> contents;
+	
+	/** Headers for the errors. These headers are always part of the analysis report. */
+	private enum Headers {
+		ErrorID, ErrorType, ViolatingClass, Class, Method, LineNumber, Statement, Message
 	}
 	
-	private void addDynamicHeader(String name) {
-		headers.add(name+"_sum");
-		for(CryptSLRule r : rules){
-			headers.add(name+"_"+r.getClassName());
+	/** 
+	 * Headers for the  statistics. These headers are only part of the analysis report, if
+	 * the corresponding parameter in the constructor is set to true.
+	 */
+	private enum StatisticHeaders {
+		SoftwareID, SeedObjectCount, CryptoAnalysisTime_ms, CallGraphTime_ms, CallGraphReachableMethods,
+		CallGraphReachableMethods_ActiveBodies, DataflowVisitedMethod
+	}
+	
+	/**
+	 * Subclass of {@link Reporter}. Creates an instance of {@link CSVReporter}, which
+	 * can be used to create a csv file containing the analysis report.
+	 * 
+	 * @param reportDir A {@link String} path giving the location of the report directory.
+	 *                  The reportPath should end without an ending file separator.
+	 * @param softwareId A {@link String} for the analyzed software.
+	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+	 * @param callGraphConstructionTime The time in milliseconds for the construction of the callgraph.
+	 * @param includeStatistics Set this value to true, if the analysis report should contain some
+	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
+	 *                          to false, no statistics will be output. 
+	 */
+	public CSVReporter(String reportDir, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime, boolean includeStatistics) {
+		super((reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir"))), softwareId, rules, callGraphConstructionTime, includeStatistics);
+		
+		headers = new ArrayList<>();
+		contents = new ArrayList<>();
+		
+		for (Headers h : Headers.values()) {
+			headers.add(h.toString());
+		}
+		
+		if (includeStatistics()) {
+			for (StatisticHeaders h : StatisticHeaders.values()) {
+				headers.add(h.toString());
+			}
 		}
 	}
 
 	@Override
-	public void beforeAnalysis() {
-		analysisTime.start();
-	}
-
-	@Override
-	public void afterAnalysis() {
-		analysisTime.stop();
-		put(Headers.DataflowVisitedMethod, dataflowReachableMethods.size());
-		put(Headers.CryptoAnalysisTime_ms, analysisTime.elapsed(TimeUnit.MILLISECONDS));
-		put(Headers.SeedObjectCount, seeds);
+	public void handleAnalysisResults() {
+		int idCount = 0;
 		
-		Table<Class, CryptSLRule, Integer> errorTable = HashBasedTable.create(); 
-		for(AbstractError err : errors){
-			Integer integer = errorTable.get(err.getClass(), err.getRule());
-			if(integer == null){
-				integer = 0;
+		for (SootClass c : this.errorMarkers.rowKeySet()) {
+			String className = c.getName();
+			
+			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
+				String methodName = e.getKey().getSubSignature();
+				
+				for (AbstractError marker : e.getValue()) {
+					String errorType = marker.getClass().getSimpleName();
+					String violatingClass = marker.getRule().getClassName();
+					String errorMessage = marker.toErrorMarkerString();
+					int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
+					String statement = marker.getErrorLocation().getUnit().get().toString();
+					
+					String line = idCount + CSV_SEPARATOR + errorType + CSV_SEPARATOR + violatingClass + CSV_SEPARATOR + className + 
+							CSV_SEPARATOR + methodName + CSV_SEPARATOR + lineNumber + CSV_SEPARATOR + statement + CSV_SEPARATOR + errorMessage;
+					
+					// Add the statistics to every single line of the report
+					if (includeStatistics()) {
+						line += CSV_SEPARATOR + getStatistics().getSoftwareID() + CSV_SEPARATOR + getStatistics().getSeedObjectCount() + CSV_SEPARATOR
+								+ getStatistics().getAnalysisTime() + CSV_SEPARATOR + getStatistics().getCallgraphTime()
+								+ CSV_SEPARATOR + getStatistics().getCallgraphReachableMethods() + CSV_SEPARATOR + getStatistics().getCallgraphReachableMethodsWithActiveBodies()
+								+ CSV_SEPARATOR + getStatistics().getDataflowVisitedMethods();
+					}
+					
+					contents.add(line);
+					
+					idCount++;
+				}
 			}
-			integer++;
-			errorTable.put(err.getClass(), err.getRule(),integer);
-		}
-
-
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
-			put(c.getRowKey().getSimpleName() + "_" + c.getColumnKey().getClassName(), c.getValue());
-		}
-		
-		Map<Class, Integer> errorsAccumulated = Maps.newHashMap(); 
-		for(Cell<Class, CryptSLRule, Integer> c : errorTable.cellSet()){
-			Integer integer = errorsAccumulated.get(c.getRowKey());	
-			if(integer == null){
-				integer = 0;
-			}
-			integer += c.getValue();
-			errorsAccumulated.put(c.getRowKey(),integer);
-		}
-
-		for(Entry<Class, Integer> c : errorsAccumulated.entrySet()){
-			put(c.getKey().getSimpleName() + "_sum", c.getValue());
 		}
 		
 		writeToFile();
 	}
-
+	
 	private void writeToFile() {
 		try {
-			File reportFile = new File(csvReportFileName).getAbsoluteFile();
-			if (!reportFile.getParentFile().exists()) {
-				try {
-					Files.createDirectories(reportFile.getParentFile().toPath());
-				} catch (IOException e) {
-					throw new RuntimeException("Was not able to create directories for IDEViz output!");
-				}
+			FileWriter writer = new FileWriter(getOutputFolder() + File.separator + REPORT_NAME);
+			
+			// write headers
+			writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
+			
+			// write errors line by line
+			for (String line : this.contents) {
+				writer.write(line + "\n");
 			}
-			boolean fileExisted = reportFile.exists();
-			FileWriter writer = new FileWriter(reportFile, true);
-			if (!fileExisted) {
-				writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
-			}
-			List<String> line = Lists.newArrayList();
-			for(String h : headers){
-				String string = headersToValues.get(h);
-				if(string == null){
-					string = "";
-				}
-				line.add(string);
-			}
-			writer.write(Joiner.on(CSV_SEPARATOR).join(line) + "\n");
+			
 			writer.close();
+			LOGGER.info("CSV Report generated to file : " + getOutputFolder().getAbsolutePath() + File.separator+ REPORT_NAME);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("Could not write to " + getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME, e);
 		}
-	}
-
-	private void put(String key, Object val) {
-		if (!headers.contains(key)) {
-			System.err.println("Did not create a header to this value " + key);
-		} else {
-			headersToValues.put(key, val.toString());
-		}
-	}
-	private void put(Headers key, Object val) {
-		put(key.toString(),val);
-	}
-
-	@Override
-	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
-	}
-
-	@Override
-	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
-	}
-
-	@Override
-	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
-	}
-
-	@Override
-	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		
-	}
-
-	@Override
-	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-	}
-
-	@Override
-	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		
-	}
-
-	@Override
-	public void reportError(AbstractError error) {
-		errors.add(error);
-	}
-
-	@Override
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCryptSLPredicate>> existingPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> expectedPredicates,
-			Table<Statement, IAnalysisSeed, Set<CryptSLPredicate>> missingPredicates) {
-		
-	}
-
-	@Override
-	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-			Collection<ISLConstraint> relConstraints) {
-	}
-
-	@Override
-	public void onSeedTimeout(Node<Statement, Val> seed) {
-		
-	}
-
-	@Override
-	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> forwardResults) {
-		dataflowReachableMethods.addAll(forwardResults.getStats().getCallVisitedMethods());
-	}
-
-
-	@Override
-	public void collectedValues(AnalysisSeedWithSpecification seed,
-			Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-		
-	}
-
-	@Override
-	public void discoveredSeed(IAnalysisSeed curr) {
-		seeds++;
-	}
-
-	@Override
-	public void onSecureObjectFound(IAnalysisSeed analysisObject) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void addProgress(int processedSeeds, int workListsize) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

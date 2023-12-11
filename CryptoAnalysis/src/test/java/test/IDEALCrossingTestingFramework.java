@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Lists;
 
 import boomerang.WeightedForwardQuery;
@@ -15,13 +18,12 @@ import boomerang.debugger.IDEVizDebugger;
 import boomerang.jimple.Val;
 import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
-import crypto.Utils;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.rules.CryptSLRule;
-import crypto.typestate.CryptSLMethodToSootMethod;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.rules.CrySLRule;
+import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
@@ -40,12 +42,14 @@ import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
 
 public abstract class IDEALCrossingTestingFramework extends AbstractTestingFramework{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(IDEALCrossingTestingFramework.class);
+
 	protected JimpleBasedInterproceduralCFG staticIcfg;
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
-	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
@@ -72,10 +76,13 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 		};
 	}
 
-	protected CryptSLRule getRule() {
-		//return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
-		return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, ruleFormat, getRuleset(), getRulename());
-		//CryptSLRuleReader.readFromFile(file);
+	protected CrySLRule getRule() {
+		try {
+			return CrySLRulesetSelector.makeSingleRule(RULES_BASE_DIR, getRuleset(), getRulename());
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+RULES_BASE_DIR, e);
+		}
+		return null;
 	}
 
 	protected abstract String getRulename();
@@ -85,7 +92,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add(Utils.getFullyQualifiedName(getRule()));
+		excludedPackages.add(getRule().getClassName());
 		return excludedPackages;
 	}
 	
@@ -133,7 +140,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	}
 
 	protected Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> executeAnalysis() {
-		CryptSLMethodToSootMethod.reset();
+		CrySLMethodToSootMethod.reset();
 		ExtendedIDEALAnaylsis analysis = IDEALCrossingTestingFramework.this.createAnalysis();
 		return analysis.run();
 	}
