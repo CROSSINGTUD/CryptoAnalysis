@@ -55,6 +55,7 @@ Other additional arguments that can be used are as follows:
 --visualization (enables the visualization, but also requires --reportPath option to be set)
 --providerDetection (enables provider detection analysis)
 --dstats (disables the output of the analysis statistics in the reports)
+--help
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
@@ -80,7 +81,7 @@ CogniCrypt<sub>SAST</sub> supports different report formats, which can be set by
 - `CSV`: The report is written to the CSV file `CryptoAnalysis-Report.csv`. The content is formatted in the CSV format.
 - `CSV_SUMMARY`: The report is written to the file `CryptoAnalysis-Report-Summary.csv` and contains a summary of the analysis results. Compared to the `CSV` format, this format does not provide concrete information about the errors, it only lists the amount of each misuse type. This option was previously implemented by the `CSV` option, which has been changed to provide more detailed information about the errors in the CSV format.
 
-If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD TXT CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
+If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD,TXT,CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
 
 ## Updating CrySL Rules
 

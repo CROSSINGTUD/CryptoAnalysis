@@ -57,13 +57,14 @@ import typestate.TransitionFunction;
 
 public abstract class HeadlessCryptoScanner {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+
 	private static CryptoScannerSettings settings = new CryptoScannerSettings();
-	private boolean hasSeeds;
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
+	private boolean hasSeeds;
 	
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
@@ -75,10 +76,11 @@ public abstract class HeadlessCryptoScanner {
 			settings.parseSettingsFromCLI(args);
 		} catch (CryptoAnalysisParserException e) {
 			LOGGER.error("Parser failed with error: " + e.getClass().toString(), e);
+			System.exit(-1);
 		}
 		
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
-			
+
 			@Override
 			protected String applicationClassPath() {
 				return settings.getApplicationPath();
@@ -97,10 +99,10 @@ public abstract class HeadlessCryptoScanner {
 						break;
 					case ZIP:
 						try {
-							rules.addAll(ruleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
-							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
+							rules.addAll(ruleReader.readFromZipFile(new File(settings.getRulesetPathDir())));
+							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathZip(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathDir(), e);
 						}
 						break;
 					default:
@@ -390,7 +392,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected String softwareIdentifier(){
-		return settings.getSoftwareIdentifier();
+		return settings.getIdentifier();
 	}
 	
 	protected String getOutputFolder(){
