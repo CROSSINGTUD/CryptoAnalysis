@@ -31,9 +31,37 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # TODO download jar
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-package: jdk
+        java-version: '11'
+    # TODO cache compiled jar
+    # TODO download pre-compiled jar instead (when available)
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.6.3
+    - name: Checkout source code
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.GH_ACTION_REPOSITORY }}
+        ref: ${{ env.GH_ACTION_REF }}
+        path: 'CryptoAnalysisBuild_98e04be6' # random string at the end to avoid any conflicts with the actual repo
+      env:
+        # workaround for https://github.com/actions/runner/issues/2473
+        GH_ACTION_REPOSITORY: ${{ github.action_repository  }}
+        GH_ACTION_REF: ${{ github.action_ref  }}
+    - name: Compile
+      shell: bash
+      run: mvn package -DskipTests=true
+      working-directory: 'CryptoAnalysisBuild_98e04be6'
+    - name: Copy JAR to convenient path
+      shell: bash
+      run: cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis/build/CryptoAnalysis-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
     - run: |
-        java -cp CryptoAnalysis-3.0.2-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+        java -cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar crypto.HeadlessCryptoScanner \
         --rulesDir ${{ inputs.rulesDir }} \
         --appPath ${{ inputs.appPath }} \
         --reportFormat github_annotation ${{ inputs.reportFormat }} \
