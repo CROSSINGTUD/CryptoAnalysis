@@ -1,5 +1,7 @@
 package crypto.analysis;
 
+import java.util.Map.Entry;
+
 import com.google.common.collect.Multimap;
 
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -10,10 +12,22 @@ public class EnsuredCrySLPredicate {
 
 	private final CrySLPredicate predicate;
 	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues;
+	private IAnalysisSeed[] seedsForParameters;
 
 	public EnsuredCrySLPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2) {
 		this.predicate = predicate;
 		parametersToValues = parametersToValues2;
+		seedsForParameters = new IAnalysisSeed[predicate.getParameters().size()];
+	}
+	
+	public void addAnalysisSeedToParameter(IAnalysisSeed seed, int paramPosition) {
+		if(paramPosition < predicate.getParameters().size()) {
+			seedsForParameters[paramPosition] = seed; 
+		}
+	}
+	
+	public IAnalysisSeed[] getParameterToAnalysisSeed() {
+		return seedsForParameters;
 	}
 	
 	public CrySLPredicate getPredicate(){
@@ -34,6 +48,14 @@ public class EnsuredCrySLPredicate {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
+		
+		for(Entry<CallSiteWithParamIndex, ExtractedValue> e: parametersToValues.entries()) {
+			result = prime * result + e.getValue().hashCode();
+		}
+		for(IAnalysisSeed seed: seedsForParameters) {
+			result = prime * result + ((seed != null) ? seed.hashCode() : 0);
+		}
+		 
 		return result;
 	}
 
