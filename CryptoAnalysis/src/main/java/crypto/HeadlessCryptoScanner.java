@@ -64,10 +64,13 @@ public abstract class HeadlessCryptoScanner {
 	private static String rulesetRootPath;
 	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
 	private boolean hasSeeds;
-	
+
+	public static int exitCode = 0;
+
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
 		scanner.exec();
+		System.exit(exitCode);
 	}
 
 	public static HeadlessCryptoScanner createFromCLISettings(String[] args) {

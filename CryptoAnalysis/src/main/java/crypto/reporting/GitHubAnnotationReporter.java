@@ -1,6 +1,7 @@
 package crypto.reporting;
 
 import com.google.common.collect.Table;
+import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
 import soot.SootClass;
@@ -97,7 +98,8 @@ public class GitHubAnnotationReporter extends Reporter  {
 
         summary.append(String.format("Number of CrySL rules: %s\n", getRules().size()));
         summary.append(String.format("Number of Objects Analyzed: %s\n", getObjects().size()));
-        summary.append(String.format("Number of violations: %s\n", errorMarkerCount.values().stream().reduce(0, Integer::sum)));
+        int errorCount = errorMarkerCount.values().stream().reduce(0, Integer::sum);
+        summary.append(String.format("Number of violations: %s\n", errorCount));
 
         if (includeStatistics() && statistics != null) {
             // add statistics to summary
@@ -112,6 +114,10 @@ public class GitHubAnnotationReporter extends Reporter  {
         }
 
         setSummary(summary.toString());
+
+        if (errorCount != 0) {
+            HeadlessCryptoScanner.exitCode = 1;
+        }
     }
 
     private Path classToSourcePath(SootClass clazz) {
