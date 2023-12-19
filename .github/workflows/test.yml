@@ -1,0 +1,20 @@
+name: Test Internal Action
+
+on: push
+
+jobs:
+  internal_action:
+    runs-on: ubuntu-latest
+    name: Test CryptoAnalysis Action
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      # Sets up Java version
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-package: 'jdk'
+          java-version: '11'
+      - name: Run CogniCrypt
+        uses: Timbals/CryptoAnalysis@annotations
