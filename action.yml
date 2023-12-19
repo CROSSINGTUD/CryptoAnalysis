@@ -14,5 +14,5 @@ runs:
   using: "composite"
   steps:
     # TODO download jar
-    - run: java -cp CryptoAnalysis-3.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner --rulesDir {{ inputs.rulesDir }} --appPath {{ inputs.appPath }} --reportFormat github_annotation
+    - run: java -cp CryptoAnalysis-3.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner --rulesDir ${{ inputs.rulesDir }} --appPath ${{ inputs.appPath }} --reportFormat github_annotation
       shell: bash
