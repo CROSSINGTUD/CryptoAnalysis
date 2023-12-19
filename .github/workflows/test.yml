@@ -18,3 +18,6 @@ jobs:
           java-version: '11'
       - name: Run CogniCrypt
         uses: Timbals/CryptoAnalysis@annotations
+        with:
+          rulesDir: "$(pwd)/JCA-CrySL-rules"
+          appPath: "$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar"
