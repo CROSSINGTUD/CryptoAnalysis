@@ -31,17 +31,17 @@ public class CryptoScannerSettings implements Callable<Integer> {
 					+ "using a ZIP file, please make sure that the path ends with '.zip'",
 			required = true)
 	private String rulesDir = null;
-	
+
 	@CommandLine.Option(
 			names = {"--cg"},
 			description = "The call graph to resolve method calls. Possible values are CHA, SPARK and SPARKLIB (default: CHA)")
 	private String cg = null;
-	
+
 	@CommandLine.Option(
 			names = {"--sootPath"},
 			description = "The absolute path of the whole project")
 	private String sootPath = "";
-	
+
 	@CommandLine.Option(
 			names = {"--identifier"},
 			description = "An identifier for the analysis to label output files")
@@ -51,29 +51,29 @@ public class CryptoScannerSettings implements Callable<Integer> {
 			names = {"--reportPath"},
 			description = "Path for a directory to write the reports into")
 	private String reportPath = null;
-	
+
 	@CommandLine.Option(
 			names = {"--reportFormat"},
 			split = ",",
 			description = "The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY (default: CMD)."
 					+ " Multiple formats should be split with a comma (e.g. CMD,TXT,CSV)")
 	private String[] reportFormat = null;
-	
+
 	@CommandLine.Option(
 			names = {"--preanalysis"},
 			description = "Enable a preanalysis")
 	private boolean preanalysis = false;
-	
+
 	@CommandLine.Option(
 			names = {"--visualization"},
 			description = "Enable visualization")
 	private boolean visualization = false;
-	
+
 	@CommandLine.Option(
 			names = {"--providerdetection"},
 			description = "Enable provider detection")
 	private boolean providerdetection = false;
-	
+
 	@CommandLine.Option(
 			names = {"--dstats"},
 			description = "Disable the output of analysis statistics in the reports")
@@ -96,7 +96,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 					+ "Note that constructors are methods that can be specified with '<init>'."
 	)
 	private String ignoreSectionsPath = null;
-	
+
 	private ControlGraph controlGraph;
 	private RulesetPathType rulesetPathType;
 	private Set<ReportFormat> reportFormats;
@@ -108,7 +108,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 	}
 
 	public enum ReportFormat {
-		CMD, TXT, SARIF, CSV, CSV_SUMMARY
+		CMD, TXT, SARIF, CSV, CSV_SUMMARY, GITHUB_ANNOTATION
 	}
 
 	public enum RulesetPathType {
@@ -133,7 +133,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		} else {
 			this.rulesetPathType = RulesetPathType.DIR;
 		}
-		
+
 		if (cg != null) {
 			parseControlGraphValue(cg);
 		}
@@ -149,7 +149,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		if (ignoreSectionsPath != null) {
 			parseIgnoredSections(ignoreSectionsPath);
 		}
-		
+
 		if (exitCode != ExitCode.OK) {
 			throw new CryptoAnalysisParserException("Error while parsing the CLI arguments");
 		}
@@ -253,16 +253,19 @@ public class CryptoScannerSettings implements Callable<Integer> {
 				case "csv_summary":
 					reportFormats.add(ReportFormat.CSV_SUMMARY);
 					break;
+				case "github_annotation":
+					reportFormats.add(ReportFormat.GITHUB_ANNOTATION);
+					break;
 				default:
 					throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
 							+ "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
 			}
 		}
 	}
-	
+
 	private boolean isZipFile(String path) throws CryptoAnalysisParserException {
 		File file = new File(path);
-		
+
 		// Copied from https://stackoverflow.com/questions/33934178/how-to-identify-a-zip-file-in-java
 		int fileSignature = 0;
 

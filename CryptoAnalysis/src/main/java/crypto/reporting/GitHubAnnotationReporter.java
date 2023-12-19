@@ -1,17 +1,124 @@
 package crypto.reporting;
 
+import com.google.common.collect.Table;
+import crypto.analysis.errors.AbstractError;
+import crypto.rules.CrySLRule;
+import soot.SootClass;
+import soot.SootMethod;
+import soot.tagkit.Host;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 
-public class GitHubAnnotationReporter {
+public class GitHubAnnotationReporter extends Reporter  {
+    /**
+     * Path to relate paths in the analyzed jar and the source tree.
+     * <p>
+     * Example:
+     * Relating the class {@code "example.IncompleOperationErrorExample"}
+     * to the source file {@code "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example/IncompleOperationErrorExample.java"}
+     * requires a {@code basePath} of {@code "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java"}.
+     */
+    private final String basePath;
+
+    /**
+     * The constructor to initialize all attributes. Since this class is abstract, all subclasses
+     * have to call this constructor.
+     * TODO describe
+     *
+     * @param softwareID                A {@link String} for the analyzed software.
+     * @param rules                     A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
+     * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
+     * @param includeStatistics         Set this value to true, if the analysis report should contain some
+     *                                  analysis statistics (e.g. the callgraph construction time). If this value is set
+     *                                  to false, no statistics will be output.
+     */
+    public GitHubAnnotationReporter(String softwareID, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
+        super(null, softwareID, rules, callgraphConstructionTime, includeStatistics);
+
+        basePath = getInput("basePath");
+    }
+
+    @Override
+    public void handleAnalysisResults() {
+        // report errors on individual lines
+        for (Table.Cell<SootClass, SootMethod, Set<AbstractError>> cell : errorMarkers.cellSet()) {
+            SootClass clazz = cell.getRowKey();
+            Path path = classToSourcePath(clazz);
+
+            boolean sourceExists = Files.exists(path); // TODO log a warning when a source file could not be found (and recommend checking the `basePath` again
+
+            for (AbstractError error : cell.getValue()) {
+                String title = error.getClass().getSimpleName() + " violating CrySL rule for " + error.getRule().getClassName();
+
+                Integer line = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartLineNumber).or(-1);
+                if (line == -1) {
+                    line = null;
+                }
+
+                Integer column = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartColumnNumber).or(-1);
+                if (column == -1) {
+                    column = null;
+                }
+
+                if (sourceExists) {
+                    ActionsAnnotation.printAnnotation(error.toErrorMarkerString(), title, path.toString(), line, null, column, null);
+                } else {
+                    // fall back to a "global" annotation when the corresponding source file could not be found
+                    StringBuilder message = new StringBuilder(error.toErrorMarkerString());
+
+                    if (line != null) {
+                        message.append(System.lineSeparator()).append("at line ").append(line);
+                    }
+
+                    if (column != null) {
+                        message.append(System.lineSeparator()).append("at column ").append(column);
+                    }
+
+                    ActionsAnnotation.printAnnotation(message.toString(), title, null, null, null, null, null);
+                }
+            }
+        }
+
+        // report summary
+        StringBuilder summary = new StringBuilder();
+
+        summary.append(String.format("Number of CrySL rules: %s\n", getRules().size()));
+        summary.append(String.format("Number of Objects Analyzed: %s\n", getObjects().size()));
+        summary.append(String.format("Number of violations: %s\n", errorMarkerCount.values().stream().reduce(0, Integer::sum)));
+
+        if (includeStatistics() && statistics != null) {
+            // add statistics to summary
+            summary.append("\nAdditional analysis statistics:\n");
+            summary.append(String.format("SoftwareID: %s\n", statistics.getSoftwareID()));
+            summary.append(String.format("SeedObjectCount: %d\n", statistics.getSeedObjectCount()));
+            summary.append(String.format("CryptoAnalysisTime (in ms): %d\n", statistics.getAnalysisTime()));
+            summary.append(String.format("CallgraphConstructionTime (in ms): %d\n", statistics.getCallgraphTime()));
+            summary.append(String.format("CallgraphReachableMethods: %d\n", statistics.getCallgraphReachableMethods()));
+            summary.append(String.format("CallgraphReachableMethodsWithActiveBodies: %d\n", statistics.getCallgraphReachableMethodsWithActiveBodies()));
+            summary.append(String.format("DataflowVisitedMethods: %d\n", statistics.getDataflowVisitedMethods()));
+        }
+
+        setSummary(summary.toString());
+    }
+
+    private Path classToSourcePath(SootClass clazz) {
+        return Paths.get(basePath, clazz.getName().replace('.', File.separatorChar) +
+                ".java");
+    }
+
     /**
      * Gets an input variable when running as a GitHub Action. Input values are read from environment
      * variables with the format specified <a
