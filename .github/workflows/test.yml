@@ -7,17 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test CryptoAnalysis Action
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      # Sets up Java version
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-package: 'jdk'
-          java-version: '11'
       - name: Run CogniCrypt
-        uses: Timbals/CryptoAnalysis@annotations
+        uses: Timbals/CryptoAnalysis@8894fae7b78de54fadd3de2d6cd5a77138e0b3df
         with:
           rulesDir: "$(pwd)/JCA-CrySL-rules"
           appPath: "$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar"
