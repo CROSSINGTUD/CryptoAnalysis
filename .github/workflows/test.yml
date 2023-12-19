@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Test CryptoAnalysis Action
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
       - name: Run CogniCrypt
         uses: Timbals/CryptoAnalysis@8894fae7b78de54fadd3de2d6cd5a77138e0b3df
         with:
