@@ -1,0 +1,18 @@
+name: CogniCrypt - Static Spplication Security Testing
+description: CogniCrypt takes rules written in the specification language CrySL as input, and performs a static analysis based on the specification of the rules.
+inputs:
+  basePath:
+    description: "Path to relate paths in the analyzed jar and the source tree. Class \"com.example\" is searched for at \"basePath/com/example\"."
+  rulesDir:
+    description: "TODO"
+    required: true
+  appPath:
+    description: "TODO"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # TODO download jar
+    - run: java -cp CryptoAnalysis-3.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner --rulesDir {{ inputs.rulesDir }} --appPath {{ inputs.appPath }} --reportFormat github_annotation
+      shell: bash
