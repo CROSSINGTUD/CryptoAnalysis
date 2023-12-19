@@ -9,12 +9,42 @@ inputs:
   appPath:
     description: "TODO"
     required: true
+  cg:
+    description: "Selection of call graph for analysis (possible values are CHA, SPARK, SPARKLIB)"
+  sootPath:
+    description: "Absolute path of the whole project"
+  identifier:
+    description: "Identifier for labeling output files"
+  reportPath:
+    description: "Directory Location for cryptoanalysis reports"
+  reportFormat:
+    description: "format of crytoanalysis reports (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)"
+  preanalysis:
+    description: "Enables pre-analysis"
+  visualization :
+    description: "Enables the visualization, but also requires reportPath option to be set"
+  providerDetection :
+    description: "Enables provider detection analysis"
+  dstats:
+    description: "Disables the output of the analysis statistics in the reports"
 
 runs:
   using: "composite"
   steps:
     # TODO download jar
-    - run: java -cp CryptoAnalysis-3.0.0-jar-with-dependencies.jar crypto.HeadlessCryptoScanner --rulesDir ${{ inputs.rulesDir }} --appPath ${{ inputs.appPath }} --reportFormat github_annotation
+    - run: |
+        java -cp CryptoAnalysis-3.0.2-jar-with-dependencies.jar crypto.HeadlessCryptoScanner \
+        --rulesDir ${{ inputs.rulesDir }} \
+        --appPath ${{ inputs.appPath }} \
+        --reportFormat github_annotation ${{ inputs.reportFormat }} \
+        ${{ inputs.cg && format('{0} {1}', '--cg', inputs.cg) || '' }} \
+        ${{ inputs.sootPath && format('{0} {1}', '--sootPath', inputs.sootPath) || '' }} \
+        ${{ inputs.identifier && format('{0} {1}', '--identifier', inputs.identifier) || '' }} \
+        ${{ inputs.reportPath && format('{0} {1}', '--reportPath', inputs.reportPath) || '' }} \
+        ${{ inputs.preanalysis == 'true' && '--preanalysis' || '' }} \
+        ${{ inputs.visualization  == 'true' && '--visualization ' || '' }} \
+        ${{ inputs.providerDetection  == 'true' && '--providerDetection ' || '' }} \
+        ${{ inputs.dstats == 'true' && '--dstats' || '' }}
       shell: bash
       # workaround for https://github.com/actions/runner/issues/665
       env:
