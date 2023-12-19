@@ -80,10 +80,9 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis/build/CryptoAnalysis-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
-
     - name: Save CryptoAnalysis Cache
       uses: actions/cache/save@v3
-      if: always()
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         path: CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
         key: ${{ steps.cache-key.outputs.cache-key }}
