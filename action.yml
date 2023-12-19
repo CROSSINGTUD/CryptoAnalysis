@@ -37,29 +37,61 @@ runs:
         distribution: 'adopt'
         java-package: jdk
         java-version: '11'
-    # TODO cache compiled jar
-    # TODO download pre-compiled jar instead (when available)
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v4.5
-      with:
-        maven-version: 3.6.3
+
     - name: Checkout source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ env.GH_ACTION_REPOSITORY }}
         ref: ${{ env.GH_ACTION_REF }}
-        path: 'CryptoAnalysisBuild_98e04be6' # random string at the end to avoid any conflicts with the actual repo
+        path: CryptoAnalysisBuild_98e04be6 # random string at the end to avoid any conflicts with the actual repo
       env:
         # workaround for https://github.com/actions/runner/issues/2473
-        GH_ACTION_REPOSITORY: ${{ github.action_repository  }}
-        GH_ACTION_REF: ${{ github.action_ref  }}
-    - name: Compile
+        GH_ACTION_REPOSITORY: ${{ github.action_repository }}
+        GH_ACTION_REF: ${{ github.action_ref }}
+
+    - name: Calculate cache key
+      id: cache-key
+      shell: bash
+      working-directory: CryptoAnalysisBuild_98e04be6
+      run: echo "cache-key=CryptoAnalysis-$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+    - name: Restore CryptoAnalysis Cache
+      id: cache
+      uses: actions/cache/restore@v3
+      with:
+        path: CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
+        key: ${{ steps.cache-key.outputs.cache-key }}
+      env:
+        # workaround for https://github.com/actions/runner/issues/2473
+        GH_ACTION_REPOSITORY: ${{ github.action_repository }}
+        GH_ACTION_REF: ${{ github.action_ref }}
+
+    # TODO download pre-compiled jar instead (when available)
+    - name: Set up Maven
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.6.3
+    - name: Compile CryptoAnalysis
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: mvn package -DskipTests=true
-      working-directory: 'CryptoAnalysisBuild_98e04be6'
+      working-directory: CryptoAnalysisBuild_98e04be6
     - name: Copy JAR to convenient path
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       run: cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis/build/CryptoAnalysis-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
+
+    - name: Save CryptoAnalysis Cache
+      uses: actions/cache/save@v3
+      if: always()
+      with:
+        path: CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
+        key: ${{ steps.cache-key.outputs.cache-key }}
+      env:
+        # workaround for https://github.com/actions/runner/issues/2473
+        GH_ACTION_REPOSITORY: ${{ github.action_repository }}
+        GH_ACTION_REF: ${{ github.action_ref }}
+
     - run: |
         java -cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar crypto.HeadlessCryptoScanner \
         --rulesDir ${{ inputs.rulesDir }} \
