@@ -10,7 +10,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v3
       - name: Run CogniCrypt
-        uses: Timbals/CryptoAnalysis@a4032930f0a7b3bdb761130eae8d2229c9534b0a
+        uses: Timbals/CryptoAnalysis@be1b88d536592c3ab08af5969808d075b8c59d82
         with:
           rulesDir: "$(pwd)/JCA-CrySL-rules"
           appPath: "$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar"
