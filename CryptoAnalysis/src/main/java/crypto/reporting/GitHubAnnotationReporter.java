@@ -59,7 +59,7 @@ public class GitHubAnnotationReporter extends Reporter  {
             SootClass clazz = cell.getRowKey();
             Path path = classToSourcePath(clazz);
 
-            boolean sourceExists = Files.exists(path); // TODO log a warning when a source file could not be found (and recommend checking the `basePath` again
+            boolean sourceExists = Files.exists(path);
 
             for (AbstractError error : cell.getValue()) {
                 String title = error.getClass().getSimpleName() + " violating CrySL rule for " + error.getRule().getClassName();
@@ -87,6 +87,8 @@ public class GitHubAnnotationReporter extends Reporter  {
                     if (column != null) {
                         message.append(System.lineSeparator()).append("at column ").append(column);
                     }
+
+                    message.append(System.lineSeparator()).append(System.lineSeparator()).append("Corresponding source file could not be found (at ").append(path).append("). The base path might be set incorrectly.");
 
                     ActionsAnnotation.printAnnotation(message.toString(), title, null, null, null, null, null);
                 }
