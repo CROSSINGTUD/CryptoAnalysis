@@ -11,4 +11,5 @@ public interface ErrorVisitor {
 	public void visit(PredicateContradictionError predicateContradictionError);
 	public void visit(HardCodedError hardcodedError);
 	public void visit(ForbiddenPredicateError forbiddenPredicateError);
+	public void visit(UncaughtExceptionError uncaughtExceptionError);
 }

@@ -24,11 +24,9 @@ public abstract class AbstractError implements IError{
 		Stmt errorStmt = errorLocation.getUnit().get();
 		if(errorStmt.containsInvokeExpr()) {
 			this.invokeMethod = errorStmt.getInvokeExpr().getMethod().toString();
-		}
-		else if(errorStmt instanceof JReturnStmt || errorStmt instanceof JReturnVoidStmt) {
+		} else if(errorStmt instanceof JReturnStmt || errorStmt instanceof JReturnVoidStmt) {
 			this.invokeMethod = errorStmt.toString();
-		}
-		else if (errorStmt instanceof JIfStmt) {
+		} else if (errorStmt instanceof JIfStmt) {
 			this.invokeMethod = ((JIfStmt) errorStmt).getCondition().toString();
 		} else {
 			this.invokeMethod = ((JAssignStmt) errorStmt).getLeftOp().toString();
@@ -87,8 +85,11 @@ public abstract class AbstractError implements IError{
 		if (rule == null) {
 			if (other.rule != null)
 				return false;
-		} else if (!rule.equals(other.rule))
+		} else if (!rule.equals(other.rule)) {
 			return false;
+		} else if (!errorLocation.equals(other.getErrorLocation())) {
+			return false;
+		}
 		return true;
 	}
 }

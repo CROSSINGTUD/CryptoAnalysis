@@ -3,6 +3,13 @@ package crypto.extractparameter;
 import soot.Value;
 import soot.jimple.Constant;
 
+/**
+ * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
+ *
+ *  CallSiteWithParamIndex gives position of the location index of the error
+ *  ExtractedValue gives the value of the call site
+ */
+
 public class CallSiteWithExtractedValue {
 	private CallSiteWithParamIndex cs;
 	private ExtractedValue val;
@@ -41,6 +48,9 @@ public class CallSiteWithExtractedValue {
 				break;
 			case 5: 
 				res = "Sixth ";
+				break;
+			default:
+				res = (cs.getIndex()+1) + "th ";
 				break;
 		}
 		res += "parameter";

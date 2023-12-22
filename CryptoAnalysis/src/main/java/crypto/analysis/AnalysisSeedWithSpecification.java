@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,6 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
+
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.AllocVal;
@@ -27,7 +29,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
-import crypto.constraints.ConstraintSolver.EvaluableConstraint;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
@@ -35,7 +37,6 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLCondPredicate;
-import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
@@ -54,7 +55,6 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
-import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
@@ -125,15 +125,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		runExtractParameterAnalysis();
 		checkInternalConstraints();
 
-		Multimap<Statement, State> unitToStates = HashMultimap.create();
-		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
-			unitToStates.putAll(c.getRowKey(), getTargetStates(c.getValue()));
-			for (EnsuredCrySLPredicate pred : indirectlyEnsuredPredicates) {
-				// TODO only maintain indirectly ensured predicate as long as they are not
-				// killed by the rule
-				predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
-			}
-		}
+		// Analysis seed was not analyzed yet -> Activate predicates from other rules
+		activateIndirectlyEnsuredPredicates();
 
 		computeTypestateErrorUnits();
 		computeTypestateErrorsForEndOfObjectLifeTime();
@@ -171,6 +164,20 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getFSM());
 		this.parameterAnalysis.run();
+	}
+	
+	private void activateIndirectlyEnsuredPredicates() {
+		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			Collection<? extends State> states = getTargetStates(c.getValue());
+			
+			for (State state : states) {
+				for (EnsuredCrySLPredicate pred : indirectlyEnsuredPredicates) {
+					if (!isPredicateNegatingState(pred.getPredicate(), state, spec.getRule().getNegatedPredicates())) {
+						predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+					}
+				}
+			}
+		}
 	}
 
 	private void computeTypestateErrorUnits() {
@@ -236,7 +243,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				continue;
 			}
 
-			if (isPredicateGeneratingState(predToBeEnsured, stateNode)) {
+			if (isPredicateGeneratingState(predToBeEnsured, stateNode) && !isPredicateNegatingState(predToBeEnsured, stateNode, spec.getRule().getNegatedPredicates())) {
 				ensuresPred(predToBeEnsured, curr, stateNode);
 			}
 		}
@@ -247,9 +254,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		}
 		boolean satisfiesConstraintSytem = checkConstraintSystem();
-		if(predToBeEnsured.getConstraint() != null) {
-			ArrayList<ISLConstraint> temp = new ArrayList<>();
-			temp.add(predToBeEnsured.getConstraint());
+		if(predToBeEnsured.getConstraint().isPresent()) {
 			satisfiesConstraintSytem = !evaluatePredCond(predToBeEnsured);
 		}
 		
@@ -331,13 +336,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void addEnsuredPredicateFromOtherRule(EnsuredCrySLPredicate ensuredCrySLPredicate) {
 		indirectlyEnsuredPredicates.add(ensuredCrySLPredicate);
-		if (results == null)
+		if (results == null) {
 			return;
-		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
-			for (EnsuredCrySLPredicate pred : indirectlyEnsuredPredicates) {
-				predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
-			}
 		}
+		
+		// Analysis seed was previously analyzed -> Activate predicate from other rule
+		activateIndirectlyEnsuredPredicates();
 	}
 
 	private void expectPredicateWhenThisObjectIsInState(State stateNode, Statement currStmt, CrySLPredicate predToBeEnsured, boolean satisfiesConstraintSytem) {
@@ -346,8 +350,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (!satisfiesConstraintSytem)
 			return;
 		for (Cell<Statement, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
-			// TODO check for any reachable state that don't kill
-			// predicates.
 			if (containsTargetState(e.getValue(), stateNode)) {
 				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
 			}
@@ -393,14 +395,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
 				if (reqPred.getPred().isNegated()) {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred())) {
+						if (reqPred.getPred().equals(ensPred.getPredicate())) {
 							return false;
 						}
 					}
 					remainingPredicates.remove(pred);
 				} else {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (ensPred.getPredicate().equals(reqPred.getPred()) && doPredsMatch(reqPred.getPred(), ensPred)) {
+						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
 							remainingPredicates.remove(pred);
 						}
 					}
@@ -420,7 +422,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					remainingPredicates.remove(pred);
 				} else if (negatives.isEmpty()) {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
+						if (alternatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
 							remainingPredicates.remove(pred);
 							break;
 						}
@@ -434,7 +436,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						}
 
 						alternatives.removeAll(negatives);
-						if (alternatives.parallelStream().allMatch(e -> ensPred.getPredicate().equals(e) && doPredsMatch(e, ensPred))) {
+						if (alternatives.parallelStream().allMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
 							satisfied = true;
 						}
 
@@ -453,7 +455,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (evaluatePredCond(singlePred.getPred())) {
 					remainingPredicates.remove(singlePred);
 				}
-			} else if (rem instanceof CrySLConstraint) {
+			} else if (rem instanceof AlternativeReqPredicate) {
 				List<CrySLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
 				if (altPred.parallelStream().anyMatch(e -> evaluatePredCond(e))) {
 					remainingPredicates.remove(rem);
@@ -466,15 +468,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean evaluatePredCond(CrySLPredicate pred) {
-		final ISLConstraint conditional = pred.getConstraint();
-		if (conditional != null) {
-			EvaluableConstraint evalCons = constraintSolver.createConstraint(conditional);
+		return pred.getConstraint().map(conditional -> {
+			EvaluableConstraint evalCons = EvaluableConstraint.getInstance(conditional, constraintSolver);
 			evalCons.evaluate();
-			if (evalCons.hasErrors()) {
-				return true;
-			}
-		}
-		return false;
+			return evalCons.hasErrors();
+		}).orElse(false);
 	}
 
 	private boolean doPredsMatch(CrySLPredicate pred, EnsuredCrySLPredicate ensPred) {
@@ -538,7 +536,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (rightSide instanceof Constant) {
 					values.add(retrieveConstantFromValue(rightSide));
 				} else {
-					final List<ValueBox> useBoxes = rightSide.getUseBoxes();
+					// final List<ValueBox> useBoxes = rightSide.getUseBoxes();
 
 					// varVal.put(callSite.getVarName(),
 					// retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
@@ -570,7 +568,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean isOfNonTrackableType(String varName) {
 		for (Entry<String, String> object : spec.getRule().getObjects()) {
-			if (object.getValue().equals(varName) && trackedTypes.contains(object.getKey())) {
+			if (object.getKey().equals(varName) && trackedTypes.contains(object.getValue())) {
 				return false;
 			}
 		}
@@ -589,7 +587,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private boolean isPredicateGeneratingState(CrySLPredicate ensPred, State stateNode) {
-		return ensPred instanceof CrySLCondPredicate && isConditionalState(((CrySLCondPredicate) ensPred).getConditionalMethods(), stateNode) || (!(ensPred instanceof CrySLCondPredicate) && stateNode.isAccepting());
+		// Predicate has a condition, i.e. "after" is specified -> Active predicate for corresponding states
+		if (ensPred instanceof CrySLCondPredicate && isConditionalState(((CrySLCondPredicate) ensPred).getConditionalMethods(), stateNode)) {
+			return true;
+		}
+
+		// If there is no condition, the predicate is activated for all accepting states
+		if (!(ensPred instanceof CrySLCondPredicate) && stateNode.isAccepting()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private boolean isConditionalState(Set<StateNode> conditionalMethods, State state) {
@@ -601,6 +609,60 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 		return false;
+	}
+	
+	private boolean isPredicateNegatingState(CrySLPredicate ensPred, State stateNode, List<CrySLPredicate> negatedPredicates) {
+		// Check, whether the predicate is negated in the given state
+		for (CrySLPredicate negPred : negatedPredicates) {
+			// Compare names
+			if (!ensPred.getPredName().equals(negPred.getPredName())) {
+				continue;
+			}
+
+			// Compare parameters
+			if (!doParametersMatch(ensPred, negPred)) {
+				continue;
+			}
+
+			// Negated predicate does not have a condition, i.e. no "after" -> predicate is negated in all states
+			if (!(negPred instanceof CrySLCondPredicate)) {
+				return true;
+			}
+
+			CrySLCondPredicate condNegPred = (CrySLCondPredicate) negPred;
+
+			for (StateNode s : condNegPred.getConditionalMethods()) {
+				if (new WrappedState(s).equals(stateNode)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+	
+	private boolean doParametersMatch(CrySLPredicate ensPred, CrySLPredicate negPred) {
+		// Compare number of parameters
+		if (!(ensPred.getParameters().size() == negPred.getParameters().size())) {
+			return false;
+		}
+
+		// Compare type of parameters pairwise
+		for (int i = 0; i < ensPred.getParameters().size(); i++) {
+			CrySLObject ensParameter = (CrySLObject) ensPred.getParameters().get(i);
+			CrySLObject negParameter = (CrySLObject) negPred.getParameters().get(i);
+
+			// If "_" is used as a parameter, the type is arbitrary
+			if (ensParameter.getJavaType().equals("null") || negParameter.getJavaType().equals("null")) {
+				continue;
+			}
+
+			if (!ensParameter.getJavaType().equals(negParameter.getJavaType())) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public Set<ISLConstraint> getMissingPredicates() {
