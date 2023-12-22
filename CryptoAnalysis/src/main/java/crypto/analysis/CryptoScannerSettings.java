@@ -2,11 +2,15 @@ package crypto.analysis;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.google.common.io.Files;
 import crypto.exceptions.CryptoAnalysisParserException;
 import picocli.CommandLine;
 import picocli.CommandLine.ExitCode;
@@ -18,19 +22,19 @@ public class CryptoScannerSettings implements Callable<Integer> {
 			names = {"--appPath"},
 			description = "The path to the jar file to be analyzed",
 			required = true)
-	private String appPath;
+	private String appPath = null;
 	
 	@CommandLine.Option(
 			names = {"--rulesDir"},
 			description = "The path to the ruleset directory. Can be a simple directory or a ZIP file. If you are"
 					+ "using a ZIP file, please make sure that the path ends with '.zip'",
 			required = true)
-	private String rulesDir;
+	private String rulesDir = null;
 	
 	@CommandLine.Option(
 			names = {"--cg"},
 			description = "The call graph to resolve method calls. Possible values are CHA, SPARK and SPARKLIB (default: CHA)")
-	private String cg;
+	private String cg = null;
 	
 	@CommandLine.Option(
 			names = {"--sootPath"},
@@ -45,14 +49,14 @@ public class CryptoScannerSettings implements Callable<Integer> {
 	@CommandLine.Option(
 			names = {"--reportPath"},
 			description = "Path for a directory to write the reports into")
-	private String reportPath;
+	private String reportPath = null;
 	
 	@CommandLine.Option(
 			names = {"--reportFormat"},
 			split = ",",
 			description = "The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY (default: CMD)."
 					+ " Multiple formats should be split with a comma (e.g. CMD,TXT,CSV)")
-	private String[] reportFormat;
+	private String[] reportFormat = null;
 	
 	@CommandLine.Option(
 			names = {"--preanalysis"},
@@ -73,10 +77,18 @@ public class CryptoScannerSettings implements Callable<Integer> {
 			names = {"--dstats"},
 			description = "Disable the output of analysis statistics in the reports")
 	private boolean includeStatistics = true;
+
+	@CommandLine.Option(
+			names = {"--forbiddenPredicates"},
+			description = "Facilitates the specification of forbidden predicates. Any "
+					+ "occurrence will be flagged by the analysis. This input expects a "
+					+ "path to a file containing one predicate per line")
+	private String forbiddenPredicatesPath = null;
 	
 	private ControlGraph controlGraph;
 	private RulesetPathType rulesetPathType;
 	private Set<ReportFormat> reportFormats;
+	private Collection<String> forbiddenPredicates;
 
 	public enum ControlGraph {
 		CHA, SPARK, SPARKLIB,
@@ -94,6 +106,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		controlGraph = ControlGraph.CHA;
 		rulesetPathType = RulesetPathType.NONE;
 		reportFormats = new HashSet<>(List.of(ReportFormat.CMD));
+		forbiddenPredicates = new ArrayList<>();
 	}
 
 	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -114,9 +127,13 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		if (reportFormat != null) {
 			parseReportFormatValues(reportFormat);
 		}
+
+		if (forbiddenPredicatesPath != null) {
+			parseForbiddenPredicates(forbiddenPredicatesPath);
+		}
 		
 		if (exitCode != ExitCode.OK) {
-			throw new CryptoAnalysisParserException("Error while parsing the CLI arugments");
+			throw new CryptoAnalysisParserException("Error while parsing the CLI arguments");
 		}
 	}
 
@@ -166,6 +183,10 @@ public class CryptoScannerSettings implements Callable<Integer> {
 	
 	public boolean isIncludeStatistics() {
 		return includeStatistics;
+	}
+
+	public Collection<String> getForbiddenPredicates() {
+		return forbiddenPredicates;
 	}
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
@@ -229,6 +250,24 @@ public class CryptoScannerSettings implements Callable<Integer> {
 			return false;
 		}
 		return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
+	}
+
+	private void parseForbiddenPredicates(String path) throws CryptoAnalysisParserException {
+		File forbPredFile = new File(path);
+
+		// Reset forbiddenPredicates
+		forbiddenPredicates = new ArrayList<>();
+
+		if (forbPredFile.isFile() && forbPredFile.canRead()) {
+			try {
+				List<String> lines = Files.readLines(forbPredFile, Charset.defaultCharset());
+				forbiddenPredicates.addAll(lines);
+			} catch (IOException e) {
+				throw new CryptoAnalysisParserException("Error while reading file " + forbPredFile + ": " + e.getMessage());
+			}
+		} else {
+			throw new CryptoAnalysisParserException(forbPredFile + " is not a file or cannot be read");
+		}
 	}
 
 	@Override

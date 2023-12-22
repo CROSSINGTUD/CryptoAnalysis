@@ -182,7 +182,7 @@ public abstract class CryptoScanner {
 		return this.seedsWithSpec.values();
 	}
 
-	public List<String> forbiddenPredicates() {
-		return new ArrayList<String>();
+	public Collection<String> getForbiddenPredicates() {
+		return new ArrayList<>();
 	}
 }
