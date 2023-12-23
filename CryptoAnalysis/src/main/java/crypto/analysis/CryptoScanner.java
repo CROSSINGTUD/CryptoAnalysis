@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -131,9 +132,7 @@ public abstract class CryptoScanner {
 			}
 			for (ClassSpecification spec : getClassSpecifictions()) {
 				spec.invokesForbiddenMethod(method);
-				if (spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
-					continue;
-				}
+				
 				for (Query seed : spec.getInitialSeeds(method)) {
 					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
 				}
@@ -181,5 +180,9 @@ public abstract class CryptoScanner {
 
 	public Collection<AnalysisSeedWithSpecification> getAnalysisSeeds() {
 		return this.seedsWithSpec.values();
+	}
+
+	public Collection<String> getForbiddenPredicates() {
+		return new ArrayList<>();
 	}
 }

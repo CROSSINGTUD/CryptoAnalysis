@@ -102,7 +102,7 @@ public final class NoValidationIssuerOrSubject {
 
 	public static KeyPair genRSAKeyPair() throws Exception {
 		KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
-		kpGen.initialize(2048, new SecureRandom());
+		kpGen.initialize(4096, new SecureRandom());
 		return kpGen.generateKeyPair();
 	}
 

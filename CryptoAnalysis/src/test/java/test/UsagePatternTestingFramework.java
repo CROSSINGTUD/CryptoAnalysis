@@ -26,7 +26,6 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCrySLPredicate;
@@ -35,6 +34,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -42,6 +42,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -80,7 +81,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
-	private static final RuleFormat ruleFormat= RuleFormat.SOURCE;
 	List<CrySLRule> rules;
 	
 	@Override
@@ -209,7 +209,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									}
 
 									@Override
+									public void visit(UncaughtExceptionError uncaughtExceptionError) {
+										
+									}
+									@Override
 									public void visit(HardCodedError predicateError) {
+										
+									}
+
+									@Override
+									public void visit(ForbiddenPredicateError forbiddenPredicateError) {
 										
 									}
 								});
@@ -356,7 +365,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	private List<CrySLRule> getRules() {
 		if(rules == null) {
 			try {
-				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, getRuleSet());
+				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
 			} catch (CryptoAnalysisException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

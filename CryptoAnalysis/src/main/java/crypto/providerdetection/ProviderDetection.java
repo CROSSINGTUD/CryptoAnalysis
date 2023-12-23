@@ -24,10 +24,9 @@ import boomerang.jimple.Val;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.seedfactory.SeedFactory;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
-import crypto.analysis.CrySLRulesetSelector;
+import crypto.rules.CrySLRuleReader;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -55,23 +54,27 @@ public class ProviderDetection {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProviderDetection.class);
 	
 	private String provider = null;
-	private String rulesDirectory = null;	
+	private String rulesDirectory = null;
+	private final CrySLRuleReader reader;
 	private static final String BOUNCY_CASTLE = "BouncyCastle";
 	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
 	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
+
+	public ProviderDetection(){
+		this(new CrySLRuleReader());
+	}
+
+	public ProviderDetection(CrySLRuleReader reader){
+		if (reader == null){
+			throw new IllegalArgumentException("reader must not be null");
+		}
+		this.reader = reader;
+	}
 	
-	/**
-	 * Returns the detected provider.
-	 *
-	 */
 	public String getProvider() {
 		return provider;
 	}
-	
-	/**
-	 * Returns the rules directory of the detected provider.
-	 *
-	 */
+
 	public String getRulesDirectory() {
 		return rulesDirectory;
 	}
@@ -87,10 +90,11 @@ public class ProviderDetection {
 	 * provider after the analysis is finished. If no Provider is detected, 
 	 * then it will return null value, meaning that there was no provider used.
 	 * 
-	 * @param observableDynamicICFG
+	 * @param observableDynamicICFG observableDynamicICFG
 	 *       
-	 * @param rootRulesDirectory
+	 * @param rootRulesDirectory directory for the rules
 	 * 
+	 * @return the detected provider
 	 */
 	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, String rootRulesDirectory) {
 		
@@ -161,7 +165,8 @@ public class ProviderDetection {
 	 * This method returns the type of Provider detected, since
 	 * it can be either `java.security.Provider` or `java.lang.String`.
 	 * 
-	 * @param providerValue
+	 * @param providerValue the value for the provider
+	 * @return the provider type
 	 */
 	private String getProviderType(Value providerValue) {
 		String providerType = providerValue.getType().toString();
@@ -172,14 +177,15 @@ public class ProviderDetection {
 	/**
 	 * This method return the provider used when Provider detected is of type `java.security.Provider`.
 	 * 
-	 * @param statement
+	 * @param statement statement
 	 *            
-	 * @param sootMethod
+	 * @param sootMethod soot method
 	 *           
-	 * @param providerValue
+	 * @param providerValue provider value
 	 *            
-	 * @param icfg
+	 * @param icfg icfg
 	 *            
+	 * @return the provider
 	 */
 	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
 		String provider = null;
@@ -246,11 +252,11 @@ public class ProviderDetection {
 	/**
 	 * This method return the provider used when Provider detected is of type `java.lang.String`.
 	 * 
-	 * @param providerValue
+	 * @param providerValue value for the provider
 	 *            
-	 * @param body
-	 *            - i.e. the ActiveBody
-	 *            
+	 * @param body - i.e. the ActiveBody
+	 * 
+	 * @return the provider
 	 */
 	private String getProviderWhenTypeString(Value providerValue, Body body) {
 		for(Unit unit : body.getUnits()) {
@@ -277,11 +283,12 @@ public class ProviderDetection {
 	 * static analysis. In case it has more than one allocation site, this method 
 	 * return true.
 	 * 
-	 * @param providerValue
+	 * @param providerValue value for the provider
 	 *            
-	 * @param body
-	 *            - i.e. the ActiveBody
-	 *            
+	 * @param body - i.e. the ActiveBody
+	 *         
+	 * @return true if the provider has only one allocation site and flows not
+	 * 		   through IF-ELSE statements or TERNARY operators
 	 */
 	private boolean checkIfStmt(Value providerValue, Body body) {
 		String value = providerValue.toString();
@@ -306,11 +313,12 @@ public class ProviderDetection {
 	 * provider can not be correctly detected through the use of static analysis.
 	 * In case it has more than one allocation site, this method return true.
 	 * 
-	 * @param providerValue
+	 * @param providerValue value for the provider
 	 *            
-	 * @param body
-	 *            - i.e. the ActiveBody
+	 * @param body - i.e. the ActiveBody
 	 *            
+	 * @return true if the provider detected has only one allocation site
+	 * 		   and it is not flowing through SWITCH statements
 	 */
 	private boolean checkSwitchStmt(Value providerValue, Body body) {
 		String value = providerValue.toString();
@@ -330,8 +338,9 @@ public class ProviderDetection {
 	/**
 	 * This method is used to check if the CryptSL rules from the detected Provider do exist.
 	 * 
-	 * @param providerRulesDirectory
+	 * @param providerRulesDirectory the path to the crysl rules
 	 * 
+	 * @return true if the CryptSL rules from the detected Provider do exist
 	 */
 	private boolean rulesExist(String providerRulesDirectory) {
 		File rulesDirectory = new File(providerRulesDirectory);
@@ -343,20 +352,41 @@ public class ProviderDetection {
 	
 	
 	/**
-	 * This method is used to choose the CryptSL rules from the detected Provider and should
+	 * This method is used to choose the CryptSL rules in a directory from the detected provider and should
 	 * be called after the `doAnalysis()` method.
 	 *            
-	 * @param providerRulesDirectory
-	 *          
+	 * @param providerRulesDirectory the path to the crysl rules
+	 * 
+	 * @return CryptSL rules from the detected provider
 	 */
 	public List<CrySLRule> chooseRules(String providerRulesDirectory) {
 		List<CrySLRule> rules = Lists.newArrayList();
 		this.rulesDirectory = providerRulesDirectory;
 		try {
-			rules = CrySLRulesetSelector.makeFromPath(new File(providerRulesDirectory), RuleFormat.SOURCE);
+			rules.addAll(reader.readFromDirectory(new File(providerRulesDirectory)));
 		} catch (CryptoAnalysisException e) {
-			LOGGER.error("Error happened when getting the CrySL rules from the"
+			LOGGER.error("Error happened when getting the CrySL rules from the "
 					+ "specified directory: "+providerRulesDirectory, e);
+		}
+		return rules;
+	}
+	
+	/**
+	 * This method is used to choose the CryptSL rules in a zip file from the detected provider and should
+	 * be called after the `doAnalysis()` method.
+	 *            
+	 * @param providerRulesZip the path to the zip file
+	 *          
+	 * @return list of crysl rules in the zip file
+	 */
+	public List<CrySLRule> chooseRulesZip(String providerRulesZip) {
+		List<CrySLRule> rules = Lists.newArrayList();
+		this.rulesDirectory = providerRulesZip;
+		try {
+			rules.addAll(reader.readFromZipFile(new File(providerRulesZip)));
+		} catch (CryptoAnalysisException e) {
+			LOGGER.error("Error happened when getting the CrySL rules from the "
+					+ "specified zip file: "+providerRulesZip, e);
 		}
 		return rules;
 	}

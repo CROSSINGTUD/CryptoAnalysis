@@ -27,6 +27,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -34,6 +35,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -52,52 +54,30 @@ import typestate.TransitionFunction;
  */
 public class ErrorMarkerListener extends CrySLAnalysisListener {
 
-	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create(); 
-	protected final Map<Class, Integer> errorMarkerCount = new HashMap<Class, Integer>();
+	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create();
+	protected final Map<Class<?>, Integer> errorMarkerCount = new HashMap<Class<?>, Integer>();
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
-	/**
-	 * List for storing the package names to be ignored
-	 */
-	protected List<String> ignorePackagesList =  Collections.<String>emptyList();
-	
+
 	private void addMarker(AbstractError error) {
 		SootMethod method = error.getErrorLocation().getMethod();
 		SootClass sootClass = method.getDeclaringClass();
+
 		Set<AbstractError> set = errorMarkers.get(sootClass, method);
-		int errorCount = (errorMarkerCount.get(error.getClass()) == null? 0 : errorMarkerCount.get(error.getClass()));
-		if(set == null){
+		if (set == null) {
 			set = Sets.newHashSet();
 		}
-		if(!ignorePackagesList.isEmpty()) {
-			if(!ignorePackagesList.stream().anyMatch((s -> sootClass.getName().startsWith(s)))) {
-				if(set.add(error)){	
-					errorCount++;
-					errorMarkerCount.put(error.getClass(), errorCount);
-				}
-				errorMarkers.put(sootClass, method, set);
-			}
+
+		int errorCount = (errorMarkerCount.get(error.getClass()) == null? 0 : errorMarkerCount.get(error.getClass()));
+		if (set.add(error)) {
+			errorCount++;
+			errorMarkerCount.put(error.getClass(), errorCount);
 		}
-		else {
-			if(set.add(error)){
-				errorCount++;
-				errorMarkerCount.put(error.getClass(), errorCount);
-			}
-			errorMarkers.put(sootClass, method, set);
-		}	
+		errorMarkers.put(sootClass, method, set);
 	}
-	
-/**
- * This method is used to set the list of packages to be ignored
- * @param packageList This parameter provides the list of package names to be excluded
- * @return void.
-*/
-	public void setIgnorePackages(List<String> packageList) {
-		this.ignorePackagesList = packageList;
-	}
-	
+
 	@Override
 	public void reportError(AbstractError error) {
-		error.accept(new ErrorVisitor(){
+		error.accept(new ErrorVisitor() {
 
 			@Override
 			public void visit(ConstraintError constraintError) {
@@ -137,16 +117,25 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(PredicateContradictionError predicateContradictionError) {
 				addMarker(predicateContradictionError);
-				
+			}
+
+			@Override
+			public void visit(UncaughtExceptionError uncaughtExceptionError) {
+				addMarker(uncaughtExceptionError);
 			}
 
 			@Override
 			public void visit(HardCodedError hardcodedError) {
 				addMarker(hardcodedError);
-			}});
-	}
-	
+			}
 
+			@Override
+			public void visit(ForbiddenPredicateError forbiddenPredicateError) {
+				addMarker(forbiddenPredicateError);
+				
+			}
+		});
+	}
 
 	@Override
 	public void afterAnalysis() {
@@ -195,45 +184,50 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void collectedValues(final AnalysisSeedWithSpecification arg0, final Multimap<CallSiteWithParamIndex, ExtractedValue> arg1) {
+	public void collectedValues(final AnalysisSeedWithSpecification arg0,
+			final Multimap<CallSiteWithParamIndex, ExtractedValue> arg1) {
 		// Nothing
 	}
 
 	@Override
 	public void discoveredSeed(final IAnalysisSeed arg0) {
-	}
-
-	@Override
-	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCrySLPredicate>> arg0, final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg1, final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
 		// Nothing
 	}
 
 	@Override
-	public void onSeedFinished(final IAnalysisSeed analysisObject, final ForwardBoomerangResults<TransitionFunction> arg1) {
-		
+	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCrySLPredicate>> arg0,
+			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg1,
+			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
+		// Nothing
 	}
+
+	@Override
+	public void onSeedFinished(final IAnalysisSeed analysisObject,
+			final ForwardBoomerangResults<TransitionFunction> arg1) {
+		// Nothing
+	}
+
 	@Override
 	public void onSecureObjectFound(final IAnalysisSeed analysisObject) {
-		secureObjects.add( analysisObject);
+		secureObjects.add(analysisObject);
 	}
 
 	@Override
 	public void onSeedTimeout(final Node<Statement, Val> arg0) {
-		//Nothing
+		// Nothing
 	}
 
 	@Override
 	public void seedStarted(final IAnalysisSeed arg0) {
 		// Nothing
 	}
+
 	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
 
 	@Override
 	public void addProgress(int processedSeeds, int workListsize) {
-		// TODO Auto-generated method stub
-		
+		// Nothing
 	}
 }
-
