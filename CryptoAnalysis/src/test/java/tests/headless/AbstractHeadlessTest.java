@@ -59,9 +59,9 @@ public abstract class AbstractHeadlessTest {
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
 	
 	/**
-	 * List for storing the package names to be ignored
+	 * List for storing the section names to be ignored
 	 */
-	private static List<String> ignorePackages = Collections.emptyList();
+	private static List<String> ignoredSections = Collections.emptyList();
 	
 	/**
 	 * Formats of the analysis report
@@ -91,8 +91,8 @@ public abstract class AbstractHeadlessTest {
 		PROVIDER_DETECTION = providerDetection;
 	}
 
-	public static void setIgnorePackages(List<String> ignorePackageList) {
-		ignorePackages = ignorePackageList;
+	public static void setIgnoredSections(List<String> ignoredSectionsList) {
+		ignoredSections = ignoredSectionsList;
 	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
@@ -148,8 +148,8 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
-			protected List<String> ignoredPackages(){
-				return ignorePackages;
+			protected List<String> ignoredSections(){
+				return ignoredSections;
 			}
 
 			@Override
@@ -179,13 +179,7 @@ public abstract class AbstractHeadlessTest {
 					currCount = 0;
 				}
 				Integer newCount = --currCount;
-				if(!ignorePackages.isEmpty()) {
-					if(!ignorePackages.stream().anyMatch((s -> errorClassName.startsWith(s)))) {
-						errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
-					}
-				} else {
-					errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
-				}
+				errorMarkerCountPerErrorTypeAndMethod.put(methodContainingError, error.getClass(), newCount);
 			}
 
 			@Override

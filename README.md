@@ -55,7 +55,8 @@ Other additional arguments that can be used are as follows:
 --visualization (enables the visualization, but also requires --reportPath option to be set)
 --providerDetection (enables provider detection analysis)
 --dstats (disables the output of the analysis statistics in the reports)
---help
+--ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
+--help (show more information for the CLI arguments)
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).

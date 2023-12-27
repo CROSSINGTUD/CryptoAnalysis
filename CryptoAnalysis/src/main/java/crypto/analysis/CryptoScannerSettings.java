@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -84,11 +85,23 @@ public class CryptoScannerSettings implements Callable<Integer> {
 					+ "occurrence will be flagged by the analysis. This input expects a "
 					+ "path to a file containing one predicate per line")
 	private String forbiddenPredicatesPath = null;
+
+	@CommandLine.Option(
+			names = {"--ignoreSections"},
+			description = "Names of packages, classes and methods to be ignored during the analysis. This "
+					+ "input expects path to a file containing one name per line. For example, "
+					+ "'de.example.testClass' ignores the class 'testClass', 'de.example.exampleClass.exampleMethod "
+					+ "ignores the method 'exampleMethod' in 'exampleClass', and 'de.example.*' ignores all classes "
+					+ "and methods in the package 'example'. Using this option may increase the analysis performance. "
+					+ "Note that constructors are methods that can be specified with '<init>'."
+	)
+	private String ignoreSectionsPath = null;
 	
 	private ControlGraph controlGraph;
 	private RulesetPathType rulesetPathType;
 	private Set<ReportFormat> reportFormats;
 	private Collection<String> forbiddenPredicates;
+	private Collection<String> ignoredSections;
 
 	public enum ControlGraph {
 		CHA, SPARK, SPARKLIB,
@@ -105,8 +118,9 @@ public class CryptoScannerSettings implements Callable<Integer> {
 	public CryptoScannerSettings() {
 		controlGraph = ControlGraph.CHA;
 		rulesetPathType = RulesetPathType.NONE;
-		reportFormats = new HashSet<>(List.of(ReportFormat.CMD));
+		reportFormats = new HashSet<>(Arrays.asList(ReportFormat.CMD));
 		forbiddenPredicates = new ArrayList<>();
+		ignoredSections = new ArrayList<>();
 	}
 
 	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -130,6 +144,10 @@ public class CryptoScannerSettings implements Callable<Integer> {
 
 		if (forbiddenPredicatesPath != null) {
 			parseForbiddenPredicates(forbiddenPredicatesPath);
+		}
+
+		if (ignoreSectionsPath != null) {
+			parseIgnoredSections(ignoreSectionsPath);
 		}
 		
 		if (exitCode != ExitCode.OK) {
@@ -187,6 +205,10 @@ public class CryptoScannerSettings implements Callable<Integer> {
 
 	public Collection<String> getForbiddenPredicates() {
 		return forbiddenPredicates;
+	}
+
+	public Collection<String> getIgnoredSections() {
+		return ignoredSections;
 	}
 	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
@@ -267,6 +289,24 @@ public class CryptoScannerSettings implements Callable<Integer> {
 			}
 		} else {
 			throw new CryptoAnalysisParserException(forbPredFile + " is not a file or cannot be read");
+		}
+	}
+
+	private void parseIgnoredSections(String path) throws CryptoAnalysisParserException {
+		final File ignorePackageFile = new File(path);
+
+		// Reset ignoredPackages
+		ignoredSections = new ArrayList<>();
+
+		if (ignorePackageFile.isFile() && ignorePackageFile.canRead()) {
+			try {
+				List<String> lines = Files.readLines(ignorePackageFile, Charset.defaultCharset());
+				ignoredSections.addAll(lines);
+			} catch (IOException e) {
+				throw new CryptoAnalysisParserException("Error while reading file " + ignorePackageFile + ": " + e.getMessage());
+			}
+		} else {
+			throw new CryptoAnalysisParserException(ignorePackageFile + " is not a file or cannot be read");
 		}
 	}
 

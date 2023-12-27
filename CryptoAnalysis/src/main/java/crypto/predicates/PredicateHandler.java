@@ -258,7 +258,7 @@ public class PredicateHandler {
 
 	private void checkForContradictions() {
 		Set<Entry<CrySLPredicate, CrySLPredicate>> contradictionPairs = new HashSet<Entry<CrySLPredicate, CrySLPredicate>>();
-		for (ClassSpecification c : cryptoScanner.getClassSpecifictions()) {
+		for (ClassSpecification c : cryptoScanner.getClassSpecifications()) {
 			CrySLRule rule = c.getRule();
 			for (ISLConstraint cons : rule.getConstraints()) {
 				if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {

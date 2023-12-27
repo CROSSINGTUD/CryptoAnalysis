@@ -306,7 +306,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// TODO refactor this method.
 		boolean matched = false;
 		EnsuredCrySLPredicate ensuredCrySLPredicate = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
-		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
+		for (ClassSpecification spec : cryptoScanner.getClassSpecifications()) {
 			if (accessGraph.value() == null) {
 				continue;
 			}

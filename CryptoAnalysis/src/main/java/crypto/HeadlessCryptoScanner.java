@@ -264,6 +264,11 @@ public abstract class HeadlessCryptoScanner {
 					public Collection<String> getForbiddenPredicates() {
 						return forbiddenPredicates();
 					}
+
+					@Override
+					public Collection<String> getIgnoredSections() {
+						return ignoredSections();
+					}
 					
 				};
 				
@@ -427,8 +432,8 @@ public abstract class HeadlessCryptoScanner {
 		return settings.getForbiddenPredicates();
 	}
 
-	protected Collection<String> ignoredPackages() {
-		return settings.getIgnoredPackages();
+	protected Collection<String> ignoredSections() {
+		return settings.getIgnoredSections();
 	}
 	
 	private static String pathToJCE() {
