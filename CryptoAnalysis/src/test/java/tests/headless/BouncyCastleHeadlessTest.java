@@ -107,7 +107,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<fabric_api_archieve.Crypto: byte[] sign(byte[],byte[])>", HardCodedError.class, 1);
 		setErrorsCount("<fabric_api_archieve.Crypto: byte[] sign(byte[],byte[])>", RequiredPredicateError.class, 1);
 		
-		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void TestSHA256DigestOne()>", TypestateError.class, 2);
+		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void TestSHA256DigestOne()>", TypestateError.class, 1);
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", TypestateError.class, 3);
 		
 		scanner.exec();

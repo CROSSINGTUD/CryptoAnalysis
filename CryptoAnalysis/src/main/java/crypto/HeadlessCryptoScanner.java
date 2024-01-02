@@ -17,7 +17,9 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.preanalysis.ExceptionAwareTransformer;
+import crypto.preanalysis.IdentityTransformer;
 import crypto.preanalysis.SeedFactory;
+import crypto.preanalysis.SeedGenerationTransformer;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CSVSummaryReporter;
@@ -118,6 +120,7 @@ public abstract class HeadlessCryptoScanner {
 		if(isPreAnalysis()){
 			try {
 				initializeSootWithEntryPointAllReachable(false);
+				setupTransformer();
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
@@ -129,10 +132,10 @@ public abstract class HeadlessCryptoScanner {
 			LOGGER.info("Using call graph algorithm {}", callGraphAlgorithm());
 			try {
 				initializeSootWithEntryPointAllReachable(true);
+				setupTransformer();
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
-			ExceptionAwareTransformer.setup(rules);
 			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
@@ -141,6 +144,13 @@ public abstract class HeadlessCryptoScanner {
 
 	public boolean hasSeeds(){
 		return hasSeeds;
+	}
+
+	private void setupTransformer() {
+		SeedGenerationTransformer.setup(rules);
+		IdentityTransformer.setup();
+		ExceptionAwareTransformer.setup(rules);
+		PackManager.v().runBodyPacks();
 	}
 	
 	private void checkIfUsesObject() {
@@ -326,6 +336,12 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
+
+		Options.v().setPhaseOption("jb", "use-original-names:true");
+
+		// enabled to deal with method chaining
+		Options.v().setPhaseOption("jb.lp", "enabled:true");
+
 		// JAVA 8
 		if(getJavaVersion() < 9)
 		{
@@ -370,7 +386,7 @@ public abstract class HeadlessCryptoScanner {
 		includeList.add("java.lang.String");
 		includeList.add("java.lang.StringCoding");
 		includeList.add("java.lang.StringIndexOutOfBoundsException");
-		return includeList;
+		return new LinkedList<>();
 	}
 
 	private List<String> getExcludeList() {

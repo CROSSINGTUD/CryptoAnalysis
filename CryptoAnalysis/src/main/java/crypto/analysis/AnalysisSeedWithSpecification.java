@@ -1,15 +1,11 @@
 package crypto.analysis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import boomerang.callgraph.ObservableICFG;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -17,20 +13,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-
-import boomerang.callgraph.ObservableICFG;
-import boomerang.debugger.Debugger;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import boomerang.results.ForwardBoomerangResults;
-import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -66,6 +52,16 @@ import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
@@ -118,9 +114,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public void execute() {
 		cryptoScanner.getAnalysisListener().seedStarted(this);
 		runTypestateAnalysis();
-		if (results == null)
+		if (results == null) {
 			// Timeout occured.
 			return;
+		}
 		allCallsOnObject = results.getInvokedMethodOnInstance();
 		runExtractParameterAnalysis();
 		checkInternalConstraints();

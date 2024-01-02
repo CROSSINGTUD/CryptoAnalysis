@@ -33,14 +33,13 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes2: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", ConstraintError.class, 1);
 
 		scanner.exec();
@@ -246,7 +245,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", ConstraintError.class, 6);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 12);
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);

@@ -130,13 +130,13 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java
-		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase1: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", RequiredPredicateError.class, 2);
 
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java
-		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		// In the case above, misuse is caught correctly, but the keysize is reported to be 0
@@ -145,7 +145,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherBB Case1.java
-		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", IncompleteOperationError.class, 2);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", ConstraintError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", RequiredPredicateError.class, 2);
 		
