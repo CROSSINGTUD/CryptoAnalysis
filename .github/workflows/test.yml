@@ -12,5 +12,5 @@ jobs:
       - name: Run CogniCrypt
         uses: ./
         with:
-          appPath: "$(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar"
-          basePath: "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java"
+          appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+          basePath: "CryptoAnalysisTargets/HelloWorld"
