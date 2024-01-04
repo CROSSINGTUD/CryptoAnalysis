@@ -150,11 +150,15 @@ public class CrySLModelReader {
 			if (!(resource instanceof LazyLinkingResource)) {
 				continue;
 			}
-			
-			CrySLRule rule = createRuleFromResource(resource);
-			
-			if (!ruleMap.containsKey(rule.getClassName())) {
-				ruleMap.put(rule.getClassName(), rule);
+
+			try {
+				CrySLRule rule = createRuleFromResource(resource);
+
+				if (!ruleMap.containsKey(rule.getClassName())) {
+					ruleMap.put(rule.getClassName(), rule);
+				}
+			} catch (CryptoAnalysisException e) {
+				LOGGER.error(e.toString());
 			}
 		}
 		
