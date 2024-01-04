@@ -5,7 +5,7 @@ inputs:
     description: "Path to relate paths in the analyzed jar and the source tree. Class \"com.example\" is searched for at \"basePath/com/example\"."
   rulesDir:
     description: "TODO"
-    required: true
+    default: "rules_98e04be6/JavaCryptographicArchitecture/src/"
   appPath:
     description: "TODO"
     required: true
@@ -37,6 +37,12 @@ runs:
         distribution: 'adopt'
         java-package: jdk
         java-version: '11'
+
+    - name: Checkout rules
+      uses: actions/checkout@v4
+      with:
+        repository: CROSSINGTUD/Crypto-API-Rules
+        path: rules_98e04be6
 
     - name: Checkout source code
       uses: actions/checkout@v4
