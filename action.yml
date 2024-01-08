@@ -4,10 +4,10 @@ inputs:
   basePath:
     description: "Path to relate paths in the analyzed jar and the source tree. Class \"com.example\" is searched for at \"basePath/com/example\"."
   rulesDir:
-    description: "TODO"
+    description: "Path to rules (in CrySL source code format)"
     default: "rules_98e04be6/JavaCryptographicArchitecture/src/"
   appPath:
-    description: "TODO"
+    description: "Path to the JAR of the application to be analyzed"
     required: true
   cg:
     description: "Selection of call graph for analysis (possible values are CHA, SPARK, SPARKLIB)"

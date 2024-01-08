@@ -61,6 +61,25 @@ Other additional arguments that can be used are as follows:
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
 
+### Use as a GitHub Action
+
+CogniCrypt<sub>SAST</sub> can be used as a GitHub action.
+
+```yaml
+- name: Run CogniCrypt
+  uses: CROSSINGTUD/CryptoAnalysis@version
+  with:
+    appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+    basePath: "CryptoAnalysisTargets/HelloWorld"
+```
+
+The `appPath` needs to be configured to point to a compiled version of your application.
+
+The `basePath` is used to relate paths in the analyzed jar and the source tree.
+Class `com.example` is searched for at `basePath/com/example`.
+
+See [`action.yml`](action.yml) for all input options.
+
 ## Report and Error Types
 
 CogniCrypt<sub>SAST</sub> reports misuses when the code is not compliant with the CrySL rules. For each misuse, CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
