@@ -24,10 +24,13 @@ import boomerang.jimple.AllocVal;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
 import boomerang.results.ForwardBoomerangResults;
+import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
 import crypto.constraints.EvaluableConstraint;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
@@ -302,7 +305,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void expectPredicateOnOtherObject(CrySLPredicate predToBeEnsured, Statement currStmt, Val accessGraph, boolean satisfiesConstraintSytem) {
 		// TODO refactor this method.
 		boolean matched = false;
-		for (ClassSpecification spec : cryptoScanner.getClassSpecifictions()) {
+		EnsuredCrySLPredicate ensuredCrySLPredicate = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
+		for (ClassSpecification spec : cryptoScanner.getClassSpecifications()) {
 			if (accessGraph.value() == null) {
 				continue;
 			}
@@ -313,7 +317,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					if (satisfiesConstraintSytem) {
 						AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 						matched = true;
-						seed.addEnsuredPredicateFromOtherRule(new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
+						seed.addEnsuredPredicateFromOtherRule(ensuredCrySLPredicate);
+						cryptoScanner.getPredicateHandler().reportForbiddenPredicate(ensuredCrySLPredicate, currStmt, seed);
 					}
 				}
 			}
@@ -323,7 +328,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<Statement, Val>(currStmt, accessGraph));
 		predicateHandler.expectPredicate(seed, currStmt, predToBeEnsured);
 		if (satisfiesConstraintSytem) {
-			seed.addEnsuredPredicate(new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues()));
+			seed.addEnsuredPredicate(ensuredCrySLPredicate);
 		} else {
 			missingPredicates.add(new RequiredCrySLPredicate(predToBeEnsured, currStmt));
 		}

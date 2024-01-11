@@ -1,24 +1,12 @@
 package crypto;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -40,6 +28,8 @@ import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.EntryPoints;
@@ -55,11 +45,19 @@ import soot.Unit;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 public abstract class HeadlessCryptoScanner {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-
-	private static CryptoScannerSettings settings = new CryptoScannerSettings();
+	private static final CryptoScannerSettings settings = new CryptoScannerSettings();
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
@@ -197,7 +195,7 @@ public abstract class HeadlessCryptoScanner {
 				
 				Set<ReportFormat> formats = reportFormats();
 				
-				if (formats.size() > 0) {
+				if (!formats.isEmpty()) {
 					for (ReportFormat format : formats) {
 						switch (format) {
 							case CMD:
@@ -261,6 +259,17 @@ public abstract class HeadlessCryptoScanner {
 						}
 						return super.debugger(solver, seed);
 					}
+					
+					@Override
+					public Collection<String> getForbiddenPredicates() {
+						return forbiddenPredicates();
+					}
+
+					@Override
+					public Collection<String> getIgnoredSections() {
+						return ignoredSections();
+					}
+					
 				};
 				
 				if (providerDetection()) {
@@ -418,6 +427,14 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean includeStatistics() {
 		return settings.isIncludeStatistics();
 	}
+
+	protected Collection<String> forbiddenPredicates() {
+		return settings.getForbiddenPredicates();
+	}
+
+	protected Collection<String> ignoredSections() {
+		return settings.getIgnoredSections();
+	}
 	
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
@@ -441,5 +458,4 @@ public abstract class HeadlessCryptoScanner {
 	    boolean check = new File(moduleFile).exists();
 	    return check;
 	}
-
 }
