@@ -19,7 +19,9 @@ inputs:
   reportPath:
     description: Directory Location for cryptoanalysis reports
   reportFormat:
-    description: format of crytoanalysis reports (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
+    description: The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY.
+      Multiple formats should be split with a comma (e.g. CMD,TXT,CSV).
+      Running this action will also implicitly enable the output as GitHub Annotations.
   preanalysis:
     description: Enables pre-analysis
   visualization :
@@ -120,7 +122,7 @@ runs:
         java -cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar crypto.HeadlessCryptoScanner \
         --rulesDir ${{ inputs.rulesDir }} \
         --appPath ${{ inputs.appPath }} \
-        --reportFormat github_annotation ${{ inputs.reportFormat }} \
+        --reportFormat github_annotation${{ inputs.reportFormat && format(',{0}', inputs.reportFormat) || '' }} \
         ${{ inputs.cg && format('{0} {1}', '--cg', inputs.cg) || '' }} \
         ${{ inputs.sootPath && format('{0} {1}', '--sootPath', inputs.sootPath) || '' }} \
         ${{ inputs.identifier && format('{0} {1}', '--identifier', inputs.identifier) || '' }} \
