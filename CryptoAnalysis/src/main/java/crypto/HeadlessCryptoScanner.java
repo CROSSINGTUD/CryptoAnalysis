@@ -22,6 +22,7 @@ import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CSVSummaryReporter;
 import crypto.reporting.CommandLineReporter;
+import crypto.reporting.GitHubAnnotationReporter;
 import crypto.reporting.Reporter;
 import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
@@ -63,10 +64,13 @@ public abstract class HeadlessCryptoScanner {
 	private static String rulesetRootPath;
 	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
 	private boolean hasSeeds;
-	
+
+	public static int exitCode = 0;
+
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
 		scanner.exec();
+		System.exit(exitCode);
 	}
 
 	public static HeadlessCryptoScanner createFromCLISettings(String[] args) {
@@ -89,16 +93,18 @@ public abstract class HeadlessCryptoScanner {
 				switch(settings.getRulesetPathType()) {
 					case DIR:
 						try {
-							rules.addAll(ruleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
-							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
+							File ruleSetDir = new File(settings.getRulesetPathDir());
+							rules.addAll(ruleReader.readFromDirectory(ruleSetDir));
+							rulesetRootPath = ruleSetDir.getParent();
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
 						}
 						break;
 					case ZIP:
 						try {
-							rules.addAll(ruleReader.readFromZipFile(new File(settings.getRulesetPathDir())));
-							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
+							File ruleSetZip = new File(settings.getRulesetPathDir());
+							rules.addAll(ruleReader.readFromZipFile(ruleSetZip));
+							rulesetRootPath = ruleSetZip.getParent();
 						} catch (CryptoAnalysisException e) {
 							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathDir(), e);
 						}
@@ -218,6 +224,10 @@ public abstract class HeadlessCryptoScanner {
 								fileReporter = new CSVSummaryReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
 								reporter.addReportListener(fileReporter);
 								break;
+							case GITHUB_ANNOTATION:
+								fileReporter = new GitHubAnnotationReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
 							default:
 								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
 								reporter.addReportListener(fileReporter);
@@ -259,7 +269,7 @@ public abstract class HeadlessCryptoScanner {
 						}
 						return super.debugger(solver, seed);
 					}
-					
+
 					@Override
 					public Collection<String> getForbiddenPredicates() {
 						return forbiddenPredicates();
@@ -269,7 +279,7 @@ public abstract class HeadlessCryptoScanner {
 					public Collection<String> getIgnoredSections() {
 						return ignoredSections();
 					}
-					
+
 				};
 				
 				if (providerDetection()) {
@@ -435,7 +445,7 @@ public abstract class HeadlessCryptoScanner {
 	protected Collection<String> ignoredSections() {
 		return settings.getIgnoredSections();
 	}
-	
+
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
