@@ -2,31 +2,44 @@ name: CogniCrypt - Static Spplication Security Testing
 description: CogniCrypt takes rules written in the specification language CrySL as input, and performs a static analysis based on the specification of the rules.
 inputs:
   basePath:
-    description: "Path to relate paths in the analyzed jar and the source tree. Class \"com.example\" is searched for at \"basePath/com/example\"."
+    description: Path to relate paths in the analyzed jar and the source tree.
+      Class \"com.example\" is searched for at \"basePath/com/example\".
   rulesDir:
-    description: "Path to rules (in CrySL source code format)"
+    description: Path to rules (in CrySL source code format)
     default: "rules_98e04be6/JavaCryptographicArchitecture/src/"
   appPath:
-    description: "Path to the JAR of the application to be analyzed"
+    description: Path to the JAR of the application to be analyzed
     required: true
   cg:
-    description: "Selection of call graph for analysis (possible values are CHA, SPARK, SPARKLIB)"
+    description: Selection of call graph for analysis (possible values are CHA, SPARK, SPARKLIB)
   sootPath:
-    description: "Absolute path of the whole project"
+    description: Absolute path of the whole project
   identifier:
-    description: "Identifier for labeling output files"
+    description: Identifier for labeling output files
   reportPath:
-    description: "Directory Location for cryptoanalysis reports"
+    description: Directory Location for cryptoanalysis reports
   reportFormat:
-    description: "format of crytoanalysis reports (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)"
+    description: format of crytoanalysis reports (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
   preanalysis:
-    description: "Enables pre-analysis"
+    description: Enables pre-analysis
   visualization :
-    description: "Enables the visualization, but also requires reportPath option to be set"
+    description: Enables the visualization, but also requires reportPath option to be set
   providerDetection :
-    description: "Enables provider detection analysis"
+    description: Enables provider detection analysis
   dstats:
-    description: "Disables the output of the analysis statistics in the reports"
+    description: Disables the output of the analysis statistics in the reports
+  forbiddenPredicates:
+    description: Facilitates the specification of forbidden predicates.
+      Any occurrence will be flagged by the analysis.
+      This input expects a path to a file containing one predicate per line
+  ignoreSections:
+    description: Names of packages, classes and methods to be ignored during the analysis.
+      This input expects path to a file containing one name per line.
+      For example, 'de.example.testClass' ignores the class 'testClass',
+      'de.example.exampleClass.exampleMethod ignores the method 'exampleMethod' in 'exampleClass',
+      and 'de.example.*' ignores all classes and methods in the package 'example'.
+      Using this option may increase the analysis performance.
+      Note that constructors are methods that can be specified with '<init>'.
 
 runs:
   using: "composite"
@@ -115,7 +128,9 @@ runs:
         ${{ inputs.preanalysis == 'true' && '--preanalysis' || '' }} \
         ${{ inputs.visualization  == 'true' && '--visualization ' || '' }} \
         ${{ inputs.providerDetection  == 'true' && '--providerDetection ' || '' }} \
-        ${{ inputs.dstats == 'true' && '--dstats' || '' }}
+        ${{ inputs.dstats == 'true' && '--dstats' || '' }} \
+        ${{ inputs.forbiddenPredicates && format('{0} {1}', '--forbiddenPredicates', inputs.forbiddenPredicates) || '' }} \
+        ${{ inputs.ignoreSections && format('{0} {1}', '--ignoreSections', inputs.ignoreSections) || '' }}
       shell: bash
       # workaround for https://github.com/actions/runner/issues/665
       env:
