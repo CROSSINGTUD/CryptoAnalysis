@@ -29,6 +29,7 @@ public class ExtractValueTest  extends UsagePatternTestingFramework{
 		char[] v = new char[] {'p'};
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(v, null, 65000, 128);
 		Assertions.extValue(0);
+		Assertions.notHasEnsuredPredicate(pbekeyspec);
 	} 
 	@Test
 	public void testIntraproceduralStringFlow() throws GeneralSecurityException {
@@ -63,7 +64,6 @@ public class ExtractValueTest  extends UsagePatternTestingFramework{
 		Assertions.extValue(0);
 	}
 	private String getAESReturn() {
-		int x = 222;
 		return "AES";
 	}
 	private String getAES() {

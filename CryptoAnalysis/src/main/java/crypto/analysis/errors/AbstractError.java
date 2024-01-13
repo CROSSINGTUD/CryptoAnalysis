@@ -2,7 +2,9 @@ package crypto.analysis.errors;
 
 import boomerang.jimple.Statement;
 import crypto.rules.CrySLRule;
+import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 
@@ -19,16 +21,16 @@ public abstract class AbstractError implements IError{
 		this.outerMethod = errorLocation.getMethod().getSignature();
 		this.declaringClass = errorLocation.getMethod().getDeclaringClass().toString();
 
-		if(errorLocation.getUnit().get().containsInvokeExpr()) {
-			this.invokeMethod = errorLocation.getUnit().get().getInvokeExpr().getMethod().toString();
+		Stmt errorStmt = errorLocation.getUnit().get();
+		if(errorStmt.containsInvokeExpr()) {
+			this.invokeMethod = errorStmt.getInvokeExpr().getMethod().toString();
+		} else if(errorStmt instanceof JReturnStmt || errorStmt instanceof JReturnVoidStmt) {
+			this.invokeMethod = errorStmt.toString();
+		} else if (errorStmt instanceof JIfStmt) {
+			this.invokeMethod = ((JIfStmt) errorStmt).getCondition().toString();
+		} else {
+			this.invokeMethod = ((JAssignStmt) errorStmt).getLeftOp().toString();
 		}
-		else if(errorLocation.getUnit().get() instanceof JReturnStmt
-			|| errorLocation.getUnit().get() instanceof JReturnVoidStmt) {
-			this.invokeMethod = errorLocation.getUnit().get().toString();
-		}
-		else {
-			this.invokeMethod = ((JAssignStmt) errorLocation.getUnit().get()).getLeftOp().toString();
-		}	
 	}
 
 	public Statement getErrorLocation() {
@@ -83,8 +85,11 @@ public abstract class AbstractError implements IError{
 		if (rule == null) {
 			if (other.rule != null)
 				return false;
-		} else if (!rule.equals(other.rule))
+		} else if (!rule.equals(other.rule)) {
 			return false;
+		} else if (!errorLocation.equals(other.getErrorLocation())) {
+			return false;
+		}
 		return true;
 	}
 }

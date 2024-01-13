@@ -1,5 +1,3 @@
-[![Build Status](https://soot-build.cs.uni-paderborn.de/jenkins/buildStatus/icon?job=boomerang%2FCryptoAnalysis-Multibranch%2Fdevelop)](https://soot-build.cs.uni-paderborn.de/jenkins/job/boomerang/job/CryptoAnalysis-Multibranch/job/develop/)
-
 # CogniCrypt<sub>SAST</sub>
 
 This repository contains CogniCrypt<sub>SAST</sub>, the static analysis component for [CogniCrypt](https://www.cognicrypt.org). 
@@ -9,11 +7,13 @@ libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/jav
 
 ## Releases
 
-You can checkout a pre-compiled version of CogniCrypt<sub>SAST</sub> [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). 
+You can checkout a pre-compiled version of CogniCrypt<sub>SAST</sub> [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). We recommend using the latest version.
 
 Download the two files:
 * CryptoAnalysis-x.y.z-jar-with-dependencies.jar
 * JCA-CrySL-rules.zip
+
+You can find CogniCrypt<sub>SAST</sub> also on [Maven Central](https://central.sonatype.com/artifact/de.fraunhofer.iem/CryptoAnalysis).
 
 ## Checkout and Build
 
@@ -21,24 +21,24 @@ CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile and build th
 
 ```mvn package -DskipTests=true```.
 
-A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar` 
+A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar`. Building requires at least Java 11.
 
 ## Usage
 
 CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the directory of the CrySL (source code format) rule files. The source code for the rules which contains spesification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
-* The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
+* The path to the directory of the CrySL (source code format) rule files. The source code for the rules which contain specification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+* The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
 java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner 
-      --rulesDir <absolute-path-to-crysl-source-code-format-rules> 
-      --appPath <absolute-application-path>
+      --rulesDir <path-to-crysl-source-code-format-rules> 
+      --appPath <application-path>
 ```
 
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-2.6-jar-with-dependencies.jar crypto.HeadlessCryptoScanner 
+java -cp CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar crypto.HeadlessCryptoScanner 
   --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture 
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
@@ -48,19 +48,41 @@ Other additional arguments that can be used are as follows:
 ```
 --cg <selection_of_call_graph_for_analysis> (possible values are CHA, SPARK, SPARKLIB)
 --sootPath <absolute_path_of_whole_project>
---identifier <identifier_for_labelling_output_files>
---reportPath <directory_location_for_cognicrypt_report>
---reportFormat <format of cognicrypt_report> (possible values are TXT, SARIF, CSV)
+--identifier <identifier_for_labeling_output_files>
+--reportPath <directory_location_for_cryptoanalysis_report>
+--reportFormat <format of cryptoanalysis_report> (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
 --preanalysis (enables pre-analysis)
 --visualization (enables the visualization, but also requires --reportPath option to be set)
 --providerDetection (enables provider detection analysis)
+--dstats (disables the output of the analysis statistics in the reports)
+--ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
+--help (show more information for the CLI arguments)
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
 
+### Use as a GitHub Action
+
+CogniCrypt<sub>SAST</sub> can be used as a GitHub action.
+
+```yaml
+- name: Run CogniCrypt
+  uses: CROSSINGTUD/CryptoAnalysis@version
+  with:
+    appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+    basePath: "CryptoAnalysisTargets/HelloWorld"
+```
+
+The `appPath` needs to be configured to point to a compiled version of your application.
+
+The `basePath` is used to relate paths in the analyzed jar and the source tree.
+Class `com.example` is searched for at `basePath/com/example`.
+
+See [`action.yml`](action.yml) for all input options.
+
 ## Report and Error Types
 
-In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the console. CogniCrypt<sub>SAST</sub> reporst misuses when the code is not compliant with the CrySL rules. For each misuse CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
+CogniCrypt<sub>SAST</sub> reports misuses when the code is not compliant with the CrySL rules. For each misuse, CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
 
 * **ConstraintError**: A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.
 * **NeverTypeOfError**: Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a `String`. (see `KeyStore` rule [here](https://github.com/CROSSINGTUD/Crypto-API-Rules/blob/master/src/de/darmstadt/tu/crossing/KeyStore.cryptsl)).
@@ -70,8 +92,16 @@ In the standard option, CogniCrypt<sub>SAST</sub> outputs a report to the consol
 
 * **RequiredPredicateError**: An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a `Cipher` object requires a `SecretKey` object to be correctly and securely generated. 
 * **IncompleteOperationError**: The usage of an object may be incomplete: For example a `Cipher`object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default).
+* **UncaughtExceptionError**: A method may throw an exception, but the exception is not caught in the program. For example, the method call is not surrounded by a try/catch block.
 
-When the option `--reportPath <directory_location_for_cognicrypt_report>` is chosen, CogniCrypt<sub>SAST</sub> writes the report to the file `CogniCrypt-Report.txt` and additionally outputs the .jimple files of the classes where misuses where found in. Jimple is an intermediate representation close to the syntax of Java. 
+CogniCrypt<sub>SAST</sub> supports different report formats, which can be set by using `--reportformat` option. The supported formats are:
+- `CMD`: The report is printed to the command line. The content is equivalent to the format from the `TXT` option.
+- `TXT`: The report is written to the text file `CryptoAnalysis-Report.txt`. The content is equivalent to the format from the `CMD` option.  Additionally, the .jimple files of the classes, where misuses were found in, are output. Jimple is an intermediate representation close to the syntax of Java.
+- `SARIF`: The report is written to the JSON file `CryptoAnalysis-Report.json`. The content is formatted in the SARIF format.
+- `CSV`: The report is written to the CSV file `CryptoAnalysis-Report.csv`. The content is formatted in the CSV format.
+- `CSV_SUMMARY`: The report is written to the file `CryptoAnalysis-Report-Summary.csv` and contains a summary of the analysis results. Compared to the `CSV` format, this format does not provide concrete information about the errors, it only lists the amount of each misuse type. This option was previously implemented by the `CSV` option, which has been changed to provide more detailed information about the errors in the CSV format.
+
+If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD,TXT,CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
 
 ## Updating CrySL Rules
 
@@ -81,18 +111,18 @@ Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/Cogn
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 
-CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android version for CogniCrypt<sub>SAST</sub> in `CryptoAnalysis-Android`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. CogniCrypt_SAST for Android can be started via the class `de.fraunhofer.iem.crypto.CogniCryptAndroid`. It requires three arguments in this order: 
+CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android version for CogniCrypt<sub>SAST</sub> in `CryptoAnalysis-Android`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. CogniCrypt_SAST for Android can be started via the class `de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis`. It requires three arguments in this order: 
 * The absolute path to the .apk file
 * The absolute path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/studio/releases/platforms). Under the Android SDK location you find a folder `platforms`. Supply CogniCrypt<sub>SAST</sub> with the path to this folder.
 * The absolute path to the directory of the CrySL rules.
 
 ```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
       <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules>
 ```
 As an optional fourth parameter one can specify an output folder: 
 ```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroid \
+java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
       <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules> <output-dir>
 ```
 

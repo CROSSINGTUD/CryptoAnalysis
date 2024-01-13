@@ -1,0 +1,107 @@
+name: Version handling
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+jobs:
+  version-update:
+    # This version does not run on self-opened PRs
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.user.login != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # Sets up Java version
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: '11'
+      # Sets up Maven version
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.6.3
+      # Semantic versioning
+      - name: Semantic versioning
+        id: versioning
+        uses: paulhatch/semantic-version@v5.1.0
+        with:
+          tag_prefix: ""
+        # A string which, if present in a git commit, indicates that a change represents a
+        # major (breaking) change, supports regular expressions wrapped with '/'
+          major_pattern: "(MAJOR)"
+        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+          minor_pattern: "(MINOR)"
+        # A string to determine the format of the version output
+          version_format: "${major}.${minor}.${patch}"
+      # Check, whether there is an existing branch "version_<version" or an open PR "version_<version>" -> "master"
+      # and store the results as environment variables
+      - name: Check if branch and PR exist
+        # The second command was copied from https://stackoverflow.com/questions/73812503/github-action-stop-the-action-if-pr-already-exists
+        run: |
+          echo VERSION_BRANCH_EXISTS=$(git ls-remote --heads origin refs/heads/version_${{ steps.versioning.outputs.version }} | wc -l) >> $GITHUB_ENV
+          echo PR_EXISTS=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --json baseRefName,headRefName \
+            --jq '
+              map(select(.baseRefName == "master" and .headRefName == "version_${{ steps.versioning.outputs.version }}"))
+              | length
+            ') >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # If the branch "version_<version>" does not exist, create the branch and update the version in all files
+      - name: Create branch and update CryptoAnalysis version
+        if:  ${{ env.VERSION_BRANCH_EXISTS == '0' }}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout -b version_${{ steps.versioning.outputs.version }}
+          mvn build-helper:parse-version versions:set -DnewVersion=\${{ steps.versioning.outputs.version }} versions:commit
+          git ls-files | grep 'pom.xml$' | xargs git add
+          git commit --allow-empty -am "Update CryptoAnalysis version to ${{ steps.versioning.outputs.version }}"
+          git push origin version_${{ steps.versioning.outputs.version }}
+      # If a PR "version_<version>" -> "master" does not exist, create the PR
+      - name: Open pull request for version update
+        if: ${{ env.PR_EXISTS == '0' }}
+        run: |
+          gh pr create -B master -H version_${{ steps.versioning.outputs.version }} -t "Update CryptoAnalysis version to ${{ steps.versioning.outputs.version }}" -b "This PR was created by the version-update workflow. Please make sure to delete the branch after merging, otherwise future workflows might fail."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  version-release:
+    # This job runs only on merged PRs, which were opened by the version-update job
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.user.login == 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # Semantic versioning
+      - name: Semantic versioning
+        id: versioning
+        uses: paulhatch/semantic-version@v5.1.0
+        with:
+          tag_prefix: ""
+        # A string which, if present in a git commit, indicates that a change represents a
+        # major (breaking) change, supports regular expressions wrapped with '/'
+          major_pattern: "(MAJOR)"
+        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+          minor_pattern: "(MINOR)"
+        # A string to determine the format of the version output
+          version_format: "${major}.${minor}.${patch}"
+      # Create a tag with the newest version to prepare a release
+      - name: Create tag for new version
+        run: |
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+          git tag -a ${{ steps.versioning.outputs.version }} -m "CryptoAnalysis version ${{ steps.versioning.outputs.version }}"
+          git push origin ${{ steps.versioning.outputs.version }}

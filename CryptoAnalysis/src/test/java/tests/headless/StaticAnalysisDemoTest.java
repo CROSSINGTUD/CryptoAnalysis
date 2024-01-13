@@ -86,11 +86,10 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/OracleExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		  
-//
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", HardCodedError.class, 1);
@@ -111,10 +110,27 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
-	//TODO: This is wrong.
-		setErrorsCount("<main.Main: void useDoFinalInLoop()>", TypestateError.class, 1);
+		//TODO: This is wrong.
+		setErrorsCount("<main.Main: void useDoFinalInLoop()>", TypestateError.class, 0);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
+
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void predicateInstanceOfExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/PredicateInstanceOfExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.CipherExample: void cipherExampleOne()>")
+				.withTPs(ConstraintError.class, 1)
+				.withTPs(RequiredPredicateError.class, 1)
+				.build());
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 0);
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);
 
 		scanner.exec();
 		assertErrors();
