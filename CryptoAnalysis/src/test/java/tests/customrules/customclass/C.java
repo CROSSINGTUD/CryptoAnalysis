@@ -1,7 +1,4 @@
-package main.prefined;
-
-import main.prefined.A;
-import main.prefined.B;
+package tests.customrules.customclass;
 
 public class C {
 	

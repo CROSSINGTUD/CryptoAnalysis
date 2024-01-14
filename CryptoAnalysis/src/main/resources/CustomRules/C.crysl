@@ -1,11 +1,11 @@
-SPEC main.prefined.A
+SPEC tests.customrules.customclass.C
 
 OBJECTS
 	byte[] attr1;
 	byte[] attr2;
 	byte[] attr3;
-	main.prefined.B b;
-	main.prefined.A a;
+	tests.customrules.customclass.B b;
+	tests.customrules.customclass.A a;
 	
 EVENTS
 	cons : C();

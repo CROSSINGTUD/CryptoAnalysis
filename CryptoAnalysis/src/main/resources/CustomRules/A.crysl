@@ -1,11 +1,11 @@
-SPEC main.prefined.A
+SPEC tests.customrules.customclass.A
 
 OBJECTS
 	byte[] attr1;
 	byte[] attr2;
 	byte[] attr3;
-	main.prefined.B b;
-	main.prefined.C c;
+	tests.customrules.customclass.B b;
+	tests.customrules.customclass.C c;
 	
 EVENTS
 	cons : A();
@@ -15,8 +15,8 @@ EVENTS
 	ens2 : b = ensurePred2OnReturnB();
 	ens3 : c = ensurePred1OnReturnC();
 	ens4 : c = ensurePred2OnReturnC();
-	ens5 : ensurePred1OnThis();
-	ens6 : ensurePred2OnThis();
+	ens5 : ensurePred1onThis();
+	ens6 : ensurePred2onThis();
 	ens7 : ensurePred1OnAttr1();
 	ens8 : ensurePred2OnAttr1();
 	ens9 : ensurePred1OnAttr2();

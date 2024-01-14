@@ -1,7 +1,4 @@
-package main.prefined;
-
-import main.prefined.B;
-import main.prefined.C;
+package tests.customrules.customclass;
 
 public class A {
 	
@@ -25,11 +22,11 @@ public class A {
 		return new C();
 	}
 	
-	public void ensurePred1OnThis() {
+	public void ensurePred1onThis() {
 		return;
 	}
 	
-	public void ensurePred2OnThis() {
+	public void ensurePred2onThis() {
 		return;
 	}
 
