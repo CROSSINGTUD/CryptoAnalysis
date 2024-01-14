@@ -42,7 +42,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(1);
 	}
 
-	@Ignore
 	@Test
 	public void notPred1onPos1() {
 		A pred1OnA = new A();
@@ -215,7 +214,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(4);
 	}
 
-	@Ignore
 	@Test
 	public void pred1onPos1_AND_notPred2onPos2() {
 		A pred1onA = new A();
@@ -248,7 +246,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(4);
 	}
 
-	@Ignore
 	@Test
 	public void notPred1onPos1_AND_pred2onPos2() {
 		A pred1onA = new A();
@@ -281,7 +278,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(4);
 	}
 
-	@Ignore
 	@Test
 	public void notPred1onPos1_AND_notPred2onPos2() {
 		A pred1onA = new A();
@@ -347,7 +343,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
-	@Ignore	// Nullpointer
+	@Ignore
 	@Test
 	public void pred1onPos1_OR_notPred1onPos2(){
 		A pred1onA = new A();
@@ -378,7 +374,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
-	@Ignore		// Nullpointer
+	@Ignore
 	@Test
 	public void notPred1onPos1_OR_pred1onPos2(){
 		A pred1onA = new A();
@@ -479,7 +475,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
-	@Ignore
 	@Test
 	public void pred1onP1_OR_notPred2onP2() {
 		A pred1onA = new A();
@@ -514,7 +509,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
-	@Ignore
 	@Test
 	public void notPred1onP1_OR_pred2onP2() {
 		A pred1onA = new A();
@@ -549,7 +543,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
-	@Ignore
 	@Test
 	public void notPred1onP1_OR_notPred2onP2() {
 		A pred1onA = new A();
@@ -631,7 +624,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore		// NullPointerException
+	@Ignore
 	@Test
 	public void pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3() {
 		A pred1onA = new A();
@@ -678,7 +671,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore		// Nullpointer
+	@Ignore
 	@Test
 	public void notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3() {
 		A pred1onA = new A();
@@ -725,7 +718,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore		// Nullpointer
+	@Ignore
 	@Test
 	public void notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3() {
 		A pred1onA = new A();
@@ -772,7 +765,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore		// Nullpointer
+	@Ignore
 	@Test
 	public void pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3() {
 		A pred1onA = new A();
@@ -820,7 +813,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore		// Nullpointer
+	@Ignore
 	@Test
 	public void pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3() {
 		A pred1onA = new A();
@@ -867,7 +860,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(3); // three, because each parameter will be reported
 	}
 
-	@Ignore 	// Nullpointer
+	@Ignore
 	@Test
 	public void notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3() {
 		A pred1onA = new A();
