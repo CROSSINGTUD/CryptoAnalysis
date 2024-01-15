@@ -394,12 +394,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (pred instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
 				if (reqPred.getPred().isNegated()) {
+					boolean violated = false;
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (reqPred.getPred().equals(ensPred.getPredicate())) {
-							return false;
+						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
+							violated = true;
 						}
 					}
-					remainingPredicates.remove(pred);
+					if (!violated) {
+						remainingPredicates.remove(pred);
+					}
 				} else {
 					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
 						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
@@ -407,45 +410,29 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						}
 					}
 				}
-			} else {
+			} else if (pred instanceof AlternativeReqPredicate) {
 				AlternativeReqPredicate alt = (AlternativeReqPredicate) pred;
 				List<CrySLPredicate> alternatives = alt.getAlternatives();
+				List<CrySLPredicate> positives = alternatives.stream().filter(e -> !e.isNegated()).collect(Collectors.toList());
+				List<CrySLPredicate> negatives = alternatives.stream().filter(e -> e.isNegated()).collect(Collectors.toList());
+
 				boolean satisfied = false;
-				List<CrySLPredicate> negatives = alternatives.parallelStream().filter(e -> e.isNegated()).collect(Collectors.toList());
-				
-				if (negatives.size() == alternatives.size()) {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> e.getPredName().equals(ensPred.getPredicate().getPredName()))) {
-							return false;
-						}
-					}
-					remainingPredicates.remove(pred);
-				} else if (negatives.isEmpty()) {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (alternatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
-							remainingPredicates.remove(pred);
-							break;
-						}
-					}
-				} else {
-					boolean neg = true;
+				List<CrySLPredicate> ensuredNegatives = alternatives.stream().filter(e -> e.isNegated()).collect(Collectors.toList());
 
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (negatives.parallelStream().anyMatch(e -> e.equals(ensPred.getPredicate()))) {
-							neg = false;
-						}
-
-						alternatives.removeAll(negatives);
-						if (alternatives.parallelStream().allMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
-							satisfied = true;
-						}
-
-						if (satisfied | neg) {
-							remainingPredicates.remove(pred);
-						}
+				for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
+					// Check if any positive alternative is satisfied by the ensured predicate
+					if (positives.stream().anyMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
+						satisfied = true;
 					}
+
+					// Negated alternatives that are ensured are not satisfied
+					List<CrySLPredicate> violatedNegAlternatives = negatives.stream().filter(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred)).collect(Collectors.toList());
+					ensuredNegatives.removeAll(violatedNegAlternatives);
 				}
 
+				if (satisfied || !ensuredNegatives.isEmpty()) {
+					remainingPredicates.remove(pred);
+				}
 			}
 		}
 
@@ -518,7 +505,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				requiredPredicatesExist = false;
 			}
 		}
-		return pred.isNegated() != requiredPredicatesExist;
+		return requiredPredicatesExist;
 	}
 
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {

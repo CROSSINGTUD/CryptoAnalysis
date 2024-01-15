@@ -22,7 +22,7 @@ public class CrySLRulesetSelector {
 	 * current RuleSets
 	 */
 	public enum Ruleset {
-		JavaCryptographicArchitecture, BouncyCastle, Tink
+		JavaCryptographicArchitecture, BouncyCastle, Tink, CustomRules
 	}
 
 	/**
@@ -37,12 +37,16 @@ public class CrySLRulesetSelector {
 		
 		List<CrySLRule> rules = Lists.newArrayList();
 		for (Ruleset s : set) {
-			rules.addAll(getRulesset(rulesBasePath, s));
+			rules.addAll(getRuleset(rulesBasePath, s));
 		}
 		if (rules.isEmpty()) {
 			LOGGER.info("No CrySL rules found for rulesset " + set);
 		}
 		return rules;
+	}
+
+	public static List<CrySLRule> makeFromRulesetPath(String path) throws CryptoAnalysisException {
+		return getRuleset(path, null);
 	}
 
 	/**
@@ -73,8 +77,14 @@ public class CrySLRulesetSelector {
 		return makeFromRuleset(rulesBasePath, ruleset.toArray(new Ruleset[ruleset.size()]));
 	}
 
-	private static List<CrySLRule> getRulesset(String rulesBasePath, Ruleset s) throws CryptoAnalysisException {
-		File[] listFiles = new File(rulesBasePath + s + "/").listFiles();
+	private static List<CrySLRule> getRuleset(String rulesBasePath, Ruleset s) throws CryptoAnalysisException {
+		File[] listFiles;
+		if (s == null) {
+			listFiles = new File(rulesBasePath + "/").listFiles();
+		} else {
+			listFiles = new File(rulesBasePath + s + "/").listFiles();
+		}
+
 		List<File> files = Arrays.asList(listFiles);
 		
 		List<CrySLRule> rules = new CrySLRuleReader().readFromSourceFiles(files);

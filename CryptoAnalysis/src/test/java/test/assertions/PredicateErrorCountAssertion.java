@@ -25,4 +25,9 @@ public class PredicateErrorCountAssertion implements Assertion {
 		return expectedErrorCounts != actualErrorCounts;
 	}
 
+	@Override
+	public String toString() {
+		return "Expected " + expectedErrorCounts + " predicate errors, but got " + actualErrorCounts;
+	}
+
 }

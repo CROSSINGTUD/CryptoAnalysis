@@ -36,6 +36,7 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;

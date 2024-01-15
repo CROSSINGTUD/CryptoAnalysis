@@ -260,9 +260,11 @@ public class PredicateHandler {
 		Set<Entry<CrySLPredicate, CrySLPredicate>> contradictionPairs = new HashSet<Entry<CrySLPredicate, CrySLPredicate>>();
 		for (ClassSpecification c : cryptoScanner.getClassSpecifications()) {
 			CrySLRule rule = c.getRule();
-			for (ISLConstraint cons : rule.getConstraints()) {
-				if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {
-					contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
+			if(!rule.getPredicates().isEmpty()) {
+				for (ISLConstraint cons : rule.getConstraints()) {
+					if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {
+						contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
+					}
 				}
 			}
 		}

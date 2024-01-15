@@ -363,16 +363,18 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	}
 
 	private List<CrySLRule> getRules() {
-		if(rules == null) {
+		if (rules == null) {
 			try {
-				rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
-			} catch (CryptoAnalysisException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				if (getRulesetPath() == null) {
+					rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, getRuleSet());
+				} else {
+					rules = CrySLRulesetSelector.makeFromRulesetPath(IDEALCrossingTestingFramework.RULES_TEST_DIR + getRulesetPath());
+				}
+			} catch (CryptoAnalysisException e) {}
 		}
 		return rules;
 	}
+
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
@@ -384,6 +386,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	
 	protected abstract Ruleset getRuleSet();
 
+	protected String getRulesetPath() {
+		return null;
+	}
 
 
 	private Set<Assertion> extractBenchmarkMethods(SootMethod sootTestMethod) {
