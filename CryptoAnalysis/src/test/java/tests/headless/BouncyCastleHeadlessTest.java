@@ -224,7 +224,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.withTPs(RequiredPredicateError.class, 3)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECFixedTransformTest: void testSix(java.lang.String)>")
-				.withTPs(RequiredPredicateError.class, 2)
+				.withTPs(RequiredPredicateError.class, 3)
 				.withTPs(IncompleteOperationError.class, 1)
 				.build());
 		
@@ -233,7 +233,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testFour(java.lang.String)>")
 				.withTPs(IncompleteOperationError.class, 1)
-				.withTPs(RequiredPredicateError.class, 3)
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewPublicKeyTransformTest: void testFive(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 4)
@@ -253,7 +253,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testFour(java.lang.String)>")
 				.withTPs(IncompleteOperationError.class, 1)
-				.withTPs(RequiredPredicateError.class, 3)
+				.withTPs(RequiredPredicateError.class, 4)
 				.build());
 		setErrorsCount(new ErrorSpecification.Builder("<transforms.ECNewRandomessTransformTest: void testFive(java.lang.String)>")
 				.withTPs(RequiredPredicateError.class, 4)
