@@ -1,11 +1,11 @@
-SPEC tests.customrules.customclass.A
+SPEC tests.custom.customclass.A
 
 OBJECTS
 	byte[] attr1;
 	byte[] attr2;
 	byte[] attr3;
-	tests.customrules.customclass.B b;
-	tests.customrules.customclass.C c;
+	tests.custom.customclass.B b;
+	tests.custom.customclass.C c;
 	
 EVENTS
 	cons : A();

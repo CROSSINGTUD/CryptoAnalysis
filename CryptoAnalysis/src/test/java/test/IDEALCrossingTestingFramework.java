@@ -50,6 +50,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	protected long analysisTime;
 	private  Debugger<TransitionFunction>  debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
+	public static final String RULES_TEST_DIR = "src/test/resources/testrules/";
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {

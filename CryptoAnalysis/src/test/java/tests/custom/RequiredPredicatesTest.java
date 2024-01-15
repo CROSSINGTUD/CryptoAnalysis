@@ -1,4 +1,4 @@
-package tests.customrules;
+package tests.custom;
 
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.junit.Ignore;
@@ -6,14 +6,19 @@ import org.junit.Test;
 
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
-import tests.customrules.customclass.A;
-import tests.customrules.customclass.Requires;
+import tests.custom.customclass.A;
+import tests.custom.customclass.Requires;
 
 public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 	@Override
 	protected Ruleset getRuleSet() {
 		return Ruleset.CustomRules;
+	}
+
+	@Override
+	protected String getRulesetPath() {
+		return "custom";
 	}
 	
 	//

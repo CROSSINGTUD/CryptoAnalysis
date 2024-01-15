@@ -1,6 +1,6 @@
-package tests.customrules.customclass;
+package tests.custom.customclass;
 
-public class B {
+public class C {
 	
 	public byte[] attr1 = "Attr1".getBytes();
 	public byte[] attr2 = "Attr2".getBytes();
@@ -14,12 +14,12 @@ public class B {
 		return new A();
 	}
 	
-	public C ensurePred1OnReturnC() {
-		return new C();
+	public B ensurePred1OnReturnB() {
+		return new B();
 	}
 	
-	public C ensurePred2OnReturnC() {
-		return new C();
+	public B ensurePred2OnReturnB() {
+		return new B();
 	}
 	
 	public void ensurePred1OnThis() {
@@ -65,5 +65,5 @@ public class B {
 	public byte[] getAttr3() {
 		return attr3;
 	}
-	
+
 }

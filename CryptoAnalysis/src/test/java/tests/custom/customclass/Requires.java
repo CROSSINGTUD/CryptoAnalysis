@@ -1,4 +1,4 @@
-package tests.customrules.customclass;
+package tests.custom.customclass;
 
 
 public class Requires {

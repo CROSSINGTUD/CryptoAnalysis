@@ -1,20 +1,20 @@
-SPEC tests.customrules.customclass.C
+SPEC tests.custom.customclass.B
 
 OBJECTS
 	byte[] attr1;
 	byte[] attr2;
 	byte[] attr3;
-	tests.customrules.customclass.B b;
-	tests.customrules.customclass.A a;
+	tests.custom.customclass.A a;
+	tests.custom.customclass.C c;
 	
 EVENTS
-	cons : C();
+	cons : B();
 	Cons := cons;
 	
-	ens1 : b = ensurePred1OnReturnB();
-	ens2 : b = ensurePred2OnReturnB();
-	ens3 : a = ensurePred1OnReturnA();
-	ens4 : a = ensurePred2OnReturnA();
+	ens1 : a = ensurePred1OnReturnA();
+	ens2 : a = ensurePred2OnReturnA();
+	ens3 : c = ensurePred1OnReturnC();
+	ens4 : c = ensurePred2OnReturnC();
 	ens5 : ensurePred1OnThis();
 	ens6 : ensurePred2OnThis();
 	ens7 : ensurePred1OnAttr1();
@@ -29,10 +29,10 @@ ORDER
 	Cons, Meth*
 	
 ENSURES
-	pred1[b] after ens1;
-	pred2[b] after ens2;
-	pred1[a] after ens3;
-	pred2[a] after ens4;
+	pred1[a] after ens1;
+	pred2[a] after ens2;
+	pred1[c] after ens3;
+	pred2[c] after ens4;
 	pred1[this] after ens5;
 	pred2[this] after ens6;
 	pred1[attr1] after ens7;

@@ -1,5 +1,1 @@
-
-src/main/resources/BouncyCastle
-src/main/resources/BouncyCastle-JCA
-src/main/resources/JavaCryptographicArchitecture
-src/main/resources/Tink
+src/main/resources/**/*.crysl
