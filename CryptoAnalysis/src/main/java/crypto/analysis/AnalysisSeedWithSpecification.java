@@ -371,15 +371,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean checkConstraintSystem() {
 		cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
-		Set<ISLConstraint> relConstraints = constraintSolver.getRelConstraints();
-		boolean checkPredicates = checkPredicates(relConstraints);
+		boolean checkPredicates = checkPredicates();
 		cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
 		if (!checkPredicates)
 			return false;
 		return internalConstraintSatisfied;
 	}
 
-	private boolean checkPredicates(Collection<ISLConstraint> relConstraints) {
+	public boolean checkPredicates() {
 		List<ISLConstraint> requiredPredicates = Lists.newArrayList();
 		for (ISLConstraint con : constraintSolver.getRequiredPredicates()) {
 			if (!ConstraintSolver.predefinedPreds.contains((con instanceof RequiredCrySLPredicate) ? ((RequiredCrySLPredicate) con).getPred().getPredName()

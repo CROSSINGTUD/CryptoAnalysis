@@ -221,6 +221,8 @@ public class PredicateHandler {
 
 	private void checkMissingRequiredPredicates() {
 		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeeds()) {
+			seed.checkPredicates();
+
 			Set<ISLConstraint> missingPredicates = seed.getMissingPredicates();
 			for (ISLConstraint pred : missingPredicates) {
 				if (pred instanceof RequiredCrySLPredicate) {
