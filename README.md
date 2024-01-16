@@ -26,13 +26,13 @@ A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/
 ## Usage
 
 CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
-* The absolute path to the directory of the CrySL (source code format) rule files. The source code for the rules which contain specification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
-* The absolute path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
+* The path to the directory of the CrySL (source code format) rule files. The source code for the rules which contain specification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+* The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
 java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner 
-      --rulesDir <absolute-path-to-crysl-source-code-format-rules> 
-      --appPath <absolute-application-path>
+      --rulesDir <path-to-crysl-source-code-format-rules> 
+      --appPath <application-path>
 ```
 
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
@@ -55,9 +55,30 @@ Other additional arguments that can be used are as follows:
 --visualization (enables the visualization, but also requires --reportPath option to be set)
 --providerDetection (enables provider detection analysis)
 --dstats (disables the output of the analysis statistics in the reports)
+--ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
+--help (show more information for the CLI arguments)
 ```
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
+
+### Use as a GitHub Action
+
+CogniCrypt<sub>SAST</sub> can be used as a GitHub action.
+
+```yaml
+- name: Run CogniCrypt
+  uses: CROSSINGTUD/CryptoAnalysis@version
+  with:
+    appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+    basePath: "CryptoAnalysisTargets/HelloWorld"
+```
+
+The `appPath` needs to be configured to point to a compiled version of your application.
+
+The `basePath` is used to relate paths in the analyzed jar and the source tree.
+Class `com.example` is searched for at `basePath/com/example`.
+
+See [`action.yml`](action.yml) for all input options.
 
 ## Report and Error Types
 
@@ -80,7 +101,7 @@ CogniCrypt<sub>SAST</sub> supports different report formats, which can be set by
 - `CSV`: The report is written to the CSV file `CryptoAnalysis-Report.csv`. The content is formatted in the CSV format.
 - `CSV_SUMMARY`: The report is written to the file `CryptoAnalysis-Report-Summary.csv` and contains a summary of the analysis results. Compared to the `CSV` format, this format does not provide concrete information about the errors, it only lists the amount of each misuse type. This option was previously implemented by the `CSV` option, which has been changed to provide more detailed information about the errors in the CSV format.
 
-If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD TXT CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
+If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defaults to the `CMD` option. It also allows the usage of multiple different formats for the same analysis (e.g. `--reportformat CMD,TXT,CSV` creates a report, which is printed to the command line and is written to a text and CSV file). If the option `--reportPath <directory_location_for_cryptoanalysis_report>` is set, the reports are created in the specified directory.
 
 ## Updating CrySL Rules
 

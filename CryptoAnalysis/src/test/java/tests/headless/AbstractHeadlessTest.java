@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,6 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
@@ -36,6 +36,7 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import crypto.rules.CrySLRuleReader;
 import soot.G;
 import sync.pds.solver.nodes.Node;
 import test.IDEALCrossingTestingFramework;
@@ -53,11 +54,19 @@ public abstract class AbstractHeadlessTest {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeadlessTest.class);
 
-	private static final RuleFormat ruleFormat = RuleFormat.SOURCE;
 	private static boolean VISUALIZATION = false;
 	private static boolean PROVIDER_DETECTION = true;
 	private CrySLAnalysisListener errorCountingAnalysisListener;
 	private Table<String, Class<?>, Integer> errorMarkerCountPerErrorTypeAndMethod = HashBasedTable.create();
+	
+	/**
+	 * List for storing the section names to be ignored
+	 */
+	private static List<String> ignoredSections = Collections.emptyList();
+	
+	/**
+	 * Formats of the analysis report
+	 */
 	private static Set<ReportFormat> reportFormats = new HashSet<>();
 	
 	public static void setReportFormat(ReportFormat reportFormat) {
@@ -82,6 +91,10 @@ public abstract class AbstractHeadlessTest {
 	public static void setProviderDetection(boolean providerDetection) {
 		PROVIDER_DETECTION = providerDetection;
 	}
+
+	public static void setIgnoredSections(List<String> ignoredSectionsList) {
+		ignoredSections = ignoredSectionsList;
+	}
 	
 	protected MavenProject createAndCompile(String mavenProjectPath) {
 		MavenProject mi = new MavenProject(mavenProjectPath);
@@ -104,7 +117,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					List<CrySLRule> rules= CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleFormat, ruleset);
+					List<CrySLRule> rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
 					HeadlessCryptoScanner.setRules(rules);
 					return rules;
 				} catch (CryptoAnalysisException e) {
@@ -136,6 +149,11 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
+			protected List<String> ignoredSections(){
+				return ignoredSections;
+			}
+
+			@Override
 			protected boolean providerDetection() {
 				return PROVIDER_DETECTION;
 			}
@@ -154,6 +172,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
+				String errorClassName = error.getErrorLocation().getMethod().getDeclaringClass().getName().toString();
 				String methodContainingError = error.getErrorLocation().getMethod().toString();
 				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());

@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-
-import java.util.Set;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
@@ -31,7 +30,7 @@ import soot.SootMethod;
 public class CSVReporter extends Reporter {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
-	
+
 	private static final String CSV_SEPARATOR = ";";
 	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
 	
@@ -116,7 +115,7 @@ public class CSVReporter extends Reporter {
 				}
 			}
 		}
-		
+
 		writeToFile();
 	}
 	
@@ -133,10 +132,9 @@ public class CSVReporter extends Reporter {
 			}
 			
 			writer.close();
-			LOGGER.info("CSV Report generated to file : " + getOutputFolder().getAbsolutePath() + File.separator+ REPORT_NAME);
+			LOGGER.info("CSV Report generated to file : " + getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME);
 		} catch (IOException e) {
 			LOGGER.error("Could not write to " + getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME, e);
 		}
 	}
-
 }

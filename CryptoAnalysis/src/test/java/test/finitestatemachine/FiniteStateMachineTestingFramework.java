@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.RuleFormat;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.StateMachineGraph;
@@ -114,9 +113,8 @@ public abstract class FiniteStateMachineTestingFramework{
 	public void createSMG() {
 		if(this.smg == null) {
 			try {
-				this.smg = CrySLRulesetSelector.makeSingleRule(IDEALCrossingTestingFramework.RULES_BASE_DIR,  RuleFormat.SOURCE,  this.ruleset,  this.crySLRule).getUsagePattern();
+				this.smg = CrySLRulesetSelector.makeSingleRule(IDEALCrossingTestingFramework.RULES_BASE_DIR, this.ruleset, this.crySLRule).getUsagePattern();
 			} catch (CryptoAnalysisException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

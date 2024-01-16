@@ -27,7 +27,7 @@ public class ExternalTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					return CrySLRuleReader.readFromDirectory(new File("./src/main/resources/JavaCryptographicArchitecture"));
+					return new CrySLRuleReader().readFromDirectory(new File("./src/main/resources/JavaCryptographicArchitecture"));
 				} catch (CryptoAnalysisException e) {
 					e.printStackTrace();
 				}

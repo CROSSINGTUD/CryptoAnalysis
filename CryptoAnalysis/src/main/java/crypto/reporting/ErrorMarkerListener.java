@@ -2,6 +2,7 @@ package crypto.reporting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -64,13 +66,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 		if (set == null) {
 			set = Sets.newHashSet();
 		}
+
+		int errorCount = (errorMarkerCount.get(error.getClass()) == null? 0 : errorMarkerCount.get(error.getClass()));
 		if (set.add(error)) {
-			Integer integer = errorMarkerCount.get(error.getClass());
-			if (integer == null) {
-				integer = 0;
-			}
-			integer++;
-			errorMarkerCount.put(error.getClass(), integer);
+			errorCount++;
+			errorMarkerCount.put(error.getClass(), errorCount);
 		}
 		errorMarkers.put(sootClass, method, set);
 	}
@@ -127,6 +127,12 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(HardCodedError hardcodedError) {
 				addMarker(hardcodedError);
+			}
+
+			@Override
+			public void visit(ForbiddenPredicateError forbiddenPredicateError) {
+				addMarker(forbiddenPredicateError);
+				
 			}
 		});
 	}
@@ -185,6 +191,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void discoveredSeed(final IAnalysisSeed arg0) {
+		// Nothing
 	}
 
 	@Override
@@ -197,7 +204,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	@Override
 	public void onSeedFinished(final IAnalysisSeed analysisObject,
 			final ForwardBoomerangResults<TransitionFunction> arg1) {
-
+		// Nothing
 	}
 
 	@Override
@@ -221,7 +228,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void addProgress(int processedSeeds, int workListsize) {
-		// TODO Auto-generated method stub
-
+		// Nothing
 	}
 }
