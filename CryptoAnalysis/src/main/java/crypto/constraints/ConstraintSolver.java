@@ -101,6 +101,7 @@ public class ConstraintSolver {
 					break;
 				} else {
 					fail++;
+					this.object.addError(e);
 					getReporter().reportError(getObject(), e);
 				}
 			}
@@ -197,6 +198,11 @@ public class ConstraintSolver {
 					result.add(new RequiredCrySLPredicate(pred, cwpi.stmt()));
 				}
 			}
+		}
+
+		// Extract predicates with 'this' as parameter
+		if (pred.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
+			result.add(new RequiredCrySLPredicate(pred, object.stmt()));
 		}
 		
 		return result;

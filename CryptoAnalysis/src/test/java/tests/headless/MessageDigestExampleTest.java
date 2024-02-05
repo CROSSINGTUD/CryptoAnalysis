@@ -16,7 +16,7 @@ public class MessageDigestExampleTest extends AbstractHeadlessTest{
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		//false positive
-		setErrorsCount("<MessageDigestExample.MessageDigestExample.Main: java.lang.String getSHA256(java.io.InputStream)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<MessageDigestExample.MessageDigestExample.Main: java.lang.String getSHA256(java.io.InputStream)>", IncompleteOperationError.class, 3);
 		
 		scanner.exec();
 		assertErrors();

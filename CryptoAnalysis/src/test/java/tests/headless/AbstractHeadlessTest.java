@@ -238,19 +238,23 @@ public abstract class AbstractHeadlessTest {
 	}
 
 	protected void assertErrors() {
+		boolean errorFound = false;
+		StringBuilder builder = new StringBuilder();
 		for (Cell<String, Class<?>, Integer> c : errorMarkerCountPerErrorTypeAndMethod.cellSet()) {
 			Integer value = c.getValue();
 			if (value != 0) {
+				builder.append("\n");
 				if (value > 0) {
-//					System.out.println(
-							throw new RuntimeException(
-									"Found " + value + " too few errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+					builder.append("\tFound " + value + " too few errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				} else {
-//					System.out.println(
-							throw new RuntimeException(
-									"Found " + Math.abs(value) + " too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+					builder.append("\tFound " + Math.abs(value) + " too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				}
+				errorFound = true;
 			}
+		}
+
+		if (errorFound) {
+			throw new RuntimeException("Tests not executed as planned:" + builder);
 		}
 	}
 
