@@ -1,9 +1,12 @@
 package crypto.analysis.errors;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import boomerang.jimple.Statement;
+import crypto.analysis.HiddenPredicate;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
@@ -20,11 +23,25 @@ public class RequiredPredicateError extends AbstractError{
 
 	private List<CrySLPredicate> contradictedPredicate;
 	private CallSiteWithExtractedValue extractedValues;
+	private List<HiddenPredicate> hiddenPredicates;
 
 	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
 		super(location, rule);
 		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = multimap;
+		this.hiddenPredicates = new ArrayList<>();
+	}
+
+	public void addHiddenPredicates(Collection<HiddenPredicate> hiddenPredicates) {
+		this.hiddenPredicates.addAll(hiddenPredicates);
+	}
+
+	public void mapPrecedingErrors() {
+		for (HiddenPredicate hiddenPredicate : hiddenPredicates) {
+			Collection<AbstractError> precedingErrors = hiddenPredicate.getPrecedingErrors();
+			this.addCausingError(precedingErrors);
+			precedingErrors.forEach(e -> e.addSubsequentError(this));
+		}
 	}
 
 	/**

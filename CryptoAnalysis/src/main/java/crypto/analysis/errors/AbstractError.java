@@ -8,6 +8,10 @@ import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class AbstractError implements IError{
 	private Statement errorLocation;
 	private CrySLRule rule;
@@ -15,11 +19,17 @@ public abstract class AbstractError implements IError{
 	private final String invokeMethod;
 	private final String declaringClass;
 
+	private Set<AbstractError> causedByErrors; // preceding
+	private Set<AbstractError> willCauseErrors; // subsequent
+
 	public AbstractError(Statement errorLocation, CrySLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
 		this.outerMethod = errorLocation.getMethod().getSignature();
 		this.declaringClass = errorLocation.getMethod().getDeclaringClass().toString();
+
+		this.causedByErrors = new HashSet<>();
+		this.willCauseErrors = new HashSet<>();
 
 		Stmt errorStmt = errorLocation.getUnit().get();
 		if(errorStmt.containsInvokeExpr()) {
@@ -31,6 +41,26 @@ public abstract class AbstractError implements IError{
 		} else {
 			this.invokeMethod = ((JAssignStmt) errorStmt).getLeftOp().toString();
 		}
+	}
+
+	public void addCausingError(AbstractError parent) {
+		causedByErrors.add(parent);
+	}
+
+	public void addCausingError(Collection<AbstractError> parents) {
+		causedByErrors.addAll(parents);
+	}
+
+	public void addSubsequentError(AbstractError subsequentError) {
+		willCauseErrors.add(subsequentError);
+	}
+
+	public Set<AbstractError> getSubsequentErrors(){
+		return this.willCauseErrors;
+	}
+
+	public Set<AbstractError> getRootErrors(){
+		return this.causedByErrors;
 	}
 
 	public Statement getErrorLocation() {

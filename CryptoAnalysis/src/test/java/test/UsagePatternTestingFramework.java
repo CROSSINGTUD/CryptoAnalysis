@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -58,11 +59,14 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
+import soot.jimple.StringConstant;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import soot.options.Options;
 import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
+import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
@@ -123,6 +127,13 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							
 							@Override
 							public void reportError(AbstractError error) {
+								for (Assertion a : expectedResults) {
+									if (a instanceof DependentErrorAssertion) {
+										DependentErrorAssertion depErrorAssertion = (DependentErrorAssertion) a;
+										depErrorAssertion.addError(error);
+									}
+								}
+
 								error.accept(new ErrorVisitor() {
 									
 									@Override
@@ -442,22 +453,44 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 //				queries.add(new ConstraintViolationAssertion(stmt));
 //			}
 
-			if(invocationName.startsWith("hasEnsuredPredicate")){
+			if (invocationName.startsWith("hasEnsuredPredicate")){
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
 				Val val = new Val(queryVar, m);
-				queries.add(new HasEnsuredPredicateAssertion(stmt, val));
+
+				if (invokeExpr.getArgCount() == 2) {
+					// predicate name is passed as parameter
+					Value predNameParam = invokeExpr.getArg(1);
+					if (!(predNameParam instanceof StringConstant)) {
+						continue;
+					}
+					String predName = ((StringConstant) predNameParam).value;
+					queries.add(new HasEnsuredPredicateAssertion(stmt, val, predName));
+				} else {
+					queries.add(new HasEnsuredPredicateAssertion(stmt, val));
+				}
 			}
 			
-			if(invocationName.startsWith("notHasEnsuredPredicate")){
+			if (invocationName.startsWith("notHasEnsuredPredicate")) {
 				Value param = invokeExpr.getArg(0);
 				if (!(param instanceof Local))
 					continue;
 				Local queryVar = (Local) param;
 				Val val = new Val(queryVar, m);
-				queries.add(new NotHasEnsuredPredicateAssertion(stmt, val));
+
+				if (invokeExpr.getArgCount() == 2) {
+					// predicate name is passed as parameter
+					Value predNameParam = invokeExpr.getArg(1);
+					if (!(predNameParam instanceof StringConstant)) {
+						continue;
+					}
+					String predName = ((StringConstant) predNameParam).value;
+					queries.add(new NotHasEnsuredPredicateAssertion(stmt, val, predName));
+				} else {
+					queries.add(new NotHasEnsuredPredicateAssertion(stmt, val));
+				}
 			}
 			
 			if(invocationName.startsWith("mustNotBeInAcceptingState")){
@@ -504,6 +537,23 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				IntConstant queryVar = (IntConstant) param;
 				queries.add(new TypestateErrorCountAssertion(queryVar.value));
 			}
+
+			if (invocationName.startsWith("dependentError")) {
+				// extract parameters
+				List<Value> params = invokeExpr.getArgs();
+				if (!params.stream().allMatch(param -> param instanceof IntConstant)) {
+					continue;
+				}
+				int thisErrorID = ((IntConstant) params.remove(0)).value;
+				int[] precedingErrorIDs = params.stream().mapToInt(param -> ((IntConstant) param).value).toArray();
+				for (Unit pred : getPredecessorsNotBenchmark(stmt)) {
+					queries.add(new DependentErrorAssertion((Stmt) pred, thisErrorID, precedingErrorIDs));
+				}
+			}
+
+			// connect DependentErrorAssertions
+			Set<Assertion> depErrors = queries.stream().filter(q -> q instanceof DependentErrorAssertion).collect(Collectors.toSet());
+			depErrors.forEach(ass -> ((DependentErrorAssertion)ass).registerListeners(depErrors));
 		}
 	}
 	private Set<Unit> getPredecessorsNotBenchmark(Stmt stmt) {

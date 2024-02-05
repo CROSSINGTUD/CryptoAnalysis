@@ -31,6 +31,8 @@ public class CallSiteWithExtractedValue {
 	public String toString() {
 		String res = "";
 		switch(cs.getIndex()) {
+			case -1:
+				return "Return value";
 			case 0: 
 				res = "First ";
 				break;
@@ -44,7 +46,7 @@ public class CallSiteWithExtractedValue {
 				res = "Fourth ";
 				break;
 			case 4: 
-				res = "Fiveth ";
+				res = "Fifth ";
 				break;
 			case 5: 
 				res = "Sixth ";

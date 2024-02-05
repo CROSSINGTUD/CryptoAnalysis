@@ -84,7 +84,7 @@ public class IssuesTest extends UsagePatternTestingFramework {
 		PublicKey pubkey2 = kf.generatePublic(keySpec2);
 		Assertions.notHasEnsuredPredicate(pubkey2);
 
-		Assertions.predicateErrors(4);
+		Assertions.predicateErrors(6);
 	}
 
 }

@@ -1,61 +1,50 @@
 package test.assertions;
 
 public class Assertions {
-	public static void assertState(Object o, int state) {
-		
-	}
+
+	public static void assertState(Object o, int state) {}
 	
-	public static void extValue(int pos) {
-		
-	}
+	public static void extValue(int pos) {}
 	
-	public static void assertValue(Object o, Object v) {
-		
-	}
+	public static void assertValue(Object o, Object v) {}
 	
-	public static void mustNotBeInAcceptingState(Object o) {
-		
-	}
+	public static void mustNotBeInAcceptingState(Object o) {}
 	
-	public static void mustBeInAcceptingState(Object o) {
-		
-	}
+	public static void mustBeInAcceptingState(Object o) {}
 	
-	public static void violatedConstraint(Object o) {
-		
-	}
+	public static void violatedConstraint(Object o) {}
 	
-	public static void callToForbiddenMethod() {
-		
-	}
+	public static void callToForbiddenMethod() {}
 
-	public static void hasEnsuredPredicate(Object o) {
-		
-	}
+	public static void hasEnsuredPredicate(Object o) {}
 
-	public static void notHasEnsuredPredicate(Object o){
-		
-	}
+	public static void hasEnsuredPredicate(Object o, String predName) {}
 
-    public static void missingTypestateChange() {
-    }
+	public static void notHasEnsuredPredicate(Object o){}
 
-	public static void noMissingTypestateChange() {
-		
-	}
+	public static void notHasEnsuredPredicate(Object o, String predName) {}
 
-	public static void predicateContradiction() {
-	}
+    public static void missingTypestateChange() {}
 
-	public static void predicateErrors(int i) {
-		
-	}
+	public static void noMissingTypestateChange() {}
 
-	public static void constraintErrors(int i) {
-		
-	}
+	public static void predicateContradiction() {}
 
-	public static void typestateErrors(int i) {
-		
-	}
+	public static void predicateErrors(int i) {}
+
+	public static void constraintErrors(int i) {}
+
+	public static void typestateErrors(int i) {}
+
+	public static void dependentError(int thisErrorNr) {}
+
+	public static void dependentError(int thisErrorNr, int precedingError1) {}
+
+	public static void dependentError(int thisErrorNr, int precedingError1, int precedingError2) {}
+
+	public static void dependentError(int thisErrorNr, int precedingError1, int precedingError2, int precedingError3) {}
+
+	public static void dependentError(int thisErrorNr, int precedingError1, int precedingError2, int precedingError3, int precedingError4) {}
+
+	public static void dependentError(int thisErrorNr, int precedingError1, int precedingError2, int precedingError3, int precedingError4, int precedingError5) {}
 }
