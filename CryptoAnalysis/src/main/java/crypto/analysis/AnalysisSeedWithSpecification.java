@@ -127,7 +127,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		runExtractParameterAnalysis();
 		this.internalConstraintsSatisfied = checkInternalConstraints();
 
-
 		computeTypestateErrorUnits();
 		computeTypestateErrorsForEndOfObjectLifeTime();
 
@@ -314,11 +313,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param stateNode the next state after executing {@code currStmt}
 	 */
 	private void ensurePredicate(EnsuredCrySLPredicate ensuredPred, Statement currStmt, State stateNode) {
-		// Check, whether subsequent error detection is enabled
-		if (ensuredPred instanceof HiddenPredicate && !cryptoScanner.isSubsequentErrorDetection()) {
-			return;
-		}
-
 		// TODO only for first parameter?
 		for (ICrySLPredicateParameter predicateParam : ensuredPred.getPredicate().getParameters()) {
 			if (predicateParam.getName().equals("this")) {

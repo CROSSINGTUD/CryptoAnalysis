@@ -298,6 +298,7 @@ public class PredicateHandler {
 			if(!rule.getPredicates().isEmpty()) {
 				for (ISLConstraint cons : rule.getConstraints()) {
 					if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {
+						// TODO This is weird; why is it always get(0)?
 						contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
 					}
 				}
@@ -311,7 +312,8 @@ public class PredicateHandler {
 				}
 				for (Entry<CrySLPredicate, CrySLPredicate> disPair : contradictionPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						cryptoScanner.getAnalysisListener().reportError(null, new PredicateContradictionError(generatingPredicateStmt, null, disPair));
+						// TODO Rule should not be null
+						//cryptoScanner.getAnalysisListener().reportError(null, new PredicateContradictionError(generatingPredicateStmt, null, disPair));
 					}
 				}
 			}

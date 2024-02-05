@@ -220,8 +220,4 @@ public abstract class CryptoScanner {
 	public Collection<String> getIgnoredSections() {
 		return new ArrayList<>();
 	}
-
-	public boolean isSubsequentErrorDetection() {
-		return true;
-	}
 }
