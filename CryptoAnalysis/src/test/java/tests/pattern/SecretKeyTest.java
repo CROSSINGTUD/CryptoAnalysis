@@ -185,6 +185,7 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		byte[] enc = key.getEncoded();
 		Assertions.mustBeInAcceptingState(key);
 		enc = key.getEncoded();
+		Assertions.hasEnsuredPredicate(enc);
 
 		Assertions.mustBeInAcceptingState(key);
 		((SecretKey) key).destroy();
@@ -301,6 +302,7 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
+		Assertions.hasEnsuredPredicate(key);
 	}
 	
 	@Test

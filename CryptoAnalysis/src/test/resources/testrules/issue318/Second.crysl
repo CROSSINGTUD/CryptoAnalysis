@@ -1,0 +1,14 @@
+SPEC tests.custom.issue318.Second
+
+OBJECTS
+	tests.custom.issue318.First f;
+
+EVENTS
+	c: Second(f);
+	g: goOn();
+
+ORDER
+	c, g
+
+REQUIRES
+	first[f];

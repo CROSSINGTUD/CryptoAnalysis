@@ -34,8 +34,8 @@ public class SecureRandomTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(r3);
 		
 		SecureRandom r4 = SecureRandom.getInstanceStrong();
-		Assertions.notHasEnsuredPredicate(r4);
 		r4.setSeed(r3.nextInt());
+		Assertions.notHasEnsuredPredicate(r4);
 	}
 
 	@Test

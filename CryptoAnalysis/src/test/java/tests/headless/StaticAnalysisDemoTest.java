@@ -24,7 +24,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.fixed.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
-		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -44,6 +44,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: byte[] sign(java.lang.String)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
+		setErrorsCount("<main.Msg: java.security.PrivateKey getPrivateKey()>", RequiredPredicateError.class, 2);
 
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Msg: void encryptAlgFromField()>", IncompleteOperationError.class, 1);
@@ -58,7 +59,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Encrypt: void incorrectBigInteger()>", RequiredPredicateError.class, 1);
 		
 		setErrorsCount("<main.Encrypt: void incorrect()>", ConstraintError.class, 2);
-		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 2);
 
 		scanner.exec();
 		assertErrors();
@@ -86,11 +87,10 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/OracleExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		  
-//
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", HardCodedError.class, 1);
@@ -100,7 +100,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 
 
 		//TODO this is a spurious finding. What happens here?
-		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 2);
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 3);
 
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
@@ -111,10 +111,27 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useCorrectDoFinal()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useNoDoFinal()>", ConstraintError.class, 1);
-	//TODO: This is wrong.
+		//TODO: This is wrong.
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", TypestateError.class, 0);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
+
+		scanner.exec();
+		assertErrors();
+	}
+	
+	@Test
+	public void predicateInstanceOfExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/PredicateInstanceOfExample").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		
+		setErrorsCount(new ErrorSpecification.Builder("<crypto.CipherExample: void cipherExampleOne()>")
+				.withTPs(ConstraintError.class, 1)
+				.withTPs(RequiredPredicateError.class, 1)
+				.build());
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 0);
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);
 
 		scanner.exec();
 		assertErrors();

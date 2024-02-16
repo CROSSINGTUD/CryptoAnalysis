@@ -9,8 +9,29 @@ import java.security.spec.ECGenParameterSpec;
 
 public final class InsecureCurve_sect131r1 {
 
-	public static void main(String argv[]) {
+	/**
+	 * Original test with updated constraints:
+	 * 	new ECGenParameterSpec("sect131r1") -> new ECGenParameterSpec("secp521r1")
+	 * 
+	 * This test does not contain any errors
+	 */
+	public void positiveTestCase() {
 		try {
+			ECGenParameterSpec ecps = new ECGenParameterSpec("secp521r1");
+
+			KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC", "SunEC");
+			kpg.initialize(ecps);
+			KeyPair kp = kpg.generateKeyPair();
+		} catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | NoSuchProviderException e) {
+		}
+	}
+
+	/**
+	 * Original test without updates
+	 */
+	public void negativeTestCase() {
+		try {
+			// Since 3.0.0: secp112r1 is not a secure curve
 			ECGenParameterSpec ecps = new ECGenParameterSpec("sect131r1");
 
 			KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC", "SunEC");

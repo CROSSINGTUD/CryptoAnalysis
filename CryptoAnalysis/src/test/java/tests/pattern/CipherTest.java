@@ -226,6 +226,7 @@ public class CipherTest extends UsagePatternTestingFramework {
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.mustBeInAcceptingState(cCipher);
 		Assertions.notHasEnsuredPredicate(cCipher);
+		Assertions.notHasEnsuredPredicate(encText);
 		cCipher.getIV();
 	}
 
@@ -338,10 +339,9 @@ public class CipherTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
-		// TODO: Fails for reasons different from the ones I expected.
 		cCipher.getIV();
-		// Assertions.mustBeInAcceptingState(cCipher);
-		// Assertions.notasEnsuredPredicate(encText);
+		Assertions.mustBeInAcceptingState(cCipher);
+		Assertions.hasEnsuredPredicate(encText);
 	}
 
 	@Test
@@ -408,6 +408,7 @@ public class CipherTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
 		Assertions.mustBeInAcceptingState(keygen);
+		Assertions.hasEnsuredPredicate(key);
 		Cipher cCipher = Cipher.getInstance("AES");
 		cCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(new byte[18], "AES"));
 		Assertions.extValue(0);
@@ -479,8 +480,8 @@ public class CipherTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		hMacSHA256.init(keyMac);
 		byte[] macced = hMacSHA256.doFinal(msgAsArray);
-		Assertions.mustNotBeInAcceptingState(hMacSHA256);
-		Assertions.notHasEnsuredPredicate(macced);
+		Assertions.mustBeInAcceptingState(hMacSHA256);
+		Assertions.hasEnsuredPredicate(macced);
 	}
 
 	@Test

@@ -1,0 +1,11 @@
+SPEC tests.custom.predicate.SimpleTarget
+
+EVENTS
+    Con: SimpleTarget();
+    dN: doNothing();
+
+ORDER
+    Con, dN*
+
+REQUIRES
+    generatedTarget[this];

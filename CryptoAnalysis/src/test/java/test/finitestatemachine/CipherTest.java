@@ -1,7 +1,5 @@
 package test.finitestatemachine;
 
-import org.junit.Test;
-
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 
 public class CipherTest extends FiniteStateMachineTestingFramework{

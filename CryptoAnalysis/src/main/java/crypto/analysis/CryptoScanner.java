@@ -1,26 +1,19 @@
 package crypto.analysis;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-
 import boomerang.Query;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
@@ -29,6 +22,12 @@ import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class CryptoScanner {
 
@@ -126,14 +125,18 @@ public abstract class CryptoScanner {
 		while (listener.hasNext()) {
 			MethodOrMethodContext next = listener.next();
 			SootMethod method = next.method();
+
 			if (method == null || !method.hasActiveBody() || !method.getDeclaringClass().isApplicationClass()) {
 				continue;
 			}
-			for (ClassSpecification spec : getClassSpecifictions()) {
+
+			if (isOnIgnoreSectionList(method)) {
+				continue;
+			}
+
+			for (ClassSpecification spec : getClassSpecifications()) {
 				spec.invokesForbiddenMethod(method);
-				if (spec.getRule().getClassName().equals("javax.crypto.SecretKey")) {
-					continue;
-				}
+				
 				for (Query seed : spec.getInitialSeeds(method)) {
 					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
 				}
@@ -141,12 +144,39 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	public List<ClassSpecification> getClassSpecifictions() {
+	public List<ClassSpecification> getClassSpecifications() {
 		return specifications;
 	}
 
 	protected void addToWorkList(IAnalysisSeed analysisSeedWithSpecification) {
 		worklist.add(analysisSeedWithSpecification);
+	}
+
+	protected boolean isOnIgnoreSectionList(SootMethod method) {
+		String declaringClass = method.getDeclaringClass().getName();
+		String methodName = declaringClass + "." + method.getName();
+
+		for (String ignoredSection : getIgnoredSections()) {
+			// Check for class name
+			if (ignoredSection.equals(declaringClass)) {
+				logger.info("Ignoring seeds in class " + declaringClass);
+				return true;
+			}
+
+			// Check for method name
+			if (ignoredSection.equals(methodName)) {
+				logger.info("Ignoring seeds in method " + methodName);
+				return true;
+			}
+
+			// Check for wildcards (i.e. *)
+			if (ignoredSection.endsWith(".*") && declaringClass.startsWith(ignoredSection.substring(0, ignoredSection.length() - 2))) {
+				logger.info("Ignoring seeds in class " + declaringClass + " and method " + methodName);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<Statement,Val> factAtStatement) {
@@ -181,5 +211,13 @@ public abstract class CryptoScanner {
 
 	public Collection<AnalysisSeedWithSpecification> getAnalysisSeeds() {
 		return this.seedsWithSpec.values();
+	}
+
+	public Collection<String> getForbiddenPredicates() {
+		return new ArrayList<>();
+	}
+
+	public Collection<String> getIgnoredSections() {
+		return new ArrayList<>();
 	}
 }

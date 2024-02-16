@@ -33,19 +33,20 @@
 	<parent>
 		<groupId>de.fraunhofer.iem</groupId>
 		<artifactId>CryptoAnalysis-Parent</artifactId>
-		<version>2.8.0</version>
+		<version>3.0.3</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<properties>
 		<flowDroidVersion>2.12.0</flowDroidVersion>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.1</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>

@@ -1,21 +1,12 @@
 package crypto;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.preanalysis.BoomerangPretransformer;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -25,17 +16,21 @@ import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.preanalysis.ExceptionAwareTransformer;
 import crypto.preanalysis.SeedFactory;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CSVSummaryReporter;
 import crypto.reporting.CommandLineReporter;
+import crypto.reporting.GitHubAnnotationReporter;
 import crypto.reporting.Reporter;
 import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.EntryPoints;
@@ -51,18 +46,31 @@ import soot.Unit;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 public abstract class HeadlessCryptoScanner {
 	
-	private static CryptoScannerSettings settings = new CryptoScannerSettings();
-	private boolean hasSeeds;
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	private static final CryptoScannerSettings settings = new CryptoScannerSettings();
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-	
+	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
+	private boolean hasSeeds;
+
+	public static int exitCode = 0;
+
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
 		scanner.exec();
+		System.exit(exitCode);
 	}
 
 	public static HeadlessCryptoScanner createFromCLISettings(String[] args) {
@@ -70,10 +78,11 @@ public abstract class HeadlessCryptoScanner {
 			settings.parseSettingsFromCLI(args);
 		} catch (CryptoAnalysisParserException e) {
 			LOGGER.error("Parser failed with error: " + e.getClass().toString(), e);
+			System.exit(-1);
 		}
 		
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
-			
+
 			@Override
 			protected String applicationClassPath() {
 				return settings.getApplicationPath();
@@ -81,22 +90,23 @@ public abstract class HeadlessCryptoScanner {
 
 			@Override
 			protected List<CrySLRule> getRules() {
-				// TODO: Somehow optimize the rule getting because this has many code duplicates for no reason.
 				switch(settings.getRulesetPathType()) {
 					case DIR:
 						try {
-							rules.addAll(CrySLRuleReader.readFromDirectory(new File(settings.getRulesetPathDir())));
-							rulesetRootPath = settings.getRulesetPathDir().substring(0, settings.getRulesetPathDir().lastIndexOf(File.separator));
+							File ruleSetDir = new File(settings.getRulesetPathDir());
+							rules.addAll(ruleReader.readFromDirectory(ruleSetDir));
+							rulesetRootPath = ruleSetDir.getParent();
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: "+settings.getRulesetPathDir(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
 						}
 						break;
 					case ZIP:
 						try {
-							rules.addAll(CrySLRuleReader.readFromZipFile(new File(settings.getRulesetPathZip())));
-							rulesetRootPath = settings.getRulesetPathZip().substring(0, settings.getRulesetPathZip().lastIndexOf(File.separator));
+							File ruleSetZip = new File(settings.getRulesetPathDir());
+							rules.addAll(ruleReader.readFromZipFile(ruleSetZip));
+							rulesetRootPath = ruleSetZip.getParent();
 						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified file: "+settings.getRulesetPathZip(), e);
+							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathDir(), e);
 						}
 						break;
 					default:
@@ -128,7 +138,8 @@ public abstract class HeadlessCryptoScanner {
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
-			LOGGER.info("Analysis soot setup done in {} ",stopwatch);
+			ExceptionAwareTransformer.setup(rules);
+			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
 		}
@@ -141,7 +152,7 @@ public abstract class HeadlessCryptoScanner {
 	private void checkIfUsesObject() {
 		final SeedFactory seedFactory = new SeedFactory(HeadlessCryptoScanner.rules);
 		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
-			protected void internalTransform(Body body, String phase, Map options) {
+			protected void internalTransform(Body body, String phase, Map<String, String> options) {
 				if (!body.getMethod().getDeclaringClass().isApplicationClass()) {
 					return;
 				}
@@ -158,9 +169,11 @@ public abstract class HeadlessCryptoScanner {
 	private void analyse() {
 		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
 		PackManager.v().getPack("wjtp").add(transform);
-		callGraphWatch = Stopwatch.createStarted();        
+		callGraphWatch = Stopwatch.createStarted();
+		
 		PackManager.v().getPack("cg").apply();
-        PackManager.v().getPack("wjtp").apply();
+		PackManager.v().getPack("wjtp").apply();
+		// PackManager.v().runPacks();
 	}
 	
 	public String toString() {
@@ -188,7 +201,7 @@ public abstract class HeadlessCryptoScanner {
 				
 				Set<ReportFormat> formats = reportFormats();
 				
-				if (formats.size() > 0) {
+				if (!formats.isEmpty()) {
 					for (ReportFormat format : formats) {
 						switch (format) {
 							case CMD:
@@ -209,6 +222,10 @@ public abstract class HeadlessCryptoScanner {
 								break;
 							case CSV_SUMMARY:
 								fileReporter = new CSVSummaryReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
+								reporter.addReportListener(fileReporter);
+								break;
+							case GITHUB_ANNOTATION:
+								fileReporter = new GitHubAnnotationReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
 								reporter.addReportListener(fileReporter);
 								break;
 							default:
@@ -252,10 +269,21 @@ public abstract class HeadlessCryptoScanner {
 						}
 						return super.debugger(solver, seed);
 					}
+
+					@Override
+					public Collection<String> getForbiddenPredicates() {
+						return forbiddenPredicates();
+					}
+
+					@Override
+					public Collection<String> getIgnoredSections() {
+						return ignoredSections();
+					}
+
 				};
 				
 				if (providerDetection()) {
-					ProviderDetection providerDetection = new ProviderDetection();
+					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
 
 					if(rulesetRootPath == null) {
 						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
@@ -267,13 +295,13 @@ public abstract class HeadlessCryptoScanner {
 						rules.clear();
 						switch(settings.getRulesetPathType()) {
 							case DIR:
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
 								break;
 							case ZIP:
-								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath+File.separator+detectedProvider+".zip"));
+								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath + File.separator + detectedProvider + ".zip"));
 								break;
 							default: 
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath+File.separator+detectedProvider));
+								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
 						}
 					}
 				}
@@ -288,7 +316,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 
 	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
-		G.v().reset();
+		G.reset();
 		Options.v().set_whole_program(wholeProgram);
 		switch (callGraphAlgorithm()) {
 		case CHA:
@@ -383,7 +411,7 @@ public abstract class HeadlessCryptoScanner {
 	}
 	
 	protected String softwareIdentifier(){
-		return settings.getSoftwareIdentifier();
+		return settings.getIdentifier();
 	}
 	
 	protected String getOutputFolder(){
@@ -409,7 +437,15 @@ public abstract class HeadlessCryptoScanner {
 	protected boolean includeStatistics() {
 		return settings.isIncludeStatistics();
 	}
-	
+
+	protected Collection<String> forbiddenPredicates() {
+		return settings.getForbiddenPredicates();
+	}
+
+	protected Collection<String> ignoredSections() {
+		return settings.getIgnoredSections();
+	}
+
 	private static String pathToJCE() {
 		// When whole program mode is disabled, the classpath misses jce.jar
 		return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
@@ -432,5 +468,4 @@ public abstract class HeadlessCryptoScanner {
 	    boolean check = new File(moduleFile).exists();
 	    return check;
 	}
-
 }
