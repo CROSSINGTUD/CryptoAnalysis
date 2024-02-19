@@ -74,8 +74,12 @@ public class CrySLMethodToSootMethod {
 		for(SootClass c : classes) {
 			for (SootMethod m : c.getMethods()) {
 				if (m.getName().equals(methodNameWithoutDeclaringClass) && m.getParameterCount() == noOfParams) {
-					if (parametersMatch(label.getParameters(), m.getParameterTypes())){
+					if (parametersMatch(label.getParameters(), m.getParameterTypes())) {
 						res.add(m);
+
+						// Set the class defining the target method to phantom to avoid analyzing the method,
+						// if it is defined in a superclass
+						c.setPhantomClass();
 					}
 				}
 			}

@@ -1,26 +1,16 @@
 package crypto.preanalysis;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
 import crypto.constraints.ExceptionConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.typestate.LabeledMatcherTransition;
 import soot.Body;
-import soot.BodyTransformer;
-import soot.PackManager;
-import soot.PhaseOptions;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Transform;
 import soot.Unit;
 import soot.UnitPatchingChain;
 import soot.jimple.NullConstant;
@@ -28,21 +18,16 @@ import soot.jimple.Stmt;
 import soot.jimple.internal.JEqExpr;
 import soot.jimple.internal.JIfStmt;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * This transformer adds a branch after each statement, that may throw an
  * Exception, to the handler of that Exception.
  * The exceptions that a statement may throw are declared in the CrySLRule.
  */
-public class ExceptionAwareTransformer extends BodyTransformer {
-
-	public static void setup(final List<CrySLRule> rules) {
-		for (final CrySLRule rule : rules) {
-			final String phaseName = "jap.etr-" + rule.getClassName();
-			PackManager.v().getPack("jap").remove(phaseName);
-			PackManager.v().getPack("jap").add(new Transform(phaseName, new ExceptionAwareTransformer(rule)));
-			PhaseOptions.v().setPhaseOption(phaseName, "on");
-		}
-	}
+public class ExceptionAwareTransformer extends PreTransformer {
 
 	private final SootClass spec;
 
