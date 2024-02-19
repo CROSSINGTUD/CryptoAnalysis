@@ -39,7 +39,7 @@
 
 	<properties>
 		<spdsVersion>2.5.1</spdsVersion>
-		<sootVersion>4.2.1</sootVersion>
+		<sootVersion>4.4.1</sootVersion>
 	</properties>
 	<build>
 		<pluginManagement>
@@ -308,7 +308,6 @@
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
 			<version>1.77</version>
-			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
 		<dependency>
