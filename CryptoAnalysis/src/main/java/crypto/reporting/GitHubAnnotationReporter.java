@@ -115,6 +115,16 @@ public class GitHubAnnotationReporter extends Reporter  {
             summary.append(String.format("DataflowVisitedMethods: %d\n", statistics.getDataflowVisitedMethods()));
         }
 
+        // GitHub only displays 10 error annotations and silently drops the rest.
+        // https://github.com/orgs/community/discussions/26680
+        // https://github.com/orgs/community/discussions/68471
+        if (errorCount > 10) {
+            String missingAnnotationsMessage = "There are more violations than the GitHub annotations interface displays. Please check the log for additional violations.";
+
+            System.out.println("::warning ::" + missingAnnotationsMessage);
+            summary.append("\nWarning: ").append(missingAnnotationsMessage).append("\n");
+        }
+
         setSummary(summary.toString());
 
         if (errorCount != 0) {
