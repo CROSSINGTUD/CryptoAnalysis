@@ -94,7 +94,10 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       continue-on-error: true
       shell: bash
-      run: mvn dependency:copy -Dartifact=de.fraunhofer.iem:CryptoAnalysis:${{ env.GH_ACTION_REF }}:jar:jar-with-dependencies -DoutputDirectory=CryptoAnalysis/build
+      run: |
+        echo "::group::Download"
+        mvn dependency:copy -Dartifact=de.fraunhofer.iem:CryptoAnalysis:${{ env.GH_ACTION_REF }}:jar:jar-with-dependencies -DoutputDirectory=CryptoAnalysis/build
+        echo "::endgroup::"
       working-directory: CryptoAnalysisBuild_98e04be6
       env:
         GH_ACTION_REF: ${{ github.action_ref }}
@@ -104,7 +107,10 @@ runs:
     - name: Compile CryptoAnalysis
       if: steps.cache.outputs.cache-hit != 'true' && steps.download.outcome != 'success'
       shell: bash
-      run: mvn package -DskipTests=true
+      run: |
+        echo "::group::Compile"
+        mvn package -DskipTests=true
+        echo "::endgroup::"
       working-directory: CryptoAnalysisBuild_98e04be6
 
     - name: Copy JAR to convenient path
