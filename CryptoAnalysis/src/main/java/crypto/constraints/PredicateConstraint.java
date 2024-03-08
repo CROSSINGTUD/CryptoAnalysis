@@ -111,7 +111,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 					if (cs.getVarName().equals(varName)) {
 						Collection<Type> vals = context.getPropagatedTypes().get(cs);
 						for (Type t : vals) {
-							if (t.toQuotedString().equals(parameters.get(1).getName())) {
+							if (t.toQuotedString().equals(((CrySLObject) parameters.get(1)).getJavaType())) {
 								for (ExtractedValue v : context.getParsAndVals().get(cs)) {
 									errors.add(
 											new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
@@ -152,8 +152,9 @@ public class PredicateConstraint extends EvaluableConstraint {
 				for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
 					if (cs.getVarName().equals(varName)) {
 						Collection<Type> vals = context.getPropagatedTypes().get(cs);
-						if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), parameters.get(1).getName())
-								|| isSubType(parameters.get(1).getName(), e.toQuotedString()))) {
+						String javaType = ((CrySLObject) parameters.get(1)).getJavaType();
+
+						if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), javaType) || isSubType(javaType, e.toQuotedString()))) {
 							for (ExtractedValue v : context.getParsAndVals().get(cs)) {
 								errors.add(
 										new InstanceOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
