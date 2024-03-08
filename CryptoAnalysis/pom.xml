@@ -329,7 +329,6 @@
 			<groupId>com.google.crypto.tink</groupId>
 			<artifactId>tink</artifactId>
 			<version>1.3.0</version>
-			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
@@ -364,7 +363,6 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>4.0.1</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
         	<groupId>com.fasterxml.jackson.core</groupId>
