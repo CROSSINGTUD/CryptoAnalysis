@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
-public class GitHubAnnotationReporter extends Reporter  {
+public class GitHubAnnotationReporter extends CommandLineReporter {
     /**
      * Path to relate paths in the analyzed jar and the source tree.
      * <p>
@@ -47,13 +47,15 @@ public class GitHubAnnotationReporter extends Reporter  {
      *                                  to false, no statistics will be output.
      */
     public GitHubAnnotationReporter(String softwareID, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
-        super(null, softwareID, rules, callgraphConstructionTime, includeStatistics);
+        super(softwareID, rules, callgraphConstructionTime, includeStatistics);
 
         basePath = getInput("basePath");
     }
 
     @Override
     public void handleAnalysisResults() {
+        System.out.println("::group::Annotations");
+
         // report errors on individual lines
         for (Table.Cell<SootClass, SootMethod, Set<AbstractError>> cell : errorMarkers.cellSet()) {
             SootClass clazz = cell.getRowKey();
@@ -115,11 +117,25 @@ public class GitHubAnnotationReporter extends Reporter  {
             summary.append(String.format("DataflowVisitedMethods: %d\n", statistics.getDataflowVisitedMethods()));
         }
 
+        // GitHub only displays 10 error annotations and silently drops the rest.
+        // https://github.com/orgs/community/discussions/26680
+        // https://github.com/orgs/community/discussions/68471
+        if (errorCount > 10) {
+            String missingAnnotationsMessage = "There are more violations than the GitHub annotations interface displays. Please check the log for additional violations.";
+
+            System.out.println("::warning ::" + missingAnnotationsMessage);
+            summary.append("\nWarning: ").append(missingAnnotationsMessage).append("\n");
+        }
+
         setSummary(summary.toString());
 
         if (errorCount != 0) {
             HeadlessCryptoScanner.exitCode = 1;
         }
+
+        System.out.println("::endgroup::");
+
+        super.handleAnalysisResults();
     }
 
     private Path classToSourcePath(SootClass clazz) {
