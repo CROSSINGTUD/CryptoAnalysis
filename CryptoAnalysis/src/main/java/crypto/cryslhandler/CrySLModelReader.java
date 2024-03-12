@@ -626,7 +626,7 @@ public class CrySLModelReader {
 			case NEVER_TYPE_OF:
 				parameters = Lists.newArrayList(
 						CrySLReaderUtils.toCrySLObject(builtinPredicate.getObject()),
-						new CrySLObject(builtinPredicate.getType().getQualifiedName(), NULL));
+						new CrySLObject(NULL, builtinPredicate.getType().getQualifiedName()));
 				break;
 
 			case NOT_HARD_CODED:
