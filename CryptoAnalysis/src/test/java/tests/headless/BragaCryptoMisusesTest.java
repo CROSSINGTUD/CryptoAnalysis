@@ -103,10 +103,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
-		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
-		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 
 		scanner.exec();
 		assertErrors();
@@ -120,10 +120,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
-		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<ivm.constantIV.SimpleIVConstant: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
@@ -217,19 +217,19 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", ConstraintError.class, 3);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA2: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA3: void main(java.lang.String[])>", TypestateError.class, 0);
 
@@ -246,10 +246,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", ConstraintError.class, 6);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 12);
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.exec();
@@ -267,7 +267,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", TypestateError.class, 4);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 10);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
+		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<br.fixedSeed.FixedSeed2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
@@ -425,13 +425,13 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultOAEP: void negativeTestCase()>", TypestateError.class, 1);
 		
 		// positive test case
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void positiveTestCase()>", TypestateError.class, 0);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void positiveTestCase()>", ConstraintError.class, 0);
 		
 		// negative test case
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void negativeTestCase()>", TypestateError.class, 0);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultRSA: void negativeTestCase()>", ConstraintError.class, 1);
@@ -450,37 +450,37 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", ConstraintError.class, 2);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void negativeTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void negativeTestCase()>", ConstraintError.class, 3);
 		
 		// positive test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void positiveTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void positiveTestCase()>", ConstraintError.class, 0);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void negativeTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA2: void negativeTestCase()>", ConstraintError.class, 1);
 		
 		// positive test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void positiveTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void positiveTestCase()>", ConstraintError.class, 0);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void negativeTestCase()>", TypestateError.class, 0);
-		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA3: void negativeTestCase()>", ConstraintError.class, 1);
 
@@ -562,7 +562,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
-		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
+		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", TypestateError.class, 2);
 
@@ -848,7 +848,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider7: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider8: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider8: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
-		setErrorsCount("<cai.undefinedCSP.UndefinedProvider8: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<cai.undefinedCSP.UndefinedProvider8: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 
 		scanner.exec();
 		assertErrors();

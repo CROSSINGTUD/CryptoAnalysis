@@ -61,6 +61,7 @@ import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
+import test.assertions.IncompleteOperationErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
 import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
@@ -163,17 +164,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									public void visit(IncompleteOperationError incompleteOperationError) {
 										boolean hasTypestateChangeError = false;
 										boolean expectsTypestateChangeError = false;
-										for(Assertion a: expectedResults){
-											if(a instanceof MissingTypestateChange){
+										for (Assertion a: expectedResults){
+											if (a instanceof MissingTypestateChange) {
 												MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
-												if(missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorLocation().getUnit().get())){
+												if (missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorLocation().getUnit().get())) {
 													missingTypestateChange.trigger();
 													hasTypestateChangeError = true;
 												}
 												expectsTypestateChangeError = true;
 											}
-											if(a instanceof NoMissingTypestateChange){
+											if (a instanceof NoMissingTypestateChange) {
 												throw new RuntimeException("Reports a typestate error that should not be reported");
+											}
+
+											if (a instanceof IncompleteOperationErrorCountAssertion) {
+												IncompleteOperationErrorCountAssertion errorCountAssertion = (IncompleteOperationErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
 											}
 										}
 										if(hasTypestateChangeError != expectsTypestateChangeError){
@@ -540,6 +546,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				IntConstant queryVar = (IntConstant) param;
 				queries.add(new TypestateErrorCountAssertion(queryVar.value));
+			}
+
+			if (invocationName.startsWith("incompleteOperationErrors")) {
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant)) {
+					continue;
+				}
+
+				IntConstant queryVar = (IntConstant) param;
+				queries.add(new IncompleteOperationErrorCountAssertion(queryVar.value));
 			}
 
 			if (invocationName.startsWith("dependentError")) {

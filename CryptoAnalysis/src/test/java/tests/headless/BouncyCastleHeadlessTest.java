@@ -35,7 +35,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<gwt_crypto.SkeinMacTest: void performTestOne()>", RequiredPredicateError.class, 1);
 		
 		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", TypestateError.class, 1);
-		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", IncompleteOperationError.class, 2);
+		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", IncompleteOperationError.class, 1);
 		
 		setErrorsCount("<pattern.MacTest: void testMac1()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pattern.MacTest: void testMac2()>", RequiredPredicateError.class, 3);

@@ -1,17 +1,11 @@
 package crypto.analysis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import boomerang.callgraph.ObservableICFG;
+import boomerang.debugger.Debugger;
+import boomerang.jimple.AllocVal;
+import boomerang.jimple.Statement;
+import boomerang.jimple.Val;
+import boomerang.results.ForwardBoomerangResults;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -19,13 +13,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-
-import boomerang.callgraph.ObservableICFG;
-import boomerang.debugger.Debugger;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -61,13 +48,24 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
-import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.ThrowStmt;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
@@ -182,9 +180,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime() {
 		Table<Statement, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
+		Map<Statement, Set<SootMethod>> incompleteOperations = new HashMap<>();
 
 		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
-			Set<SootMethod> expectedMethodsToBeCalled = Sets.newHashSet();
+			Set<SootMethod> expectedMethodsToBeCalled = new HashSet<>();
 
 			for (ITransition n : c.getValue().values()) {
 				if (n.to() == null) {
@@ -209,16 +208,87 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			if (!expectedMethodsToBeCalled.isEmpty()) {
-				Statement s = c.getRowKey();
-				Val val = c.getColumnKey();
-
-				if (!(s.getUnit().get() instanceof ThrowStmt)) {
-					IncompleteOperationError incompleteOperationError = new IncompleteOperationError(s, val, getSpec().getRule(), this, expectedMethodsToBeCalled);
-					this.addError(incompleteOperationError);
-					cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
-				}
+				incompleteOperations.put(c.getRowKey(), expectedMethodsToBeCalled);
 			}
 		}
+
+		// No incomplete operations were found
+		if (incompleteOperations.entrySet().isEmpty()) {
+			return;
+		}
+
+		/* If there is only one incomplete operation, then there is only one dataflow path. Hence,
+		 * the error can be reported directly.
+		 */
+		if (incompleteOperations.entrySet().size() == 1) {
+			Entry<Statement, Set<SootMethod>> entry = incompleteOperations.entrySet().iterator().next();
+			Statement s = entry.getKey();
+			Set<SootMethod> methodsToBeCalled = entry.getValue();
+
+			if (!s.getUnit().isPresent()) {
+				return;
+			}
+
+			if (s.getUnit().get() instanceof ThrowStmt) {
+				return;
+			}
+
+			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, s, spec.getRule(), methodsToBeCalled);
+			this.addError(incompleteOperationError);
+			cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
+		}
+
+		/* Multiple incomplete operations were found. Depending on the dataflow paths, the
+		 * errors are reported:
+		 * 1) A dataflow path ends in an accepting state: No error is reported
+		 * 2) A dataflow path does not end in an accepting state: Report the error on the last used statement on this path
+		 */
+		if (incompleteOperations.size() > 1) {
+			for (Entry<Statement, Set<SootMethod>> entry : incompleteOperations.entrySet()) {
+				Statement statement = entry.getKey();
+				Set<SootMethod> expectedMethodsToBeCalled = entry.getValue();
+
+				// Extract the called SootMethod from the statement
+				if (!statement.getUnit().isPresent()) {
+					continue;
+				}
+
+				if (statement.getUnit().get() instanceof ThrowStmt) {
+					continue;
+				}
+
+				if (!statement.getUnit().get().containsInvokeExpr()) {
+					continue;
+				}
+
+				// Only if the path does not end in an accepting state, the error should be reported
+				InvokeExpr invokeExpr = statement.getUnit().get().getInvokeExpr();
+				if (isMethodToAcceptingState(invokeExpr.getMethod())) {
+					continue;
+				}
+
+				IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, spec.getRule(), expectedMethodsToBeCalled, true);
+				this.addError(incompleteOperationError);
+				cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
+			}
+		}
+	}
+
+	private boolean isMethodToAcceptingState(SootMethod method) {
+		Collection<TransitionEdge> transitions = spec.getRule().getUsagePattern().getAllTransitions();
+		Collection<CrySLMethod> methods = CrySLMethodToSootMethod.v().convert(method);
+
+		for (TransitionEdge edge : transitions) {
+            if (edge.getLabel().stream().noneMatch(e -> methods.contains(e))) {
+                continue;
+            }
+
+            if (edge.to().getAccepting()) {
+                return true;
+            }
+        }
+
+		return false;
 	}
 
 	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
