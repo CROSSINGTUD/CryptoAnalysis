@@ -4,7 +4,6 @@ import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
-import boomerang.preanalysis.BoomerangPretransformer;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.analysis.CrySLAnalysisListener;
@@ -16,8 +15,8 @@ import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
-import crypto.preanalysis.ExceptionAwareTransformer;
 import crypto.preanalysis.SeedFactory;
+import crypto.preanalysis.TransformerSetup;
 import crypto.providerdetection.ProviderDetection;
 import crypto.reporting.CSVReporter;
 import crypto.reporting.CSVSummaryReporter;
@@ -138,7 +137,7 @@ public abstract class HeadlessCryptoScanner {
 			} catch (CryptoAnalysisException e) {
 				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
 			}
-			ExceptionAwareTransformer.setup(rules);
+
 			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
 			analyse();
 			LOGGER.info("Analysis finished in {}", stopwatch);
@@ -189,8 +188,8 @@ public abstract class HeadlessCryptoScanner {
 			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				BoomerangPretransformer.v().reset();
-				BoomerangPretransformer.v().apply();
+				TransformerSetup.v().setupPreTransformer(rules);
+
 				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
 				
@@ -336,6 +335,14 @@ public abstract class HeadlessCryptoScanner {
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
 		Options.v().set_keep_line_number(true);
+
+		/* This phase is new in soot 4.3.0 and manipulates the jimple code in a
+		 * way that CryptoAnalysis is not able to find seeds in some cases (see
+		 * https://github.com/CROSSINGTUD/CryptoAnalysis/issues/293). Therefore,
+		 * it is disabled.
+		 */
+		Options.v().setPhaseOption("jb.sils", "enabled:false");
+
 		// JAVA 8
 		if(getJavaVersion() < 9)
 		{
@@ -380,13 +387,14 @@ public abstract class HeadlessCryptoScanner {
 		includeList.add("java.lang.String");
 		includeList.add("java.lang.StringCoding");
 		includeList.add("java.lang.StringIndexOutOfBoundsException");
-		return includeList;
+		return new LinkedList<>();
 	}
 
 	private List<String> getExcludeList() {
 		List<String> exList = new LinkedList<String>();
 		List<CrySLRule> rules = getRules();
-		for(CrySLRule r : rules) {
+
+		for (CrySLRule r : rules) {
 			exList.add(r.getClassName());
 		}
 		return exList;

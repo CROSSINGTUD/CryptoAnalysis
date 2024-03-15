@@ -36,6 +36,8 @@ public class Assertions {
 
 	public static void typestateErrors(int i) {}
 
+	public static void incompleteOperationErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}

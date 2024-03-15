@@ -1,52 +1,69 @@
 package crypto.analysis.errors;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
 import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 import soot.SootMethod;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
-/** This class defines-IncompleteOperationError:
- *
- *Found when the usage of an object may be incomplete
- *
- *For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
- *This error heavily depends on the computed call graph (CHA by default)
- *
- * */
 
+/** <p>This class defines-IncompleteOperationError:</p>
+ *
+ * <p>Found when the usage of an object may be incomplete. If there are
+ * multiple paths, and at least one path introduces an incomplete operation,
+ * the analysis indicates that there is a potential path with missing calls.</p>
+ *
+ * <p>For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
+ * This error heavily depends on the computed call graph (CHA by default).</p>
+ */
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
-	private Val errorVariable;
-	private Collection<SootMethod> expectedMethodCalls;
-	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
+	private final Collection<SootMethod> expectedMethodCalls;
+	private final Set<String> expectedMethodCallsSet;
+	private final boolean multiplePaths;
 
-	public IncompleteOperationError(Statement errorLocation,
-			Val errorVariable, CrySLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
+	/**
+	 * Create an IncompleteOperationError, if there is only one dataflow path, where the
+	 * incomplete operation occurs.
+	 *
+	 * @param objectLocation the seed for the incomplete operation
+	 * @param errorLocation the statement of the last usage of the seed
+	 * @param rule the CrySL rule for the seed
+	 * @param expectedMethodsToBeCalled the methods that are expected to be called
+	 */
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled) {
+		this(objectLocation, errorLocation, rule, expectedMethodsToBeCalled, false);
+	}
+
+	/**
+	 * Create an IncompleteOperationError, if there is at least one dataflow path, where an
+	 * incomplete operation occurs.
+	 *
+	 * @param objectLocation the seed for the incomplete operation
+	 * @param errorLocation the statement of the last usage of the seed
+	 * @param rule the CrySL rule for the seed
+	 * @param expectedMethodsToBeCalled the methods that are expected to be called
+	 * @param multiplePaths set to true, if there are multiple paths (default: false)
+	 */
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
 		super(errorLocation, rule, objectLocation);
-		this.errorVariable = errorVariable;
-		this.expectedMethodCalls = expectedMethodsToBeCalled;	
-		
+		this.expectedMethodCalls = expectedMethodsToBeCalled;
+		this.multiplePaths = multiplePaths;
+
+		this.expectedMethodCallsSet = new HashSet<>();
 		for (SootMethod method : expectedMethodCalls) {
 			this.expectedMethodCallsSet.add(method.getSignature());
-		}	
+		}
 	}
 
-	public Val getErrorVariable() {
-		return errorVariable;
-	}
-	
 	public Collection<SootMethod> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
@@ -57,21 +74,52 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
 	@Override
 	public String toErrorMarkerString() {
-		Collection<SootMethod> expectedCalls = getExpectedMethodCalls();
-		final StringBuilder msg = new StringBuilder();
+		if (multiplePaths) {
+			return getErrorMarkerStringForMultipleDataflowPaths();
+		} else {
+			return getErrorMarkerStringForSingleDataflowPath();
+		}
+	}
+
+	private String getErrorMarkerStringForSingleDataflowPath() {
+		StringBuilder msg = new StringBuilder();
 		msg.append("Operation");
 		msg.append(getObjectType());
-		msg.append(" object not completed. Expected call to ");
-		final Set<String> altMethods = new HashSet<>();
-		for (final SootMethod expectedCall : expectedCalls) {
+		msg.append(" not completed. Expected call to ");
+
+		Set<String> altMethods = getFormattedExpectedCalls();
+		msg.append(Joiner.on(", ").join(altMethods));
+		return msg.toString();
+	}
+
+	private String getErrorMarkerStringForMultipleDataflowPaths() {
+		if (!getErrorLocation().isCallsite() || !getErrorLocation().getUnit().isPresent()) {
+			return "Unable to describe error";
+		}
+		StringBuilder msg = new StringBuilder();
+		msg.append("Call to ");
+
+		InvokeExpr invokeExpr = getErrorLocation().getUnit().get().getInvokeExpr();
+		msg.append(invokeExpr.getMethod().getName());
+		msg.append(getObjectType());
+		msg.append(" is on a dataflow path with an incomplete operation. Potential missing call to ");
+
+		Set<String> altMethods = getFormattedExpectedCalls();
+		msg.append(Joiner.on(", ").join(altMethods));
+		return msg.toString();
+	}
+
+	private Set<String> getFormattedExpectedCalls() {
+		Set<String> altMethods = new HashSet<>();
+
+		for (SootMethod expectedCall : getExpectedMethodCalls()) {
 			if (stmtInvokesExpectedCallName(expectedCall.getName())){
 				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
 			} else {
 				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			}
 		}
-		msg.append(Joiner.on(", ").join(altMethods));
-		return msg.toString();
+		return altMethods;
 	}
 
 	/**
@@ -80,19 +128,24 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 */
 	private boolean stmtInvokesExpectedCallName(String expectedCallName){
 		Statement errorLocation = getErrorLocation();
-		if (errorLocation.isCallsite()){
-			Optional<Stmt> stmtOptional = errorLocation.getUnit();
-			if (stmtOptional.isPresent()){
-				Stmt stmt = stmtOptional.get();
-				if (stmt.containsInvokeExpr()){
-					InvokeExpr call = stmt.getInvokeExpr();
-					SootMethod calledMethod = call.getMethod();
-					if (calledMethod.getName().equals(expectedCallName)){
-						return true;
-					}
-				}
-			}
+
+		if (!errorLocation.isCallsite()) {
+			return false;
 		}
+
+		Optional<Stmt> stmtOptional = errorLocation.getUnit().toJavaUtil();
+
+		if (!stmtOptional.isPresent()) {
+			return false;
+		}
+
+		Stmt stmt = stmtOptional.get();
+		if (stmt.containsInvokeExpr()) {
+			InvokeExpr call = stmt.getInvokeExpr();
+			SootMethod calledMethod = call.getMethod();
+			return calledMethod.getName().equals(expectedCallName);
+		}
+
 		return false;
 	}
 	

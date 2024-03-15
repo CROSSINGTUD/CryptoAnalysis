@@ -1,28 +1,18 @@
 package test;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
-
 import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.jimple.Statement;
 import boomerang.jimple.Val;
-import boomerang.preanalysis.BoomerangPretransformer;
 import boomerang.results.ForwardBoomerangResults;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
@@ -48,6 +38,7 @@ import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
+import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import soot.Body;
@@ -70,6 +61,7 @@ import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
+import test.assertions.IncompleteOperationErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
 import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
@@ -81,19 +73,31 @@ import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework{
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
-	List<CrySLRule> rules;
+	private List<CrySLRule> rules = getRules();
 	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
+
+		// Required since Soot 4.3.0
+		Options.v().setPhaseOption("jb.sils", "enabled:false");
+
 		return new SceneTransformer() {
 
-			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-				BoomerangPretransformer.v().reset();
-				BoomerangPretransformer.v().apply();
+			protected void internalTransform(String phaseName, Map<String, String> options) {
+				TransformerSetup.v().setupPreTransformer(rules);
+
 				staticIcfg = new JimpleBasedInterproceduralCFG(true);
 //				icfg = new ObservableStaticICFG(new JimpleBasedInterproceduralCFG(true));
 				icfg = new ObservableDynamicICFG(true);
@@ -160,17 +164,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									public void visit(IncompleteOperationError incompleteOperationError) {
 										boolean hasTypestateChangeError = false;
 										boolean expectsTypestateChangeError = false;
-										for(Assertion a: expectedResults){
-											if(a instanceof MissingTypestateChange){
+										for (Assertion a: expectedResults){
+											if (a instanceof MissingTypestateChange) {
 												MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
-												if(missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorLocation().getUnit().get())){
+												if (missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorLocation().getUnit().get())) {
 													missingTypestateChange.trigger();
 													hasTypestateChangeError = true;
 												}
 												expectsTypestateChangeError = true;
 											}
-											if(a instanceof NoMissingTypestateChange){
+											if (a instanceof NoMissingTypestateChange) {
 												throw new RuntimeException("Reports a typestate error that should not be reported");
+											}
+
+											if (a instanceof IncompleteOperationErrorCountAssertion) {
+												IncompleteOperationErrorCountAssertion errorCountAssertion = (IncompleteOperationErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
 											}
 										}
 										if(hasTypestateChangeError != expectsTypestateChangeError){
@@ -348,7 +357,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						return reporters;
 					}
 				};
-				scanner.scan(getRules());
+				scanner.scan(rules);
 				
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
@@ -389,7 +398,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		for(CrySLRule r : getRules()) {
+
+		for (CrySLRule r : rules) {
 			excludedPackages.add(r.getClassName());
 		}
 		return excludedPackages;
@@ -536,6 +546,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				IntConstant queryVar = (IntConstant) param;
 				queries.add(new TypestateErrorCountAssertion(queryVar.value));
+			}
+
+			if (invocationName.startsWith("incompleteOperationErrors")) {
+				Value param = invokeExpr.getArg(0);
+				if (!(param instanceof IntConstant)) {
+					continue;
+				}
+
+				IntConstant queryVar = (IntConstant) param;
+				queries.add(new IncompleteOperationErrorCountAssertion(queryVar.value));
 			}
 
 			if (invocationName.startsWith("dependentError")) {

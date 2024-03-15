@@ -46,7 +46,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.DefinedProvider6: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.DefinedProvider6: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 
 		scanner.exec();
@@ -67,7 +67,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", TypestateError.class, 1);
-		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", TypestateError.class, 2);
 
@@ -103,25 +103,25 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		// positive test case
-		setErrorsCount("<example.UseOAEPForRSA: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseOAEPForRSA: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.UseOAEPForRSA: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.UseOAEPForRSA: void positiveTestCase()>", ConstraintError.class, 0);
 		setErrorsCount("<example.UseOAEPForRSA: void positiveTestCase()>", TypestateError.class, 0);
 		
 		// negative test case
-		setErrorsCount("<example.UseOAEPForRSA: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseOAEPForRSA: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.UseOAEPForRSA: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UseOAEPForRSA: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.UseOAEPForRSA: void negativeTestCase()>", TypestateError.class, 0);
 		
 		// positive test case
-		setErrorsCount("<example.UsePKCS1ForRSA: void positiveTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UsePKCS1ForRSA: void positiveTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.UsePKCS1ForRSA: void positiveTestCase()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.UsePKCS1ForRSA: void positiveTestCase()>", ConstraintError.class, 0);
 		setErrorsCount("<example.UsePKCS1ForRSA: void positiveTestCase()>", TypestateError.class, 0);
 
 		// negative test case
-		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", TypestateError.class, 0);
@@ -261,10 +261,10 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", TypestateError.class, 2);
 		
@@ -736,10 +736,10 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseRandomIVsForCBC: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<example.UseRandomIVsForCBC: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseRandomIVsForCFB: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", ConstraintError.class, 2);
 
