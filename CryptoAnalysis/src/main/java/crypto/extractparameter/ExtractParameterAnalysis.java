@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -15,9 +16,8 @@ import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.AllocVal;
+import boomerang.scene.Val;
 import boomerang.results.BackwardBoomerangResults;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
@@ -32,13 +32,14 @@ import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.Edge;
 import sync.pds.solver.nodes.Node;
 import typestate.finiteautomata.MatcherTransition;
 import wpds.impl.Weight.NoWeight;
 
 public class ExtractParameterAnalysis {
 
-	private Map<Statement, SootMethod> allCallsOnObject;
+	private Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject;
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
 	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
@@ -51,7 +52,7 @@ public class ExtractParameterAnalysis {
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject,
+	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject,
 			SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
@@ -63,7 +64,7 @@ public class ExtractParameterAnalysis {
 	}
 
 	public void run() {
-		for (Map.Entry<Statement,SootMethod> stmt : allCallsOnObject.entrySet()) {
+		for (Map.Entry<ControlFlowGraph.Edge,SootMethod> stmt : allCallsOnObject.entrySet()) {
 			if (!stmt.getKey().isCallsite())
 				continue;
 
@@ -90,21 +91,21 @@ public class ExtractParameterAnalysis {
 		return querySites;
 	}
 
-	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
+	private void injectQueryAtCallSite(CrySLMethod match, ControlFlowGraph.Edge callSite) {
 		int index = 0;
 		for (Entry<String, String> param : match.getParameters())
 			addQueryAtCallsite(param.getKey(), callSite, index++);
 	}
 
-	public void addQueryAtCallsite(final String varNameInSpecification, final Statement stmt, final int index) {
+	public void addQueryAtCallsite(final String varNameInSpecification, final ControlFlowGraph.Edge stmt, final int index) {
 		if (!stmt.isCallsite())
 			return;
 		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
 		if (!(parameter instanceof Local)) {
 			Val parameterVal = new Val(parameter, stmt.getMethod());
 			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameterVal, index, varNameInSpecification);
-			Set<Node<Statement, Val>> dataFlowPath = Sets.newHashSet();
-			dataFlowPath.add(new Node<Statement, Val>(stmt, parameterVal));
+			Set<Node<ControlFlowGraph.Edge, Val>> dataFlowPath = Sets.newHashSet();
+			dataFlowPath.add(new Node<ControlFlowGraph.Edge, Val>(stmt, parameterVal));
 			collectedValues.put(cs, new ExtractedValue(stmt, parameter, dataFlowPath));
 			querySites.add(cs);
 			return;
@@ -151,7 +152,7 @@ public class ExtractParameterAnalysis {
 	}
 
 	public class AdditionalBoomerangQuery extends BackwardQuery {
-		public AdditionalBoomerangQuery(Statement stmt, Val variable) {
+		public AdditionalBoomerangQuery(ControlFlowGraph.Edge stmt, Val variable) {
 			super(stmt, variable);
 		}
 

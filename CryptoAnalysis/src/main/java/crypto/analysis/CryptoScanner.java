@@ -3,8 +3,8 @@ package crypto.analysis;
 import boomerang.Query;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.predicates.PredicateHandler;
@@ -37,10 +37,10 @@ public abstract class CryptoScanner {
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
 
-	private DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(Node<Statement, Val> key) {
+		protected AnalysisSeedWithEnsuredPredicate createItem(Node<ControlFlowGraph.Edge, Val> key) {
 			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
 		}
 	};
@@ -179,7 +179,7 @@ public abstract class CryptoScanner {
 		return false;
 	}
 
-	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<Statement,Val> factAtStatement) {
+	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<ControlFlowGraph.Edge, Val> factAtStatement) {
 		boolean addToWorklist = false;
 		if (!seedsWithoutSpec.containsKey(factAtStatement))
 			addToWorklist = true;

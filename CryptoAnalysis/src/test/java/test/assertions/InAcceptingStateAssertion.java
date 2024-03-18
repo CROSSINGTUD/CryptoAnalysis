@@ -1,6 +1,6 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import soot.Unit;
 import test.Assertion;
 import test.ComparableResult;

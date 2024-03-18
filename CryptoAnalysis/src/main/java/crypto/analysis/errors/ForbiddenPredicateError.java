@@ -1,6 +1,6 @@
 package crypto.analysis.errors;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
@@ -10,7 +10,7 @@ public class ForbiddenPredicateError extends AbstractError{
 	private CrySLPredicate contradictedPredicate;
 	private CallSiteWithExtractedValue extractedValues;
 
-	public ForbiddenPredicateError(CrySLPredicate contradictedPredicate, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
+	public ForbiddenPredicateError(CrySLPredicate contradictedPredicate, ControlFlowGraph.Edge location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
 		super(location, rule);
 		this.contradictedPredicate = contradictedPredicate;
 		this.extractedValues = multimap;

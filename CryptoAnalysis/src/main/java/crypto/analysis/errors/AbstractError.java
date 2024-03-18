@@ -1,6 +1,6 @@
 package crypto.analysis.errors;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.rules.CrySLRule;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbstractError implements IError{
-	private Statement errorLocation;
+	private ControlFlowGraph.Edge errorLocation;
 	private CrySLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
@@ -22,7 +22,7 @@ public abstract class AbstractError implements IError{
 	private Set<AbstractError> causedByErrors; // preceding
 	private Set<AbstractError> willCauseErrors; // subsequent
 
-	public AbstractError(Statement errorLocation, CrySLRule rule) {
+	public AbstractError(ControlFlowGraph.Edge errorLocation, CrySLRule rule) {
 		this.errorLocation = errorLocation;
 		this.rule = rule;
 		this.outerMethod = errorLocation.getMethod().getSignature();
@@ -63,7 +63,7 @@ public abstract class AbstractError implements IError{
 		return this.causedByErrors;
 	}
 
-	public Statement getErrorLocation() {
+	public ControlFlowGraph.Edge getErrorLocation() {
 		return errorLocation;
 	}
 

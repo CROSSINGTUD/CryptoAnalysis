@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.InstanceOfError;
@@ -68,7 +68,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 					// check whether predMethod is in foundMethods, which type-state analysis has to
 					// figure out
 					CrySLMethod reqMethod = (CrySLMethod) predMethod;
-					for (Statement unit : context.getCollectedCalls()) {
+					for (ControlFlowGraph.Edge unit : context.getCollectedCalls()) {
 						if (!(unit.isCallsite()))
 							continue;
 						SootMethod foundCall = ((Stmt) unit.getUnit().get()).getInvokeExpr().getMethod();
@@ -90,7 +90,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 					// analysis has to figure out
 					CrySLMethod reqMethod = ((CrySLMethod) predForbMethod);
 
-					for (Statement call : context.getCollectedCalls()) {
+					for (ControlFlowGraph.Edge call : context.getCollectedCalls()) {
 						if (!call.isCallsite())
 							continue;
 						SootMethod foundCall = call.getUnit().get().getInvokeExpr().getMethod();

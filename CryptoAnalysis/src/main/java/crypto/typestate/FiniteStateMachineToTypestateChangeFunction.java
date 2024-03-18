@@ -8,8 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
+import boomerang.scene.AllocVal;
 import soot.RefType;
 import soot.SootMethod;
 import soot.Unit;

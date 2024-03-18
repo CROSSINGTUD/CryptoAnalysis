@@ -2,7 +2,7 @@ package crypto.rules;
 
 import java.util.Set;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.interfaces.ISLConstraint;
 
 public class CrySLConstraint implements ISLConstraint {
@@ -14,7 +14,7 @@ public class CrySLConstraint implements ISLConstraint {
 	private LogOps operator;
 	private ISLConstraint left;
 	private ISLConstraint right;
-	private Statement location;
+	private ControlFlowGraph.Edge location;
 
 	public CrySLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
 		left = l;
@@ -65,12 +65,12 @@ public class CrySLConstraint implements ISLConstraint {
 	}
 
 	@Override
-	public void setLocation(Statement location) {
+	public void setLocation(ControlFlowGraph.Edge location) {
 		this.location = location;
 	}
 
 	@Override
-	public Statement getLocation() {
+	public ControlFlowGraph.Edge getLocation() {
 		return location;
 	}
 

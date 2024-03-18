@@ -1,6 +1,6 @@
 package crypto.analysis.errors;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
@@ -39,7 +39,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * @param rule the CrySL rule for the seed
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled) {
+	public IncompleteOperationError(IAnalysisSeed objectLocation, ControlFlowGraph.Edge errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled) {
 		this(objectLocation, errorLocation, rule, expectedMethodsToBeCalled, false);
 	}
 
@@ -53,7 +53,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 * @param multiplePaths set to true, if there are multiple paths (default: false)
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
+	public IncompleteOperationError(IAnalysisSeed objectLocation, ControlFlowGraph.Edge errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
 		super(errorLocation, rule, objectLocation);
 		this.expectedMethodCalls = expectedMethodsToBeCalled;
 		this.multiplePaths = multiplePaths;

@@ -5,7 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import boomerang.jimple.Statement;
+
+import boomerang.scene.ControlFlowGraph;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 
@@ -13,15 +14,15 @@ public class AlternativeReqPredicate implements ISLConstraint {
 
 	private static final long serialVersionUID = 9111353268603202392L;
 	private final List<CrySLPredicate> alternatives;
-	private Statement stmt;
+	private ControlFlowGraph.Edge stmt;
 
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne,  Statement stmt) {
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne,  ControlFlowGraph.Edge stmt) {
 		this.alternatives = new ArrayList<CrySLPredicate>();
 		this.alternatives.add(alternativeOne);
 		this.stmt = stmt;	
 	}
 	
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, Statement stmt) {
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, ControlFlowGraph.Edge stmt) {
 		this.alternatives = new ArrayList<CrySLPredicate>();
 		this.alternatives.add(alternativeOne);
 		this.alternatives.add(alternativeTwo);
@@ -59,7 +60,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		return true;
 	}
 
-	public Statement getLocation() {
+	public ControlFlowGraph.Edge getLocation() {
 		return stmt;
 	}
 
@@ -83,7 +84,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public void setLocation(Statement location) {
+	public void setLocation(ControlFlowGraph.Edge location) {
 		throw new UnsupportedOperationException();
 	}
 

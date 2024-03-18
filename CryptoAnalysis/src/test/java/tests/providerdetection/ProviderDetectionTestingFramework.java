@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.preanalysis.BoomerangPretransformer;
+import boomerang.scene.jimple.BoomerangPretransformer;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.providerdetection.ProviderDetection;
 import soot.G;

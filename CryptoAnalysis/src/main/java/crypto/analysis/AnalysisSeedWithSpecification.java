@@ -2,9 +2,9 @@ package crypto.analysis;
 
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.AllocVal;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -73,17 +73,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private ExtendedIDEALAnaylsis analysis;
 	private ForwardBoomerangResults<TransitionFunction> results;
 	private Collection<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
-	private Multimap<Statement, State> typeStateChange = HashMultimap.create();
+	private Multimap<ControlFlowGraph.Edge, State> typeStateChange = HashMultimap.create();
 	private Collection<EnsuredCrySLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private Set<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintsSatisfied;
-	protected Map<Statement, SootMethod> allCallsOnObject = Maps.newLinkedHashMap();
+	protected Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject = Maps.newLinkedHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
 	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, Statement stmt, Val val, ClassSpecification spec) {
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, ControlFlowGraph.Edge stmt, Val val, ClassSpecification spec) {
 		super(cryptoScanner, stmt, val, spec.getFSM().getInitialWeight(stmt));
 		this.spec = spec;
 		this.analysis = new ExtendedIDEALAnaylsis() {
@@ -163,12 +163,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void computeTypestateErrorUnits() {
-		Set<Statement> allTypestateChangeStatements = Sets.newHashSet();
-		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+		Set<ControlFlowGraph.Edge> allTypestateChangeStatements = Sets.newHashSet();
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			allTypestateChangeStatements.addAll(c.getValue().getLastStateChangeStatements());
 		}
-		for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
-			Statement curr = c.getRowKey();
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			ControlFlowGraph.Edge curr = c.getRowKey();
 			if (allTypestateChangeStatements.contains(curr)) {
 				Collection<? extends State> targetStates = getTargetStates(c.getValue());
 				for (State newStateAtCurr : targetStates) {
@@ -179,10 +179,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime() {
-		Table<Statement, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
-		Map<Statement, Set<SootMethod>> incompleteOperations = new HashMap<>();
+		Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
+		Map<ControlFlowGraph.Edge, Set<SootMethod>> incompleteOperations = new HashMap<>();
 
-		for (Cell<Statement, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
 			Set<SootMethod> expectedMethodsToBeCalled = new HashSet<>();
 
 			for (ITransition n : c.getValue().values()) {
@@ -221,8 +221,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		 * the error can be reported directly.
 		 */
 		if (incompleteOperations.entrySet().size() == 1) {
-			Entry<Statement, Set<SootMethod>> entry = incompleteOperations.entrySet().iterator().next();
-			Statement s = entry.getKey();
+			Entry<ControlFlowGraph.Edge, Set<SootMethod>> entry = incompleteOperations.entrySet().iterator().next();
+			ControlFlowGraph.Edge s = entry.getKey();
 			Set<SootMethod> methodsToBeCalled = entry.getValue();
 
 			if (!s.getUnit().isPresent()) {
@@ -244,8 +244,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		 * 2) A dataflow path does not end in an accepting state: Report the error on the last used statement on this path
 		 */
 		if (incompleteOperations.size() > 1) {
-			for (Entry<Statement, Set<SootMethod>> entry : incompleteOperations.entrySet()) {
-				Statement statement = entry.getKey();
+			for (Entry<ControlFlowGraph.Edge, Set<SootMethod>> entry : incompleteOperations.entrySet()) {
+				ControlFlowGraph.Edge statement = entry.getKey();
 				Set<SootMethod> expectedMethodsToBeCalled = entry.getValue();
 
 				// Extract the called SootMethod from the statement
@@ -291,7 +291,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return false;
 	}
 
-	private void typeStateChangeAtStatement(Statement curr, State stateNode) {
+	private void typeStateChangeAtStatement(ControlFlowGraph.Edge curr, State stateNode) {
 		if (typeStateChange.put(curr, stateNode)) {
 			if (stateNode instanceof ReportingErrorStateNode) {
 				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
@@ -332,7 +332,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		for (CrySLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
 			boolean isPredicateGeneratingStateAvailable = false;
-			for (Entry<Statement, State> entry : typeStateChange.entries()) {
+			for (Entry<ControlFlowGraph.Edge, State> entry : typeStateChange.entries()) {
 				State state = entry.getValue();
 
 				// Check, whether the predicate should be generated in state
@@ -367,7 +367,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				 */
 				HiddenPredicate hiddenPredicate = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.GeneratingStateIsNeverReached);
 
-				for (Entry<Statement, State> entry : typeStateChange.entries()) {
+				for (Entry<ControlFlowGraph.Edge, State> entry : typeStateChange.entries()) {
 					ensurePredicate(hiddenPredicate, entry.getKey(), entry.getValue());
 				}
 			}
@@ -382,7 +382,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param currStmt the statement before the type change
 	 * @param stateNode the next state after executing {@code currStmt}
 	 */
-	private void ensurePredicate(EnsuredCrySLPredicate ensuredPred, Statement currStmt, State stateNode) {
+	private void ensurePredicate(EnsuredCrySLPredicate ensuredPred, ControlFlowGraph.Edge currStmt, State stateNode) {
 		// TODO only for first parameter?
 		for (ICrySLPredicateParameter predicateParam : ensuredPred.getPredicate().getParameters()) {
 			if (predicateParam.getName().equals("this")) {
@@ -443,10 +443,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param stateNode the state, where the predicate is expected to be ensured
 	 * @param currStmt the statement that leads to the state
 	 */
-	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, Statement currStmt) {
+	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, ControlFlowGraph.Edge currStmt) {
 		predicateHandler.expectPredicate(this, currStmt, ensuredPred.getPredicate());
 
-		for (Cell<Statement, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
 			if (containsTargetState(e.getValue(), stateNode)) {
 				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 			}
@@ -473,7 +473,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param currStmt the statement that ensures the predicate
 	 * @param accessGraph holds the statement and the other seed's type
 	 */
-	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, Statement currStmt, Val accessGraph) {
+	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, ControlFlowGraph.Edge currStmt, Val accessGraph) {
 		boolean specificationExists = false;
 
 		// Check, whether there is a specification (i.e. a CrySL rule) for the target object
@@ -550,7 +550,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			 * and ensure it in all accepting states that do not negate it
 			 */
 			addEnsuredPredicate(predWithThis);
-			for (Cell<Statement, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 				Collection<? extends State> states = getTargetStates(c.getValue());
 
 				for (State state : states) {
@@ -938,11 +938,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	@Override
-	public Set<Node<Statement, Val>> getDataFlowPath() {
+	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
 		return results.getDataFlowPath();
 	}
 
-	public Map<Statement, SootMethod> getAllCallsOnObject() {
+	public Map<ControlFlowGraph.Edge, SootMethod> getAllCallsOnObject() {
 		return allCallsOnObject;
 	}
 

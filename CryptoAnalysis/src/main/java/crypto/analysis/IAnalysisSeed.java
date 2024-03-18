@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.predicates.PredicateHandler;
 import soot.SootMethod;
@@ -23,7 +23,7 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 	protected final List<AbstractError> errorCollection;
 	private String objectId;
 
-	public IAnalysisSeed(CryptoScanner scanner, Statement stmt, Val fact, TransitionFunction func){
+	public IAnalysisSeed(CryptoScanner scanner, ControlFlowGraph.Edge stmt, Val fact, TransitionFunction func){
 		super(stmt,fact, func);
 		this.cryptoScanner = scanner;
 		this.predicateHandler = scanner.getPredicateHandler();
@@ -58,6 +58,6 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 		
 	}
 	
-	public abstract Set<Node<Statement, Val>> getDataFlowPath();
+	public abstract Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath();
 	
 }

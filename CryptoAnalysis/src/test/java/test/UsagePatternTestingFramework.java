@@ -4,8 +4,8 @@ import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -250,10 +250,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							}
 
 							@Override
-							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
-									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
-								for(Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()){
+							public void ensuredPredicates(Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
+									Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+									Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
+								for(Cell<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()){
 									for(Assertion e : expectedResults){
 										if(e instanceof HasEnsuredPredicateAssertion){
 											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
@@ -334,7 +334,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						
 
 							@Override
-							public void onSeedTimeout(Node<Statement, Val> seed) {
+							public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {
 								
 							}
 

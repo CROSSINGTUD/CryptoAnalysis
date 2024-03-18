@@ -3,13 +3,13 @@ package test;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import soot.Unit;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
@@ -28,9 +28,9 @@ public class TestingResultReporter {
 		}
 	}
 
-	public void onSeedFinished(Node<Statement, Val> seed, final Table<Statement, Val, TransitionFunction> res) {
+	public void onSeedFinished(Node<ControlFlowGraph.Edge, Val> seed, final Table<ControlFlowGraph.Edge, Val, TransitionFunction> res) {
 		for (final Entry<Unit, ComparableResult<State, Val>> expectedResults : allExpectedTypestateResults.entries()) {
-			for (Cell<Statement, Val, TransitionFunction> s : res.cellSet()) {
+			for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> s : res.cellSet()) {
 				Unit expectedUnit = expectedResults.getKey();
 				Val expectedVal = expectedResults.getValue().getVal();
 

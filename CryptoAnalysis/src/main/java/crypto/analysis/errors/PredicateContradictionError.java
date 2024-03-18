@@ -2,7 +2,7 @@ package crypto.analysis.errors;
 
 import java.util.Map.Entry;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 
@@ -10,7 +10,7 @@ public class PredicateContradictionError extends AbstractError {
 
 	Entry<CrySLPredicate, CrySLPredicate> mismatchedPreds;
 
-	public PredicateContradictionError(Statement errorLocation, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
+	public PredicateContradictionError(ControlFlowGraph.Edge errorLocation, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
 		super(errorLocation, rule);
 		mismatchedPreds = disPair;
 	}

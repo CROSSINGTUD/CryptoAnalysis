@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.typestate.CrySLMethodToSootMethod;
@@ -37,7 +37,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 */
 	@Override
 	public void evaluate() {
-		for (Statement call : context.getCollectedCalls()) {
+		for (ControlFlowGraph.Edge call : context.getCollectedCalls()) {
 			evaluate(call);
 		}
 	}
@@ -48,7 +48,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * 
 	 * @param call	the called statement
 	 */
-	public void evaluate(Statement call) {
+	public void evaluate(ControlFlowGraph.Edge call) {
 		try {
 			Stmt stmt = call.getUnit().get();
 			if (!isSameMethod(stmt.getInvokeExpr().getMethod()))

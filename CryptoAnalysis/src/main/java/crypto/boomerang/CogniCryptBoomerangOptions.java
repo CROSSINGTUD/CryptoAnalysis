@@ -4,9 +4,8 @@ import com.google.common.base.Optional;
 
 import boomerang.DefaultBoomerangOptions;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.AllocVal;
+import boomerang.scene.Val;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;

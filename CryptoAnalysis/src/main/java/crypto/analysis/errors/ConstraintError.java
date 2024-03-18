@@ -3,10 +3,10 @@ package crypto.analysis.errors;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.CharMatcher;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -45,7 +45,7 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	}
 	
 	@Override
-	public Set<Node<Statement, Val>> getDataFlowPath() {
+	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
 		return callSiteWithParamIndex.getVal().getDataFlowPath();
 	}
 

@@ -1,12 +1,11 @@
 package crypto.boomerang;
 
+import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import com.google.common.base.Optional;
 
-import boomerang.IntAndStringBoomerangOptions;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.AllocVal;
+import boomerang.scene.Val;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;

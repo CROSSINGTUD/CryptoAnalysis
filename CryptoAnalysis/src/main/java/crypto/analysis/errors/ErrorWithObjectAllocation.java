@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import java.util.Set;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 import sync.pds.solver.nodes.Node;
@@ -11,7 +11,7 @@ import sync.pds.solver.nodes.Node;
 public abstract class ErrorWithObjectAllocation extends AbstractError{
 	private final IAnalysisSeed objectAllocationLocation;
 
-	public ErrorWithObjectAllocation(Statement errorLocation, CrySLRule rule, IAnalysisSeed objectAllocationLocation) {
+	public ErrorWithObjectAllocation(ControlFlowGraph.Edge errorLocation, CrySLRule rule, IAnalysisSeed objectAllocationLocation) {
 		super(errorLocation, rule);
 		this.objectAllocationLocation = objectAllocationLocation;
 	}
@@ -26,7 +26,7 @@ public abstract class ErrorWithObjectAllocation extends AbstractError{
 		return "";
 	}
 	
-	public Set<Node<Statement, Val>> getDataFlowPath(){
+	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath(){
 		return objectAllocationLocation.getDataFlowPath();
 	}
 }

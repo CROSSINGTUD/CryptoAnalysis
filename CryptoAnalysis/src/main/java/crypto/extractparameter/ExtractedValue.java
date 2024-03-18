@@ -2,23 +2,23 @@ package crypto.extractparameter;
 
 import java.util.Set;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 import soot.Value;
 import sync.pds.solver.nodes.Node;
 
 public class ExtractedValue {
-	private Statement stmt;
+	private ControlFlowGraph.Edge stmt;
 	private Value val;
-	private Set<Node<Statement, Val>> dataFlowPath;
+	private Set<Node<ControlFlowGraph.Edge, Val>> dataFlowPath;
 
-	public ExtractedValue(Statement stmt, Value val, Set<Node<Statement, Val>> dataFlowPath) {
+	public ExtractedValue(ControlFlowGraph.Edge stmt, Value val, Set<Node<ControlFlowGraph.Edge, Val>> dataFlowPath) {
 		this.stmt = stmt;
 		this.val = val;
 		this.dataFlowPath = dataFlowPath;
 	}
 
-	public Statement stmt() {
+	public ControlFlowGraph.Edge stmt() {
 		return stmt;
 	}
 	
@@ -31,7 +31,7 @@ public class ExtractedValue {
 		return "Extracted Value: " + val + " at " +stmt;
 	}
 	
-	public Set<Node<Statement, Val>> getDataFlowPath() {
+	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
 		return dataFlowPath;
 	}
 

@@ -1,7 +1,8 @@
 package crypto.analysis;
 
 import java.util.Set;
-import boomerang.jimple.Statement;
+
+import boomerang.scene.ControlFlowGraph;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 
@@ -9,9 +10,9 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 
 	private static final long serialVersionUID = 9111353268603202392L;
 	private final CrySLPredicate predicate;
-	private final Statement stmt;
+	private final ControlFlowGraph.Edge stmt;
 
-	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement stmt) {
+	public RequiredCrySLPredicate(CrySLPredicate predicate, ControlFlowGraph.Edge stmt) {
 		this.predicate = predicate;
 		this.stmt = stmt;
 	}
@@ -51,7 +52,7 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		return predicate;
 	}
 
-	public Statement getLocation() {
+	public ControlFlowGraph.Edge getLocation() {
 		return stmt;
 	}
 
@@ -72,7 +73,7 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public void setLocation(Statement location) {
+	public void setLocation(ControlFlowGraph.Edge location) {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -16,8 +17,7 @@ import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
 import boomerang.Query;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
@@ -195,9 +195,9 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCrySLPredicate>> arg0,
-			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg1,
-			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
+	public void ensuredPredicates(final Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> arg0,
+			final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> arg1,
+			final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
 		// Nothing
 	}
 
@@ -213,7 +213,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void onSeedTimeout(final Node<Statement, Val> arg0) {
+	public void onSeedTimeout(final Node<ControlFlowGraph.Edge, Val> arg0) {
 		// Nothing
 	}
 

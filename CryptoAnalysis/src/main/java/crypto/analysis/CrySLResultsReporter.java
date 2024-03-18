@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 
 import boomerang.BackwardQuery;
 import boomerang.Query;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -49,7 +49,7 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
+	public void ensuredPredicates(Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates, Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
 		for (ICrySLResultsListener listen : listeners) {
 			if (listen instanceof CrySLAnalysisListener) {
 				((CrySLAnalysisListener) listen).ensuredPredicates(existingPredicates, expectedPredicates, missingPredicates);
@@ -141,7 +141,7 @@ public class CrySLResultsReporter  {
 		}
 	}
 	
-	public void onSeedTimeout(Node<Statement,Val> seed) {
+	public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {
 		for (ICrySLResultsListener listen : listeners) {
 			listen.onSeedTimeout(seed);
 		}

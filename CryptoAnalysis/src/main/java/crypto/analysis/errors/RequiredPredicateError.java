@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.ControlFlowGraph;
 import crypto.analysis.HiddenPredicate;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
@@ -25,7 +25,7 @@ public class RequiredPredicateError extends AbstractError{
 	private CallSiteWithExtractedValue extractedValues;
 	private List<HiddenPredicate> hiddenPredicates;
 
-	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
+	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, ControlFlowGraph.Edge location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
 		super(location, rule);
 		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = multimap;

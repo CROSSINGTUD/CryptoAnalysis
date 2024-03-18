@@ -2,14 +2,14 @@ package crypto.analysis;
 
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -28,7 +28,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	private ExtendedIDEALAnaylsis problem;
 	private boolean analyzed;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<Statement,Val> delegate) {
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<ControlFlowGraph.Edge, Val> delegate) {
 		super(cryptoScanner,delegate.stmt(),delegate.fact(), TransitionFunction.one());
 	}
 
@@ -48,7 +48,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		if(analysisResults == null)
 			return;
 
-		for(Cell<Statement, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
+		for(Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
 			predicateHandler.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
 		}
 	}
@@ -104,7 +104,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	}
 
 	@Override
-	public Set<Node<Statement, Val>> getDataFlowPath() {
+	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
 		return analysisResults.getDataFlowPath();
 	}
 }

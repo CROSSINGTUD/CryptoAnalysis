@@ -3,10 +3,10 @@ package crypto.analysis.errors;
 import java.util.Collection;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
-import boomerang.jimple.Statement;
 import crypto.rules.CrySLRule;
 import soot.SootMethod;
 
@@ -16,8 +16,8 @@ public class ForbiddenMethodError extends AbstractError {
 	private SootMethod calledMethod;
 	private Set<String> alternativesSet = Sets.newHashSet();
 
-	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, SootMethod calledMethod,
-			Collection<SootMethod> collection) {
+	public ForbiddenMethodError(ControlFlowGraph.Edge errorLocation, CrySLRule rule, SootMethod calledMethod,
+								Collection<SootMethod> collection) {
 		super(errorLocation, rule);
 		this.calledMethod = calledMethod;
 		this.alternatives = collection;

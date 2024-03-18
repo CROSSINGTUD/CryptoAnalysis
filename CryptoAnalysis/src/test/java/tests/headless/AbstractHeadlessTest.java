@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,7 @@ import com.google.common.collect.Table.Cell;
 
 import boomerang.BackwardQuery;
 import boomerang.Query;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -184,14 +184,14 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			public void onSeedTimeout(Node<Statement, Val> seed) {}
+			public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {}
 
 			@Override
 			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {}
 
 			@Override
-			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-					Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {}
+			public void ensuredPredicates(Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+										  Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {}
 
 			@Override
 			public void discoveredSeed(IAnalysisSeed curr) {}

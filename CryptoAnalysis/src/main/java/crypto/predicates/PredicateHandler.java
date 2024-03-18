@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
@@ -53,13 +53,13 @@ import typestate.TransitionFunction;
 public class PredicateHandler {
 
 	private final class AddPredicateToOtherSeed implements ResultsHandler {
-		private final Statement statement;
+		private final ControlFlowGraph.Edge statement;
 		private final Value base;
 		private final SootMethod callerMethod;
 		private final EnsuredCrySLPredicate ensPred;
 		private final AnalysisSeedWithSpecification secondSeed;
 
-		private AddPredicateToOtherSeed(Statement statement, Value base, SootMethod callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+		private AddPredicateToOtherSeed(ControlFlowGraph.Edge statement, Value base, SootMethod callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
 			this.statement = statement;
 			this.base = base;
 			this.callerMethod = callerMethod;
@@ -132,9 +132,9 @@ public class PredicateHandler {
 
 	}
 
-	private final Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
-	private final Table<Statement, IAnalysisSeed, Set<EnsuredCrySLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
-	private final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
+	private final Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
+	private final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<EnsuredCrySLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
+	private final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private final CryptoScanner cryptoScanner;
 	private final Map<AnalysisSeedWithSpecification, List<RequiredPredicateError>> requiredPredicateErrors;
 
@@ -143,7 +143,7 @@ public class PredicateHandler {
 		this.requiredPredicateErrors = new HashMap<>();
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCrySLPredicate ensPred) {
+	public boolean addNewPred(IAnalysisSeed seedObj, ControlFlowGraph.Edge statement, Val variable, EnsuredCrySLPredicate ensPred) {
 		Set<EnsuredCrySLPredicate> set = getExistingPredicates(statement, variable);
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(statement, variable).contains(ensPred);
@@ -160,7 +160,7 @@ public class PredicateHandler {
 		return added;
 	}
 	
-	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
+	public Set<EnsuredCrySLPredicate> getExistingPredicates(ControlFlowGraph.Edge stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
 			set = Sets.newHashSet();
@@ -169,7 +169,7 @@ public class PredicateHandler {
 		return set;
 	}
 
-	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCrySLPredicate ensPred) {
+	private void onPredicateAdded(IAnalysisSeed seedObj, ControlFlowGraph.Edge statement, Val seed, EnsuredCrySLPredicate ensPred) {
 		if (statement.isCallsite()) {
 			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
 			if (ivexpr instanceof InstanceInvokeExpr) {
@@ -208,7 +208,7 @@ public class PredicateHandler {
 		}
 	}
 
-	public void expectPredicate(IAnalysisSeed object, Statement stmt, CrySLPredicate predToBeEnsured) {
+	public void expectPredicate(IAnalysisSeed object, ControlFlowGraph.Edge stmt, CrySLPredicate predToBeEnsured) {
 		for (Unit succ : cryptoScanner.icfg().getSuccsOf(stmt.getUnit().get())) {
 			Set<CrySLPredicate> set = expectedPredicateObjectBased.get(succ, object);
 			if (set == null)
@@ -304,7 +304,7 @@ public class PredicateHandler {
 				}
 			}
 		}
-		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
+		for (ControlFlowGraph.Edge generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCrySLPredicate exPred : exPredCell.getValue()) {
@@ -320,9 +320,9 @@ public class PredicateHandler {
 		}
 	}
 
-	private Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> computeMissingPredicates() {
-		Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> res = HashBasedTable.create();
-		for (Cell<Statement, IAnalysisSeed, Set<CrySLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
+	private Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> computeMissingPredicates() {
+		Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> res = HashBasedTable.create();
+		for (Cell<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
 			Set<EnsuredCrySLPredicate> exPreds = existingPredicatesObjectBased.get(c.getRowKey(), c.getColumnKey());
 			if (c.getValue() == null)
 				continue;
@@ -340,7 +340,7 @@ public class PredicateHandler {
 		return res;
 	}
 
-	public void reportForbiddenPredicate(EnsuredCrySLPredicate predToBeChecked, Statement location, IAnalysisSeed seedObj) {
+	public void reportForbiddenPredicate(EnsuredCrySLPredicate predToBeChecked, ControlFlowGraph.Edge location, IAnalysisSeed seedObj) {
 		Collection<String> forbiddenPredicates = cryptoScanner.getForbiddenPredicates();
 		if (!forbiddenPredicates.isEmpty()) {
 			for (String pred : forbiddenPredicates) {

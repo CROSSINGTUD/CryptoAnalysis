@@ -2,10 +2,10 @@ package crypto.analysis;
 
 import java.util.Collection;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Multimap;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -20,7 +20,7 @@ public interface ICrySLResultsListener {
 
 	void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints);
 	
-	void onSeedTimeout(Node<Statement,Val> seed);
+	void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed);
 	
 	void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults);
 	
@@ -30,6 +30,6 @@ public interface ICrySLResultsListener {
 
 	void onSecureObjectFound(IAnalysisSeed analysisObject);
 
-	void addProgress(int processedSeeds, int workListsize);
+	void addProgress(int processedSeeds, int workListSize);
 
 }

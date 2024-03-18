@@ -7,7 +7,6 @@ import java.util.Optional;
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.Statement;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLRule;

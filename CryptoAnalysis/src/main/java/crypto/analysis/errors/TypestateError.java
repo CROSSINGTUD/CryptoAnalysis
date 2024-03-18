@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 
-import boomerang.jimple.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 import soot.SootMethod;
@@ -20,7 +20,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 	private Collection<SootMethod> expectedMethodCalls;
 	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
-	public TypestateError(Statement stmt, CrySLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
+	public TypestateError(ControlFlowGraph.Edge stmt, CrySLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
 		super(stmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
 		

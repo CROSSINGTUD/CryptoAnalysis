@@ -2,11 +2,11 @@ package crypto.reporting;
 
 import java.util.Collection;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
@@ -30,7 +30,7 @@ public class CollectErrorListener implements ICrySLResultsListener {
 			Collection<ISLConstraint> relConstraints) {
 	}
 
-	public void onSeedTimeout(Node<Statement, Val> seed) {
+	public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {
 
 	}
 

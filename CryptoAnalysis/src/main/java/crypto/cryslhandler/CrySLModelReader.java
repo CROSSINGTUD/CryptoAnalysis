@@ -15,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -488,7 +487,7 @@ public class CrySLModelReader {
 				// NOT operator was only implemented for Predicates, which were
 				// not reachable from the Constraint rule.
 				// Add it to LogOps?
-				throw new NotImplementedException("The NOT operator is not implemented.");
+				throw new UnsupportedOperationException("The NOT operator is not implemented.");
 			case IMPLY:
 			case OR:
 			case AND: {
@@ -516,7 +515,7 @@ public class CrySLModelReader {
 			case DIVIDE:
 				// These were specified in Syntax, but not implemented here.
 				// Add it to ArithOp?
-				throw new NotImplementedException("The multiplication operators are not implemented.");
+				throw new UnsupportedOperationException("The multiplication operators are not implemented.");
 			case PLUS:
 			case MINUS:
 			case MODULO: {

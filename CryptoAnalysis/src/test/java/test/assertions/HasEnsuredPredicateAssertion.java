@@ -1,6 +1,6 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
 import soot.jimple.Stmt;

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Maps;
 
 import boomerang.BoomerangOptions;
@@ -13,8 +14,7 @@ import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.IAnalysisSeed;
@@ -46,7 +46,7 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public WeightFunctions<Statement, Val, Statement, TransitionFunction> weightFunctions() {
+			public WeightFunctions<ControlFlowGraph.Edge, Val, ControlFlowGraph.Edge, TransitionFunction> weightFunctions() {
 				return getOrCreateTypestateChangeFunction();
 			}
 

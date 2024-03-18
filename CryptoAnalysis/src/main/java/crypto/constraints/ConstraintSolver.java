@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.jimple.Statement;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.ClassSpecification;
@@ -31,11 +31,11 @@ public class ConstraintSolver {
 			"notHardCoded", "instanceOf");
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
-	private final Collection<Statement> collectedCalls;
+	private final Collection<ControlFlowGraph.Edge> collectedCalls;
 	private final CrySLResultsReporter reporter;
 	private final AnalysisSeedWithSpecification object;
 
-	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<Statement> collectedCalls,
+	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<ControlFlowGraph.Edge> collectedCalls,
 			CrySLResultsReporter crySLResultsReporter) {
 		this.object = object;
 		this.collectedCalls = collectedCalls;
@@ -55,7 +55,7 @@ public class ConstraintSolver {
 		return this.object.getSpec();
 	}
 
-	public Collection<Statement> getCollectedCalls() {
+	public Collection<ControlFlowGraph.Edge> getCollectedCalls() {
 		return collectedCalls;
 	}
 

@@ -1,7 +1,7 @@
 package crypto.extractparameter;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Val;
 
 public class CallSiteWithParamIndex{
 
@@ -16,9 +16,9 @@ public class CallSiteWithParamIndex{
 
 	private int index;
 	private Val fact;
-	private Statement statement;
+	private ControlFlowGraph.Edge statement;
 
-	public CallSiteWithParamIndex(Statement u, Val fact, int index, String varName) {
+	public CallSiteWithParamIndex(ControlFlowGraph.Edge u, Val fact, int index, String varName) {
 		this.fact = fact;
 		this.index = index;
 		this.varName = varName;
@@ -72,7 +72,7 @@ public class CallSiteWithParamIndex{
 		return fact;
 	}
 
-	public Statement stmt() {
+	public ControlFlowGraph.Edge stmt() {
 		return statement;
 	}
 
