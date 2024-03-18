@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import boomerang.jimple.Statement;
 import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
@@ -104,7 +104,7 @@ public class SootBasedStateMachineGraph {
 		return Sets.newHashSet(edgeLabelMethods);
 	}
 
-	public TransitionFunction getInitialWeight(Statement stmt) {
+	public TransitionFunction getInitialWeight(ControlFlowGraph.Edge stmt) {
 		TransitionFunction defaultTransition = new TransitionFunction(((ArrayList<LabeledMatcherTransition>) initialMatcherTransitions).get(0), Collections.singleton(stmt));
 		
 		if (!(stmt.getUnit().get() instanceof InvokeStmt) && !(stmt.getUnit().get() instanceof AssignStmt)) {

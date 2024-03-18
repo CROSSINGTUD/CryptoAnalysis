@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +17,6 @@ import com.google.common.base.Joiner;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
-import soot.SootMethod;
 
 /**
  * This class extends the class {@link Reporter} by generating an analysis report and write it into a
@@ -85,10 +85,10 @@ public class CSVReporter extends Reporter {
 	public void handleAnalysisResults() {
 		int idCount = 0;
 		
-		for (SootClass c : this.errorMarkers.rowKeySet()) {
+		for (WrappedClass c : this.errorMarkers.rowKeySet()) {
 			String className = c.getName();
 			
-			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
+			for (Entry<Method, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
 				String methodName = e.getKey().getSubSignature();
 				
 				for (AbstractError marker : e.getValue()) {

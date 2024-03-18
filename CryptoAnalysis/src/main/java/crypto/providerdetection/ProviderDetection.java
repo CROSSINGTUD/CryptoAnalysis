@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,7 +188,7 @@ public class ProviderDetection {
 	 *            
 	 * @return the provider
 	 */
-	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableICFG<Unit, SootMethod> observableDynamicICFG) {
+	private String getProviderWhenTypeProvider(JAssignStmt statement, SootMethod sootMethod, Value providerValue, ObservableICFG<Statement, Method> observableDynamicICFG) {
 		String provider = null;
 		
 		//Create a Boomerang solver.
@@ -194,18 +196,8 @@ public class ProviderDetection {
 			public boolean onTheFlyCallGraph() {
 				//Must be turned of if no SeedFactory is specified.
 				return false;
-			};
-		}) {
-			@Override
-			public ObservableICFG<Unit, SootMethod> icfg() {
-				return observableDynamicICFG;
 			}
-
-			@Override
-			public SeedFactory<NoWeight> getSeedFactory() {
-				return null;
-			}
-		};
+		});
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = Maps.newHashMap();
 		for(Unit pred : observableDynamicICFG.getPredsOf(statement)) {
 			//Create a backward query

@@ -54,12 +54,12 @@ public class PredicateHandler {
 
 	private final class AddPredicateToOtherSeed implements ResultsHandler {
 		private final ControlFlowGraph.Edge statement;
-		private final Value base;
+		private final Val base;
 		private final SootMethod callerMethod;
 		private final EnsuredCrySLPredicate ensPred;
 		private final AnalysisSeedWithSpecification secondSeed;
 
-		private AddPredicateToOtherSeed(ControlFlowGraph.Edge statement, Value base, SootMethod callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+		private AddPredicateToOtherSeed(ControlFlowGraph.Edge statement, Val base, SootMethod callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
 			this.statement = statement;
 			this.base = base;
 			this.callerMethod = callerMethod;

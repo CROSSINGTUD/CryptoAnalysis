@@ -3,6 +3,7 @@ package crypto.reporting;
 import java.io.File;
 import java.util.Collection;
 
+import boomerang.scene.WrappedClass;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -16,7 +17,7 @@ public class SourceCodeLocater {
 		this.baseDir = baseDir;
 	}
 	
-	public String getAbsolutePath(SootClass className) {
+	public String getAbsolutePath(WrappedClass className) {
 		String shortName = className.getShortName();
 		Collection<File> files = FileUtils.listFiles(
 				  baseDir, 

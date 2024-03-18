@@ -1,24 +1,21 @@
 package crypto.boomerang;
 
-import com.google.common.base.Optional;
-
 import boomerang.DefaultBoomerangOptions;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.scene.AllocVal;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import soot.SootMethod;
-import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.NullConstant;
-import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
+
+import java.util.Optional;
 
 public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override
-	public Optional<AllocVal> getAllocationVal(SootMethod m, Stmt stmt, Val fact,
-			ObservableICFG<Unit, SootMethod> icfg) {
+	public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
 	
 		if (stmt.containsInvokeExpr()) {
 			if (stmt instanceof AssignStmt) {
@@ -86,11 +83,6 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	@Override
 	public boolean onTheFlyCallGraph() {
 		return false;
-	}
-
-	@Override
-	public boolean arrayFlows() {
-		return true;
 	}
 
 	@Override

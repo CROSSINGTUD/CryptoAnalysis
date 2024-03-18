@@ -2,13 +2,14 @@ package crypto.reporting;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
@@ -40,8 +41,6 @@ import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
-import soot.SootClass;
-import soot.SootMethod;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -54,13 +53,13 @@ import typestate.TransitionFunction;
  */
 public class ErrorMarkerListener extends CrySLAnalysisListener {
 
-	protected final Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers = HashBasedTable.create();
+	protected final Table<WrappedClass, Method, Set<AbstractError>> errorMarkers = HashBasedTable.create();
 	protected final Map<Class<?>, Integer> errorMarkerCount = new HashMap<Class<?>, Integer>();
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
 
 	private void addMarker(AbstractError error) {
-		SootMethod method = error.getErrorLocation().getMethod();
-		SootClass sootClass = method.getDeclaringClass();
+		Method method = error.getErrorLocation().getMethod();
+		WrappedClass sootClass = method.getDeclaringClass();
 
 		Set<AbstractError> set = errorMarkers.get(sootClass, method);
 		if (set == null) {

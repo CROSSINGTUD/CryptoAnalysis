@@ -1,9 +1,11 @@
 package crypto.analysis;
 
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.AllocVal;
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import com.google.common.collect.HashMultimap;
@@ -78,7 +80,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintsSatisfied;
-	protected Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject = Maps.newLinkedHashMap();
+	protected Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject = Maps.newLinkedHashMap();
 	private ExtractParameterAnalysis parameterAnalysis;
 	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
@@ -94,8 +96,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 
 			@Override
-			protected ObservableICFG<Unit, SootMethod> icfg() {
-				return cryptoScanner.icfg();
+			protected CallGraph callGraph() {
+				return cryptoScanner.callGraph();
+			}
+
+			@Override
+			protected DataFlowScope getDataFlowScope() {
+				return cryptoScanner.getDataFlowScope();
 			}
 
 			@Override
@@ -935,15 +942,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void setSecure(boolean secure) {
 		this.secure = secure;
-	}
-
-	@Override
-	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
-		return results.getDataFlowPath();
-	}
-
-	public Map<ControlFlowGraph.Edge, SootMethod> getAllCallsOnObject() {
-		return allCallsOnObject;
 	}
 
 }

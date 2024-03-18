@@ -63,7 +63,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		return msg.toString();
 	}
 
-	private String getCalledMethodString(Statement location, boolean useSignature) {
+	private String getCalledMethodString(ControlFlowGraph.Edge location, boolean useSignature) {
 		Stmt stmt = location.getUnit().get();
 		if(stmt.containsInvokeExpr()){
 			if (useSignature){

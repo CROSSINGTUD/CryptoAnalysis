@@ -3,7 +3,11 @@ package crypto.analysis;
 import boomerang.Query;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -17,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
-import soot.Unit;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.nodes.Node;
@@ -37,7 +40,7 @@ public abstract class CryptoScanner {
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
 
-	private DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<Statement, Val>, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
 		protected AnalysisSeedWithEnsuredPredicate createItem(Node<ControlFlowGraph.Edge, Val> key) {
@@ -54,7 +57,11 @@ public abstract class CryptoScanner {
 	private int solvedObject;
 	private Stopwatch analysisWatch;
 
-	public abstract ObservableICFG<Unit, SootMethod> icfg();
+	public abstract ObservableICFG<Statement, Method> icfg();
+
+	public abstract CallGraph callGraph();
+
+	public abstract DataFlowScope getDataFlowScope();
 
 	public CrySLResultsReporter getAnalysisListener() {
 		return resultsAggregator;

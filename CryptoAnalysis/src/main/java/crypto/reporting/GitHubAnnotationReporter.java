@@ -1,11 +1,11 @@
 package crypto.reporting;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
-import soot.SootMethod;
 import soot.tagkit.Host;
 
 import javax.annotation.Nonnull;
@@ -57,8 +57,8 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         System.out.println("::group::Annotations");
 
         // report errors on individual lines
-        for (Table.Cell<SootClass, SootMethod, Set<AbstractError>> cell : errorMarkers.cellSet()) {
-            SootClass clazz = cell.getRowKey();
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorMarkers.cellSet()) {
+            WrappedClass clazz = cell.getRowKey();
             Path path = classToSourcePath(clazz);
 
             boolean sourceExists = Files.exists(path);
@@ -138,7 +138,7 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         super.handleAnalysisResults();
     }
 
-    private Path classToSourcePath(SootClass clazz) {
+    private Path classToSourcePath(WrappedClass clazz) {
         return Paths.get(basePath, clazz.getName().replace('.', File.separatorChar) +
                 ".java");
     }

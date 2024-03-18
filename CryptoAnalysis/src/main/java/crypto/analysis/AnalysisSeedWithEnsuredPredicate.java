@@ -2,12 +2,13 @@ package crypto.analysis;
 
 import java.util.Set;
 
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -16,8 +17,6 @@ import crypto.rules.StateNode;
 import crypto.typestate.ExtendedIDEALAnaylsis;
 import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
-import soot.SootMethod;
-import soot.Unit;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
@@ -56,10 +55,15 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	private ExtendedIDEALAnaylsis getOrCreateAnalysis() {
 		problem = new ExtendedIDEALAnaylsis() {
-			
+
 			@Override
-			protected ObservableICFG<Unit, SootMethod> icfg() {
-				return cryptoScanner.icfg();
+			public CallGraph callGraph() {
+				return cryptoScanner.callGraph();
+			}
+
+			@Override
+			public DataFlowScope getDataFlowScope() {
+				return cryptoScanner.getDataFlowScope();
 			}
 			
 			@Override
@@ -103,8 +107,4 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
 	}
 
-	@Override
-	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
-		return analysisResults.getDataFlowPath();
-	}
 }

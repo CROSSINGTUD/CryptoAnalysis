@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.List;
 
+import boomerang.scene.WrappedClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import crypto.rules.CrySLRule;
@@ -58,7 +59,7 @@ public class TXTReporter extends Reporter {
 			writer.write(this.analysisReport);
 			writer.close();
 			
-			for (SootClass c : this.errorMarkers.rowKeySet()) {
+			for (WrappedClass c : this.errorMarkers.rowKeySet()) {
 				FileOutputStream streamOut = new FileOutputStream(new File(getOutputFolder() + File.separator + c.toString() + ".jimple"));
 				PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
 				Printer.v().printTo(c, writerOut);

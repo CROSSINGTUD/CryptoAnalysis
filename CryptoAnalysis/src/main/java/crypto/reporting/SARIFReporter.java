@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -20,8 +22,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
-import soot.SootMethod;
 
 
 /**
@@ -76,7 +76,7 @@ public class SARIFReporter extends Reporter {
 		this.errorCountMap.put(SARIFConfig.UNCAUGHT_EXCEPTION_ERROR_KEY, 0);
 	}
 
-	private void addFile(SootClass c) {
+	private void addFile(WrappedClass c) {
 		String filePath = this.sarifHelper.getFileName(c);
 		JSONObject mimeType = new JSONObject();
 		mimeType.put(SARIFConfig.MIME_TYPE_KEY, SARIFConfig.MIME_TYPE_VALUE);
@@ -99,7 +99,7 @@ public class SARIFReporter extends Reporter {
 		return errorType;
 	}
 
-	private void addResults(String errorType, SootClass c, String methodName, int lineNumber, String method, String statement, String text,
+	private void addResults(String errorType, WrappedClass c, String methodName, int lineNumber, String method, String statement, String text,
 			String richText) {
 		JSONObject result = new JSONObject();
 		String finalErrorType = addRules(errorType);
@@ -137,10 +137,10 @@ public class SARIFReporter extends Reporter {
 
 	@Override
 	public void handleAnalysisResults() {
-		for (SootClass c : this.errorMarkers.rowKeySet()) {
+		for (WrappedClass c : this.errorMarkers.rowKeySet()) {
 			addFile(c);
 
-			for (Entry<SootMethod, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
+			for (Entry<Method, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
 				for (AbstractError marker : e.getValue()) {
 					String errorType = marker.getClass().getSimpleName();
 					String richText = String.format("%s violating CrySL rule for %s.",

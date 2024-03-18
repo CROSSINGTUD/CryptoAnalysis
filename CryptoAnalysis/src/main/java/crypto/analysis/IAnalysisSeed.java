@@ -1,20 +1,18 @@
 package crypto.analysis;
 
+import boomerang.WeightedForwardQuery;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Method;
+import boomerang.scene.Val;
+import crypto.analysis.errors.AbstractError;
+import crypto.predicates.PredicateHandler;
+import typestate.TransitionFunction;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
-import boomerang.WeightedForwardQuery;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Val;
-import crypto.analysis.errors.AbstractError;
-import crypto.predicates.PredicateHandler;
-import soot.SootMethod;
-import sync.pds.solver.nodes.Node;
-import typestate.TransitionFunction;
 
 public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunction> {
 
@@ -31,8 +29,8 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 	}
 	abstract void execute();
 
-	public SootMethod getMethod(){
-		return stmt().getMethod();
+	public Method getMethod(){
+		return cfgEdge().getMethod();
 	}
 
 	public void addError(AbstractError e) {
@@ -57,7 +55,5 @@ public abstract class IAnalysisSeed extends WeightedForwardQuery<TransitionFunct
 		return this.objectId;
 		
 	}
-	
-	public abstract Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath();
 	
 }

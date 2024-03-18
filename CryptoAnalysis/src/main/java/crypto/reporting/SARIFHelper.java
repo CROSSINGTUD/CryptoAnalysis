@@ -3,6 +3,7 @@ package crypto.reporting;
 import java.util.HashMap;
 import java.util.Map;
 
+import boomerang.scene.WrappedClass;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -68,7 +69,7 @@ public class SARIFHelper {
 		return message;
 	}
 	
-	public String getFileName(SootClass c) {
+	public String getFileName(WrappedClass c) {
 		return sourceLocater == null ? c.getName().replace(".", "/") + ".java" : sourceLocater.getAbsolutePath(c);
 	}
 	

@@ -5,14 +5,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
 import com.google.common.collect.Maps;
 
 import boomerang.BoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
@@ -39,10 +40,10 @@ public abstract class ExtendedIDEALAnaylsis {
 	private ForwardBoomerangResults<TransitionFunction> results;
 
 	public ExtendedIDEALAnaylsis() {
-		analysis = new IDEALAnalysis<TransitionFunction>(new IDEALAnalysisDefinition<TransitionFunction>() {
+		analysis = new IDEALAnalysis<>(new IDEALAnalysisDefinition<TransitionFunction>() {
 			@Override
-			public Collection<WeightedForwardQuery<TransitionFunction>> generate(SootMethod method, Unit stmt) {
-				return getOrCreateTypestateChangeFunction().generateSeed(method, stmt);
+			public Collection<WeightedForwardQuery<TransitionFunction>> generate(ControlFlowGraph.Edge edge) {
+				return getOrCreateTypestateChangeFunction().generateSeed(edge);
 			}
 
 			@Override
@@ -51,16 +52,16 @@ public abstract class ExtendedIDEALAnaylsis {
 			}
 
 			@Override
-			public ObservableICFG<Unit, SootMethod> icfg() {
-				return ExtendedIDEALAnaylsis.this.icfg();
+			public CallGraph callGraph() {
+				return ExtendedIDEALAnaylsis.this.callGraph();
 			}
 
 			@Override
-			public boolean enableStrongUpdates() {
-				return true;
+			public DataFlowScope getDataFlowScope() {
+				return ExtendedIDEALAnaylsis.this.getDataFlowScope();
 			}
 
-			@Override
+            @Override
 			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 				return ExtendedIDEALAnaylsis.this.debugger(solver);
 			}
@@ -91,7 +92,9 @@ public abstract class ExtendedIDEALAnaylsis {
 		}
 	}
 
-	protected abstract ObservableICFG<Unit, SootMethod> icfg();
+	protected abstract CallGraph callGraph();
+
+	protected abstract DataFlowScope getDataFlowScope();
 
 	protected abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver);
 

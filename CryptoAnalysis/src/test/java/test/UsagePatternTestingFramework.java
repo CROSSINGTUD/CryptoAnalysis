@@ -4,7 +4,11 @@ import boomerang.BackwardQuery;
 import boomerang.Query;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
 import com.google.common.base.Joiner;
@@ -85,6 +89,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	protected ObservableICFG<Unit, SootMethod> icfg;
 	private JimpleBasedInterproceduralCFG staticIcfg;
+	private CallGraph callGraph;
+	private DataFlowScope dataFlowScope;
 	private List<CrySLRule> rules = getRules();
 	
 	@Override
@@ -106,8 +112,18 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				CryptoScanner scanner = new CryptoScanner() {
 					
 					@Override
-					public ObservableICFG<Unit, SootMethod> icfg() {
+					public ObservableICFG<Statement, Method> icfg() {
 						return icfg;
+					}
+
+					@Override
+					public CallGraph callGraph() {
+						return callGraph;
+					}
+
+					@Override
+					public DataFlowScope getDataFlowScope() {
+						return dataFlowScope;
 					}
 
 					@Override

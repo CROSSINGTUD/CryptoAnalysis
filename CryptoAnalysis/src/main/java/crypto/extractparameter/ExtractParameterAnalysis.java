@@ -7,6 +7,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -27,19 +30,17 @@ import crypto.typestate.SootBasedStateMachineGraph;
 import heros.utilities.DefaultValueMap;
 import soot.Local;
 import soot.Scene;
-import soot.SootMethod;
 import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
-import soot.jimple.toolkits.callgraph.Edge;
 import sync.pds.solver.nodes.Node;
 import typestate.finiteautomata.MatcherTransition;
 import wpds.impl.Weight.NoWeight;
 
 public class ExtractParameterAnalysis {
 
-	private Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject;
+	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
 	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
 	private CryptoScanner cryptoScanner;
 	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
@@ -52,7 +53,7 @@ public class ExtractParameterAnalysis {
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, SootMethod> allCallsOnObject,
+	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject,
 			SootBasedStateMachineGraph fsm) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
@@ -64,7 +65,7 @@ public class ExtractParameterAnalysis {
 	}
 
 	public void run() {
-		for (Map.Entry<ControlFlowGraph.Edge,SootMethod> stmt : allCallsOnObject.entrySet()) {
+		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : allCallsOnObject.entrySet()) {
 			if (!stmt.getKey().isCallsite())
 				continue;
 
@@ -161,11 +162,11 @@ public class ExtractParameterAnalysis {
 		private BackwardBoomerangResults<NoWeight> res;
 
 		public void solve() {
-			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
-				@Override
-				public ObservableICFG<Unit, SootMethod> icfg() {
+			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions()) {
+				/*@Override
+				public ObservableICFG<Statement, Method> icfg() {
 					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
-				}
+				}*/
 			};
 			res = boomerang.solve(this);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {

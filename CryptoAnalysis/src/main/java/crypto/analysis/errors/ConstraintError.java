@@ -1,12 +1,9 @@
 package crypto.analysis.errors;
 
 import java.util.List;
-import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
 import com.google.common.base.CharMatcher;
 
-import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -23,7 +20,6 @@ import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInvokeExpr;
-import sync.pds.solver.nodes.Node;
 
 public class ConstraintError extends ErrorWithObjectAllocation{
 
@@ -43,12 +39,6 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	public void accept(ErrorVisitor visitor){
 		visitor.visit(this);
 	}
-	
-	@Override
-	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
-		return callSiteWithParamIndex.getVal().getDataFlowPath();
-	}
-
 
 	public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
 		return callSiteWithParamIndex;
@@ -58,8 +48,6 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	public String toErrorMarkerString() {
 		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(brokenConstraint);
 	}
-	
-	
 
 	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint) {
 		StringBuilder msg = new StringBuilder();

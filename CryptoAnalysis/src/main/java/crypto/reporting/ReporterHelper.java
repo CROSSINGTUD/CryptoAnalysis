@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ErrorWithObjectAllocation;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
-import soot.SootMethod;
 
 /**
  * This class is used to generate a report as a {@link String} for multiple other classes. This class is
@@ -26,7 +26,7 @@ public class ReporterHelper {
 	 * @param rules A {@link List} with {@link CrySLRule} rules, which were used in the analysis
 	 * @param objects A {@link Collection} with {@link IAnalysisSeed} objects
 	 * @param secureObjects A {@link List} with {@link IAnalysisSeed} secureObjects
-	 * @param errorMarkers A {@link Table} containing {@link SootClass}, {@link SootMethod} 
+	 * @param errorMarkers A {@link Table} containing {@link WrappedClass}, {@link Method}
 	 *                     and a {@link Set} of {@link AbstractError} of the errors found during analysis
 	 * @param errorMarkerCount A {@link Map} containing {@link Class} class of error and 
 	 *                         {@link Integer} number of errors
@@ -36,7 +36,7 @@ public class ReporterHelper {
 	 * @return report The formatted analysis report as {@link String}
 	 */
 	public static String generateReport(List<CrySLRule> rules, Collection<IAnalysisSeed> objects, 
-			List<IAnalysisSeed> secureObjects, Table<SootClass, SootMethod, Set<AbstractError>> errorMarkers, 
+			List<IAnalysisSeed> secureObjects, Table<WrappedClass, Method, Set<AbstractError>> errorMarkers,
 			Map<Class<?>, Integer> errorMarkerCount, ReportStatistics statistics) {
 		String report = "";
 
@@ -60,10 +60,10 @@ public class ReporterHelper {
 		
 		report += "\n";
 		
-		for (SootClass c : errorMarkers.rowKeySet()) {
+		for (WrappedClass c : errorMarkers.rowKeySet()) {
 			report += String.format("Findings in Java Class: %s\n", c.getName());
 			
-			for (Entry<SootMethod, Set<AbstractError>> e : errorMarkers.row(c).entrySet()) {
+			for (Entry<Method, Set<AbstractError>> e : errorMarkers.row(c).entrySet()) {
 				report += String.format("\n\t in Method: %s\n", e.getKey().getSubSignature());
 				
 				for (AbstractError marker : e.getValue()) {

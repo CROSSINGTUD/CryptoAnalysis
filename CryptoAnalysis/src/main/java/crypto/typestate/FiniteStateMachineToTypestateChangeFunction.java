@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import boomerang.scene.ControlFlowGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 
 
 	@Override
-	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(SootMethod method, Unit unit) {
+	public Collection<WeightedForwardQuery<TransitionFunction>> generateSeed(ControlFlowGraph.Edge edge) {
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
 		
 		if (!(unit instanceof Stmt) || !((Stmt) unit).containsInvokeExpr()) {

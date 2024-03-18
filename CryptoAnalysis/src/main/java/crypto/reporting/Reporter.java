@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import boomerang.scene.Method;
 import com.google.common.base.Stopwatch;
 
 import boomerang.results.ForwardBoomerangResults;
@@ -44,7 +45,7 @@ public abstract class Reporter extends ErrorMarkerListener {
 	protected final Collection<IAnalysisSeed> objects = new HashSet<>();
 	
 	/** A {@link Set} to store and count all reachable methods in the dataflow */
-	protected final Set<SootMethod> dataflowReachableMethods = new HashSet<>();
+	protected final Set<Method> dataflowReachableMethods = new HashSet<>();
 	
 	/**
 	 * The constructor to initialize all attributes. Since this class is abstract, all subclasses

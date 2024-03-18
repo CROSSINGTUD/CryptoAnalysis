@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.scene.CallGraph;
+import boomerang.scene.DataFlowScope;
 import boomerang.scene.jimple.BoomerangPretransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.scene.Val;
@@ -46,18 +46,23 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	private static final Logger LOGGER = LoggerFactory.getLogger(IDEALCrossingTestingFramework.class);
 
 	protected JimpleBasedInterproceduralCFG staticIcfg;
-	protected ObservableICFG<Unit, SootMethod> icfg;
-	protected long analysisTime;
-	private  Debugger<TransitionFunction>  debugger;
+	protected CallGraph callGraph;
+	protected DataFlowScope dataFlowScope;
+	private Debugger<TransitionFunction> debugger;
 	public static final String RULES_BASE_DIR = "src/main/resources/";
 	public static final String RULES_TEST_DIR = "src/test/resources/testrules/";
 	
 	protected ExtendedIDEALAnaylsis createAnalysis() {
 		return new ExtendedIDEALAnaylsis() {
-			
+
 			@Override
-			protected ObservableICFG<Unit, SootMethod> icfg() {
-				return icfg;
+			protected CallGraph callGraph() {
+				return callGraph;
+			}
+
+			@Override
+			protected DataFlowScope getDataFlowScope() {
+				return dataFlowScope;
 			}
 			
 			@Override
@@ -99,7 +104,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 	
 	protected Debugger<TransitionFunction> getDebugger() {
 		if(debugger == null)
-			debugger =  new IDEVizDebugger<>(ideVizFile, icfg);
+			debugger =  new IDEVizDebugger<>(ideVizFile);
 		return debugger;
 	}
 
@@ -110,8 +115,7 @@ public abstract class IDEALCrossingTestingFramework extends AbstractTestingFrame
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
 				staticIcfg = new JimpleBasedInterproceduralCFG(true);
-//				icfg = new ObservableStaticICFG(new JimpleBasedInterproceduralCFG(true));
-				icfg = new ObservableDynamicICFG(true);
+
 				Set<Assertion> expectedResults = parseExpectedQueryResults(sootTestMethod);
 				TestingResultReporter testingResultReporter = new TestingResultReporter(expectedResults);
 				Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolvers = executeAnalysis();

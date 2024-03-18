@@ -7,6 +7,10 @@ import java.util.Optional;
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
+import boomerang.scene.CallGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLRule;
@@ -42,8 +46,13 @@ public class ClassSpecification {
 			}
 
 			@Override
-			public ObservableICFG<Unit, SootMethod> icfg() {
-				return cryptoScanner.icfg();
+			public CallGraph callGraph() {
+				return cryptoScanner.callGraph();
+			}
+
+			@Override
+			public DataFlowScope getDataFlowScope() {
+				return cryptoScanner.getDataFlowScope();
 			}
 
 			@Override
