@@ -1,22 +1,19 @@
 package crypto.typestate;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import boomerang.scene.CallGraph;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
-import com.google.common.collect.Maps;
-
 import boomerang.BoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
-import boomerang.scene.Val;
 import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.CallGraph;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
+import boomerang.scene.jimple.JimpleMethod;
+import com.google.common.collect.Maps;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
@@ -26,12 +23,15 @@ import ideal.IDEALSeedSolver;
 import ideal.IDEALSeedTimeout;
 import soot.MethodOrMethodContext;
 import soot.Scene;
-import soot.SootMethod;
-import soot.Unit;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
 import sync.pds.solver.WeightFunctions;
 import typestate.TransitionFunction;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ExtendedIDEALAnaylsis {
 
@@ -98,18 +98,18 @@ public abstract class ExtendedIDEALAnaylsis {
 
 	protected abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver);
 
-	public void log(String string) {
-		// System.out.println(string);
-	}
-
 	public abstract CrySLResultsReporter analysisListener();
 
-	public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(SootMethod method) {
+	public Collection<WeightedForwardQuery<TransitionFunction>> computeSeeds(Method method) {
 		Collection<WeightedForwardQuery<TransitionFunction>> seeds = new HashSet<>();
-		if (!method.hasActiveBody())
+		/*if (!method.hasActiveBody())
 			return seeds;
 		for (Unit u : method.getActiveBody().getUnits()) {
 			seeds.addAll(getOrCreateTypestateChangeFunction().generateSeed(method, u));
+		}*/
+
+		for (Statement statement : method.getStatements()) {
+			seeds.addAll(getOrCreateTypestateChangeFunction().generateSeed(new ControlFlowGraph.Edge(statement, statement)));
 		}
 		return seeds;
 	}
@@ -126,7 +126,7 @@ public abstract class ExtendedIDEALAnaylsis {
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
 			MethodOrMethodContext next = listener.next();
-			seeds.addAll(computeSeeds(next.method()));
+			seeds.addAll(computeSeeds(JimpleMethod.of(next.method())));
 		}
 		Map<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> seedToSolver = Maps
 				.newHashMap();

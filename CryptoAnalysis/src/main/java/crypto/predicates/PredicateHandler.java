@@ -1,5 +1,38 @@
 package crypto.predicates;
 
+import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
+import crypto.analysis.AlternativeReqPredicate;
+import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
+import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.ClassSpecification;
+import crypto.analysis.CryptoScanner;
+import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.RequiredCrySLPredicate;
+import crypto.analysis.ResultsHandler;
+import crypto.analysis.errors.ForbiddenPredicateError;
+import crypto.analysis.errors.RequiredPredicateError;
+import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractedValue;
+import crypto.interfaces.ICrySLPredicateParameter;
+import crypto.interfaces.ISLConstraint;
+import crypto.rules.CrySLObject;
+import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
+import soot.Unit;
+import typestate.TransitionFunction;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,55 +44,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
-
-import boomerang.scene.Val;
-import boomerang.results.ForwardBoomerangResults;
-import crypto.analysis.AlternativeReqPredicate;
-import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.ClassSpecification;
-import crypto.analysis.CryptoScanner;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.RequiredCrySLPredicate;
-import crypto.analysis.ResultsHandler;
-import crypto.analysis.errors.ForbiddenPredicateError;
-import crypto.analysis.errors.PredicateContradictionError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
-import crypto.rules.CrySLObject;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
-import soot.SootMethod;
-import soot.Unit;
-import soot.Value;
-import soot.jimple.AssignStmt;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.InvokeExpr;
-import soot.jimple.StaticInvokeExpr;
-import soot.jimple.Stmt;
-import typestate.TransitionFunction;
-
 public class PredicateHandler {
 
 	private final class AddPredicateToOtherSeed implements ResultsHandler {
-		private final ControlFlowGraph.Edge statement;
+		private final Statement statement;
 		private final Val base;
-		private final SootMethod callerMethod;
+		private final Method callerMethod;
 		private final EnsuredCrySLPredicate ensPred;
 		private final AnalysisSeedWithSpecification secondSeed;
 
-		private AddPredicateToOtherSeed(ControlFlowGraph.Edge statement, Val base, SootMethod callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+		private AddPredicateToOtherSeed(Statement statement, Val base, Method callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
 			this.statement = statement;
 			this.base = base;
 			this.callerMethod = callerMethod;
@@ -69,9 +63,18 @@ public class PredicateHandler {
 
 		@Override
 		public void done(ForwardBoomerangResults<TransitionFunction> results) {
-			if (results.asStatementValWeightTable().row(statement).containsKey(new Val(base, callerMethod))) {
-				secondSeed.addEnsuredPredicate(ensPred);
+			for (Entry<ControlFlowGraph.Edge, Map<Val, TransitionFunction>> row : results.asStatementValWeightTable().rowMap().entrySet()) {
+				if (row.getKey().getTarget().equals(statement)) {
+					Map<Val, TransitionFunction> entry = row.getValue();
+
+					if (entry.containsKey(base)) {
+						secondSeed.addEnsuredPredicate(ensPred);
+					}
+				}
 			}
+			/*if (results.asStatementValWeightTable().row(statement).containsKey(base)) {
+				secondSeed.addEnsuredPredicate(ensPred);
+			}*/
 		}
 
 		@Override
@@ -132,9 +135,9 @@ public class PredicateHandler {
 
 	}
 
-	private final Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
-	private final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<EnsuredCrySLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
-	private final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
+	private final Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
+	private final Table<Statement, IAnalysisSeed, Set<EnsuredCrySLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
+	private final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private final CryptoScanner cryptoScanner;
 	private final Map<AnalysisSeedWithSpecification, List<RequiredPredicateError>> requiredPredicateErrors;
 
@@ -143,7 +146,7 @@ public class PredicateHandler {
 		this.requiredPredicateErrors = new HashMap<>();
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, ControlFlowGraph.Edge statement, Val variable, EnsuredCrySLPredicate ensPred) {
+	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCrySLPredicate ensPred) {
 		Set<EnsuredCrySLPredicate> set = getExistingPredicates(statement, variable);
 		boolean added = set.add(ensPred);
 		assert existingPredicates.get(statement, variable).contains(ensPred);
@@ -160,7 +163,7 @@ public class PredicateHandler {
 		return added;
 	}
 	
-	public Set<EnsuredCrySLPredicate> getExistingPredicates(ControlFlowGraph.Edge stmt, Val seed) {
+	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
 			set = Sets.newHashSet();
@@ -169,16 +172,16 @@ public class PredicateHandler {
 		return set;
 	}
 
-	private void onPredicateAdded(IAnalysisSeed seedObj, ControlFlowGraph.Edge statement, Val seed, EnsuredCrySLPredicate ensPred) {
-		if (statement.isCallsite()) {
-			InvokeExpr ivexpr = ((Stmt) statement.getUnit().get()).getInvokeExpr();
-			if (ivexpr instanceof InstanceInvokeExpr) {
-				InstanceInvokeExpr iie = (InstanceInvokeExpr) ivexpr;
-				SootMethod callerMethod = statement.getMethod();
-				Value base = iie.getBase();
+	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCrySLPredicate ensPred) {
+		if (statement.containsInvokeExpr()) {
+			InvokeExpr invokeExpr = statement.getInvokeExpr();
+
+			if (invokeExpr.isInstanceInvokeExpr()) {
+				Method callerMethod = statement.getMethod();
+				Val base = invokeExpr.getBase();
 				boolean paramMatch = false;
-				for (Value arg : iie.getArgs()) {
-					if (seed.value() != null && seed.value().equals(arg))
+				for (Val arg : invokeExpr.getArgs()) {
+					if (!seed.isNull() && seed.equals(arg))
 						paramMatch = true;
 				}
 				if (paramMatch) {
@@ -189,16 +192,15 @@ public class PredicateHandler {
 				}
 			}
 
-			if (ivexpr instanceof StaticInvokeExpr && statement.getUnit().get() instanceof AssignStmt) {
-				StaticInvokeExpr iie = (StaticInvokeExpr) ivexpr;
+			if (invokeExpr.isStaticInvokeExpr() && statement.isAssign()) {
 				boolean paramMatch = false;
-				for (Value arg : iie.getArgs()) {
-					if (seed.value() != null && seed.value().equals(arg))
+				for (Val arg : invokeExpr.getArgs()) {
+					if (!seed.isNull() && seed.equals(arg))
 						paramMatch = true;
 				}
 				if (paramMatch) {
 					for (AnalysisSeedWithSpecification spec : Lists.newArrayList(cryptoScanner.getAnalysisSeeds())) {
-						if (spec.stmt().equals(statement)) {
+						if (spec.cfgEdge().getTarget().equals(statement)) {
 							spec.addEnsuredPredicate(ensPred);
 						}
 					}
@@ -208,13 +210,13 @@ public class PredicateHandler {
 		}
 	}
 
-	public void expectPredicate(IAnalysisSeed object, ControlFlowGraph.Edge stmt, CrySLPredicate predToBeEnsured) {
-		for (Unit succ : cryptoScanner.icfg().getSuccsOf(stmt.getUnit().get())) {
+	public void expectPredicate(IAnalysisSeed object, Statement stmt, CrySLPredicate predToBeEnsured) {
+		for (Statement succ : cryptoScanner.icfg().getEndPointsOf(stmt.getMethod())) {
 			Set<CrySLPredicate> set = expectedPredicateObjectBased.get(succ, object);
 			if (set == null)
 				set = Sets.newHashSet();
 			set.add(predToBeEnsured);
-			expectedPredicateObjectBased.put(new Statement((Stmt) succ, stmt.getMethod()), object, set);
+			expectedPredicateObjectBased.put(stmt, object, set);
 		}
 	}
 
@@ -243,7 +245,7 @@ public class PredicateHandler {
 	private void collectMissingPred(AnalysisSeedWithSpecification seed, RequiredCrySLPredicate missingPred) {
 		// Check for predicate errors with 'this' as parameter
 		if (missingPred.getPred().getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this"))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(Arrays.asList(missingPred.getPred()), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
+			RequiredPredicateError reqPredError = new RequiredPredicateError(Arrays.asList(missingPred.getPred()), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
 			addRequiredPredicateErrorOnSeed(reqPredError, seed);
 
 			return;
@@ -251,7 +253,7 @@ public class PredicateHandler {
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 			if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(Arrays.asList(missingPred.getPred()), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(Arrays.asList(missingPred.getPred()), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}
@@ -260,7 +262,7 @@ public class PredicateHandler {
 	private void collectMissingPred(AnalysisSeedWithSpecification seed, AlternativeReqPredicate missingPred) {
 		// Check for predicate errors with 'this' as parameter in all alternatives
 		if (missingPred.getAlternatives().parallelStream().anyMatch(p -> p.getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this")))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
+			RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
 			addRequiredPredicateErrorOnSeed(reqPredError, seed);
 
 			return;
@@ -268,7 +270,7 @@ public class PredicateHandler {
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 			if (missingPred.getAlternatives().parallelStream().anyMatch(e -> e.getInvolvedVarNames().contains(v.getVarName())) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}
@@ -304,7 +306,7 @@ public class PredicateHandler {
 				}
 			}
 		}
-		for (ControlFlowGraph.Edge generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
+		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCrySLPredicate exPred : exPredCell.getValue()) {
@@ -320,9 +322,9 @@ public class PredicateHandler {
 		}
 	}
 
-	private Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> computeMissingPredicates() {
-		Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> res = HashBasedTable.create();
-		for (Cell<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
+	private Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> computeMissingPredicates() {
+		Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> res = HashBasedTable.create();
+		for (Cell<Statement, IAnalysisSeed, Set<CrySLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
 			Set<EnsuredCrySLPredicate> exPreds = existingPredicatesObjectBased.get(c.getRowKey(), c.getColumnKey());
 			if (c.getValue() == null)
 				continue;
@@ -340,7 +342,7 @@ public class PredicateHandler {
 		return res;
 	}
 
-	public void reportForbiddenPredicate(EnsuredCrySLPredicate predToBeChecked, ControlFlowGraph.Edge location, IAnalysisSeed seedObj) {
+	public void reportForbiddenPredicate(EnsuredCrySLPredicate predToBeChecked, Statement location, IAnalysisSeed seedObj) {
 		Collection<String> forbiddenPredicates = cryptoScanner.getForbiddenPredicates();
 		if (!forbiddenPredicates.isEmpty()) {
 			for (String pred : forbiddenPredicates) {

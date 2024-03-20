@@ -1,20 +1,20 @@
 package crypto.typestate;
 
-import java.util.Collection;
-
-import soot.SootMethod;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
 import typestate.finiteautomata.State;
+
+import java.util.Collection;
 
 public class ReportingErrorStateNode implements State {
 
-	private Collection<SootMethod> expectedCalls;
-	private boolean report;
+	private Collection<Method> expectedCalls;
 
-	public ReportingErrorStateNode(Collection<SootMethod> expectedCalls) {
+	public ReportingErrorStateNode(Collection<Method> expectedCalls) {
 		this.expectedCalls = expectedCalls;
 	}
 
-	public Collection<SootMethod> getExpectedCalls() {
+	public Collection<Method> getExpectedCalls() {
 		return expectedCalls;
 	}
 	@Override
@@ -30,10 +30,6 @@ public class ReportingErrorStateNode implements State {
 	@Override
 	public boolean isAccepting() {
 		return false;
-	}
-
-	public boolean isReport() {
-		return report;
 	}
 	
 	@Override

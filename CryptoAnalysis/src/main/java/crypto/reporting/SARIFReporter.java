@@ -146,9 +146,9 @@ public class SARIFReporter extends Reporter {
 					String richText = String.format("%s violating CrySL rule for %s.",
 							marker.getClass().getSimpleName(), marker.getRule().getClassName());
 					String text = String.format("%s.", marker.toErrorMarkerString());
-					int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
+					int lineNumber = marker.getErrorStatement().getStartLineNumber();
 					String method = e.getKey().getSubSignature();
-					String statement = marker.getErrorLocation().getUnit().get().toString();
+					String statement = marker.getErrorStatement().toString();
 					this.addResults(errorType, c, e.getKey().getName(), lineNumber, method, statement, text, richText);
 				}
 			}

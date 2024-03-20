@@ -1,16 +1,14 @@
 package crypto.analysis;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
 import boomerang.WeightedForwardQuery;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
+import boomerang.scene.jimple.JimpleStatement;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLRule;
@@ -20,9 +18,12 @@ import crypto.typestate.SootBasedStateMachineGraph;
 import ideal.IDEALSeedSolver;
 import soot.SootMethod;
 import soot.Unit;
-import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import typestate.TransitionFunction;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 public class ClassSpecification {
 	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
@@ -68,7 +69,7 @@ public class ClassSpecification {
 
 	
 
-	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds(SootMethod m) {
+	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds(Method m) {
 		return extendedIdealAnalysis.computeSeeds(m);
 	}
 
@@ -78,33 +79,29 @@ public class ClassSpecification {
 		return crySLRule.getClassName().toString();
 	}
 
-	public void invokesForbiddenMethod(SootMethod m) {
-		if ( !m.hasActiveBody()) {
-			return;
-		}
-		for (Unit u : m.getActiveBody().getUnits()) {
-			if (u instanceof Stmt) {
-				Stmt stmt = (Stmt) u;
-				if (!stmt.containsInvokeExpr())
-					continue;
-				InvokeExpr invokeExpr = stmt.getInvokeExpr();
-				SootMethod method = invokeExpr.getMethod();
-				Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
-				if (forbiddenMethod.isPresent()){
-					cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(new Statement((Stmt)u, cryptoScanner.icfg().getMethodOf(u)), this.getRule(), method, CrySLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
-				}
+	public void invokesForbiddenMethod(Method m) {
+		for (Statement statement : m.getStatements()) {
+			if (!statement.containsInvokeExpr()) {
+				continue;
+			}
+
+			DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(declaredMethod);
+			Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
+			if (forbiddenMethod.isPresent()){
+				cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(statement, this.getRule(), method, CrySLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
 			}
 		}
 	}
 
-	private Optional<CrySLForbiddenMethod> isForbiddenMethod(SootMethod method) {
+	private Optional<CrySLForbiddenMethod> isForbiddenMethod(Method method) {
 		// TODO replace by real specification once available.
 		List<CrySLForbiddenMethod> forbiddenMethods = crySLRule.getForbiddenMethods();
 //		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
 		for(CrySLForbiddenMethod m : forbiddenMethods){
 			if(!m.getSilent()){
-				Collection<SootMethod> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
+				Collection<Method> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
 				if(matchingMethod.contains(method))
 					return Optional.of(m);
 				
@@ -143,10 +140,6 @@ public class ClassSpecification {
 		return true;
 	}
 
-	public Collection<SootMethod> getInvolvedMethods() {
-		return fsm.getInvolvedMethods();
-	}
-	
 	public SootBasedStateMachineGraph getFSM(){
 		return fsm;
 	}

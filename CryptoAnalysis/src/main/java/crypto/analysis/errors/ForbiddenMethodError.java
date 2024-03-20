@@ -1,33 +1,33 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
+import crypto.rules.CrySLRule;
+
 import java.util.Collection;
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
-
-import crypto.rules.CrySLRule;
-import soot.SootMethod;
-
 public class ForbiddenMethodError extends AbstractError {
 
-	private Collection<SootMethod> alternatives;
-	private SootMethod calledMethod;
+	private Method calledMethod;
+	private Collection<Method> alternatives;
 	private Set<String> alternativesSet = Sets.newHashSet();
 
-	public ForbiddenMethodError(ControlFlowGraph.Edge errorLocation, CrySLRule rule, SootMethod calledMethod,
-								Collection<SootMethod> collection) {
+	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, Method calledMethod,
+								Collection<Method> collection) {
 		super(errorLocation, rule);
 		this.calledMethod = calledMethod;
 		this.alternatives = collection;
 		
-		for (SootMethod method : alternatives) {
-			this.alternativesSet.add(method.getSignature());
+		for (Method method : alternatives) {
+			this.alternativesSet.add(method.getName());
 		}	
 	}
 
-	public Collection<SootMethod> getAlternatives() {
+	public Collection<Method> getAlternatives() {
 		return alternatives;
 	}
 
@@ -35,7 +35,7 @@ public class ForbiddenMethodError extends AbstractError {
 		visitor.visit(this);
 	}
 
-	public SootMethod getCalledMethod() {
+	public Method getCalledMethod() {
 		return calledMethod;
 	}
 
@@ -47,7 +47,7 @@ public class ForbiddenMethodError extends AbstractError {
 		msg.append(" of class " + getCalledMethod().getDeclaringClass());
 		if (!getAlternatives().isEmpty()) {
 			msg.append(". Instead, call method ");
-			Collection<SootMethod> subSignatures = getAlternatives();
+			Collection<Method> subSignatures = getAlternatives();
 			msg.append(Joiner.on(", ").join(subSignatures));
 			msg.append(".");
 		}
@@ -59,7 +59,7 @@ public class ForbiddenMethodError extends AbstractError {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((alternativesSet == null) ? 0 : alternativesSet.hashCode());
-		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().hashCode());
+		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getName().hashCode());
 		return result;
 	}
 
@@ -80,12 +80,8 @@ public class ForbiddenMethodError extends AbstractError {
 		if (calledMethod == null) {
 			if (other.calledMethod != null)
 				return false;
-		} else if (!calledMethod.getSignature().equals(other.calledMethod.getSignature()))
+		} else if (!calledMethod.getName().equals(other.calledMethod.getName()))
 			return false;
 		return true;
 	}
-
-
-	
-
 }

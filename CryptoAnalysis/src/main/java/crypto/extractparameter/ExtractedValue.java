@@ -1,38 +1,28 @@
 package crypto.extractparameter;
 
-import java.util.Set;
-
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
-import soot.Value;
-import sync.pds.solver.nodes.Node;
 
 public class ExtractedValue {
 	private ControlFlowGraph.Edge stmt;
-	private Value val;
-	private Set<Node<ControlFlowGraph.Edge, Val>> dataFlowPath;
+	private Val val;
 
-	public ExtractedValue(ControlFlowGraph.Edge stmt, Value val, Set<Node<ControlFlowGraph.Edge, Val>> dataFlowPath) {
+	public ExtractedValue(ControlFlowGraph.Edge stmt, Val val) {
 		this.stmt = stmt;
 		this.val = val;
-		this.dataFlowPath = dataFlowPath;
 	}
 
 	public ControlFlowGraph.Edge stmt() {
 		return stmt;
 	}
 	
-	public Value getValue() {
+	public Val getValue() {
 		return val;
 	}
 	
 	@Override
 	public String toString() {
 		return "Extracted Value: " + val + " at " +stmt;
-	}
-	
-	public Set<Node<ControlFlowGraph.Edge, Val>> getDataFlowPath() {
-		return dataFlowPath;
 	}
 
 	@Override

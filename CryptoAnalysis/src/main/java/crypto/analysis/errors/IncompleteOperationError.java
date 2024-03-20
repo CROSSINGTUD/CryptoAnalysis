@@ -1,17 +1,16 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
-import soot.SootMethod;
-import soot.jimple.InvokeExpr;
-import soot.jimple.Stmt;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 
@@ -26,7 +25,7 @@ import java.util.Set;
  */
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
-	private final Collection<SootMethod> expectedMethodCalls;
+	private final Collection<Method> expectedMethodCalls;
 	private final Set<String> expectedMethodCallsSet;
 	private final boolean multiplePaths;
 
@@ -35,12 +34,12 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * incomplete operation occurs.
 	 *
 	 * @param objectLocation the seed for the incomplete operation
-	 * @param errorLocation the statement of the last usage of the seed
+	 * @param errorStmt the statement of the last usage of the seed
 	 * @param rule the CrySL rule for the seed
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, ControlFlowGraph.Edge errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled) {
-		this(objectLocation, errorLocation, rule, expectedMethodsToBeCalled, false);
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<Method> expectedMethodsToBeCalled) {
+		this(objectLocation, errorStmt, rule, expectedMethodsToBeCalled, false);
 	}
 
 	/**
@@ -48,23 +47,23 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * incomplete operation occurs.
 	 *
 	 * @param objectLocation the seed for the incomplete operation
-	 * @param errorLocation the statement of the last usage of the seed
+	 * @param errorStmt the statement of the last usage of the seed
 	 * @param rule the CrySL rule for the seed
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 * @param multiplePaths set to true, if there are multiple paths (default: false)
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, ControlFlowGraph.Edge errorLocation, CrySLRule rule, Collection<SootMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
-		super(errorLocation, rule, objectLocation);
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<Method> expectedMethodsToBeCalled, boolean multiplePaths) {
+		super(errorStmt, rule, objectLocation);
 		this.expectedMethodCalls = expectedMethodsToBeCalled;
 		this.multiplePaths = multiplePaths;
 
 		this.expectedMethodCallsSet = new HashSet<>();
-		for (SootMethod method : expectedMethodCalls) {
-			this.expectedMethodCallsSet.add(method.getSignature());
+		for (Method method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getName());
 		}
 	}
 
-	public Collection<SootMethod> getExpectedMethodCalls() {
+	public Collection<Method> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
 	
@@ -93,13 +92,14 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	}
 
 	private String getErrorMarkerStringForMultipleDataflowPaths() {
-		if (!getErrorLocation().isCallsite() || !getErrorLocation().getUnit().isPresent()) {
+		Statement statement = getErrorStatement();
+		if (!statement.containsInvokeExpr()) {
 			return "Unable to describe error";
 		}
 		StringBuilder msg = new StringBuilder();
 		msg.append("Call to ");
 
-		InvokeExpr invokeExpr = getErrorLocation().getUnit().get().getInvokeExpr();
+		InvokeExpr invokeExpr = statement.getInvokeExpr();
 		msg.append(invokeExpr.getMethod().getName());
 		msg.append(getObjectType());
 		msg.append(" is on a dataflow path with an incomplete operation. Potential missing call to ");
@@ -112,9 +112,9 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	private Set<String> getFormattedExpectedCalls() {
 		Set<String> altMethods = new HashSet<>();
 
-		for (SootMethod expectedCall : getExpectedMethodCalls()) {
+		for (Method expectedCall : getExpectedMethodCalls()) {
 			if (stmtInvokesExpectedCallName(expectedCall.getName())){
-				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
+				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			} else {
 				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			}
@@ -127,22 +127,16 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * This occurs when a call to the method with the correct name, but wrong signature is invoked.
 	 */
 	private boolean stmtInvokesExpectedCallName(String expectedCallName){
-		Statement errorLocation = getErrorLocation();
+		Statement statement = getErrorStatement();
 
-		if (!errorLocation.isCallsite()) {
+		if (!statement.containsInvokeExpr()) {
 			return false;
 		}
 
-		Optional<Stmt> stmtOptional = errorLocation.getUnit().toJavaUtil();
-
-		if (!stmtOptional.isPresent()) {
-			return false;
-		}
-
-		Stmt stmt = stmtOptional.get();
-		if (stmt.containsInvokeExpr()) {
-			InvokeExpr call = stmt.getInvokeExpr();
-			SootMethod calledMethod = call.getMethod();
+		if (statement.containsInvokeExpr()) {
+			// TODO DeclaredMethod?
+			InvokeExpr call = statement.getInvokeExpr();
+			DeclaredMethod calledMethod = call.getMethod();
 			return calledMethod.getName().equals(expectedCallName);
 		}
 
@@ -176,10 +170,10 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	}
 	
 	@SuppressWarnings("unused")
-	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
+	private int expectedMethodCallsHashCode(Collection<Method> expectedMethodCalls) {
 		Set<String> expectedMethodCallsSet = Sets.newHashSet();
-		for (SootMethod method : expectedMethodCalls) {
-			expectedMethodCallsSet.add(method.getSignature());
+		for (Method method : expectedMethodCalls) {
+			expectedMethodCallsSet.add(method.getName());
 		}
 		return expectedMethodCallsSet.hashCode();
 	}

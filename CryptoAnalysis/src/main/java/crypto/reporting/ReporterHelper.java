@@ -50,9 +50,9 @@ public class ReporterHelper {
 		report += "Analyzed Objects: \n";
 		for (IAnalysisSeed r : objects) {
 			report += String.format("\tObject:\n");
-			report += String.format("\t\tVariable: %s\n", r.var().value());
+			report += String.format("\t\tVariable: %s\n", r.var().getVariableName());
 			report += String.format("\t\tType: %s\n", r.getType());
-			report += String.format("\t\tStatement: %s\n", r.stmt().getUnit().get());
+			report += String.format("\t\tStatement: %s\n", r.cfgEdge().getTarget());
 			report += String.format("\t\tMethod: %s\n", r.getMethod());
 			report += String.format("\t\tSHA-256: %s\n", r.getObjectId());
 			report += String.format("\t\tSecure: %s\n", secureObjects.contains(r));
@@ -76,8 +76,8 @@ public class ReporterHelper {
 					}
 					
 					report += String.format("\t\t\t%s\n", marker.toErrorMarkerString());
-					report += String.format("\t\t\tat statement: %s\n", marker.getErrorLocation().getUnit().get());
-					report += String.format("\t\t\tat line: %d\n\n", marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber());
+					report += String.format("\t\t\tat statement: %s\n", marker.getErrorStatement());
+					report += String.format("\t\t\tat line: %d\n\n", marker.getErrorStatement().getStartLineNumber());
 				}
 			}
 			

@@ -1,26 +1,15 @@
 package tests.headless;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import boomerang.BackwardQuery;
+import boomerang.Query;
+import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
-import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-
-import boomerang.BackwardQuery;
-import boomerang.Query;
-import boomerang.scene.Val;
-import boomerang.results.ForwardBoomerangResults;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
@@ -36,16 +25,25 @@ import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
+import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.G;
 import sync.pds.solver.nodes.Node;
-import test.IDEALCrossingTestingFramework;
+import test.TestConstants;
 import tests.headless.FindingsType.FalseNegatives;
 import tests.headless.FindingsType.FalsePositives;
 import tests.headless.FindingsType.NoFalseNegatives;
 import tests.headless.FindingsType.NoFalsePositives;
 import tests.headless.FindingsType.TruePositives;
 import typestate.TransitionFunction;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractHeadlessTest {
 
@@ -117,11 +115,11 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					List<CrySLRule> rules = CrySLRulesetSelector.makeFromRuleset(IDEALCrossingTestingFramework.RULES_BASE_DIR, ruleset);
+					List<CrySLRule> rules = CrySLRulesetSelector.makeFromRuleset(TestConstants.RULES_BASE_DIR, ruleset);
 					HeadlessCryptoScanner.setRules(rules);
 					return rules;
 				} catch (CryptoAnalysisException e) {
-					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + IDEALCrossingTestingFramework.RULES_BASE_DIR, e);
+					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + TestConstants.RULES_BASE_DIR, e);
 				}
 				return null;
 			}
@@ -172,8 +170,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
-				String errorClassName = error.getErrorLocation().getMethod().getDeclaringClass().getName().toString();
-				String methodContainingError = error.getErrorLocation().getMethod().toString();
+				String methodContainingError = error.getErrorStatement().getMethod().getName();
 				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
 				} else {
@@ -190,8 +187,8 @@ public abstract class AbstractHeadlessTest {
 			public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> solver) {}
 
 			@Override
-			public void ensuredPredicates(Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-										  Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {}
+			public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates, Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
+										  Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {}
 
 			@Override
 			public void discoveredSeed(IAnalysisSeed curr) {}

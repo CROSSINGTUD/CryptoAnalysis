@@ -1,14 +1,20 @@
 package crypto.analysis;
 
 import boomerang.Query;
+import boomerang.callgraph.BoomerangResolver;
+import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
+import boomerang.controlflowgraph.DynamicCFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
+import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import boomerang.scene.jimple.JimpleMethod;
+import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.predicates.PredicateHandler;
@@ -30,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CryptoScanner {
@@ -51,17 +58,24 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.stmt(), key.var(), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.cfgEdge(), key.var(), key.getSpec());
 		}
 	};
 	private int solvedObject;
 	private Stopwatch analysisWatch;
+	private CallGraph callGraph;
 
-	public abstract ObservableICFG<Statement, Method> icfg();
+	public ObservableICFG<Statement, Method> icfg() {
+		return new ObservableDynamicICFG(new DynamicCFG(), new BoomerangResolver(callGraph(), getDataFlowScope()));
+	}
 
-	public abstract CallGraph callGraph();
+	public CallGraph callGraph() {
+		return callGraph;
+	}
 
-	public abstract DataFlowScope getDataFlowScope();
+	public DataFlowScope getDataFlowScope() {
+		return SootDataFlowScope.make(Scene.v());
+	}
 
 	public CrySLResultsReporter getAnalysisListener() {
 		return resultsAggregator;
@@ -69,6 +83,7 @@ public abstract class CryptoScanner {
 
 	public CryptoScanner() {
 		CrySLMethodToSootMethod.reset();
+		callGraph = new SootCallGraph();
 	}
 
 	public void scan(List<CrySLRule> specs) {
@@ -126,16 +141,41 @@ public abstract class CryptoScanner {
 		}
 	}
 
+	/*private void initialize() {
+		Set<Method> methods = callGraph().getReachableMethods();
+
+		for (Method method : methods) {
+
+			for (ClassSpecification spec : getClassSpecifications()) {
+				if (!((JimpleMethod) method).getDelegate().hasActiveBody())) {
+					continue;
+				}
+
+				spec.invokesForbiddenMethod(method);
+
+				if (isOnIgnoreSectionList(method)) {
+					continue;
+				}
+
+				for (Query seed : spec.getInitialSeeds(method)) {
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.cfgEdge(), seed.var(), spec));
+				}
+			}
+		}
+	}*/
+
 	private void initialize() {
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
 			MethodOrMethodContext next = listener.next();
-			SootMethod method = next.method();
+			SootMethod sootMethod = next.method();
 
-			if (method == null || !method.hasActiveBody() || !method.getDeclaringClass().isApplicationClass()) {
+			if (sootMethod == null || !sootMethod.hasActiveBody() || !sootMethod.getDeclaringClass().isApplicationClass()) {
 				continue;
 			}
+
+			Method method = JimpleMethod.of(sootMethod);
 
 			if (isOnIgnoreSectionList(method)) {
 				continue;
@@ -145,7 +185,7 @@ public abstract class CryptoScanner {
 				spec.invokesForbiddenMethod(method);
 				
 				for (Query seed : spec.getInitialSeeds(method)) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.stmt(), seed.var(), spec));
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.cfgEdge(), seed.var(), spec));
 				}
 			}
 		}
@@ -159,7 +199,7 @@ public abstract class CryptoScanner {
 		worklist.add(analysisSeedWithSpecification);
 	}
 
-	protected boolean isOnIgnoreSectionList(SootMethod method) {
+	protected boolean isOnIgnoreSectionList(Method method) {
 		String declaringClass = method.getDeclaringClass().getName();
 		String methodName = declaringClass + "." + method.getName();
 

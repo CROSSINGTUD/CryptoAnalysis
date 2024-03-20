@@ -1,23 +1,23 @@
 package test.assertions;
 
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
-import soot.jimple.Stmt;
 import test.Assertion;
 
 public class HasEnsuredPredicateAssertion implements Assertion {
 
-	private Stmt stmt;
+	private Statement stmt;
 	private Val val;
 	private boolean satisfied;
 	private String predName;
 
-	public HasEnsuredPredicateAssertion(Stmt stmt,  Val val) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Val val) {
 		this(stmt, val, null);
 	}
 
-	public HasEnsuredPredicateAssertion(Stmt stmt, Val val, String predName) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Val val, String predName) {
 		this.stmt = stmt;
 		this.val = val;
 		this.predName = predName;
@@ -38,7 +38,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 	}
 
 
-	public Stmt getStmt() {
+	public Statement getStmt() {
 		return stmt;
 	}
 

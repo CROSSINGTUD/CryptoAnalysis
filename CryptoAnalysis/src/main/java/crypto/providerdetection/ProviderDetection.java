@@ -1,38 +1,27 @@
 package crypto.providerdetection;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import boomerang.scene.Method;
-import boomerang.scene.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.callgraph.ObservableICFG;
-import boomerang.scene.Val;
 import boomerang.results.AbstractBoomerangResults;
 import boomerang.results.BackwardBoomerangResults;
-import boomerang.seedfactory.SeedFactory;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
+import boomerang.scene.Val;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLRuleReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
@@ -41,6 +30,14 @@ import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import wpds.impl.Weight.NoWeight;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * The ProviderDetection class helps in detecting the provider used when
@@ -61,7 +58,7 @@ public class ProviderDetection {
 	private static final String[] PROVIDER_VALUES = new String[] {"BC", "BCPQC", "BCJSSE"};
 	private static final Set<String> SUPPORTED_PROVIDERS = new HashSet<>(Arrays.asList(PROVIDER_VALUES));
 
-	public ProviderDetection(){
+	public ProviderDetection() {
 		this(new CrySLRuleReader());
 	}
 
@@ -97,9 +94,8 @@ public class ProviderDetection {
 	 * 
 	 * @return the detected provider
 	 */
-	public String doAnalysis(ObservableICFG<Unit, SootMethod> observableDynamicICFG, String rootRulesDirectory) {
-		
-		for(SootClass sootClass : Scene.v().getApplicationClasses()) {
+	public String doAnalysis(ObservableICFG<Statement, Method> observableDynamicICFG, String rootRulesDirectory) {
+		for (SootClass sootClass : Scene.v().getApplicationClasses()) {
 			for(SootMethod sootMethod : sootClass.getMethods()) {
 				if(sootMethod.hasActiveBody()) {
 					Body body = sootMethod.getActiveBody();
@@ -154,7 +150,7 @@ public class ProviderDetection {
 							}
 						}
 					}
-				}	
+				}
 			}
 		}
 	 			
@@ -184,7 +180,7 @@ public class ProviderDetection {
 	 *           
 	 * @param providerValue provider value
 	 *            
-	 * @param icfg icfg
+	 * @param observableDynamicICFG icfg
 	 *            
 	 * @return the provider
 	 */
@@ -192,14 +188,14 @@ public class ProviderDetection {
 		String provider = null;
 		
 		//Create a Boomerang solver.
-		Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
+		/*Boomerang solver = new Boomerang(new DefaultBoomerangOptions(){
 			public boolean onTheFlyCallGraph() {
 				//Must be turned of if no SeedFactory is specified.
 				return false;
 			}
 		});
 		Map<ForwardQuery, AbstractBoomerangResults<NoWeight>.Context> map = Maps.newHashMap();
-		for(Unit pred : observableDynamicICFG.getPredsOf(statement)) {
+		for(Statement pred : observableDynamicICFG.getStartPointsOf(statement)) {
 			//Create a backward query
 			BackwardQuery query = new BackwardQuery(new Statement((Stmt) pred,sootMethod), new Val(providerValue, sootMethod));
 			//Submit query to the solver.
@@ -217,8 +213,7 @@ public class ProviderDetection {
 				ForwardQuery forwardQuery = entry.getKey();
 				
 				Val forwardQueryVal = forwardQuery.var();
-				Value value = forwardQueryVal.value();
-				Type valueType = value.getType();
+				Type valueType = forwardQueryVal.getType();
 				String valueTypeString = valueType.toString();
 				
 				// In here are listed all the supported providers so far
@@ -235,7 +230,7 @@ public class ProviderDetection {
 		else {
 			LOGGER.error("Error occured to detect provider in the Provider Detection"
 					+ " analysis.");
-		}
+		}*/
 		return provider;
 	}
 	

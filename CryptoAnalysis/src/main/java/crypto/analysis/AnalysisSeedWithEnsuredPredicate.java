@@ -23,8 +23,7 @@ import typestate.TransitionFunction;
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
 	private ForwardBoomerangResults<TransitionFunction> analysisResults;
-	private Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
-	private ExtendedIDEALAnaylsis problem;
+	private final Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
 	private boolean analyzed;
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<ControlFlowGraph.Edge, Val> delegate) {
@@ -48,13 +47,13 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			return;
 
 		for(Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
-			predicateHandler.addNewPred(this,c.getRowKey(), c.getColumnKey(), pred);
+			predicateHandler.addNewPred(this,c.getRowKey().getTarget(), c.getColumnKey(), pred);
 		}
 	}
 
 
 	private ExtendedIDEALAnaylsis getOrCreateAnalysis() {
-		problem = new ExtendedIDEALAnaylsis() {
+		return new ExtendedIDEALAnaylsis() {
 
 			@Override
 			public CallGraph callGraph() {
@@ -65,11 +64,11 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 			public DataFlowScope getDataFlowScope() {
 				return cryptoScanner.getDataFlowScope();
 			}
-			
+
 			@Override
 			public SootBasedStateMachineGraph getStateMachine() {
 				StateMachineGraph m = new StateMachineGraph();
-				StateNode s = new StateNode("0", true, true){
+				StateNode s = new StateNode("0", true, true) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -78,22 +77,21 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 					}
 				};
 				m.addNode(s);
-				m.createNewEdge(Lists.newLinkedList(), s,s);
+				m.createNewEdge(Lists.newLinkedList(), s, s);
 				return new SootBasedStateMachineGraph(m);
 			}
-			
+
 			@Override
 			public CrySLResultsReporter analysisListener() {
 				return cryptoScanner.getAnalysisListener();
 			}
-			
+
 
 			@Override
 			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver,AnalysisSeedWithEnsuredPredicate.this);
+				return cryptoScanner.debugger(solver, AnalysisSeedWithEnsuredPredicate.this);
 			}
 		};
-		return problem;
 	}
 
 	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {

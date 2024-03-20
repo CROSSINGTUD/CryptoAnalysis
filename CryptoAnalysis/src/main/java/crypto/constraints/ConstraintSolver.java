@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -23,7 +24,6 @@ import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
-import soot.Type;
 
 public class ConstraintSolver {
 
@@ -97,7 +97,7 @@ public class ConstraintSolver {
 			for (AbstractError e : currentConstraint.getErrors()) {
 				if (e instanceof ImpreciseValueExtractionError) {
 					getReporter().reportError(getObject(),
-							new ImpreciseValueExtractionError(con, e.getErrorLocation(), e.getRule()));
+							new ImpreciseValueExtractionError(con, e.getErrorStatement(), e.getRule()));
 					break;
 				} else {
 					fail++;
@@ -202,7 +202,7 @@ public class ConstraintSolver {
 
 		// Extract predicates with 'this' as parameter
 		if (pred.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
-			result.add(new RequiredCrySLPredicate(pred, object.stmt()));
+			result.add(new RequiredCrySLPredicate(pred, object.cfgEdge()));
 		}
 		
 		return result;

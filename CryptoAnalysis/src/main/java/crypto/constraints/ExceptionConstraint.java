@@ -7,6 +7,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.JimpleMethod;
+import boomerang.scene.jimple.JimpleStatement;
+import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.typestate.CrySLMethodToSootMethod;
@@ -22,13 +29,15 @@ import soot.jimple.Stmt;
 
 public class ExceptionConstraint extends EvaluableConstraint {
 
-	private final Set<SootMethod> method;
-	private final SootClass exception;
+	private final Set<Method> method;
+	private final WrappedClass exception;
 
 	public ExceptionConstraint(CrySLExceptionConstraint cons, ConstraintSolver context) {
 		super(cons, context);
 		this.method = new HashSet<>(CrySLMethodToSootMethod.v().convert(cons.getMethod()));
-		this.exception = Scene.v().getSootClass(cons.getException().getException());
+
+		SootClass exceptionClass = Scene.v().getSootClass(cons.getException().getException());
+		this.exception = new JimpleWrappedClass(exceptionClass);
 	}
 
 	/**
@@ -50,11 +59,27 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 */
 	public void evaluate(ControlFlowGraph.Edge call) {
 		try {
-			Stmt stmt = call.getUnit().get();
-			if (!isSameMethod(stmt.getInvokeExpr().getMethod()))
+			Statement stmt = call.getTarget();
+			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(stmt.getInvokeExpr().getMethod());
+			if (!isSameMethod(method))
 				return;
-			if (!getTrap(call.getMethod().getActiveBody(), stmt, this.exception).isPresent())
-				errors.add(new UncaughtExceptionError(call, context.getClassSpec().getRule(), this.exception));
+
+			if (!(stmt.getMethod() instanceof JimpleMethod)) {
+				return;
+			}
+
+			JimpleMethod jimpleMethod = (JimpleMethod) stmt.getMethod();
+			SootMethod sootMethod = jimpleMethod.getDelegate();
+
+			if (!(stmt instanceof JimpleStatement)) {
+				return;
+			}
+
+			JimpleStatement jimpleStatement = (JimpleStatement) stmt;
+			Stmt sootStmt = jimpleStatement.getDelegate();
+
+			if (!getTrap(sootMethod.getActiveBody(), sootStmt, this.exception).isPresent())
+				errors.add(new UncaughtExceptionError(stmt, context.getClassSpec().getRule(), this.exception));
 		} catch (Exception e) {
 		}
 	}
@@ -88,9 +113,9 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @param exception The called Method, throwing the exception.
 	 * @return Returns the handler, that catches the exception thrown by callee in the method.
 	 */
-	public static Optional<Trap> getTrap(final Body body, final Unit unit, final SootClass exception) {
+	public static Optional<Trap> getTrap(final Body body, final Unit unit, final WrappedClass exception) {
 		for (final Trap trap : body.getTraps())
-			if (ExceptionConstraint.isCaughtAs(trap.getException(), exception))
+			if (ExceptionConstraint.isCaughtAs(new JimpleWrappedClass(trap.getException()), exception))
 				if (trapsUnit(body, trap, unit))
 					return Optional.of(trap);
 		return Optional.empty();
@@ -128,7 +153,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return Wheter a catch clause with the given catchClause, would catch
 	 *         the given exception.
 	 */
-	public static boolean isCaughtAs(SootClass catchClause, SootClass exception) {
+	public static boolean isCaughtAs(WrappedClass catchClause, WrappedClass exception) {
 		return LabeledMatcherTransition.isSubtype(exception, catchClause);
 	}
 
@@ -137,7 +162,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return Wheter the methods represented in this constraint match the given
 	 *         method.
 	 */
-	public boolean isSameMethod(SootMethod method) {
+	public boolean isSameMethod(Method method) {
 		return this.method.stream().anyMatch(declared -> LabeledMatcherTransition.matches(method, declared));
 	}
 }

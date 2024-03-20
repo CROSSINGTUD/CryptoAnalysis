@@ -29,8 +29,9 @@ public class SeedFactory {
 
 	public void generate(SootMethod method, Unit unit) {
 		for(FiniteStateMachineToTypestateChangeFunction defs : idealAnalysisDefs){
-			Collection<WeightedForwardQuery<TransitionFunction>> found = defs.generateSeed(method, unit);
-			seeds.addAll(found);
+			// TODO Refactor
+			//Collection<WeightedForwardQuery<TransitionFunction>> found = defs.generateSeed(method, unit);
+			//seeds.addAll(found);
 		}
 	}
 	

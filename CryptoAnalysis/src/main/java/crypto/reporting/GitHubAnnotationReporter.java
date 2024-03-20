@@ -66,12 +66,12 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
             for (AbstractError error : cell.getValue()) {
                 String title = error.getClass().getSimpleName() + " violating CrySL rule for " + error.getRule().getClassName();
 
-                Integer line = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartLineNumber).or(-1);
+                Integer line = error.getErrorStatement().getStartLineNumber();
                 if (line == -1) {
                     line = null;
                 }
 
-                Integer column = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartColumnNumber).or(-1);
+                Integer column = error.getErrorStatement().getStartColumnNumber();
                 if (column == -1) {
                     column = null;
                 }

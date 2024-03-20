@@ -1,13 +1,7 @@
 package crypto;
 
-import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.Method;
-import boomerang.scene.Statement;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.analysis.CrySLAnalysisListener;
@@ -194,9 +188,6 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				TransformerSetup.v().setupPreTransformer(rules);
 
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				CallGraph callGraph;
-				DataFlowScope dataFlowScope;
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
 				
 				long callgraphConstructionTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
@@ -251,21 +242,6 @@ public abstract class HeadlessCryptoScanner {
 				CryptoScanner scanner = new CryptoScanner() {
 
 					@Override
-					public ObservableICFG<Statement, Method> icfg() {
-						return observableDynamicICFG;
-					}
-
-					@Override
-					public CallGraph callGraph() {
-						return callgraph;
-					}
-
-					@Override
-					public DataFlowScope getDataFlowScope() {
-						return dataFlowScope;
-					}
-
-					@Override
 					public CrySLResultsReporter getAnalysisListener() {
 						return reporter;
 					}
@@ -304,7 +280,7 @@ public abstract class HeadlessCryptoScanner {
 						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
 					}
 					
-					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rulesetRootPath);
+					String detectedProvider = providerDetection.doAnalysis(scanner.icfg(), rulesetRootPath);
 					
 					if(detectedProvider != null) {
 						rules.clear();

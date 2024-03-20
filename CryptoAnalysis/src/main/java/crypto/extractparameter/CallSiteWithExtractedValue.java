@@ -1,7 +1,6 @@
 package crypto.extractparameter;
 
-import soot.Value;
-import soot.jimple.Constant;
+import boomerang.scene.Val;
 
 /**
  * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
@@ -57,8 +56,8 @@ public class CallSiteWithExtractedValue {
 		}
 		res += "parameter";
 		if(val != null && val.getValue() != null){
-			Value allocVal = val.getValue();
-			if(allocVal instanceof Constant){
+			Val allocVal = val.getValue();
+			if(allocVal.isConstant()){
 				res += " (with value " + allocVal +")";
 			}
 		}

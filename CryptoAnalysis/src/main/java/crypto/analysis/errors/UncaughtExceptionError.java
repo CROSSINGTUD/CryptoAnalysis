@@ -1,15 +1,15 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
+import boomerang.scene.WrappedClass;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
 
 public class UncaughtExceptionError extends AbstractError {
 
-	private final SootClass exception;
+	private final WrappedClass exception;
 
-	public UncaughtExceptionError(ControlFlowGraph.Edge errorLocation, CrySLRule rule, SootClass exception) {
-		super(errorLocation, rule);
+	public UncaughtExceptionError(Statement errorStmt, CrySLRule rule, WrappedClass exception) {
+		super(errorStmt, rule);
 		this.exception = exception;
 	}
 

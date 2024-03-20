@@ -1,13 +1,18 @@
 package crypto.analysis;
 
 import boomerang.debugger.Debugger;
+import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
-import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.jimple.JimpleDeclaredMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -39,19 +44,7 @@ import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.SootBasedStateMachineGraph;
 import crypto.typestate.WrappedState;
 import ideal.IDEALSeedSolver;
-import soot.IntType;
-import soot.Local;
-import soot.RefType;
-import soot.SootMethod;
-import soot.Type;
-import soot.Unit;
-import soot.Value;
 import soot.jimple.AssignStmt;
-import soot.jimple.Constant;
-import soot.jimple.IntConstant;
-import soot.jimple.InvokeExpr;
-import soot.jimple.StringConstant;
-import soot.jimple.ThrowStmt;
 import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
@@ -187,10 +180,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private void computeTypestateErrorsForEndOfObjectLifeTime() {
 		Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
-		Map<ControlFlowGraph.Edge, Set<SootMethod>> incompleteOperations = new HashMap<>();
+		Map<ControlFlowGraph.Edge, Set<Method>> incompleteOperations = new HashMap<>();
 
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
-			Set<SootMethod> expectedMethodsToBeCalled = new HashSet<>();
+			Set<Method> expectedMethodsToBeCalled = new HashSet<>();
 
 			for (ITransition n : c.getValue().values()) {
 				if (n.to() == null) {
@@ -208,7 +201,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				WrappedState wrappedState = (WrappedState) n.to();
 				for (TransitionEdge t : spec.getRule().getUsagePattern().getAllTransitions()) {
 					if (t.getLeft().equals(wrappedState.delegate()) && !t.from().equals(t.to())) {
-						Collection<SootMethod> converted = CrySLMethodToSootMethod.v().convert(t.getLabel());
+						Collection<Method> converted = CrySLMethodToSootMethod.v().convert(t.getLabel());
 						expectedMethodsToBeCalled.addAll(converted);
 					}
 				}
@@ -228,19 +221,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		 * the error can be reported directly.
 		 */
 		if (incompleteOperations.entrySet().size() == 1) {
-			Entry<ControlFlowGraph.Edge, Set<SootMethod>> entry = incompleteOperations.entrySet().iterator().next();
-			ControlFlowGraph.Edge s = entry.getKey();
-			Set<SootMethod> methodsToBeCalled = entry.getValue();
+			Entry<ControlFlowGraph.Edge, Set<Method>> entry = incompleteOperations.entrySet().iterator().next();
+			Set<Method> methodsToBeCalled = entry.getValue();
+			Statement statement = entry.getKey().getTarget();
 
-			if (!s.getUnit().isPresent()) {
+			if (statement.isThrowStmt()) {
 				return;
 			}
 
-			if (s.getUnit().get() instanceof ThrowStmt) {
-				return;
-			}
-
-			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, s, spec.getRule(), methodsToBeCalled);
+			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, spec.getRule(), methodsToBeCalled);
 			this.addError(incompleteOperationError);
 			cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
 		}
@@ -251,26 +240,22 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		 * 2) A dataflow path does not end in an accepting state: Report the error on the last used statement on this path
 		 */
 		if (incompleteOperations.size() > 1) {
-			for (Entry<ControlFlowGraph.Edge, Set<SootMethod>> entry : incompleteOperations.entrySet()) {
-				ControlFlowGraph.Edge statement = entry.getKey();
-				Set<SootMethod> expectedMethodsToBeCalled = entry.getValue();
+			for (Entry<ControlFlowGraph.Edge, Set<Method>> entry : incompleteOperations.entrySet()) {
+				Set<Method> expectedMethodsToBeCalled = entry.getValue();
+				Statement statement = entry.getKey().getTarget();
 
-				// Extract the called SootMethod from the statement
-				if (!statement.getUnit().isPresent()) {
+				if (statement.isThrowStmt()) {
 					continue;
 				}
 
-				if (statement.getUnit().get() instanceof ThrowStmt) {
-					continue;
-				}
-
-				if (!statement.getUnit().get().containsInvokeExpr()) {
+				if (!statement.containsInvokeExpr()) {
 					continue;
 				}
 
 				// Only if the path does not end in an accepting state, the error should be reported
-				InvokeExpr invokeExpr = statement.getUnit().get().getInvokeExpr();
-				if (isMethodToAcceptingState(invokeExpr.getMethod())) {
+				DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+				Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(declaredMethod);
+				if (isMethodToAcceptingState(method)) {
 					continue;
 				}
 
@@ -281,7 +266,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private boolean isMethodToAcceptingState(SootMethod method) {
+	private boolean isMethodToAcceptingState(Method method) {
 		Collection<TransitionEdge> transitions = spec.getRule().getUsagePattern().getAllTransitions();
 		Collection<CrySLMethod> methods = CrySLMethodToSootMethod.v().convert(method);
 
@@ -303,7 +288,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (stateNode instanceof ReportingErrorStateNode) {
 				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
 
-				TypestateError typestateError = new TypestateError(curr, getSpec().getRule(), this, errorStateNode.getExpectedCalls());
+				TypestateError typestateError = new TypestateError(curr.getTarget(), getSpec().getRule(), this, errorStateNode.getExpectedCalls());
 				this.addError(typestateError);
 				cryptoScanner.getAnalysisListener().reportError(this, typestateError);
 			}
@@ -393,38 +378,36 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// TODO only for first parameter?
 		for (ICrySLPredicateParameter predicateParam : ensuredPred.getPredicate().getParameters()) {
 			if (predicateParam.getName().equals("this")) {
-				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode, currStmt);
+				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode, currStmt.getTarget());
 			}
 		}
 
 		// Check, whether the predicate should be ensured on another object
-		if (!currStmt.isCallsite()) {
+		Statement statement = currStmt.getTarget();
+		if (!statement.containsInvokeExpr()) {
 			return;
 		}
 
-		if (!currStmt.getUnit().isPresent()) {
-			return;
-		}
-
-		InvokeExpr invokeExpr = currStmt.getUnit().get().getInvokeExpr();
-		SootMethod invokedMethod = invokeExpr.getMethod();
-		Collection<CrySLMethod> convert = CrySLMethodToSootMethod.v().convert(invokedMethod);
+		DeclaredMethod invokedMethod = statement.getInvokeExpr().getMethod();
+		Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(invokedMethod);
+		Collection<CrySLMethod> convert = CrySLMethodToSootMethod.v().convert(method);
 
 		for (CrySLMethod crySLMethod : convert) {
 			Entry<String, String> retObject = crySLMethod.getRetObject();
-			if (!retObject.getKey().equals("_") && currStmt.getUnit().get() instanceof AssignStmt && predicateParameterEquals(ensuredPred.getPredicate().getParameters(), retObject.getKey())) {
-				AssignStmt as = (AssignStmt) currStmt.getUnit().get();
-				Value leftOp = as.getLeftOp();
-				AllocVal val = new AllocVal(leftOp, currStmt.getMethod(), as.getRightOp(), new Statement(as, currStmt.getMethod()));
+			if (!retObject.getKey().equals("_") && statement.isAssign() && predicateParameterEquals(ensuredPred.getPredicate().getParameters(), retObject.getKey())) {
+				Val leftOp = statement.getLeftOp();
+				Val rightOp = statement.getRightOp();
+
+				AllocVal val = new AllocVal(leftOp, statement, rightOp);
 				expectPredicateOnOtherObject(ensuredPred, currStmt, val);
 			}
 			int i = 0;
 			for (Entry<String, String> p : crySLMethod.getParameters()) {
 				if (predicateParameterEquals(ensuredPred.getPredicate().getParameters(), p.getKey())) {
-					Value param = invokeExpr.getArg(i);
-					if (param instanceof Local) {
-						Val val = new Val(param, currStmt.getMethod());
-						expectPredicateOnOtherObject(ensuredPred, currStmt, val);
+					Val param = statement.getInvokeExpr().getArg(i);
+
+					if (param.isLocal()) {
+						expectPredicateOnOtherObject(ensuredPred, currStmt, param);
 					}
 				}
 				i++;
@@ -450,12 +433,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param stateNode the state, where the predicate is expected to be ensured
 	 * @param currStmt the statement that leads to the state
 	 */
-	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, ControlFlowGraph.Edge currStmt) {
+	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, Statement currStmt) {
 		predicateHandler.expectPredicate(this, currStmt, ensuredPred.getPredicate());
 
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
 			if (containsTargetState(e.getValue(), stateNode)) {
-				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
+				predicateHandler.addNewPred(this, e.getRowKey().getTarget(), e.getColumnKey(), ensuredPred);
 			}
 		}
 	}
@@ -485,21 +468,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		// Check, whether there is a specification (i.e. a CrySL rule) for the target object
 		for (ClassSpecification spec : cryptoScanner.getClassSpecifications()) {
-			if (accessGraph.value() == null) {
+			if (accessGraph.isNull()) {
 				continue;
 			}
 
-			Type baseType = accessGraph.value().getType();
-			if (!(baseType instanceof RefType)) {
+			Type baseType = accessGraph.getType();
+			if (!(baseType.isRefType())) {
 				continue;
 			}
 
 			// TODO Use refType (return type) or static type?
-			RefType refType = (RefType) baseType;
-			if (spec.getRule().getClassName().equals(refType.getSootClass().getName())) {
+			//if (spec.getRule().getClassName().equals(refType.getSootClass().getName())) {
+			if (baseType.getWrappedClass().getName().equals(spec.getRule().getClassName())) {
 				AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, currStmt, accessGraph, spec));
 				seed.addEnsuredPredicateFromOtherRule(ensPred);
-				cryptoScanner.getPredicateHandler().reportForbiddenPredicate(ensPred, currStmt, seed);
+				cryptoScanner.getPredicateHandler().reportForbiddenPredicate(ensPred, currStmt.getTarget(), seed);
 
 				specificationExists = true;
 			}
@@ -508,7 +491,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// If no specification has been found, create a seed without a specification
 		if (!specificationExists) {
 			AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<>(currStmt, accessGraph));
-			predicateHandler.expectPredicate(seed, currStmt, ensPred.getPredicate());
+			predicateHandler.expectPredicate(seed, currStmt.getTarget(), ensPred.getPredicate());
 			seed.addEnsuredPredicate(ensPred);
 		}
 	}
@@ -566,7 +549,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					}
 
 					if (state.isAccepting()) {
-						predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), predWithThis);
+						predicateHandler.addNewPred(this, c.getRowKey().getTarget(), c.getColumnKey(), predWithThis);
 					}
 				}
 			}
@@ -848,16 +831,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
 		Collection<String> values = new ArrayList<String>();
 		for (ExtractedValue q : collection) {
-			Unit u = q.stmt().getUnit().get();
+			Statement statement = q.stmt().getTarget();
+
 			if (cswpi.stmt().equals(q.stmt())) {
-				if (u instanceof AssignStmt) {
-					values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
+				if (statement.isAssign()) {
+					Val leftOp = statement.getLeftOp();
+					//values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
 				} else {
-					values.add(retrieveConstantFromValue(u.getUseBoxes().get(cswpi.getIndex()).getValue()));
+					//values.add(retrieveConstantFromValue(u.getUseBoxes().get(cswpi.getIndex()).getValue()));
 				}
-			} else if (u instanceof AssignStmt) {
-				final Value rightSide = ((AssignStmt) u).getRightOp();
-				if (rightSide instanceof Constant) {
+			} else if (statement.isAssign()) {
+				Val rightSide = statement.getRightOp();
+				if (rightSide.isConstant()) {
 					values.add(retrieveConstantFromValue(rightSide));
 				} else {
 					// final List<ValueBox> useBoxes = rightSide.getUseBoxes();
@@ -878,11 +863,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return values;
 	}
 
-	private String retrieveConstantFromValue(Value val) {
-		if (val instanceof StringConstant) {
-			return ((StringConstant) val).value;
-		} else if (val instanceof IntConstant || val.getType() instanceof IntType) {
-			return val.toString();
+	private String retrieveConstantFromValue(Val val) {
+		if (val.isStringConstant()) {
+			return val.getStringValue();
+		} else if (val.isIntConstant()) {
+			return String.valueOf(val.getIntValue());
 		} else {
 			return "";
 		}

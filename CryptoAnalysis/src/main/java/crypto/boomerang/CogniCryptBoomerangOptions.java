@@ -5,42 +5,41 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import soot.Value;
-import soot.jimple.AssignStmt;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.NullConstant;
-import soot.jimple.StringConstant;
 
 import java.util.Optional;
 
 public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
+
 	@Override
 	public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
 	
 		if (stmt.containsInvokeExpr()) {
-			if (stmt instanceof AssignStmt) {
-				AssignStmt as = (AssignStmt) stmt;
-				if (as.getLeftOp().equals(fact.value())) {
-					if(as.getInvokeExpr().getMethod().isNative())
-						return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(as, m)));
+			if (stmt.isAssign()) {
+				Val leftOp = stmt.getLeftOp();
+				Val rightOp = stmt.getRightOp();
+
+				if (leftOp.equals(fact)) {
+					if(stmt.getInvokeExpr().getMethod().isNative())
+						return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 			}
 			if (stmt.getInvokeExpr().getMethod().isConstructor()
-					&& (stmt.getInvokeExpr() instanceof InstanceInvokeExpr)) {
-				InstanceInvokeExpr iie = (InstanceInvokeExpr) stmt.getInvokeExpr();
-				Value base = iie.getBase();
-				if (base.equals(fact.value())) {
-					return Optional.of(new AllocVal(base, m, base, new Statement(stmt, m)));
+					&& (stmt.getInvokeExpr().isInstanceInvokeExpr())) {
+				Val base = stmt.getInvokeExpr().getBase();
+				if (base.equals(fact)) {
+					return Optional.of(new AllocVal(base, stmt, base));
 				}
 			}
 		}
 
-		if (!(stmt instanceof AssignStmt)) {
-			return Optional.absent();
+		if (!(stmt.isAssign())) {
+			return Optional.empty();
 		}
-		AssignStmt as = (AssignStmt) stmt;
-		if (!as.getLeftOp().equals(fact.value())) {
-			return Optional.absent();
+
+		Val leftOp = stmt.getLeftOp();
+		Val rightOp = stmt.getRightOp();
+		if (!leftOp.equals(fact)) {
+			return Optional.empty();
 		}
 //		if (as.containsInvokeExpr()) {
 //			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
@@ -52,46 +51,40 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 //				}
 //			}
 //		}
-		if (isAllocationVal(as.getRightOp())) {
-			return Optional.of(new AllocVal(as.getLeftOp(), m, as.getRightOp(), new Statement(stmt, m)));
+		if (isAllocationVal(rightOp)) {
+			return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 		}
 
-		return Optional.absent();
+		return Optional.empty();
 	}
 
 	@Override
-	public boolean isAllocationVal(Value val) {
-		if (!trackStrings() && isStringAllocationType(val.getType())) {
+	public boolean isAllocationVal(Val val) {
+		if (!trackStrings() && val.isStringBufferOrBuilder()) {
 			return false;
 		}
-		if (trackNullAssignments() && val instanceof NullConstant) {
+		if (trackNullAssignments() && val.isNull()) {
 			return true;
 		}
-		if (arrayFlows() && isArrayAllocationVal(val)) {
+		if (getArrayStrategy() != ArrayStrategy.DISABLED && val.isArrayAllocationVal()) {
 			return true;
 		}
-		if (trackStrings() && val instanceof StringConstant) {
+		if (trackStrings() && val.isStringConstant()) {
 			return true;
 		}
-		if (!trackAnySubclassOfThrowable() && isThrowableAllocationType(val.getType())) {
+		if (!trackAnySubclassOfThrowable() && val.isThrowableAllocationType()) {
 			return false;
 		}
-
 		return false;
 	}
 
-	@Override
-	public boolean onTheFlyCallGraph() {
-		return false;
-	}
-
-	@Override
+    @Override
 	public int analysisTimeoutMS() {
 		return 5000;
 	}
 	
 	@Override
 	public boolean trackStaticFieldAtEntryPointToClinit() {
-		return false;
+		return true;
 	}
 }

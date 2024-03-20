@@ -1,9 +1,8 @@
 package crypto.analysis.errors;
 
-import java.util.List;
-
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
-
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
@@ -16,18 +15,17 @@ import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
 import soot.Value;
-import soot.jimple.AssignStmt;
-import soot.jimple.Constant;
-import soot.jimple.Stmt;
 import soot.jimple.internal.AbstractInvokeExpr;
 
-public class ConstraintError extends ErrorWithObjectAllocation{
+import java.util.List;
+
+public class ConstraintError extends ErrorWithObjectAllocation {
 
 	private ISLConstraint brokenConstraint;
 	private CallSiteWithExtractedValue callSiteWithParamIndex;
 
 	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs.getCallSite().stmt(), rule, objectLocation);
+		super(cs.getCallSite().stmt().getTarget(), rule, objectLocation);
 		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;
 	}
@@ -131,13 +129,14 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 		msg.append(" should be any of ");
 		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Stmt stmt = callSiteWithParamIndex.getVal().stmt().getUnit().get();
+			Statement stmt = callSiteWithParamIndex.getVal().stmt().getTarget();
 			String[] splitValues = new String[] { "" };
-			if (stmt instanceof AssignStmt) {
-				Value rightSide = ((AssignStmt) stmt).getRightOp();
-				if (rightSide instanceof Constant) {
+			if (stmt.isAssign()) {
+				Val rightSide = stmt.getRightOp();
+				if (rightSide.isConstant()) {
 					splitValues = filterQuotes(rightSide.toString()).split(splitter.getSplitter());
-				} else if (rightSide instanceof AbstractInvokeExpr) {
+					// TODO Refactor
+				} /*else if (rightSide instanceof AbstractInvokeExpr) {
 					List<Value> args = ((AbstractInvokeExpr) rightSide).getArgs();
 					for (Value arg : args) {
 						if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
@@ -145,9 +144,9 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 							break;
 						}
 					}
-				}
+				}*/
 			} else {
-				splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
+				//splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
 			}
 			if (splitValues.length >= splitter.getIndex()) {
 				for (int i = 0; i < splitter.getIndex(); i++) {
@@ -175,7 +174,7 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	@Override
 	public int hashCode() {
 		final int paramIndex = callSiteWithParamIndex.getCallSite().getIndex();
-		final Value parameterValue = callSiteWithParamIndex.getVal().getValue();
+		final Val parameterValue = callSiteWithParamIndex.getVal().getValue();
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + paramIndex;

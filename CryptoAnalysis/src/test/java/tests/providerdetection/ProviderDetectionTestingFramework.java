@@ -5,8 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
+import boomerang.controlflowgraph.DynamicCFG;
+import boomerang.scene.CallGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.jimple.BoomerangPretransformer;
+import boomerang.scene.jimple.SootCallGraph;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.providerdetection.ProviderDetection;
 import soot.G;
@@ -88,10 +94,12 @@ public class ProviderDetectionTestingFramework extends ProviderDetection {
 		return new SceneTransformer() {
 			
 			@Override
-			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
+				CallGraph callGraph = new SootCallGraph();
+				DataFlowScope dataFlowScope = SootDataFlowScope.make(Scene.v());
+				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(new DynamicCFG(), new BoomerangResolver(callGraph, dataFlowScope));
 				setRulesDirectory(defaultRulesDirectory);
 				doAnalysis(observableDynamicICFG, rootRulesDirectory);
 			}

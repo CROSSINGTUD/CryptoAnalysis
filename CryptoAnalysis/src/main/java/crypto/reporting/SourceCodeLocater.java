@@ -18,7 +18,7 @@ public class SourceCodeLocater {
 	}
 	
 	public String getAbsolutePath(WrappedClass className) {
-		String shortName = className.getShortName();
+		String shortName = className.getName();
 		Collection<File> files = FileUtils.listFiles(
 				  baseDir, 
 				  new RegexFileFilter(shortName+".java"), 

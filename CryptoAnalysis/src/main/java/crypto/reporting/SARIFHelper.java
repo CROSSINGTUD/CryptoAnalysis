@@ -73,7 +73,7 @@ public class SARIFHelper {
 		return sourceLocater == null ? c.getName().replace(".", "/") + ".java" : sourceLocater.getAbsolutePath(c);
 	}
 	
-	public JSONArray getLocations(SootClass c, String methodName, int lineNumber, String method, String statement) {
+	public JSONArray getLocations(WrappedClass c, String methodName, int lineNumber, String method, String statement) {
 		JSONArray locations = new JSONArray();
 		JSONObject location = new JSONObject();
 		

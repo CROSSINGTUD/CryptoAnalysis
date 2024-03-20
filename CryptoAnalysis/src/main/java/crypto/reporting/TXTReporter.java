@@ -1,20 +1,13 @@
 package crypto.reporting;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.List;
-
-import boomerang.scene.WrappedClass;
+import crypto.rules.CrySLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import crypto.rules.CrySLRule;
-import soot.Printer;
-import soot.SootClass;
-import soot.util.EscapedWriter;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class extends the class {@link Reporter} by generating a report and writing it into a text file.
@@ -59,7 +52,7 @@ public class TXTReporter extends Reporter {
 			writer.write(this.analysisReport);
 			writer.close();
 			
-			for (WrappedClass c : this.errorMarkers.rowKeySet()) {
+			/*for (WrappedClass c : this.errorMarkers.rowKeySet()) {
 				FileOutputStream streamOut = new FileOutputStream(new File(getOutputFolder() + File.separator + c.toString() + ".jimple"));
 				PrintWriter writerOut = new PrintWriter(new EscapedWriter(new OutputStreamWriter(streamOut)));
 				Printer.v().printTo(c, writerOut);
@@ -67,7 +60,7 @@ public class TXTReporter extends Reporter {
 				writerOut.flush();
 				streamOut.close();
 				writerOut.close();
-			}
+			}*/
 			
 			LOG.info("Text Report generated to file : "+ getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME);
 		} catch (IOException e) {

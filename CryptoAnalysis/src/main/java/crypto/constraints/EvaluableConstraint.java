@@ -5,6 +5,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -28,9 +32,7 @@ import soot.Value;
 import soot.jimple.AssignStmt;
 import soot.jimple.Constant;
 import soot.jimple.IntConstant;
-import soot.jimple.InvokeExpr;
 import soot.jimple.LongConstant;
-import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.JNewArrayExpr;
 
@@ -77,10 +79,10 @@ public abstract class EvaluableConstraint {
 	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 		for (CallSiteWithParamIndex wrappedCallSite : context.getParsAndVals().keySet()) {
-			final Stmt callSite = wrappedCallSite.stmt().getUnit().get();
+			final Statement callSite = wrappedCallSite.stmt().getTarget();
 
 			for (ExtractedValue wrappedAllocSite : context.getParsAndVals().get(wrappedCallSite)) {
-				final Stmt allocSite = wrappedAllocSite.stmt().getUnit().get();
+				final Statement allocSite = wrappedAllocSite.stmt().getTarget();
 				if (!wrappedCallSite.getVarName().equals(varName))
 					continue;
 
@@ -88,8 +90,9 @@ public abstract class EvaluableConstraint {
 				if (callSite.equals(allocSite)) {
 					varVal.put(retrieveConstantFromValue(invoker.getArg(wrappedCallSite.getIndex())),
 							new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
-				} else if (allocSite instanceof AssignStmt) {
-					if (wrappedAllocSite.getValue() instanceof Constant) {
+				} else if (allocSite.isAssign()) {
+					if (wrappedAllocSite.getValue().isConstant()) {
+						// TODO Refactor
 						// varVal.put(retrieveConstantFromValue(wrappedAllocSite.getValue()), new
 						// CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						String retrieveConstantFromValue = retrieveConstantFromValue(wrappedAllocSite.getValue());
@@ -100,14 +103,15 @@ public abstract class EvaluableConstraint {
 								pos = i;
 							}
 						}
-						if (pos > -1 && "boolean".equals(invoker.getMethodRef().getParameterType(pos).toQuotedString())) {
+						if (pos > -1 && invoker.getArg(pos).getType().isBooleanType()) {
+						//if (pos > -1 && "boolean".equals(invoker.getArg(pos).getType()..toQuotedString())) {
 							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true",
 									new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						} else {
 							varVal.put(retrieveConstantFromValue,
 									new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						}
-					} else if (wrappedAllocSite.getValue() instanceof JNewArrayExpr) {
+					} else if (wrappedAllocSite.getValue().isNewExpr()) {
 						varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite));
 					}
 				}
@@ -125,9 +129,25 @@ public abstract class EvaluableConstraint {
 	 */
 	protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite,
 			ExtractedValue allocSite) {
-		Value arrayLocal = allocSite.getValue();
-		Body methodBody = allocSite.stmt().getMethod().getActiveBody();
+		Val arrayLocal = allocSite.getValue();
+		Method method = allocSite.stmt().getMethod();
+
 		Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
+
+		for (Statement statement : method.getStatements()) {
+			if (!statement.isAssign()) {
+				continue;
+			}
+
+			Val leftVal = statement.getLeftOp();
+			Val rightVal = statement.getRightOp();
+
+			if (leftVal.equals(arrayLocal) && !rightVal.toString().contains("newarray")) {
+				arrVal.put(retrieveConstantFromValue(rightVal), new CallSiteWithExtractedValue(callSite, allocSite));
+			}
+		}
+
+		/*Body methodBody = allocSite.stmt().getMethod().getActiveBody();
 
 		if (methodBody == null)
 			return arrVal;
@@ -143,17 +163,17 @@ public abstract class EvaluableConstraint {
 			if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
 				arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
 			}
-		}
+		}*/
 		return arrVal;
 	}
 
-	private String retrieveConstantFromValue(Value val) {
-		if (val instanceof StringConstant) {
-			return ((StringConstant) val).value;
-		} else if (val instanceof IntConstant || val.getType() instanceof IntType) {
-			return val.toString();
-		} else if (val instanceof LongConstant) {
-			return val.toString().replaceAll("L", "");
+	private String retrieveConstantFromValue(Val val) {
+		if (val.isStringConstant()) {
+			return val.getStringValue();
+		} else if (val.isIntConstant()) {
+			return String.valueOf(val.getIntValue());
+		} else if (val.isLongConstant()) {
+			return String.valueOf(val.getLongValue()).replaceAll("L", "");
 		} else {
 			return "";
 		}

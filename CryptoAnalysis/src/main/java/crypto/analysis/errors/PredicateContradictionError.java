@@ -1,17 +1,17 @@
 package crypto.analysis.errors;
 
-import java.util.Map.Entry;
-
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+
+import java.util.Map.Entry;
 
 public class PredicateContradictionError extends AbstractError {
 
 	Entry<CrySLPredicate, CrySLPredicate> mismatchedPreds;
 
-	public PredicateContradictionError(ControlFlowGraph.Edge errorLocation, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
-		super(errorLocation, rule);
+	public PredicateContradictionError(Statement errorStmt, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
+		super(errorStmt, rule);
 		mismatchedPreds = disPair;
 	}
 

@@ -1,19 +1,15 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import crypto.rules.CrySLRule;
-import soot.jimple.Stmt;
-import soot.jimple.internal.JAssignStmt;
-import soot.jimple.internal.JIfStmt;
-import soot.jimple.internal.JReturnStmt;
-import soot.jimple.internal.JReturnVoidStmt;
+import soot.jimple.IfStmt;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbstractError implements IError{
-	private ControlFlowGraph.Edge errorLocation;
+	private Statement errorStmt;
 	private CrySLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
@@ -22,24 +18,24 @@ public abstract class AbstractError implements IError{
 	private Set<AbstractError> causedByErrors; // preceding
 	private Set<AbstractError> willCauseErrors; // subsequent
 
-	public AbstractError(ControlFlowGraph.Edge errorLocation, CrySLRule rule) {
-		this.errorLocation = errorLocation;
+	public AbstractError(Statement errorStmt, CrySLRule rule) {
+		this.errorStmt = errorStmt;
 		this.rule = rule;
-		this.outerMethod = errorLocation.getMethod().getSignature();
-		this.declaringClass = errorLocation.getMethod().getDeclaringClass().toString();
+		this.outerMethod = errorStmt.getMethod().getName();
+		this.declaringClass = errorStmt.getMethod().getDeclaringClass().getName();
 
 		this.causedByErrors = new HashSet<>();
 		this.willCauseErrors = new HashSet<>();
 
-		Stmt errorStmt = errorLocation.getUnit().get();
 		if(errorStmt.containsInvokeExpr()) {
-			this.invokeMethod = errorStmt.getInvokeExpr().getMethod().toString();
-		} else if(errorStmt instanceof JReturnStmt || errorStmt instanceof JReturnVoidStmt) {
+			this.invokeMethod = errorStmt.getInvokeExpr().getMethod().getName();
+		} else if(errorStmt.isReturnStmt()) {
 			this.invokeMethod = errorStmt.toString();
-		} else if (errorStmt instanceof JIfStmt) {
-			this.invokeMethod = ((JIfStmt) errorStmt).getCondition().toString();
+		} else if (errorStmt.isIfStmt()) {
+			// TODO getCondition not accessible
+			this.invokeMethod = ((IfStmt) errorStmt).getCondition().toString();
 		} else {
-			this.invokeMethod = ((JAssignStmt) errorStmt).getLeftOp().toString();
+			this.invokeMethod = errorStmt.getLeftOp().getStringValue();
 		}
 	}
 
@@ -63,8 +59,8 @@ public abstract class AbstractError implements IError{
 		return this.causedByErrors;
 	}
 
-	public ControlFlowGraph.Edge getErrorLocation() {
-		return errorLocation;
+	public Statement getErrorStatement() {
+		return errorStmt;
 	}
 
 	public CrySLRule getRule() {
@@ -117,7 +113,7 @@ public abstract class AbstractError implements IError{
 				return false;
 		} else if (!rule.equals(other.rule)) {
 			return false;
-		} else if (!errorLocation.equals(other.getErrorLocation())) {
+		} else if (!errorStmt.equals(other.getErrorStatement())) {
 			return false;
 		}
 		return true;

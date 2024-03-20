@@ -1,6 +1,7 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLRule;
 
@@ -8,8 +9,8 @@ public class ImpreciseValueExtractionError extends AbstractError {
 
 	private ISLConstraint violatedConstraint;
 
-	public ImpreciseValueExtractionError(ISLConstraint violatedCons, ControlFlowGraph.Edge errorLocation, CrySLRule rule) {
-		super(errorLocation, rule);
+	public ImpreciseValueExtractionError(ISLConstraint violatedCons, Statement errorStmt, CrySLRule rule) {
+		super(errorStmt, rule);
 		this.violatedConstraint = violatedCons;
 	}
 

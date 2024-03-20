@@ -1,22 +1,20 @@
 package test.finitestatemachine;
 
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.junit.Before;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import test.IDEALCrossingTestingFramework;
+import org.junit.Before;
+import test.TestConstants;
+
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class FiniteStateMachineTestingFramework{
 
@@ -113,7 +111,7 @@ public abstract class FiniteStateMachineTestingFramework{
 	public void createSMG() {
 		if(this.smg == null) {
 			try {
-				this.smg = CrySLRulesetSelector.makeSingleRule(IDEALCrossingTestingFramework.RULES_BASE_DIR, this.ruleset, this.crySLRule).getUsagePattern();
+				this.smg = CrySLRulesetSelector.makeSingleRule(TestConstants.RULES_BASE_DIR, this.ruleset, this.crySLRule).getUsagePattern();
 			} catch (CryptoAnalysisException e) {
 				e.printStackTrace();
 			}

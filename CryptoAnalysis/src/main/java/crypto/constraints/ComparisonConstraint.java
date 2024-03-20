@@ -122,7 +122,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			predicateConstraint.evaluate();
 			if (!predicateConstraint.getErrors().isEmpty()) {
 				for (AbstractError err : predicateConstraint.getErrors()) {
-					errors.add(new ImpreciseValueExtractionError(arith, err.getErrorLocation(), err.getRule()));
+					errors.add(new ImpreciseValueExtractionError(arith, err.getErrorStatement(), err.getRule()));
 				}
 				predicateConstraint.errors.clear();
 			}

@@ -1,35 +1,33 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
+import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CrySLRule;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
-import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
-import soot.SootMethod;
-import soot.jimple.InvokeExpr;
-import soot.jimple.Stmt;
-
 public class TypestateError extends ErrorWithObjectAllocation{
 
-	private Collection<SootMethod> expectedMethodCalls;
+	private Collection<Method> expectedMethodCalls;
 	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
-	public TypestateError(ControlFlowGraph.Edge stmt, CrySLRule rule, IAnalysisSeed object, Collection<SootMethod> expectedMethodCalls) {
-		super(stmt, rule, object);
+	public TypestateError(Statement errorStmt, CrySLRule rule, IAnalysisSeed object, Collection<Method> expectedMethodCalls) {
+		super(errorStmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
 		
-		for (SootMethod method : expectedMethodCalls) {
-			this.expectedMethodCallsSet.add(method.getSignature());
+		for (Method method : expectedMethodCalls) {
+			this.expectedMethodCallsSet.add(method.getName());
 		}	
 	}
 
-	public Collection<SootMethod> getExpectedMethodCalls() {
+	public Collection<Method> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
 
@@ -43,13 +41,12 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		boolean useSignatures = useSignatures();
 
 		msg.append("Unexpected call to method ");
-		Statement location = getErrorLocation();
-		msg.append(getCalledMethodString(location, useSignatures));
+		msg.append(getCalledMethodString(useSignatures));
 		msg.append(getObjectType());
 		final Set<String> altMethods = new HashSet<>();
-		for (final SootMethod expectedCall : expectedMethodCalls) {
+		for (Method expectedCall : expectedMethodCalls) {
 			if (useSignatures){
-				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
+				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			} else {
 				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			}
@@ -63,10 +60,11 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		return msg.toString();
 	}
 
-	private String getCalledMethodString(ControlFlowGraph.Edge location, boolean useSignature) {
-		Stmt stmt = location.getUnit().get();
-		if(stmt.containsInvokeExpr()){
-			if (useSignature){
+	private String getCalledMethodString(boolean useSignature) {
+		Statement stmt = getErrorStatement();
+
+		if (stmt.containsInvokeExpr()) {
+			if (useSignature) {
 				return stmt.getInvokeExpr().getMethod().getSignature();
 			} else {
 				return stmt.getInvokeExpr().getMethod().getName();
@@ -81,19 +79,16 @@ public class TypestateError extends ErrorWithObjectAllocation{
 	 * This occurs when a call to the method with the correct name, but wrong signature is invoked.
 	 */
 	private boolean useSignatures(){
-		Statement errorLocation = getErrorLocation();
-		if (errorLocation.isCallsite()){
-			Optional<Stmt> stmtOptional = errorLocation.getUnit();
-			if (stmtOptional.isPresent()){
-				Stmt stmt = stmtOptional.get();
-				if (stmt.containsInvokeExpr()){
-					InvokeExpr call = stmt.getInvokeExpr();
-					SootMethod calledMethod = call.getMethod();
-					for (SootMethod expectedCall : getExpectedMethodCalls()){
-						if (calledMethod.getName().equals(expectedCall.getName())){
-							return true;
-						}
-					}
+		Statement statement = getErrorStatement();
+
+		if (statement.containsInvokeExpr()) {
+			// TODO DeclaredMethod?
+			InvokeExpr call = statement.getInvokeExpr();
+			DeclaredMethod calledMethod = call.getMethod();
+
+			for (Method expectedCall : getExpectedMethodCalls()){
+				if (calledMethod.getName().equals(expectedCall.getName())){
+					return true;
 				}
 			}
 		}

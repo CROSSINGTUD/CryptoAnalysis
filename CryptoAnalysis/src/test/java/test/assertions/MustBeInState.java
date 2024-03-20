@@ -1,21 +1,20 @@
 package test.assertions;
 
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.typestate.ReportingErrorStateNode;
-import soot.Unit;
 import test.Assertion;
-import test.ComparableResult;
 import typestate.finiteautomata.State;
 
-public class MustBeInState implements Assertion, ComparableResult<State,Val> {
+public class MustBeInState implements Assertion {
 
-	private Unit unit;
+	private Statement unit;
 	private Val accessGraph;
 	private String state;
 	private boolean satisfied;
 	private int imprecise;
 
-	public MustBeInState(Unit unit, Val accessGraph, String state) {
+	public MustBeInState(Statement unit, Val accessGraph, String state) {
 		this.unit = unit;
 		this.accessGraph = accessGraph;
 		this.state = state;
@@ -28,7 +27,7 @@ public class MustBeInState implements Assertion, ComparableResult<State,Val> {
 		} 
 	}
 
-	public Unit getStmt() {
+	public Statement getStmt() {
 		return unit;
 	}
 

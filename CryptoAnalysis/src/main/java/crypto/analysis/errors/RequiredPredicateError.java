@@ -1,15 +1,15 @@
 package crypto.analysis.errors;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import crypto.analysis.HiddenPredicate;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Creates {@link RequiredPredicateError} for all Required Predicate error generates RequiredPredicateError
@@ -25,8 +25,8 @@ public class RequiredPredicateError extends AbstractError{
 	private CallSiteWithExtractedValue extractedValues;
 	private List<HiddenPredicate> hiddenPredicates;
 
-	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, ControlFlowGraph.Edge location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
-		super(location, rule);
+	public RequiredPredicateError(List<CrySLPredicate> contradictedPredicates, Statement errorStmt, CrySLRule rule, CallSiteWithExtractedValue multimap) {
+		super(errorStmt, rule);
 		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = multimap;
 		this.hiddenPredicates = new ArrayList<>();

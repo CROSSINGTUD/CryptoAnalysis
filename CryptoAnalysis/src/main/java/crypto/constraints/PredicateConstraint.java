@@ -1,10 +1,10 @@
 package crypto.constraints;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.InstanceOfError;
@@ -18,12 +18,10 @@ import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.typestate.CrySLMethodToSootMethod;
-import soot.SootMethod;
-import soot.Type;
-import soot.jimple.IntConstant;
-import soot.jimple.NewExpr;
-import soot.jimple.Stmt;
-import soot.jimple.StringConstant;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class PredicateConstraint extends EvaluableConstraint {
 
@@ -41,9 +39,9 @@ public class PredicateConstraint extends EvaluableConstraint {
 	}
 
 	public boolean isHardCoded(ExtractedValue val) {
-		return val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant
-				|| (val.getValue() instanceof NewExpr
-						&& ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"));
+		return val.getValue().isIntConstant() || val.getValue().isStringConstant()
+				|| (val.getValue().isNewExpr()
+						&& val.getValue().getType().toString().equals("java.math.BigInteger"));
 	}
 
 	protected boolean isSubType(String typeOne, String typeTwo) {
@@ -68,12 +66,16 @@ public class PredicateConstraint extends EvaluableConstraint {
 					// check whether predMethod is in foundMethods, which type-state analysis has to
 					// figure out
 					CrySLMethod reqMethod = (CrySLMethod) predMethod;
-					for (ControlFlowGraph.Edge unit : context.getCollectedCalls()) {
-						if (!(unit.isCallsite()))
+					for (ControlFlowGraph.Edge edge : context.getCollectedCalls()) {
+						Statement statement = edge.getTarget();
+						if (!(statement.containsInvokeExpr())) {
 							continue;
-						SootMethod foundCall = ((Stmt) unit.getUnit().get()).getInvokeExpr().getMethod();
-						Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(foundCall)) {
+						}
+
+						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+						Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
+						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
+						if (convert.contains(methodFoundCall)) {
 							return;
 						}
 					}
@@ -91,12 +93,17 @@ public class PredicateConstraint extends EvaluableConstraint {
 					CrySLMethod reqMethod = ((CrySLMethod) predForbMethod);
 
 					for (ControlFlowGraph.Edge call : context.getCollectedCalls()) {
-						if (!call.isCallsite())
+						Statement statement = call.getTarget();
+
+						if (!statement.containsInvokeExpr()) {
 							continue;
-						SootMethod foundCall = call.getUnit().get().getInvokeExpr().getMethod();
-						Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(foundCall)) {
-							errors.add(new ForbiddenMethodError(call, context.getClassSpec().getRule(), foundCall, convert));
+						}
+
+						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+						Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
+						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
+						if (convert.contains(methodFoundCall)) {
+							errors.add(new ForbiddenMethodError(statement, context.getClassSpec().getRule(), methodFoundCall, convert));
 							return;
 						}
 					}
@@ -111,7 +118,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 					if (cs.getVarName().equals(varName)) {
 						Collection<Type> vals = context.getPropagatedTypes().get(cs);
 						for (Type t : vals) {
-							if (t.toQuotedString().equals(((CrySLObject) parameters.get(1)).getJavaType())) {
+							// TODO Refactor
+							/*if (t.toQuotedString().equals(((CrySLObject) parameters.get(1)).getJavaType())) {
 								for (ExtractedValue v : context.getParsAndVals().get(cs)) {
 									errors.add(
 											new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
@@ -119,7 +127,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 													pred));
 								}
 								return;
-							}
+							}*/
 						}
 					}
 				}
@@ -136,13 +144,14 @@ public class PredicateConstraint extends EvaluableConstraint {
 					if (cs.getVarName().equals(name)) {
 						Collection<ExtractedValue> values = context.getParsAndVals().get(cs);
 						for (ExtractedValue v : values) {
-							if (isSubType(type, v.getValue().getType().toQuotedString())
+							// TODO Refactor
+							/*if (isSubType(type, v.getValue().getType().toQuotedString())
 									&& (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v)))) {
 								errors.add(
 										new HardCodedError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
 												context.getObject(),
 												pred));
-							}
+							}*/
 						}
 					}
 				}
@@ -154,14 +163,15 @@ public class PredicateConstraint extends EvaluableConstraint {
 						Collection<Type> vals = context.getPropagatedTypes().get(cs);
 						String javaType = ((CrySLObject) parameters.get(1)).getJavaType();
 
-						if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), javaType) || isSubType(javaType, e.toQuotedString()))) {
+						// TODO refactor
+						/*if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), javaType) || isSubType(javaType, e.toQuotedString()))) {
 							for (ExtractedValue v : context.getParsAndVals().get(cs)) {
 								errors.add(
 										new InstanceOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
 												context.getObject(),
 												pred));
 							}
-						}
+						}*/
 					}
 				}
 				return;

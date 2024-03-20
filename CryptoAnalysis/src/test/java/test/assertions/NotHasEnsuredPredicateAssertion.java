@@ -1,5 +1,6 @@
 package test.assertions;
 
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
@@ -8,16 +9,16 @@ import test.Assertion;
 
 public class NotHasEnsuredPredicateAssertion implements Assertion {
 
-	private Stmt stmt;
+	private Statement stmt;
 	private Val val;
 	private boolean imprecise = false;
 	private String predName;
 
-	public NotHasEnsuredPredicateAssertion(Stmt stmt, Val val) {
+	public NotHasEnsuredPredicateAssertion(Statement stmt, Val val) {
 		this(stmt, val, null);
 	}
 
-	public NotHasEnsuredPredicateAssertion(Stmt stmt, Val val, String predName) {
+	public NotHasEnsuredPredicateAssertion(Statement stmt, Val val, String predName) {
 		this.stmt = stmt;
 		this.val = val;
 		this.predName = predName;
@@ -38,7 +39,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 	}
 
 
-	public Stmt getStmt() {
+	public Statement getStmt() {
 		return stmt;
 	}
 

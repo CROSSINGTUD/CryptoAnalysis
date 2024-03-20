@@ -1,28 +1,23 @@
 package test.assertions;
 
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import soot.Unit;
 import test.Assertion;
-import test.ComparableResult;
 import typestate.finiteautomata.State;
 
-public class InAcceptingStateAssertion implements Assertion, ComparableResult<State,Val> {
+public class InAcceptingStateAssertion implements Assertion {
 
-	private Unit unit;
+	private Statement unit;
 	private Val val;
 	private boolean satisfied;
 
-	public InAcceptingStateAssertion(Unit unit, Val val) {
+	public InAcceptingStateAssertion(Statement unit, Val val) {
 		this.unit = unit;
 		this.val = val;
 	}
 
 	public void computedResults(State s) {
 		satisfied |= s.isAccepting();
-	}
-
-	public Unit getStmt() {
-		return unit;
 	}
 
 	@Override
@@ -37,11 +32,7 @@ public class InAcceptingStateAssertion implements Assertion, ComparableResult<St
 
 	@Override
 	public String toString() {
-		return "[" + getVal() + "@" + getStmt() + " must not be in error state]";
+		return "[" + val + "@" + unit + " must not be in error state]";
 	}
 
-	@Override
-	public Val getVal() {
-		return val;
-	}
 }

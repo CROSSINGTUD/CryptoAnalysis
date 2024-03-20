@@ -1,5 +1,24 @@
 package crypto.typestate;
 
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import crypto.rules.CrySLMethod;
+import crypto.rules.StateMachineGraph;
+import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
+import typestate.TransitionFunction;
+import typestate.finiteautomata.MatcherTransition;
+import typestate.finiteautomata.MatcherTransition.Parameter;
+import typestate.finiteautomata.MatcherTransition.Type;
+import typestate.finiteautomata.State;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,34 +26,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
-import crypto.rules.CrySLMethod;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
-import soot.SootMethod;
-import soot.jimple.AssignStmt;
-import soot.jimple.InvokeExpr;
-import soot.jimple.InvokeStmt;
-import typestate.TransitionFunction;
-import typestate.finiteautomata.MatcherTransition;
-import typestate.finiteautomata.MatcherTransition.Parameter;
-import typestate.finiteautomata.MatcherTransition.Type;
-import typestate.finiteautomata.State;
-
 public class SootBasedStateMachineGraph {
 
 	private Set<MatcherTransition> transition = new HashSet<>();
-	private Collection<SootMethod> edgeLabelMethods = Sets.newHashSet();
+	private Collection<Method> edgeLabelMethods = Sets.newHashSet();
 
 	private final StateMachineGraph stateMachineGraph;
-	private Multimap<State, SootMethod> outTransitions = HashMultimap.create();
-	private Collection<SootMethod> initialTransitionLabels;
+	private Multimap<State, Method> outTransitions = HashMultimap.create();
+	private Collection<Method> initialTransitionLabels;
 	private Collection<CrySLMethod> crySLinitialTransitionLabels;
 	private Collection<LabeledMatcherTransition> initialMatcherTransitions;
 
@@ -67,26 +66,24 @@ public class SootBasedStateMachineGraph {
 		// All transitions that are not in the state machine
 		for (StateNode t : this.stateMachineGraph.getNodes()) {
 			State wrapped = wrappedState(t);
-			Collection<SootMethod> remaining = getInvolvedMethods();
-			Collection<SootMethod> expected = this.outTransitions.get(wrapped);
-			if (expected != null) {
-				remaining.removeAll(expected);
-				ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(expected);
-				this.addTransition(LabeledMatcherTransition.getErrorTransition(wrapped, remaining, Parameter.This,
-						new ReportingErrorStateNode(expected), Type.OnCallOrOnCallToReturn));
-				// Once an object is in error state, it always remains in the error state.
-				ErrorStateNode errorState = new ErrorStateNode();
-				this.addTransition(LabeledMatcherTransition.getErrorTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState,
-						Type.OnCallOrOnCallToReturn));
-			}
-		}
+			Collection<Method> remaining = getInvolvedMethods();
+			Collection<Method> expected = this.outTransitions.get(wrapped);
+            remaining.removeAll(expected);
+            ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(expected);
+            this.addTransition(LabeledMatcherTransition.getErrorTransition(wrapped, remaining, Parameter.This,
+                    new ReportingErrorStateNode(expected), Type.OnCallOrOnCallToReturn));
+            // Once an object is in error state, it always remains in the error state.
+            ErrorStateNode errorState = new ErrorStateNode();
+            this.addTransition(LabeledMatcherTransition.getErrorTransition(repErrorState, getInvolvedMethods(), Parameter.This, errorState,
+                    Type.OnCallOrOnCallToReturn));
+        }
 	}
 
 	private WrappedState wrappedState(StateNode t) {
 		return new WrappedState(t, stateMachineGraph.getInitialTransition().from().equals(t));
 	}
 
-	public Collection<SootMethod> getEdgesOutOf(State n) {
+	public Collection<Method> getEdgesOutOf(State n) {
 		return outTransitions.get(n);
 	}
 
@@ -94,34 +91,36 @@ public class SootBasedStateMachineGraph {
 		transition.add(trans);
 	}
 
-	private Collection<SootMethod> convert(List<CrySLMethod> label) {
-		Collection<SootMethod> converted = CrySLMethodToSootMethod.v().convert(label);
+	private Collection<Method> convert(List<CrySLMethod> label) {
+		Collection<Method> converted = CrySLMethodToSootMethod.v().convert(label);
 		edgeLabelMethods.addAll(converted);
 		return converted;
 	}
 
-	public Collection<SootMethod> getInvolvedMethods() {
+	public Collection<Method> getInvolvedMethods() {
 		return Sets.newHashSet(edgeLabelMethods);
 	}
 
 	public TransitionFunction getInitialWeight(ControlFlowGraph.Edge stmt) {
 		TransitionFunction defaultTransition = new TransitionFunction(((ArrayList<LabeledMatcherTransition>) initialMatcherTransitions).get(0), Collections.singleton(stmt));
-		
-		if (!(stmt.getUnit().get() instanceof InvokeStmt) && !(stmt.getUnit().get() instanceof AssignStmt)) {
+		Statement statement = stmt.getTarget();
+
+		if (!statement.containsInvokeExpr()) {
+			return defaultTransition;
+		}
+		InvokeExpr invokeExpr = statement.getInvokeExpr();
+
+		if (!(invokeExpr.isInstanceInvokeExpr()) && !(statement.isAssign())) {
 			return defaultTransition;
 		}
 		
 		for (LabeledMatcherTransition trans : initialMatcherTransitions) {
-			if (stmt.getUnit().get() instanceof InvokeStmt) {
-				InvokeExpr invokeExpr = stmt.getUnit().get().getInvokeExpr();
-
-				if (trans.getMatching(invokeExpr.getMethod()).isPresent()) {
+			if (invokeExpr.isInstanceInvokeExpr()) {
+				if (trans.getMatching(statement.getInvokeExpr().getMethod()).isPresent()) {
 					return new TransitionFunction(trans, Collections.singleton(stmt));
 				}
-			} else if (stmt.getUnit().get() instanceof AssignStmt) {
-				InvokeExpr invokeExpr = stmt.getUnit().get().getInvokeExpr();
-				
-				if (trans.getMatching(invokeExpr.getMethod()).isPresent()) {
+			} else if (statement.isAssign()) {
+				if (trans.getMatching(statement.getInvokeExpr().getMethod()).isPresent()) {
 					return new TransitionFunction(trans, Collections.singleton(stmt));
 				}
 			}
@@ -133,7 +132,7 @@ public class SootBasedStateMachineGraph {
 		return Lists.newArrayList(transition);
 	}
 
-	public Collection<SootMethod> initialTransitonLabel() {
+	public Collection<Method> initialTransitionLabel() {
 		return initialTransitionLabels;
 	}
 

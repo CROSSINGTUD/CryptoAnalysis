@@ -34,8 +34,8 @@ public class CSVReporter extends Reporter {
 	private static final String CSV_SEPARATOR = ";";
 	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
 	
-	private List<String> headers;
-	private List<String> contents;
+	private final List<String> headers;
+	private final List<String> contents;
 	
 	/** Headers for the errors. These headers are always part of the analysis report. */
 	private enum Headers {
@@ -95,8 +95,8 @@ public class CSVReporter extends Reporter {
 					String errorType = marker.getClass().getSimpleName();
 					String violatingClass = marker.getRule().getClassName();
 					String errorMessage = marker.toErrorMarkerString();
-					int lineNumber = marker.getErrorLocation().getUnit().get().getJavaSourceStartLineNumber();
-					String statement = marker.getErrorLocation().getUnit().get().toString();
+					int lineNumber = marker.getErrorStatement().getStartLineNumber();
+					String statement = marker.getErrorStatement().getMethod().getName();
 					
 					String line = idCount + CSV_SEPARATOR + errorType + CSV_SEPARATOR + violatingClass + CSV_SEPARATOR + className + 
 							CSV_SEPARATOR + methodName + CSV_SEPARATOR + lineNumber + CSV_SEPARATOR + statement + CSV_SEPARATOR + errorMessage;

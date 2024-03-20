@@ -9,6 +9,7 @@ import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Method;
+import boomerang.scene.Statement;
 import boomerang.scene.WrappedClass;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;
@@ -58,7 +59,7 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	protected final List<IAnalysisSeed> secureObjects = new ArrayList<IAnalysisSeed>();
 
 	private void addMarker(AbstractError error) {
-		Method method = error.getErrorLocation().getMethod();
+		Method method = error.getErrorStatement().getMethod();
 		WrappedClass sootClass = method.getDeclaringClass();
 
 		Set<AbstractError> set = errorMarkers.get(sootClass, method);
@@ -194,9 +195,9 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void ensuredPredicates(final Table<ControlFlowGraph.Edge, Val, Set<EnsuredCrySLPredicate>> arg0,
-			final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> arg1,
-			final Table<ControlFlowGraph.Edge, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
+	public void ensuredPredicates(final Table<Statement, Val, Set<EnsuredCrySLPredicate>> arg0,
+			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg1,
+			final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> arg2) {
 		// Nothing
 	}
 

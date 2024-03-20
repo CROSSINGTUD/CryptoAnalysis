@@ -1,13 +1,14 @@
 package crypto.typestate;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Type;
+import boomerang.scene.Val;
+import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.JimpleDeclaredMethod;
+import boomerang.scene.jimple.JimpleMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
 import crypto.cryslhandler.CrySLReaderUtils;
 import crypto.rules.CrySLMethod;
 import soot.Scene;
@@ -16,17 +17,22 @@ import soot.SootMethod;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 public class LabeledMatcherTransition extends MatcherTransition {
 
 	public static LabeledMatcherTransition getTransition(State from, Collection<CrySLMethod> label, Parameter param,
-			State to, Type type) {
-		Multimap<CrySLMethod, SootMethod> resolvedLabel = HashMultimap.create(label.size(), 1);
+			State to, MatcherTransition.Type type) {
+		Multimap<CrySLMethod, Method> resolvedLabel = HashMultimap.create(label.size(), 1);
 		for (CrySLMethod method : label)
 			resolvedLabel.putAll(method, CrySLMethodToSootMethod.v().convert(method));
 		return new LabeledMatcherTransition(from, resolvedLabel, param, to, type);
 	}
 
-	public static MatcherTransition getErrorTransition(State from, Collection<SootMethod> matchingMethods,
+	public static MatcherTransition getErrorTransition(State from, Collection<Method> matchingMethods,
 			Parameter param, State to, Type type) {
 		return new LabeledMatcherTransition(from, matchingMethods, param, to, type);
 	}
@@ -40,7 +46,8 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	 * 
 	 * @return true, if called and declared method match
 	 */
-	public static boolean matches(SootMethod called, SootMethod declared) {
+	public static boolean matches(Method called, Method declared) {
+
 		// Name is equal
 		if (!called.getName().equals(declared.getName()))
 			return false;
@@ -48,11 +55,17 @@ public class LabeledMatcherTransition extends MatcherTransition {
 		if (!isSubtype(called.getDeclaringClass(), declared.getDeclaringClass()))
 			return false;
 		// Number of Parameters are equal
-		if (!(called.getParameterCount() == declared.getParameterCount()))
+		if (called.getParameterLocals().size() != declared.getParameterLocals().size())
 			return false;
 		// Parameters are equal
-		if (!called.getParameterTypes().equals(declared.getParameterTypes()))
-			return false;
+		for (int i = 0; i < called.getParameterLocals().size(); i++) {
+			Val calledParameter = called.getParameterLocal(i);
+			Val declaredParameter = declared.getParameterLocal(i);
+
+			if (!calledParameter.getType().equals(declaredParameter.getType())) {
+				return false;
+			}
+		}
 		// nice, declared is the declared version of called
 		return true;
 	}
@@ -61,12 +74,15 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	 * Returns whether parent is a super type of child, i.e. if they
 	 * are the same, child implements or extends parent transitively.
 	 * 
-	 * @param child		the child to check
-	 * @param parent	the parent to check against
+	 * @param childClass		the child to check
+	 * @param parentClass	the parent to check against
 	 * 
 	 * @return true, if parent is a super type of child
 	 */
-	public static boolean isSubtype(SootClass child, SootClass parent) {
+	public static boolean isSubtype(WrappedClass childClass, WrappedClass parentClass) {
+		SootClass child = (SootClass) childClass.getDelegate();
+		SootClass parent = (SootClass) parentClass.getDelegate();
+
 		if (child.equals(parent))
 			return true;
 
@@ -78,26 +94,26 @@ public class LabeledMatcherTransition extends MatcherTransition {
 				|| child.getInterfaces().contains(parent);
 	}
 
-	private final Multimap<CrySLMethod, SootMethod> label;
+	private final Multimap<CrySLMethod, Method> label;
 	private final CrySLMethod NO_METHOD = new CrySLMethod("", Collections.emptyList(),
 			CrySLReaderUtils.resolveObject(null));
 
-	private LabeledMatcherTransition(State from, Collection<SootMethod> matchingMethods, Parameter param, State to,
+	private LabeledMatcherTransition(State from, Collection<Method> matchingMethods, Parameter param, State to,
 			Type type) {
-		super(from, matchingMethods, param, to, type);
+		super(from, "", param, to, type);
 		this.label = HashMultimap.create(1, matchingMethods.size());
 		this.label.putAll(NO_METHOD, matchingMethods);
 	}
 
-	private LabeledMatcherTransition(State from, Multimap<CrySLMethod, SootMethod> label, Parameter param, State to,
+	private LabeledMatcherTransition(State from, Multimap<CrySLMethod, Method> label, Parameter param, State to,
 			Type type) {
-		super(from, label.values(), param, to, type);
+		super(from, "", param, to, type);
 		this.label = label;
 	}
 
 	/**
 	 * The matches method of {@link MatcherTransition} matches Methods taken
-	 * from some {@link soot.jimple.InvokeExpr}'s.
+	 * from some {@link DeclaredMethod}'s.
 	 * The method getDeclaringClass() will return the object's class they are
 	 * called on not the actual declaring class.
 	 *
@@ -112,13 +128,17 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	 * declaring class and it is correct to return true if it matches the
 	 * method of *some* super-type.
 	 *
-	 * @see typestate.finiteautomata.MatcherTransition#matches(soot.SootMethod)
+	 * @see typestate.finiteautomata.MatcherTransition#matches(DeclaredMethod)
 	 */
 	@Override
-	public boolean matches(SootMethod method) {
-		for (SootMethod m : this.label.values())
-			if (matches(method, m))
+	public boolean matches(DeclaredMethod declaredMethod) {
+		for (Method m : this.label.values()) {
+			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(declaredMethod);
+
+			if (matches(method, m)) {
 				return true;
+			}
+		}
 		return false;
 	}
 
@@ -128,13 +148,17 @@ public class LabeledMatcherTransition extends MatcherTransition {
 	 * defined here, to get the {@link CrySLMethod}s that were resolved to the
 	 * matching {@link SootMethod}s.
 	 *
-	 * @param method	the given method
+	 * @param declaredMethod	the given method
 	 * @return The {@link CrySLMethod}'s matching the given soot method.
 	 */
-	public Optional<CrySLMethod> getMatching(SootMethod method) {
-		for (Map.Entry<CrySLMethod, SootMethod> m : this.label.entries())
-			if (matches(method, m.getValue()))
+	public Optional<CrySLMethod> getMatching(DeclaredMethod declaredMethod) {
+		for (Map.Entry<CrySLMethod, Method> m : this.label.entries()) {
+			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(declaredMethod);
+
+			if (matches(method, m.getValue())) {
 				return Optional.of(m.getKey());
+			}
+		}
 		return Optional.empty();
 	}
 
