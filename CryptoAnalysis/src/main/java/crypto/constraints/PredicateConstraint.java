@@ -6,9 +6,6 @@ import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -18,8 +15,10 @@ import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.typestate.CrySLMethodToSootMethod;
+import crypto.typestate.MatcherUtils;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +60,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 		List<ICrySLPredicateParameter> parameters = pred.getParameters();
 		switch (pred.getPredName()) {
 			case "callTo":
-				List<ICrySLPredicateParameter> predMethods = parameters;
-				for (ICrySLPredicateParameter predMethod : predMethods) {
+                for (ICrySLPredicateParameter predMethod : parameters) {
 					// check whether predMethod is in foundMethods, which type-state analysis has to
 					// figure out
 					CrySLMethod reqMethod = (CrySLMethod) predMethod;
@@ -73,11 +71,15 @@ public class PredicateConstraint extends EvaluableConstraint {
 						}
 
 						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-						Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
+						if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
+							return;
+						}
+
+						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
 						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
 						if (convert.contains(methodFoundCall)) {
 							return;
-						}
+						}*/
 					}
 				}
 				// TODO: Need seed here.
@@ -100,10 +102,16 @@ public class PredicateConstraint extends EvaluableConstraint {
 						}
 
 						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-						Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
+						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
 						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
 						if (convert.contains(methodFoundCall)) {
-							errors.add(new ForbiddenMethodError(statement, context.getClassSpec().getRule(), methodFoundCall, convert));
+							errors.add(new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall, convert));
+							return;
+						}*/
+						//Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
+						if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
+							ForbiddenMethodError forbiddenMethodError = new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall);
+							errors.add(forbiddenMethodError);
 							return;
 						}
 					}

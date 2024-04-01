@@ -28,14 +28,14 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void missingGerateKey() throws GeneralSecurityException {
+	public void missingGenerateKey() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		keygen.init(128);
 		Assertions.missingTypestateChange();
 	}
 
 	@Test
-	public void missingGerateKeyCatched() {
+	public void missingGenerateKeyCaught() {
 		try {
 			KeyGenerator keygen = KeyGenerator.getInstance("AES");
 			keygen.init(128);
@@ -71,6 +71,7 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 		key.destroy();
 	}
 
+	// TODO Boomerang Error
 	@Test
 	public void missingDoFinalCall5() throws GeneralSecurityException, DestroyFailedException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -87,7 +88,7 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 		key.destroy();
 	}
 
-	private class Container {
+	private static class Container {
 		Cipher c;
 	}
 

@@ -1,33 +1,38 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ForbiddenMethodError extends AbstractError {
 
-	private Method calledMethod;
-	private Collection<Method> alternatives;
-	private Set<String> alternativesSet = Sets.newHashSet();
+	private final DeclaredMethod calledMethod;
+	private final Collection<CrySLMethod> alternatives;
+	private final Set<String> alternativesSet = Sets.newHashSet();
 
-	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, Method calledMethod,
-								Collection<Method> collection) {
+	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod) {
+		this(errorLocation, rule, calledMethod, new HashSet<>());
+	}
+
+	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod,
+								Collection<CrySLMethod> alternatives) {
 		super(errorLocation, rule);
 		this.calledMethod = calledMethod;
-		this.alternatives = collection;
+		this.alternatives = alternatives;
 		
-		for (Method method : alternatives) {
+		for (CrySLMethod method : alternatives) {
 			this.alternativesSet.add(method.getName());
 		}	
 	}
 
-	public Collection<Method> getAlternatives() {
+	public Collection<CrySLMethod> getAlternatives() {
 		return alternatives;
 	}
 
@@ -35,7 +40,7 @@ public class ForbiddenMethodError extends AbstractError {
 		visitor.visit(this);
 	}
 
-	public Method getCalledMethod() {
+	public DeclaredMethod getCalledMethod() {
 		return calledMethod;
 	}
 
@@ -44,10 +49,11 @@ public class ForbiddenMethodError extends AbstractError {
 		final StringBuilder msg = new StringBuilder();
 		msg.append("Detected call to forbidden method ");
 		msg.append(getCalledMethod().getSubSignature());
-		msg.append(" of class " + getCalledMethod().getDeclaringClass());
+		msg.append(" of class ");
+		msg.append(getCalledMethod().getDeclaringClass());
 		if (!getAlternatives().isEmpty()) {
 			msg.append(". Instead, call method ");
-			Collection<Method> subSignatures = getAlternatives();
+			Collection<CrySLMethod> subSignatures = getAlternatives();
 			msg.append(Joiner.on(", ").join(subSignatures));
 			msg.append(".");
 		}

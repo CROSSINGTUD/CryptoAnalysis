@@ -57,6 +57,15 @@ public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
 		return getName();
 	}
 
+	public String getSignature() {
+        return getMethodName() +
+				"(" +
+				parameters.stream()
+						.map(param -> String.format("%s", param.getValue()))
+						.collect(Collectors.joining(", ")) +
+				")";
+	}
+
 	@Override
 	public String getName() {
 		StringBuilder stmntBuilder = new StringBuilder();

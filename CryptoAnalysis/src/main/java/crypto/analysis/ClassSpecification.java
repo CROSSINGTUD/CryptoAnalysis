@@ -3,22 +3,19 @@ package crypto.analysis;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
+import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
-import boomerang.scene.jimple.JimpleStatement;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.rules.CrySLForbiddenMethod;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.ExtendedIDEALAnaylsis;
-import crypto.typestate.SootBasedStateMachineGraph;
+import crypto.typestate.ExtendedIDEALAnalysis;
+import crypto.typestate.MatcherTransitionCollection;
+import crypto.typestate.MatcherUtils;
 import ideal.IDEALSeedSolver;
-import soot.SootMethod;
-import soot.Unit;
-import soot.jimple.Stmt;
 import typestate.TransitionFunction;
 
 import java.util.Collection;
@@ -26,19 +23,21 @@ import java.util.List;
 import java.util.Optional;
 
 public class ClassSpecification {
-	private ExtendedIDEALAnaylsis extendedIdealAnalysis;
-	private CrySLRule crySLRule;
+
+	private final ExtendedIDEALAnalysis extendedIdealAnalysis;
+	private final CrySLRule crySLRule;
 	private final CryptoScanner cryptoScanner;
-	private final SootBasedStateMachineGraph fsm;
+	private final MatcherTransitionCollection matcherTransitions;
 
 	public ClassSpecification(final CrySLRule rule, final CryptoScanner cScanner) {
 		this.crySLRule = rule;
 		this.cryptoScanner = cScanner;
-		this.fsm = new SootBasedStateMachineGraph(rule.getUsagePattern());
-		this.extendedIdealAnalysis = new ExtendedIDEALAnaylsis() {
+		this.matcherTransitions = new MatcherTransitionCollection(rule.getUsagePattern());
+		this.extendedIdealAnalysis = new ExtendedIDEALAnalysis() {
+
 			@Override
-			public SootBasedStateMachineGraph getStateMachine() {
-				return fsm;
+			public MatcherTransitionCollection getMatcherTransitions() {
+				return matcherTransitions;
 			}
 
 			@Override
@@ -63,12 +62,6 @@ public class ClassSpecification {
 		};
 	}
 
-	public boolean isLeafRule() {
-		return crySLRule.isLeafRule();
-	}
-
-	
-
 	public Collection<WeightedForwardQuery<TransitionFunction>> getInitialSeeds(Method m) {
 		return extendedIdealAnalysis.computeSeeds(m);
 	}
@@ -76,7 +69,7 @@ public class ClassSpecification {
 
 	@Override
 	public String toString() {
-		return crySLRule.getClassName().toString();
+		return crySLRule.getClassName();
 	}
 
 	public void invokesForbiddenMethod(Method m) {
@@ -86,33 +79,45 @@ public class ClassSpecification {
 			}
 
 			DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
-			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(declaredMethod);
-			Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(method);
+			Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(declaredMethod);
 			if (forbiddenMethod.isPresent()){
-				cryptoScanner.getAnalysisListener().reportError(null, new ForbiddenMethodError(statement, this.getRule(), method, CrySLMethodToSootMethod.v().convert(forbiddenMethod.get().getAlternatives())));
+				Collection<CrySLMethod> alternatives = forbiddenMethod.get().getAlternatives();
+				ForbiddenMethodError error = new ForbiddenMethodError(statement, this.getRule(), declaredMethod, alternatives);
+				cryptoScanner.getAnalysisListener().reportError(null, error);
 			}
 		}
 	}
 
-	private Optional<CrySLForbiddenMethod> isForbiddenMethod(Method method) {
+	private Optional<CrySLForbiddenMethod> isForbiddenMethod(DeclaredMethod declaredMethod) {
 		// TODO replace by real specification once available.
 		List<CrySLForbiddenMethod> forbiddenMethods = crySLRule.getForbiddenMethods();
-//		System.out.println(forbiddenMethods);
 		//TODO Iterate over ICFG and report on usage of forbidden method.
-		for(CrySLForbiddenMethod m : forbiddenMethods){
-			if(!m.getSilent()){
-				Collection<Method> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
-				if(matchingMethod.contains(method))
-					return Optional.of(m);
-				
+		for (CrySLForbiddenMethod method : forbiddenMethods) {
+			if (method.getSilent()) {
+				continue;
+			}
+
+			// TODO Refactoring
+			//Collection<Method> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
+			//if(matchingMethod.contains(method))
+			//		return Optional.of(m);
+			if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method.getMethod(), declaredMethod)) {
+				return Optional.of(method);
 			}
 		}
 		return Optional.empty();
 	}
 
-
 	public CrySLRule getRule() {
 		return crySLRule;
+	}
+
+	public MatcherTransitionCollection getMatcherTransitions() {
+		return matcherTransitions;
+	}
+
+	public TransitionFunction getInitialWeight(ControlFlowGraph.Edge stmt) {
+		return matcherTransitions.getInitialWeight(stmt);
 	}
 
 	@Override
@@ -138,10 +143,6 @@ public class ClassSpecification {
 		} else if (!crySLRule.equals(other.crySLRule))
 			return false;
 		return true;
-	}
-
-	public SootBasedStateMachineGraph getFSM(){
-		return fsm;
 	}
 
 }

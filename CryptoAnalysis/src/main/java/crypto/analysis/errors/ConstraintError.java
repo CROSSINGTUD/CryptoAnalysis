@@ -1,6 +1,7 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
@@ -14,18 +15,16 @@ import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
-import soot.Value;
-import soot.jimple.internal.AbstractInvokeExpr;
 
-import java.util.List;
+import java.util.Collection;
 
 public class ConstraintError extends ErrorWithObjectAllocation {
 
-	private ISLConstraint brokenConstraint;
-	private CallSiteWithExtractedValue callSiteWithParamIndex;
+	private final ISLConstraint brokenConstraint;
+	private final CallSiteWithExtractedValue callSiteWithParamIndex;
 
 	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs.getCallSite().stmt().getTarget(), rule, objectLocation);
+		super(cs.getCallSite().stmt().getStart(), rule, objectLocation);
 		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;
 	}
@@ -129,22 +128,27 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 		msg.append(" should be any of ");
 		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Statement stmt = callSiteWithParamIndex.getVal().stmt().getTarget();
+			Statement stmt = callSiteWithParamIndex.getVal().stmt().getStart();
 			String[] splitValues = new String[] { "" };
 			if (stmt.isAssign()) {
 				Val rightSide = stmt.getRightOp();
 				if (rightSide.isConstant()) {
-					splitValues = filterQuotes(rightSide.toString()).split(splitter.getSplitter());
+					splitValues = filterQuotes(rightSide.getVariableName()).split(splitter.getSplitter());
+				} else if (stmt.containsInvokeExpr()) {
+					Collection<Val> parameters = stmt.getInvokeExpr().getArgs();
+
 					// TODO Refactor
-				} /*else if (rightSide instanceof AbstractInvokeExpr) {
-					List<Value> args = ((AbstractInvokeExpr) rightSide).getArgs();
-					for (Value arg : args) {
-						if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
-							splitValues = filterQuotes(arg.toString()).split(splitter.getSplitter());
+					for (Val parameter : parameters) {
+						//if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
+						Type parameterType = parameter.getType();
+						String javaType = brokenConstraint.getVar().getJavaType();
+
+						if (parameterType.toString().equals(javaType)) {
+							splitValues = filterQuotes(parameter.getVariableName()).split(splitter.getSplitter());
 							break;
 						}
 					}
-				}*/
+				}
 			} else {
 				//splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
 			}

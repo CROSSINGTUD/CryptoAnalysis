@@ -1,7 +1,6 @@
 package crypto.rules;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CrySLForbiddenMethod implements Serializable{
@@ -10,11 +9,7 @@ public class CrySLForbiddenMethod implements Serializable{
 	private CrySLMethod meth;
 	private Boolean silent;// = false;
 	private List<CrySLMethod> alternate;
-	
-	public CrySLForbiddenMethod(CrySLMethod method, Boolean silent) {
-		this(method, silent, new ArrayList<CrySLMethod>());
-	}
-	
+
 	public CrySLForbiddenMethod(CrySLMethod method, Boolean silent, List<CrySLMethod> alternatives) {
 		this.meth = method;
 		this.silent = silent;

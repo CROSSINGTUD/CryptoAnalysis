@@ -1,11 +1,5 @@
 package crypto.constraints;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
@@ -17,7 +11,7 @@ import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.LabeledMatcherTransition;
+import crypto.typestate.MatcherUtils;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -26,6 +20,12 @@ import soot.Trap;
 import soot.Unit;
 import soot.UnitBox;
 import soot.jimple.Stmt;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class ExceptionConstraint extends EvaluableConstraint {
 
@@ -60,8 +60,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	public void evaluate(ControlFlowGraph.Edge call) {
 		try {
 			Statement stmt = call.getTarget();
-			Method method = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(stmt.getInvokeExpr().getMethod());
-			if (!isSameMethod(method))
+			DeclaredMethod declaredMethod = stmt.getInvokeExpr().getMethod();
+			if (!isSameMethod(declaredMethod))
 				return;
 
 			if (!(stmt.getMethod() instanceof JimpleMethod)) {
@@ -154,7 +154,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 *         the given exception.
 	 */
 	public static boolean isCaughtAs(WrappedClass catchClause, WrappedClass exception) {
-		return LabeledMatcherTransition.isSubtype(exception, catchClause);
+		return MatcherUtils.isSubtype(exception, catchClause);
 	}
 
 	/**
@@ -162,7 +162,9 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return Wheter the methods represented in this constraint match the given
 	 *         method.
 	 */
-	public boolean isSameMethod(Method method) {
-		return this.method.stream().anyMatch(declared -> LabeledMatcherTransition.matches(method, declared));
+	public boolean isSameMethod(DeclaredMethod method) {
+		// TODO Refactoring
+		return false;
+		//return this.method.stream().anyMatch(declared -> MatcherUtils.matches(method, declared));
 	}
 }

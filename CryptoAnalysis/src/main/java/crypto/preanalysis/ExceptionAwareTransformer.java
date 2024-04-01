@@ -1,18 +1,12 @@
 package crypto.preanalysis;
 
-import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
-import boomerang.scene.Statement;
 import boomerang.scene.jimple.JimpleMethod;
-import boomerang.scene.jimple.JimpleStatement;
-import boomerang.scene.jimple.JimpleWrappedClass;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.constraints.ExceptionConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLRule;
 import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.LabeledMatcherTransition;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -94,11 +88,11 @@ public class ExceptionAwareTransformer extends PreTransformer {
 		if (lookupCache.containsKey(called))
 			return Optional.of(lookupCache.get(called));
 		for (final Method declared : exceptions.keySet()) {
-
-			if (LabeledMatcherTransition.matches(called, declared)) {
+			// TODO Refactoring
+			/*if (LabeledMatcherTransitionOld.matches(called, declared)) {
 				lookupCache.put(called, declared);
 				return Optional.of(declared);
-			}
+			}*/
 		}
 		return Optional.empty();
 	}

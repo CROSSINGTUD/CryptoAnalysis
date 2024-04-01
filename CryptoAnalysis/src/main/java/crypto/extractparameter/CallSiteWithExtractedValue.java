@@ -55,10 +55,10 @@ public class CallSiteWithExtractedValue {
 				break;
 		}
 		res += "parameter";
-		if(val != null && val.getValue() != null){
+		if (val != null && !val.getValue().isNull()) {
 			Val allocVal = val.getValue();
-			if(allocVal.isConstant()){
-				res += " (with value " + allocVal +")";
+			if (allocVal.isConstant()) {
+				res += " (with value " + allocVal.getVariableName() +")";
 			}
 		}
 		return res;

@@ -3,17 +3,14 @@ package crypto.extractparameter;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleDeclaredMethod;
-import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.JimpleType;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -23,11 +20,9 @@ import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.rules.CrySLMethod;
 import crypto.typestate.LabeledMatcherTransition;
-import crypto.typestate.SootBasedStateMachineGraph;
+import crypto.typestate.MatcherTransitionCollection;
 import heros.utilities.DefaultValueMap;
 import soot.Scene;
-import soot.SootMethod;
-import typestate.finiteautomata.MatcherTransition;
 import wpds.impl.Weight.NoWeight;
 
 import java.util.Collection;
@@ -50,31 +45,19 @@ public class ExtractParameterAnalysis {
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject,
-			SootBasedStateMachineGraph fsm) {
+	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject, MatcherTransitionCollection matcherTransitions) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
-		for (MatcherTransition m : fsm.getAllTransitions()) {
-			if (m instanceof LabeledMatcherTransition) {
-				this.events.add((LabeledMatcherTransition) m);
-			}
-		}
+		this.events.addAll(matcherTransitions.getAllTransitions());
 	}
 
 	public void run() {
 		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : allCallsOnObject.entrySet()) {
-			Statement statement = stmt.getKey().getTarget();
+			Statement statement = stmt.getKey().getStart();
 			if (!statement.containsInvokeExpr())
 				continue;
 
 			DeclaredMethod declaredMethod = stmt.getValue();
-			if (!(declaredMethod instanceof JimpleDeclaredMethod)) {
-				continue;
-			}
-
-			JimpleDeclaredMethod jimpleDeclaredMethod = (JimpleDeclaredMethod) declaredMethod;
-			SootMethod sootMethod = (SootMethod) jimpleDeclaredMethod.getDelegate();
-
 			for (LabeledMatcherTransition e : events) {
 				e.getMatching(declaredMethod)
 					.ifPresent(method -> injectQueryAtCallSite(method, stmt.getKey()));
@@ -101,11 +84,11 @@ public class ExtractParameterAnalysis {
 	private void injectQueryAtCallSite(CrySLMethod match, ControlFlowGraph.Edge callSite) {
 		int index = 0;
 		for (Entry<String, String> param : match.getParameters())
-			addQueryAtCallsite(param.getKey(), callSite, index++);
+			addQueryAtCallSite(param.getKey(), callSite, index++);
 	}
 
-	public void addQueryAtCallsite(final String varNameInSpecification, final ControlFlowGraph.Edge stmt, final int index) {
-		Statement statement = stmt.getTarget();
+	public void addQueryAtCallSite(final String varNameInSpecification, final ControlFlowGraph.Edge stmt, final int index) {
+		Statement statement = stmt.getStart();
 
 		if (!statement.containsInvokeExpr()) {
 			return;
@@ -119,37 +102,33 @@ public class ExtractParameterAnalysis {
 			return;
 		}
 
-		for (Statement pred : cryptoScanner.icfg().getStartPointsOf(stmt.getTarget().getMethod())) {
-			AdditionalBoomerangQuery query = additionalBoomerangQuery
-					.getOrCreate(new AdditionalBoomerangQuery(stmt, parameter));
-			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, parameter, index,
-					varNameInSpecification);
+		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+		for (Statement pred : predecessors) {
+			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
+			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
-			query.addListener(new QueryListener() {
-				@Override
-				public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
-					propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
-					for (ForwardQuery v : res.getAllocationSites().keySet()) {
-						ExtractedValue extractedValue = null;
-						if (v.var() instanceof AllocVal) {
-							AllocVal allocVal = (AllocVal) v.var();
-							// TODO Refactor
-							//extractedValue = new ExtractedValue(allocVal.allocationStatement(), allocVal.allocationValue());
-						} else {
-							extractedValue = new ExtractedValue(v.cfgEdge(), v.var());
-						}
-						collectedValues.put(callSiteWithParamIndex,
-								extractedValue);
-						// Special handling for toCharArray method (required for NeverTypeOf constraint)
-						if (v.cfgEdge().getTarget().containsInvokeExpr()) {
-							String calledMethodSignature = v.cfgEdge().getTarget().getInvokeExpr().getMethod().getSignature();
-							if (calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")) {
-								propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
-							}
-						}
-					}
-				}
-			});
+			query.addListener((q, res) -> {
+                propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
+                for (ForwardQuery v : res.getAllocationSites().keySet()) {
+                    ExtractedValue extractedValue = null;
+                    if (v.var() instanceof AllocVal) {
+                        AllocVal allocVal = (AllocVal) v.var();
+                        // TODO ExtractValue constructor: Edge to Statement
+                        extractedValue = new ExtractedValue(v.cfgEdge(), allocVal.getAllocVal());
+                    } else {
+                        extractedValue = new ExtractedValue(v.cfgEdge(), v.var());
+                    }
+                    collectedValues.put(callSiteWithParamIndex, extractedValue);
+					// TODO Adapt target
+                    // Special handling for toCharArray method (required for NeverTypeOf constraint)
+                    if (v.cfgEdge().getTarget().containsInvokeExpr()) {
+                        String calledMethodSignature = v.cfgEdge().getTarget().getInvokeExpr().getMethod().getSignature();
+                        if (calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")) {
+                            propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
+                        }
+                    }
+                }
+            });
 		}
 	}
 
@@ -169,10 +148,10 @@ public class ExtractParameterAnalysis {
 
 		public void solve() {
 			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions()) {
-				@Override
+				/*@Override
 				public ObservableICFG<Statement, Method> icfg() {
 					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
-				}
+				}*/
 			};
 			res = boomerang.solve(this);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {

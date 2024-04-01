@@ -102,8 +102,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					public CrySLResultsReporter getAnalysisListener() {
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 							@Override
-							public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> res) {
-							}
+							public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> res) {}
 
 							@Override
 							public void collectedValues(AnalysisSeedWithSpecification seed,
@@ -150,7 +149,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									public void visit(IncompleteOperationError incompleteOperationError) {
 										boolean hasTypestateChangeError = false;
 										boolean expectsTypestateChangeError = false;
-										for (Assertion a: expectedResults){
+										for (Assertion a: expectedResults) {
 											if (a instanceof MissingTypestateChange) {
 												MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
 												if (missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorStatement())) {
@@ -551,20 +550,37 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			depErrors.forEach(ass -> ((DependentErrorAssertion)ass).registerListeners(depErrors));
 		}
 	}
+
 	private Set<Statement> getPredecessorsNotBenchmark(Statement stmt) {
 		Set<Statement> res = Sets.newHashSet();
 		Set<Statement> visited = Sets.newHashSet();
-		LinkedList<Statement> worklist = Lists.newLinkedList();
-		worklist.add(stmt);
-		while(!worklist.isEmpty()){
-			Statement curr = worklist.poll();
-			if(!visited.add(curr))
+		LinkedList<Statement> workList = Lists.newLinkedList();
+		workList.add(stmt);
+
+		while(!workList.isEmpty()){
+			Statement curr = workList.poll();
+
+			if(!visited.add(curr)) {
 				continue;
+			}
+
+			if (stmt.containsInvokeExpr()) {
+				String invokedClassName = curr.getInvokeExpr().getMethod().getDeclaringClass().getName();
+				String assertionClassName = Assertions.class.getName();
+
+				if (!invokedClassName.equals(assertionClassName)) {
+					res.add(curr);
+					continue;
+				}
+			}
+			/*String name = Assertions.class.getName();
+			String name2 = Assertions.class.getSimpleName();
 			if(!curr.toString().contains(Assertions.class.getSimpleName()) && curr.containsInvokeExpr()){
 				res.add(curr);
 				continue;
-			}
-			worklist.addAll(scanner.icfg().getStartPointsOf(curr.getMethod()));
+			}*/
+			Collection<Statement> preds = stmt.getMethod().getControlFlowGraph().getPredsOf(curr);
+			workList.addAll(preds);
 		}
 		return res;
 	}

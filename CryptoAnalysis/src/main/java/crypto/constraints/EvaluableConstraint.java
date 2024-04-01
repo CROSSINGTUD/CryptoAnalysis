@@ -1,20 +1,12 @@
 package crypto.constraints;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -25,16 +17,12 @@ import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLValueConstraint;
-import soot.Body;
-import soot.IntType;
-import soot.Unit;
-import soot.Value;
-import soot.jimple.AssignStmt;
-import soot.jimple.Constant;
-import soot.jimple.IntConstant;
-import soot.jimple.LongConstant;
-import soot.jimple.StringConstant;
-import soot.jimple.internal.JNewArrayExpr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class EvaluableConstraint {
 
@@ -79,31 +67,33 @@ public abstract class EvaluableConstraint {
 	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 		for (CallSiteWithParamIndex wrappedCallSite : context.getParsAndVals().keySet()) {
-			final Statement callSite = wrappedCallSite.stmt().getTarget();
+			final Statement callSite = wrappedCallSite.stmt().getStart();
 
 			for (ExtractedValue wrappedAllocSite : context.getParsAndVals().get(wrappedCallSite)) {
-				final Statement allocSite = wrappedAllocSite.stmt().getTarget();
+				final Statement allocSite = wrappedAllocSite.stmt().getStart();
 				if (!wrappedCallSite.getVarName().equals(varName))
 					continue;
 
 				InvokeExpr invoker = callSite.getInvokeExpr();
 				if (callSite.equals(allocSite)) {
+					// TODO no retrieve
 					varVal.put(retrieveConstantFromValue(invoker.getArg(wrappedCallSite.getIndex())),
 							new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 				} else if (allocSite.isAssign()) {
 					if (wrappedAllocSite.getValue().isConstant()) {
-						// TODO Refactor
-						// varVal.put(retrieveConstantFromValue(wrappedAllocSite.getValue()), new
-						// CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						String retrieveConstantFromValue = retrieveConstantFromValue(wrappedAllocSite.getValue());
 						int pos = -1;
+
 						for (int i = 0; i < invoker.getArgs().size(); i++) {
-							if (((AssignStmt) allocSite).getLeftOpBox().getValue().toString()
-									.equals(invoker.getArgs().get(i).toString())) {
+							Val allocVal = allocSite.getLeftOp();
+							Val parameterVal = invoker.getArg(i);
+
+							if (allocVal.equals(parameterVal)) {
 								pos = i;
 							}
 						}
-						if (pos > -1 && invoker.getArg(pos).getType().isBooleanType()) {
+						Type parameterType = invoker.getArg(pos).getType();
+						if (pos > -1 && parameterType.isBooleanType()) {
 						//if (pos > -1 && "boolean".equals(invoker.getArg(pos).getType()..toQuotedString())) {
 							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true",
 									new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));

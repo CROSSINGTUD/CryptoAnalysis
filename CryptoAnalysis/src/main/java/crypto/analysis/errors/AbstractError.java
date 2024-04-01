@@ -8,15 +8,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AbstractError implements IError{
-	private Statement errorStmt;
-	private CrySLRule rule;
+public abstract class AbstractError implements IError {
+
+	private final Statement errorStmt;
+	private final CrySLRule rule;
 	private final String outerMethod;
 	private final String invokeMethod;
 	private final String declaringClass;
 
-	private Set<AbstractError> causedByErrors; // preceding
-	private Set<AbstractError> willCauseErrors; // subsequent
+	private final Set<AbstractError> causedByErrors; // preceding
+	private final Set<AbstractError> willCauseErrors; // subsequent
 
 	public AbstractError(Statement errorStmt, CrySLRule rule) {
 		this.errorStmt = errorStmt;
@@ -35,7 +36,7 @@ public abstract class AbstractError implements IError{
 			// TODO getCondition not accessible
 			this.invokeMethod = ((IfStmt) errorStmt).getCondition().toString();
 		} else {
-			this.invokeMethod = errorStmt.getLeftOp().getStringValue();
+			this.invokeMethod = errorStmt.getLeftOp().getVariableName();
 		}
 	}
 
@@ -71,7 +72,6 @@ public abstract class AbstractError implements IError{
 	public String toString() {
 		return toErrorMarkerString();
 	}
-	
 
 	@Override
 	public int hashCode() {

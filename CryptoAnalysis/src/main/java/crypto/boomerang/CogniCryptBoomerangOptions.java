@@ -80,11 +80,16 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 
     @Override
 	public int analysisTimeoutMS() {
-		return 5000;
+		return 600000000;
 	}
 	
 	@Override
 	public boolean trackStaticFieldAtEntryPointToClinit() {
+		return true;
+	}
+
+	@Override
+	public boolean allowMultipleQueries() {
 		return true;
 	}
 }

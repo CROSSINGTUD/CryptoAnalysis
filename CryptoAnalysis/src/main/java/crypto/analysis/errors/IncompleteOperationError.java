@@ -2,11 +2,11 @@ package crypto.analysis.errors;
 
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 
 import java.util.Collection;
@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class IncompleteOperationError extends ErrorWithObjectAllocation{
 
-	private final Collection<Method> expectedMethodCalls;
+	private final Collection<CrySLMethod> expectedMethodCalls;
 	private final Set<String> expectedMethodCallsSet;
 	private final boolean multiplePaths;
 
@@ -38,7 +38,7 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * @param rule the CrySL rule for the seed
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<Method> expectedMethodsToBeCalled) {
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<CrySLMethod> expectedMethodsToBeCalled) {
 		this(objectLocation, errorStmt, rule, expectedMethodsToBeCalled, false);
 	}
 
@@ -52,18 +52,18 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	 * @param expectedMethodsToBeCalled the methods that are expected to be called
 	 * @param multiplePaths set to true, if there are multiple paths (default: false)
 	 */
-	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<Method> expectedMethodsToBeCalled, boolean multiplePaths) {
+	public IncompleteOperationError(IAnalysisSeed objectLocation, Statement errorStmt, CrySLRule rule, Collection<CrySLMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
 		super(errorStmt, rule, objectLocation);
 		this.expectedMethodCalls = expectedMethodsToBeCalled;
 		this.multiplePaths = multiplePaths;
 
 		this.expectedMethodCallsSet = new HashSet<>();
-		for (Method method : expectedMethodCalls) {
+		for (CrySLMethod method : expectedMethodCalls) {
 			this.expectedMethodCallsSet.add(method.getName());
 		}
 	}
 
-	public Collection<Method> getExpectedMethodCalls() {
+	public Collection<CrySLMethod> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
 	
@@ -112,11 +112,11 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	private Set<String> getFormattedExpectedCalls() {
 		Set<String> altMethods = new HashSet<>();
 
-		for (Method expectedCall : getExpectedMethodCalls()) {
+		for (CrySLMethod expectedCall : getExpectedMethodCalls()) {
 			if (stmtInvokesExpectedCallName(expectedCall.getName())){
-				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
+				altMethods.add(expectedCall.getSignature());//.replace("<", "").replace(">", ""));
 			} else {
-				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
+				altMethods.add(expectedCall.getSignature());//.replace("<", "").replace(">", ""));
 			}
 		}
 		return altMethods;
@@ -134,7 +134,6 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 		}
 
 		if (statement.containsInvokeExpr()) {
-			// TODO DeclaredMethod?
 			InvokeExpr call = statement.getInvokeExpr();
 			DeclaredMethod calledMethod = call.getMethod();
 			return calledMethod.getName().equals(expectedCallName);
@@ -170,9 +169,9 @@ public class IncompleteOperationError extends ErrorWithObjectAllocation{
 	}
 	
 	@SuppressWarnings("unused")
-	private int expectedMethodCallsHashCode(Collection<Method> expectedMethodCalls) {
+	private int expectedMethodCallsHashCode(Collection<CrySLMethod> expectedMethodCalls) {
 		Set<String> expectedMethodCallsSet = Sets.newHashSet();
-		for (Method method : expectedMethodCalls) {
+		for (CrySLMethod method : expectedMethodCalls) {
 			expectedMethodCallsSet.add(method.getName());
 		}
 		return expectedMethodCallsSet.hashCode();

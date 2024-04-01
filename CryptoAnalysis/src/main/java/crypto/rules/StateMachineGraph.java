@@ -14,6 +14,7 @@ import crypto.interfaces.FiniteStateMachine;
 public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private StateNode startNode;
 	private final Set<StateNode> nodes;
 	private final List<TransitionEdge> edges;
 	private final List<TransitionEdge> initialEdges;
@@ -109,6 +110,9 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 
 	public Boolean addNode(StateNode node) {
+		if (node.isInitialState()) {
+			this.startNode = node;
+		}
 		return nodes.parallelStream().anyMatch(n -> n.getName().equals(node.getName())) ? false : nodes.add(node);
 	}
 
@@ -129,6 +133,10 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 
 	public Set<StateNode> getNodes() {
 		return nodes;
+	}
+
+	public StateNode getStartNode() {
+		return startNode;
 	}
 
 	public List<TransitionEdge> getEdges() {

@@ -63,13 +63,6 @@ public class CrySLMethodToSootMethod {
 		return descriptorToSootMethod.getOrCreate(label);
 	}
 
-	public static Method declaredMethodToJimpleMethod(DeclaredMethod declaredMethod) {
-		JimpleDeclaredMethod jimpleDeclaredMethod = (JimpleDeclaredMethod) declaredMethod;
-		SootMethod sootMethod = (SootMethod) jimpleDeclaredMethod.getDelegate();
-
-		return JimpleMethod.of(sootMethod);
-	}
-
 	private Collection<Method> _convert(CrySLMethod label) {
 		Set<Method> res = Sets.newHashSet();
 		String methodName = label.getMethodName();

@@ -2,12 +2,13 @@ package crypto.analysis.errors;
 
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
+import crypto.typestate.MatcherUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,19 +16,19 @@ import java.util.Set;
 
 public class TypestateError extends ErrorWithObjectAllocation{
 
-	private Collection<Method> expectedMethodCalls;
-	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
+	private final Collection<CrySLMethod> expectedMethodCalls;
+	private final Set<String> expectedMethodCallsSet = Sets.newHashSet();
 
-	public TypestateError(Statement errorStmt, CrySLRule rule, IAnalysisSeed object, Collection<Method> expectedMethodCalls) {
+	public TypestateError(Statement errorStmt, CrySLRule rule, IAnalysisSeed object, Collection<CrySLMethod> expectedMethodCalls) {
 		super(errorStmt, rule, object);
 		this.expectedMethodCalls = expectedMethodCalls;
 		
-		for (Method method : expectedMethodCalls) {
+		for (CrySLMethod method : expectedMethodCalls) {
 			this.expectedMethodCallsSet.add(method.getName());
 		}	
 	}
 
-	public Collection<Method> getExpectedMethodCalls() {
+	public Collection<CrySLMethod> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
 
@@ -44,7 +45,8 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		msg.append(getCalledMethodString(useSignatures));
 		msg.append(getObjectType());
 		final Set<String> altMethods = new HashSet<>();
-		for (Method expectedCall : expectedMethodCalls) {
+		for (CrySLMethod expectedCall : expectedMethodCalls) {
+			// TODO Output
 			if (useSignatures){
 				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
 			} else {
@@ -82,12 +84,11 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		Statement statement = getErrorStatement();
 
 		if (statement.containsInvokeExpr()) {
-			// TODO DeclaredMethod?
 			InvokeExpr call = statement.getInvokeExpr();
 			DeclaredMethod calledMethod = call.getMethod();
 
-			for (Method expectedCall : getExpectedMethodCalls()){
-				if (calledMethod.getName().equals(expectedCall.getName())){
+			for (CrySLMethod expectedCall : getExpectedMethodCalls()){
+				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(expectedCall, calledMethod)){
 					return true;
 				}
 			}

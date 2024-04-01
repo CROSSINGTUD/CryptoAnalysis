@@ -1,22 +1,22 @@
 package crypto.typestate;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
+import crypto.rules.CrySLMethod;
 import typestate.finiteautomata.State;
 
-import java.util.Collection;
+import java.util.Set;
 
 public class ReportingErrorStateNode implements State {
 
-	private Collection<Method> expectedCalls;
+	private final Set<CrySLMethod> expectedCalls;
 
-	public ReportingErrorStateNode(Collection<Method> expectedCalls) {
+	public ReportingErrorStateNode(Set<CrySLMethod> expectedCalls) {
 		this.expectedCalls = expectedCalls;
 	}
 
-	public Collection<Method> getExpectedCalls() {
+	public Set<CrySLMethod> getExpectedCalls() {
 		return expectedCalls;
 	}
+
 	@Override
 	public boolean isErrorState() {
 		return true;
