@@ -39,7 +39,7 @@
 
 	<properties>
 		<spdsVersion>2.5.1</spdsVersion>
-		<sootVersion>4.4.1</sootVersion>
+		<sootVersion>4.5.0</sootVersion>
 	</properties>
 	<build>
 		<pluginManagement>
