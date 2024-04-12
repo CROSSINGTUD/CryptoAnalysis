@@ -47,11 +47,9 @@ public class MatcherUtils {
             return false;
         }
 
-        // TODO check for class hierarchy
-        String cryslMethodName = cryslMethod.getMethodName();
         String cryslClassName = getDeclaringClassName(cryslMethod.getMethodName());
         String declaredClassName = declaredMethod.getDeclaringClass().getName();
-        if (!cryslClassName.equals(declaredClassName)) {
+        if (!cryslClassName.equals(declaredClassName) && !isSubtype(cryslClassName, declaredClassName)) {
             return false;
         }
 
@@ -88,6 +86,16 @@ public class MatcherUtils {
                 continue;
             }
 
+            // For some reason Boomerang transforms boolean parameters to int values
+            if (cryslParameter.equals("boolean") && declaredParameter.equals("int")) {
+                continue;
+            }
+
+            // int and short correspond to the same type
+            if (cryslParameter.equals("int") && declaredParameter.equals("short")) {
+                continue;
+            }
+
             if (cryslParameter.equals(declaredParameter)) {
                 continue;
             }
@@ -115,7 +123,7 @@ public class MatcherUtils {
                 || child.getInterfaces().contains(parent);
     }
 
-    public static boolean isSubtype(String childClass, String parentClass) {
+    private static boolean isSubtype(String childClass, String parentClass) {
         // Check for primitive types
         if (!(Scene.v().containsClass(childClass) || Scene.v().containsClass(parentClass))) {
             return false;
@@ -124,14 +132,43 @@ public class MatcherUtils {
         SootClass child = Scene.v().getSootClass(childClass);
         SootClass parent = Scene.v().getSootClass(parentClass);
 
-        if (child.equals(parent))
-            return true;
+        Collection<SootClass> fullHierarchy = getFullHierarchy(child, new HashSet<>());
 
-        if (child.isInterface()) {
-            return parent.isInterface() &&
-                    Scene.v().getActiveHierarchy().isInterfaceSubinterfaceOf(child, parent);
+        return fullHierarchy.contains(parent);
+    }
+
+    private static Collection<SootClass> getFullHierarchy(SootClass sourceClass, Set<SootClass> visited) {
+        Set<SootClass> result = new HashSet<>();
+
+        if (visited.contains(sourceClass)) {
+            return result;
         }
-        return Scene.v().getActiveHierarchy().isClassSubclassOf(child, parent)
-                || child.getInterfaces().contains(parent);
+
+        result.add(sourceClass);
+        visited.add(sourceClass);
+
+        // Super interfaces
+        Collection<SootClass> interfaces = sourceClass.getInterfaces();
+        for (SootClass intFace : interfaces) {
+            result.addAll(getFullHierarchy(intFace, visited));
+        }
+
+        if (sourceClass.isInterface()) {
+            // Super interfaces
+            Collection<SootClass> superInterfaces = Scene.v().getActiveHierarchy().getSuperinterfacesOf(sourceClass);
+
+            for (SootClass superInterface : superInterfaces) {
+                result.addAll(getFullHierarchy(superInterface, visited));
+            }
+        } else {
+            // Super classes
+            Collection<SootClass> superClasses = Scene.v().getActiveHierarchy().getSuperclassesOf(sourceClass);
+
+            for (SootClass superClass : superClasses) {
+                result.addAll(getFullHierarchy(superClass, visited));
+            }
+        }
+
+        return result;
     }
 }

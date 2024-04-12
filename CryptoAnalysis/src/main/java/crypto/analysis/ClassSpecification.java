@@ -66,7 +66,6 @@ public class ClassSpecification {
 		return extendedIdealAnalysis.computeSeeds(m);
 	}
 
-
 	@Override
 	public String toString() {
 		return crySLRule.getClassName();
@@ -80,7 +79,7 @@ public class ClassSpecification {
 
 			DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
 			Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(declaredMethod);
-			if (forbiddenMethod.isPresent()){
+			if (forbiddenMethod.isPresent()) {
 				Collection<CrySLMethod> alternatives = forbiddenMethod.get().getAlternatives();
 				ForbiddenMethodError error = new ForbiddenMethodError(statement, this.getRule(), declaredMethod, alternatives);
 				cryptoScanner.getAnalysisListener().reportError(null, error);
@@ -97,10 +96,6 @@ public class ClassSpecification {
 				continue;
 			}
 
-			// TODO Refactoring
-			//Collection<Method> matchingMethod = CrySLMethodToSootMethod.v().convert(m.getMethod());
-			//if(matchingMethod.contains(method))
-			//		return Optional.of(m);
 			if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method.getMethod(), declaredMethod)) {
 				return Optional.of(method);
 			}

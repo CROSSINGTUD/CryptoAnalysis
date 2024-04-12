@@ -239,7 +239,7 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(getAdditionalListener());	
 				}
 				
-				CryptoScanner scanner = new CryptoScanner() {
+				CryptoScanner scanner = new CryptoScanner(getExcludeList()) {
 
 					@Override
 					public CrySLResultsReporter getAnalysisListener() {

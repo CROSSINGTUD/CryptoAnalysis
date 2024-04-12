@@ -1,11 +1,14 @@
 package crypto.boomerang;
 
+import boomerang.callgraph.BoomerangResolver;
+import boomerang.callgraph.ICallerCalleeResolutionStrategy;
 import boomerang.scene.AllocVal;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
+import soot.Scene;
 
 import java.util.Optional;
 
@@ -41,11 +44,12 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 
-				/*if (Scene.v().isExcluded(stmt.getInvokeExpr().getMethod().getDeclaringClass())) {
+				String className = stmt.getInvokeExpr().getMethod().getDeclaringClass().getName();
+				if (Scene.v().isExcluded(className)) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 
-				if (!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
+				/*if (!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}*/
 			}
@@ -69,6 +73,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 		if (!leftOp.equals(fact)) {
 			return Optional.empty();
 		}
+		// TODO Deal with static fields
 		/*if (as.getRightOp() instanceof StaticFieldRef) {
 			StaticFieldRef sfr = (StaticFieldRef) as.getRightOp();
 			if (sfr.getField().toString().equals("<java.security.spec.RSAKeyGenParameterSpec: java.math.BigInteger F4>")) {
@@ -100,7 +105,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 
     @Override
 	public int analysisTimeoutMS() {
-		return 5000;
+		return 60000000;
 	}
 	
 	@Override

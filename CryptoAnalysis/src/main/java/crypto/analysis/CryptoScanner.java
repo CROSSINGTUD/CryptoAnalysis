@@ -10,16 +10,15 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
-import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import crypto.boomerang.CryptoAnalysisDataFlowScope;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLRule;
-import crypto.typestate.CrySLMethodToSootMethod;
 import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CryptoScanner {
@@ -64,6 +62,7 @@ public abstract class CryptoScanner {
 	private int solvedObject;
 	private Stopwatch analysisWatch;
 	private CallGraph callGraph;
+	private DataFlowScope dataFlowScope;
 
 	public ObservableICFG<Statement, Method> icfg() {
 		return new ObservableDynamicICFG(new DynamicCFG(), new BoomerangResolver(callGraph(), getDataFlowScope()));
@@ -74,16 +73,16 @@ public abstract class CryptoScanner {
 	}
 
 	public DataFlowScope getDataFlowScope() {
-		return SootDataFlowScope.make(Scene.v());
+		return dataFlowScope;
 	}
 
 	public CrySLResultsReporter getAnalysisListener() {
 		return resultsAggregator;
 	};
 
-	public CryptoScanner() {
-		CrySLMethodToSootMethod.reset();
+	public CryptoScanner(Collection<String> excludedClasses) {
 		callGraph = new SootCallGraph();
+		dataFlowScope = CryptoAnalysisDataFlowScope.make(excludedClasses);
 	}
 
 	public void scan(List<CrySLRule> specs) {

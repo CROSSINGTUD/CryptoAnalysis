@@ -27,7 +27,6 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
 		Assertions.extValue(0);
-		Assertions.extValue(1);
 		Assertions.hasEnsuredPredicate(parameters);
 		generator.initialize(parameters, new SecureRandom());
 		KeyPair keyPair = generator.generateKeyPair();

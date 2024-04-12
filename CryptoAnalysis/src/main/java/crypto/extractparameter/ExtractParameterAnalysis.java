@@ -25,10 +25,12 @@ import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import wpds.impl.Weight.NoWeight;
 
+import javax.swing.text.html.Option;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 public class ExtractParameterAnalysis {
 
@@ -54,13 +56,16 @@ public class ExtractParameterAnalysis {
 	public void run() {
 		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : allCallsOnObject.entrySet()) {
 			Statement statement = stmt.getKey().getStart();
-			if (!statement.containsInvokeExpr())
+
+			if (!statement.containsInvokeExpr()) {
 				continue;
+			}
 
 			DeclaredMethod declaredMethod = stmt.getValue();
 			for (LabeledMatcherTransition e : events) {
-				e.getMatching(declaredMethod)
-					.ifPresent(method -> injectQueryAtCallSite(method, stmt.getKey()));
+				Optional<CrySLMethod> matchingMethod = e.getMatching(declaredMethod);
+
+                matchingMethod.ifPresent(crySLMethod -> injectQueryAtCallSite(crySLMethod, stmt.getKey()));
 			}
 		}
 
@@ -82,6 +87,7 @@ public class ExtractParameterAnalysis {
 	}
 
 	private void injectQueryAtCallSite(CrySLMethod match, ControlFlowGraph.Edge callSite) {
+		// TODO edge to getStart()
 		int index = 0;
 		for (Entry<String, String> param : match.getParameters())
 			addQueryAtCallSite(param.getKey(), callSite, index++);
@@ -95,7 +101,7 @@ public class ExtractParameterAnalysis {
 		}
 
 		Val parameter = statement.getInvokeExpr().getArg(index);
-		if (!(parameter.isLocal())) {
+		if (!parameter.isLocal()) {
 			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
 			collectedValues.put(cs, new ExtractedValue(stmt, parameter));
 			querySites.add(cs);
@@ -105,6 +111,7 @@ public class ExtractParameterAnalysis {
 		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
 		for (Statement pred : predecessors) {
 			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
+			// Edge to getStart()
 			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
 			query.addListener((q, res) -> {
@@ -147,17 +154,13 @@ public class ExtractParameterAnalysis {
 		private BackwardBoomerangResults<NoWeight> res;
 
 		public void solve() {
-			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions()) {
-				/*@Override
-				public ObservableICFG<Statement, Method> icfg() {
-					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
-				}*/
-			};
+			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions());
 			res = boomerang.solve(this);
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
 			}
 			solved = true;
+			boomerang.unregisterAllListeners();
 		}
 
 		public void addListener(QueryListener q) {

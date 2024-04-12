@@ -5,15 +5,23 @@ import boomerang.scene.Val;
 import test.Assertion;
 import typestate.finiteautomata.State;
 
-public class NotInAcceptingStateAssertion implements Assertion {
+public class NotInAcceptingStateAssertion implements Assertion, StateResult {
 
-	private Statement unit;
-	private Val val;
+	private final Statement unit;
+	private final Val val;
 	private boolean satisfied;
 
 	public NotInAcceptingStateAssertion(Statement unit, Val accessGraph) {
 		this.unit = unit;
 		this.val = accessGraph;
+	}
+
+	public Val getVal() {
+		return val;
+	}
+
+	public Statement getStmt() {
+		return unit;
 	}
 
 	public void computedResults(State s) {

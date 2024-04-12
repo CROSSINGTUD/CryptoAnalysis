@@ -211,8 +211,9 @@ public class PredicateHandler {
 	}
 
 	public void expectPredicate(IAnalysisSeed object, Statement stmt, CrySLPredicate predToBeEnsured) {
-		for (Statement succ : cryptoScanner.icfg().getEndPointsOf(stmt.getMethod())) {
-			Set<CrySLPredicate> set = expectedPredicateObjectBased.get(succ, object);
+		//for (Statement succ : cryptoScanner.icfg().getEndPointsOf(stmt.getMethod())) {
+		for (Statement successor : stmt.getMethod().getControlFlowGraph().getSuccsOf(stmt)) {
+			Set<CrySLPredicate> set = expectedPredicateObjectBased.get(successor, object);
 			if (set == null)
 				set = Sets.newHashSet();
 			set.add(predToBeEnsured);

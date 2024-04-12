@@ -48,7 +48,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 		Set<WeightedForwardQuery<TransitionFunction>> out = new HashSet<>();
 		Statement statement = edge.getStart();
 		
-		if (!(statement.containsInvokeExpr())) {
+		if (!statement.containsInvokeExpr()) {
 			return out;
 		}
 		
@@ -64,7 +64,6 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				Val leftOp = statement.getLeftOp();
 				Val rightOp = statement.getRightOp();
 				out.add(createQuery(edge, new AllocVal(leftOp, statement, rightOp)));
-				//out.add(createQuery(edge, leftOp));
 			}
 		} else if (invokeExpr.isInstanceInvokeExpr() && !(invokeExpr instanceof InterfaceInvokeExpr)){
 			Val base = invokeExpr.getBase();

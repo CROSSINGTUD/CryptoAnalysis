@@ -40,7 +40,7 @@ public class MatcherTransitionCollection {
         }
         InvokeExpr invokeExpr = statement.getInvokeExpr();
 
-        if (!(invokeExpr.isInstanceInvokeExpr()) && !(statement.isAssign())) {
+        if (!invokeExpr.isInstanceInvokeExpr() && !statement.isAssign()) {
             return defaultTransition;
         }
 

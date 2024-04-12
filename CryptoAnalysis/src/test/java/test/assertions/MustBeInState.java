@@ -6,23 +6,23 @@ import crypto.typestate.ReportingErrorStateNode;
 import test.Assertion;
 import typestate.finiteautomata.State;
 
-public class MustBeInState implements Assertion {
+public class MustBeInState implements Assertion, StateResult {
 
-	private Statement unit;
-	private Val accessGraph;
-	private String state;
+	private final Statement unit;
+	private final Val val;
+	private final String state;
 	private boolean satisfied;
 	private int imprecise;
 
-	public MustBeInState(Statement unit, Val accessGraph, String state) {
+	public MustBeInState(Statement unit, Val val, String state) {
 		this.unit = unit;
-		this.accessGraph = accessGraph;
+		this.val = val;
 		this.state = state;
 	}
 
 	public void computedResults(State s) {
 		if ((state.toString().equals("-1") && s instanceof ReportingErrorStateNode) || state.toString().equals(s.toString())) {
-			satisfied |= true;
+			satisfied = true;
 			imprecise++;
 		} 
 	}
@@ -42,7 +42,7 @@ public class MustBeInState implements Assertion {
 	}
 
 	public Val getVal() {
-		return accessGraph;
+		return val;
 	}
 	@Override
 	public String toString() {

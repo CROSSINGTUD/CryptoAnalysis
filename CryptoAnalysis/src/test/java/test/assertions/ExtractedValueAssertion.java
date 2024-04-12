@@ -10,8 +10,8 @@ import java.util.Map.Entry;
 
 public class ExtractedValueAssertion implements Assertion {
 
-	private Statement stmt;
-	private int index;
+	private final Statement stmt;
+	private final int index;
 	private boolean satisfied;
 
 	public ExtractedValueAssertion(Statement stmt, int index) {
@@ -20,9 +20,12 @@ public class ExtractedValueAssertion implements Assertion {
 	}
 	
 	public void computedValues(Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues){
-		for(Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()){
-			if(e.getKey().stmt().getTarget().equals(stmt) && e.getKey().getIndex() == index)
+		for (Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()) {
+			Statement callSite = e.getKey().stmt().getStart();
+
+			if (callSite.equals(stmt) && e.getKey().getIndex() == index) {
 				satisfied = true;
+			}
 		}
 	}
 	
