@@ -92,4 +92,5 @@ public class CogniCryptBoomerangOptions extends DefaultBoomerangOptions {
 	public boolean allowMultipleQueries() {
 		return true;
 	}
+
 }

@@ -90,7 +90,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 		// Required since Soot 4.3.0
 		Options.v().setPhaseOption("jb.sils", "enabled:false");
-		//Options.v().setPhaseOption("jb", "use-original-names:false");
 
 		return new SceneTransformer() {
 

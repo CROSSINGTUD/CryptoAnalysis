@@ -75,8 +75,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, ControlFlowGraph.Edge stmt, Val val, ClassSpecification spec) {
-		super(cryptoScanner, stmt, val, spec.getInitialWeight(stmt));
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, WeightedForwardQuery<TransitionFunction> forwardQuery, ClassSpecification spec) {
+		super(cryptoScanner, forwardQuery);
 		this.spec = spec;
 		this.analysis = new ExtendedIDEALAnalysis() {
 
@@ -105,6 +105,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				return cryptoScanner.getAnalysisListener();
 			}
 		};
+	}
+
+	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, ControlFlowGraph.Edge edge, Val val, ClassSpecification spec) {
+		this(cryptoScanner, new WeightedForwardQuery<>(edge, val, spec.getInitialWeight(edge)), spec);
 	}
 
 	@Override
@@ -145,7 +149,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private void runTypestateAnalysis() {
-		analysis.run(this);
+		analysis.run(getForwardQuery());
 		results = analysis.getResults();
 
 		if (results != null) {
@@ -439,7 +443,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
 			if (containsTargetState(e.getValue(), stateNode)) {
-				predicateHandler.addNewPred(this, e.getRowKey().getTarget(), e.getColumnKey(), ensuredPred);
+				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
 			}
 		}
 	}
@@ -561,7 +565,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					}
 
 					if (state.isAccepting()) {
-						predicateHandler.addNewPred(this, c.getRowKey().getTarget(), c.getColumnKey(), predWithThis);
+						predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), predWithThis);
 					}
 				}
 			}

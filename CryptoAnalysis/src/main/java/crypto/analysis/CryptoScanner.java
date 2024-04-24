@@ -1,6 +1,7 @@
 package crypto.analysis;
 
 import boomerang.Query;
+import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CryptoScanner {
@@ -56,7 +58,7 @@ public abstract class CryptoScanner {
 
 		@Override
 		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.cfgEdge(), key.var(), key.getSpec());
+			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.getForwardQuery(), key.getSpec());
 		}
 	};
 	private int solvedObject;
@@ -140,13 +142,13 @@ public abstract class CryptoScanner {
 		}
 	}
 
-	/*private void initialize() {
+	private void initialize() {
 		Set<Method> methods = callGraph().getReachableMethods();
 
 		for (Method method : methods) {
 
 			for (ClassSpecification spec : getClassSpecifications()) {
-				if (!((JimpleMethod) method).getDelegate().hasActiveBody())) {
+				if (!((JimpleMethod) method).getDelegate().hasActiveBody()) {
 					continue;
 				}
 
@@ -156,14 +158,14 @@ public abstract class CryptoScanner {
 					continue;
 				}
 
-				for (Query seed : spec.getInitialSeeds(method)) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.cfgEdge(), seed.var(), spec));
+				for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds(method)) {
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
 				}
 			}
 		}
-	}*/
+	}
 
-	private void initialize() {
+	/*private void initialize() {
 		ReachableMethods rm = Scene.v().getReachableMethods();
 		QueueReader<MethodOrMethodContext> listener = rm.listener();
 		while (listener.hasNext()) {
@@ -183,12 +185,12 @@ public abstract class CryptoScanner {
 			for (ClassSpecification spec : getClassSpecifications()) {
 				spec.invokesForbiddenMethod(method);
 				
-				for (Query seed : spec.getInitialSeeds(method)) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed.cfgEdge(), seed.var(), spec));
+				for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds(method)) {
+					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
 				}
 			}
 		}
-	}
+	}*/
 
 	public List<ClassSpecification> getClassSpecifications() {
 		return specifications;

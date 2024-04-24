@@ -12,6 +12,7 @@ public class TransformerSetup {
     public void setupPreTransformer(List<CrySLRule> rules) {
         // Transformer related to the analysis
         setupCastTransformer();
+        setupStaticCallTransformer();
         setupExceptionAwareTransformer(rules);
 
         // Transformer related to Boomerang
@@ -21,6 +22,11 @@ public class TransformerSetup {
     public void setupCastTransformer() {
         CastTransformer.v().reset();
         CastTransformer.v().apply();
+    }
+
+    public void setupStaticCallTransformer() {
+        StaticCallTransformer.v().reset();
+        StaticCallTransformer.v().apply();
     }
 
     public void setupExceptionAwareTransformer(List<CrySLRule> rules) {

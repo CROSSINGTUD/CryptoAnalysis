@@ -3,6 +3,7 @@ package crypto.analysis;
 import java.util.ArrayList;
 import java.util.Set;
 
+import boomerang.WeightedForwardQuery;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
@@ -22,38 +23,16 @@ import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
-	private ForwardBoomerangResults<TransitionFunction> analysisResults;
+	private final ExtendedIDEALAnalysis solver;
 	private final Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
+
+	private ForwardBoomerangResults<TransitionFunction> analysisResults;
 	private boolean analyzed;
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<ControlFlowGraph.Edge, Val> delegate) {
-		super(cryptoScanner,delegate.stmt(),delegate.fact(), TransitionFunction.one());
-	}
+		super(cryptoScanner, new WeightedForwardQuery<>(delegate.stmt(), delegate.fact(), TransitionFunction.one()));
 
-	@Override
-	public void execute() {
-		cryptoScanner.getAnalysisListener().seedStarted(this);
-		ExtendedIDEALAnalysis solver = getOrCreateAnalysis();
-		solver.run(this);
-		analysisResults = solver.getResults();
-		for(EnsuredCrySLPredicate pred : ensuredPredicates)
-			ensurePredicates(pred);
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
-		analyzed = true;
-	}
-
-	protected void ensurePredicates(EnsuredCrySLPredicate pred) {
-		if(analysisResults == null)
-			return;
-
-		for(Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()){
-			predicateHandler.addNewPred(this,c.getRowKey().getTarget(), c.getColumnKey(), pred);
-		}
-	}
-
-
-	private ExtendedIDEALAnalysis getOrCreateAnalysis() {
-		return new ExtendedIDEALAnalysis() {
+		solver = new ExtendedIDEALAnalysis() {
 
 			@Override
 			public CallGraph callGraph() {
@@ -89,15 +68,39 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		};
 	}
 
-	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {
-		if(ensuredPredicates.add(pred) && analyzed)
+	@Override
+	public void execute() {
+		cryptoScanner.getAnalysisListener().seedStarted(this);
+		solver.run(getForwardQuery());
+		analysisResults = solver.getResults();
+
+		for (EnsuredCrySLPredicate pred : ensuredPredicates) {
 			ensurePredicates(pred);
+		}
+
+		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
+		analyzed = true;
 	}
 
+	protected void ensurePredicates(EnsuredCrySLPredicate pred) {
+		if (analysisResults == null) {
+			return;
+		}
+
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
+			predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+		}
+	}
+
+	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {
+		if (ensuredPredicates.add(pred) && analyzed) {
+			ensurePredicates(pred);
+		}
+	}
 
 	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate:"+this.asNode() +" " + ensuredPredicates; 
+		return "AnalysisSeedWithEnsuredPredicate: " + getForwardQuery().asNode() + " " + ensuredPredicates;
 	}
 
 }

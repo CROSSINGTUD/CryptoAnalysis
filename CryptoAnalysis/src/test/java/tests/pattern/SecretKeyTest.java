@@ -117,6 +117,18 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		Assertions.extValue(1);
 		Assertions.hasEnsuredPredicate(actKey);
 	}
+
+	@Test
+	public void test() throws GeneralSecurityException {
+		KeyGenerator c = KeyGenerator.getInstance("AES");
+		Key key = c.generateKey();
+		Assertions.mustBeInAcceptingState(key);
+		byte[] enc = key.getEncoded();
+		Assertions.mustBeInAcceptingState(key);
+		enc = key.getEncoded();
+		Assertions.hasEnsuredPredicate(enc);
+		Assertions.mustBeInAcceptingState(key);
+	}
 	
 	public char[] generateRandomPassword() {
 		SecureRandom rnd = new SecureRandom();

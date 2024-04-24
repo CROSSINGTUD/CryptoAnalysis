@@ -9,7 +9,6 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.rules.CrySLMethod;
 import crypto.rules.TransitionEdge;
-import soot.jimple.InterfaceInvokeExpr;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
@@ -20,18 +19,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachineWeightFunctions {
-
-	//private SootBasedStateMachineGraph fsm;
-	//private Collection<TransitionEdge> initialTransitions;
-
-	//public FiniteStateMachineToTypestateChangeFunction(SootBasedStateMachineGraph fsm, StateMachineGraph smg) {
-		/*for(MatcherTransition trans : fsm.getAllTransitions()){
-			this.addTransition(trans);
-		}
-
-		this.initialTransitions = smg.getInitialTransitions();
-		this.fsm = fsm;*/
-	//}
 
 	private final MatcherTransitionCollection matcherTransitions;
 
@@ -65,7 +52,7 @@ public class FiniteStateMachineToTypestateChangeFunction extends TypeStateMachin
 				Val rightOp = statement.getRightOp();
 				out.add(createQuery(edge, new AllocVal(leftOp, statement, rightOp)));
 			}
-		} else if (invokeExpr.isInstanceInvokeExpr() && !(invokeExpr instanceof InterfaceInvokeExpr)){
+		} else if (invokeExpr.isInstanceInvokeExpr() && invokeExpr.isSpecialInvokeExpr()){
 			Val base = invokeExpr.getBase();
 
 			out.add(createQuery(edge, new AllocVal(base, statement, base)));

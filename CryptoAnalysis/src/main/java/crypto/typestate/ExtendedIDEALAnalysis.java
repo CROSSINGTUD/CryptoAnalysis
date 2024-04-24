@@ -12,7 +12,6 @@ import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.CrySLResultsReporter;
-import crypto.analysis.IAnalysisSeed;
 import crypto.boomerang.CogniCryptBoomerangOptions;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
@@ -77,7 +76,7 @@ public abstract class ExtendedIDEALAnalysis {
 		try {
 			results = analysis.run(query);
 		} catch (IDEALSeedTimeout e) {
-			if (reports != null && query instanceof IAnalysisSeed) {
+			if (reports != null) {
 				reports.onSeedTimeout(query.asNode());
 			}
 		}

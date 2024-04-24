@@ -50,7 +50,7 @@ public class ReporterHelper {
 		report += "Analyzed Objects: \n";
 		for (IAnalysisSeed r : objects) {
 			report += String.format("\tObject:\n");
-			report += String.format("\t\tVariable: %s\n", r.var().getVariableName());
+			report += String.format("\t\tVariable: %s\n", r.getFact().getVariableName());
 			report += String.format("\t\tType: %s\n", r.getType());
 			report += String.format("\t\tStatement: %s\n", r.cfgEdge().getStart());
 			report += String.format("\t\tMethod: %s\n", r.getMethod());
