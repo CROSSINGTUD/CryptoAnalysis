@@ -38,11 +38,10 @@ import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import crypto.typestate.ExtendedIDEALAnalysis;
 import crypto.typestate.MatcherTransitionCollection;
-import crypto.typestate.MatcherUtils;
 import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.WrappedState;
+import crypto.utils.MatcherUtils;
 import ideal.IDEALSeedSolver;
-import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
@@ -165,22 +164,27 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void computeTypestateErrorUnits() {
-		Set<ControlFlowGraph.Edge> allTypestateChangeStatements = Sets.newHashSet();
-		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
-			allTypestateChangeStatements.addAll(c.getValue().getLastStateChangeStatements());
-		}
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			ControlFlowGraph.Edge curr = c.getRowKey();
 
-			if (allTypestateChangeStatements.contains(curr)) {
-				/*if (!curr.getStart().containsInvokeExpr()) {
-					continue;
-				}*/
-
+			if (allCallsOnObject.containsKey(curr)) {
 				Collection<? extends State> targetStates = getTargetStates(c.getValue());
+
 				for (State newStateAtCurr : targetStates) {
 					typeStateChangeAtStatement(curr, newStateAtCurr);
 				}
+			}
+		}
+	}
+
+	private void typeStateChangeAtStatement(ControlFlowGraph.Edge statement, State stateNode) {
+		if (typeStateChange.put(statement, stateNode)) {
+			if (stateNode instanceof ReportingErrorStateNode) {
+				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
+
+				TypestateError typestateError = new TypestateError(statement.getStart(), getSpec().getRule(), this, errorStateNode.getExpectedCalls());
+				this.addError(typestateError);
+				cryptoScanner.getAnalysisListener().reportError(this, typestateError);
 			}
 		}
 	}
@@ -288,18 +292,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return false;
 	}
 
-	private void typeStateChangeAtStatement(ControlFlowGraph.Edge statement, State stateNode) {
-		if (typeStateChange.put(statement, stateNode)) {
-			if (stateNode instanceof ReportingErrorStateNode) {
-				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
-
-				TypestateError typestateError = new TypestateError(statement.getTarget(), getSpec().getRule(), this, errorStateNode.getExpectedCalls());
-				this.addError(typestateError);
-				cryptoScanner.getAnalysisListener().reportError(this, typestateError);
-			}
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 *                               Predicate checks                                    *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -387,8 +379,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 
-		// Check, whether the predicate should be ensured on another object
-		Statement statement = currStmt.getTarget();
+		Statement statement = currStmt.getStart();
 		if (!statement.containsInvokeExpr()) {
 			return;
 		}
@@ -396,6 +387,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		DeclaredMethod invokedMethod = statement.getInvokeExpr().getMethod();
 		Collection<CrySLMethod> convert = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(spec.getRule(), invokedMethod);
 
+		// Check, whether the predicate should be ensured on another object
 		for (CrySLMethod crySLMethod : convert) {
 			Entry<String, String> retObject = crySLMethod.getRetObject();
 			if (!retObject.getKey().equals("_") && statement.isAssign() && predicateParameterEquals(ensuredPred.getPredicate().getParameters(), retObject.getKey())) {
@@ -403,7 +395,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Val rightOp = statement.getRightOp();
 
 				AllocVal val = new AllocVal(leftOp, statement, rightOp);
-				expectPredicateOnOtherObject(ensuredPred, statement, val);
+				expectPredicateOnOtherObject(ensuredPred, currStmt, val);
 			}
 			int i = 0;
 			for (Entry<String, String> p : crySLMethod.getParameters()) {
@@ -412,7 +404,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 					if (param.isLocal()) {
 						AllocVal allocVal = new AllocVal(param, statement, param);
-						expectPredicateOnOtherObject(ensuredPred, statement, allocVal);
+						expectPredicateOnOtherObject(ensuredPred, currStmt, allocVal);
 					}
 				}
 				i++;
@@ -465,10 +457,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * Ensure a predicate on another object. The predicate is added to the other seed's ensured predicates
 	 *
 	 * @param ensPred the predicate to ensure
-	 * @param currStmt the statement that ensures the predicate
+	 * @param edge the statement that ensures the predicate
 	 * @param accessGraph holds the value for the other seed's type
 	 */
-	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, Statement currStmt, Val accessGraph) {
+	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, ControlFlowGraph.Edge edge, Val accessGraph) {
 		boolean specificationExists = false;
 
 		// Check, whether there is a specification (i.e. a CrySL rule) for the target object
@@ -484,15 +476,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			// TODO Use refType (return type) or static type?
 			if (baseType.getWrappedClass().getName().equals(spec.getRule().getClassName())) {
-				Collection<Statement> successors = currStmt.getMethod().getControlFlowGraph().getSuccsOf(currStmt);
-
-				// The initial edge for a seed has to contain the instantiation statement as start element
-				for (Statement statement : successors) {
-					ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(currStmt, statement);
-
-					AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, edge, accessGraph, spec));
-					seed.addEnsuredPredicateFromOtherRule(ensPred);
-				}
+				AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, edge, accessGraph, spec));
+				seed.addEnsuredPredicateFromOtherRule(ensPred);
 
 				specificationExists = true;
 			}
@@ -500,15 +485,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		// If no specification has been found, create a seed without a specification
 		if (!specificationExists) {
-            Collection<Statement> successors = currStmt.getMethod().getControlFlowGraph().getSuccsOf(currStmt);
-
-            for (Statement statement : successors) {
-                ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(currStmt, statement);
-
-                AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeed(new Node<>(edge, accessGraph));
-                predicateHandler.expectPredicate(seed, currStmt, ensPred.getPredicate());
-                seed.addEnsuredPredicate(ensPred);
-            }
+			AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeedWithoutSpec(new AnalysisSeedWithEnsuredPredicate(cryptoScanner, edge, accessGraph));
+			predicateHandler.expectPredicate(seed, edge.getStart(), ensPred.getPredicate());
+			seed.addEnsuredPredicate(ensPred);
 		}
 	}
 

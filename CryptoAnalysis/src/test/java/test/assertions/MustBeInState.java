@@ -6,15 +6,17 @@ import crypto.typestate.ReportingErrorStateNode;
 import test.Assertion;
 import typestate.finiteautomata.State;
 
+import java.util.Collection;
+
 public class MustBeInState implements Assertion, StateResult {
 
 	private final Statement unit;
-	private final Val val;
+	private final Collection<Val> val;
 	private final String state;
 	private boolean satisfied;
 	private int imprecise;
 
-	public MustBeInState(Statement unit, Val val, String state) {
+	public MustBeInState(Statement unit, Collection<Val> val, String state) {
 		this.unit = unit;
 		this.val = val;
 		this.state = state;
@@ -41,7 +43,7 @@ public class MustBeInState implements Assertion, StateResult {
 		return imprecise > 1;
 	}
 
-	public Val getVal() {
+	public Collection<Val> getVal() {
 		return val;
 	}
 	@Override

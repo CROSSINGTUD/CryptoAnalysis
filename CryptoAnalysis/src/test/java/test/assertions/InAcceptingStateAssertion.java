@@ -5,18 +5,20 @@ import boomerang.scene.Val;
 import test.Assertion;
 import typestate.finiteautomata.State;
 
+import java.util.Collection;
+
 public class InAcceptingStateAssertion implements Assertion, StateResult {
 
 	private final Statement unit;
-	private final Val val;
+	private final Collection<Val> val;
 	private boolean satisfied;
 
-	public InAcceptingStateAssertion(Statement unit, Val val) {
+	public InAcceptingStateAssertion(Statement unit, Collection<Val> val) {
 		this.unit = unit;
 		this.val = val;
 	}
 
-	public Val getVal() {
+	public Collection<Val> getVal() {
 		return val;
 	}
 

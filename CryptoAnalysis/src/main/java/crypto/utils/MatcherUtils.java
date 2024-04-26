@@ -1,8 +1,12 @@
-package crypto.typestate;
+package crypto.utils;
 
 import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.JimpleDeclaredMethod;
+import boomerang.scene.jimple.JimpleType;
+import boomerang.scene.jimple.JimpleVal;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 import crypto.rules.TransitionEdge;
@@ -49,11 +53,13 @@ public class MatcherUtils {
 
         String cryslClassName = getDeclaringClassName(cryslMethod.getMethodName());
         String declaredClassName = declaredMethod.getDeclaringClass().getName();
-        if (!cryslClassName.equals(declaredClassName) && !isSubtype(cryslClassName, declaredClassName)) {
+        if (!cryslClassName.equals(declaredClassName) && !SootUtils.isSubtype(cryslClassName, declaredClassName)) {
             return false;
         }
 
-        if (!matchParameters(cryslMethod.getParameters(), declaredMethod.getInvokeExpr().getArgs())) {
+        List<Map.Entry<String, String>> cryslParameters = cryslMethod.getParameters();
+        List<JimpleType> declaredParameters = SootUtils.getParameterTypes(declaredMethod);
+        if (!matchParameters(cryslParameters, declaredParameters)) {
             return false;
         }
 
@@ -67,7 +73,7 @@ public class MatcherUtils {
         return cryslMethodName.substring(0, cryslMethodName.lastIndexOf("."));
     }
 
-    public static boolean matchParameters(List<Map.Entry<String, String>> cryslParameters, List<Val> declaredParameters) {
+    public static boolean matchParameters(List<Map.Entry<String, String>> cryslParameters, List<JimpleType> declaredParameters) {
         if (cryslParameters.size() != declaredParameters.size()) {
             return false;
         }
@@ -79,20 +85,10 @@ public class MatcherUtils {
 
             // Soot does not track generic types, so we are required to remove <...> from the parameter
             String cryslParameter = cryslParameters.get(i).getValue().replaceAll("<.*?>", "");
-            String declaredParameter = declaredParameters.get(i).getType().toString();
+            String declaredParameter = declaredParameters.get(i).toString();
 
             // null type corresponds to any type
             if (declaredParameter.equals("null_type")) {
-                continue;
-            }
-
-            // For some reason Boomerang transforms boolean parameters to int values
-            if (cryslParameter.equals("boolean") && declaredParameter.equals("int")) {
-                continue;
-            }
-
-            // int and short correspond to the same type
-            if (cryslParameter.equals("int") && declaredParameter.equals("short")) {
                 continue;
             }
 
@@ -100,7 +96,7 @@ public class MatcherUtils {
                 continue;
             }
 
-            if (!isSubtype(declaredParameter, cryslParameter)) {
+            if (!SootUtils.isSubtype(declaredParameter, cryslParameter)) {
                 return false;
             }
         }
@@ -121,54 +117,5 @@ public class MatcherUtils {
         }
         return Scene.v().getActiveHierarchy().isClassSubclassOf(child, parent)
                 || child.getInterfaces().contains(parent);
-    }
-
-    private static boolean isSubtype(String childClass, String parentClass) {
-        // Check for primitive types
-        if (!(Scene.v().containsClass(childClass) || Scene.v().containsClass(parentClass))) {
-            return false;
-        }
-
-        SootClass child = Scene.v().getSootClass(childClass);
-        SootClass parent = Scene.v().getSootClass(parentClass);
-
-        Collection<SootClass> fullHierarchy = getFullHierarchy(child, new HashSet<>());
-
-        return fullHierarchy.contains(parent);
-    }
-
-    private static Collection<SootClass> getFullHierarchy(SootClass sourceClass, Set<SootClass> visited) {
-        Set<SootClass> result = new HashSet<>();
-
-        if (visited.contains(sourceClass)) {
-            return result;
-        }
-
-        result.add(sourceClass);
-        visited.add(sourceClass);
-
-        // Super interfaces
-        Collection<SootClass> interfaces = sourceClass.getInterfaces();
-        for (SootClass intFace : interfaces) {
-            result.addAll(getFullHierarchy(intFace, visited));
-        }
-
-        if (sourceClass.isInterface()) {
-            // Super interfaces
-            Collection<SootClass> superInterfaces = Scene.v().getActiveHierarchy().getSuperinterfacesOf(sourceClass);
-
-            for (SootClass superInterface : superInterfaces) {
-                result.addAll(getFullHierarchy(superInterface, visited));
-            }
-        } else {
-            // Super classes
-            Collection<SootClass> superClasses = Scene.v().getActiveHierarchy().getSuperclassesOf(sourceClass);
-
-            for (SootClass superClass : superClasses) {
-                result.addAll(getFullHierarchy(superClass, visited));
-            }
-        }
-
-        return result;
     }
 }

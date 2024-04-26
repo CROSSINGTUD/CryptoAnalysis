@@ -93,7 +93,7 @@ public class ExtractParameterAnalysis {
 			addQueryAtCallSite(param.getKey(), callSite, index++);
 	}
 
-	public void addQueryAtCallSite(final String varNameInSpecification, final ControlFlowGraph.Edge stmt, final int index) {
+	public void addQueryAtCallSite(String varNameInSpecification, ControlFlowGraph.Edge stmt, int index) {
 		Statement statement = stmt.getStart();
 
 		if (!statement.containsInvokeExpr()) {

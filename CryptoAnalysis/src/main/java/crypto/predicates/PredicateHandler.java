@@ -250,7 +250,7 @@ public class PredicateHandler {
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 			if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(Collections.singletonList(missingPred.getPred()), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(Collections.singletonList(missingPred.getPred()), missingPred.getLocation().getStart(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}
@@ -259,7 +259,7 @@ public class PredicateHandler {
 	private void collectMissingPred(AnalysisSeedWithSpecification seed, AlternativeReqPredicate missingPred) {
 		// Check for predicate errors with 'this' as parameter in all alternatives
 		if (missingPred.getAlternatives().parallelStream().anyMatch(p -> p.getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this")))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
+			RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getStart(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
 			addRequiredPredicateErrorOnSeed(reqPredError, seed);
 
 			return;
@@ -267,7 +267,7 @@ public class PredicateHandler {
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 			if (missingPred.getAlternatives().parallelStream().anyMatch(e -> e.getInvolvedVarNames().contains(v.getVarName())) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getTarget(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation().getStart(), seed.getSpec().getRule(), new CallSiteWithExtractedValue(v, null));
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}

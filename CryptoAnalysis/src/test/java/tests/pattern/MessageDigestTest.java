@@ -143,18 +143,6 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(input2);
 		Assertions.notHasEnsuredPredicate(output);
 	}
-
-	@Test
-	public void test() throws GeneralSecurityException {
-		byte[] input = new byte[1];
-		byte[] output = new byte[1];
-		System.out.println(input + " " + output);
-
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		output = md.digest(input);
-		Assertions.mustBeInAcceptingState(md);
-		Assertions.notHasEnsuredPredicate(output);
-	}
 	
 	@Test
 	public void messageDigest() throws NoSuchAlgorithmException, DestroyFailedException {

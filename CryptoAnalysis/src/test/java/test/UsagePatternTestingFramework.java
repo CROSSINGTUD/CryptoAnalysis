@@ -1,16 +1,21 @@
 package test;
 
 import boomerang.BackwardQuery;
+import boomerang.Boomerang;
 import boomerang.Query;
+import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
+import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
+import boomerang.util.AccessPath;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -46,6 +51,7 @@ import crypto.interfaces.ISLConstraint;
 import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
 import sync.pds.solver.nodes.Node;
@@ -69,6 +75,7 @@ import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
+import wpds.impl.Weight;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,6 +108,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				scanner = new CryptoScanner(excludedPackages()) {
 
 					@Override
+					public DataFlowScope getDataFlowScope() {
+						return TestDataFlowScope.make(excludedPackages());
+					}
+
+					@Override
 					public CrySLResultsReporter getAnalysisListener() {
 						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
 
@@ -118,12 +130,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 								for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
 									for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : res.asStatementValWeightTable().cellSet()) {
 										Statement expectedStatement = entry.getKey();
-										Val expectedVal = entry.getValue().getVal();
+										Collection<Val> expectedVal = entry.getValue().getVal();
 
 										Statement analysisResultStatement = cell.getRowKey().getStart();
 										Val analysisResultVal = cell.getColumnKey();
 
-										if (!analysisResultStatement.equals(expectedStatement) || !analysisResultVal.equals(expectedVal)) {
+										if (!analysisResultStatement.equals(expectedStatement) || !expectedVal.contains(analysisResultVal)) {
 											continue;
 										}
 
@@ -274,20 +286,20 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
 									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
 									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
-								for(Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()){
-									for(Assertion e : expectedResults){
-										if(e instanceof HasEnsuredPredicateAssertion){
+								for (Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()) {
+									for (Assertion e : expectedResults) {
+										if (e instanceof HasEnsuredPredicateAssertion) {
 											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
-												for(EnsuredCrySLPredicate pred : c.getValue()){
+											if (assertion.getStmt().equals(c.getRowKey())) {
+												for (EnsuredCrySLPredicate pred : c.getValue()) {
 													assertion.reported(c.getColumnKey(),pred);
 												}	
 											}
 										}
-										if(e instanceof NotHasEnsuredPredicateAssertion){
+										if (e instanceof NotHasEnsuredPredicateAssertion) {
 											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
-											if(assertion.getStmt().equals(c.getRowKey())){
-												for(EnsuredCrySLPredicate pred : c.getValue()){
+											if (assertion.getStmt().equals(c.getRowKey())) {
+												for (EnsuredCrySLPredicate pred : c.getValue()) {
 													assertion.reported(c.getColumnKey(),pred);
 												}	
 											}
@@ -418,7 +430,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	@Override
 	public List<String> excludedPackages() {
 		List<String> excludedPackages = super.excludedPackages();
-		excludedPackages.add("java.lang.String");
 
 		for (CrySLRule r : rules) {
 			excludedPackages.add(r.getClassName());
@@ -484,7 +495,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!param.isLocal()) {
 					continue;
 				}
-				queries.add(new InAcceptingStateAssertion(statement, param));
+
+				Set<Val> aliases = getAliasesForValue(statement, param);
+
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new InAcceptingStateAssertion(pred, aliases));
+				}
 			}
 			
 			//if (invocationName.startsWith("violatedConstraint")) {
@@ -497,16 +513,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
+				Set<Val> aliases = getAliasesForValue(statement, param);
+
 				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
 					Val predNameParam = invokeExpr.getArg(1);
-					if (!(predNameParam.isStringConstant())) {
+					if (!predNameParam.isStringConstant()) {
 						continue;
 					}
 					String predName = param.getStringValue();
-					queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
+					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+						queries.add(new HasEnsuredPredicateAssertion(pred, aliases, predName));
+					}
 				} else {
-					queries.add(new HasEnsuredPredicateAssertion(statement, param));
+					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+						queries.add(new HasEnsuredPredicateAssertion(pred, aliases));
+					}
 				}
 			}
 			
@@ -516,16 +538,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				if (invokeExpr.getArgs().size()== 2) {
+				Set<Val> aliases = getAliasesForValue(statement, param);
+
+				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
 					Val predNameParam = invokeExpr.getArg(1);
-					if (!(predNameParam.isStringConstant())) {
+					if (!predNameParam.isStringConstant()) {
 						continue;
 					}
 					String predName = predNameParam.getStringValue();
-					queries.add(new NotHasEnsuredPredicateAssertion(statement, param, predName));
+					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+						queries.add(new NotHasEnsuredPredicateAssertion(pred, aliases, predName));
+					}
 				} else {
-					queries.add(new NotHasEnsuredPredicateAssertion(statement, param));
+					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+						queries.add(new NotHasEnsuredPredicateAssertion(pred, aliases));
+					}
 				}
 			}
 			
@@ -534,7 +562,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				if (!param.isLocal()) {
 					continue;
 				}
-				queries.add(new NotInAcceptingStateAssertion(statement, param));
+
+				Set<Val> aliases = getAliasesForValue(statement, param);
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new NotInAcceptingStateAssertion(pred, aliases));
+				}
 			}
 
 			if (invocationName.startsWith("predicateContradiction")) {
@@ -631,5 +663,24 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			workList.addAll(preds);
 		}
 		return res;
+	}
+
+	@SuppressWarnings("deprecation")
+	private Set<Val> getAliasesForValue(Statement stmt, Val val) {
+		Set<Val> aliases = new HashSet<>();
+		aliases.add(val);
+
+		for (Statement pred : stmt.getMethod().getControlFlowGraph().getPredsOf(stmt)) {
+			ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, stmt);
+			BackwardQuery query = BackwardQuery.make(edge, val);
+
+			Boomerang solver = new Boomerang(callGraph, SootDataFlowScope.make(Scene.v()));
+			BackwardBoomerangResults<Weight.NoWeight> results = solver.solve(query);
+
+			for (AccessPath accessPath : results.getAllAliases()) {
+				aliases.add(accessPath.getBase());
+			}
+		}
+		return aliases;
 	}
 }

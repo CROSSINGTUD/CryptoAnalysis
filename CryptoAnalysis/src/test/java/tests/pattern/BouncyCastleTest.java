@@ -54,16 +54,16 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 	
 	
 	@Test
-	public void rsKeyParameters() {
+	public void rsaKeyParameters() {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
 		BigInteger pub = new BigInteger("9f0783a49...da", 16);	
 		BigInteger pri = new BigInteger("21231...cda7", 16); 
 		
-		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod, pri); //<--- warning here
+		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod, pri);
 		Assertions.mustBeInAcceptingState(privParameters);
 		Assertions.notHasEnsuredPredicate(privParameters);
 		
-		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pub); //<--- but no warning here
+		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pub);
 		Assertions.mustBeInAcceptingState(pubParameters);
 		Assertions.hasEnsuredPredicate(pubParameters);
 	}

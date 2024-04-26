@@ -1,6 +1,5 @@
 package crypto.analysis;
 
-import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Method;
@@ -25,7 +24,7 @@ public abstract class IAnalysisSeed {
 	protected final List<AbstractError> errorCollection;
 	private String objectId;
 
-	public IAnalysisSeed(CryptoScanner scanner, WeightedForwardQuery<TransitionFunction> forwardQuery){
+	public IAnalysisSeed(CryptoScanner scanner, WeightedForwardQuery<TransitionFunction> forwardQuery) {
 		this.forwardQuery = forwardQuery;
 		this.cryptoScanner = scanner;
 		this.predicateHandler = scanner.getPredicateHandler();

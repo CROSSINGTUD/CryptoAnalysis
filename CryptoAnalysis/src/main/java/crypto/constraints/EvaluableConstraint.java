@@ -3,7 +3,6 @@ package crypto.constraints;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
-import boomerang.scene.Type;
 import boomerang.scene.Val;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -17,6 +16,7 @@ import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLValueConstraint;
+import crypto.utils.SootUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +30,11 @@ public abstract class EvaluableConstraint {
 
 	public static EvaluableConstraint getInstance(ISLConstraint con, ConstraintSolver context) {
 		if (con instanceof CrySLComparisonConstraint) {
-			return new ComparisonConstraint((CrySLComparisonConstraint) con, context);
+			return new ComparisonConstraint(con, context);
 		} else if (con instanceof CrySLValueConstraint) {
-			return new ValueConstraint((CrySLValueConstraint) con, context);
+			return new ValueConstraint(con, context);
 		} else if (con instanceof CrySLPredicate) {
-			return new PredicateConstraint((CrySLPredicate) con, context);
+			return new PredicateConstraint(con, context);
 		} else if (con instanceof CrySLConstraint) {
 			return new BinaryConstraint((CrySLConstraint) con, context);
 		} else if (con instanceof CrySLExceptionConstraint) {
@@ -58,7 +58,7 @@ public abstract class EvaluableConstraint {
 
 	public boolean hasErrors() {
 		return !errors.isEmpty();
-	};
+	}
 
 	protected Collection<AbstractError> getErrors() {
 		return errors;
@@ -92,14 +92,11 @@ public abstract class EvaluableConstraint {
 								pos = i;
 							}
 						}
-						Type parameterType = invoker.getArg(pos).getType();
-						if (pos > -1 && parameterType.isBooleanType()) {
-						//if (pos > -1 && "boolean".equals(invoker.getArg(pos).getType()..toQuotedString())) {
-							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true",
-									new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
+
+						if (pos > -1 && SootUtils.getParameterType(invoker, pos).isBooleanType()) {
+							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true", new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						} else {
-							varVal.put(retrieveConstantFromValue,
-									new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
+							varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						}
 					} else if (wrappedAllocSite.getValue().isNewExpr()) {
 						varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite));

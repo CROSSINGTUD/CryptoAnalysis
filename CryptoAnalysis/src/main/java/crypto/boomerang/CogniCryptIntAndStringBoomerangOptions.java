@@ -1,13 +1,12 @@
 package crypto.boomerang;
 
-import boomerang.callgraph.BoomerangResolver;
-import boomerang.callgraph.ICallerCalleeResolutionStrategy;
 import boomerang.scene.AllocVal;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
+import boomerang.scene.jimple.JimpleVal;
 import soot.Scene;
 
 import java.util.Optional;
@@ -64,7 +63,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 			}
 		}
 
-		if (!(stmt.isAssign())) {
+		if (!stmt.isAssign()) {
 			return Optional.empty();
 		}
 
@@ -73,16 +72,18 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 		if (!leftOp.equals(fact)) {
 			return Optional.empty();
 		}
-		// TODO Deal with static fields
-		/*if (as.getRightOp() instanceof StaticFieldRef) {
-			StaticFieldRef sfr = (StaticFieldRef) as.getRightOp();
-			if (sfr.getField().toString().equals("<java.security.spec.RSAKeyGenParameterSpec: java.math.BigInteger F4>")) {
-				return Optional.of(new AllocVal(as.getLeftOp(), m, IntConstant.v(65537), new Statement(stmt, m)));
+
+		// Extract static fields
+		if (rightOp instanceof JimpleVal) {
+			JimpleVal jimpleRightOp = (JimpleVal) rightOp;
+
+			if (jimpleRightOp.isStaticFieldRef()) {
+				AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+				return Optional.of(allocVal);
+
 			}
-			if (sfr.getField().toString().equals("<java.security.spec.RSAKeyGenParameterSpec: java.math.BigInteger F0>")) {
-				return Optional.of(new AllocVal(leftOp, stmt, new JimpleVal() IntConstant.v(3));
-			}
-		}*/
+		}
+
 		if (rightOp.isLengthExpr()) {
 			return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 		}

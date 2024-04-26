@@ -32,7 +32,7 @@ public class MatcherTransitionCollection {
     }
 
     public TransitionFunction getInitialWeight(ControlFlowGraph.Edge stmt) {
-        TransitionFunction defaultTransition = new TransitionFunction(initialTransitions, Collections.singleton(stmt));
+        TransitionFunction defaultTransition = getDefaultTransitionFunction(stmt);
         Statement statement = stmt.getStart();
 
         if (!statement.containsInvokeExpr()) {
@@ -56,6 +56,20 @@ public class MatcherTransitionCollection {
             }
         }
         return defaultTransition;
+    }
+
+    private TransitionFunction getDefaultTransitionFunction(ControlFlowGraph.Edge stmt) {
+        for (LabeledMatcherTransition matcherTransition : initialTransitions) {
+            if (matcherTransition.from().isInitialState() && matcherTransition.to().toString().equals("0")) {
+                Collection<Statement> preds = stmt.getMethod().getControlFlowGraph().getPredsOf(stmt.getStart());
+
+                for (Statement pred : preds) {
+                    ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, stmt.getStart());
+                    return new TransitionFunction(matcherTransition, Collections.singleton(edge));
+                }
+            }
+        }
+        return new TransitionFunction(initialTransitions, Collections.singleton(stmt));
     }
 
     public Collection<TransitionEdge> getInitialTransitions() {

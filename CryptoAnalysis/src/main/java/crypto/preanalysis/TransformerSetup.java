@@ -25,8 +25,8 @@ public class TransformerSetup {
     }
 
     public void setupStaticCallTransformer() {
-        StaticCallTransformer.v().reset();
-        StaticCallTransformer.v().apply();
+        EmptyStatementTransformer.v().reset();
+        EmptyStatementTransformer.v().apply();
     }
 
     public void setupExceptionAwareTransformer(List<CrySLRule> rules) {

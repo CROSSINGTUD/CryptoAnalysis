@@ -2,6 +2,7 @@ package crypto.typestate;
 
 import boomerang.scene.DeclaredMethod;
 import crypto.rules.CrySLMethod;
+import crypto.utils.MatcherUtils;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 
@@ -34,8 +35,22 @@ public class LabeledMatcherTransition extends MatcherTransition {
         return Optional.empty();
     }
 
+    public Collection<CrySLMethod> getMethods() {
+        return methods;
+    }
+
     @Override
     public String toString() {
         return super.toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!super.equals(other)) {
+            return false;
+        }
+
+        LabeledMatcherTransition matcherTransition = (LabeledMatcherTransition) other;
+        return this.methods.equals(matcherTransition.getMethods());
     }
 }

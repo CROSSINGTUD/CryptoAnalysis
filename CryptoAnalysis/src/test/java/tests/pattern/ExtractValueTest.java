@@ -11,7 +11,7 @@ import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class ExtractValueTest  extends UsagePatternTestingFramework{
+public class ExtractValueTest extends UsagePatternTestingFramework {
 
 	@Override
 	protected Ruleset getRuleSet() {

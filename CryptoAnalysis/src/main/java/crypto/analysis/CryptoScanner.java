@@ -1,6 +1,5 @@
 package crypto.analysis;
 
-import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
@@ -8,11 +7,9 @@ import boomerang.callgraph.ObservableICFG;
 import boomerang.controlflowgraph.DynamicCFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
-import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
@@ -24,12 +21,6 @@ import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import soot.MethodOrMethodContext;
-import soot.Scene;
-import soot.SootMethod;
-import soot.jimple.toolkits.callgraph.ReachableMethods;
-import soot.util.queue.QueueReader;
-import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
 
 import java.util.ArrayList;
@@ -47,11 +38,11 @@ public abstract class CryptoScanner {
 	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
 	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
 
-	private DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<Node<ControlFlowGraph.Edge, Val>, AnalysisSeedWithEnsuredPredicate>() {
+	private DefaultValueMap<AnalysisSeedWithEnsuredPredicate, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<AnalysisSeedWithEnsuredPredicate, AnalysisSeedWithEnsuredPredicate>() {
 
 		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(Node<ControlFlowGraph.Edge, Val> key) {
-			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key);
+		protected AnalysisSeedWithEnsuredPredicate createItem(AnalysisSeedWithEnsuredPredicate key) {
+			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key.cfgEdge(), key.getFact());
 		}
 	};
 	private DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification> seedsWithSpec = new DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification>() {
@@ -146,7 +137,6 @@ public abstract class CryptoScanner {
 		Set<Method> methods = callGraph().getReachableMethods();
 
 		for (Method method : methods) {
-
 			for (ClassSpecification spec : getClassSpecifications()) {
 				if (!((JimpleMethod) method).getDelegate().hasActiveBody()) {
 					continue;
@@ -227,7 +217,7 @@ public abstract class CryptoScanner {
 		return false;
 	}
 
-	public AnalysisSeedWithEnsuredPredicate getOrCreateSeed(Node<ControlFlowGraph.Edge, Val> factAtStatement) {
+	public AnalysisSeedWithEnsuredPredicate getOrCreateSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate factAtStatement) {
 		boolean addToWorklist = false;
 		if (!seedsWithoutSpec.containsKey(factAtStatement))
 			addToWorklist = true;

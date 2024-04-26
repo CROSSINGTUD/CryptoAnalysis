@@ -1,21 +1,23 @@
 package crypto.preanalysis;
 
 import soot.Body;
+import soot.Unit;
 import soot.UnitPatchingChain;
 import soot.UnitPrinter;
 import soot.Value;
 import soot.jimple.AssignStmt;
+import soot.jimple.InvokeStmt;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.internal.AbstractStmt;
 
 import java.util.Map;
 
-public class StaticCallTransformer extends PreTransformer {
+public class EmptyStatementTransformer extends PreTransformer {
 
-    private static StaticCallTransformer instance;
+    private static EmptyStatementTransformer instance;
     private static final String EMPTY_STATEMENT = "empty";
 
-    public StaticCallTransformer() {
+    public EmptyStatementTransformer() {
         super();
     }
 
@@ -27,23 +29,34 @@ public class StaticCallTransformer extends PreTransformer {
 
         final UnitPatchingChain units = body.getUnits();
         units.snapshotIterator().forEachRemaining(unit -> {
-            if (!(unit instanceof AssignStmt)) {
-                return;
+            if (isStaticAssignStatement(unit) || isConstructorCall(unit)) {
+                units.insertAfter(new EmptyStatement(), unit);
             }
-            AssignStmt assignStmt = (AssignStmt) unit;
-
-            Value rightSide = assignStmt.getRightOp();
-            if (!(rightSide instanceof StaticInvokeExpr)) {
-                return;
-            }
-
-            units.insertAfter(new EmptyStatement(), unit);
         });
     }
 
-    public static StaticCallTransformer v() {
+    private boolean isStaticAssignStatement(Unit unit) {
+        if (!(unit instanceof AssignStmt)) {
+            return false;
+        }
+        AssignStmt assignStmt = (AssignStmt) unit;
+
+        Value rightSide = assignStmt.getRightOp();
+        return rightSide instanceof StaticInvokeExpr;
+    }
+
+    private boolean isConstructorCall(Unit unit) {
+        if (!(unit instanceof InvokeStmt)) {
+            return false;
+        }
+
+        InvokeStmt invokeStmt = (InvokeStmt) unit;
+        return invokeStmt.getInvokeExpr().getMethod().isConstructor();
+    }
+
+    public static EmptyStatementTransformer v() {
         if (instance == null) {
-            instance = new StaticCallTransformer();
+            instance = new EmptyStatementTransformer();
         }
         return instance;
     }

@@ -29,8 +29,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	private ForwardBoomerangResults<TransitionFunction> analysisResults;
 	private boolean analyzed;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, Node<ControlFlowGraph.Edge, Val> delegate) {
-		super(cryptoScanner, new WeightedForwardQuery<>(delegate.stmt(), delegate.fact(), TransitionFunction.one()));
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, ControlFlowGraph.Edge stmt, Val fact) {
+		super(cryptoScanner, new WeightedForwardQuery<>(stmt, fact, TransitionFunction.one()));
 
 		solver = new ExtendedIDEALAnalysis() {
 

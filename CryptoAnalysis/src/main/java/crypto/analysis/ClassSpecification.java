@@ -14,7 +14,7 @@ import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 import crypto.typestate.ExtendedIDEALAnalysis;
 import crypto.typestate.MatcherTransitionCollection;
-import crypto.typestate.MatcherUtils;
+import crypto.utils.MatcherUtils;
 import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;
 
@@ -33,6 +33,7 @@ public class ClassSpecification {
 		this.crySLRule = rule;
 		this.cryptoScanner = cScanner;
 		this.matcherTransitions = new MatcherTransitionCollection(rule.getUsagePattern());
+
 		this.extendedIdealAnalysis = new ExtendedIDEALAnalysis() {
 
 			@Override

@@ -2,7 +2,6 @@ package crypto.constraints;
 
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -14,11 +13,9 @@ import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
-import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.MatcherUtils;
+import crypto.utils.MatcherUtils;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +72,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 							return;
 						}
 
+						// TODO Refactoring
 						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
 						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
 						if (convert.contains(methodFoundCall)) {
@@ -101,6 +99,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 							continue;
 						}
 
+						// TODO Refactoring
 						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
 						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
 						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);

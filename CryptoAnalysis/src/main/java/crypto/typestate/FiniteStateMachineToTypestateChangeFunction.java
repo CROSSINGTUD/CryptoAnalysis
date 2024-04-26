@@ -9,6 +9,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.rules.CrySLMethod;
 import crypto.rules.TransitionEdge;
+import crypto.utils.MatcherUtils;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;

@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-import crypto.typestate.MatcherUtils;
+import crypto.utils.MatcherUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,6 +28,7 @@ public class TypestateError extends ErrorWithObjectAllocation{
 		}	
 	}
 
+	// TODO Replace with callSet
 	public Collection<CrySLMethod> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}

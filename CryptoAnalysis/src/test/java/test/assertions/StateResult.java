@@ -4,9 +4,11 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import typestate.finiteautomata.State;
 
+import java.util.Collection;
+
 public interface StateResult {
 
-    Val getVal();
+    Collection<Val> getVal();
 
     Statement getStmt();
 
