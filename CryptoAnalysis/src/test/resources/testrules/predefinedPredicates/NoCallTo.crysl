@@ -1,0 +1,17 @@
+SPEC tests.custom.predefinedpredicates.nocallto.NoCallTo
+
+OBJECTS
+    boolean condition;
+
+EVENTS
+    Con1: NoCallTo();
+    Con2: NoCallTo(condition);
+    Con := Con1 | Con2;
+
+    op1: operation1();
+    op2: operation2();
+    op3: operation3();
+
+CONSTRAINTS
+    noCallTo[op2];
+    condition == true => noCallTo[op3];

@@ -2,10 +2,12 @@ package crypto.constraints;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -31,15 +33,20 @@ public class ConstraintSolver {
 			"notHardCoded", "instanceOf");
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
-	private final Collection<ControlFlowGraph.Edge> collectedCalls;
+	private final Collection<Statement> collectedCalls;
 	private final CrySLResultsReporter reporter;
 	private final AnalysisSeedWithSpecification object;
 
-	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<ControlFlowGraph.Edge> collectedCalls,
+	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<ControlFlowGraph.Edge> callsOnObject,
 			CrySLResultsReporter crySLResultsReporter) {
 		this.object = object;
-		this.collectedCalls = collectedCalls;
 		this.reporter = crySLResultsReporter;
+
+		this.collectedCalls = new HashSet<>();
+		for (ControlFlowGraph.Edge edge : callsOnObject) {
+			collectedCalls.add(edge.getStart());
+		}
+
 		partitionConstraints();
 	}
 
@@ -55,7 +62,7 @@ public class ConstraintSolver {
 		return this.object.getSpec();
 	}
 
-	public Collection<ControlFlowGraph.Edge> getCollectedCalls() {
+	public Collection<Statement> getCollectedCalls() {
 		return collectedCalls;
 	}
 
@@ -115,35 +122,43 @@ public class ConstraintSolver {
 	 */
 	private void partitionConstraints() {
 		for (ISLConstraint cons : getAllConstraints()) {
-
 			Set<String> involvedVarNames = cons.getInvolvedVarNames();
+
 			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 				involvedVarNames.remove(cwpi.getVarName());
 			}
 
-			if (involvedVarNames.isEmpty() || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
-				if (cons instanceof CrySLPredicate) {
-					List<RequiredCrySLPredicate> preds = retrieveValuesForPred(cons);
-					
-					for (RequiredCrySLPredicate pred : preds) {
-						CrySLPredicate innerPred = pred.getPred();
-						
-						if (innerPred != null) {
-							relConstraints.add(innerPred);
-							requiredPredicates.add(pred);
-						}
+			if (!involvedVarNames.isEmpty()) {
+				continue;
+			}// || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
+
+			if (cons instanceof CrySLPredicate) {
+				CrySLPredicate predicate = (CrySLPredicate) cons;
+				if (predefinedPreds.contains(predicate.getPredName())) {
+					relConstraints.add(predicate);
+					continue;
+				}
+
+				List<RequiredCrySLPredicate> preds = retrieveValuesForPred(predicate);
+
+				for (RequiredCrySLPredicate pred : preds) {
+					CrySLPredicate innerPred = pred.getPred();
+
+					if (innerPred != null) {
+						relConstraints.add(innerPred);
+						requiredPredicates.add(pred);
 					}
-				} else if (cons instanceof CrySLConstraint) {
-					ISLConstraint left = ((CrySLConstraint) cons).getLeft();
-					
-					if (left instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
-						requiredPredicates.addAll(collectAlternativePredicates((CrySLConstraint) cons, Lists.newArrayList()));
-					} else {
-						relConstraints.add(cons);
-					}
+				}
+			} else if (cons instanceof CrySLConstraint) {
+				ISLConstraint left = ((CrySLConstraint) cons).getLeft();
+
+				if (left instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
+					requiredPredicates.addAll(collectAlternativePredicates((CrySLConstraint) cons, Lists.newArrayList()));
 				} else {
 					relConstraints.add(cons);
 				}
+			} else {
+				relConstraints.add(cons);
 			}
 		}
 	}
@@ -178,8 +193,7 @@ public class ConstraintSolver {
 		return alts;
 	}
 
-	private List<RequiredCrySLPredicate> retrieveValuesForPred(ISLConstraint cons) {
-		CrySLPredicate pred = (CrySLPredicate) cons;
+	private List<RequiredCrySLPredicate> retrieveValuesForPred(CrySLPredicate pred) {
 		List<RequiredCrySLPredicate> result = Lists.newArrayList();
 		
 		for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {

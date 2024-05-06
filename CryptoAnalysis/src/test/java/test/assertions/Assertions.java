@@ -38,6 +38,8 @@ public class Assertions {
 
 	public static void incompleteOperationErrors(int i) {}
 
+	public static void forbiddenMethodErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}

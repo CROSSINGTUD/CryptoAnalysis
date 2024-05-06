@@ -61,9 +61,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 					// check whether predMethod is in foundMethods, which type-state analysis has to
 					// figure out
 					CrySLMethod reqMethod = (CrySLMethod) predMethod;
-					for (ControlFlowGraph.Edge edge : context.getCollectedCalls()) {
-						Statement statement = edge.getTarget();
-						if (!(statement.containsInvokeExpr())) {
+					for (Statement statement : context.getCollectedCalls()) {
+						if (!statement.containsInvokeExpr()) {
 							continue;
 						}
 
@@ -83,39 +82,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 				// TODO: Need seed here.
 				return;
 			case "noCallTo":
-				if (context.getCollectedCalls().isEmpty()) {
-					return;
-				}
-				List<ICrySLPredicateParameter> predForbiddenMethods = parameters;
-				for (ICrySLPredicateParameter predForbMethod : predForbiddenMethods) {
-					// check whether predForbMethod is in foundForbMethods, which forbidden-methods
-					// analysis has to figure out
-					CrySLMethod reqMethod = ((CrySLMethod) predForbMethod);
-
-					for (ControlFlowGraph.Edge call : context.getCollectedCalls()) {
-						Statement statement = call.getTarget();
-
-						if (!statement.containsInvokeExpr()) {
-							continue;
-						}
-
-						// TODO Refactoring
-						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
-						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(methodFoundCall)) {
-							errors.add(new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall, convert));
-							return;
-						}*/
-						//Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
-							ForbiddenMethodError forbiddenMethodError = new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall);
-							errors.add(forbiddenMethodError);
-							return;
-						}
-					}
-				}
-				return;
+                evaluateNoCallToPredicate(pred.getParameters());
+				break;
 			case "neverTypeOf":
 				// pred looks as follows: neverTypeOf($varName, $type)
 				// -> first parameter is always the variable
@@ -184,6 +152,28 @@ public class PredicateConstraint extends EvaluableConstraint {
 				return;
 			default:
 				return;
+		}
+	}
+
+	private void evaluateCallToPredicate(List<ICrySLPredicateParameter> callToMethods) {
+
+	}
+
+	private void evaluateNoCallToPredicate(List<ICrySLPredicateParameter> noCallToMethods) {
+		for (ICrySLPredicateParameter predMethod : noCallToMethods) {
+			CrySLMethod reqMethod = ((CrySLMethod) predMethod);
+
+			for (Statement statement : context.getCollectedCalls()) {
+				if (!statement.containsInvokeExpr()) {
+					continue;
+				}
+
+				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
+					ForbiddenMethodError forbiddenMethodError = new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall);
+					errors.add(forbiddenMethodError);
+				}
+			}
 		}
 	}
 

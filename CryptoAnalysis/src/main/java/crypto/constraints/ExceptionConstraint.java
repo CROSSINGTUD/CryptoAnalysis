@@ -46,8 +46,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 */
 	@Override
 	public void evaluate() {
-		for (ControlFlowGraph.Edge call : context.getCollectedCalls()) {
-			evaluate(call);
+		for (Statement statement : context.getCollectedCalls()) {
+			evaluate(statement);
 		}
 	}
 
@@ -55,11 +55,10 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * Checks if a) the method that is called is the same as the method of
 	 * this constraint and b) if the specified exception is caught.
 	 * 
-	 * @param call	the called statement
+	 * @param stmt	the called statement
 	 */
-	public void evaluate(ControlFlowGraph.Edge call) {
+	public void evaluate(Statement stmt) {
 		try {
-			Statement stmt = call.getTarget();
 			DeclaredMethod declaredMethod = stmt.getInvokeExpr().getMethod();
 			if (!isSameMethod(declaredMethod))
 				return;

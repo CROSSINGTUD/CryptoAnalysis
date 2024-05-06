@@ -60,6 +60,7 @@ import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
+import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
@@ -223,10 +224,15 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									
 									@Override
 									public void visit(ForbiddenMethodError abstractError) {
-										for(Assertion e : expectedResults){
-											if(e instanceof CallToForbiddenMethodAssertion){
+										for (Assertion e : expectedResults) {
+											if (e instanceof CallToForbiddenMethodAssertion) {
 												CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
 												expectedResults.reported(abstractError.getErrorStatement());
+											}
+
+											if (e instanceof ForbiddenMethodErrorCountAssertion) {
+												ForbiddenMethodErrorCountAssertion assertion = (ForbiddenMethodErrorCountAssertion) e;
+												assertion.increaseCount();
 											}
 										}
 									}
@@ -490,6 +496,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					queries.add(new CallToForbiddenMethodAssertion(pred));
 				}
 			}
+
 			if (invocationName.startsWith("mustBeInAcceptingState")) {
 				Val param = invokeExpr.getArg(0);
 				if (!param.isLocal()) {
@@ -615,6 +622,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 				queries.add(new IncompleteOperationErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("forbiddenMethodErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new ForbiddenMethodErrorCountAssertion(param.getIntValue()));
 			}
 
 			if (invocationName.startsWith("dependentError")) {
