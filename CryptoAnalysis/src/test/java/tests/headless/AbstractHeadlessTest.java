@@ -170,7 +170,7 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			public void reportError(AbstractError error) {
 				Integer currCount;
-				String methodContainingError = error.getErrorStatement().getMethod().getName();
+				String methodContainingError = error.getErrorStatement().getMethod().toString();
 				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodContainingError, error.getClass())) {
 					currCount = errorMarkerCountPerErrorTypeAndMethod.get(methodContainingError, error.getClass());
 				} else {

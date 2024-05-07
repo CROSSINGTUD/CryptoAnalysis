@@ -9,6 +9,9 @@ public interface ErrorVisitor {
 	public void visit(ImpreciseValueExtractionError predicateError);
 	public void visit(NeverTypeOfError predicateError);
 	public void visit(PredicateContradictionError predicateContradictionError);
+	public void visit(CallToError callToError);
+
+	public void visit(NoCallToError noCallToError);
 	public void visit(HardCodedError hardcodedError);
 	public void visit(ForbiddenPredicateError forbiddenPredicateError);
 	public void visit(UncaughtExceptionError uncaughtExceptionError);

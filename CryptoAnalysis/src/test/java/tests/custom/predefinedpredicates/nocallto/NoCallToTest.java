@@ -25,7 +25,7 @@ public class NoCallToTest extends UsagePatternTestingFramework {
         noCallTo.operation2();
         Assertions.callToForbiddenMethod();
 
-        Assertions.forbiddenMethodErrors(1);
+        Assertions.noCallToErrors(1);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class NoCallToTest extends UsagePatternTestingFramework {
         // operation2 is never called
         noCallTo.operation1();
 
-        Assertions.forbiddenMethodErrors(0);
+        Assertions.noCallToErrors(0);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class NoCallToTest extends UsagePatternTestingFramework {
         noCallTo.operation3();
         Assertions.callToForbiddenMethod();
 
-        Assertions.forbiddenMethodErrors(1);
+        Assertions.noCallToErrors(1);
     }
 
     @Test
@@ -56,6 +56,6 @@ public class NoCallToTest extends UsagePatternTestingFramework {
         // Condition is not satisfied => Call to operation3 is allowed
         noCallTo.operation3();
 
-        Assertions.forbiddenMethodErrors(0);
+        Assertions.noCallToErrors(0);
     }
 }

@@ -1,12 +1,8 @@
 package crypto.utils;
 
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
 import boomerang.scene.WrappedClass;
-import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleType;
-import boomerang.scene.jimple.JimpleVal;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 import crypto.rules.TransitionEdge;

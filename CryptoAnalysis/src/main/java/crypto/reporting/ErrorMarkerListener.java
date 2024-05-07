@@ -26,6 +26,7 @@ import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -34,6 +35,7 @@ import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -132,7 +134,16 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(ForbiddenPredicateError forbiddenPredicateError) {
 				addMarker(forbiddenPredicateError);
-				
+			}
+
+			@Override
+			public void visit(CallToError callToError) {
+				addMarker(callToError);
+			}
+
+			@Override
+			public void visit(NoCallToError noCallToError) {
+				addMarker(noCallToError);
 			}
 		});
 	}

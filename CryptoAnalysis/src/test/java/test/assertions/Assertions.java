@@ -40,6 +40,10 @@ public class Assertions {
 
 	public static void forbiddenMethodErrors(int i) {}
 
+	public static void callToErrors(int i) {}
+
+	public static void noCallToErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}

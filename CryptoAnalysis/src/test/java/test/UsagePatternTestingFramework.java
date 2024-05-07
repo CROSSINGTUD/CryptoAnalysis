@@ -32,6 +32,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ErrorVisitor;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -40,6 +41,7 @@ import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -56,6 +58,7 @@ import soot.SceneTransformer;
 import soot.options.Options;
 import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
+import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.DependentErrorAssertion;
@@ -65,6 +68,7 @@ import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
+import test.assertions.NoCallToErrorCountAssertion;
 import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
@@ -279,6 +283,31 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									@Override
 									public void visit(ForbiddenPredicateError forbiddenPredicateError) {
 										
+									}
+
+									@Override
+									public void visit(CallToError callToError) {
+										for (Assertion a : expectedResults) {
+											if (a instanceof CallToErrorCountAssertion) {
+												CallToErrorCountAssertion errorCountAssertion = (CallToErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
+											}
+										}
+									}
+
+									@Override
+									public void visit(NoCallToError noCallToError) {
+										for (Assertion a : expectedResults) {
+											if (a instanceof CallToForbiddenMethodAssertion) {
+												CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) a;
+												expectedResults.reported(noCallToError.getErrorStatement());
+											}
+
+											if (a instanceof NoCallToErrorCountAssertion) {
+												NoCallToErrorCountAssertion errorCountAssertion = (NoCallToErrorCountAssertion) a;
+												errorCountAssertion.increaseCount();
+											}
+										}
 									}
 								});
 							}
@@ -630,6 +659,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 				queries.add(new ForbiddenMethodErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("callToErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new CallToErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("noCallToErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new NoCallToErrorCountAssertion(param.getIntValue()));
 			}
 
 			if (invocationName.startsWith("dependentError")) {

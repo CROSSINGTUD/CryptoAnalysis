@@ -1,10 +1,12 @@
 package crypto.constraints;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
+import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.NoCallToError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -15,6 +17,7 @@ import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.utils.MatcherUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -57,30 +60,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 		List<ICrySLPredicateParameter> parameters = pred.getParameters();
 		switch (pred.getPredName()) {
 			case "callTo":
-                for (ICrySLPredicateParameter predMethod : parameters) {
-					// check whether predMethod is in foundMethods, which type-state analysis has to
-					// figure out
-					CrySLMethod reqMethod = (CrySLMethod) predMethod;
-					for (Statement statement : context.getCollectedCalls()) {
-						if (!statement.containsInvokeExpr()) {
-							continue;
-						}
-
-						DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-						if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
-							return;
-						}
-
-						// TODO Refactoring
-						/*Method methodFoundCall = CrySLMethodToSootMethod.declaredMethodToJimpleMethod(foundCall);
-						Collection<Method> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(methodFoundCall)) {
-							return;
-						}*/
-					}
-				}
-				// TODO: Need seed here.
-				return;
+                evaluateCallToPredicate(pred.getParameters());
+				break;
 			case "noCallTo":
                 evaluateNoCallToPredicate(pred.getParameters());
 				break;
@@ -156,25 +137,60 @@ public class PredicateConstraint extends EvaluableConstraint {
 	}
 
 	private void evaluateCallToPredicate(List<ICrySLPredicateParameter> callToMethods) {
+		boolean isCalled = false;
+		Collection<CrySLMethod> methods = parametersToCryslMethods(callToMethods);
 
-	}
-
-	private void evaluateNoCallToPredicate(List<ICrySLPredicateParameter> noCallToMethods) {
-		for (ICrySLPredicateParameter predMethod : noCallToMethods) {
-			CrySLMethod reqMethod = ((CrySLMethod) predMethod);
-
+		for (CrySLMethod predMethod : methods) {
 			for (Statement statement : context.getCollectedCalls()) {
 				if (!statement.containsInvokeExpr()) {
 					continue;
 				}
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(reqMethod, foundCall)) {
-					ForbiddenMethodError forbiddenMethodError = new ForbiddenMethodError(statement, context.getClassSpec().getRule(), foundCall);
-					errors.add(forbiddenMethodError);
+				Collection<CrySLMethod> matchingCryslMethods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(context.getClassSpec().getRule(), foundCall);
+				if (matchingCryslMethods.contains(predMethod)) {
+					isCalled = true;
 				}
 			}
 		}
+
+		if (!isCalled) {
+			IAnalysisSeed seed = context.getObject();
+			CallToError typestateError = new CallToError(seed.cfgEdge().getStart(), seed, context.getClassSpec().getRule(), methods);
+			errors.add(typestateError);
+		}
+	}
+
+	private void evaluateNoCallToPredicate(List<ICrySLPredicateParameter> noCallToMethods) {
+		Collection<CrySLMethod> methods = parametersToCryslMethods(noCallToMethods);
+
+		for (CrySLMethod predMethod : methods) {
+			for (Statement statement : context.getCollectedCalls()) {
+				if (!statement.containsInvokeExpr()) {
+					continue;
+				}
+
+				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
+					NoCallToError noCallToError = new NoCallToError(statement, context.getObject(), context.getClassSpec().getRule());
+					errors.add(noCallToError);
+				}
+			}
+		}
+	}
+
+	private Collection<CrySLMethod> parametersToCryslMethods(Collection<ICrySLPredicateParameter> parameters) {
+		List<CrySLMethod> methods = new ArrayList<>();
+
+		for (ICrySLPredicateParameter parameter : parameters) {
+			if (!(parameter instanceof CrySLMethod)) {
+				continue;
+			}
+
+			CrySLMethod crySLMethod = (CrySLMethod) parameter;
+			methods.add(crySLMethod);
+		}
+		return methods;
 	}
 
 	private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {
