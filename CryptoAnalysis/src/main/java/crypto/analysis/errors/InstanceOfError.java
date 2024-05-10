@@ -12,6 +12,11 @@ public class InstanceOfError extends ConstraintError {
 	}
 
 	@Override
+	public void accept(ErrorVisitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
 	public int hashCode() {
 		int result = super.hashCode();
 		return result;

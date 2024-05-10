@@ -40,6 +40,7 @@ import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
@@ -67,6 +68,7 @@ import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
+import test.assertions.InstanceOfErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
 import test.assertions.NeverTypeOfErrorCountAssertion;
 import test.assertions.NoCallToErrorCountAssertion;
@@ -262,6 +264,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 										for (Assertion a : expectedResults) {
 											if (a instanceof NeverTypeOfErrorCountAssertion) {
 												NeverTypeOfErrorCountAssertion assertion = (NeverTypeOfErrorCountAssertion) a;
+												assertion.increaseCount();
+											}
+										}
+									}
+
+									@Override
+									public void visit(InstanceOfError predicateError) {
+										for (Assertion a : expectedResults) {
+											if (a instanceof InstanceOfErrorCountAssertion) {
+												InstanceOfErrorCountAssertion assertion = (InstanceOfErrorCountAssertion) a;
 												assertion.increaseCount();
 											}
 										}
@@ -690,6 +702,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 				queries.add(new NeverTypeOfErrorCountAssertion(param.getIntValue()));
  			}
+
+			if (invocationName.startsWith("instanceOfErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new InstanceOfErrorCountAssertion(param.getIntValue()));
+			}
 
 			if (invocationName.startsWith("dependentError")) {
 				// extract parameters

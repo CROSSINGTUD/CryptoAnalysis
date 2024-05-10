@@ -5,6 +5,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.CallToError;
+import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -43,21 +44,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 						&& val.getValue().getType().toString().equals("java.math.BigInteger"));
 	}
 
-	protected boolean isSubType(String typeOne, String typeTwo) {
-		boolean subTypes = typeOne.equals(typeTwo);
-		subTypes |= (typeOne + "[]").equals(typeTwo);
-		if (!subTypes) {
-			try {
-				subTypes = Class.forName(typeOne).isAssignableFrom(Class.forName(typeTwo));
-			} catch (ClassNotFoundException e) {
-			}
-		}
-		return subTypes;
-	}
-
 	private void handlePredefinedNames(CrySLPredicate pred) {
-
-		List<ICrySLPredicateParameter> parameters = pred.getParameters();
 		switch (pred.getPredName()) {
 			case "callTo":
                 evaluateCallToPredicate(pred.getParameters());
@@ -92,24 +79,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 				}
 				return;
 			case "instanceOf":
-				varName = ((CrySLObject) parameters.get(0)).getVarName();
-				for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
-					if (cs.getVarName().equals(varName)) {
-						Collection<Type> vals = context.getPropagatedTypes().get(cs);
-						String javaType = ((CrySLObject) parameters.get(1)).getJavaType();
-
-						// TODO refactor
-						/*if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), javaType) || isSubType(javaType, e.toQuotedString()))) {
-							for (ExtractedValue v : context.getParsAndVals().get(cs)) {
-								errors.add(
-										new InstanceOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-												context.getObject(),
-												pred));
-							}
-						}*/
-					}
-				}
-				return;
+				evaluateInstanceOfPredicate(pred);
+				break;
 			default:
 				return;
 		}
@@ -176,14 +147,47 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 			Collection<Type> types = context.getPropagatedTypes().get(cs);
 			for (Type type : types) {
-				if (!type.isSubtypeOf(parameterType.getJavaType())) {
+				if (!parameterType.getJavaType().equals(type.toString())) {
 					continue;
 				}
 
-				for (ExtractedValue extractedValue : context.getParsAndVals().get(cs)) {
-					NeverTypeOfError neverTypeOfError = new NeverTypeOfError(new CallSiteWithExtractedValue(cs, extractedValue), context.getClassSpec().getRule(), context.getObject(), neverTypeOfPredicate);
-					errors.add(neverTypeOfError);
+				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
+				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(callSite, context.getClassSpec().getRule(), context.getObject(), neverTypeOfPredicate);
+				errors.add(neverTypeOfError);
+			}
+		}
+	}
+
+	private void evaluateInstanceOfPredicate(CrySLPredicate instanceOfPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(instanceOfPredicate.getParameters());
+
+		if (objects.size() != 2) {
+			return;
+		}
+
+		// instanceOf[$variable, $type]
+		CrySLObject variable = objects.get(0);
+		CrySLObject parameterType = objects.get(1);
+
+		for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
+			if (!variable.getName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			boolean isSubType = false;
+			Collection<Type> types = context.getPropagatedTypes().get(cs);
+			for (Type type : types) {
+				if (type.isSubtypeOf(parameterType.getJavaType())) {
+					isSubType = true;
 				}
+			}
+
+			if (!isSubType) {
+				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
+				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
+				InstanceOfError instanceOfError = new InstanceOfError(callSite, context.getClassSpec().getRule(), context.getObject(), instanceOfPredicate);
+				errors.add(instanceOfError);
 			}
 		}
 	}
@@ -214,6 +218,21 @@ public class PredicateConstraint extends EvaluableConstraint {
 			objects.add(crySLObject);
 		}
 		return objects;
+	}
+
+	private boolean isSubType(String subType, String superType) {
+		boolean subTypes = subType.equals(superType);
+		subTypes |= (subType + "[]").equals(superType);
+
+		if (subTypes) {
+			return true;
+		}
+
+        try {
+            return Class.forName(superType).isAssignableFrom(Class.forName(subType));
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
 	}
 
 	private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {

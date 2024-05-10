@@ -34,6 +34,7 @@ import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
@@ -114,6 +115,11 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 			@Override
 			public void visit(NeverTypeOfError neverTypeOfError) {
 				addMarker(neverTypeOfError);
+			}
+
+			@Override
+			public void visit(InstanceOfError instanceOfError) {
+				addMarker(instanceOfError);
 			}
 
 			@Override

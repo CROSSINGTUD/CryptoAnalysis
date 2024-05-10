@@ -46,6 +46,8 @@ public class Assertions {
 
 	public static void neverTypeOfErrors(int i) {}
 
+	public static void instanceOfErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}
