@@ -44,6 +44,8 @@ public class Assertions {
 
 	public static void noCallToErrors(int i) {}
 
+	public static void neverTypeOfErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}

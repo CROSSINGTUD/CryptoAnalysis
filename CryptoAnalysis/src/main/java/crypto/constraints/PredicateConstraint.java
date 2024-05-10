@@ -5,7 +5,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.CallToError;
-import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -66,29 +66,8 @@ public class PredicateConstraint extends EvaluableConstraint {
                 evaluateNoCallToPredicate(pred.getParameters());
 				break;
 			case "neverTypeOf":
-				// pred looks as follows: neverTypeOf($varName, $type)
-				// -> first parameter is always the variable
-				// -> second parameter is always the type
-				String varName = ((CrySLObject) parameters.get(0)).getVarName();
-				for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
-					if (cs.getVarName().equals(varName)) {
-						Collection<Type> vals = context.getPropagatedTypes().get(cs);
-						for (Type t : vals) {
-							// TODO Refactor
-							/*if (t.toQuotedString().equals(((CrySLObject) parameters.get(1)).getJavaType())) {
-								for (ExtractedValue v : context.getParsAndVals().get(cs)) {
-									errors.add(
-											new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-													context.getObject(),
-													pred));
-								}
-								return;
-							}*/
-						}
-					}
-				}
-
-				return;
+				evaluateNeverTypeOfPredicate(pred);
+				break;
 			case "length":
 				// TODO Not implemented!
 				return;
@@ -179,6 +158,36 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 	}
 
+	private void evaluateNeverTypeOfPredicate(CrySLPredicate neverTypeOfPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(neverTypeOfPredicate.getParameters());
+
+		if (objects.size() != 2) {
+			return;
+		}
+
+		// neverTypeOf[$variable, $type]
+		CrySLObject variable = objects.get(0);
+		CrySLObject parameterType = objects.get(1);
+
+		for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
+			if (!variable.getName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			Collection<Type> types = context.getPropagatedTypes().get(cs);
+			for (Type type : types) {
+				if (!type.isSubtypeOf(parameterType.getJavaType())) {
+					continue;
+				}
+
+				for (ExtractedValue extractedValue : context.getParsAndVals().get(cs)) {
+					NeverTypeOfError neverTypeOfError = new NeverTypeOfError(new CallSiteWithExtractedValue(cs, extractedValue), context.getClassSpec().getRule(), context.getObject(), neverTypeOfPredicate);
+					errors.add(neverTypeOfError);
+				}
+			}
+		}
+	}
+
 	private Collection<CrySLMethod> parametersToCryslMethods(Collection<ICrySLPredicateParameter> parameters) {
 		List<CrySLMethod> methods = new ArrayList<>();
 
@@ -191,6 +200,20 @@ public class PredicateConstraint extends EvaluableConstraint {
 			methods.add(crySLMethod);
 		}
 		return methods;
+	}
+
+	private List<CrySLObject> parametersToCryslObjects(Collection<ICrySLPredicateParameter> parameters) {
+		List<CrySLObject> objects = new ArrayList<>();
+
+		for (ICrySLPredicateParameter parameter : parameters) {
+			if (!(parameter instanceof CrySLObject)) {
+				continue;
+			}
+
+			CrySLObject crySLObject = (CrySLObject) parameter;
+			objects.add(crySLObject);
+		}
+		return objects;
 	}
 
 	private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {

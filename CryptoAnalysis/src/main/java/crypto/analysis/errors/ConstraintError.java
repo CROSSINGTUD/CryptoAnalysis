@@ -55,7 +55,7 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 			switch (brokenPred.getPredName()) {
 				case "neverTypeOf":
 					msg.append(" should never be of type ");
-					msg.append(brokenPred.getParameters().get(1).getName());
+					msg.append(brokenPred.getParameters().get(0).getName());
 					msg.append(".");
 					break;
 				case "notHardCoded":

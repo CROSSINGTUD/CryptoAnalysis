@@ -1,0 +1,15 @@
+SPEC tests.custom.predefinedpredicates.nevertypeof.NeverTypeOf
+
+OBJECTS
+    boolean condition;
+    java.lang.String param;
+
+EVENTS
+    Con1: NeverTypeOf();
+    Con2: NeverTypeOf(condition);
+    Con := Con1 | Con2;
+
+    op: operation(param);
+
+CONSTRAINTS
+    neverTypeOf[param, java.lang.String];
