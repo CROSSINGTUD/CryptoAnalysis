@@ -793,7 +793,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pdf.sideChannelAttacks.MacVerificationVariableTime: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: boolean oracle(byte[],byte[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: boolean oracle(byte[],byte[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: byte[] encripta()>", RequiredPredicateError.class, 3);
+		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: byte[] encripta()>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: byte[] encripta()>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.sideChannelAttacks.PaddingOracle: void <clinit>()>", RequiredPredicateError.class, 1);
 
