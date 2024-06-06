@@ -58,7 +58,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processingCorrect(byte[],boolean)>", RequiredPredicateError.class, 0);
 		
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
-		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
+		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
 	  	assertErrors();
