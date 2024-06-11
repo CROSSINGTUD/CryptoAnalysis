@@ -22,7 +22,7 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void positiveRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+	public void positiveRsaParameterSpecTest() throws GeneralSecurityException {
 		int keySize = 4096;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
@@ -35,7 +35,7 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void negativeRsaParameterSpecTest() throws GeneralSecurityException, IOException {
+	public void negativeRsaParameterSpecTest() throws GeneralSecurityException {
 		// Since 3.0.0: key size of 2048 is not allowed
 		int keySize = 2048;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -49,7 +49,7 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void positiveRsaParameterSpecTestBigInteger() throws GeneralSecurityException, IOException {
+	public void positiveRsaParameterSpecTestBigInteger() throws GeneralSecurityException {
 		int keySize = 4096;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 		RSAKeyGenParameterSpec parameters = new RSAKeyGenParameterSpec(keySize, BigInteger.valueOf(65537));
@@ -62,7 +62,7 @@ public class KeyPairTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void negativeRsaParameterSpecTestBigInteger() throws GeneralSecurityException, IOException {
+	public void negativeRsaParameterSpecTestBigInteger() throws GeneralSecurityException {
 		// Since 3.0.0: key size of 2048 is not allowed
 		int keySize = 2048;
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");

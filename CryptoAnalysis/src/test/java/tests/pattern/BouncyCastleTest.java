@@ -1,11 +1,6 @@
 package tests.pattern;
 
-import java.io.File;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.util.Random;
-
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -22,12 +17,15 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
+
+import java.io.File;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 public class BouncyCastleTest extends UsagePatternTestingFramework {
 
@@ -51,28 +49,27 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         Assertions.mustNotBeInAcceptingState(eng);
         Assertions.notHasEnsuredPredicate(cipherText);
 	}
-	
-	
+
 	@Test
 	public void rsaKeyParameters() {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
 		BigInteger pub = new BigInteger("9f0783a49...da", 16);	
 		BigInteger pri = new BigInteger("21231...cda7", 16); 
 		
-		RSAKeyParameters privParameters = new RSAKeyParameters(true, mod, pri);
-		Assertions.mustBeInAcceptingState(privParameters);
-		Assertions.notHasEnsuredPredicate(privParameters);
+		RSAKeyParameters privateParameters = new RSAKeyParameters(true, mod, pri);
+		Assertions.mustBeInAcceptingState(privateParameters);
+		Assertions.notHasEnsuredPredicate(privateParameters);
 		
-		RSAKeyParameters pubParameters = new RSAKeyParameters(false, mod, pub);
-		Assertions.mustBeInAcceptingState(pubParameters);
-		Assertions.hasEnsuredPredicate(pubParameters);
+		RSAKeyParameters publicParameters = new RSAKeyParameters(false, mod, pub);
+		Assertions.mustBeInAcceptingState(publicParameters);
+		Assertions.hasEnsuredPredicate(publicParameters);
 	}
 	
 	@Test
 	public void testORingTwoPredicates1() throws GeneralSecurityException {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
 		BigInteger pub = new BigInteger("9f0783a49...da", 16);
-		BigInteger priv = new BigInteger("92e08f83...19", 16);
+		BigInteger prv = new BigInteger("92e08f83...19", 16);
 		
 		RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
 		Assertions.mustBeInAcceptingState(params);
@@ -90,28 +87,27 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		BigInteger q = new BigInteger(1024, randomGenerator);
 		BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
 		BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
-		BigInteger crtCoef = new BigInteger("dae7651ee...39", 16);
+		BigInteger crtCoefficient = new BigInteger("dae7651ee...39", 16);
 		
-		RSAPrivateCrtKeyParameters privParam = new RSAPrivateCrtKeyParameters(mod, pub, priv, p, q, pExp, qExp, crtCoef);
-		Assertions.mustBeInAcceptingState(privParam);
-		Assertions.notHasEnsuredPredicate(privParam); // because p & q are of type BigInteger which cannot ensure randomized predicate
+		RSAPrivateCrtKeyParameters privateParam = new RSAPrivateCrtKeyParameters(mod, pub, prv, p, q, pExp, qExp, crtCoefficient);
+		Assertions.mustBeInAcceptingState(privateParam);
+		Assertions.notHasEnsuredPredicate(privateParam); // because p & q are of type BigInteger which cannot ensure randomized predicate
 		
-		ParametersWithRandom randomParam2 = new ParametersWithRandom(privParam);
+		ParametersWithRandom randomParam2 = new ParametersWithRandom(privateParam);
 		Assertions.mustBeInAcceptingState(randomParam2);
 		Assertions.notHasEnsuredPredicate(randomParam2);
 	}
-	
-	@Ignore
+
 	@Test
-	public void testORingTwoPredicates2() throws GeneralSecurityException, IllegalStateException, InvalidCipherTextException {
+	public void testORingTwoPredicates2() throws IllegalStateException, InvalidCipherTextException {
 		SecureRandom random = new SecureRandom();
 		byte[] genSeed = random.generateSeed(128);
 		KeyParameter keyParam = new KeyParameter(genSeed);
 		byte[] nonce = random.generateSeed(128);
 		
-		AEADParameters aeadParam = new AEADParameters(keyParam, 128, nonce);
-		Assertions.hasEnsuredPredicate(aeadParam);
-		Assertions.mustBeInAcceptingState(aeadParam);
+		AEADParameters params = new AEADParameters(keyParam, 128, nonce);
+		Assertions.hasEnsuredPredicate(params);
+		Assertions.mustBeInAcceptingState(params);
 		AESEngine engine = (AESEngine) AESEngine.newInstance();
 		Assertions.notHasEnsuredPredicate(engine);
 		
@@ -119,7 +115,7 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		byte[] output = new byte[100];
 		
 		GCMBlockCipher cipher1 = (GCMBlockCipher) GCMBlockCipher.newInstance(engine);
-		cipher1.init(false, aeadParam);
+		cipher1.init(false, params);
 		cipher1.processAADBytes(input, 0, input.length);
 		cipher1.doFinal(output, 0);
 		Assertions.notHasEnsuredPredicate(cipher1);
@@ -131,9 +127,11 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		
 		GCMBlockCipher cipher2 = (GCMBlockCipher) GCMBlockCipher.newInstance(engine);
 		cipher2.init(false, ivParam);
-		// cipher2.processAADBytes(input, 0, input.length);
-		// cipher2.doFinal(output, 0);
-		Assertions.notHasEnsuredPredicate(cipher2);
+		/* Missing:
+		 * cipher2.processAADBytes(input, 0, input.length);
+		 * cipher2.doFinal(output, 0);
+		 */
+		Assertions.hasEnsuredPredicate(cipher2);
 		Assertions.mustNotBeInAcceptingState(cipher2);
 	}
 	
@@ -147,7 +145,7 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(randomParam1);
 		Assertions.hasEnsuredPredicate(randomParam1);
 		
-		BigInteger priv = new BigInteger("92e08f83...19", 16);
+		BigInteger prv = new BigInteger("92e08f83...19", 16);
 		Random randomGenerator = SecureRandom.getInstance("SHA1PRNG");
 		Assertions.mustBeInAcceptingState(randomGenerator);
 		Assertions.hasEnsuredPredicate(randomGenerator);
@@ -155,12 +153,12 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		BigInteger q = new BigInteger(1024, randomGenerator);
 		BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
 		BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
-		BigInteger crtCoef = new BigInteger("dae7651ee...39", 16);
-		RSAPrivateCrtKeyParameters privParam = new RSAPrivateCrtKeyParameters(mod, pub, priv, p, q, pExp, qExp, crtCoef);
-		Assertions.mustBeInAcceptingState(privParam);
-		Assertions.notHasEnsuredPredicate(privParam); // because p & q are of type BigInteger which cannot ensure randomized predicate
+		BigInteger crtCoefficient = new BigInteger("dae7651ee...39", 16);
+		RSAPrivateCrtKeyParameters privateParam = new RSAPrivateCrtKeyParameters(mod, pub, prv, p, q, pExp, qExp, crtCoefficient);
+		Assertions.mustBeInAcceptingState(privateParam);
+		Assertions.notHasEnsuredPredicate(privateParam); // because p & q are of type BigInteger which cannot ensure randomized predicate
 		
-		ParametersWithRandom randomParam2 = new ParametersWithRandom(privParam);
+		ParametersWithRandom randomParam2 = new ParametersWithRandom(privateParam);
 		Assertions.mustBeInAcceptingState(randomParam2);
 		Assertions.notHasEnsuredPredicate(randomParam2);
 		
@@ -179,7 +177,7 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void testORingThreePredicates2() throws GeneralSecurityException {
+	public void testORingThreePredicates2() {
 		BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
 		BigInteger pub = new BigInteger("9f0783a49...da", 16);	
 		RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
@@ -215,6 +213,6 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 	@Override
 	protected String getSootClassPath() {
 		String bouncyCastleJarPath = new File("src/test/resources/bcprov-jdk18on-1.76.jar").getAbsolutePath();
-		return super.getSootClassPath() +File.pathSeparator +bouncyCastleJarPath;
+		return super.getSootClassPath() + File.pathSeparator + bouncyCastleJarPath;
 	}
 }

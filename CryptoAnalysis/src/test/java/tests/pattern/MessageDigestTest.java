@@ -1,17 +1,14 @@
 package tests.pattern;
 
-import java.io.UnsupportedEncodingException;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Test;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
+
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import javax.security.auth.DestroyFailedException;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
 
 public class MessageDigestTest extends UsagePatternTestingFramework {
 
@@ -21,10 +18,10 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void mdUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest1() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.hasEnsuredPredicate(input);
@@ -32,10 +29,10 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest2() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input);
@@ -44,10 +41,10 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest3() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		md.update(input);
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input);
@@ -55,10 +52,10 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest4() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest4() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		md.update(input);
 		byte[] digest = md.digest();
 		Assertions.mustBeInAcceptingState(md);
@@ -66,13 +63,14 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest5() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest5() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		final String[] input = {"input1", "input2", "input3", "input4"};
 		int i = 0;
 		while (i < input.length) {
-			md.update(input[i].getBytes("UTF-8"));
+			md.update(input[i].getBytes(StandardCharsets.UTF_8));
+			i++;
 		}
 		byte[] digest = md.digest();
 		Assertions.mustBeInAcceptingState(md);
@@ -80,10 +78,10 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest6() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest6() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		md.reset();
 		Assertions.mustBeInAcceptingState(md);
@@ -93,10 +91,11 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest7() throws GeneralSecurityException, UnsupportedEncodingException {
+	@SuppressWarnings("ConstantConditions")
+	public void mdUsagePatternTest7() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
@@ -110,11 +109,11 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest8() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest8() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
-		final byte[] input2 = "input2".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
+		final byte[] input2 = "input2".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
@@ -127,11 +126,11 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void mdUsagePatternTest9() throws GeneralSecurityException, UnsupportedEncodingException {
+	public void mdUsagePatternTest9() throws GeneralSecurityException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
-		final byte[] input = "input".getBytes("UTF-8");
-		final byte[] input2 = "input2".getBytes("UTF-8");
+		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
+		final byte[] input2 = "input2".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
@@ -145,8 +144,8 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void messageDigest() throws NoSuchAlgorithmException, DestroyFailedException {
-		while (true) {
+	public void messageDigest() throws NoSuchAlgorithmException {
+		while (Math.random() > 0.5) {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			md.update(new byte[] {});
 			md.update(new byte[] {});
@@ -156,7 +155,7 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void messageDigestReturned() throws NoSuchAlgorithmException, DestroyFailedException {
+	public void messageDigestReturned() throws NoSuchAlgorithmException {
 		MessageDigest d = createDigest();
 		byte[] digest = d.digest(new byte[] {});
 		Assertions.hasEnsuredPredicate(digest);

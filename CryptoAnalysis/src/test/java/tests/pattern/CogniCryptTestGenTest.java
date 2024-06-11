@@ -1,5 +1,11 @@
 package tests.pattern;
 
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Test;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
+
+import javax.net.ssl.SSLParameters;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,7 +19,6 @@ import java.security.KeyStore.ProtectionParameter;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.UnrecoverableEntryException;
 import java.security.UnrecoverableKeyException;
@@ -23,14 +28,6 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.TrustAnchor;
 import java.util.Set;
 
-import javax.net.ssl.SSLParameters;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
-
 public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 
 	@Override
@@ -39,6 +36,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void pKIXBuilderParametersValidTest2() throws InvalidAlgorithmParameterException {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		Set<TrustAnchor> trustAnchors = null;
@@ -50,6 +48,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void sSLParametersValidTest1() {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		SSLParameters sSLParameters0 = new SSLParameters(new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384" },
@@ -85,6 +84,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest10() throws NoSuchAlgorithmException, UnrecoverableKeyException, IOException,
 			KeyStoreException, CertificateException {
 
@@ -92,7 +92,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		char[] passwordKey = null;
 		String alias = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
@@ -100,7 +100,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		LoadStoreParameter paramStore = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(paramStore);
@@ -109,14 +109,15 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest11() throws NoSuchAlgorithmException, UnrecoverableKeyException, IOException,
-			KeyStoreException, CertificateException, NoSuchProviderException {
+			KeyStoreException, CertificateException {
 
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		char[] passwordKey = null;
 		String alias = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
@@ -124,7 +125,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		LoadStoreParameter paramStore = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm, (Provider) null);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(paramStore);
@@ -134,6 +135,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest12() throws NoSuchAlgorithmException, UnrecoverableKeyException, IOException,
 			KeyStoreException, CertificateException {
 
@@ -157,6 +159,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest13() throws NoSuchAlgorithmException, UnrecoverableKeyException, IOException,
 			KeyStoreException, CertificateException {
 
@@ -164,31 +167,32 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		char[] passwordKey = null;
 		String alias = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
-		OutputStream fileoutput = null;
+		OutputStream fileOutput = null;
 		char[] passwordOut = null;
 		char[] passwordIn = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
-		keyStore0.store(fileoutput, passwordOut);
+		keyStore0.store(fileOutput, passwordOut);
 		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keyStore0);
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest14() throws NoSuchAlgorithmException, IOException, KeyStoreException,
 			CertificateException, UnrecoverableEntryException {
 		
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		String aliasGet = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
@@ -197,7 +201,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		ProtectionParameter protParamGet = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		keyStore0.getEntry(aliasGet, protParamGet);
 		// missing getKey
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
@@ -207,13 +211,14 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest15() throws NoSuchAlgorithmException, IOException, KeyStoreException,
-			CertificateException, NoSuchProviderException, UnrecoverableEntryException {
+			CertificateException, UnrecoverableEntryException {
 
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		String aliasGet = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
@@ -222,7 +227,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		ProtectionParameter protParamGet = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm, (Provider) null);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		keyStore0.getEntry(aliasGet, protParamGet);
 		// missing getKey
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
@@ -232,6 +237,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest16() throws NoSuchAlgorithmException, IOException, KeyStoreException,
 			CertificateException, UnrecoverableEntryException {
 
@@ -256,38 +262,40 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void keyStoreInvalidTest17() throws NoSuchAlgorithmException, IOException, KeyStoreException,
 			CertificateException, UnrecoverableEntryException {
 
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		String aliasGet = null;
 		Entry entry = null;
-		InputStream fileinput = null;
+		InputStream fileInput = null;
 		String keyStoreAlgorithm = null;
 		String aliasSet = null;
 		ProtectionParameter protParamSet = null;
-		OutputStream fileoutput = null;
+		OutputStream fileOutput = null;
 		char[] passwordOut = null;
 		char[] passwordIn = null;
 		ProtectionParameter protParamGet = null;
 
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
-		keyStore0.load(fileinput, passwordIn);
+		keyStore0.load(fileInput, passwordIn);
 		keyStore0.getEntry(aliasGet, protParamGet);
 		// missing getKey
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
-		keyStore0.store(fileoutput, passwordOut);
+		keyStore0.store(fileOutput, passwordOut);
 		Assertions.notHasEnsuredPredicate(keyStore0);
 		Assertions.mustNotBeInAcceptingState(keyStore0);
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void messageDigestInvalidTest10() throws NoSuchAlgorithmException {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
-		byte[] inbytearr = null;
+		byte[] inByteArr = null;
 
 		MessageDigest messageDigest0 = MessageDigest.getInstance("SHA-256");
-		byte[] out = messageDigest0.digest(inbytearr);
+		byte[] out = messageDigest0.digest(inByteArr);
 		// update is skipped
 		out = messageDigest0.digest();
 		Assertions.notHasEnsuredPredicate(out);
@@ -295,12 +303,13 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void messageDigestInvalidTest11() throws NoSuchAlgorithmException, NoSuchProviderException {
+	@SuppressWarnings("ConstantConditions")
+	public void messageDigestInvalidTest11() throws NoSuchAlgorithmException {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
-		byte[] inbytearr = null;
+		byte[] inByteArr = null;
 
 		MessageDigest messageDigest0 = MessageDigest.getInstance("SHA-256", (Provider) null);
-		byte[] out = messageDigest0.digest(inbytearr);
+		byte[] out = messageDigest0.digest(inByteArr);
 		// update is skipped
 		out = messageDigest0.digest();
 		Assertions.notHasEnsuredPredicate(out);
@@ -308,15 +317,16 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void messageDigestInvalidTest12() throws NoSuchAlgorithmException, DigestException {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
 		int off = 0;
-		byte[] inbytearr = null;
+		byte[] inByteArr = null;
 		int len = 0;
 		byte[] out = null;
 
 		MessageDigest messageDigest0 = MessageDigest.getInstance("SHA-256");
-		out = messageDigest0.digest(inbytearr);
+		out = messageDigest0.digest(inByteArr);
 		// update is skipped
 		messageDigest0.digest(out, off, len);
 		Assertions.notHasEnsuredPredicate(out);
@@ -324,13 +334,14 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void messageDigestInvalidTest13() throws NoSuchAlgorithmException {
 		// Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
-		byte[] inbytearr = null;
+		byte[] inByteArr = null;
 
 		MessageDigest messageDigest0 = MessageDigest.getInstance("SHA-256");
-		byte[] out = messageDigest0.digest(inbytearr);
-		out = messageDigest0.digest(inbytearr);
+		byte[] out = messageDigest0.digest(inByteArr);
+		out = messageDigest0.digest(inByteArr);
 		Assertions.hasEnsuredPredicate(out);
 		Assertions.mustBeInAcceptingState(messageDigest0);
 	}

@@ -1,23 +1,21 @@
 package tests.pattern;
 
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.X509EncodedKeySpec;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Test;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.security.auth.DestroyFailedException;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.spec.X509EncodedKeySpec;
 
 public class IssuesTest extends UsagePatternTestingFramework {
 
@@ -45,7 +43,7 @@ public class IssuesTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void testIssue419() throws GeneralSecurityException, UnsupportedEncodingException, DestroyFailedException {
+	public void testIssue419() throws GeneralSecurityException, DestroyFailedException {
 		// Related to issue 419: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/419
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 		SecretKey secretKey = keyGenerator.generateKey();
@@ -63,7 +61,7 @@ public class IssuesTest extends UsagePatternTestingFramework {
 		cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);
 
 		// encrypt
-		byte[] plainText = "ThisIsThePlainText".getBytes("UTF-8");
+		byte[] plainText = "ThisIsThePlainText".getBytes(StandardCharsets.UTF_8);
 		byte[] cipherText = cipher.doFinal(plainText);
 		Assertions.notHasEnsuredPredicate(cipherText);
 	}
@@ -78,11 +76,11 @@ public class IssuesTest extends UsagePatternTestingFramework {
 		Assertions.notHasEnsuredPredicate(keySpec2);
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
-		PublicKey pubkey1 = kf.generatePublic(keySpec1);
-		Assertions.notHasEnsuredPredicate(pubkey1);
+		PublicKey pubKey1 = kf.generatePublic(keySpec1);
+		Assertions.notHasEnsuredPredicate(pubKey1);
 		
-		PublicKey pubkey2 = kf.generatePublic(keySpec2);
-		Assertions.notHasEnsuredPredicate(pubkey2);
+		PublicKey pubKey2 = kf.generatePublic(keySpec2);
+		Assertions.notHasEnsuredPredicate(pubKey2);
 
 		Assertions.predicateErrors(6);
 	}

@@ -1,20 +1,18 @@
 package tests.pattern;
 
-import java.io.UnsupportedEncodingException;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.bouncycastle.util.encoders.Hex;
+import org.junit.Test;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
+
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-
-import org.bouncycastle.util.encoders.Hex;
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
 
 public class SignatureTest extends UsagePatternTestingFramework {
 
@@ -26,9 +24,9 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void testSignature2() throws InvalidKeyException, GeneralSecurityException {
+	public void testSignature2() throws GeneralSecurityException {
 		Signature s = Signature.getInstance("SHA256withRSA");
-		/**
+		/*
 		 * The Signature API expects a call to update here. This call supplied the actual data to the signature instance.
 		 * A call such as s.update(data); would resolve this finding.
 		 */
@@ -40,7 +38,7 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void testSignature1() throws InvalidKeyException, GeneralSecurityException {
+	public void testSignature1() throws GeneralSecurityException {
 		Signature s = Signature.getInstance("SHA256withRSA");
 		// no initSign call
 		s.update("".getBytes());
@@ -50,15 +48,15 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	}
 	
 	private static PrivateKey getPrivateKey() throws GeneralSecurityException {
-		KeyPairGenerator kpgen = KeyPairGenerator.getInstance("RSA");
-		kpgen.initialize(4096);
-		KeyPair gp = kpgen.generateKeyPair();
+		KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA");
+		kpGen.initialize(4096);
+		KeyPair gp = kpGen.generateKeyPair();
 		return gp.getPrivate();
 	}
 	
 	@Test
-	public void positiveSignUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void positiveSignUsagePatternTest1() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -67,21 +65,21 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
-		Assertions.hasEnsuredPredicate(privKey);
+		final PrivateKey privateKey = kp.getPrivate();
+		Assertions.hasEnsuredPredicate(privateKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.hasEnsuredPredicate(signature);
 	}
 	
 	@Test
-	public void negativeSignUsagePatternTest1() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void negativeSignUsagePatternTest1() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -92,21 +90,21 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.notHasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
-		Assertions.notHasEnsuredPredicate(privKey);
+		final PrivateKey privateKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privateKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.notHasEnsuredPredicate(signature);
 	}
 	
 	@Test
-	public void positiveSignUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void positiveSignUsagePatternTest2() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -115,8 +113,8 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
-		Assertions.hasEnsuredPredicate(privKey);
+		final PrivateKey privateKey = kp.getPrivate();
+		Assertions.hasEnsuredPredicate(privateKey);
 		String algorithm = "SHA256withDSA";
 		if (Math.random() % 2 == 0) {
 			algorithm = "SHA256withECDSA";
@@ -124,16 +122,16 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Signature sign = Signature.getInstance(algorithm);
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.hasEnsuredPredicate(signature);
 	}
 	
 	@Test
-	public void negativeSignUsagePatternTest2() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void negativeSignUsagePatternTest2() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -144,8 +142,8 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.notHasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
-		Assertions.notHasEnsuredPredicate(privKey);
+		final PrivateKey privateKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privateKey);
 		String algorithm = "SHA256withDSA";
 		if (Math.random() % 2 == 0) {
 			algorithm = "SHA256withECDSA";
@@ -153,16 +151,16 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Signature sign = Signature.getInstance(algorithm);
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.notHasEnsuredPredicate(signature);
 	}
 	
 	@Test
-	public void positiveSignUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void positiveSignUsagePatternTest3() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -171,14 +169,14 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.hasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
+		final PrivateKey privateKey = kp.getPrivate();
 		Assertions.mustBeInAcceptingState(kp);
-		Assertions.hasEnsuredPredicate(privKey);
+		Assertions.hasEnsuredPredicate(privateKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.hasEnsuredPredicate(signature);
@@ -191,14 +189,14 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 
 		ver.initVerify(pubKey);
-		ver.update(input.getBytes("UTF-8"));
+		ver.update(input.getBytes(StandardCharsets.UTF_8));
 		ver.verify(signature);
 		Assertions.mustBeInAcceptingState(ver);
 	}
 	
 	@Test
-	public void negativeSignUsagePatternTest3() throws GeneralSecurityException, UnsupportedEncodingException {
-		String input = "TESTITESTiTEsTI";
+	public void negativeSignUsagePatternTest3() throws GeneralSecurityException {
+		String input = "TestTestTest";
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 		Assertions.extValue(0);
@@ -209,13 +207,13 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(keyGen);
 		Assertions.notHasEnsuredPredicate(kp);
 
-		final PrivateKey privKey = kp.getPrivate();
-		Assertions.notHasEnsuredPredicate(privKey);
+		final PrivateKey privateKey = kp.getPrivate();
+		Assertions.notHasEnsuredPredicate(privateKey);
 		Signature sign = Signature.getInstance("SHA256withDSA");
 		Assertions.extValue(0);
 
-		sign.initSign(privKey);
-		sign.update(input.getBytes("UTF-8"));
+		sign.initSign(privateKey);
+		sign.update(input.getBytes(StandardCharsets.UTF_8));
 		byte[] signature = sign.sign();
 		Assertions.mustBeInAcceptingState(sign);
 		Assertions.notHasEnsuredPredicate(signature);
@@ -227,7 +225,7 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 
 		ver.initVerify(pubKey);
-		ver.update(input.getBytes("UTF-8"));
+		ver.update(input.getBytes(StandardCharsets.UTF_8));
 		ver.verify(signature);
 		Assertions.mustBeInAcceptingState(ver);
 	}

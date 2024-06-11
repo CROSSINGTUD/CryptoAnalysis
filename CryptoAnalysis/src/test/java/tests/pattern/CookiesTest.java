@@ -15,7 +15,7 @@ public class CookiesTest extends UsagePatternTestingFramework{
 
 	@Test
 	public void testOne() {
-		Cookie ck= new Cookie("name","testing");
+		Cookie ck= new Cookie("name", "testing");
 		ck.setSecure(true); // constraint is satisfied
 		Assertions.hasEnsuredPredicate(ck);
 		Assertions.mustBeInAcceptingState(ck);
@@ -24,7 +24,7 @@ public class CookiesTest extends UsagePatternTestingFramework{
 
 	@Test
 	public void testTwo() {
-		Cookie ck= new Cookie("name","testing");
+		Cookie ck= new Cookie("name", "testing");
 		ck.setSecure(false); // constraint is violated
 		Assertions.notHasEnsuredPredicate(ck);
 		Assertions.mustBeInAcceptingState(ck);
@@ -32,7 +32,7 @@ public class CookiesTest extends UsagePatternTestingFramework{
 	
 	@Test
 	public void testThree() {
-		Cookie ck= new Cookie("name","testing");
+		Cookie ck= new Cookie("name", "testing");
 		// setSecure call is unused
 		Assertions.notHasEnsuredPredicate(ck);
 		Assertions.mustNotBeInAcceptingState(ck);

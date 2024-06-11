@@ -1,17 +1,14 @@
 package tests.pattern;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
+import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Test;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
 
 public class PBETest extends UsagePatternTestingFramework {
 
@@ -21,7 +18,7 @@ public class PBETest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void predictablePassword() throws GeneralSecurityException {
+	public void predictablePassword() {
 		char[] defaultKey = new char[] {'s', 'a', 'a', 'g', 'a', 'r'};
 		byte[] salt = new byte[16];
 		SecureRandom sr = new SecureRandom();
@@ -33,7 +30,7 @@ public class PBETest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void unPredictablePassword() throws GeneralSecurityException {
+	public void unPredictablePassword() {
 		char[] defaultKey = generateRandomPassword();
 		byte[] salt = new byte[16];
 		SecureRandom sr = new SecureRandom();
@@ -46,18 +43,18 @@ public class PBETest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void pbeUsagePatternMinPBEIterationsMinimized() throws GeneralSecurityException, IOException {
+	public void pbeUsagePatternMinPBEIterationsMinimized() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		char[] corPwd = generateRandomPassword();;
+		char[] corPwd = generateRandomPassword();
 		PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 100000, 128);
 		Assertions.extValue(1);
 		Assertions.hasEnsuredPredicate(pbekeyspec);
 	}
 	
 	@Test
-	public void pbeUsagePatternMinPBEIterations() throws GeneralSecurityException, IOException {
+	public void pbeUsagePatternMinPBEIterations() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
@@ -77,28 +74,28 @@ public class PBETest extends UsagePatternTestingFramework {
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		pbekeyspec.clearPassword();
 
-		PBEParameterSpec pbeparspec = new PBEParameterSpec(salt, 10000);
+		PBEParameterSpec pbeParSpec1 = new PBEParameterSpec(salt, 10000);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
-		Assertions.mustBeInAcceptingState(pbeparspec);
-		Assertions.hasEnsuredPredicate(pbeparspec);
+		Assertions.mustBeInAcceptingState(pbeParSpec1);
+		Assertions.hasEnsuredPredicate(pbeParSpec1);
 
-		pbeparspec = new PBEParameterSpec(salt, 9999);
+		PBEParameterSpec pbeParSpec2 = new PBEParameterSpec(salt, 9999);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
-		Assertions.mustBeInAcceptingState(pbeparspec);
-		Assertions.notHasEnsuredPredicate(pbeparspec);
+		Assertions.mustBeInAcceptingState(pbeParSpec2);
+		Assertions.notHasEnsuredPredicate(pbeParSpec2);
 	}
 	
 	@Test
-	public void pbeUsagePattern1() throws GeneralSecurityException, IOException {
+	public void pbeUsagePattern1() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
 		Assertions.hasEnsuredPredicate(salt);
-		char[] corPwd = generateRandomPassword();;
+		char[] corPwd = generateRandomPassword();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-		// Assertions.violatedConstraint(pbekeyspec);
+		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -108,7 +105,7 @@ public class PBETest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void pbeUsagePattern2() throws GeneralSecurityException, IOException {
+	public void pbeUsagePattern2() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 		Assertions.hasEnsuredPredicate(salt);
@@ -133,7 +130,7 @@ public class PBETest extends UsagePatternTestingFramework {
 	}
 	
 	@Test
-	public void pbeUsagePatternForbMeth() throws GeneralSecurityException, IOException {
+	public void pbeUsagePatternForbiddenMeth() {
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd);
 		Assertions.callToForbiddenMethod();

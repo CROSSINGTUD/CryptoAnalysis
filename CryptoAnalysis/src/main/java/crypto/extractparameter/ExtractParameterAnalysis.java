@@ -7,10 +7,12 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleType;
+import boomerang.scene.jimple.JimpleVal;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -124,14 +126,21 @@ public class ExtractParameterAnalysis {
                         extractedValue = new ExtractedValue(v.cfgEdge(), v.var());
                     }
                     collectedValues.put(callSiteWithParamIndex, extractedValue);
-					// TODO Adapt target
+
+					// TODO This seems to be odd; char[] is not a String
                     // Special handling for toCharArray method (required for NeverTypeOf constraint)
-                    if (v.cfgEdge().getTarget().containsInvokeExpr()) {
-                        String calledMethodSignature = v.cfgEdge().getTarget().getInvokeExpr().getMethod().getSignature();
-                        if (calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")) {
-                            propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
-                        }
-                    }
+					Val val = v.var();
+					if (!(val instanceof AllocVal)) {
+						continue;
+					}
+
+					AllocVal allocVal = (AllocVal) val;
+					Method calledMethod = allocVal.getDelegate().m();
+
+					String calledMethodName = calledMethod.toString();
+					if (calledMethodName.equals("<java.lang.String: char[] toCharArray()>")) {
+						propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
+					}
                 }
             });
 		}

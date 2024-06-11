@@ -39,13 +39,13 @@ public class SecureRandomTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void dynSeed() throws GeneralSecurityException {
+	public void dynSeed() {
 		SecureRandom srPrep = new SecureRandom();
 		byte[] bytes = new byte[32];
 		srPrep.nextBytes(bytes);
 		Assertions.mustBeInAcceptingState(srPrep);
 		Assertions.hasEnsuredPredicate(bytes);
-		// sr.setSeed(456789L); // Noncompliant
+		// sr.setSeed(456789L); // Non compliant
 
 		SecureRandom sr = new SecureRandom();
 		sr.setSeed(bytes);
@@ -55,7 +55,7 @@ public class SecureRandomTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void staticSeed() throws GeneralSecurityException {
+	public void staticSeed() {
 		byte[] bytes = {(byte) 100, (byte) 200};
 		SecureRandom sr = new SecureRandom();
 		sr.setSeed(bytes);
