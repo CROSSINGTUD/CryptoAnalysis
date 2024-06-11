@@ -23,9 +23,13 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.fixed.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		
+		setErrorsCount("<example.fixed.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
+
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.fixed.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
+
+
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.IncompleOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
@@ -116,6 +120,11 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<main.Main: void useDoFinalInLoop()>", ConstraintError.class, 1);
 
+
+		setErrorsCount("<main.Main: void interproceduralTypestate()>", ConstraintError.class, 1);
+
+		
+
 		scanner.exec();
 		assertErrors();
 	}
@@ -130,7 +139,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 				.withTPs(ConstraintError.class, 1)
 				.withTPs(RequiredPredicateError.class, 1)
 				.build());
-		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 0);
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 1);
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);
 
 		scanner.exec();

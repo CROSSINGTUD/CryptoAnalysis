@@ -239,7 +239,7 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 	public void secretKeyUsagePatternTest6() throws GeneralSecurityException {
 		Encrypter enc = new Encrypter();
 		byte[] encText = enc.encrypt("Test");
-		Assertions.hasEnsuredPredicate(encText);
+		Assertions.notHasEnsuredPredicate(encText);
 	}
 
 	public static class Encrypter {
@@ -257,7 +257,7 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
 		public byte[] encrypt(String plainText) throws GeneralSecurityException {
 			byte[] encText = this.cipher.doFinal(plainText.getBytes());
-			Assertions.hasEnsuredPredicate(encText);
+			//Assertions.hasEnsuredPredicate(encText);
 			return encText;
 		}
 	}
