@@ -11,4 +11,9 @@ public class HardCodedError extends ConstraintError {
 		super(cs, rule, objectLocation, con);
 	}
 
+	@Override
+	public void accept(ErrorVisitor visitor) {
+		visitor.visit(this);
+	}
+
 }

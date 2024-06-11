@@ -33,8 +33,8 @@ public class InstanceOfTest extends UsagePatternTestingFramework {
         InstanceOf instanceOf = new InstanceOf();
 
         // Call requires explicit instance of sub class
-        SuperClass classismus = new SuperClass();
-        instanceOf.operation2(classismus);
+        SuperClass superClass = new SuperClass();
+        instanceOf.operation2(superClass);
 
         Assertions.instanceOfErrors(1);
     }

@@ -73,6 +73,7 @@ import test.assertions.MissingTypestateChange;
 import test.assertions.NeverTypeOfErrorCountAssertion;
 import test.assertions.NoCallToErrorCountAssertion;
 import test.assertions.NoMissingTypestateChange;
+import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradiction;
@@ -270,6 +271,16 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 									}
 
 									@Override
+									public void visit(HardCodedError predicateError) {
+										for (Assertion a : expectedResults) {
+											if (a instanceof NotHardCodedErrorCountAssertion) {
+												NotHardCodedErrorCountAssertion assertion = (NotHardCodedErrorCountAssertion) a;
+												assertion.increaseCount();
+											}
+										}
+									}
+
+									@Override
 									public void visit(InstanceOfError predicateError) {
 										for (Assertion a : expectedResults) {
 											if (a instanceof InstanceOfErrorCountAssertion) {
@@ -291,10 +302,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 									@Override
 									public void visit(UncaughtExceptionError uncaughtExceptionError) {
-										
-									}
-									@Override
-									public void visit(HardCodedError predicateError) {
 										
 									}
 
@@ -702,6 +709,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 				queries.add(new NeverTypeOfErrorCountAssertion(param.getIntValue()));
  			}
+
+			if (invocationName.startsWith("notHardCodedErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new NotHardCodedErrorCountAssertion(param.getIntValue()));
+			}
 
 			if (invocationName.startsWith("instanceOfErrors")) {
 				Val param = invokeExpr.getArg(0);

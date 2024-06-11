@@ -1,11 +1,20 @@
 package crypto.constraints;
 
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
+import boomerang.ForwardQuery;
+import boomerang.results.BackwardBoomerangResults;
+import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.AllocVal;
+import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
@@ -21,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -164,6 +174,61 @@ public abstract class EvaluableConstraint {
 		} else {
 			return "";
 		}
+	}
+
+	protected Map<Integer, Val> extractArray(ExtractedValue extractedValue) {
+		Map<Integer, Val> result = new HashMap<>();
+
+		Statement statement = extractedValue.stmt().getStart();
+		if (!statement.isAssign()) {
+			return result;
+		}
+
+		Val leftOp = statement.getLeftOp();
+		Val rightOp = statement.getRightOp();
+		if (!rightOp.isArrayAllocationVal()) {
+			return result;
+		}
+
+		AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
+		ForwardQuery forwardQuery = new ForwardQuery(extractedValue.stmt(), allocVal);
+
+		Boomerang solver = new Boomerang(context.getObject().getCryptoScanner().callGraph(), context.getObject().getCryptoScanner().getDataFlowScope());
+		ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
+
+		for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry : results.asStatementValWeightTable().cellSet()) {
+			Statement stmt = entry.getRowKey().getStart();
+			if (!stmt.isArrayStore()) {
+				continue;
+			}
+
+
+			Val arrayBase = stmt.getLeftOp().getArrayBase().getX();
+			Integer index = stmt.getLeftOp().getArrayBase().getY();
+			if (!arrayBase.equals(allocVal.getDelegate())) {
+				continue;
+			}
+
+			// TODO
+			ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream().findFirst().get(), stmt);
+			BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
+
+			Boomerang indexSolver = new Boomerang(context.getObject().getCryptoScanner().callGraph(), context.getObject().getCryptoScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
+			BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
+
+			for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {
+				Statement allocStmt = allocSite.cfgEdge().getStart();
+
+				if (!allocStmt.isAssign()) {
+					continue;
+				}
+
+				result.put(index, allocStmt.getRightOp());
+			}
+
+		}
+
+		return result;
 	}
 
 }

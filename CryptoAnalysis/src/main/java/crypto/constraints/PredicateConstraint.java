@@ -3,8 +3,10 @@ package crypto.constraints;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.CallToError;
+import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
@@ -38,52 +40,29 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 	}
 
-	public boolean isHardCoded(ExtractedValue val) {
-		return val.getValue().isIntConstant() || val.getValue().isStringConstant()
-				|| (val.getValue().isNewExpr()
-						&& val.getValue().getType().toString().equals("java.math.BigInteger"));
-	}
-
-	private void handlePredefinedNames(CrySLPredicate pred) {
-		switch (pred.getPredName()) {
+	private void handlePredefinedNames(CrySLPredicate predicate) {
+		switch (predicate.getPredName()) {
 			case "callTo":
-                evaluateCallToPredicate(pred.getParameters());
+                evaluateCallToPredicate(predicate.getParameters());
 				break;
 			case "noCallTo":
-                evaluateNoCallToPredicate(pred.getParameters());
+                evaluateNoCallToPredicate(predicate.getParameters());
 				break;
 			case "neverTypeOf":
-				evaluateNeverTypeOfPredicate(pred);
+				evaluateNeverTypeOfPredicate(predicate);
 				break;
 			case "length":
 				// TODO Not implemented!
-				return;
+				break;
 			case "notHardCoded":
-				CrySLObject varNotToBeHardCoded = (CrySLObject) pred.getParameters().get(0);
-				String name = varNotToBeHardCoded.getVarName();
-				String type = varNotToBeHardCoded.getJavaType();
-				for (CallSiteWithParamIndex cs : context.getParsAndVals().keySet()) {
-					if (cs.getVarName().equals(name)) {
-						Collection<ExtractedValue> values = context.getParsAndVals().get(cs);
-						for (ExtractedValue v : values) {
-							// TODO Refactor
-							/*if (isSubType(type, v.getValue().getType().toQuotedString())
-									&& (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v)))) {
-								errors.add(
-										new HardCodedError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-												context.getObject(),
-												pred));
-							}*/
-						}
-					}
-				}
-				return;
+				evaluateHardCodedPredicate(predicate);
+				break;
 			case "instanceOf":
-				evaluateInstanceOfPredicate(pred);
+				evaluateInstanceOfPredicate(predicate);
 				break;
 			default:
-				return;
-		}
+				LOGGER.error("Cannot evaluate predicate {}", predicate.getPredName());
+        }
 	}
 
 	private void evaluateCallToPredicate(List<ICrySLPredicateParameter> callToMethods) {
@@ -155,6 +134,32 @@ public class PredicateConstraint extends EvaluableConstraint {
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
 				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(callSite, context.getClassSpec().getRule(), context.getObject(), neverTypeOfPredicate);
 				errors.add(neverTypeOfError);
+			}
+		}
+	}
+
+	private void evaluateHardCodedPredicate(CrySLPredicate hardCodedPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(hardCodedPredicate.getParameters());
+
+		if (objects.size() != 1) {
+			return;
+		}
+
+		// notHardCoded[$variable]
+		CrySLObject variable = objects.get(0);
+
+		for (CallSiteWithParamIndex cs : context.getParsAndVals().keySet()) {
+			if (!variable.getVarName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			Collection<ExtractedValue> extractedValues = context.getParsAndVals().get(cs);
+			for (ExtractedValue extractedValue : extractedValues) {
+				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
+					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
+					HardCodedError hardCodedError = new HardCodedError(callSiteWithExtractedValue, context.getClassSpec().getRule(), context.getObject(), hardCodedPredicate);
+					errors.add(hardCodedError);
+				}
 			}
 		}
 	}
@@ -235,7 +240,28 @@ public class PredicateConstraint extends EvaluableConstraint {
         }
 	}
 
-	private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {
-		return !(extractSootArray.keySet().size() == 1 && extractSootArray.containsKey(""));
+	public boolean isHardCodedVariable(ExtractedValue val) {
+		// Check for basic constants
+		if (val.getValue().isConstant()) {
+			return true;
+		}
+
+		// Objects initialized with 'new' are hard coded
+		if (val.stmt().getStart().containsInvokeExpr()) {
+			DeclaredMethod declaredMethod = val.stmt().getStart().getInvokeExpr().getMethod();
+
+			if (declaredMethod.isConstructor()) {
+				return true;
+			}
+		}
+
+		LOGGER.debug("Value {} is not hardCoded", val.getValue());
+		return false;
+	}
+
+	private boolean isHardCodedArray(ExtractedValue value) {
+		Map<Integer, Val> extractedArray = extractArray(value);
+
+		return !extractedArray.keySet().isEmpty();
 	}
 }

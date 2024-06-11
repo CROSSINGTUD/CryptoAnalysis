@@ -10,7 +10,6 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleType;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -25,7 +24,6 @@ import heros.utilities.DefaultValueMap;
 import soot.Scene;
 import wpds.impl.Weight.NoWeight;
 
-import javax.swing.text.html.Option;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

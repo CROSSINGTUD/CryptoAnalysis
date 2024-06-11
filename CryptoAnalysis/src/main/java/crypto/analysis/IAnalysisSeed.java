@@ -59,6 +59,10 @@ public abstract class IAnalysisSeed {
 	public List<AbstractError> getErrors(){
 		return new ArrayList<>(errorCollection);
 	}
+
+	public CryptoScanner getCryptoScanner() {
+		return cryptoScanner;
+	}
 	
 	public String getObjectId() {
 		if(objectId == null) {
