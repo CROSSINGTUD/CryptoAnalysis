@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -50,7 +51,7 @@ public abstract class EvaluableConstraint {
 		} else if (con instanceof CrySLExceptionConstraint) {
 			return new ExceptionConstraint((CrySLExceptionConstraint) con, context);
 		}
-		return null;
+		throw new RuntimeException("Type of constraint is not supported");
 	}
 
 	final Set<AbstractError> errors = Sets.newHashSet();
@@ -74,7 +75,7 @@ public abstract class EvaluableConstraint {
 		return errors;
 	}
 
-	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName, ISLConstraint cons) {
+	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 		for (CallSiteWithParamIndex wrappedCallSite : context.getParsAndVals().keySet()) {
 			final Statement callSite = wrappedCallSite.stmt().getStart();
@@ -229,6 +230,33 @@ public abstract class EvaluableConstraint {
 		}
 
 		return result;
+	}
+
+	/**
+	 * If the {@link crypto.extractparameter.ExtractParameterAnalysis} cannot find the allocation site of a parameter,
+	 * it adds the ZERO value to the results to indicate that the value could not be extracted. In such a case, a
+	 * {@link ImpreciseValueExtractionError} is reported.
+	 *
+	 * @param extractedValueMap the map from the {@link #extractValueAsString(String)} method
+	 * @param constraint the constraint that cannot be evaluated
+	 * @return true if the value could not be extracted and an {@link ImpreciseValueExtractionError} got reported
+	 */
+	protected boolean couldNotExtractValues(Map<String, CallSiteWithExtractedValue> extractedValueMap, ISLConstraint constraint) {
+		if (extractedValueMap.size() != 1) {
+			return false;
+		}
+
+		for (CallSiteWithExtractedValue callSite : extractedValueMap.values()) {
+			Statement statement = callSite.getCallSite().stmt().getStart();
+			Val extractedVal = callSite.getVal().getValue();
+
+			if (extractedVal.equals(Val.zero())) {
+				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(constraint, statement, context.getClassSpec().getRule());
+				errors.add(extractionError);
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

@@ -21,6 +21,9 @@ public class LabeledMatcherTransition extends MatcherTransition {
 
     @Override
     public boolean matches(DeclaredMethod declaredMethod) {
+        //if (declaredMethod.toString().equals("<javax.crypto.Cipher: void init(int,java.security.Key)>")) {
+        //    System.out.println("found");
+        //}
         return getMatching(declaredMethod).isPresent();
     }
 

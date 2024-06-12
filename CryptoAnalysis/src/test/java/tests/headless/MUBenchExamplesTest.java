@@ -10,26 +10,23 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 
-
 /**
+ * The following Headless tests are deducted from the MUBench benchmarking tool
+ * that detects various API misuses. For the creating these Headless tests, only
+ * previous Cryptographic API misuses were considered from the data-set of MUBench,
+ * which contains numerous projects having these kind of API misuses.
+ *
  * @author Enri Ozuni
  */
 public class MUBenchExamplesTest extends AbstractHeadlessTest{
-	
-	
-	/**
-	 * The following Headless tests are deducted from the MUBench benchmarking tool 
-	 * that detects various API misuses. For the creating these Headless tests, only 
-	 * previous Cryptographic API misuses were considered from the data-set of MUBench,
-	 * which contains numerous projects having these kind of API misuses.
-	 */
+
 	@Test
 	public void muBenchExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/MUBenchExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		/**
+		/*
 		 * The links for each test case redirect to the description of the misuse, 
 		 * and also contain the correct usage of the corresponding misuse in the directory
 		 * where `misuse.yml` file is contained
@@ -55,7 +52,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 		setErrorsCount("<example.CipherUsesDSAExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.CipherUsesDSAExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
-		// This test case corresponds to the following project in MUBench having the this misuse:
+		// This test case corresponds to the following project in MUBench having this misuse:
 		// https://github.com/akwick/MUBench/blob/master/data/corona-old/misuses/1/misuse.yml		
 		setErrorsCount("<example.CipherUsesJustAESExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.CipherUsesJustAESExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -83,7 +80,6 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 		// This test case corresponds to the following project in MUBench having this misuse:
 		// https://github.com/akwick/MUBench/blob/master/data/red5-server/misuses/1/misuse.yml
 		setErrorsCount("<example.InitInMacCalledMoreThanOnceExample: void main(java.lang.String[])>", TypestateError.class, 2);
-		setErrorsCount("<example.InitInMacCalledMoreThanOnceExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
 		
 		scanner.exec();

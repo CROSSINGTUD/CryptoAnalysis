@@ -8,6 +8,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -242,17 +243,17 @@ public class CipherTest extends UsagePatternTestingFramework {
 
 		byte[] iv = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(iv);
-		IvParameterSpec spec = new IvParameterSpec(iv);
+		GCMParameterSpec spec = new GCMParameterSpec(96, iv);
 
-		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Cipher cCipher = Cipher.getInstance("AES/GCM/NoPadding");
 		Assertions.extValue(0);
 		int mode = 1;
 		if (Math.random() % 2 == 0) {
 			mode = 2;
 		}
 		cCipher.init(mode, key, spec);
-
 		Assertions.extValue(0);
+
 		byte[] encText = cCipher.doFinal("".getBytes());
 		Assertions.hasEnsuredPredicate(encText);
 		Assertions.mustBeInAcceptingState(cCipher);

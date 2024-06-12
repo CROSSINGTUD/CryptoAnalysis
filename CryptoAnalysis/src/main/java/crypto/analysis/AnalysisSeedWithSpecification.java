@@ -824,9 +824,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
-		Collection<String> values = new ArrayList<String>();
+		Collection<String> values = new ArrayList<>();
 		for (ExtractedValue q : collection) {
-			Statement statement = q.stmt().getTarget();
+			Statement statement = q.stmt().getStart();
 
 			if (cswpi.stmt().equals(q.stmt())) {
 				if (statement.isAssign()) {

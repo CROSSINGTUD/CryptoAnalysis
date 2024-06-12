@@ -244,7 +244,7 @@ public abstract class AbstractHeadlessTest {
 				if (value > 0) {
 					builder.append("\tFound " + value + " too few errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				} else {
-					builder.append("\tFound " + Math.abs(value) + " too many  errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
+					builder.append("\tFound " + Math.abs(value) + " too many errors of type " + c.getColumnKey() + " in method " + c.getRowKey());
 				}
 				errorFound = true;
 			}

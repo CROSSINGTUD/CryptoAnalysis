@@ -45,7 +45,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 
 				String className = stmt.getInvokeExpr().getMethod().getDeclaringClass().getName();
 				if (Scene.v().isExcluded(className)) {
-					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
+					//return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 
 				/*if (!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
@@ -58,7 +58,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 				Val base = stmt.getInvokeExpr().getBase();
 
 				if (base.equals(fact)) {
-					return Optional.of(new AllocVal(base, stmt, base));
+					//return Optional.of(new AllocVal(base, stmt, base));
 				}
 			}
 		}
@@ -102,6 +102,30 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 		}
 
 		return Optional.empty();
+	}
+
+	@Override
+	public boolean isAllocationVal(Val val) {
+		if (val.isConstant()) {
+			return true;
+		}
+		if (!trackStrings() && val.isStringBufferOrBuilder()) {
+			return false;
+		}
+		if (trackNullAssignments() && val.isNull()) {
+			return true;
+		}
+		if (getArrayStrategy() != ArrayStrategy.DISABLED && val.isArrayAllocationVal()) {
+			return true;
+		}
+		if (trackStrings() && val.isStringConstant()) {
+			return true;
+		}
+		if (!trackAnySubclassOfThrowable() && val.isThrowableAllocationType()) {
+			return false;
+		}
+
+		return false;
 	}
 
     @Override

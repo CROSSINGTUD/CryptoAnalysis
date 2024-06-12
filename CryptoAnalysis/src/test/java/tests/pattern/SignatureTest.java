@@ -22,7 +22,7 @@ public class SignatureTest extends UsagePatternTestingFramework {
 	protected Ruleset getRuleSet() {
 		return Ruleset.JavaCryptographicArchitecture;
 	}
-	
+
 	@Test
 	public void testSignature2() throws GeneralSecurityException {
 		Signature s = Signature.getInstance("SHA256withRSA");
@@ -34,7 +34,7 @@ public class SignatureTest extends UsagePatternTestingFramework {
 		s.update(tData);
 		s.sign();
 		Assertions.notHasEnsuredPredicate(s); // passing
-		Assertions.mustBeInAcceptingState(s); 
+		Assertions.mustBeInAcceptingState(s);
 	}
 	
 	@Test

@@ -150,10 +150,11 @@ public class ComparisonConstraint extends EvaluableConstraint {
 		} catch (NumberFormatException ex) {
 			// 2. If not, it's a variable name.
 			// Get value of variable left from map
-			final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp, cons);
-			if (valueCollection.isEmpty()) {
+			Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(exp);
+			if (couldNotExtractValues(valueCollection, cons)) {
 				return valuesInt;
 			}
+
 			try {
 				for (Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
 					if (value.getKey().equals("true"))

@@ -40,6 +40,8 @@ public class Assertions {
 
 	public static void forbiddenMethodErrors(int i) {}
 
+	public static void impreciseValueExtractionErrors(int i) {}
+
 	public static void callToErrors(int i) {}
 
 	public static void noCallToErrors(int i) {}

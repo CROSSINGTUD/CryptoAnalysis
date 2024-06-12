@@ -18,37 +18,38 @@ class BinaryConstraint extends EvaluableConstraint {
 		LogOps ops = binaryConstraint.getOperator();
 
 		if (ops.equals(LogOps.implies)) {
+			// Left side of implication is not satisfied => Right side does not need to be satisfied
 			if (left.hasErrors()) {
 				return;
-			} else {
-				right.evaluate();
-				errors.addAll(right.getErrors());
-				return;
 			}
-		} else if (ops.equals(LogOps.or)) {
+
+			right.evaluate();
+			errors.addAll(right.getErrors());
+        } else if (ops.equals(LogOps.or)) {
+			// Constraint is violated if left and right is not satisfied
 			right.evaluate();
 			errors.addAll(left.getErrors());
 			errors.addAll(right.getErrors());
-			return;
-		} else if (ops.equals(LogOps.and)) {
+        } else if (ops.equals(LogOps.and)) {
+			// Left is not satisfied => AND cannot be satisfied
 			if (left.hasErrors()) {
 				errors.addAll(left.getErrors());
 				return;
-			} else {
-				right.evaluate();
-				errors.addAll(right.getErrors());
-				return;
 			}
+
+			right.evaluate();
+			errors.addAll(right.getErrors());
 		} else if (ops.equals(LogOps.eq)) {
 			right.evaluate();
+
+			// Simple <=> evaluation
 			if ((left.hasErrors() && right.hasErrors()) || (!left.hasErrors() && !right.hasErrors())) {
 				return;
-			} else {
-				errors.addAll(right.getErrors());
-				return;
 			}
+			errors.addAll(right.getErrors());
+        } else {
+			errors.addAll(left.getErrors());
 		}
-		errors.addAll(left.getErrors());
 	}
 
 }

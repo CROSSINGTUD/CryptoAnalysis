@@ -85,8 +85,8 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 		if (!isCalled) {
 			IAnalysisSeed seed = context.getObject();
-			CallToError typestateError = new CallToError(seed.cfgEdge().getStart(), seed, context.getClassSpec().getRule(), methods);
-			errors.add(typestateError);
+			CallToError callToError = new CallToError(seed.cfgEdge().getStart(), seed, context.getClassSpec().getRule(), methods);
+			errors.add(callToError);
 		}
 	}
 
@@ -183,6 +183,10 @@ public class PredicateConstraint extends EvaluableConstraint {
 			boolean isSubType = false;
 			Collection<Type> types = context.getPropagatedTypes().get(cs);
 			for (Type type : types) {
+				if (type.isNullType()) {
+					continue;
+				}
+
 				if (type.isSubtypeOf(parameterType.getJavaType())) {
 					isSubType = true;
 				}

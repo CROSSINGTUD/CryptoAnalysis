@@ -111,11 +111,19 @@ public class ExtractParameterAnalysis {
 		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
 		for (Statement pred : predecessors) {
 			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
-			// Edge to getStart()
+			// TODO Edge to getStart()
 			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
 			query.addListener((q, res) -> {
                 propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
+
+				// If the allocation site could not be extracted, add the zero value for indication
+				if (res.getAllocationSites().keySet().isEmpty()) {
+					ExtractedValue zeroValue = new ExtractedValue(callSiteWithParamIndex.stmt(), Val.zero());
+					collectedValues.put(callSiteWithParamIndex, zeroValue);
+					return;
+				}
+
                 for (ForwardQuery v : res.getAllocationSites().keySet()) {
                     ExtractedValue extractedValue = null;
                     if (v.var() instanceof AllocVal) {

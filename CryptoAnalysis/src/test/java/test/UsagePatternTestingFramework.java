@@ -66,6 +66,7 @@ import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
+import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
 import test.assertions.InstanceOfErrorCountAssertion;
@@ -257,7 +258,12 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 									@Override
 									public void visit(ImpreciseValueExtractionError predicateError) {
-
+										for (Assertion a : expectedResults) {
+											if (a instanceof ImpreciseValueExtractionErrorCountAssertion) {
+												ImpreciseValueExtractionErrorCountAssertion assertion = (ImpreciseValueExtractionErrorCountAssertion) a;
+												assertion.increaseCount();
+											}
+										}
 									}
 
 									@Override
@@ -684,6 +690,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 				queries.add(new ForbiddenMethodErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("impreciseValueExtractionErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
 			}
 
 			if (invocationName.startsWith("callToErrors")) {

@@ -1,6 +1,8 @@
 package tests.headless;
 
 import java.io.File;
+
+import crypto.analysis.errors.CallToError;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.HardCodedError;
@@ -13,7 +15,9 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/FileEncryptor").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
+
+		setErrorsCount("<Crypto.Enc: byte[] encrypt(byte[],javax.crypto.SecretKey)>", CallToError.class, 1);
+
 		//All the following errors are false positives
 		setErrorsCount("<Crypto.KeyDeriv: javax.crypto.SecretKey getKey(char[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<Crypto.KeyDeriv: javax.crypto.SecretKey getKey(char[])>", HardCodedError.class, 1);
