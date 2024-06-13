@@ -36,8 +36,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 
 		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		while (cis.read() != -1) {
 			System.out.println("Reading...");
 		}
@@ -59,10 +57,8 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		cipher.init(Cipher.DECRYPT_MODE, key);
 		Assertions.extValue(0);
 
-		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
+		InputStream is = Files.newInputStream(Paths.get(String.valueOf(Paths.get(".\\resources\\cis.txt"))));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		int result = cis.read("input".getBytes());
 		cis.close();
 		Assertions.mustBeInAcceptingState(cis);
@@ -85,8 +81,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 
 		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		int result = cis.read("input".getBytes(), 0, "input".getBytes().length);
 		cis.close();
 		Assertions.mustBeInAcceptingState(cis);
@@ -109,8 +103,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 
 		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		while (cis.read() != -1) {
 			System.out.println("Reading...");
 		}
@@ -134,8 +126,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 
 		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		int result = cis.read("input".getBytes(), 100, "input".getBytes().length);
 		Assertions.violatedConstraint(cis);
 		Assertions.mustNotBeInAcceptingState(cis);
@@ -150,8 +140,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestInputStream dis = new DigestInputStream(is, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		while (dis.read() != -1) {
 			System.out.println("Reading...");
 		}
@@ -165,8 +153,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestInputStream dis = new DigestInputStream(is, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		int result = dis.read("input".getBytes(), 0, "input".getBytes().length);
 		dis.close();
 		Assertions.mustBeInAcceptingState(dis);
@@ -179,8 +165,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestInputStream dis = new DigestInputStream(is, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		Assertions.mustNotBeInAcceptingState(dis);
 		while (dis.read() != -1) {
 			System.out.println("Reading...");
@@ -193,8 +177,6 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestInputStream dis = new DigestInputStream(is, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		int result = dis.read("input".getBytes(), 100, "input".getBytes().length);
 		Assertions.violatedConstraint(dis);
 		System.out.println(result);

@@ -2,6 +2,8 @@ package tests.headless;
 
 import java.io.File;
 
+import crypto.analysis.errors.CallToError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -67,9 +69,11 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", CallToError.class, 1);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", CallToError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -261,12 +265,14 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.UseExplicitPadding1: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 2);
 		
 		// positive test case
 		setErrorsCount("<example.UseQualifiedNameForRSAOAEP: void positiveTestCase()>", TypestateError.class, 1);
@@ -466,13 +472,22 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher1: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher2: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher3: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher3: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher4: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", CallToError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -694,6 +709,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.DoNotPrintPrivKey1: void negativeTestCase()>", TypestateError.class, 1);
 		
 		setErrorsCount("<example.DoNotPrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<example.DoNotPrintSecKey1: void main(java.lang.String[])>", CallToError.class, 1);
 
 		setErrorsCount("<example.DoNotPrintDHSecret1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<example.DoNotPrintDHSecret1: void main(java.lang.String[])>", RequiredPredicateError.class, 16);

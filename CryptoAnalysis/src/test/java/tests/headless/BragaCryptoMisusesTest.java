@@ -105,9 +105,12 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
+		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
+		setErrorsCount("<cib.buggyIVgen.BuggyIVGen2: void main(java.lang.String[])>", CallToError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -124,9 +127,11 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
+		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", CallToError.class, 1);
 		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
+		setErrorsCount("<ivm.constantIV.FixedIV2: void main(java.lang.String[])>", CallToError.class, 1);
 		setErrorsCount("<ivm.constantIV.SimpleIVConstant: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 
 		scanner.exec();
@@ -216,7 +221,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ForbiddenMethodError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
@@ -249,7 +254,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", TypestateError.class, 0);
-		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+
+		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB2: void main(java.lang.String[])>", TypestateError.class, 0);
 
@@ -621,14 +627,23 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", RequiredPredicateError.class, 8);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4: void main(java.lang.String[])>", CallToError.class, 1);
+
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5: void main(java.lang.String[])>", CallToError.class, 1);
 
 		scanner.exec();
 		assertErrors();

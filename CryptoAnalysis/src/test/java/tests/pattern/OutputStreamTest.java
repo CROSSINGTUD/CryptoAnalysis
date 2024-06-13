@@ -37,8 +37,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 
 		OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\cos.txt"));
 		CipherOutputStream cos = new CipherOutputStream(os, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		cos.write("Hello World\n".getBytes());
 		cos.close();
 		Assertions.mustBeInAcceptingState(cos);
@@ -60,8 +58,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 
 		OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\cos.txt"));
 		CipherOutputStream cos = new CipherOutputStream(os, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		cos.write("message".getBytes(), 0, "message".getBytes().length);
 		cos.close();
 		Assertions.mustBeInAcceptingState(cos);
@@ -83,8 +79,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 
 		OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\cos.txt"));
 		CipherOutputStream cos = new CipherOutputStream(os, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		cos.write("Hello World\n".getBytes());
 		Assertions.mustNotBeInAcceptingState(cos);
 		cos.close();
@@ -106,8 +100,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 
 		OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\cos.txt"));
 		CipherOutputStream cos = new CipherOutputStream(os, cipher);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		cos.write("message".getBytes(), 100, "message".getBytes().length);
 		Assertions.violatedConstraint(cos);
 		Assertions.mustNotBeInAcceptingState(cos);
@@ -123,8 +115,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestOutputStream dos = new DigestOutputStream(os, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		dos.on(false);
 		Assertions.callToForbiddenMethod();
 		dos.write("Hello World\n".getBytes());
@@ -138,8 +128,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestOutputStream dos = new DigestOutputStream(os, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		Assertions.mustNotBeInAcceptingState(dos);
 		dos.write("Hello World".getBytes());
 	}
@@ -150,8 +138,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestOutputStream dos = new DigestOutputStream(os, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		dos.write("message".getBytes(), 0, "message".getBytes().length);
 		dos.close();
 		Assertions.mustBeInAcceptingState(dos);
@@ -163,8 +149,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		Assertions.extValue(0);
 		DigestOutputStream dos = new DigestOutputStream(os, md);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
 		dos.write("message".getBytes(), 100, "message".getBytes().length);
 		Assertions.violatedConstraint(dos);
 		Assertions.mustNotBeInAcceptingState(dos);

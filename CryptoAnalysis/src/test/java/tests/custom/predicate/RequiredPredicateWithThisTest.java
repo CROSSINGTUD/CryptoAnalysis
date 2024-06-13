@@ -1,7 +1,6 @@
 package tests.custom.predicate;
 
 import crypto.analysis.CrySLRulesetSelector;
-import org.junit.Ignore;
 import org.junit.Test;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

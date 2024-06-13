@@ -593,7 +593,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					if (!predNameParam.isStringConstant()) {
 						continue;
 					}
-					String predName = param.getStringValue();
+					String predName = predNameParam.getStringValue();
 					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
 						queries.add(new HasEnsuredPredicateAssertion(pred, aliases, predName));
 					}

@@ -1,25 +1,23 @@
 package crypto.analysis;
 
-import java.util.ArrayList;
-import java.util.Set;
-
 import boomerang.WeightedForwardQuery;
+import boomerang.debugger.Debugger;
+import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
+import boomerang.scene.Val;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
-
-import boomerang.debugger.Debugger;
-import boomerang.scene.Val;
-import boomerang.results.ForwardBoomerangResults;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.typestate.ExtendedIDEALAnalysis;
 import crypto.typestate.MatcherTransitionCollection;
 import ideal.IDEALSeedSolver;
-import sync.pds.solver.nodes.Node;
 import typestate.TransitionFunction;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 
