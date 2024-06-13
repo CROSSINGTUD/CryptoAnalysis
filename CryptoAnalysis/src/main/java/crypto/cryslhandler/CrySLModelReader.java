@@ -331,7 +331,7 @@ public class CrySLModelReader {
 		for (final ForbiddenMethod method : forbidden.getForbiddenMethods()) {
 			CrySLMethod cryslMethod = CrySLReaderUtils.toCrySLMethod(method);
 			List<CrySLMethod> alternatives = CrySLReaderUtils.resolveEventToCryslMethods(method.getReplacement());
-			forbiddenMethods.add(new CrySLForbiddenMethod(cryslMethod, false, alternatives));
+			forbiddenMethods.add(new CrySLForbiddenMethod(cryslMethod, alternatives));
 		}
 		return forbiddenMethods;
 	}

@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -31,6 +32,7 @@ import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLCondPredicate;
+import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
@@ -55,6 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -123,11 +126,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			return;
 		allCallsOnObject = results.getInvokedMethodOnInstance();
 		runExtractParameterAnalysis();
+
+		// Check the CONSTRAINTS section
 		this.internalConstraintsSatisfied = checkInternalConstraints();
 
-		computeTypestateErrorUnits();
-		computeTypestateErrorsForEndOfObjectLifeTime();
+		// Check the FORBIDDEN section
+		evaluateForbiddenMethods();
 
+		// Check the ORDER section
+		evaluateTypestateOrder();
+		evaluateIncompleteOperations();
+
+		// Check the REQUIRES section and ensure predicates in ENSURES section
 		activateIndirectlyEnsuredPredicates();
 		checkConstraintsAndEnsurePredicates();
 
@@ -163,7 +173,36 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		this.parameterAnalysis.run();
 	}
 
-	private void computeTypestateErrorUnits() {
+	/**
+	 * Check the FORBIDDEN section and report corresponding errors
+	 */
+	private void evaluateForbiddenMethods() {
+		for (Entry<ControlFlowGraph.Edge, DeclaredMethod> calledMethod : allCallsOnObject.entrySet()) {
+			Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(calledMethod.getValue());
+
+			if (forbiddenMethod.isPresent()) {
+				Collection<CrySLMethod> alternatives = forbiddenMethod.get().getAlternatives();
+				Statement statement = calledMethod.getKey().getStart();
+				DeclaredMethod declaredMethod = calledMethod.getValue();
+
+				ForbiddenMethodError error = new ForbiddenMethodError(statement, spec.getRule(), declaredMethod, alternatives);
+				cryptoScanner.getAnalysisListener().reportError(this, error);
+			}
+		}
+	}
+
+	private Optional<CrySLForbiddenMethod> isForbiddenMethod(DeclaredMethod declaredMethod) {
+		Collection<CrySLForbiddenMethod> forbiddenMethods = spec.getRule().getForbiddenMethods();
+
+		for (CrySLForbiddenMethod method : forbiddenMethods) {
+			if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method.getMethod(), declaredMethod)) {
+				return Optional.of(method);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private void evaluateTypestateOrder() {
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
 			ControlFlowGraph.Edge curr = c.getRowKey();
 
@@ -189,7 +228,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void computeTypestateErrorsForEndOfObjectLifeTime() {
+	private void evaluateIncompleteOperations() {
 		Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
 		Map<ControlFlowGraph.Edge, Set<CrySLMethod>> incompleteOperations = new HashMap<>();
 

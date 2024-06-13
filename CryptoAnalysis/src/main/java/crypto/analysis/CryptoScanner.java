@@ -142,8 +142,6 @@ public abstract class CryptoScanner {
 					continue;
 				}
 
-				spec.invokesForbiddenMethod(method);
-
 				if (isOnIgnoreSectionList(method)) {
 					continue;
 				}
