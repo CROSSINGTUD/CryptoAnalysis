@@ -105,7 +105,8 @@ public class ConstraintSolver {
 				if (e instanceof ImpreciseValueExtractionError) {
 					getReporter().reportError(getObject(),
 							new ImpreciseValueExtractionError(con, e.getErrorStatement(), e.getRule()));
-					break;
+					fail++;
+					//break;
 				} else {
 					fail++;
 					this.object.addError(e);

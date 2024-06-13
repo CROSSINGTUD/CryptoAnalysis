@@ -1,38 +1,35 @@
 package crypto.rules;
 
+import crypto.interfaces.ISLConstraint;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
 
-import com.google.common.collect.Sets;
-
-import crypto.interfaces.ISLConstraint;
-import soot.SootMethod;
-
-public class CrySLRule implements java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class CrySLRule {
 
 	private final String className;
 	
-	private final List<Entry<String, String>> objects;  
+	private final List<Entry<String, String>> objects;
 	
-	protected final List<CrySLForbiddenMethod> forbiddenMethods;
+	private final List<CrySLForbiddenMethod> forbiddenMethods;
+
+	private final Collection<CrySLMethod> events;
 	
-	protected final StateMachineGraph usagePattern;
+	private final StateMachineGraph usagePattern;
 	
-	protected final List<ISLConstraint> constraints;
+	private final List<ISLConstraint> constraints;
 	
-	protected final List<CrySLPredicate> predicates;
+	private final List<CrySLPredicate> predicates;
 	
-	protected final List<CrySLPredicate> negatedPredicates;
+	private final List<CrySLPredicate> negatedPredicates;
 	
-	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates, List<CrySLPredicate> negatedPredicates) {
+	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, Collection<CrySLMethod> events, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates, List<CrySLPredicate> negatedPredicates) {
 		this.className = className;
 		this.objects = objects;
 		this.forbiddenMethods =forbiddenMethods;
+		this.events = events;
 		this.usagePattern = usagePattern;
 		this.constraints = constraints;
 		this.predicates = predicates;
@@ -48,16 +45,6 @@ public class CrySLRule implements java.io.Serializable {
 		return false;
 	}
 
-
-	public boolean isLeafRule() {
-		for (ISLConstraint con : constraints) {
-			if (con instanceof CrySLPredicate) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	@Override
 	public int hashCode() {
 		return 31 * className.hashCode();
@@ -85,7 +72,14 @@ public class CrySLRule implements java.io.Serializable {
 	public List<CrySLForbiddenMethod> getForbiddenMethods() {
 		return forbiddenMethods;
 	}
-	
+
+	/**
+	 * @return the events
+	 */
+	public Collection<CrySLMethod> getEvents() {
+		return events;
+	}
+
 	/**
 	 * @return the usagePattern
 	 */
@@ -126,17 +120,23 @@ public class CrySLRule implements java.io.Serializable {
 		}
 		return requires;
 	}
-	
+
+	@Override
 	public String toString() {
 		StringBuilder outputSB = new StringBuilder();
 		
 		outputSB.append(this.className);
 		
 		outputSB.append("\nforbiddenMethods:");
-		for (CrySLForbiddenMethod forbMethSig : this.forbiddenMethods) {
-			
-			outputSB.append(forbMethSig);
-			outputSB.append(",");
+		for (CrySLForbiddenMethod forMethSig : this.forbiddenMethods) {
+			outputSB.append(forMethSig);
+			outputSB.append(", ");
+		}
+
+		outputSB.append("\nEvents:");
+		for (CrySLMethod method : events) {
+			outputSB.append(method);
+			outputSB.append(", ");
 		}
 		
 		outputSB.append("\nUsage Pattern:");
@@ -145,14 +145,14 @@ public class CrySLRule implements java.io.Serializable {
 		outputSB.append("\nConstraints:");
 		for (ISLConstraint constraint : this.constraints) {
 			outputSB.append(constraint);
-			outputSB.append(",");
+			outputSB.append(", ");
 		}
 
 		if (this.predicates != null) {
 			outputSB.append("\nPredicates:");
 			for (CrySLPredicate predicate : this.predicates) {
 				outputSB.append(predicate);
-				outputSB.append(",");
+				outputSB.append(", ");
 			}
 		}
 		
@@ -160,19 +160,11 @@ public class CrySLRule implements java.io.Serializable {
 			outputSB.append("\nNegated predicates:");
 			for (CrySLPredicate predicate : this.negatedPredicates) {
 				outputSB.append(predicate);
-				outputSB.append(",");
+				outputSB.append(", ");
 			}
 		}
 		
 		return outputSB.toString();
 	}
-	
-	public static Collection<String> toSubSignatures(Collection<SootMethod> methods) {
-		Set<String> subSignatures = Sets.newHashSet();
-		for(SootMethod m : methods){
-			subSignatures.add(m.getName());
-		}
-		return subSignatures;
-	}
-	
+
 }

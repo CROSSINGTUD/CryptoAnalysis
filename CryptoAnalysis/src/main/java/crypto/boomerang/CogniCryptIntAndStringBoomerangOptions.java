@@ -4,6 +4,7 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
@@ -31,8 +32,10 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 					return Optional.of(new AllocVal(leftOp, stmt, arg));
 				}
 
+				// TODO Special handling for toCharArray required; trigger new BackwardQuery?
 				if (sig.equals("<java.lang.String: char[] toCharArray()>")) {
-					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
+					//Val rightBase = stmt.getInvokeExpr().getBase();
+					//return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 
 				if (sig.equals("<java.lang.String: byte[] getBytes()>")) {
@@ -84,9 +87,20 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 			}
 		}
 
+		// Extract the length value of length expressions
 		if (rightOp.isLengthExpr()) {
 			return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 		}
+
+		// Strings are initialized with a concrete value
+		if (rightOp.isNewExpr()) {
+			Type type = rightOp.getNewExprType();
+
+			if (type.toString().equals("java.lang.String")) {
+				return Optional.empty();
+			}
+		}
+
 //		if (as.containsInvokeExpr()) {
 //			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
 //				for (Unit u : icfg.getEndPointsOf(callee)) {
@@ -125,7 +139,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 			return false;
 		}
 
-		return false;
+		return val.isNewExpr();
 	}
 
     @Override

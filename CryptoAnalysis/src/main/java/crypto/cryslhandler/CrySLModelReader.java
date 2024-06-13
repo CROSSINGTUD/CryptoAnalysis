@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -278,7 +279,9 @@ public class CrySLModelReader {
 		constraints.addAll(getRequiredPredicates(model.getRequires()));
 		
 		// Since 3.0.0: All sections are optional
+		final Collection<CrySLMethod> eventMethods = new HashSet<>();
 		if (eventsBlock != null) {
+			eventMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(events));
 			constraints.addAll(ExceptionsReader.getExceptionConstraints(eventsBlock));
 		}
 
@@ -290,7 +293,7 @@ public class CrySLModelReader {
 		predicates.addAll(getEnsuredPredicates(ensuresBlock));
 		negatedPredicates.addAll(getNegatedPredicates(negatesBlock));
 
-		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates, negatedPredicates);
+		return new CrySLRule(currentClass, objects, forbiddenMethods, eventMethods, this.smg, constraints, predicates, negatedPredicates);
 	}
 
 	private List<Event> changeDeclaringClass(JvmTypeReference currentClass, EventsBlock eventsBlock) {

@@ -125,7 +125,7 @@ public class ExtractParameterAnalysis {
 				}
 
                 for (ForwardQuery v : res.getAllocationSites().keySet()) {
-                    ExtractedValue extractedValue = null;
+					ExtractedValue extractedValue;
                     if (v.var() instanceof AllocVal) {
                         AllocVal allocVal = (AllocVal) v.var();
                         // TODO ExtractValue constructor: Edge to Statement
@@ -137,16 +137,13 @@ public class ExtractParameterAnalysis {
 
 					// TODO This seems to be odd; char[] is not a String
                     // Special handling for toCharArray method (required for NeverTypeOf constraint)
-					Val val = v.var();
-					if (!(val instanceof AllocVal)) {
+					Statement allocStmt = v.cfgEdge().getStart();
+					if (!allocStmt.isAssign()) {
 						continue;
 					}
 
-					AllocVal allocVal = (AllocVal) val;
-					Method calledMethod = allocVal.getDelegate().m();
-
-					String calledMethodName = calledMethod.toString();
-					if (calledMethodName.equals("<java.lang.String: char[] toCharArray()>")) {
+					Val rightOp = allocStmt.getRightOp();
+					if (rightOp.getVariableName().contains("<java.lang.String: char[] toCharArray()>")) {
 						propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
 					}
                 }

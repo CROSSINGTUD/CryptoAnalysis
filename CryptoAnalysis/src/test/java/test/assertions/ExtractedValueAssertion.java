@@ -1,6 +1,7 @@
 package test.assertions;
 
 import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -22,6 +23,10 @@ public class ExtractedValueAssertion implements Assertion {
 	public void computedValues(Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues){
 		for (Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()) {
 			Statement callSite = e.getKey().stmt().getStart();
+
+			if (e.getValue().getValue().equals(Val.zero())) {
+				continue;
+			}
 
 			if (callSite.equals(stmt) && e.getKey().getIndex() == index) {
 				satisfied = true;

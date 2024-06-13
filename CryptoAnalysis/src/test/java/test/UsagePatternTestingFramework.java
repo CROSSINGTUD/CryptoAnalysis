@@ -462,14 +462,19 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						imprecise.add(r);
 					}
 				}
-				if (!unsound.isEmpty())
-					throw new RuntimeException("Unsound results: \n" + Joiner.on("\n").join(unsound));
+				StringBuilder errors = new StringBuilder();
+				if (!unsound.isEmpty()) {
+					errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound));
+					//throw new RuntimeException("Unsound results: \n" + Joiner.on("\n").join(unsound));
+				}
 				if (!imprecise.isEmpty()) {
-					throw new ImprecisionException("Imprecise results: " + Joiner.on("\n").join(imprecise));
+					errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise));
+					//throw new ImprecisionException("Imprecise results: " + Joiner.on("\n").join(imprecise));
+				}
+				if (!errors.toString().isEmpty()) {
+					throw new RuntimeException(errors.toString());
 				}
 			}
-
-
 		};
 	}
 

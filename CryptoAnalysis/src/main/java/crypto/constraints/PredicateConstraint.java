@@ -247,19 +247,24 @@ public class PredicateConstraint extends EvaluableConstraint {
 	public boolean isHardCodedVariable(ExtractedValue val) {
 		// Check for basic constants
 		if (val.getValue().isConstant()) {
+			LOGGER.debug("Value {} is hard coded", val.getValue());
 			return true;
 		}
 
 		// Objects initialized with 'new' are hard coded
-		if (val.stmt().getStart().containsInvokeExpr()) {
-			DeclaredMethod declaredMethod = val.stmt().getStart().getInvokeExpr().getMethod();
-
-			if (declaredMethod.isConstructor()) {
-				return true;
-			}
+		Statement statement = val.stmt().getStart();
+		if (!statement.isAssign()) {
+			LOGGER.debug("Value {} is not hard coded", val.getValue());
+			return false;
 		}
 
-		LOGGER.debug("Value {} is not hardCoded", val.getValue());
+		Val rightOp = statement.getRightOp();
+		if (rightOp.isNewExpr()) {
+			LOGGER.debug("Value {} is hard coded", val.getValue());
+			return true;
+		}
+
+		LOGGER.debug("Value {} is not hard coded", val.getValue());
 		return false;
 	}
 

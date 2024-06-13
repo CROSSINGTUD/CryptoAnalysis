@@ -46,17 +46,21 @@ public class CrySLPredicate extends CrySLLiteral {
 	
 	}
 
+	// TODO Make comparison with parameters here
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
+		}
 
-		if (!(obj instanceof CrySLPredicate))
+		if (!(obj instanceof CrySLPredicate)) {
 			return false;
+		}
 
 		CrySLPredicate other = (CrySLPredicate) obj;
-		if(!getPredName().equals(other.getPredName()))
-				return false;
+		if (!getPredName().equals(other.getPredName())) {
+			return false;
+		}
 
 		return true;
 	}

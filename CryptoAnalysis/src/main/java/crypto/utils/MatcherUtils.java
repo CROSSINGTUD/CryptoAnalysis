@@ -24,7 +24,7 @@ public class MatcherUtils {
         }
 
         Set<CrySLMethod> matchingMethods = new HashSet<>();
-        for (CrySLMethod method : allMethods) {
+        for (CrySLMethod method : rule.getEvents()) {
             if (matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {
                 matchingMethods.add(method);
             }

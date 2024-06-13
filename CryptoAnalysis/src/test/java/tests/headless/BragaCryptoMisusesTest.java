@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 
+import crypto.analysis.errors.CallToError;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -643,6 +644,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<ivm.nonceReuse.NonceReuse1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<ivm.nonceReuse.NonceReuse1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<ivm.nonceReuse.NonceReuse1: void main(java.lang.String[])>", CallToError.class, 1);
 
 		scanner.exec();
 		assertErrors();

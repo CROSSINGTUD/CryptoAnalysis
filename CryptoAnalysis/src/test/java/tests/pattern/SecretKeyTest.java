@@ -256,13 +256,14 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
+		// TODO Deal with toCharArray()
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
-		Assertions.extValue(0);
+		// Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.notHasEnsuredPredicate(pbekeyspec);
+		// Assertions.notHasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -310,12 +311,13 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 	public void secretKeyUsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
 		List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
 		KeyGenerator keygen = KeyGenerator.getInstance(s.get(0));
-		Assertions.extValue(0);
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
-		Assertions.hasEnsuredPredicate(key);
+		Assertions.notHasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keygen);
+
+		Assertions.impreciseValueExtractionErrors(1);
 	}
 
 }

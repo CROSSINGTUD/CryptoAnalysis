@@ -58,7 +58,6 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "misses " + predicate + " @ " + stmt.toString();
 	}
 

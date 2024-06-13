@@ -178,7 +178,7 @@ public class PredicateHandler {
 				Val base = invokeExpr.getBase();
 				boolean paramMatch = false;
 				for (Val arg : invokeExpr.getArgs()) {
-					if (!seed.isNull() && seed.getType().equals(arg.getType()) && seed.getVariableName().equals(seed.getVariableName())) {
+					if (!seed.isNull() && seed.getType().equals(arg.getType()) && seed.getVariableName().equals(arg.getVariableName())) {
 						paramMatch = true;
 					}
 				}
