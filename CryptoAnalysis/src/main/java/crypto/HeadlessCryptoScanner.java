@@ -186,7 +186,7 @@ public abstract class HeadlessCryptoScanner {
 			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				TransformerSetup.v().setupPreTransformer(rules);
+				//TransformerSetup.v().setupPreTransformer(rules);
 
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
 				
@@ -239,7 +239,7 @@ public abstract class HeadlessCryptoScanner {
 					reporter.addReportListener(getAdditionalListener());	
 				}
 				
-				CryptoScanner scanner = new CryptoScanner(getExcludeList()) {
+				CryptoScanner scanner = new CryptoScanner(getRules()) {
 
 					@Override
 					public CrySLResultsReporter getAnalysisListener() {
@@ -297,7 +297,7 @@ public abstract class HeadlessCryptoScanner {
 					}
 				}
 				
-				scanner.scan(rules);
+				scanner.scan();
 			}
 		};
 	}

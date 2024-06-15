@@ -15,7 +15,7 @@ import javax.crypto.NoSuchPaddingException;
  * CogniCrypt_SAST reports that the object is destroyed in an non-accepting state, or in other words the object is not used to fulfill a task.
  *
  */
-public class IncompleOperationErrorExample {
+public class IncompleteOperationErrorExample {
 	public static void main(String...args) throws NoSuchAlgorithmException, NoSuchPaddingException, GeneralSecurityException {
 		Signature instance = Signature.getInstance("SHA256withRSA");
 		instance.initSign(getPrivateKey());
@@ -25,7 +25,7 @@ public class IncompleOperationErrorExample {
 		 */
 		instance.sign();
 		
-		IncompleOperationErrorExample ex = new IncompleOperationErrorExample();
+		IncompleteOperationErrorExample ex = new IncompleteOperationErrorExample();
 		ex.doInit();
 		ex.doUpate();
 		ex.doSign();

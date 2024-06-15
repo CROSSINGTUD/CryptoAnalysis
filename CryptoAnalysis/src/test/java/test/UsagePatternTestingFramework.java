@@ -111,11 +111,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		return new SceneTransformer() {
 
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				TransformerSetup.v().setupPreTransformer(rules);
+				//TransformerSetup.v().setupPreTransformer(rules);
 
 				callGraph = new SootCallGraph();
 				final Set<Assertion> expectedResults = extractBenchmarkMethods(JimpleMethod.of(sootTestMethod));
-				scanner = new CryptoScanner(excludedPackages()) {
+				scanner = new CryptoScanner(getRules()) {
 
 					@Override
 					public DataFlowScope getDataFlowScope() {
@@ -448,7 +448,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 						return reporters;
 					}
 				};
-				scanner.scan(rules);
+				scanner.scan();
 				
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();

@@ -125,7 +125,7 @@ public abstract class Reporter extends ErrorMarkerListener {
 	
 	@Override
 	public void afterAnalysis() {
-		this.analysisWatch.stop();
+		//this.analysisWatch.stop();
 		
 		this.statistics.setSeedObjectCount(this.objects.size());
 		this.statistics.setAnalysisTime(this.analysisWatch.elapsed(TimeUnit.MILLISECONDS));

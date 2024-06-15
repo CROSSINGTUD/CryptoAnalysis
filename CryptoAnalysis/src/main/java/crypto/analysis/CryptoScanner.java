@@ -9,10 +9,12 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
+import boomerang.scene.jimple.BoomerangPretransformer;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.boomerang.CryptoAnalysisDataFlowScope;
+import crypto.preanalysis.TransformerSetup;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
@@ -36,10 +38,10 @@ public abstract class CryptoScanner {
 
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
-	private final CrySLResultsReporter resultsReporter = new CrySLResultsReporter();
+	private final CrySLResultsReporter resultsReporter;
 
 	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds = new HashMap<>();
-	private final Collection<CrySLRule> ruleset = new HashSet<>();
+	private final Collection<CrySLRule> ruleset;
 
 	private int solvedObject;
 	private Stopwatch analysisWatch;
@@ -62,15 +64,18 @@ public abstract class CryptoScanner {
 		return resultsReporter;
 	}
 
-	public CryptoScanner(Collection<String> excludedClasses) {
+	public CryptoScanner(Collection<CrySLRule> rules) {
+		TransformerSetup.v().reset();
+		TransformerSetup.v().setupPreTransformer(rules);
+
+		resultsReporter = getAnalysisListener();
+		ruleset = new HashSet<>(rules);
 		callGraph = new SootCallGraph();
-		dataFlowScope = CryptoAnalysisDataFlowScope.make(excludedClasses);
+		dataFlowScope = new CryptoAnalysisDataFlowScope(rules);
 	}
 
-	public void scan(Collection<CrySLRule> rules) {
-		ruleset.addAll(rules);
-
-		SeedGenerator generator = new SeedGenerator(this, rules);
+	public void scan() {
+		SeedGenerator generator = new SeedGenerator(this, ruleset);
 		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
 
 		for (IAnalysisSeed seed : seeds) {
@@ -84,6 +89,8 @@ public abstract class CryptoScanner {
 		}
 
 		predicateHandler.checkPredicates();
+
+		resultsReporter.afterAnalysis();
 	}
 
 	public void scan2(List<CrySLRule> specs) {

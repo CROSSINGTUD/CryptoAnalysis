@@ -1,24 +1,33 @@
 package crypto.preanalysis;
 
+import crypto.rules.CrySLRule;
 import soot.Body;
+import soot.SootMethod;
 import soot.Unit;
 import soot.UnitPatchingChain;
 import soot.UnitPrinter;
 import soot.Value;
 import soot.jimple.AssignStmt;
+import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
-import soot.jimple.StaticInvokeExpr;
 import soot.jimple.internal.AbstractStmt;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 public class EmptyStatementTransformer extends PreTransformer {
 
-    private static EmptyStatementTransformer instance;
     private static final String EMPTY_STATEMENT = "empty";
+    private final Collection<String> ruleNames;
 
-    public EmptyStatementTransformer() {
-        super();
+    public EmptyStatementTransformer(Collection<CrySLRule> rules) {
+        this.ruleNames = new HashSet<>();
+
+        for (CrySLRule rule : rules) {
+            ruleNames.add(rule.getClassName());
+        }
     }
 
     @Override
@@ -29,20 +38,10 @@ public class EmptyStatementTransformer extends PreTransformer {
 
         final UnitPatchingChain units = body.getUnits();
         units.snapshotIterator().forEachRemaining(unit -> {
-            if (isStaticAssignStatement(unit) || isConstructorCall(unit)) {
+            if (isConstructorCall(unit) || isAssignmentSeed(unit)) {
                 units.insertAfter(new EmptyStatement(), unit);
             }
         });
-    }
-
-    private boolean isStaticAssignStatement(Unit unit) {
-        if (!(unit instanceof AssignStmt)) {
-            return false;
-        }
-        AssignStmt assignStmt = (AssignStmt) unit;
-
-        Value rightSide = assignStmt.getRightOp();
-        return rightSide instanceof StaticInvokeExpr;
     }
 
     private boolean isConstructorCall(Unit unit) {
@@ -51,18 +50,35 @@ public class EmptyStatementTransformer extends PreTransformer {
         }
 
         InvokeStmt invokeStmt = (InvokeStmt) unit;
-        return invokeStmt.getInvokeExpr().getMethod().isConstructor();
-    }
+        SootMethod sootMethod = invokeStmt.getInvokeExpr().getMethod();
 
-    public static EmptyStatementTransformer v() {
-        if (instance == null) {
-            instance = new EmptyStatementTransformer();
+        if (!sootMethod.isConstructor()) {
+            return false;
         }
-        return instance;
+
+        // Seeds that originate from constructor calls
+        InvokeExpr invokeExpr = invokeStmt.getInvokeExpr();
+        if (!(invokeExpr instanceof InstanceInvokeExpr)) {
+            return false;
+        }
+
+        InstanceInvokeExpr instanceInvokeExpr = (InstanceInvokeExpr) invokeExpr;
+        String callingType = instanceInvokeExpr.getBase().getType().toString();
+
+        return ruleNames.contains(callingType);
     }
 
-    public void reset() {
-        instance = null;
+    private boolean isAssignmentSeed(Unit unit) {
+        if (!(unit instanceof AssignStmt)) {
+            return false;
+        }
+
+        // Seeds that originate from assignments
+        AssignStmt assignStmt = (AssignStmt) unit;
+        Value leftSide = assignStmt.getLeftOp();
+        String leftSideType = leftSide.getType().toString();
+
+        return ruleNames.contains(leftSideType);
     }
 
     private static class EmptyStatement extends AbstractStmt {
