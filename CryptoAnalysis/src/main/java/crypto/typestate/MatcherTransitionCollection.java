@@ -8,7 +8,6 @@ import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
 import typestate.TransitionFunction;
-import typestate.finiteautomata.MatcherTransition;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,7 +20,7 @@ public class MatcherTransitionCollection {
     private final Set<LabeledMatcherTransition> transitions;
     private final Set<LabeledMatcherTransition> initialTransitions;
 
-    public MatcherTransitionCollection(StateMachineGraph smg) {
+    private MatcherTransitionCollection(StateMachineGraph smg) {
         this.smg = smg;
 
         transitions = new HashSet<>();
@@ -29,6 +28,20 @@ public class MatcherTransitionCollection {
 
         initializeExistingTransitions();
         initializeErrorTransitions();
+    }
+
+    public static MatcherTransitionCollection makeCollection(StateMachineGraph smg) {
+        return new MatcherTransitionCollection(smg);
+    }
+
+    public static MatcherTransitionCollection makeOne() {
+        StateMachineGraph smg = new StateMachineGraph();
+        StateNode node = new StateNode("0", true, true);
+
+        smg.addNode(node);
+        smg.createNewEdge(Collections.emptyList(), node, node);
+
+        return new MatcherTransitionCollection(smg);
     }
 
     public TransitionFunction getInitialWeight(ControlFlowGraph.Edge stmt) {
@@ -85,7 +98,7 @@ public class MatcherTransitionCollection {
             WrappedState from = createWrappedState(edge.from());
             WrappedState to = createWrappedState(edge.to());
 
-            LabeledMatcherTransition matcherTransition = new LabeledMatcherTransition(from, edge.getLabel(), MatcherTransition.Parameter.This, to, MatcherTransition.Type.OnCallOrOnCallToReturn);
+            LabeledMatcherTransition matcherTransition = new LabeledMatcherTransition(from, edge.getLabel(), to);
             transitions.add(matcherTransition);
 
             if (smg.getInitialTransitions().contains(edge)) {
@@ -114,17 +127,17 @@ public class MatcherTransitionCollection {
             // Create the error state, where typestate errors are reported
             WrappedState state = createWrappedState(node);
             ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(remainingMethods);
-            LabeledMatcherTransition repErrorTransition = new LabeledMatcherTransition(state, remainingMethods, MatcherTransition.Parameter.This, repErrorState, MatcherTransition.Type.OnCallOrOnCallToReturn);
+            LabeledMatcherTransition repErrorTransition = new LabeledMatcherTransition(state, remainingMethods, repErrorState);
             transitions.add(repErrorTransition);
 
             // Once in an error state, never leave it again
             ErrorStateNode errorState = new ErrorStateNode();
-            LabeledMatcherTransition errorTransition = new LabeledMatcherTransition(repErrorState, allMethods, MatcherTransition.Parameter.This, errorState, MatcherTransition.Type.OnCallOrOnCallToReturn);
+            LabeledMatcherTransition errorTransition = new LabeledMatcherTransition(repErrorState, allMethods, errorState);
             transitions.add(errorTransition);
         }
     }
 
     private WrappedState createWrappedState(StateNode node) {
-        return new WrappedState(node, node.equals(smg.getStartNode()));
+        return WrappedState.of(node, node.equals(smg.getStartNode()));
     }
 }

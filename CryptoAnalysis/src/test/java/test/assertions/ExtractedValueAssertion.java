@@ -22,7 +22,7 @@ public class ExtractedValueAssertion implements Assertion {
 	
 	public void computedValues(Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues){
 		for (Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()) {
-			Statement callSite = e.getKey().stmt().getStart();
+			Statement callSite = e.getKey().stmt();
 
 			if (e.getValue().getValue().equals(Val.zero())) {
 				continue;

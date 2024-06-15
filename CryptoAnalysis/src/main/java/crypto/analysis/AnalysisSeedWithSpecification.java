@@ -1,19 +1,14 @@
 package crypto.analysis;
 
-import boomerang.WeightedForwardQuery;
-import boomerang.debugger.Debugger;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.AllocVal;
-import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -36,14 +31,12 @@ import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import crypto.typestate.ExtendedIDEALAnalysis;
-import crypto.typestate.MatcherTransitionCollection;
 import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.WrappedState;
 import crypto.utils.MatcherUtils;
-import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
@@ -63,68 +56,45 @@ import java.util.stream.Collectors;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
-	private final ClassSpecification spec;
-	private ExtendedIDEALAnalysis analysis;
-	private ForwardBoomerangResults<TransitionFunction> results;
-	private Collection<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
-	private Multimap<ControlFlowGraph.Edge, State> typeStateChange = HashMultimap.create();
-	private Collection<EnsuredCrySLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
-	private Set<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
+	private final CrySLRule specification;
+
+	private ExtractParameterAnalysis parameterAnalysis;
 	private ConstraintSolver constraintSolver;
 	private boolean internalConstraintsSatisfied;
-	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject = Maps.newLinkedHashMap();
-	private ExtractParameterAnalysis parameterAnalysis;
-	private Set<ResultsHandler> resultHandlers = Sets.newHashSet();
+
+	private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
+	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
+
+	private final Collection<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
+	private final Collection<EnsuredCrySLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
+	private final Set<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
+
+	private final Set<ResultsHandler> resultHandlers = Sets.newHashSet();
 	private boolean secure = true;
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, WeightedForwardQuery<TransitionFunction> forwardQuery, ClassSpecification spec) {
-		super(cryptoScanner, forwardQuery);
-		this.spec = spec;
-		this.analysis = new ExtendedIDEALAnalysis() {
-
-			@Override
-			public MatcherTransitionCollection getMatcherTransitions() {
-				return spec.getMatcherTransitions();
-			}
-
-			@Override
-			protected CallGraph callGraph() {
-				return cryptoScanner.callGraph();
-			}
-
-			@Override
-			protected DataFlowScope getDataFlowScope() {
-				return cryptoScanner.getDataFlowScope();
-			}
-
-			@Override
-			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver, AnalysisSeedWithSpecification.this);
-			}
-
-			@Override
-			public CrySLResultsReporter analysisListener() {
-				return cryptoScanner.getAnalysisListener();
-			}
-		};
+	public AnalysisSeedWithSpecification(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results, CrySLRule specification) {
+		super(scanner, statement, fact, results);
+		this.specification = specification;
 	}
 
-	public AnalysisSeedWithSpecification(CryptoScanner cryptoScanner, ControlFlowGraph.Edge edge, Val val, ClassSpecification spec) {
-		this(cryptoScanner, new WeightedForwardQuery<>(edge, val, spec.getInitialWeight(edge)), spec);
+	public static AnalysisSeedWithSpecification makeSeedForComparison(CryptoScanner scanner, Statement statement, Val fact, CrySLRule rule) {
+		return new AnalysisSeedWithSpecification(scanner, statement, fact, null, rule);
 	}
 
 	@Override
 	public String toString() {
-		return "AnalysisSeed [" + super.toString() + " with spec " + spec.getRule().getClassName() + "]";
+		return "AnalysisSeedWithSpec [" + super.toString() + " with spec " + specification.getClassName() + "]";
 	}
 
 	public void execute() {
-		cryptoScanner.getAnalysisListener().seedStarted(this);
-		runTypestateAnalysis();
-		if (results == null)
+		if (analysisResults == null) {
 			// Timeout occured.
 			return;
-		allCallsOnObject = results.getInvokedMethodOnInstance();
+		}
+		scanner.getAnalysisListener().seedStarted(this);
+
+		this.allCallsOnObject = analysisResults.getInvokedMethodOnInstance();
+		notifyResultsHandler();
 		runExtractParameterAnalysis();
 
 		// Check the CONSTRAINTS section
@@ -141,15 +111,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		activateIndirectlyEnsuredPredicates();
 		checkConstraintsAndEnsurePredicates();
 
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, results);
-		cryptoScanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
+		scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
+		scanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
 
 	public void registerResultsHandler(ResultsHandler handler) {
-		if (results != null) {
-			handler.done(results);
+		if (analysisResults != null) {
+			handler.done(analysisResults);
 		} else {
 			resultHandlers.add(handler);
+		}
+	}
+
+	private void notifyResultsHandler() {
+		for (ResultsHandler handler : Lists.newArrayList(resultHandlers)) {
+			handler.done(analysisResults);
 		}
 	}
 
@@ -157,19 +133,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 *                                Typestate checks                                   *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private void runTypestateAnalysis() {
-		analysis.run(getForwardQuery());
-		results = analysis.getResults();
-
-		if (results != null) {
-			for (ResultsHandler handler : Lists.newArrayList(resultHandlers)) {
-				handler.done(results);
-			}
-		}
-	}
 
 	private void runExtractParameterAnalysis() {
-		this.parameterAnalysis = new ExtractParameterAnalysis(this.cryptoScanner, allCallsOnObject, spec.getMatcherTransitions());
+		this.parameterAnalysis = new ExtractParameterAnalysis(this.scanner, allCallsOnObject, specification);
 		this.parameterAnalysis.run();
 	}
 
@@ -185,14 +151,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Statement statement = calledMethod.getKey().getStart();
 				DeclaredMethod declaredMethod = calledMethod.getValue();
 
-				ForbiddenMethodError error = new ForbiddenMethodError(statement, spec.getRule(), declaredMethod, alternatives);
-				cryptoScanner.getAnalysisListener().reportError(this, error);
+				ForbiddenMethodError error = new ForbiddenMethodError(statement, specification, declaredMethod, alternatives);
+				scanner.getAnalysisListener().reportError(this, error);
 			}
 		}
 	}
 
 	private Optional<CrySLForbiddenMethod> isForbiddenMethod(DeclaredMethod declaredMethod) {
-		Collection<CrySLForbiddenMethod> forbiddenMethods = spec.getRule().getForbiddenMethods();
+		Collection<CrySLForbiddenMethod> forbiddenMethods = specification.getForbiddenMethods();
 
 		for (CrySLForbiddenMethod method : forbiddenMethods) {
 			if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method.getMethod(), declaredMethod)) {
@@ -203,33 +169,38 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	}
 
 	private void evaluateTypestateOrder() {
-		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+		Collection<ControlFlowGraph.Edge> allTypestateChangeStatements = new HashSet<>();
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : analysisResults.asStatementValWeightTable().cellSet()) {
+			allTypestateChangeStatements.addAll(cell.getValue().getLastStateChangeStatements());
+		}
+
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
 			ControlFlowGraph.Edge curr = c.getRowKey();
 
-			if (allCallsOnObject.containsKey(curr)) {
+			if (allTypestateChangeStatements.contains(curr)) {
 				Collection<? extends State> targetStates = getTargetStates(c.getValue());
 
 				for (State newStateAtCurr : targetStates) {
-					typeStateChangeAtStatement(curr, newStateAtCurr);
+					typeStateChangeAtStatement(curr.getTarget(), newStateAtCurr);
 				}
 			}
 		}
 	}
 
-	private void typeStateChangeAtStatement(ControlFlowGraph.Edge statement, State stateNode) {
+	private void typeStateChangeAtStatement(Statement statement, State stateNode) {
 		if (typeStateChange.put(statement, stateNode)) {
 			if (stateNode instanceof ReportingErrorStateNode) {
 				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
 
-				TypestateError typestateError = new TypestateError(statement.getStart(), getSpec().getRule(), this, errorStateNode.getExpectedCalls());
+				TypestateError typestateError = new TypestateError(statement, specification, this, errorStateNode.getExpectedCalls());
 				this.addError(typestateError);
-				cryptoScanner.getAnalysisListener().reportError(this, typestateError);
+				scanner.getAnalysisListener().reportError(this, typestateError);
 			}
 		}
 	}
 
 	private void evaluateIncompleteOperations() {
-		Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation = results.getObjectDestructingStatements();
+		Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation = analysisResults.getObjectDestructingStatements();
 		Map<ControlFlowGraph.Edge, Set<CrySLMethod>> incompleteOperations = new HashMap<>();
 
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : endPathOfPropagation.cellSet()) {
@@ -249,7 +220,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				}
 
 				WrappedState wrappedState = (WrappedState) n.to();
-				for (TransitionEdge t : spec.getRule().getUsagePattern().getAllTransitions()) {
+				for (TransitionEdge t : specification.getUsagePattern().getAllTransitions()) {
 					if (t.getLeft().equals(wrappedState.delegate()) && !t.from().equals(t.to())) {
 						List<CrySLMethod> labels = t.getLabel();
 						expectedMethodsToBeCalled.addAll(labels);
@@ -279,9 +250,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				return;
 			}
 
-			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, spec.getRule(), methodsToBeCalled);
+			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, specification, methodsToBeCalled);
 			this.addError(incompleteOperationError);
-			cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
+			scanner.getAnalysisListener().reportError(this, incompleteOperationError);
 		}
 
 		/* Multiple incomplete operations were found. Depending on the dataflow paths, the
@@ -308,15 +279,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					continue;
 				}
 
-				IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, spec.getRule(), expectedMethodsToBeCalled, true);
+				IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, specification, expectedMethodsToBeCalled, true);
 				this.addError(incompleteOperationError);
-				cryptoScanner.getAnalysisListener().reportError(this, incompleteOperationError);
+				scanner.getAnalysisListener().reportError(this, incompleteOperationError);
 			}
 		}
 	}
 
 	private boolean isMethodToAcceptingState(DeclaredMethod method) {
-		Collection<TransitionEdge> transitions = spec.getRule().getUsagePattern().getAllTransitions();
+		Collection<TransitionEdge> transitions = specification.getUsagePattern().getAllTransitions();
 
 		for (TransitionEdge edge : transitions) {
             if (edge.getLabel().stream().noneMatch(e -> MatcherUtils.matchCryslMethodAndDeclaredMethod(e, method))) {
@@ -358,9 +329,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void checkConstraintsAndEnsurePredicates() {
 		boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
 
-		for (CrySLPredicate predToBeEnsured : spec.getRule().getPredicates()) {
+		for (CrySLPredicate predToBeEnsured : specification.getPredicates()) {
 			boolean isPredicateGeneratingStateAvailable = false;
-			for (Entry<ControlFlowGraph.Edge, State> entry : typeStateChange.entries()) {
+			for (Entry<Statement, State> entry : typeStateChange.entries()) {
+				Statement statement = entry.getKey();
 				State state = entry.getValue();
 
 				// Check, whether the predicate should be generated in state
@@ -385,7 +357,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					// constraints are satisfied and predicate has no condition or the condition is satisfied
 					ensPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
 				}
-				ensurePredicate(ensPred, entry.getKey(), entry.getValue());
+				ensurePredicate(ensPred, statement, entry.getValue());
 			}
 
 			if (parameterAnalysis != null && !isPredicateGeneratingStateAvailable) {
@@ -395,8 +367,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				 */
 				HiddenPredicate hiddenPredicate = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.GeneratingStateIsNeverReached);
 
-				for (Entry<ControlFlowGraph.Edge, State> entry : typeStateChange.entries()) {
-					ensurePredicate(hiddenPredicate, entry.getKey(), entry.getValue());
+				for (Entry<Statement, State> entry : typeStateChange.entries()) {
+					Statement statement = entry.getKey();
+					State state = entry.getValue();
+
+					ensurePredicate(hiddenPredicate, statement, state);
 				}
 			}
 		}
@@ -407,34 +382,33 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * if any constraint (CONSTRAINTS, ORDER or REQUIRES) is not satisfied, for the given statement.
 	 *
 	 * @param ensuredPred the predicate to be ensured
-	 * @param currStmt the statement before the type change
+	 * @param statement the statement before the type change
 	 * @param stateNode the next state after executing {@code currStmt}
 	 */
-	private void ensurePredicate(EnsuredCrySLPredicate ensuredPred, ControlFlowGraph.Edge currStmt, State stateNode) {
+	private void ensurePredicate(EnsuredCrySLPredicate ensuredPred, Statement statement, State stateNode) {
 		// TODO only for first parameter?
 		for (ICrySLPredicateParameter predicateParam : ensuredPred.getPredicate().getParameters()) {
 			if (predicateParam.getName().equals("this")) {
-				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode, currStmt);
+				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode, statement);
 			}
 		}
 
-		Statement statement = currStmt.getStart();
 		if (!statement.containsInvokeExpr()) {
 			return;
 		}
 
 		DeclaredMethod invokedMethod = statement.getInvokeExpr().getMethod();
-		Collection<CrySLMethod> convert = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(spec.getRule(), invokedMethod);
+		Collection<CrySLMethod> convert = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(specification, invokedMethod);
 
 		// Check, whether the predicate should be ensured on another object
 		for (CrySLMethod crySLMethod : convert) {
 			Entry<String, String> retObject = crySLMethod.getRetObject();
-			if (!retObject.getKey().equals("_") && statement.isAssign() && predicateParameterEquals(ensuredPred.getPredicate().getParameters(), retObject.getKey())) {
+			if (!retObject.getKey().equals(CrySLMethod.NO_NAME) && statement.isAssign() && predicateParameterEquals(ensuredPred.getPredicate().getParameters(), retObject.getKey())) {
 				Val leftOp = statement.getLeftOp();
 				Val rightOp = statement.getRightOp();
 
 				AllocVal val = new AllocVal(leftOp, statement, rightOp);
-				expectPredicateOnOtherObject(ensuredPred, currStmt, val);
+				expectPredicateOnOtherObject(ensuredPred, statement, val);
 			}
 			int i = 0;
 			for (Entry<String, String> p : crySLMethod.getParameters()) {
@@ -443,7 +417,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 					if (param.isLocal()) {
 						AllocVal allocVal = new AllocVal(param, statement, param);
-						expectPredicateOnOtherObject(ensuredPred, currStmt, allocVal);
+						expectPredicateOnOtherObject(ensuredPred, statement, allocVal);
 					}
 				}
 				i++;
@@ -467,14 +441,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 *
 	 * @param ensuredPred the predicate to ensure on this seed
 	 * @param stateNode the state, where the predicate is expected to be ensured
-	 * @param currStmt the statement that leads to the state
+	 * @param statement the statement that leads to the state
 	 */
-	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, ControlFlowGraph.Edge currStmt) {
-		predicateHandler.expectPredicate(this, currStmt.getTarget(), ensuredPred.getPredicate());
+	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, Statement statement) {
+		predicateHandler.expectPredicate(this, statement, ensuredPred.getPredicate());
 
-		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : results.asStatementValWeightTable().cellSet()) {
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : analysisResults.asStatementValWeightTable().cellSet()) {
 			if (containsTargetState(e.getValue(), stateNode)) {
-				predicateHandler.addNewPred(this, e.getRowKey(), e.getColumnKey(), ensuredPred);
+				predicateHandler.addNewPred(this, e.getRowKey().getStart(), e.getColumnKey(), ensuredPred);
 			}
 		}
 	}
@@ -496,43 +470,53 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * Ensure a predicate on another object. The predicate is added to the other seed's ensured predicates
 	 *
 	 * @param ensPred the predicate to ensure
-	 * @param edge the statement that ensures the predicate
-	 * @param accessGraph holds the value for the other seed's type
+	 * @param statement the statement that ensures the predicate
+	 * @param fact holds the value for the other seed's type
 	 */
-	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, ControlFlowGraph.Edge edge, Val accessGraph) {
+	private void expectPredicateOnOtherObject(EnsuredCrySLPredicate ensPred, Statement statement, Val fact) {
 		boolean specificationExists = false;
 
 		// Check, whether there is a specification (i.e. a CrySL rule) for the target object
-		for (ClassSpecification spec : cryptoScanner.getClassSpecifications()) {
-			if (accessGraph.isNull()) {
+		for (CrySLRule rule : scanner.getRuleset()) {
+			if (fact.isNull()) {
 				continue;
 			}
 
-			Type baseType = accessGraph.getType();
+			Type baseType = fact.getType();
 			if (!baseType.isRefType()) {
 				continue;
 			}
 
-			// TODO Use refType (return type) or static type?
-			if (baseType.getWrappedClass().getName().equals(spec.getRule().getClassName())) {
-				AnalysisSeedWithSpecification seed = cryptoScanner.getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(cryptoScanner, edge, accessGraph, spec));
-				seed.addEnsuredPredicateFromOtherRule(ensPred);
+			if (baseType.getWrappedClass().getName().equals(rule.getClassName())) {
+				Optional<AnalysisSeedWithSpecification> seed = scanner.getSeedWithSpec(AnalysisSeedWithSpecification.makeSeedForComparison(scanner, statement, fact, rule));
 
+				if (!seed.isPresent()) {
+					LOGGER.debug("{} has not been discovered in the Typestate Analysis", seed);
+					continue;
+				}
+
+				seed.get().addEnsuredPredicateFromOtherRule(ensPred);
 				specificationExists = true;
 			}
 		}
 
 		// If no specification has been found, create a seed without a specification
 		if (!specificationExists) {
-			AnalysisSeedWithEnsuredPredicate seed = cryptoScanner.getOrCreateSeedWithoutSpec(new AnalysisSeedWithEnsuredPredicate(cryptoScanner, edge, accessGraph));
-			predicateHandler.expectPredicate(seed, edge.getStart(), ensPred.getPredicate());
-			seed.addEnsuredPredicate(ensPred);
+			Optional<AnalysisSeedWithEnsuredPredicate> seed = scanner.getSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate.makeSeedForComparison(scanner, statement, fact));
+
+			if (!seed.isPresent()) {
+				LOGGER.debug("{} has not been discovered in the Typestate Analysis", seed);
+				return;
+			}
+
+			predicateHandler.expectPredicate(seed.get(), statement, ensPred.getPredicate());
+			seed.get().addEnsuredPredicate(ensPred);
 		}
 	}
 
 	private void addEnsuredPredicateFromOtherRule(EnsuredCrySLPredicate ensuredCrySLPredicate) {
 		indirectlyEnsuredPredicates.add(ensuredCrySLPredicate);
-		if (results == null) {
+		if (analysisResults == null) {
 			return;
 		}
 
@@ -545,7 +529,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void activateIndirectlyEnsuredPredicates() {
 		for (EnsuredCrySLPredicate pred : indirectlyEnsuredPredicates) {
 			Collection<ICrySLPredicateParameter> parameters = pred.getPredicate().getParameters();
-			String specName = spec.getRule().getClassName();
+			String specName = specification.getClassName();
 			boolean hasThisParameter = parameters.stream().anyMatch(p -> p instanceof CrySLObject && ((CrySLObject) p).getJavaType().equals(specName));
 
 			if (!hasThisParameter) {
@@ -574,7 +558,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			 * and ensure it in all accepting states that do not negate it
 			 */
 			addEnsuredPredicate(predWithThis);
-			for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : results.asStatementValWeightTable().cellSet()) {
+			for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
 				Collection<? extends State> states = getTargetStates(c.getValue());
 
 				for (State state : states) {
@@ -582,8 +566,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						continue;
 					}
 
+					Statement statement = c.getRowKey().getStart();
+					Val val = c.getColumnKey();
 					if (state.isAccepting()) {
-						predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), predWithThis);
+						predicateHandler.addNewPred(this, statement, val, predWithThis);
 					}
 				}
 			}
@@ -608,7 +594,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (conditionalMethods == null)
 			return false;
 		for (StateNode s : conditionalMethods) {
-			if (new WrappedState(s).equals(state)) {
+			if (WrappedState.of(s).equals(state)) {
 				return true;
 			}
 		}
@@ -617,7 +603,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private boolean isPredicateNegatingState(CrySLPredicate ensPred, State stateNode) {
 		// Check, whether the predicate is negated in the given state
-		for (CrySLPredicate negPred : spec.getRule().getNegatedPredicates()) {
+		for (CrySLPredicate negPred : specification.getNegatedPredicates()) {
 			// Compare names
 			if (!ensPred.getPredName().equals(negPred.getPredName())) {
 				continue;
@@ -636,7 +622,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			CrySLCondPredicate condNegPred = (CrySLCondPredicate) negPred;
 
 			for (StateNode s : condNegPred.getConditionalMethods()) {
-				if (new WrappedState(s).equals(stateNode)) {
+				if (WrappedState.of(s).equals(stateNode)) {
 					return true;
 				}
 			}
@@ -677,11 +663,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * Check the constraints from the CONSTRAINTS section
 	 */
 	private boolean checkInternalConstraints() {
-		cryptoScanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), cryptoScanner.getAnalysisListener());
-		cryptoScanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
+		scanner.getAnalysisListener().beforeConstraintCheck(this);
+		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), scanner.getAnalysisListener());
+		scanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
 		boolean constraintsSatisfied = (0 == constraintSolver.evaluateRelConstraints());
-		cryptoScanner.getAnalysisListener().afterConstraintCheck(this);
+		scanner.getAnalysisListener().afterConstraintCheck(this);
 
 		return constraintsSatisfied;
 	}
@@ -694,9 +680,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 */
 	private boolean isConstraintSystemSatisfied() {
 		if (internalConstraintsSatisfied) {
-			cryptoScanner.getAnalysisListener().beforePredicateCheck(this);
+			scanner.getAnalysisListener().beforePredicateCheck(this);
 			boolean requiredPredicatesEnsured = checkPredicates().isEmpty();
-			cryptoScanner.getAnalysisListener().afterPredicateCheck(this);
+			scanner.getAnalysisListener().afterPredicateCheck(this);
 
 			return requiredPredicatesEnsured;
 		}
@@ -865,7 +851,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
 		Collection<String> values = new ArrayList<>();
 		for (ExtractedValue q : collection) {
-			Statement statement = q.stmt().getStart();
+			Statement statement = q.stmt();
 
 			if (cswpi.stmt().equals(q.stmt())) {
 				if (statement.isAssign()) {
@@ -910,7 +896,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private final static List<String> trackedTypes = Arrays.asList("java.lang.String", "int", "java.lang.Integer");
 
 	private boolean isOfNonTrackableType(String varName) {
-		for (Entry<String, String> object : spec.getRule().getObjects()) {
+		for (Entry<String, String> object : specification.getObjects()) {
 			if (object.getKey().equals(varName) && trackedTypes.contains(object.getValue())) {
 				return false;
 			}
@@ -922,8 +908,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 *                               Additional methods	                                 *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	public ClassSpecification getSpec() {
-		return spec;
+	public CrySLRule getSpecification() {
+		return specification;
 	}
 
 	public ExtractParameterAnalysis getParameterAnalysis() {
@@ -934,7 +920,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((spec == null) ? 0 : spec.hashCode());
+		result = prime * result + ((specification == null) ? 0 : specification.hashCode());
 		return result;
 	}
 
@@ -947,13 +933,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (getClass() != obj.getClass())
 			return false;
 		AnalysisSeedWithSpecification other = (AnalysisSeedWithSpecification) obj;
-		if (spec == null) {
-			if (other.spec != null)
-				return false;
-		} else if (!spec.equals(other.spec))
-			return false;
-		return true;
-	}
+		if (specification == null) {
+            return other.specification == null;
+		} else return specification.equals(other.specification);
+    }
 
 	public boolean isSecure() {
 		return secure;

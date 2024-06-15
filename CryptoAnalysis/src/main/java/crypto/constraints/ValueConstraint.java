@@ -31,7 +31,7 @@ public class ValueConstraint extends EvaluableConstraint {
 		List<String> lowerCaseValues = valCons.getValueRange().parallelStream().map(String::toLowerCase).collect(Collectors.toList());
 		for (Entry<String, CallSiteWithExtractedValue> val : values) {
 			if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
-				errors.add(new ConstraintError(val.getValue(), context.getClassSpec().getRule(), context.getObject(), valCons));
+				errors.add(new ConstraintError(val.getValue(), context.getSpecification(), context.getObject(), valCons));
 			}
 		}
     }

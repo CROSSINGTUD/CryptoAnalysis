@@ -24,7 +24,7 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 	private final CallSiteWithExtractedValue callSiteWithParamIndex;
 
 	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs.getCallSite().stmt().getStart(), rule, objectLocation);
+		super(cs.getCallSite().stmt(), rule, objectLocation);
 		this.callSiteWithParamIndex = cs;
 		this.brokenConstraint = con;
 	}
@@ -128,7 +128,7 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 		msg.append(" should be any of ");
 		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Statement stmt = callSiteWithParamIndex.getVal().stmt().getStart();
+			Statement stmt = callSiteWithParamIndex.getVal().stmt();
 			String[] splitValues = new String[] { "" };
 			if (stmt.isAssign()) {
 				Val rightSide = stmt.getRightOp();

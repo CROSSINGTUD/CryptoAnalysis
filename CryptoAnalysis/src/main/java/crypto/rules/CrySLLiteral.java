@@ -1,18 +1,18 @@
 package crypto.rules;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import crypto.interfaces.ISLConstraint;
 
 public abstract class CrySLLiteral implements ISLConstraint {
 
 	private static final long serialVersionUID = 1L;
-	private ControlFlowGraph.Edge location;
+	private Statement location;
 
-	public void setLocation(ControlFlowGraph.Edge location) {
+	public void setLocation(Statement location) {
 		this.location = location;
 	}
 	
-	public ControlFlowGraph.Edge getLocation() {
+	public Statement getLocation() {
 		return location;
 	}
 

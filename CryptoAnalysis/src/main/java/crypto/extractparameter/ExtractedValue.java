@@ -1,18 +1,19 @@
 package crypto.extractparameter;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 
 public class ExtractedValue {
-	private ControlFlowGraph.Edge stmt;
-	private Val val;
 
-	public ExtractedValue(ControlFlowGraph.Edge stmt, Val val) {
+	private final Statement stmt;
+	private final Val val;
+
+	public ExtractedValue(Statement stmt, Val val) {
 		this.stmt = stmt;
 		this.val = val;
 	}
 
-	public ControlFlowGraph.Edge stmt() {
+	public Statement stmt() {
 		return stmt;
 	}
 	
@@ -22,7 +23,7 @@ public class ExtractedValue {
 	
 	@Override
 	public String toString() {
-		return "Extracted Value: " + val + " at " +stmt;
+		return "Extracted Value: " + val + " at " + stmt;
 	}
 
 	@Override
@@ -49,11 +50,8 @@ public class ExtractedValue {
 		} else if (!stmt.equals(other.stmt))
 			return false;
 		if (val == null) {
-			if (other.val != null)
-				return false;
-		} else if (!val.equals(other.val))
-			return false;
-		return true;
-	}
+            return other.val == null;
+		} else return val.equals(other.val);
+    }
 	
 }

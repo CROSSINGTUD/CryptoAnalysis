@@ -29,7 +29,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
-				errors.add(new ConstraintError(entry.getValue(), context.getClassSpec().getRule(), context.getObject(),
+				errors.add(new ConstraintError(entry.getValue(), context.getSpecification(), context.getObject(),
 						compConstraint));
 				return;
 			}
@@ -37,7 +37,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
-				errors.add(new ConstraintError(leftie.getValue(), context.getClassSpec().getRule(), context.getObject(),
+				errors.add(new ConstraintError(leftie.getValue(), context.getSpecification(), context.getObject(),
 						compConstraint));
 				return;
 			}
@@ -67,8 +67,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 						cons = false;
 				}
 				if (!cons) {
-					errors.add(
-							new ConstraintError(leftie.getValue(), context.getClassSpec().getRule(), context.getObject(), origin));
+					errors.add(new ConstraintError(leftie.getValue(), context.getSpecification(), context.getObject(), origin));
 					return;
 				}
 			}

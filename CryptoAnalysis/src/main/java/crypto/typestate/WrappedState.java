@@ -7,14 +7,22 @@ public class WrappedState implements State {
 	private final StateNode delegate;
 	private final boolean initialState;
 
-	WrappedState(StateNode delegate, boolean initialState) {
+	private WrappedState(StateNode delegate, boolean initialState) {
 		this.delegate = delegate;
 		this.initialState = initialState;
 	}
 
-	public WrappedState(StateNode delegate) {
+	private WrappedState(StateNode delegate) {
 		this.delegate = delegate;
 		this.initialState = false;
+	}
+
+	public static WrappedState of(StateNode delegate, boolean initialState) {
+		return new WrappedState(delegate, initialState);
+	}
+
+	public static WrappedState of(StateNode delegate) {
+		return new WrappedState(delegate);
 	}
 	
 	public StateNode delegate(){
@@ -63,6 +71,6 @@ public class WrappedState implements State {
 
 	@Override
 	public String toString() {
-		return delegate.getName().toString();
+		return delegate.getName();
 	}
 }

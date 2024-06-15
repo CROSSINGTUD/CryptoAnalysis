@@ -19,7 +19,7 @@ public class SeedFactory {
 
 	public SeedFactory(List<CrySLRule> rules) {
 		for(CrySLRule rule : rules){
-			idealAnalysisDefs.add(new FiniteStateMachineToTypestateChangeFunction(new MatcherTransitionCollection(rule.getUsagePattern())));
+			idealAnalysisDefs.add(new FiniteStateMachineToTypestateChangeFunction(MatcherTransitionCollection.makeCollection(rule.getUsagePattern())));
 		}
 	}
 

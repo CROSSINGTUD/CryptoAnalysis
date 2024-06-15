@@ -6,6 +6,7 @@ import crypto.utils.MatcherUtils;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -13,17 +14,14 @@ public class LabeledMatcherTransition extends MatcherTransition {
 
     private final Collection<CrySLMethod> methods;
 
-    public LabeledMatcherTransition(State from, Collection<CrySLMethod> methods, Parameter param, State to, Type type) {
-        super(from, "", param, to, type);
+    public LabeledMatcherTransition(State from, Collection<CrySLMethod> methods, State to) {
+        super(from, "", Parameter.This, to, Type.OnCallOrOnCallToReturn);
 
         this.methods = methods;
     }
 
     @Override
     public boolean matches(DeclaredMethod declaredMethod) {
-        //if (declaredMethod.toString().equals("<javax.crypto.Cipher: void init(int,java.security.Key)>")) {
-        //    System.out.println("found");
-        //}
         return getMatching(declaredMethod).isPresent();
     }
 
@@ -55,5 +53,15 @@ public class LabeledMatcherTransition extends MatcherTransition {
 
         LabeledMatcherTransition matcherTransition = (LabeledMatcherTransition) other;
         return this.methods.equals(matcherTransition.getMethods());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[] {
+                super.hashCode(),
+                from(),
+                to(),
+                methods
+        });
     }
 }

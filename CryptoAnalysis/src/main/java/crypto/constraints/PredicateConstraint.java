@@ -76,7 +76,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 				}
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-				Collection<CrySLMethod> matchingCryslMethods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(context.getClassSpec().getRule(), foundCall);
+				Collection<CrySLMethod> matchingCryslMethods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(context.getSpecification(), foundCall);
 				if (matchingCryslMethods.contains(predMethod)) {
 					isCalled = true;
 				}
@@ -85,7 +85,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 		if (!isCalled) {
 			IAnalysisSeed seed = context.getObject();
-			CallToError callToError = new CallToError(seed.cfgEdge().getStart(), seed, context.getClassSpec().getRule(), methods);
+			CallToError callToError = new CallToError(seed.getOrigin(), seed, context.getSpecification(), methods);
 			errors.add(callToError);
 		}
 	}
@@ -101,7 +101,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
 				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
-					NoCallToError noCallToError = new NoCallToError(statement, context.getObject(), context.getClassSpec().getRule());
+					NoCallToError noCallToError = new NoCallToError(statement, context.getObject(), context.getSpecification());
 					errors.add(noCallToError);
 				}
 			}
@@ -132,7 +132,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(callSite, context.getClassSpec().getRule(), context.getObject(), neverTypeOfPredicate);
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(callSite, context.getSpecification(), context.getObject(), neverTypeOfPredicate);
 				errors.add(neverTypeOfError);
 			}
 		}
@@ -157,7 +157,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 			for (ExtractedValue extractedValue : extractedValues) {
 				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
 					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
-					HardCodedError hardCodedError = new HardCodedError(callSiteWithExtractedValue, context.getClassSpec().getRule(), context.getObject(), hardCodedPredicate);
+					HardCodedError hardCodedError = new HardCodedError(callSiteWithExtractedValue, context.getSpecification(), context.getObject(), hardCodedPredicate);
 					errors.add(hardCodedError);
 				}
 			}
@@ -195,7 +195,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 			if (!isSubType) {
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				InstanceOfError instanceOfError = new InstanceOfError(callSite, context.getClassSpec().getRule(), context.getObject(), instanceOfPredicate);
+				InstanceOfError instanceOfError = new InstanceOfError(callSite, context.getSpecification(), context.getObject(), instanceOfPredicate);
 				errors.add(instanceOfError);
 			}
 		}
@@ -252,7 +252,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 
 		// Objects initialized with 'new' are hard coded
-		Statement statement = val.stmt().getStart();
+		Statement statement = val.stmt();
 		if (!statement.isAssign()) {
 			LOGGER.debug("Value {} is not hard coded", val.getValue());
 			return false;

@@ -13,18 +13,16 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 
 /**
+ * The following headless tests are deducted from the Braga et al. paper which benchmarks
+ * several static analyzer tools against several hundred test projects containing various
+ * Cryptographic providers of the JCA framework. For the creation of these headless tests,
+ * various projects from Braga paper were considered and used for testing the provider
+ * detection functionality. The test projects of the paper can be found in the link below:
+ * <a href="https://bitbucket.org/alexmbraga/cryptomisuses/src/master/">BragaCryptoMisuses</a>
+ *
  * @author Enri Ozuni
  */
 public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
-	/**
-	 * The following headless tests are deducted from the Braga et al. paper which benchmarks
-	 * several static analyzer tools against several hundred test projects containing various
-	 * Cryptographic providers of the JCA framework. For the creation of these headless tests,
-	 * various projects from Braga paper were considered and used for testing the provider
-	 * detection functionality. The test projects of the paper can be found in the link below:
-	 *
-	 * https://bitbucket.org/alexmbraga/cryptomisuses/src/master/
-	 */
 
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptomisuses/src/master/wc/brokenInsecureHash/
@@ -58,8 +56,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", ConstraintError.class, 8);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 8);
-		// setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", ConstraintError.class, 8);
-		// setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
+		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", ConstraintError.class, 8);
+		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC4: void main(java.lang.String[])>", ConstraintError.class, 4);
@@ -175,11 +173,13 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -278,6 +278,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<br.fixedSeed.FixedSeed2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed3: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<br.fixedSeed.FixedSeed4: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+
 		scanner.exec();
 		assertErrors();
 	}
@@ -415,6 +416,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefault3DES: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -689,14 +691,17 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -746,6 +751,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.printPrivSecKey.PrintPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		
 		setErrorsCount("<cib.printPrivSecKey.PrintSecKey1: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<cib.printPrivSecKey.PrintSecKey1: void main(java.lang.String[])>", CallToError.class, 1);
 		
 		// positive test case
 		setErrorsCount("<cib.printPrivSecKey.PrintDHSecret1: void positiveTestCase()>", ConstraintError.class, 0);
@@ -778,6 +784,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCrypto3DES: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCrypto3DES: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCrypto3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 3);

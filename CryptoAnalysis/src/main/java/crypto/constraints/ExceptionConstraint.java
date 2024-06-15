@@ -78,7 +78,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 			Stmt sootStmt = jimpleStatement.getDelegate();
 
 			if (!getTrap(sootMethod.getActiveBody(), sootStmt, this.exception).isPresent())
-				errors.add(new UncaughtExceptionError(stmt, context.getClassSpec().getRule(), this.exception));
+				errors.add(new UncaughtExceptionError(stmt, context.getSpecification(), this.exception));
 		} catch (Exception e) {
 		}
 	}

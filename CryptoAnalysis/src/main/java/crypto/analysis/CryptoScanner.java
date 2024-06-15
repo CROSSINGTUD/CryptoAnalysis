@@ -1,6 +1,5 @@
 package crypto.analysis;
 
-import boomerang.WeightedForwardQuery;
 import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.callgraph.ObservableICFG;
@@ -10,14 +9,12 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
-import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.boomerang.CryptoAnalysisDataFlowScope;
 import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLRule;
-import heros.utilities.DefaultValueMap;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,33 +22,25 @@ import typestate.TransitionFunction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public abstract class CryptoScanner {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CryptoScanner.class);
+
 	private final LinkedList<IAnalysisSeed> worklist = Lists.newLinkedList();
-	private final List<ClassSpecification> specifications = Lists.newLinkedList();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
-	private CrySLResultsReporter resultsAggregator = new CrySLResultsReporter();
-	private static final Logger logger = LoggerFactory.getLogger(CryptoScanner.class);
+	private final CrySLResultsReporter resultsReporter = new CrySLResultsReporter();
 
-	private DefaultValueMap<AnalysisSeedWithEnsuredPredicate, AnalysisSeedWithEnsuredPredicate> seedsWithoutSpec = new DefaultValueMap<AnalysisSeedWithEnsuredPredicate, AnalysisSeedWithEnsuredPredicate>() {
+	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds = new HashMap<>();
+	private final Collection<CrySLRule> ruleset = new HashSet<>();
 
-		@Override
-		protected AnalysisSeedWithEnsuredPredicate createItem(AnalysisSeedWithEnsuredPredicate key) {
-			return new AnalysisSeedWithEnsuredPredicate(CryptoScanner.this, key.cfgEdge(), key.getFact());
-		}
-	};
-	private DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification> seedsWithSpec = new DefaultValueMap<AnalysisSeedWithSpecification, AnalysisSeedWithSpecification>() {
-
-		@Override
-		protected AnalysisSeedWithSpecification createItem(AnalysisSeedWithSpecification key) {
-			return new AnalysisSeedWithSpecification(CryptoScanner.this, key.getForwardQuery(), key.getSpec());
-		}
-	};
 	private int solvedObject;
 	private Stopwatch analysisWatch;
 	private CallGraph callGraph;
@@ -70,26 +59,42 @@ public abstract class CryptoScanner {
 	}
 
 	public CrySLResultsReporter getAnalysisListener() {
-		return resultsAggregator;
-	};
+		return resultsReporter;
+	}
 
 	public CryptoScanner(Collection<String> excludedClasses) {
 		callGraph = new SootCallGraph();
 		dataFlowScope = CryptoAnalysisDataFlowScope.make(excludedClasses);
 	}
 
-	public void scan(List<CrySLRule> specs) {
-		int processedSeeds = 0;
-		for (CrySLRule rule : specs) {
-			specifications.add(new ClassSpecification(rule, this));
+	public void scan(Collection<CrySLRule> rules) {
+		ruleset.addAll(rules);
+
+		SeedGenerator generator = new SeedGenerator(this, rules);
+		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
+
+		for (IAnalysisSeed seed : seeds) {
+			discoveredSeeds.put(seed, seed);
 		}
+
+		resultsReporter.addProgress(0, seeds.size());
+		for (int i = 0; i < seeds.size(); i++) {
+			seeds.get(i).execute();
+			resultsReporter.addProgress(i, seeds.size());
+		}
+
+		predicateHandler.checkPredicates();
+	}
+
+	public void scan2(List<CrySLRule> specs) {
+		int processedSeeds = 0;
+
 		CrySLResultsReporter listener = getAnalysisListener();
 		listener.beforeAnalysis();
 		analysisWatch = Stopwatch.createStarted();
-		logger.info("Searching for seeds for the analysis!");
-		initialize();
+		LOGGER.info("Searching for seeds for the analysis!");
 		long elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		logger.info("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
+		LOGGER.info("Discovered " + worklist.size() + " analysis seeds within " + elapsed + " seconds!");
 		while (!worklist.isEmpty()) {
 			IAnalysisSeed curr = worklist.poll();
 			listener.discoveredSeed(curr);
@@ -106,7 +111,7 @@ public abstract class CryptoScanner {
 //		}
 		predicateHandler.checkPredicates();
 
-		for (AnalysisSeedWithSpecification seed : getAnalysisSeeds()) {
+		for (AnalysisSeedWithSpecification seed : getAnalysisSeedsWithSpec()) {
 			if (seed.isSecure()) {
 				listener.onSecureObjectFound(seed);
 			}
@@ -114,7 +119,7 @@ public abstract class CryptoScanner {
 		
 		listener.afterAnalysis();
 		elapsed = analysisWatch.elapsed(TimeUnit.SECONDS);
-		logger.info("Static Analysis took " + elapsed + " seconds!");
+		LOGGER.info("Static Analysis took " + elapsed + " seconds!");
 //		debugger().afterAnalysis();
 	}
 
@@ -127,65 +132,14 @@ public abstract class CryptoScanner {
 //			Duration remainingTime = estimate.multipliedBy(remaining);
 //			System.out.println(String.format("Analysis Time: %s", elapsed));
 //			System.out.println(String.format("Estimated Time: %s", remainingTime));
-			logger.info(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
-			logger.info(String.format("Percentage Completed: %s\n",
+			LOGGER.info(String.format("Analyzed Objects: %s of %s", solvedObject, remaining + solvedObject));
+			LOGGER.info(String.format("Percentage Completed: %s\n",
 					((float) Math.round((float) solvedObject * 100 / (remaining + solvedObject))) / 100));
 		}
 	}
 
-	private void initialize() {
-		Set<Method> methods = callGraph().getReachableMethods();
-
-		for (Method method : methods) {
-			for (ClassSpecification spec : getClassSpecifications()) {
-				if (!((JimpleMethod) method).getDelegate().hasActiveBody()) {
-					continue;
-				}
-
-				if (isOnIgnoreSectionList(method)) {
-					continue;
-				}
-
-				for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds(method)) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
-				}
-			}
-		}
-	}
-
-	/*private void initialize() {
-		ReachableMethods rm = Scene.v().getReachableMethods();
-		QueueReader<MethodOrMethodContext> listener = rm.listener();
-		while (listener.hasNext()) {
-			MethodOrMethodContext next = listener.next();
-			SootMethod sootMethod = next.method();
-
-			if (sootMethod == null || !sootMethod.hasActiveBody() || !sootMethod.getDeclaringClass().isApplicationClass()) {
-				continue;
-			}
-
-			Method method = JimpleMethod.of(sootMethod);
-
-			if (isOnIgnoreSectionList(method)) {
-				continue;
-			}
-
-			for (ClassSpecification spec : getClassSpecifications()) {
-				spec.invokesForbiddenMethod(method);
-				
-				for (WeightedForwardQuery<TransitionFunction> seed : spec.getInitialSeeds(method)) {
-					getOrCreateSeedWithSpec(new AnalysisSeedWithSpecification(this, seed, spec));
-				}
-			}
-		}
-	}*/
-
-	public List<ClassSpecification> getClassSpecifications() {
-		return specifications;
-	}
-
-	protected void addToWorkList(IAnalysisSeed analysisSeedWithSpecification) {
-		worklist.add(analysisSeedWithSpecification);
+	public Collection<CrySLRule> getRuleset() {
+		return ruleset;
 	}
 
 	protected boolean isOnIgnoreSectionList(Method method) {
@@ -195,19 +149,19 @@ public abstract class CryptoScanner {
 		for (String ignoredSection : getIgnoredSections()) {
 			// Check for class name
 			if (ignoredSection.equals(declaringClass)) {
-				logger.info("Ignoring seeds in class " + declaringClass);
+				LOGGER.info("Ignoring seeds in class " + declaringClass);
 				return true;
 			}
 
 			// Check for method name
 			if (ignoredSection.equals(methodName)) {
-				logger.info("Ignoring seeds in method " + methodName);
+				LOGGER.info("Ignoring seeds in method " + methodName);
 				return true;
 			}
 
 			// Check for wildcards (i.e. *)
 			if (ignoredSection.endsWith(".*") && declaringClass.startsWith(ignoredSection.substring(0, ignoredSection.length() - 2))) {
-				logger.info("Ignoring seeds in class " + declaringClass + " and method " + methodName);
+				LOGGER.info("Ignoring seeds in class " + declaringClass + " and method " + methodName);
 				return true;
 			}
 		}
@@ -215,25 +169,31 @@ public abstract class CryptoScanner {
 		return false;
 	}
 
-	public AnalysisSeedWithEnsuredPredicate getOrCreateSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate factAtStatement) {
-		boolean addToWorklist = false;
-		if (!seedsWithoutSpec.containsKey(factAtStatement))
-			addToWorklist = true;
+	public Collection<AnalysisSeedWithSpecification> getAnalysisSeedsWithSpec() {
+		Collection<AnalysisSeedWithSpecification> seeds = new HashSet<>();
 
-		AnalysisSeedWithEnsuredPredicate seed = seedsWithoutSpec.getOrCreate(factAtStatement);
-		if (addToWorklist)
-			addToWorkList(seed);
-		return seed;
+		for (IAnalysisSeed seed : discoveredSeeds.keySet()) {
+			if (seed instanceof AnalysisSeedWithSpecification) {
+				seeds.add((AnalysisSeedWithSpecification) seed);
+			}
+		}
+		return seeds;
 	}
 
-	public AnalysisSeedWithSpecification getOrCreateSeedWithSpec(AnalysisSeedWithSpecification factAtStatement) {
-		boolean addToWorklist = false;
-		if (!seedsWithSpec.containsKey(factAtStatement))
-			addToWorklist = true;
-		AnalysisSeedWithSpecification seed = seedsWithSpec.getOrCreate(factAtStatement);
-		if (addToWorklist)
-			addToWorkList(seed);
-		return seed;
+	public Optional<AnalysisSeedWithSpecification> getSeedWithSpec(AnalysisSeedWithSpecification seedAtStatement) {
+		if (discoveredSeeds.containsKey(seedAtStatement)) {
+			AnalysisSeedWithSpecification seed = (AnalysisSeedWithSpecification) discoveredSeeds.get(seedAtStatement);
+			return Optional.of(seed);
+		}
+		return Optional.empty();
+	}
+
+	public Optional<AnalysisSeedWithEnsuredPredicate> getSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate seedAtStatement) {
+		if (discoveredSeeds.containsKey(seedAtStatement)) {
+			AnalysisSeedWithEnsuredPredicate seed = (AnalysisSeedWithEnsuredPredicate) discoveredSeeds.get(seedAtStatement);
+			return Optional.of(seed);
+		}
+		return Optional.empty();
 	}
 
 	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver,
@@ -243,10 +203,6 @@ public abstract class CryptoScanner {
 
 	public PredicateHandler getPredicateHandler() {
 		return predicateHandler;
-	}
-
-	public Collection<AnalysisSeedWithSpecification> getAnalysisSeeds() {
-		return this.seedsWithSpec.values();
 	}
 
 	public Collection<String> getForbiddenPredicates() {

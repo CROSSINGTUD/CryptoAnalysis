@@ -7,12 +7,10 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleType;
-import boomerang.scene.jimple.JimpleVal;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -20,6 +18,7 @@ import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.rules.CrySLMethod;
+import crypto.rules.CrySLRule;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.MatcherTransitionCollection;
 import heros.utilities.DefaultValueMap;
@@ -47,9 +46,11 @@ public class ExtractParameterAnalysis {
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject, MatcherTransitionCollection matcherTransitions) {
+	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject, CrySLRule rule) {
 		this.cryptoScanner = cryptoScanner;
 		this.allCallsOnObject = allCallsOnObject;
+
+		MatcherTransitionCollection matcherTransitions = MatcherTransitionCollection.makeCollection(rule.getUsagePattern());
 		this.events.addAll(matcherTransitions.getAllTransitions());
 	}
 
@@ -65,7 +66,7 @@ public class ExtractParameterAnalysis {
 			for (LabeledMatcherTransition e : events) {
 				Optional<CrySLMethod> matchingMethod = e.getMatching(declaredMethod);
 
-                matchingMethod.ifPresent(crySLMethod -> injectQueryAtCallSite(crySLMethod, stmt.getKey()));
+                matchingMethod.ifPresent(crySLMethod -> injectQueryAtCallSite(crySLMethod, statement));
 			}
 		}
 
@@ -86,24 +87,21 @@ public class ExtractParameterAnalysis {
 		return querySites;
 	}
 
-	private void injectQueryAtCallSite(CrySLMethod match, ControlFlowGraph.Edge callSite) {
-		// TODO edge to getStart()
+	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
 		int index = 0;
 		for (Entry<String, String> param : match.getParameters())
 			addQueryAtCallSite(param.getKey(), callSite, index++);
 	}
 
-	public void addQueryAtCallSite(String varNameInSpecification, ControlFlowGraph.Edge stmt, int index) {
-		Statement statement = stmt.getStart();
-
+	public void addQueryAtCallSite(String varNameInSpecification, Statement statement, int index) {
 		if (!statement.containsInvokeExpr()) {
 			return;
 		}
 
 		Val parameter = statement.getInvokeExpr().getArg(index);
 		if (!parameter.isLocal()) {
-			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
-			collectedValues.put(cs, new ExtractedValue(stmt, parameter));
+			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpecification);
+			collectedValues.put(cs, new ExtractedValue(statement, parameter));
 			querySites.add(cs);
 			return;
 		}
@@ -112,7 +110,7 @@ public class ExtractParameterAnalysis {
 		for (Statement pred : predecessors) {
 			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
 			// TODO Edge to getStart()
-			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, parameter, index, varNameInSpecification);
+			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
 			query.addListener((q, res) -> {
                 propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
@@ -129,9 +127,9 @@ public class ExtractParameterAnalysis {
                     if (v.var() instanceof AllocVal) {
                         AllocVal allocVal = (AllocVal) v.var();
                         // TODO ExtractValue constructor: Edge to Statement
-                        extractedValue = new ExtractedValue(v.cfgEdge(), allocVal.getAllocVal());
+                        extractedValue = new ExtractedValue(v.cfgEdge().getStart(), allocVal.getAllocVal());
                     } else {
-                        extractedValue = new ExtractedValue(v.cfgEdge(), v.var());
+                        extractedValue = new ExtractedValue(v.cfgEdge().getStart(), v.var());
                     }
                     collectedValues.put(callSiteWithParamIndex, extractedValue);
 

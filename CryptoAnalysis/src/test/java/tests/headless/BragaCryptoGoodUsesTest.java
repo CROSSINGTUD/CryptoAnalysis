@@ -15,19 +15,17 @@ import crypto.analysis.errors.TypestateError;
 import tests.headless.FindingsType.FalsePositives;
 
 /**
+ * The following headless tests are deducted from the Braga et al. paper which
+ * benchmarks several static analyzer tools against several hundred test
+ * projects containing various Cryptographic providers of the JCA framework. For
+ * the creation of these headless tests, various projects from Braga paper were
+ * considered and used for testing the provider detection functionality. The
+ * test projects of the paper can be found in the link below:
+ * <a href="https://bitbucket.org/alexmbraga/cryptogooduses/src/master/">BragaCryptoGoodUses</a>
+ *
  * @author Enri Ozuni
  */
-public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
-	/**
-	 * The following headless tests are deducted from the Braga et al. paper which
-	 * benchmarks several static analyzer tools against several hundred test
-	 * projects containing various Cryptographic providers of the JCA framework. For
-	 * the creation of these headless tests, various projects from Braga paper were
-	 * considered and used for testing the provider detection functionality. The
-	 * test projects of the paper can be found in the link below:
-	 * 
-	 * https://bitbucket.org/alexmbraga/cryptogooduses/src/master/
-	 */
+public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 	// This test case corresponds to the following project in BragaCryptoBench:
 	// https://bitbucket.org/alexmbraga/cryptogooduses/src/master/cai/alwaysDefineCSP/
@@ -68,6 +66,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
+		setErrorsCount("<example.PBEwLargeCountAndRandomSalt: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.DoNotSaveToString: void main(java.lang.String[])>", CallToError.class, 1);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
@@ -92,6 +91,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.exec();
 		assertErrors();
@@ -265,6 +265,7 @@ public class BragaCryptoGoodusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.UseQualifiedNameForPBE1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<example.UseExplicitMode1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);

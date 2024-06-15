@@ -78,10 +78,10 @@ public abstract class EvaluableConstraint {
 	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
 		for (CallSiteWithParamIndex wrappedCallSite : context.getParsAndVals().keySet()) {
-			final Statement callSite = wrappedCallSite.stmt().getStart();
+			final Statement callSite = wrappedCallSite.stmt();
 
 			for (ExtractedValue wrappedAllocSite : context.getParsAndVals().get(wrappedCallSite)) {
-				final Statement allocSite = wrappedAllocSite.stmt().getStart();
+				final Statement allocSite = wrappedAllocSite.stmt();
 				if (!wrappedCallSite.getVarName().equals(varName))
 					continue;
 
@@ -180,7 +180,7 @@ public abstract class EvaluableConstraint {
 	protected Map<Integer, Val> extractArray(ExtractedValue extractedValue) {
 		Map<Integer, Val> result = new HashMap<>();
 
-		Statement statement = extractedValue.stmt().getStart();
+		Statement statement = extractedValue.stmt();
 		if (!statement.isAssign()) {
 			return result;
 		}
@@ -192,41 +192,41 @@ public abstract class EvaluableConstraint {
 		}
 
 		AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
-		ForwardQuery forwardQuery = new ForwardQuery(extractedValue.stmt(), allocVal);
+		for (Statement successor : statement.getMethod().getControlFlowGraph().getSuccsOf(statement)) {
+			ForwardQuery forwardQuery = new ForwardQuery(new ControlFlowGraph.Edge(statement, successor), allocVal);
 
-		Boomerang solver = new Boomerang(context.getObject().getCryptoScanner().callGraph(), context.getObject().getCryptoScanner().getDataFlowScope());
-		ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
+			Boomerang solver = new Boomerang(context.getObject().getScanner().callGraph(), context.getObject().getScanner().getDataFlowScope());
+			ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
 
-		for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry : results.asStatementValWeightTable().cellSet()) {
-			Statement stmt = entry.getRowKey().getStart();
-			if (!stmt.isArrayStore()) {
-				continue;
-			}
-
-
-			Val arrayBase = stmt.getLeftOp().getArrayBase().getX();
-			Integer index = stmt.getLeftOp().getArrayBase().getY();
-			if (!arrayBase.equals(allocVal.getDelegate())) {
-				continue;
-			}
-
-			// TODO
-			ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream().findFirst().get(), stmt);
-			BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
-
-			Boomerang indexSolver = new Boomerang(context.getObject().getCryptoScanner().callGraph(), context.getObject().getCryptoScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
-			BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
-
-			for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {
-				Statement allocStmt = allocSite.cfgEdge().getStart();
-
-				if (!allocStmt.isAssign()) {
+			for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry : results.asStatementValWeightTable().cellSet()) {
+				Statement stmt = entry.getRowKey().getStart();
+				if (!stmt.isArrayStore()) {
 					continue;
 				}
 
-				result.put(index, allocStmt.getRightOp());
-			}
+				Val arrayBase = stmt.getLeftOp().getArrayBase().getX();
+				Integer index = stmt.getLeftOp().getArrayBase().getY();
+				if (!arrayBase.equals(allocVal.getDelegate())) {
+					continue;
+				}
 
+				// TODO
+				ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream().findFirst().get(), stmt);
+				BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
+
+				Boomerang indexSolver = new Boomerang(context.getObject().getScanner().callGraph(), context.getObject().getScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
+				BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
+
+				for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {
+					Statement allocStmt = allocSite.cfgEdge().getStart();
+
+					if (!allocStmt.isAssign()) {
+						continue;
+					}
+
+					result.put(index, allocStmt.getRightOp());
+				}
+			}
 		}
 
 		return result;
@@ -247,11 +247,11 @@ public abstract class EvaluableConstraint {
 		}
 
 		for (CallSiteWithExtractedValue callSite : extractedValueMap.values()) {
-			Statement statement = callSite.getCallSite().stmt().getStart();
+			Statement statement = callSite.getCallSite().stmt();
 			Val extractedVal = callSite.getVal().getValue();
 
 			if (extractedVal.equals(Val.zero())) {
-				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(constraint, statement, context.getClassSpec().getRule());
+				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(constraint, statement, context.getSpecification());
 				errors.add(extractionError);
 				return true;
 			}

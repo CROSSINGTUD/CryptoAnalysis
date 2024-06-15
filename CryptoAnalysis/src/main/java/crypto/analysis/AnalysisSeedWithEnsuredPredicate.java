@@ -1,82 +1,37 @@
 package crypto.analysis;
 
-import boomerang.WeightedForwardQuery;
-import boomerang.debugger.Debugger;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
+import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.typestate.ExtendedIDEALAnalysis;
-import crypto.typestate.MatcherTransitionCollection;
-import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;
 
-import java.util.ArrayList;
 import java.util.Set;
 
-public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
+public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
-	private final ExtendedIDEALAnalysis solver;
 	private final Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
-
-	private ForwardBoomerangResults<TransitionFunction> analysisResults;
 	private boolean analyzed;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner cryptoScanner, ControlFlowGraph.Edge stmt, Val fact) {
-		super(cryptoScanner, new WeightedForwardQuery<>(stmt, fact, TransitionFunction.one()));
+	public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
+		super(scanner, statement, fact, results);
+	}
 
-		solver = new ExtendedIDEALAnalysis() {
-
-			@Override
-			public CallGraph callGraph() {
-				return cryptoScanner.callGraph();
-			}
-
-			@Override
-			public DataFlowScope getDataFlowScope() {
-				return cryptoScanner.getDataFlowScope();
-			}
-
-			@Override
-			public MatcherTransitionCollection getMatcherTransitions() {
-				StateMachineGraph smg = new StateMachineGraph();
-				StateNode node = new StateNode("0", true, true);
-
-				smg.addNode(node);
-				smg.createNewEdge(new ArrayList<>(), node, node);
-
-				return new MatcherTransitionCollection(smg);
-			}
-
-			@Override
-			public CrySLResultsReporter analysisListener() {
-				return cryptoScanner.getAnalysisListener();
-			}
-
-
-			@Override
-			protected Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				return cryptoScanner.debugger(solver, AnalysisSeedWithEnsuredPredicate.this);
-			}
-		};
+	public static AnalysisSeedWithEnsuredPredicate makeSeedForComparison(CryptoScanner scanner, Statement statement, Val fact) {
+		return new AnalysisSeedWithEnsuredPredicate(scanner, statement, fact, null);
 	}
 
 	@Override
 	public void execute() {
-		cryptoScanner.getAnalysisListener().seedStarted(this);
-		solver.run(getForwardQuery());
-		analysisResults = solver.getResults();
+		scanner.getAnalysisListener().seedStarted(this);
 
 		for (EnsuredCrySLPredicate pred : ensuredPredicates) {
 			ensurePredicates(pred);
 		}
 
-		cryptoScanner.getAnalysisListener().onSeedFinished(this, analysisResults);
+		scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
 		analyzed = true;
 	}
 
@@ -86,7 +41,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 		}
 
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
-			predicateHandler.addNewPred(this, c.getRowKey(), c.getColumnKey(), pred);
+			predicateHandler.addNewPred(this, c.getRowKey().getStart(), c.getColumnKey(), pred);
 		}
 	}
 
@@ -97,8 +52,18 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed{
 	}
 
 	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
+	@Override
 	public String toString() {
-		return "AnalysisSeedWithEnsuredPredicate: " + getForwardQuery().asNode() + " " + ensuredPredicates;
+		return "AnalysisSeedWithoutSpec [" + super.toString() + "]";
 	}
 
 }

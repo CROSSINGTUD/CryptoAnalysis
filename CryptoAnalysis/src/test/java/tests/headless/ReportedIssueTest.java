@@ -1,6 +1,8 @@
 package tests.headless;
 
 import java.io.File;
+
+import crypto.analysis.errors.TypestateError;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
@@ -53,6 +55,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", ConstraintError.class, 2);
 		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", TypestateError.class, 1);
 		// TODO False Positive due to reopened Issue 208
 		setErrorsCount("<issue68.simplified.field.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
 
@@ -64,6 +67,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+
 		scanner.exec();
 		assertErrors();
 	}

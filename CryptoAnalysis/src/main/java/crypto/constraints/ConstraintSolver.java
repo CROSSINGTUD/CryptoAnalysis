@@ -1,21 +1,13 @@
 package crypto.constraints;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.ClassSpecification;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
@@ -26,6 +18,13 @@ import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.CrySLRule;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ConstraintSolver {
 
@@ -58,8 +57,8 @@ public class ConstraintSolver {
 		return this.object.getParameterAnalysis().getAllQuerySites();
 	}
 
-	public ClassSpecification getClassSpec() {
-		return this.object.getSpec();
+	public CrySLRule getSpecification() {
+		return this.object.getSpecification();
 	}
 
 	public Collection<Statement> getCollectedCalls() {
@@ -82,7 +81,7 @@ public class ConstraintSolver {
 	 * @return the allConstraints
 	 */
 	public List<ISLConstraint> getAllConstraints() {
-		return this.getClassSpec().getRule().getConstraints();
+		return getSpecification().getConstraints();
 	}
 
 	/**
@@ -217,7 +216,7 @@ public class ConstraintSolver {
 
 		// Extract predicates with 'this' as parameter
 		if (pred.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
-			result.add(new RequiredCrySLPredicate(pred, object.cfgEdge()));
+			result.add(new RequiredCrySLPredicate(pred, object.getOrigin()));
 		}
 		
 		return result;

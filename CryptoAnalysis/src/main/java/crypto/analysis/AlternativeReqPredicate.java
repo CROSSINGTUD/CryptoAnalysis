@@ -1,29 +1,30 @@
 package crypto.analysis;
 
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
+import crypto.interfaces.ISLConstraint;
+import crypto.rules.CrySLPredicate;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import boomerang.scene.ControlFlowGraph;
-import crypto.interfaces.ISLConstraint;
-import crypto.rules.CrySLPredicate;
-
 public class AlternativeReqPredicate implements ISLConstraint {
 
 	private static final long serialVersionUID = 9111353268603202392L;
+	private final Statement stmt;
 	private final List<CrySLPredicate> alternatives;
-	private ControlFlowGraph.Edge stmt;
 
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne,  ControlFlowGraph.Edge stmt) {
-		this.alternatives = new ArrayList<CrySLPredicate>();
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, Statement stmt) {
+		this.alternatives = new ArrayList<>();
 		this.alternatives.add(alternativeOne);
 		this.stmt = stmt;	
 	}
 	
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, ControlFlowGraph.Edge stmt) {
-		this.alternatives = new ArrayList<CrySLPredicate>();
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, Statement stmt) {
+		this.alternatives = new ArrayList<>();
 		this.alternatives.add(alternativeOne);
 		this.alternatives.add(alternativeTwo);
 		this.stmt = stmt;
@@ -53,25 +54,22 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		} else if (!alternatives.equals(other.alternatives))
 			return false;
 		if (stmt == null) {
-			if (other.stmt != null)
-				return false;
-		} else if (!stmt.equals(other.stmt))
-			return false;
-		return true;
-	}
+            return other.stmt == null;
+		} else return stmt.equals(other.stmt);
+    }
 
-	public ControlFlowGraph.Edge getLocation() {
+	public Statement getLocation() {
 		return stmt;
 	}
 
 	@Override
 	public String toString() {
-		return "misses " + alternatives.stream().map(e -> e.toString()).collect(Collectors.joining(" OR ")) + ((stmt != null) ? " @ " + stmt.toString() : "");
+		return "misses " + alternatives.stream().map(CrySLPredicate::toString).collect(Collectors.joining(" OR ")) + ((stmt != null) ? " @ " + stmt : "");
 	}
 
 	@Override
 	public String getName() {
-		return alternatives.stream().map(e -> e.getName()).collect(Collectors.joining(" OR "));
+		return alternatives.stream().map(CrySLPredicate::getName).collect(Collectors.joining(" OR "));
 	}
 
 	@Override
@@ -84,7 +82,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public void setLocation(ControlFlowGraph.Edge location) {
+	public void setLocation(Statement location) {
 		throw new UnsupportedOperationException();
 	}
 

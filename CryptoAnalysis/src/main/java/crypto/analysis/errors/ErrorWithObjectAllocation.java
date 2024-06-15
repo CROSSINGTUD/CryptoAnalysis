@@ -17,8 +17,8 @@ public abstract class ErrorWithObjectAllocation extends AbstractError {
 	}
 
 	protected String getObjectType() {
-		if (this.objectAllocationLocation.getForwardQuery().asNode().fact() != null && !this.objectAllocationLocation.getForwardQuery().asNode().fact().isNull())
-			return " on object of type " + this.objectAllocationLocation.getForwardQuery().asNode().fact().getType();
+		if (this.objectAllocationLocation.getFact() != null && !this.objectAllocationLocation.getFact().isNull())
+			return " on object of type " + this.objectAllocationLocation.getFact().getType();
 		return "";
 	}
 

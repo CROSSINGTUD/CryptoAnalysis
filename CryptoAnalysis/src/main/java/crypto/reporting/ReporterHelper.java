@@ -52,7 +52,7 @@ public class ReporterHelper {
 			report += String.format("\tObject:\n");
 			report += String.format("\t\tVariable: %s\n", r.getFact().getVariableName());
 			report += String.format("\t\tType: %s\n", r.getType());
-			report += String.format("\t\tStatement: %s\n", r.cfgEdge().getStart());
+			report += String.format("\t\tStatement: %s\n", r.getOrigin());
 			report += String.format("\t\tMethod: %s\n", r.getMethod());
 			report += String.format("\t\tSHA-256: %s\n", r.getObjectId());
 			report += String.format("\t\tSecure: %s\n", secureObjects.contains(r));

@@ -1,6 +1,6 @@
 package crypto.interfaces;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.Statement;
 
 import java.util.Set;
 
@@ -8,8 +8,8 @@ public interface ISLConstraint extends java.io.Serializable, ICrySLPredicatePara
 
 	public Set<String> getInvolvedVarNames(); 
 
-	public void setLocation(ControlFlowGraph.Edge location);
+	public void setLocation(Statement location);
 
-	public ControlFlowGraph.Edge getLocation();
+	public Statement getLocation();
 
 }

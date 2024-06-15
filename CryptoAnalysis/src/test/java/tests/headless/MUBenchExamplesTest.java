@@ -79,7 +79,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 
 		// This test case corresponds to the following project in MUBench having this misuse:
 		// https://github.com/akwick/MUBench/blob/master/data/red5-server/misuses/1/misuse.yml
-		setErrorsCount("<example.InitInMacCalledMoreThanOnceExample: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<example.InitInMacCalledMoreThanOnceExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		
 		
 		scanner.exec();
