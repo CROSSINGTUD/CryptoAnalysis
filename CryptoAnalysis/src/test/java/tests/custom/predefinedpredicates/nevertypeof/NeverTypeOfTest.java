@@ -1,20 +1,15 @@
 package tests.custom.predefinedpredicates.nevertypeof;
 
-import crypto.analysis.CrySLRulesetSelector;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class NeverTypeOfTest extends UsagePatternTestingFramework {
 
     @Override
-    protected CrySLRulesetSelector.Ruleset getRuleSet() {
-        return CrySLRulesetSelector.Ruleset.CustomRules;
-    }
-
-    @Override
     protected String getRulesetPath() {
-        return "predefinedPredicates";
+        return TestConstants.RULES_TEST_DIR + "predefinedPredicates";
     }
 
     @Test

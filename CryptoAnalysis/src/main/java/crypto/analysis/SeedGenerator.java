@@ -20,7 +20,6 @@ public class SeedGenerator {
     private final CryptoScanner scanner;
     private final TypestateAnalysis typestateAnalysis;
 
-
     public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
         this.scanner = scanner;
 
@@ -38,7 +37,9 @@ public class SeedGenerator {
     }
 
     public Collection<IAnalysisSeed> computeSeeds() {
+        scanner.getAnalysisReporter().beforeTypestateAnalysis();
         typestateAnalysis.runTypestateAnalysis();
+        scanner.getAnalysisReporter().afterTypestateAnalysis();
 
         return extractSeedsFromBoomerangResults();
     }
@@ -53,6 +54,10 @@ public class SeedGenerator {
         Collection<IAnalysisSeed> seeds = new HashSet<>();
 
         for (Map.Entry<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> entry : results.entrySet()) {
+            if (entry.getValue() == null) {
+                continue;
+            }
+
             ForwardSeedQuery forwardQuery = entry.getKey();
             Statement stmt = forwardQuery.cfgEdge().getStart();
             Val fact = forwardQuery.var();
@@ -66,6 +71,8 @@ public class SeedGenerator {
                 seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, entry.getValue());
             }
             seeds.add(seed);
+
+            scanner.getAnalysisReporter().typestateAnalysisResults(seed, entry.getValue());
         }
 
         return seeds;

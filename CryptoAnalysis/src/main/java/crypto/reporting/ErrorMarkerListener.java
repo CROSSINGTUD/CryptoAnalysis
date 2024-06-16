@@ -160,11 +160,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	}
 
 	@Override
-	public void afterConstraintCheck(final AnalysisSeedWithSpecification arg0) {
-		// nothing
-	}
-
-	@Override
 	public void afterPredicateCheck(final AnalysisSeedWithSpecification arg0) {
 		// Nothing
 	}
@@ -173,11 +168,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 	public void beforeAnalysis() {
 		// Nothing
 
-	}
-
-	@Override
-	public void beforeConstraintCheck(final AnalysisSeedWithSpecification arg0) {
-		// Nothing
 	}
 
 	@Override
@@ -231,11 +221,6 @@ public class ErrorMarkerListener extends CrySLAnalysisListener {
 
 	@Override
 	public void onSeedTimeout(final Node<ControlFlowGraph.Edge, Val> arg0) {
-		// Nothing
-	}
-
-	@Override
-	public void seedStarted(final IAnalysisSeed arg0) {
 		// Nothing
 	}
 

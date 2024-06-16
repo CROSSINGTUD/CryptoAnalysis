@@ -5,10 +5,10 @@ import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLRule;
 
-public class HardCodedError extends ConstraintError {
+public class HardCodedError extends ErrorWithObjectAllocation {
 
 	public HardCodedError(CallSiteWithExtractedValue cs, CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs, rule, objectLocation, con);
+		super(cs.getCallSite().stmt(), rule, objectLocation);
 	}
 
 	@Override
@@ -16,4 +16,8 @@ public class HardCodedError extends ConstraintError {
 		visitor.visit(this);
 	}
 
+	@Override
+	public String toErrorMarkerString() {
+		return "Not hard coded";
+	}
 }

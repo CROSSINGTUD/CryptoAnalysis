@@ -1,10 +1,5 @@
 package tests.pattern.tink;
 
-import java.security.GeneralSecurityException;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
@@ -16,17 +11,21 @@ import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Ignore;
+import org.junit.Test;
+import test.TestConstants;
 import test.assertions.Assertions;
+
+import java.security.GeneralSecurityException;
 
 @Ignore
 public class TestHybridEncryption extends TestTinkPrimitives {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.Tink;
+	protected String getRulesetPath() {
+		return TestConstants.TINK_RULESET_PATH;
 	}
+
 	@Test
 	public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_GCMKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(EllipticCurveType.NIST_P256,

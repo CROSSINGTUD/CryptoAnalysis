@@ -1,16 +1,17 @@
 package tests.pattern;
 
-import javax.servlet.http.Cookie;
 import org.junit.Test;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
+
+import javax.servlet.http.Cookie;
 
 public class CookiesTest extends UsagePatternTestingFramework{
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
 	}
 
 	@Test

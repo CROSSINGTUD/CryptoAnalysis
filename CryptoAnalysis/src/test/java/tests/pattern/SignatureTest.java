@@ -1,8 +1,8 @@
 package tests.pattern;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -17,10 +17,10 @@ import java.security.Signature;
 public class SignatureTest extends UsagePatternTestingFramework {
 
 	private static final byte[] tData   = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
-	
+
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
 	}
 
 	@Test

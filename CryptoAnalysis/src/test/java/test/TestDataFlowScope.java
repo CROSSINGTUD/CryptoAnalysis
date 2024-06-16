@@ -6,38 +6,47 @@ import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleMethod;
+import crypto.rules.CrySLRule;
 
 import java.util.Collection;
+import java.util.HashSet;
 
-public class TestDataFlowScope {
+public class TestDataFlowScope implements DataFlowScope {
 
-    public static DataFlowScope make(Collection<String> excludedClasses) {
-        return new DataFlowScope() {
-            @Override
-            public boolean isExcluded(DeclaredMethod method) {
-                WrappedClass declaringClass = method.getDeclaringClass();
-                if (declaringClass.getName().contains("Assertion")) {
-                    return true;
-                }
+    private static final String ASSERTION = "Assertion";
+    private final Collection<String> ruleNames;
 
-                JimpleDeclaredMethod jimpleMethod = (JimpleDeclaredMethod) method;
-                String declaringClassName = jimpleMethod.getDeclaringClass().getName();
+    public TestDataFlowScope(Collection<CrySLRule> rules) {
+        ruleNames = new HashSet<>();
 
-                return excludedClasses.contains(declaringClassName);
-            }
+        for (CrySLRule rule : rules) {
+            ruleNames.add(rule.getClassName());
+        }
+    }
 
-            @Override
-            public boolean isExcluded(Method method) {
-                WrappedClass declaringClass = method.getDeclaringClass();
-                if (declaringClass.getName().contains("Assertion")) {
-                    return true;
-                }
+    @Override
+    public boolean isExcluded(DeclaredMethod method) {
+        WrappedClass declaringClass = method.getDeclaringClass();
+        if (declaringClass.getName().contains(ASSERTION)) {
+            return true;
+        }
 
-                JimpleMethod jimpleMethod = (JimpleMethod) method;
-                String declaringClassName = jimpleMethod.getDeclaringClass().getName();
+        JimpleDeclaredMethod jimpleMethod = (JimpleDeclaredMethod) method;
+        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
 
-                return excludedClasses.contains(declaringClassName);
-            }
-        };
+        return ruleNames.contains(declaringClassName);
+    }
+
+    @Override
+    public boolean isExcluded(Method method) {
+        WrappedClass declaringClass = method.getDeclaringClass();
+        if (declaringClass.getName().contains(ASSERTION)) {
+            return true;
+        }
+
+        JimpleMethod jimpleMethod = (JimpleMethod) method;
+        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
+
+        return ruleNames.contains(declaringClassName);
     }
 }

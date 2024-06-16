@@ -1,7 +1,7 @@
 package tests.pattern;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -31,8 +31,8 @@ import java.util.Set;
 public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
 	}
 
 	@Test

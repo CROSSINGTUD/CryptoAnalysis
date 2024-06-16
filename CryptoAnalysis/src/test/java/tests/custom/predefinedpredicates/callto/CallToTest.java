@@ -1,20 +1,15 @@
 package tests.custom.predefinedpredicates.callto;
 
-import crypto.analysis.CrySLRulesetSelector;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class CallToTest extends UsagePatternTestingFramework {
 
     @Override
-    protected CrySLRulesetSelector.Ruleset getRuleSet() {
-        return CrySLRulesetSelector.Ruleset.CustomRules;
-    }
-
-    @Override
     protected String getRulesetPath() {
-        return "predefinedPredicates";
+        return TestConstants.RULES_TEST_DIR + "predefinedPredicates";
     }
 
     @Test

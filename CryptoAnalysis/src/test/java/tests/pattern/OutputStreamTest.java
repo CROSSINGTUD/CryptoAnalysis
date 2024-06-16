@@ -1,8 +1,8 @@
 package tests.pattern;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.junit.Ignore;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -19,6 +19,11 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 
 public class OutputStreamTest extends UsagePatternTestingFramework {
+
+	@Override
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
+	}
 
 	// Usage Pattern for CipherOutputStream
 	@Test
@@ -152,11 +157,6 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		dos.write("message".getBytes(), 100, "message".getBytes().length);
 		Assertions.violatedConstraint(dos);
 		Assertions.mustNotBeInAcceptingState(dos);
-	}
-
-	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
 	}
 
 }

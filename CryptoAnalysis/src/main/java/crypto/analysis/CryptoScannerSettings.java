@@ -263,7 +263,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		}
 	}
 
-	private boolean isZipFile(String path) throws CryptoAnalysisParserException {
+	private boolean isZipFile(String path) {
 		File file = new File(path);
 
 		// Copied from https://stackoverflow.com/questions/33934178/how-to-identify-a-zip-file-in-java

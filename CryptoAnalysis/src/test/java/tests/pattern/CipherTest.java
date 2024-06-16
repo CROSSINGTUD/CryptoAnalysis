@@ -1,8 +1,9 @@
 package tests.pattern;
 
-import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import org.junit.Test;
+import test.TestConstants;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -11,18 +12,15 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class CipherTest extends UsagePatternTestingFramework {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
 	}
 	
 	@Test

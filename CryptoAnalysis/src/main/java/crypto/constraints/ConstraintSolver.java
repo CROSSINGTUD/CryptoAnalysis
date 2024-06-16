@@ -7,11 +7,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import crypto.analysis.AlternativeReqPredicate;
+import crypto.analysis.AnalysisReporter;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.interfaces.ICrySLPredicateParameter;
@@ -33,13 +32,12 @@ public class ConstraintSolver {
 	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
 	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
-	private final CrySLResultsReporter reporter;
+	private final AnalysisReporter analysisReporter;
 	private final AnalysisSeedWithSpecification object;
 
-	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<ControlFlowGraph.Edge> callsOnObject,
-			CrySLResultsReporter crySLResultsReporter) {
+	public ConstraintSolver(AnalysisSeedWithSpecification object, Collection<ControlFlowGraph.Edge> callsOnObject, AnalysisReporter analysisReporter) {
 		this.object = object;
-		this.reporter = crySLResultsReporter;
+		this.analysisReporter = analysisReporter;
 
 		this.collectedCalls = new HashSet<>();
 		for (ControlFlowGraph.Edge edge : callsOnObject) {
@@ -63,10 +61,6 @@ public class ConstraintSolver {
 
 	public Collection<Statement> getCollectedCalls() {
 		return collectedCalls;
-	}
-
-	public CrySLResultsReporter getReporter() {
-		return reporter;
 	}
 
 	public AnalysisSeedWithSpecification getObject() {
@@ -100,17 +94,18 @@ public class ConstraintSolver {
 		for (ISLConstraint con : getRelConstraints()) {
 			EvaluableConstraint currentConstraint = EvaluableConstraint.getInstance(con, this);
 			currentConstraint.evaluate();
-			for (AbstractError e : currentConstraint.getErrors()) {
-				if (e instanceof ImpreciseValueExtractionError) {
-					getReporter().reportError(getObject(),
-							new ImpreciseValueExtractionError(con, e.getErrorStatement(), e.getRule()));
+			for (AbstractError error : currentConstraint.getErrors()) {
+				analysisReporter.reportError(object, error);
+				fail++;
+				/*if (e instanceof ImpreciseValueExtractionError) {
+					reporter.reportError(getObject(), new ImpreciseValueExtractionError(con, e.getErrorStatement(), e.getRule()));
 					fail++;
 					//break;
 				} else {
 					fail++;
 					this.object.addError(e);
 					getReporter().reportError(getObject(), e);
-				}
+				}*/
 			}
 		}
 		return fail;

@@ -131,9 +131,8 @@ public class CrySLModelReader {
 	 * 
 	 * @param files	a list of files to read from
 	 * @return	the list with the parsed CrySLRules
-	 * @throws CryptoAnalysisException If a file cannot be read or there is a problem with a rule
 	 */
-	public List<CrySLRule> readRulesFromFiles(List<File> files) throws CryptoAnalysisException {
+	public List<CrySLRule> readRulesFromFiles(List<File> files) {
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		
 		for (File file : files) {
@@ -177,7 +176,7 @@ public class CrySLModelReader {
 	 * @throws IOException If there is a problem with reading the file
 	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException {
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IOException, CryptoAnalysisException {
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
 			throw new CryptoAnalysisException("The extension of " + virtualFileName + " does not match " + cryslFileEnding);
 		}
@@ -201,13 +200,7 @@ public class CrySLModelReader {
 	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
-		final String fileName = ruleFile.getName();
-		
-		if (!fileName.endsWith(cryslFileEnding)) {
-			throw new CryptoAnalysisException("The extension of " + fileName + "  does not match " + cryslFileEnding);
-		}
-		
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
+		Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
 
 		return createRuleFromResource(resource);
 	}
@@ -252,7 +245,7 @@ public class CrySLModelReader {
 		try {
 			return createRuleFromDomainmodel((Domainmodel) resource.getContents().get(0));
 		} catch (Exception e) {
-			throw new CryptoAnalysisException("An error occured while reading the rule " + resource.getURI(), e);
+			throw new CryptoAnalysisException("An error occurred while reading the rule " + resource.getURI(), e);
 		}
 	}
 

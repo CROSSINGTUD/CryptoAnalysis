@@ -2,9 +2,7 @@ package test;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
-import boomerang.Query;
 import boomerang.results.BackwardBoomerangResults;
-import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
@@ -17,47 +15,17 @@ import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
 import boomerang.util.AccessPath;
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.CrySLResultsReporter;
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.CallToError;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.ErrorVisitor;
-import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.ForbiddenPredicateError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.NoCallToError;
-import crypto.analysis.errors.PredicateContradictionError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
-import crypto.analysis.errors.UncaughtExceptionError;
-import crypto.exceptions.CryptoAnalysisException;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.cryslhandler.CrySLRuleReader;
+import crypto.listener.IErrorListener;
+import crypto.listener.IResultsListener;
 import crypto.preanalysis.TransformerSetup;
-import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
-import sync.pds.solver.nodes.Node;
 import test.assertions.Assertions;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
@@ -79,14 +47,12 @@ import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradiction;
 import test.assertions.PredicateErrorCountAssertion;
-import test.assertions.StateResult;
 import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
-import typestate.TransitionFunction;
-import typestate.finiteautomata.ITransition;
 import wpds.impl.Weight;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -98,10 +64,6 @@ import java.util.stream.Collectors;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework {
 
-	private CallGraph callGraph;
-	private List<CrySLRule> rules = getRules();
-	private CryptoScanner scanner;
-	
 	@Override
 	protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 
@@ -111,365 +73,64 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		return new SceneTransformer() {
 
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				//TransformerSetup.v().setupPreTransformer(rules);
+				Collection<CrySLRule> ruleset;
+				try {
+					CrySLRuleReader reader = new CrySLRuleReader();
+					ruleset = reader.readRulesFromPath(getRulesetPath());
+				} catch (IOException e) {
+					throw new RuntimeException("Could not read rules: " + e.getMessage());
+				}
 
-				callGraph = new SootCallGraph();
-				final Set<Assertion> expectedResults = extractBenchmarkMethods(JimpleMethod.of(sootTestMethod));
-				scanner = new CryptoScanner(getRules()) {
+				TransformerSetup.v().setupPreTransformer(ruleset);
+				CallGraph callGraph = new SootCallGraph();
+				TestDataFlowScope dataFlowScope = new TestDataFlowScope(ruleset);
+
+				// Setup test listener
+				Collection<Assertion> assertions = extractBenchmarkMethods(JimpleMethod.of(sootTestMethod), callGraph);
+				IErrorListener errorListener = new UsagePatternErrorListener(assertions);
+				IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
+
+				// Setup scanner
+				CryptoScanner scanner = new CryptoScanner(ruleset) {
+
+					@Override
+					public CallGraph callGraph() {
+						return callGraph;
+					}
 
 					@Override
 					public DataFlowScope getDataFlowScope() {
-						return TestDataFlowScope.make(excludedPackages());
-					}
-
-					@Override
-					public CrySLResultsReporter getAnalysisListener() {
-						CrySLAnalysisListener cryslListener = new CrySLAnalysisListener() {
-
-							@Override
-							public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> res) {
-								Multimap<Statement, StateResult> expectedTypestateResults = HashMultimap.create();
-
-								for (Assertion a : expectedResults) {
-									if (a instanceof StateResult) {
-										StateResult stateResult = (StateResult) a;
-										expectedTypestateResults.put(stateResult.getStmt(), stateResult);
-									}
-								}
-
-								for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
-									for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : res.asStatementValWeightTable().cellSet()) {
-										Statement expectedStatement = entry.getKey();
-										Collection<Val> expectedVal = entry.getValue().getVal();
-
-										Statement analysisResultStatement = cell.getRowKey().getStart();
-										Val analysisResultVal = cell.getColumnKey();
-
-										if (!analysisResultStatement.equals(expectedStatement) || !expectedVal.contains(analysisResultVal)) {
-											continue;
-										}
-
-										for (ITransition transition : cell.getValue().values()) {
-											if (transition.from() == null || transition.to() == null) {
-												continue;
-											}
-
-											if (transition.from().isInitialState()) {
-												entry.getValue().computedResults(transition.to());
-											}
-										}
-									}
-								}
-							}
-
-							@Override
-							public void collectedValues(AnalysisSeedWithSpecification seed,
-									Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
-								for (Assertion a : expectedResults) {
-									if (a instanceof ExtractedValueAssertion) {
-										ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;
-										assertion.computedValues(collectedValues);
-									}
-								}
-							}
-							
-							@Override
-							public void reportError(AbstractError error) {
-								for (Assertion a : expectedResults) {
-									if (a instanceof DependentErrorAssertion) {
-										DependentErrorAssertion depErrorAssertion = (DependentErrorAssertion) a;
-										depErrorAssertion.addError(error);
-									}
-								}
-
-								error.accept(new ErrorVisitor() {
-									
-									@Override
-									public void visit(RequiredPredicateError predicateError) {
-										for(Assertion a: expectedResults){
-											if(a instanceof PredicateErrorCountAssertion){
-												PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-									}
-									
-									@Override
-									public void visit(TypestateError typestateError) {
-										for(Assertion a: expectedResults){
-											if(a instanceof TypestateErrorCountAssertion){
-												TypestateErrorCountAssertion errorCountAssertion = (TypestateErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-									}
-									
-									@Override
-									public void visit(IncompleteOperationError incompleteOperationError) {
-										boolean hasTypestateChangeError = false;
-										boolean expectsTypestateChangeError = false;
-										for (Assertion a: expectedResults) {
-											if (a instanceof MissingTypestateChange) {
-												MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
-												if (missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorStatement())) {
-													missingTypestateChange.trigger();
-													hasTypestateChangeError = true;
-												}
-												expectsTypestateChangeError = true;
-											}
-											if (a instanceof NoMissingTypestateChange) {
-												throw new RuntimeException("Reports a typestate error that should not be reported");
-											}
-
-											if (a instanceof IncompleteOperationErrorCountAssertion) {
-												IncompleteOperationErrorCountAssertion errorCountAssertion = (IncompleteOperationErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-										if(hasTypestateChangeError != expectsTypestateChangeError){
-											throw new RuntimeException("Reports a typestate error that should not be reported");
-										}
-									}
-									
-									@Override
-									public void visit(ForbiddenMethodError abstractError) {
-										for (Assertion e : expectedResults) {
-											if (e instanceof CallToForbiddenMethodAssertion) {
-												CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) e;
-												expectedResults.reported(abstractError.getErrorStatement());
-											}
-
-											if (e instanceof ForbiddenMethodErrorCountAssertion) {
-												ForbiddenMethodErrorCountAssertion assertion = (ForbiddenMethodErrorCountAssertion) e;
-												assertion.increaseCount();
-											}
-										}
-									}
-									
-									@Override
-									public void visit(ConstraintError constraintError) {
-										for(Assertion a: expectedResults){
-											if(a instanceof ConstraintErrorCountAssertion){
-												ConstraintErrorCountAssertion errorCountAssertion = (ConstraintErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(ImpreciseValueExtractionError predicateError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof ImpreciseValueExtractionErrorCountAssertion) {
-												ImpreciseValueExtractionErrorCountAssertion assertion = (ImpreciseValueExtractionErrorCountAssertion) a;
-												assertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(NeverTypeOfError predicateError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof NeverTypeOfErrorCountAssertion) {
-												NeverTypeOfErrorCountAssertion assertion = (NeverTypeOfErrorCountAssertion) a;
-												assertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(HardCodedError predicateError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof NotHardCodedErrorCountAssertion) {
-												NotHardCodedErrorCountAssertion assertion = (NotHardCodedErrorCountAssertion) a;
-												assertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(InstanceOfError predicateError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof InstanceOfErrorCountAssertion) {
-												InstanceOfErrorCountAssertion assertion = (InstanceOfErrorCountAssertion) a;
-												assertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(PredicateContradictionError predicateContradictionError) {
-										for (Assertion e : expectedResults) {
-											if (e instanceof PredicateContradiction) {
-												PredicateContradiction p = (PredicateContradiction) e;
-												p.trigger();
-											}
-										}
-									}
-
-									@Override
-									public void visit(UncaughtExceptionError uncaughtExceptionError) {
-										
-									}
-
-									@Override
-									public void visit(ForbiddenPredicateError forbiddenPredicateError) {
-										
-									}
-
-									@Override
-									public void visit(CallToError callToError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof CallToErrorCountAssertion) {
-												CallToErrorCountAssertion errorCountAssertion = (CallToErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-									}
-
-									@Override
-									public void visit(NoCallToError noCallToError) {
-										for (Assertion a : expectedResults) {
-											if (a instanceof CallToForbiddenMethodAssertion) {
-												CallToForbiddenMethodAssertion expectedResults = (CallToForbiddenMethodAssertion) a;
-												expectedResults.reported(noCallToError.getErrorStatement());
-											}
-
-											if (a instanceof NoCallToErrorCountAssertion) {
-												NoCallToErrorCountAssertion errorCountAssertion = (NoCallToErrorCountAssertion) a;
-												errorCountAssertion.increaseCount();
-											}
-										}
-									}
-								});
-							}
-
-							@Override
-							public void discoveredSeed(IAnalysisSeed curr) {
-								
-							}
-
-							@Override
-							public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates,
-									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicates,
-									Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> missingPredicates) {
-								for (Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()) {
-									for (Assertion e : expectedResults) {
-										if (e instanceof HasEnsuredPredicateAssertion) {
-											HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) e;
-											if (assertion.getStmt().equals(c.getRowKey())) {
-												for (EnsuredCrySLPredicate pred : c.getValue()) {
-													assertion.reported(c.getColumnKey(),pred);
-												}	
-											}
-										}
-										if (e instanceof NotHasEnsuredPredicateAssertion) {
-											NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) e;
-											if (assertion.getStmt().equals(c.getRowKey())) {
-												for (EnsuredCrySLPredicate pred : c.getValue()) {
-													assertion.reported(c.getColumnKey(),pred);
-												}	
-											}
-										}
-									}
-								}
-							}
-
-							@Override
-							public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
-							public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-								
-							}
-
-							@Override
-							public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-								
-							}
-
-
-							@Override
-							public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification,
-									Collection<ISLConstraint> relConstraints) {
-								
-							}
-
-							@Override
-							public void beforeAnalysis() {
-								
-							}
-
-							@Override
-							public void afterAnalysis() {
-								
-							}
-
-							@Override
-							public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
-							public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
-							public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
-							public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-								
-							}
-
-							@Override
-							public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {
-								
-							}
-
-							@Override
-							public void onSecureObjectFound(IAnalysisSeed analysisObject) {
-								
-							}
-
-							@Override
-							public void addProgress(int processedSeeds, int workListSize) {
-								
-							}
-							
-
-						};
-						CrySLResultsReporter reporters = new CrySLResultsReporter();
-						reporters.addReportListener(cryslListener);
-						return reporters;
+						return dataFlowScope;
 					}
 				};
+
+				scanner.addErrorListener(errorListener);
+				scanner.addResultsListener(resultsListener);
+
 				scanner.scan();
-				
+
+				// Evaluate results
 				List<Assertion> unsound = Lists.newLinkedList();
 				List<Assertion> imprecise = Lists.newLinkedList();
-				for (Assertion r : expectedResults) {
+
+				for (Assertion r : assertions) {
 					if (!r.isSatisfied()) {
 						unsound.add(r);
 					}
 				}
-				for (Assertion r : expectedResults) {
+
+				for (Assertion r : assertions) {
 					if (r.isImprecise()) {
 						imprecise.add(r);
 					}
 				}
+
 				StringBuilder errors = new StringBuilder();
 				if (!unsound.isEmpty()) {
 					errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound));
-					//throw new RuntimeException("Unsound results: \n" + Joiner.on("\n").join(unsound));
 				}
 				if (!imprecise.isEmpty()) {
 					errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise));
-					//throw new ImprecisionException("Imprecise results: " + Joiner.on("\n").join(imprecise));
 				}
 				if (!errors.toString().isEmpty()) {
 					throw new RuntimeException(errors.toString());
@@ -478,20 +139,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 		};
 	}
 
-	private List<CrySLRule> getRules() {
-		if (rules == null) {
-			try {
-				if (getRulesetPath() == null) {
-					rules = CrySLRulesetSelector.makeFromRuleset(TestConstants.RULES_BASE_DIR, getRuleSet());
-				} else {
-					rules = CrySLRulesetSelector.makeFromRulesetPath(TestConstants.RULES_TEST_DIR + getRulesetPath());
-				}
-			} catch (CryptoAnalysisException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return rules;
-	}
+	protected abstract String getRulesetPath();
 
 	@Override
 	public List<String> getIncludeList() {
@@ -500,28 +148,23 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 	@Override
 	public List<String> excludedPackages() {
-		List<String> excludedPackages = super.excludedPackages();
+		return new ArrayList<>();
+		/*List<String> excludedPackages = super.excludedPackages();
 
 		for (CrySLRule r : rules) {
 			excludedPackages.add(r.getClassName());
 		}
-		return excludedPackages;
-	}
-	
-	protected abstract Ruleset getRuleSet();
-
-	protected String getRulesetPath() {
-		return null;
+		return excludedPackages;*/
 	}
 
 
-	private Set<Assertion> extractBenchmarkMethods(Method testMethod) {
+	private Set<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
 		Set<Assertion> results = new HashSet<>();
-		extractBenchmarkMethods(testMethod, results, new HashSet<>());
+		extractBenchmarkMethods(testMethod, callGraph, results, new HashSet<>());
 		return results;
 	}
 
-	private void extractBenchmarkMethods(Method method, Set<Assertion> queries, Set<Method> visited) {
+	private void extractBenchmarkMethods(Method method, CallGraph callGraph, Set<Assertion> queries, Set<Method> visited) {
 		if (visited.contains(method)) {
 			return;
 		}
@@ -529,7 +172,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
 		for (CallGraph.Edge callSite : callGraph.edgesInto(method)) {
 			Method callee = callSite.tgt();
-			extractBenchmarkMethods(callee, queries, visited);
+			extractBenchmarkMethods(callee, callGraph, queries, visited);
 		}
 
 		for (Statement statement : method.getStatements()) {
@@ -568,7 +211,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(statement, param);
+				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
 
 				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
 					queries.add(new InAcceptingStateAssertion(pred, aliases));
@@ -585,7 +228,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(statement, param);
+				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
 
 				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
@@ -610,7 +253,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(statement, param);
+				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
 
 				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
@@ -635,7 +278,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(statement, param);
+				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
 				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
 					queries.add(new NotInAcceptingStateAssertion(pred, aliases));
 				}
@@ -794,7 +437,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	}
 
 	@SuppressWarnings("deprecation")
-	private Set<Val> getAliasesForValue(Statement stmt, Val val) {
+	private Set<Val> getAliasesForValue(CallGraph callGraph, Statement stmt, Val val) {
 		Set<Val> aliases = new HashSet<>();
 		aliases.add(val);
 

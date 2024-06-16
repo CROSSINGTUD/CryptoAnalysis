@@ -13,7 +13,6 @@ import java.util.Set;
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
 	private final Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
-	private boolean analyzed;
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
 		super(scanner, statement, fact, results);
@@ -25,29 +24,27 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
 	@Override
 	public void execute() {
-		scanner.getAnalysisListener().seedStarted(this);
+		if (analysisResults == null) {
+			return;
+		}
+		scanner.getAnalysisReporter().onSeedStarted(this);
 
 		for (EnsuredCrySLPredicate pred : ensuredPredicates) {
 			ensurePredicates(pred);
 		}
 
-		scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
-		analyzed = true;
-	}
-
-	protected void ensurePredicates(EnsuredCrySLPredicate pred) {
-		if (analysisResults == null) {
-			return;
-		}
-
-		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
-			predicateHandler.addNewPred(this, c.getRowKey().getStart(), c.getColumnKey(), pred);
-		}
+		scanner.getAnalysisReporter().onSeedFinished(this);
 	}
 
 	public void addEnsuredPredicate(EnsuredCrySLPredicate pred) {
-		if (ensuredPredicates.add(pred) && analyzed) {
+		if (ensuredPredicates.add(pred)) {
 			ensurePredicates(pred);
+		}
+	}
+
+	private void ensurePredicates(EnsuredCrySLPredicate pred) {
+		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
+			predicateHandler.addNewPred(this, c.getRowKey().getStart(), c.getColumnKey(), pred);
 		}
 	}
 

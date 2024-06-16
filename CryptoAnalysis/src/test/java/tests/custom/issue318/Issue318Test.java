@@ -1,20 +1,15 @@
 package tests.custom.issue318;
 
-import crypto.analysis.CrySLRulesetSelector;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class Issue318Test extends UsagePatternTestingFramework {
 
     @Override
-    protected CrySLRulesetSelector.Ruleset getRuleSet() {
-        return CrySLRulesetSelector.Ruleset.CustomRules;
-    }
-
-    @Override
     protected String getRulesetPath() {
-        return "issue318";
+        return TestConstants.RULES_TEST_DIR + "issue318";
     }
 
     @Test

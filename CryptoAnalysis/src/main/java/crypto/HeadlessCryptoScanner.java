@@ -2,8 +2,13 @@ package crypto;
 
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
+import boomerang.scene.CallGraph;
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
@@ -11,6 +16,8 @@ import crypto.analysis.CryptoScannerSettings;
 import crypto.analysis.CryptoScannerSettings.ControlGraph;
 import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
+import crypto.cryslhandler.CrySLRuleReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.preanalysis.SeedFactory;
@@ -24,7 +31,6 @@ import crypto.reporting.Reporter;
 import crypto.reporting.SARIFReporter;
 import crypto.reporting.TXTReporter;
 import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +50,7 @@ import soot.options.Options;
 import typestate.TransitionFunction;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -59,10 +66,12 @@ public abstract class HeadlessCryptoScanner {
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
-	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
+	private static final crypto.rules.CrySLRuleReader ruleReader = new crypto.rules.CrySLRuleReader();
 	private boolean hasSeeds;
 
 	public static int exitCode = 0;
+
+	// public HeadlessCryptoScanner(String applicationPath, String rulesDirectory) {}
 
 	public static void main(String[] args) {
 		HeadlessCryptoScanner scanner = createFromCLISettings(args);
@@ -170,7 +179,6 @@ public abstract class HeadlessCryptoScanner {
 		
 		PackManager.v().getPack("cg").apply();
 		PackManager.v().getPack("wjtp").apply();
-		// PackManager.v().runPacks();
 	}
 	
 	public String toString() {
@@ -186,7 +194,6 @@ public abstract class HeadlessCryptoScanner {
 			
 			@Override
 			protected void internalTransform(String phaseName, Map<String, String> options) {
-				//TransformerSetup.v().setupPreTransformer(rules);
 
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
 				
@@ -238,8 +245,29 @@ public abstract class HeadlessCryptoScanner {
 				if(getAdditionalListener() != null) {
 					reporter.addReportListener(getAdditionalListener());	
 				}
+
+
+
+
+
+
+				Collection<CrySLRule> ruleset;
+				try {
+					CrySLRuleReader reader = new CrySLRuleReader();
+					ruleset = reader.readRulesFromPath(getRulesetPath());
+				} catch (IOException e) {
+					throw new RuntimeException("Could not read rules: " + e.getMessage());
+				}
+
+				TransformerSetup.v().setupPreTransformer(ruleset);
+				CallGraph callGraph = new SootCallGraph();
 				
-				CryptoScanner scanner = new CryptoScanner(getRules()) {
+				CryptoScanner scanner = new CryptoScanner(ruleset) {
+
+					@Override
+					public CallGraph callGraph() {
+						return callGraph;
+					}
 
 					@Override
 					public CrySLResultsReporter getAnalysisListener() {
@@ -248,30 +276,32 @@ public abstract class HeadlessCryptoScanner {
 					
 					@Override
 					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
-						if(enableVisualization()) {
-							if(getOutputFolder() == null) {
-								LOGGER.error("The visualization requires the --reportDir option.");
-							}
-							
-							File vizFile = new File(getOutputFolder() + "/viz/ObjectId#" + seed.getObjectId() + ".json");
-							vizFile.getParentFile().mkdirs();
-							
-							return new IDEVizDebugger<>(vizFile);
+						if (!isVisualization()) {
+							return super.debugger(solver, seed);
 						}
-						return super.debugger(solver, seed);
-					}
 
-					@Override
-					public Collection<String> getForbiddenPredicates() {
-						return forbiddenPredicates();
-					}
+						if (getOutputFolder() == null) {
+							LOGGER.error("The visualization requires the --reportDir option");
+							return super.debugger(solver, seed);
+						}
 
-					@Override
-					public Collection<String> getIgnoredSections() {
-						return ignoredSections();
+						File vizFile = new File(getOutputFolder() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
+						boolean created = vizFile.getParentFile().mkdirs();
+
+						if (!created) {
+							LOGGER.error("Could not create directory {}", vizFile.getAbsolutePath());
+							return new Debugger<>();
+						}
+							
+						return new IDEVizDebugger<>(vizFile);
 					}
 
 				};
+
+
+
+
+
 				
 				if (providerDetection()) {
 					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
@@ -298,6 +328,10 @@ public abstract class HeadlessCryptoScanner {
 				}
 				
 				scanner.scan();
+
+				// TODO Reporter
+				Table<WrappedClass, Method, Set<AbstractError>> errorCollection = scanner.getErrorCollector().getErrorCollection();
+
 			}
 		};
 	}
@@ -417,12 +451,16 @@ public abstract class HeadlessCryptoScanner {
 	protected String getOutputFolder(){
 		return settings.getReportDirectory();
 	}
+
+	public String getRulesetPath() {
+		return settings.getRulesetPathDir();
+	}
 	
 	protected boolean isPreAnalysis() {
 		return settings.isPreAnalysis();
 	}
 
-	protected boolean enableVisualization(){
+	protected boolean isVisualization(){
 		return settings.isVisualization();
 	}
 	
@@ -436,10 +474,6 @@ public abstract class HeadlessCryptoScanner {
 	
 	protected boolean includeStatistics() {
 		return settings.isIncludeStatistics();
-	}
-
-	protected Collection<String> forbiddenPredicates() {
-		return settings.getForbiddenPredicates();
 	}
 
 	protected Collection<String> ignoredSections() {

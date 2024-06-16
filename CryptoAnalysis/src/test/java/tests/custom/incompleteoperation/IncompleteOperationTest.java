@@ -1,20 +1,15 @@
 package tests.custom.incompleteoperation;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class IncompleteOperationTest extends UsagePatternTestingFramework {
 
     @Override
-    public Ruleset getRuleSet() {
-        return Ruleset.CustomRules;
-    }
-
-    @Override
-    public String getRulesetPath() {
-        return "incompleteOperation";
+    protected String getRulesetPath() {
+        return TestConstants.RULES_TEST_DIR + "incompleteOperation";
     }
 
     @Test

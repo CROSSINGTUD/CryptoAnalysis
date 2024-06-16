@@ -5,15 +5,20 @@ import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLRule;
 
-public class NeverTypeOfError extends ConstraintError {
+public class NeverTypeOfError extends ErrorWithObjectAllocation {
 
 	public NeverTypeOfError(CallSiteWithExtractedValue cs, CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs, rule, objectLocation, con);
+		super(cs.getCallSite().stmt(), rule, objectLocation);
 	}
 
 	@Override
 	public void accept(ErrorVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public String toErrorMarkerString() {
+		return "NeverTypeOf error";
 	}
 
 	@Override

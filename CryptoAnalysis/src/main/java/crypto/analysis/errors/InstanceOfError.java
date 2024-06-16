@@ -5,15 +5,20 @@ import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLRule;
 
-public class InstanceOfError extends ConstraintError {
+public class InstanceOfError extends ErrorWithObjectAllocation {
 
 	public InstanceOfError(CallSiteWithExtractedValue cs, CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs, rule, objectLocation, con);
+		super(cs.getCallSite().stmt(), rule, objectLocation);
 	}
 
 	@Override
 	public void accept(ErrorVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public String toErrorMarkerString() {
+		return "InstanceOf error";
 	}
 
 	@Override

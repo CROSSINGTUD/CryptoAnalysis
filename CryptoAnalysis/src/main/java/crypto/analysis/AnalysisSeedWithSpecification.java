@@ -70,7 +70,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private final Set<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
 
 	private final Set<ResultsHandler> resultHandlers = Sets.newHashSet();
-	private boolean secure = true;
 
 	public AnalysisSeedWithSpecification(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results, CrySLRule specification) {
 		super(scanner, statement, fact, results);
@@ -91,7 +90,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// Timeout occured.
 			return;
 		}
-		scanner.getAnalysisListener().seedStarted(this);
+		//scanner.getAnalysisListener().seedStarted(this);
+		scanner.getAnalysisReporter().onSeedStarted(this);
 
 		this.allCallsOnObject = analysisResults.getInvokedMethodOnInstance();
 		notifyResultsHandler();
@@ -111,8 +111,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		activateIndirectlyEnsuredPredicates();
 		checkConstraintsAndEnsurePredicates();
 
-		scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
-		scanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
+		scanner.getAnalysisReporter().onSeedFinished(this);
+		//scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
+		//scanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
 
 	public void registerResultsHandler(ResultsHandler handler) {
@@ -137,6 +138,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void runExtractParameterAnalysis() {
 		this.parameterAnalysis = new ExtractParameterAnalysis(this.scanner, allCallsOnObject, specification);
 		this.parameterAnalysis.run();
+		scanner.getAnalysisReporter().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
 
 	/**
@@ -152,7 +154,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				DeclaredMethod declaredMethod = calledMethod.getValue();
 
 				ForbiddenMethodError error = new ForbiddenMethodError(statement, specification, declaredMethod, alternatives);
-				scanner.getAnalysisListener().reportError(this, error);
+				//scanner.getAnalysisListener().reportError(this, error);
+				scanner.getAnalysisReporter().reportError(this, error);
 			}
 		}
 	}
@@ -194,7 +197,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 				TypestateError typestateError = new TypestateError(statement, specification, this, errorStateNode.getExpectedCalls());
 				this.addError(typestateError);
-				scanner.getAnalysisListener().reportError(this, typestateError);
+				//scanner.getAnalysisListener().reportError(this, typestateError);
+				scanner.getAnalysisReporter().reportError(this, typestateError);
 			}
 		}
 	}
@@ -252,7 +256,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, specification, methodsToBeCalled);
 			this.addError(incompleteOperationError);
-			scanner.getAnalysisListener().reportError(this, incompleteOperationError);
+			scanner.getAnalysisReporter().reportError(this, incompleteOperationError);
 		}
 
 		/* Multiple incomplete operations were found. Depending on the dataflow paths, the
@@ -281,7 +285,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 				IncompleteOperationError incompleteOperationError = new IncompleteOperationError(this, statement, specification, expectedMethodsToBeCalled, true);
 				this.addError(incompleteOperationError);
-				scanner.getAnalysisListener().reportError(this, incompleteOperationError);
+				scanner.getAnalysisReporter().reportError(this, incompleteOperationError);
 			}
 		}
 	}
@@ -663,13 +667,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * Check the constraints from the CONSTRAINTS section
 	 */
 	private boolean checkInternalConstraints() {
-		scanner.getAnalysisListener().beforeConstraintCheck(this);
-		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), scanner.getAnalysisListener());
-		scanner.getAnalysisListener().checkedConstraints(this, constraintSolver.getRelConstraints());
-		boolean constraintsSatisfied = (0 == constraintSolver.evaluateRelConstraints());
-		scanner.getAnalysisListener().afterConstraintCheck(this);
+		scanner.getAnalysisReporter().beforeConstraintsCheck(this);
 
-		return constraintsSatisfied;
+		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), scanner.getAnalysisReporter());
+		int violatedConstraints = constraintSolver.evaluateRelConstraints();
+
+		scanner.getAnalysisReporter().checkedConstraints(this, constraintSolver.getRelConstraints());
+		scanner.getAnalysisReporter().afterConstraintsCheck(this, violatedConstraints);
+
+		return violatedConstraints == 0;
 	}
 
 	/**
@@ -680,11 +686,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 */
 	private boolean isConstraintSystemSatisfied() {
 		if (internalConstraintsSatisfied) {
-			scanner.getAnalysisListener().beforePredicateCheck(this);
-			boolean requiredPredicatesEnsured = checkPredicates().isEmpty();
-			scanner.getAnalysisListener().afterPredicateCheck(this);
-
-			return requiredPredicatesEnsured;
+			return checkPredicates().isEmpty();
 		}
 		return false;
 	}
@@ -937,13 +939,5 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             return other.specification == null;
 		} else return specification.equals(other.specification);
     }
-
-	public boolean isSecure() {
-		return secure;
-	}
-
-	public void setSecure(boolean secure) {
-		this.secure = secure;
-	}
 
 }

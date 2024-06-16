@@ -1,20 +1,15 @@
 package tests.custom.predicate;
 
-import crypto.analysis.CrySLRulesetSelector;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
 public class RequiredPredicateWithThisTest extends UsagePatternTestingFramework {
 
     @Override
-    protected CrySLRulesetSelector.Ruleset getRuleSet() {
-        return CrySLRulesetSelector.Ruleset.CustomRules;
-    }
-
-    @Override
     protected String getRulesetPath() {
-        return "requiredPredicateWithThis";
+        return TestConstants.RULES_TEST_DIR + "requiredPredicateWithThis";
     }
 
     @Test

@@ -142,7 +142,7 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			protected boolean enableVisualization() {
+			protected boolean isVisualization() {
 				return VISUALIZATION;
 			}
 			
@@ -200,9 +200,6 @@ public abstract class AbstractHeadlessTest {
 			public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {}
 
 			@Override
-			public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {}
-
-			@Override
 			public void boomerangQueryStarted(Query seed, BackwardQuery q) {}
 
 			@Override
@@ -212,16 +209,10 @@ public abstract class AbstractHeadlessTest {
 			public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
-			public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
-
-			@Override
 			public void beforeAnalysis() {}
 
 			@Override
 			public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
-
-			@Override
-			public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {}
 
 			@Override
 			public void afterAnalysis() {}

@@ -1,27 +1,26 @@
 package tests.pattern.tink;
 
-import java.security.GeneralSecurityException;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.Mac;
 import com.google.crypto.tink.mac.MacFactory;
 import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Ignore;
+import org.junit.Test;
+import test.TestConstants;
 import test.assertions.Assertions;
+
+import java.security.GeneralSecurityException;
 
 @Ignore
 public class TestMAC extends TestTinkPrimitives {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.Tink;
+	protected String getRulesetPath() {
+		return TestConstants.TINK_RULESET_PATH;
 	}
+
 	@Test
 	public void generateNewHMACSHA256_128BitTag() throws GeneralSecurityException {
 		KeyTemplate kt = MacKeyTemplates.createHmacKeyTemplate(32, 16, HashType.SHA256);

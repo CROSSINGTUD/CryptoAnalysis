@@ -58,12 +58,6 @@ public class CrySLResultsReporter  {
 		}
 	}
 
-	public void checkedConstraints(AnalysisSeedWithSpecification analysisSeedWithSpecification, Collection<ISLConstraint> relConstraints) {
-		for (ICrySLResultsListener listen : listeners) {
-			listen.checkedConstraints(analysisSeedWithSpecification, relConstraints);
-		}
-	}
-
 	public void beforeAnalysis() {
 		for (ICrySLResultsListener listen : listeners) {
 			if (listen instanceof CrySLAnalysisListener) {
@@ -79,81 +73,10 @@ public class CrySLResultsReporter  {
 			}
 		}
 	}
-
-	public void beforeConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).beforeConstraintCheck(analysisSeedWithSpecification);
-			}
-		}
-	}
-
-	public void afterConstraintCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).afterConstraintCheck(analysisSeedWithSpecification);
-			}
-		}
-	}
-
-	public void beforePredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).beforePredicateCheck(analysisSeedWithSpecification);
-			}
-		}
-	}
-
-	public void afterPredicateCheck(AnalysisSeedWithSpecification analysisSeedWithSpecification) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).afterPredicateCheck(analysisSeedWithSpecification);
-			}
-		}
-	}
-
-	public void seedStarted(IAnalysisSeed analysisSeedWithSpecification) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).seedStarted(analysisSeedWithSpecification);
-			}
-		}
-	}
-
-	public void boomerangQueryStarted(Query seed, BackwardQuery q) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).boomerangQueryStarted(seed, q);
-			}
-		}
-	}
-
-	public void boomerangQueryFinished(Query seed, BackwardQuery q) {
-		for (ICrySLResultsListener listen : listeners) {
-			if (listen instanceof CrySLAnalysisListener) {
-				((CrySLAnalysisListener) listen).boomerangQueryFinished(seed, q);
-			}
-		}
-	}
-	
-	public void onSeedFinished(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> analysisResults) {
-		for (ICrySLResultsListener listen : listeners) {
-			listen.onSeedFinished(seed, analysisResults);
-		}
-	}
 	
 	public void onSeedTimeout(Node<ControlFlowGraph.Edge, Val> seed) {
 		for (ICrySLResultsListener listen : listeners) {
 			listen.onSeedTimeout(seed);
-		}
-	}
-	
-	public void reportError(IAnalysisSeed object, AbstractError err) {
-		if (object != null && object instanceof AnalysisSeedWithSpecification) {
-			((AnalysisSeedWithSpecification) object).setSecure(false);
-		}
-		for (ICrySLResultsListener listen : listeners) {
-			listen.reportError(err);
 		}
 	}
 

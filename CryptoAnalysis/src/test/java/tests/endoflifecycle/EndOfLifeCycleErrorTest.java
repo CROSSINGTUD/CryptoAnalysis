@@ -10,6 +10,7 @@ import javax.security.auth.DestroyFailedException;
 import org.junit.Test;
 
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -17,6 +18,12 @@ import test.assertions.Assertions;
  * Created by johannesspath on 24.12.17.
  */
 public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
+
+	@Override
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
+	}
+
 	@Test
 	public void missingDoFinalCall() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -90,10 +97,5 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 
 	private static class Container {
 		Cipher c;
-	}
-
-	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
 	}
 }

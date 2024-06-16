@@ -1,20 +1,15 @@
 package tests.custom.imprecisevalueextraction;
 
-import crypto.analysis.CrySLRulesetSelector;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
-public class ImpreciseValueExtractionErrorTest extends UsagePatternTestingFramework {
+public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
 
     @Override
-    protected CrySLRulesetSelector.Ruleset getRuleSet() {
-        return CrySLRulesetSelector.Ruleset.CustomRules;
-    }
-
-    @Override
-    public String getRulesetPath() {
-        return "impreciseValueExtraction";
+    protected String getRulesetPath() {
+        return TestConstants.RULES_TEST_DIR + "impreciseValueExtraction";
     }
 
     @Test

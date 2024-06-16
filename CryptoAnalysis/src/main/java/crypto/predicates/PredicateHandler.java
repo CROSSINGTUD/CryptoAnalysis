@@ -11,19 +11,15 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 import crypto.analysis.AlternativeReqPredicate;
-import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.ResultsHandler;
-import crypto.analysis.errors.ForbiddenPredicateError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ICrySLPredicateParameter;
 import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
@@ -147,8 +143,7 @@ public class PredicateHandler {
 		if (added) {
 			onPredicateAdded(seedObj, statement, variable, ensPred);
 		}
-		reportForbiddenPredicate(ensPred, statement, seedObj);
-		cryptoScanner.getAnalysisListener().onSecureObjectFound(seedObj);
+
 		Set<EnsuredCrySLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
 		if (predsObjBased == null)
 			predsObjBased = Sets.newHashSet();
@@ -218,7 +213,8 @@ public class PredicateHandler {
 		collectMissingRequiredPredicates();
 		reportRequiredPredicateErrors();
 		checkForContradictions();
-		cryptoScanner.getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
+		cryptoScanner.getAnalysisReporter().ensuredPredicates(existingPredicates);
+		//cryptoScanner.getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 	}
 
 	private void collectMissingRequiredPredicates() {
@@ -282,7 +278,7 @@ public class PredicateHandler {
 
 			for (RequiredPredicateError reqPredError : entry.getValue()) {
 				reqPredError.mapPrecedingErrors();
-				cryptoScanner.getAnalysisListener().reportError(seed, reqPredError);
+				cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
 			}
 		}
 	}
@@ -333,44 +329,6 @@ public class PredicateHandler {
 			}
 		}
 		return res;
-	}
-
-	public void reportForbiddenPredicate(EnsuredCrySLPredicate predToBeChecked, Statement location, IAnalysisSeed seedObj) {
-		Collection<String> forbiddenPredicates = cryptoScanner.getForbiddenPredicates();
-		if (!forbiddenPredicates.isEmpty()) {
-			for (String pred : forbiddenPredicates) {
-				if (!pred.substring(0, pred.indexOf("[")).equalsIgnoreCase(predToBeChecked.getPredicate().getPredName())) {
-					continue;
-				}
-				
-				String[] forbiddenParamTypes = pred.substring(pred.indexOf("["), pred.lastIndexOf("]")).split(",");
-				List<ICrySLPredicateParameter> foundParams = predToBeChecked.getPredicate().getParameters();
-
-				if (forbiddenParamTypes.length != foundParams.size()) {
-					continue;
-				}
-
-				if (doParametersDiffer(forbiddenParamTypes, foundParams)) {
-					continue;
-				}
-
-				Entry<CallSiteWithParamIndex, ExtractedValue> cswithParam = predToBeChecked.getParametersToValues().entries().iterator().next();
-				if (seedObj instanceof AnalysisSeedWithSpecification) {					
-					cryptoScanner.getAnalysisListener().reportError(seedObj, new ForbiddenPredicateError(predToBeChecked.getPredicate(), location, ((AnalysisSeedWithSpecification)seedObj).getSpecification(), new CallSiteWithExtractedValue(cswithParam.getKey(), cswithParam.getValue())));
-				} else if (seedObj instanceof AnalysisSeedWithEnsuredPredicate) {
-					cryptoScanner.getAnalysisListener().reportError(seedObj, new ForbiddenPredicateError(predToBeChecked.getPredicate(), location, null, new CallSiteWithExtractedValue(cswithParam.getKey(), cswithParam.getValue())));
-				}
-			}
-		}
-	}
-
-	private boolean doParametersDiffer(String[] forbiddenParamTypes, List<ICrySLPredicateParameter> foundParams) {
-		for (int i = 0; i < foundParams.size(); i++) {
-			if (!forbiddenParamTypes[i].equals(((CrySLObject) foundParams.get(i)).getJavaType())) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 }

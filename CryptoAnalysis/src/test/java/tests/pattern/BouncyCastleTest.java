@@ -1,6 +1,5 @@
 package tests.pattern;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
@@ -18,6 +17,7 @@ import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
+import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
@@ -30,8 +30,8 @@ import java.util.Random;
 public class BouncyCastleTest extends UsagePatternTestingFramework {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.BouncyCastle;
+	protected String getRulesetPath() {
+		return TestConstants.BOUNCY_CASTLE_RULESET_PATH;
 	}
 	
 	@Test

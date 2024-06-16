@@ -1,31 +1,30 @@
 package tests.pattern.tink;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
-import java.security.GeneralSecurityException;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.StreamingAead;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.streamingaead.StreamingAeadFactory;
 import com.google.crypto.tink.streamingaead.StreamingAeadKeyTemplates;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Ignore;
+import org.junit.Test;
+import test.TestConstants;
 import test.assertions.Assertions;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
+import java.security.GeneralSecurityException;
 
 @Ignore
 public class TestStreamingAEADCipher extends TestTinkPrimitives {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.Tink;
+	protected String getRulesetPath() {
+		return TestConstants.TINK_RULESET_PATH;
 	}
+
 	@Test
 	public void generateNewAES128_CTR_HMAC_SHA256_4KBKeySet() throws GeneralSecurityException {
 		KeyTemplate kt = StreamingAeadKeyTemplates.createAesCtrHmacStreamingKeyTemplate(16, HashType.SHA256, 16, HashType.SHA256, 32, 4096);

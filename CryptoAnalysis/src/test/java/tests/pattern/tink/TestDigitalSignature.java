@@ -1,10 +1,5 @@
 package tests.pattern.tink;
 
-import java.security.GeneralSecurityException;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.PublicKeySign;
 import com.google.crypto.tink.PublicKeyVerify;
@@ -15,18 +10,21 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import org.junit.Ignore;
+import org.junit.Test;
+import test.TestConstants;
 import test.assertions.Assertions;
 
-@SuppressWarnings("deprecation")
+import java.security.GeneralSecurityException;
+
 @Ignore
 public class TestDigitalSignature extends TestTinkPrimitives {
 
 	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.Tink;
+	protected String getRulesetPath() {
+		return TestConstants.TINK_RULESET_PATH;
 	}
+
 	@Test
 	public void generateNewECDSA_P256() throws GeneralSecurityException {
 		KeyTemplate kt = SignatureKeyTemplates.createEcdsaKeyTemplate(HashType.SHA256, EllipticCurveType.NIST_P256, EcdsaSignatureEncoding.DER, null);
