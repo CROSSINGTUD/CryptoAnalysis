@@ -11,7 +11,7 @@ import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.listener.IResultsListener;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;

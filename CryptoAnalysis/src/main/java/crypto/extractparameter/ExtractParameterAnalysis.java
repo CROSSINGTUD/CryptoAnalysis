@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
-import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 import crypto.typestate.LabeledMatcherTransition;

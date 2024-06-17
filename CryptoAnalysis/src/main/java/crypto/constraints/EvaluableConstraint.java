@@ -20,7 +20,7 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLExceptionConstraint;

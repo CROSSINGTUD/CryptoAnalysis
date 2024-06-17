@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import crypto.rules.CrySLMethod;
+import crypto.rules.FiniteStateMachine;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import de.darmstadt.tu.crossing.crySL.Event;
@@ -16,7 +17,7 @@ import de.darmstadt.tu.crossing.crySL.OrderOperator;
 import de.darmstadt.tu.crossing.crySL.Primary;
 
 /**
- * This class will build a {@link crypto.interfaces.FiniteStateMachine} for a given ORDER expression from crysl rules.
+ * This class will build a {@link FiniteStateMachine} for a given ORDER expression from crysl rules.
  * @author marvinvogel
  *
  */

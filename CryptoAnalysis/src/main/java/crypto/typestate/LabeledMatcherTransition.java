@@ -3,6 +3,7 @@ package crypto.typestate;
 import boomerang.scene.DeclaredMethod;
 import crypto.rules.CrySLMethod;
 import crypto.utils.MatcherUtils;
+import soot.SootMethod;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 
@@ -25,7 +26,15 @@ public class LabeledMatcherTransition extends MatcherTransition {
         return getMatching(declaredMethod).isPresent();
     }
 
-    // Return value corresponds to crysl method on
+    /**
+     * Return the {@link CrySLMethod}'s that match the given method.
+     * As the method is taken from a statement, we need to apply the matching logic
+     * defined here, to get the {@link CrySLMethod}s that were resolved to the
+     * matching {@link DeclaredMethod}s.
+     *
+     * @param declaredMethod	the given method
+     * @return The {@link CrySLMethod}'s matching the given declared method.
+     */
     public Optional<CrySLMethod> getMatching(DeclaredMethod declaredMethod) {
         for (CrySLMethod method : methods) {
             if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {

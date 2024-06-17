@@ -6,7 +6,6 @@ import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
-import crypto.predicates.PredicateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import typestate.TransitionFunction;

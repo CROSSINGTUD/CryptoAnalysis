@@ -39,8 +39,8 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ICrySLPredicateParameter;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
 import crypto.rules.CrySLArithmeticConstraint.ArithOp;
 import crypto.rules.CrySLComparisonConstraint;

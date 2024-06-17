@@ -2,15 +2,9 @@ package crypto.rules;
 
 import java.util.List;
 import java.util.Set;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
 
 public class CrySLCondPredicate extends CrySLPredicate {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private final Set<StateNode> conditionalNodes;
 
 	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> parameters,

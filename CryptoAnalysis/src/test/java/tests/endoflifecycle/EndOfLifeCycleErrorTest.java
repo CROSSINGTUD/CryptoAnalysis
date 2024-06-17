@@ -1,18 +1,15 @@
 package tests.endoflifecycle;
 
-import java.security.GeneralSecurityException;
+import org.junit.Test;
+import test.TestConstants;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.security.auth.DestroyFailedException;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.security.GeneralSecurityException;
 
 /**
  * Created by johannesspath on 24.12.17.
@@ -42,14 +39,10 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void missingGenerateKeyCaught() {
-		try {
-			KeyGenerator keygen = KeyGenerator.getInstance("AES");
-			keygen.init(128);
-			Assertions.missingTypestateChange();
-		} catch (Exception e) {
-
-		}
+	public void missingGenerateKeyCaught() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		Assertions.missingTypestateChange();
 	}
 
 	@Test

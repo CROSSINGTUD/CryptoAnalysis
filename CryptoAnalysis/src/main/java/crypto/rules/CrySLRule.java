@@ -1,7 +1,5 @@
 package crypto.rules;
 
-import crypto.interfaces.ISLConstraint;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;

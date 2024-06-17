@@ -1,4 +1,4 @@
-package crypto.boomerang;
+package crypto.extractparameter;
 
 import boomerang.scene.AllocVal;
 import boomerang.scene.DeclaredMethod;

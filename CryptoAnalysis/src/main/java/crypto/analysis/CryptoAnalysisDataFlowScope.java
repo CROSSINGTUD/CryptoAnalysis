@@ -1,4 +1,4 @@
-package crypto.boomerang;
+package crypto.analysis;
 
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;

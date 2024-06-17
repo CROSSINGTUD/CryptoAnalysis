@@ -4,9 +4,7 @@ import boomerang.scene.Method;
 import boomerang.scene.jimple.JimpleMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLRule;
-import crypto.typestate.CrySLMethodToSootMethod;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -38,12 +36,13 @@ public class ExceptionAwareTransformer extends PreTransformer {
 	public ExceptionAwareTransformer(final CrySLRule rule) {
 		this.exceptions = HashMultimap.create();
 		this.spec = Scene.v().getSootClass(rule.getClassName());
-		rule.getConstraints().stream()
+		// TODO Refactoring
+		/*rule.getConstraints().stream()
 				.filter(constraint -> constraint instanceof CrySLExceptionConstraint)
 				.map(constraint -> (CrySLExceptionConstraint) constraint)
 				.forEach(constraint -> CrySLMethodToSootMethod.v().convert(constraint.getMethod()).stream()
 						.forEach(
-								method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));
+								method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));*/
 	}
 
 	protected void internalTransform(final Body body, final String phase, final Map<String, String> options) {

@@ -1,10 +1,5 @@
 package tests.providerdetection;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
 import boomerang.controlflowgraph.DynamicCFG;
@@ -13,7 +8,6 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.jimple.BoomerangPretransformer;
 import boomerang.scene.jimple.SootCallGraph;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.providerdetection.ProviderDetection;
 import soot.G;
 import soot.PackManager;
@@ -24,11 +18,15 @@ import soot.Transform;
 import soot.Transformer;
 import soot.options.Options;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 public class ProviderDetectionTestingFramework extends ProviderDetection {
-	
-	private static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
+
 	private static final String rootRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
-	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
+	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+ "JavaCryptographicArchitecture";
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	/**

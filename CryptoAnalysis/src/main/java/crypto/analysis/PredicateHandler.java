@@ -1,4 +1,4 @@
-package crypto.predicates;
+package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
@@ -10,17 +10,10 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
-import crypto.analysis.AlternativeReqPredicate;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.CryptoScanner;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.RequiredCrySLPredicate;
-import crypto.analysis.ResultsHandler;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;

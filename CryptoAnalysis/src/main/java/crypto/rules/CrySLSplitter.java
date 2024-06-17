@@ -1,15 +1,9 @@
 package crypto.rules;
 
-import java.io.Serializable;
+public class CrySLSplitter {
 
-public class CrySLSplitter implements Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private int index = 0;
-	private String split = "";
+	private final int index;
+	private final String split;
 	
 	public CrySLSplitter(int ind, String spl) {
 		this.index = ind;

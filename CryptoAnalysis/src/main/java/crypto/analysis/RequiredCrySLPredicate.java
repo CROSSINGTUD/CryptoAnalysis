@@ -2,14 +2,12 @@ package crypto.analysis;
 
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 
 public class RequiredCrySLPredicate implements ISLConstraint {
 
-	private static final long serialVersionUID = 9111353268603202392L;
 	private final CrySLPredicate predicate;
 	private final Statement statement;
 
@@ -69,8 +67,4 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		return predicate.getInvolvedVarNames();
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		throw new UnsupportedOperationException();
-	}
 }

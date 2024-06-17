@@ -1,8 +1,7 @@
 package crypto.analysis;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLPredicate;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 
 public class AlternativeReqPredicate implements ISLConstraint {
 
-	private static final long serialVersionUID = 9111353268603202392L;
 	private final Statement stmt;
 	private final List<CrySLPredicate> alternatives;
 
@@ -81,12 +79,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		return involvedVarNames;
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		throw new UnsupportedOperationException();
-	}
-
-	public List<CrySLPredicate> getAlternatives() {
+    public List<CrySLPredicate> getAlternatives() {
 		return alternatives;
 	}
 	

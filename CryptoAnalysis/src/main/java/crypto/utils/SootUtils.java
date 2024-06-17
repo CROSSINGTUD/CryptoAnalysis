@@ -49,6 +49,15 @@ public class SootUtils {
         return new JimpleType(sootType);
     }
 
+    /**
+     * Returns whether parent is a super type of child, i.e. if they
+     * are the same, child implements or extends parent transitively.
+     *
+     * @param childClass		the child to check
+     * @param parentClass	the parent to check against
+     *
+     * @return true, if parent is a super type of child
+     */
     public static boolean isSubtype(String childClass, String parentClass) {
         // Check for primitive types
         if (!(Scene.v().containsClass(childClass) || Scene.v().containsClass(parentClass))) {

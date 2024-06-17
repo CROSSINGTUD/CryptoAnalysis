@@ -2,7 +2,7 @@ package crypto.analysis.errors;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLRule;
 
 public class HardCodedError extends ErrorWithObjectAllocation {

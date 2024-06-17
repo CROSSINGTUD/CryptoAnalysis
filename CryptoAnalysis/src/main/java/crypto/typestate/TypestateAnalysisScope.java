@@ -9,7 +9,7 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.interfaces.ICrySLPredicateParameter;
+import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;

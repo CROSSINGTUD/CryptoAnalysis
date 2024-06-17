@@ -1,4 +1,4 @@
-package crypto.interfaces;
+package crypto.rules;
 
 import java.util.Collection;
 

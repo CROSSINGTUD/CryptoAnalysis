@@ -1,19 +1,15 @@
 package crypto.rules;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import crypto.interfaces.ICrySLPredicateParameter;
-
-public class CrySLMethod implements Serializable, ICrySLPredicateParameter {
+public class CrySLMethod implements ICrySLPredicateParameter {
 
 	public static final String VOID = "void";
 	public static final String ANY_TYPE = "AnyType";
 	public static final String NO_NAME = "_";
 
-	private static final long serialVersionUID = 1L;
 	private final String methodName;
 	private final Entry<String, String> retObject;
 	/**

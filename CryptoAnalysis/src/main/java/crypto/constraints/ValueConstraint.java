@@ -2,7 +2,7 @@ package crypto.constraints;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;

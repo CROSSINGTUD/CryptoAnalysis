@@ -7,12 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
-
 public class CrySLPredicate extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;

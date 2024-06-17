@@ -1,22 +1,15 @@
 package crypto.analysis;
 
-import boomerang.callgraph.BoomerangResolver;
-import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.callgraph.ObservableICFG;
-import boomerang.controlflowgraph.DynamicCFG;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
-import boomerang.scene.Statement;
 import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
-import crypto.boomerang.CryptoAnalysisDataFlowScope;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
-import crypto.predicates.PredicateHandler;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
@@ -43,18 +36,6 @@ public abstract class CryptoScanner {
 	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds = new HashMap<>();
 	private final PredicateHandler predicateHandler = new PredicateHandler(this);
 
-
-	private final CrySLResultsReporter resultsReporter;
-
-	public ObservableICFG<Statement, Method> icfg() {
-		return new ObservableDynamicICFG(new DynamicCFG(), new BoomerangResolver(callGraph(), getDataFlowScope()));
-	}
-
-
-	public CrySLResultsReporter getAnalysisListener() {
-		return new CrySLResultsReporter();
-	}
-
 	public CryptoScanner(Collection<CrySLRule> rules) {
 		analysisReporter = new AnalysisReporter();
 
@@ -63,9 +44,6 @@ public abstract class CryptoScanner {
 
 		errorCollector = new ErrorCollector();
 		addErrorListener(errorCollector);
-
-		// TODO
-		resultsReporter = getAnalysisListener();
 
 		ruleset = new HashSet<>(rules);
 		dataFlowScope = new CryptoAnalysisDataFlowScope(rules);
@@ -91,8 +69,6 @@ public abstract class CryptoScanner {
 		this.getAnalysisReporter().afterPredicateCheck();
 
 		this.getAnalysisReporter().afterAnalysis();
-
-		resultsReporter.afterAnalysis();
 	}
 
 	public abstract CallGraph callGraph();

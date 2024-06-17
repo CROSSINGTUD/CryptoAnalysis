@@ -1,8 +1,7 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLRule;
 
 public class ImpreciseValueExtractionError extends AbstractError {

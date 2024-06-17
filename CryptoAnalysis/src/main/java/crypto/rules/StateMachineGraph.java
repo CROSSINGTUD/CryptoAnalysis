@@ -9,11 +9,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
-import crypto.interfaces.FiniteStateMachine;
+public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 
-public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;
 	private StateNode startNode;
 	private final Set<StateNode> nodes;
 	private final List<TransitionEdge> edges;
@@ -21,9 +18,9 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	private int nodeNameCounter = 0;
 
 	public StateMachineGraph() {
-		nodes = new HashSet<StateNode>();
-		edges = new ArrayList<TransitionEdge>();
-		initialEdges = new ArrayList<TransitionEdge>();
+		nodes = new HashSet<>();
+		edges = new ArrayList<>();
+		initialEdges = new ArrayList<>();
 	}
 	
 	public StateNode createNewNode() {
@@ -71,11 +68,11 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 	
 	public StateNode aggregateNodesToOneNode(Set<StateNode> endNodes, StateNode newNode) {
-		this.aggregateNodestoOtherNodes(endNodes, Lists.newArrayList(newNode));
+		this.aggregateNodesToOtherNodes(endNodes, Lists.newArrayList(newNode));
 		return newNode;
 	}
 	
-	public Collection<StateNode> aggregateNodestoOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
+	public Collection<StateNode> aggregateNodesToOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
 		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
 		// Add new edges to newNode instead of Aggr Node 
 		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.createNewEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node)));
@@ -85,7 +82,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 	
 	private void removeNodesWithAllEdges(Collection<StateNode> nodesToRemove) {
-		nodesToRemove.forEach(node -> removeNodeWithAllEdges(node));
+		nodesToRemove.forEach(this::removeNodeWithAllEdges);
 	}
 	
 	private void removeNodeWithAllEdges(StateNode node) {
@@ -152,7 +149,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 
 	public Collection<StateNode> getAcceptingStates() {
-		return nodes.parallelStream().filter(node -> node.getAccepting()).collect(Collectors.toList());
+		return nodes.parallelStream().filter(StateNode::getAccepting).collect(Collectors.toList());
 	}
 
 	public Collection<TransitionEdge> getAllTransitions() {

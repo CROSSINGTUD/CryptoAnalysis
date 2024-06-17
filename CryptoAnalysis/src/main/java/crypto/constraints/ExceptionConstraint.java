@@ -1,6 +1,5 @@
 package crypto.constraints;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
@@ -10,7 +9,6 @@ import boomerang.scene.jimple.JimpleStatement;
 import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
-import crypto.typestate.CrySLMethodToSootMethod;
 import crypto.utils.MatcherUtils;
 import soot.Body;
 import soot.Scene;
@@ -34,7 +32,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 
 	public ExceptionConstraint(CrySLExceptionConstraint cons, ConstraintSolver context) {
 		super(cons, context);
-		this.method = new HashSet<>(CrySLMethodToSootMethod.v().convert(cons.getMethod()));
+		//this.method = new HashSet<>(CrySLMethodToSootMethod.v().convert(cons.getMethod()));
+		this.method = new HashSet<>();
 
 		SootClass exceptionClass = Scene.v().getSootClass(cons.getException().getException());
 		this.exception = new JimpleWrappedClass(exceptionClass);

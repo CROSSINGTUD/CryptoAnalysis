@@ -3,17 +3,13 @@ package crypto.rules;
 import java.util.Collections;
 import java.util.Set;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
-import crypto.interfaces.ISLConstraint;
 
 /**
  * Constraint expressing, that a {@link CrySLMethod} throws an
  * {@link CrySLException}, that must be caught.
  * */
 public class CrySLExceptionConstraint implements ISLConstraint {
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The Method throwing the Exception.
@@ -61,12 +57,7 @@ public class CrySLExceptionConstraint implements ISLConstraint {
 		return String.format("%s(%s, %s)", this.getClass().getName(), getMethod(), getException());
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		this.location = location;
-	}
-
-	@Override
+    @Override
 	public Statement getLocation() {
 		return this.location;
 	}

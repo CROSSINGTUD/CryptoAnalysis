@@ -6,7 +6,7 @@ import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLComparisonConstraint.CompOp;
