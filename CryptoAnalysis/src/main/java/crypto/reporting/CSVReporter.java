@@ -1,140 +1,92 @@
 package crypto.reporting;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Table;
+import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
+import crypto.rules.CrySLRule;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-
-import crypto.analysis.errors.AbstractError;
-import crypto.rules.CrySLRule;
-
-/**
- * This class extends the class {@link Reporter} by generating an analysis report and write it into a
- * csv file.
- * 
- * Compared to the {@link CSVSummaryReporter}, this reporter writes each error from the analysis into
- * a single line. If the statistics are enabled, each line is extended by the corresponding statistic
- * fields. Since the statistics are computed for the whole analysis, each value for the different fields
- * are the same in all lines.
- */
 public class CSVReporter extends Reporter {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CSVReporter.class);
 
-	private static final String CSV_SEPARATOR = ";";
-	private static final String REPORT_NAME = "CryptoAnalysis-Report.csv";
-	
-	private final List<String> headers;
-	private final List<String> contents;
-	
-	/** Headers for the errors. These headers are always part of the analysis report. */
-	private enum Headers {
-		ErrorID, ErrorType, ViolatingClass, Class, Method, LineNumber, Statement, Message
-	}
-	
-	/** 
-	 * Headers for the  statistics. These headers are only part of the analysis report, if
-	 * the corresponding parameter in the constructor is set to true.
-	 */
-	private enum StatisticHeaders {
-		SoftwareID, SeedObjectCount, CryptoAnalysisTime_ms, CallGraphTime_ms, CallGraphReachableMethods,
-		CallGraphReachableMethods_ActiveBodies, DataflowVisitedMethod
-	}
-	
-	/**
-	 * Subclass of {@link Reporter}. Creates an instance of {@link CSVReporter}, which
-	 * can be used to create a csv file containing the analysis report.
-	 * 
-	 * @param reportDir A {@link String} path giving the location of the report directory.
-	 *                  The reportPath should end without an ending file separator.
-	 * @param softwareId A {@link String} for the analyzed software.
-	 * @param rules A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
-	 * @param callGraphConstructionTime The time in milliseconds for the construction of the callgraph.
-	 * @param includeStatistics Set this value to true, if the analysis report should contain some
-	 *                          analysis statistics (e.g. the callgraph construction time). If this value is set
-	 *                          to false, no statistics will be output. 
-	 */
-	public CSVReporter(String reportDir, String softwareId,  List<CrySLRule> rules, long callGraphConstructionTime, boolean includeStatistics) {
-		super((reportDir != null ? new File(reportDir) : new File(System.getProperty("user.dir"))), softwareId, rules, callGraphConstructionTime, includeStatistics);
-		
-		headers = new ArrayList<>();
-		contents = new ArrayList<>();
-		
-		for (Headers h : Headers.values()) {
-			headers.add(h.toString());
-		}
-		
-		if (includeStatistics()) {
-			for (StatisticHeaders h : StatisticHeaders.values()) {
-				headers.add(h.toString());
-			}
-		}
-	}
+    private static final String FILE_ENDING = ".csv";
+    private static final String CSV_SEPARATOR = ";";
 
-	@Override
-	public void handleAnalysisResults() {
-		int idCount = 0;
-		
-		for (WrappedClass c : this.errorMarkers.rowKeySet()) {
-			String className = c.getName();
-			
-			for (Entry<Method, Set<AbstractError>> e : this.errorMarkers.row(c).entrySet()) {
-				String methodName = e.getKey().getSubSignature();
-				
-				for (AbstractError marker : e.getValue()) {
-					String errorType = marker.getClass().getSimpleName();
-					String violatingClass = marker.getRule().getClassName();
-					String errorMessage = marker.toErrorMarkerString();
-					int lineNumber = marker.getErrorStatement().getStartLineNumber();
-					String statement = marker.getErrorStatement().getMethod().getName();
-					
-					String line = idCount + CSV_SEPARATOR + errorType + CSV_SEPARATOR + violatingClass + CSV_SEPARATOR + className + 
-							CSV_SEPARATOR + methodName + CSV_SEPARATOR + lineNumber + CSV_SEPARATOR + statement + CSV_SEPARATOR + errorMessage;
-					
-					// Add the statistics to every single line of the report
-					if (includeStatistics()) {
-						line += CSV_SEPARATOR + getStatistics().getSoftwareID() + CSV_SEPARATOR + getStatistics().getSeedObjectCount() + CSV_SEPARATOR
-								+ getStatistics().getAnalysisTime() + CSV_SEPARATOR + getStatistics().getCallgraphTime()
-								+ CSV_SEPARATOR + getStatistics().getCallgraphReachableMethods() + CSV_SEPARATOR + getStatistics().getCallgraphReachableMethodsWithActiveBodies()
-								+ CSV_SEPARATOR + getStatistics().getDataflowVisitedMethods();
-					}
-					
-					contents.add(line);
-					
-					idCount++;
-				}
-			}
-		}
+    /** Headers for the errors */
+    private enum Headers {
+        ErrorId, ErrorType, ViolatingClass, Class, Method, Statement, LineNumber, Message
+    }
 
-		writeToFile();
-	}
-	
-	private void writeToFile() {
-		try {
-			FileWriter writer = new FileWriter(getOutputFolder() + File.separator + REPORT_NAME);
-			
-			// write headers
-			writer.write(Joiner.on(CSV_SEPARATOR).join(headers) + "\n");
-			
-			// write errors line by line
-			for (String line : this.contents) {
-				writer.write(line + "\n");
-			}
-			
-			writer.close();
-			LOGGER.info("CSV Report generated to file : " + getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME);
-		} catch (IOException e) {
-			LOGGER.error("Could not write to " + getOutputFolder().getAbsolutePath() + File.separator + REPORT_NAME, e);
-		}
-	}
+    public CSVReporter(String outputDir, Collection<CrySLRule> ruleset) throws IOException {
+        super(outputDir, ruleset);
+    }
+
+    @Override
+    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+        int idCount = 0;
+        List<String> lineContents = new ArrayList<>();
+
+        for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
+            String className = wrappedClass.getName();
+
+            for (Map.Entry<Method, Set<AbstractError>> entry : errorCollection.row(wrappedClass).entrySet()) {
+                String methodName = entry.getKey().toString();
+
+                for (AbstractError error : entry.getValue()) {
+                    List<String> lineFields = Arrays.asList(
+                            String.valueOf(idCount),                // id
+                            error.getClass().getSimpleName(),       // error type
+                            error.getRule().getClassName(),         // violating class
+                            className,                              // class
+                            methodName,                             // method
+                            error.getErrorStatement().toString(),   // statement
+                            String.valueOf(error.getLineNumber()),  // line number
+                            error.toErrorMarkerString()             // message
+                    );
+
+                    String line = Joiner.on(CSV_SEPARATOR).join(lineFields);
+                    lineContents.add(line);
+
+                    idCount++;
+                }
+            }
+        }
+
+        writeToFile(lineContents);
+    }
+
+    public void writeToFile(List<String> contents) {
+        List<String> headers = new ArrayList<>();
+
+        for (CSVReporter.Headers h : CSVReporter.Headers.values()) {
+            headers.add(h.toString());
+        }
+
+        String header = Joiner.on(CSV_SEPARATOR).join(headers);
+
+        String fileName = outputFile.getAbsolutePath() + File.separator + REPORT_NAME + FILE_ENDING;
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(header + "\n");
+
+            // Write headers line by line
+            for (String line : contents) {
+                writer.write(line + "\n");
+            }
+
+            LOGGER.info("CSV report generated in {}", fileName);
+        } catch (IOException e) {
+            LOGGER.error("Could not write CSV report to {}: {}", fileName, e.getMessage());
+        }
+    }
 }

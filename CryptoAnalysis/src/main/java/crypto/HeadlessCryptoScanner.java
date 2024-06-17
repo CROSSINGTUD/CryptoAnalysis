@@ -9,27 +9,22 @@ import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import crypto.analysis.AnalysisSettings;
+import crypto.analysis.AnalysisSettings.ControlGraph;
+import crypto.analysis.AnalysisSettings.ReportFormat;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLResultsReporter;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.CryptoScannerSettings;
-import crypto.analysis.CryptoScannerSettings.ControlGraph;
-import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.cryslhandler.CrySLRuleReader;
+import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.preanalysis.SeedFactory;
 import crypto.preanalysis.TransformerSetup;
 import crypto.providerdetection.ProviderDetection;
-import crypto.reporting.CSVReporter;
-import crypto.reporting.CSVSummaryReporter;
-import crypto.reporting.CommandLineReporter;
-import crypto.reporting.GitHubAnnotationReporter;
 import crypto.reporting.Reporter;
-import crypto.reporting.SARIFReporter;
-import crypto.reporting.TXTReporter;
+import crypto.reporting.ReporterFactory;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
@@ -57,12 +52,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public abstract class HeadlessCryptoScanner {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-	private static final CryptoScannerSettings settings = new CryptoScannerSettings();
+	private static final AnalysisSettings settings = new AnalysisSettings();
 	private static Stopwatch callGraphWatch;
 	private static List<CrySLRule> rules = Lists.newArrayList();
 	private static String rulesetRootPath;
@@ -83,7 +77,7 @@ public abstract class HeadlessCryptoScanner {
 		try {
 			settings.parseSettingsFromCLI(args);
 		} catch (CryptoAnalysisParserException e) {
-			LOGGER.error("Parser failed with error: " + e.getClass().toString(), e);
+			LOGGER.error("Parser failed with error: " + e.getClass(), e);
 			System.exit(-1);
 		}
 		
@@ -196,69 +190,30 @@ public abstract class HeadlessCryptoScanner {
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 
 				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
-				
-				long callgraphConstructionTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
-				
-				final CrySLResultsReporter reporter = new CrySLResultsReporter();
-				Reporter fileReporter;
-				
-				Set<ReportFormat> formats = reportFormats();
-				
-				if (!formats.isEmpty()) {
-					for (ReportFormat format : formats) {
-						switch (format) {
-							case CMD:
-								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case TXT:
-								fileReporter = new TXTReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case SARIF:
-								fileReporter = new SARIFReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case CSV:
-								fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case CSV_SUMMARY:
-								fileReporter = new CSVSummaryReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case GITHUB_ANNOTATION:
-								fileReporter = new GitHubAnnotationReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							default:
-								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-						}
-					}
-				} else {
-					// if the --reportformat flag is not set or no format is specified, use the command line reporter as default
-					fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-					reporter.addReportListener(fileReporter);
-				}
-				
+
+				final CrySLResultsReporter resultsReporter = new CrySLResultsReporter();
+
+
 				if(getAdditionalListener() != null) {
-					reporter.addReportListener(getAdditionalListener());	
+					resultsReporter.addReportListener(getAdditionalListener());
 				}
 
 
 
 
 
-
+				// Create ruleset and reporter
 				Collection<CrySLRule> ruleset;
 				try {
-					CrySLRuleReader reader = new CrySLRuleReader();
+					RulesetReader reader = new RulesetReader();
 					ruleset = reader.readRulesFromPath(getRulesetPath());
 				} catch (IOException e) {
 					throw new RuntimeException("Could not read rules: " + e.getMessage());
 				}
 
+				Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getOutputDirectory(), ruleset);
+
+				// Initialize scanner
 				TransformerSetup.v().setupPreTransformer(ruleset);
 				CallGraph callGraph = new SootCallGraph();
 				
@@ -271,7 +226,7 @@ public abstract class HeadlessCryptoScanner {
 
 					@Override
 					public CrySLResultsReporter getAnalysisListener() {
-						return reporter;
+						return resultsReporter;
 					}
 					
 					@Override
@@ -280,12 +235,12 @@ public abstract class HeadlessCryptoScanner {
 							return super.debugger(solver, seed);
 						}
 
-						if (getOutputFolder() == null) {
+						if (getOutputDirectory() == null) {
 							LOGGER.error("The visualization requires the --reportDir option");
 							return super.debugger(solver, seed);
 						}
 
-						File vizFile = new File(getOutputFolder() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
+						File vizFile = new File(getOutputDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
 						boolean created = vizFile.getParentFile().mkdirs();
 
 						if (!created) {
@@ -297,8 +252,6 @@ public abstract class HeadlessCryptoScanner {
 					}
 
 				};
-
-
 
 
 
@@ -326,12 +279,19 @@ public abstract class HeadlessCryptoScanner {
 						}
 					}
 				}
-				
+
+
+
+
 				scanner.scan();
 
-				// TODO Reporter
+				// Report the findings
+				Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
 				Table<WrappedClass, Method, Set<AbstractError>> errorCollection = scanner.getErrorCollector().getErrorCollection();
 
+				for (Reporter reporter : reporters) {
+					reporter.createAnalysisReport(discoveredSeeds, errorCollection);
+				}
 			}
 		};
 	}
@@ -448,7 +408,7 @@ public abstract class HeadlessCryptoScanner {
 		return settings.getIdentifier();
 	}
 	
-	protected String getOutputFolder(){
+	protected String getOutputDirectory(){
 		return settings.getReportDirectory();
 	}
 
@@ -464,7 +424,7 @@ public abstract class HeadlessCryptoScanner {
 		return settings.isVisualization();
 	}
 	
-	protected Set<ReportFormat> reportFormats() {
+	protected Set<ReportFormat> getReportFormats() {
 		return settings.getReportFormats();
 	}
 	

@@ -17,7 +17,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.ExitCode;
 
 @CommandLine.Command(mixinStandardHelpOptions = true)
-public class CryptoScannerSettings implements Callable<Integer> {
+public class AnalysisSettings implements Callable<Integer> {
 
 	@CommandLine.Option(
 			names = {"--appPath"},
@@ -115,7 +115,7 @@ public class CryptoScannerSettings implements Callable<Integer> {
 		DIR, ZIP, NONE
 	}
 	
-	public CryptoScannerSettings() {
+	public AnalysisSettings() {
 		controlGraph = ControlGraph.CHA;
 		rulesetPathType = RulesetPathType.NONE;
 		reportFormats = new HashSet<>(Arrays.asList(ReportFormat.CMD));

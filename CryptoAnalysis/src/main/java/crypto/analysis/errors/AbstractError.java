@@ -40,6 +40,20 @@ public abstract class AbstractError implements IError {
 		}
 	}
 
+	public abstract String toErrorMarkerString();
+
+	public Statement getErrorStatement() {
+		return errorStmt;
+	}
+
+	public CrySLRule getRule() {
+		return rule;
+	}
+
+	public int getLineNumber() {
+		return errorStmt.getStartLineNumber();
+	}
+
 	public void addCausingError(AbstractError parent) {
 		causedByErrors.add(parent);
 	}
@@ -60,14 +74,6 @@ public abstract class AbstractError implements IError {
 		return this.causedByErrors;
 	}
 
-	public Statement getErrorStatement() {
-		return errorStmt;
-	}
-
-	public CrySLRule getRule() {
-		return rule;
-	}
-	public abstract String toErrorMarkerString();
 
 	public String toString() {
 		return toErrorMarkerString();

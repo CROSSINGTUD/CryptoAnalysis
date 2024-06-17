@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
-import crypto.analysis.CryptoScannerSettings.ReportFormat;
+import crypto.analysis.AnalysisSettings.ReportFormat;
 
 public class ReportFormatTest extends AbstractHeadlessTest{
 
@@ -19,9 +19,9 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
 	
 	@Test
-	public void TXTReportCreationTest() {
+	public void testTXTReportCreation() {
 		File report = new File(txtReportPath);
-		if(report.exists()) {
+		if (report.exists()) {
 			report.delete();
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
@@ -34,7 +34,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	}
 	
 	@Test
-	public void CSVReportCreationTest() {
+	public void testCSVReportCreation() {
 		File report = new File(csvReportPath);
 		if(report.exists()) {
 			report.delete();
@@ -49,7 +49,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	}
 	
 	@Test
-	public void CSVSummaryCreationTest() {
+	public void testCSVSummaryCreation() {
 		File report = new File(csvSummaryReportPath);
 		
 		if (report.exists()) {
@@ -67,7 +67,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	}
 	
 	@Test
-	public void SARIFReportCreationTest() {
+	public void testSARIFReportCreation() {
 		File report = new File(sarifReportPath);
 		if(report.exists()) {
 			report.delete();
@@ -82,7 +82,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 	}
 	
 	@Test
-	public void multipleFormatsCreationTest() {
+	public void testMultipleFormatsCreation() {
 		File txtReport = new File(txtReportPath);
 		
 		if (txtReport.exists()) {
@@ -127,7 +127,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		try {
 			FileUtils.deleteDirectory(new File(rootPath));
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Could not delete test directories");
 		}
 	}
 	

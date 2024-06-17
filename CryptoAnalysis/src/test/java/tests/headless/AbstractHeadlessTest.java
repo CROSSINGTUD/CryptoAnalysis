@@ -15,10 +15,11 @@ import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.CrySLAnalysisListener;
 import crypto.analysis.CrySLRulesetSelector;
 import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.analysis.CryptoScannerSettings.ReportFormat;
+import crypto.analysis.AnalysisSettings.ReportFormat;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
@@ -39,6 +40,8 @@ import tests.headless.FindingsType.TruePositives;
 import typestate.TransitionFunction;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -101,10 +104,10 @@ public abstract class AbstractHeadlessTest {
 	}
 
 	protected HeadlessCryptoScanner createScanner(MavenProject mp) {
-		return createScanner(mp, Ruleset.JavaCryptographicArchitecture);
+		return createScanner(mp, TestConstants.JCA_RULESET_PATH);
 	}
 
-	protected HeadlessCryptoScanner createScanner(MavenProject mp, Ruleset ruleset) {
+	protected HeadlessCryptoScanner createScanner(MavenProject mp, String rulesetPath) {
 		G.reset();
 		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
 			@Override
@@ -115,13 +118,13 @@ public abstract class AbstractHeadlessTest {
 			@Override
 			protected List<CrySLRule> getRules() {
 				try {
-					List<CrySLRule> rules = CrySLRulesetSelector.makeFromRuleset(TestConstants.RULES_BASE_DIR, ruleset);
+					RulesetReader reader = new RulesetReader();
+					List<CrySLRule> rules = new ArrayList<>(reader.readRulesFromPath(rulesetPath));
 					HeadlessCryptoScanner.setRules(rules);
 					return rules;
-				} catch (CryptoAnalysisException e) {
-					LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + TestConstants.RULES_BASE_DIR, e);
+				} catch (IOException e) {
+					throw new RuntimeException("Error happened when getting the CrySL rules from the specified directory: " + TestConstants.RULES_BASE_DIR, e);
 				}
-				return null;
 			}
 
 			@Override
@@ -135,10 +138,10 @@ public abstract class AbstractHeadlessTest {
 			}
 
 			@Override
-			protected String getOutputFolder() {
+			protected String getOutputDirectory() {
 				File file = new File("cognicrypt-output/");
 				file.mkdirs();
-				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputFolder();
+				return VISUALIZATION ? file.getAbsolutePath() : super.getOutputDirectory();
 			}
 
 			@Override
@@ -157,8 +160,13 @@ public abstract class AbstractHeadlessTest {
 			}
 			
 			@Override
-			protected Set<ReportFormat> reportFormats(){
+			protected Set<ReportFormat> getReportFormats(){
 				return VISUALIZATION ? reportFormats : new HashSet<>();
+			}
+
+			@Override
+			public String getRulesetPath() {
+				return rulesetPath;
 			}
 		};
 		return scanner;

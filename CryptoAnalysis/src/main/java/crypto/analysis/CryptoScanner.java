@@ -125,6 +125,10 @@ public abstract class CryptoScanner {
 		return ruleset;
 	}
 
+	public Collection<IAnalysisSeed> getDiscoveredSeeds() {
+		return discoveredSeeds.keySet();
+	}
+
 	protected boolean isOnIgnoreSectionList(Method method) {
 		String declaringClass = method.getDeclaringClass().getName();
 		String methodName = declaringClass + "." + method.getName();

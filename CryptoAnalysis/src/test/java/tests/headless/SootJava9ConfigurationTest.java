@@ -35,7 +35,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 	public void testJava9ClasspathProject() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/Java9ClasspathExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -48,7 +48,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 	public void testJava8Project() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 2);
@@ -70,7 +70,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 	public void testJava9ModularProject() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/Java9ModuleExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, Ruleset.JavaCryptographicArchitecture);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", IncompleteOperationError.class, 1);

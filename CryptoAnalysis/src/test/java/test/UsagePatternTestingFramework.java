@@ -18,7 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
-import crypto.cryslhandler.CrySLRuleReader;
+import crypto.cryslhandler.RulesetReader;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.preanalysis.TransformerSetup;
@@ -75,7 +75,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 			protected void internalTransform(String phaseName, Map<String, String> options) {
 				Collection<CrySLRule> ruleset;
 				try {
-					CrySLRuleReader reader = new CrySLRuleReader();
+					RulesetReader reader = new RulesetReader();
 					ruleset = reader.readRulesFromPath(getRulesetPath());
 				} catch (IOException e) {
 					throw new RuntimeException("Could not read rules: " + e.getMessage());
