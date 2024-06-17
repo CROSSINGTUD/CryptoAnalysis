@@ -1,7 +1,6 @@
-package crypto.analysis;
+package crypto;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,19 +71,12 @@ public class AnalysisSettings implements Callable<Integer> {
 	@CommandLine.Option(
 			names = {"--providerdetection"},
 			description = "Enable provider detection")
-	private boolean providerdetection = false;
+	private boolean providerDetection = false;
 
 	@CommandLine.Option(
 			names = {"--dstats"},
 			description = "Disable the output of analysis statistics in the reports")
 	private boolean includeStatistics = true;
-
-	@CommandLine.Option(
-			names = {"--forbiddenPredicates"},
-			description = "Facilitates the specification of forbidden predicates. Any "
-					+ "occurrence will be flagged by the analysis. This input expects a "
-					+ "path to a file containing one predicate per line")
-	private String forbiddenPredicatesPath = null;
 
 	@CommandLine.Option(
 			names = {"--ignoreSections"},
@@ -97,29 +89,21 @@ public class AnalysisSettings implements Callable<Integer> {
 	)
 	private String ignoreSectionsPath = null;
 
-	private ControlGraph controlGraph;
-	private RulesetPathType rulesetPathType;
-	private Set<ReportFormat> reportFormats;
-	private Collection<String> forbiddenPredicates;
-	private Collection<String> ignoredSections;
-
-	public enum ControlGraph {
-		CHA, SPARK, SPARKLIB,
+	public enum AnalysisCallGraph {
+		CHA, SPARK, SPARK_LIB,
 	}
 
 	public enum ReportFormat {
 		CMD, TXT, SARIF, CSV, CSV_SUMMARY, GITHUB_ANNOTATION
 	}
 
-	public enum RulesetPathType {
-		DIR, ZIP, NONE
-	}
+	private AnalysisCallGraph analysisCallGraph;
+	private Set<ReportFormat> reportFormats;
+	private Collection<String> ignoredSections;
 	
 	public AnalysisSettings() {
-		controlGraph = ControlGraph.CHA;
-		rulesetPathType = RulesetPathType.NONE;
+		analysisCallGraph = AnalysisCallGraph.CHA;
 		reportFormats = new HashSet<>(Arrays.asList(ReportFormat.CMD));
-		forbiddenPredicates = new ArrayList<>();
 		ignoredSections = new ArrayList<>();
 	}
 
@@ -127,12 +111,6 @@ public class AnalysisSettings implements Callable<Integer> {
 		CommandLine parser = new CommandLine(this);
 		parser.setOptionsCaseInsensitive(true);
 		int exitCode = parser.execute(settings);
-		
-		if (this.isZipFile(rulesDir)) {
-			this.rulesetPathType = RulesetPathType.ZIP;
-		} else {
-			this.rulesetPathType = RulesetPathType.DIR;
-		}
 
 		if (cg != null) {
 			parseControlGraphValue(cg);
@@ -140,10 +118,6 @@ public class AnalysisSettings implements Callable<Integer> {
 
 		if (reportFormat != null) {
 			parseReportFormatValues(reportFormat);
-		}
-
-		if (forbiddenPredicatesPath != null) {
-			parseForbiddenPredicates(forbiddenPredicatesPath);
 		}
 
 		if (ignoreSectionsPath != null) {
@@ -155,88 +129,35 @@ public class AnalysisSettings implements Callable<Integer> {
 		}
 	}
 
-	public ControlGraph getControlGraph() {
-		return controlGraph;
-	}
 
-	public RulesetPathType getRulesetPathType() {
-		return rulesetPathType;
-	}
 
-	public String getRulesetPathDir() {
-		return rulesDir;
-	}
-
-	public String getSootPath() {
-		return sootPath;
-	}
-
-	public String getApplicationPath() {
-		return appPath;
-	}
-
-	public String getIdentifier() {
-		return identifier;
-	}
-
-	public String getReportDirectory() {
-		return reportPath;
-	}
-	
-	public Set<ReportFormat> getReportFormats() {
-		return reportFormats;
-	}
-
-	public boolean isPreAnalysis() {
-		return preanalysis;
-	}
-
-	public boolean isVisualization() {
-		return visualization;
-	}
-
-	public boolean isProviderDetectionAnalysis() {
-		return providerdetection;
-	}
-	
-	public boolean isIncludeStatistics() {
-		return includeStatistics;
-	}
-
-	public Collection<String> getForbiddenPredicates() {
-		return forbiddenPredicates;
-	}
-
-	public Collection<String> getIgnoredSections() {
-		return ignoredSections;
-	}
-	
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
 		String CGValue = value.toLowerCase();
-		
+
 		switch(CGValue) {
 			case "cha":
-				controlGraph = ControlGraph.CHA;
+				analysisCallGraph = AnalysisCallGraph.CHA;
 				break;
 			case "spark":
-				controlGraph = ControlGraph.SPARK;
+				analysisCallGraph = AnalysisCallGraph.SPARK;
 				break;
 			case "sparklib":
-				controlGraph = ControlGraph.SPARKLIB;
+				analysisCallGraph = AnalysisCallGraph.SPARK_LIB;
 				break;
 			default:
 				throw new CryptoAnalysisParserException("Incorrect value " + CGValue + " for --cg option. "
 						+ "Available options are: CHA, SPARK and SPARKLIB.\n");
 		}
 	}
-	
+
+
 	private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
 		// reset the report formats
 		this.reportFormats = new HashSet<>();
-		
+
 		for (String format : settings) {
 			String reportFormatValue = format.toLowerCase();
-			
+
 			switch (reportFormatValue) {
 				case "cmd":
 					reportFormats.add(ReportFormat.CMD);
@@ -263,43 +184,8 @@ public class AnalysisSettings implements Callable<Integer> {
 		}
 	}
 
-	private boolean isZipFile(String path) {
-		File file = new File(path);
-
-		// Copied from https://stackoverflow.com/questions/33934178/how-to-identify-a-zip-file-in-java
-		int fileSignature = 0;
-
-		try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
-			fileSignature = raf.readInt();
-		} catch (IOException e) {
-			return false;
-		}
-		return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
-	}
-
-	private void parseForbiddenPredicates(String path) throws CryptoAnalysisParserException {
-		File forbPredFile = new File(path);
-
-		// Reset forbiddenPredicates
-		forbiddenPredicates = new ArrayList<>();
-
-		if (forbPredFile.isFile() && forbPredFile.canRead()) {
-			try {
-				List<String> lines = Files.readLines(forbPredFile, Charset.defaultCharset());
-				forbiddenPredicates.addAll(lines);
-			} catch (IOException e) {
-				throw new CryptoAnalysisParserException("Error while reading file " + forbPredFile + ": " + e.getMessage());
-			}
-		} else {
-			throw new CryptoAnalysisParserException(forbPredFile + " is not a file or cannot be read");
-		}
-	}
-
 	private void parseIgnoredSections(String path) throws CryptoAnalysisParserException {
 		final File ignorePackageFile = new File(path);
-
-		// Reset ignoredPackages
-		ignoredSections = new ArrayList<>();
 
 		if (ignorePackageFile.isFile() && ignorePackageFile.canRead()) {
 			try {
@@ -311,6 +197,102 @@ public class AnalysisSettings implements Callable<Integer> {
 		} else {
 			throw new CryptoAnalysisParserException(ignorePackageFile + " is not a file or cannot be read");
 		}
+	}
+
+	public String getApplicationPath() {
+		return appPath;
+	}
+
+	public void setApplicationPath(String applicationPath) {
+		this.appPath = applicationPath;
+	}
+
+	public String getRulesetPath() {
+		return rulesDir;
+	}
+
+	public void setRulesetPath(String rulesetPath) {
+		this.rulesDir = rulesetPath;
+	}
+
+	public AnalysisCallGraph getCallGraph() {
+		return analysisCallGraph;
+	}
+
+	public void setCallGraph(AnalysisCallGraph analysisCallGraph) {
+		this.analysisCallGraph = analysisCallGraph;
+	}
+
+	public String getSootPath() {
+		return sootPath;
+	}
+
+	public void setSootPath(String sootPath) {
+		this.sootPath = sootPath;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+
+	public String getReportDirectory() {
+		return reportPath;
+	}
+
+	public void setReportDirectory(String reportDirectory) {
+		this.reportPath = reportDirectory;
+	}
+	
+	public Set<ReportFormat> getReportFormats() {
+		return reportFormats;
+	}
+
+	public void setReportFormats(Collection<ReportFormat> reportFormats) {
+		this.reportFormats = new HashSet<>(reportFormats);
+	}
+
+	public boolean isPreAnalysis() {
+		return preanalysis;
+	}
+
+	public void setPreAnalysis(boolean preAnalysis) {
+		this.preanalysis = preAnalysis;
+	}
+
+	public boolean isVisualization() {
+		return visualization;
+	}
+
+	public void setVisualization(boolean visualization) {
+		this.visualization = visualization;
+	}
+
+	public boolean isProviderDetectionAnalysis() {
+		return providerDetection;
+	}
+
+	public void setProviderDetection(boolean providerDetection) {
+		this.providerDetection = providerDetection;
+	}
+	
+	public boolean isIncludeStatistics() {
+		return includeStatistics;
+	}
+
+	public void setIncludeStatistics(boolean includeStatistics) {
+		this.includeStatistics = includeStatistics;
+	}
+
+	public Collection<String> getIgnoredSections() {
+		return ignoredSections;
+	}
+
+	public void setIgnoredSections(Collection<String> ignoredSections) {
+		this.ignoredSections = new HashSet<>(ignoredSections);
 	}
 
 	@Override

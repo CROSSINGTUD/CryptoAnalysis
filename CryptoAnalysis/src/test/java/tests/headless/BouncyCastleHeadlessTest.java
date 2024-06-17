@@ -6,7 +6,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -45,8 +44,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		//setErrorsCount("<org.bouncycastle.crypto.macs.GMac: void init(org.bouncycastle.crypto.CipherParameters)>", RequiredPredicateError.class, 1);
 		setErrorsCount(RequiredPredicateError.class, new FindingsType.FalsePositives(1, "Analysis should not go into BouncyCastle class"), "<org.bouncycastle.crypto.macs.GMac: void init(org.bouncycastle.crypto.CipherParameters)>");
 
-		scanner.exec();
-	  	assertErrors();
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -61,8 +60,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: void setKey(byte[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
 
-		scanner.exec();
-	  	assertErrors();
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -91,8 +90,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<generators.RSAKeyPairGeneratorTest: void testTwo()>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ParametersWithRandomTest: void testTwo()>");
 		
-		scanner.exec();
-	  	assertErrors();
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -115,8 +114,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void TestSHA256DigestOne()>", TypestateError.class, 2);
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", TypestateError.class, 4);
 		
-		scanner.exec();
-	  	assertErrors();
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Ignore
@@ -155,8 +154,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pattern.SignerTest: void testSignerGenerate()>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pattern.SignerTest: void testSignerVerify()>", RequiredPredicateError.class, 3);
 		
-		scanner.exec();
-	  	assertErrors();
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -286,7 +285,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(new ErrorSpecification.Builder("<constants.Constants: void <clinit>()>")
 				.withTPs(HardCodedError.class, 1)
 				.build());
-		scanner.exec();
-	  	assertErrors();
+
+		scanner.run();
+	  	assertErrors(scanner.getErrorCollection());
 	}
 }

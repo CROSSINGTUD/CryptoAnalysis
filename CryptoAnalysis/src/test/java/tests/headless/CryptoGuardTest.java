@@ -61,8 +61,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// all the test cases above:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/ecbcrypto
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -86,8 +86,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.brokenhash.BrokenHashBBCase2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		// BBCase1, -3, -4 not included due to being similar to BBCase2 above
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -118,8 +118,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoCorrected: void go()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoCorrected: void go()>", ConstraintError.class, 1);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -151,8 +151,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", ConstraintError.class, 1);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", RequiredPredicateError.class, 5);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	
@@ -181,8 +181,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// and not 20, as it really is. This is caused because of the structure of the project
 		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 						
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -211,8 +211,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABICase2.java
 		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>", RequiredPredicateError.class, 1);
 	
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -229,8 +229,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1: void go(java.lang.String)>", NeverTypeOfError.class, 0);
 		// ABH1, ABI2, BB1 are other similar test cases that were not included
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -260,8 +260,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.predictablepbepassword.PredictablePBEPasswordABICase1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		// ABHCase1, BBCase1 are similar to the case above
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	// Headless test cases regarding the CryptoGuard projects `predictableseeds` 
@@ -310,8 +310,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.staticinitializationvector.StaticInitializationVectorBBCase1: void go()>", ConstraintError.class, 1);
 
 			
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -336,7 +336,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.staticsalts.StaticSaltsBBCase1: void key2()>", RequiredPredicateError.class, 1);
 		// ABICase1 is similar to the examples above	
 					
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 }

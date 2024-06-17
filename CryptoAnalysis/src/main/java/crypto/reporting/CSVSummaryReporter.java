@@ -20,6 +20,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLRule;
+import crypto.utils.ErrorUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -43,7 +44,7 @@ public class CSVSummaryReporter extends Reporter {
 
     @Override
     public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
-        Map<String, Integer> errorCounts = ReportGenerator.getErrorCounts(errorCollection);
+        Map<String, Integer> errorCounts = ErrorUtils.getErrorCounts(errorCollection);
 
         String fileName = outputFile.getAbsolutePath() + File.separator + REPORT_NAME + "-Summary" + FILE_ENDING;
 

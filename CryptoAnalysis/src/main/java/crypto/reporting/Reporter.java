@@ -23,6 +23,9 @@ public abstract class Reporter {
     protected final Collection<CrySLRule> ruleset;
 
     protected Reporter(String outputDir, Collection<CrySLRule> ruleset) throws IOException {
+        if (outputDir == null) {
+            throw new RuntimeException("Cannot create report without directory (try using --reportDir or setOutputDirectory)");
+        }
         this.outputFile = new File(outputDir);
         this.ruleset = ruleset;
 

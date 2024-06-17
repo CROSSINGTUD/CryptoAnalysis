@@ -49,8 +49,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.DefinedProvider7: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -74,8 +74,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.GenerateRandomIV: void main(java.lang.String[])>", CallToError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -93,8 +93,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.PBEwParameterPassword: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -130,8 +130,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.UsePKCS1ForRSA: void negativeTestCase()>", TypestateError.class, 0);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -145,8 +145,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<example.DoNotUseWeakSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -167,8 +167,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<example.UseDynamicKeyforMAC2: void main(java.lang.String[])>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -248,8 +248,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", RequiredPredicateError.class, 7);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void negativeTestCase()>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -295,8 +295,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", RequiredPredicateError.class, 7);
 		setErrorsCount("<example.UseQualifiedParamsForRSAOAEP: void negativeTestCase()>", ConstraintError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -315,8 +315,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
 		setErrorsCount("<example.UseSHA3_2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -328,8 +328,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -401,8 +401,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.OAEP_2048x512_2: void negativeTestCase()>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -441,8 +441,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PSSwSHA512Signature: void negativeTestCase()>", ConstraintError.class, 2);
 		setErrorsCount("<example.PSSwSHA512Signature: void negativeTestCase()>", RequiredPredicateError.class, 5);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -458,8 +458,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseAES_CTR: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseAES_CTR: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -490,8 +490,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.DoNotReuseKeyStreamCipher5: void main(java.lang.String[])>", CallToError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -503,8 +503,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -516,8 +516,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -532,8 +532,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SSLClientCertPathCRLValidation: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<example.SSLClientCompleteValidation: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -567,8 +567,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.NonAuthenticatedDH_2048: void negativeTestCase()>", RequiredPredicateError.class, 18);
 		setErrorsCount("<example.NonAuthenticatedDH_2048: void negativeTestCase()>", IncompleteOperationError.class, 1);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -604,8 +604,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SUN_256bits_ECDSA571wSHA512: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.SUN_256bits_ECDSA571wSHA512: void main(java.lang.String[])>", ConstraintError.class, 3);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -677,8 +677,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PSS_192bitsSign7680xSHA384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.PSS_192bitsSign7680xSHA384_2: void main(java.lang.String[])>", ConstraintError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -718,8 +718,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.DoNotPrintDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<example.DoNotPrintDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 16);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -736,8 +736,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.EncryptThenMacCiphertextAndIV: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.EncryptThenMacCiphertextAndIV: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -760,8 +760,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<example.UseRandomIVsForCFB128: void main(java.lang.String[])>", ConstraintError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -859,8 +859,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_2: void negativeTestCase()>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -932,8 +932,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureCurve_sect571r1: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.SecureCurve_sect571r1: void negativeTestCase()>", RequiredPredicateError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	// This test case corresponds to the following project in BragaCryptoBench:
@@ -948,8 +948,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.UseMacWithMaleableStream: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<example.UseMacWithMaleableStream: void main(java.lang.String[])>", TypestateError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 }

@@ -2,6 +2,7 @@ package tests.headless;
 
 import java.io.File;
 
+import crypto.AnalysisSettings;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import org.junit.Test;
 
@@ -20,6 +21,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CogniCryptDemoExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		scanner.setReportFormats(AnalysisSettings.ReportFormat.CMD);
 		
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -33,8 +35,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<example.IncompleteOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 
@@ -64,8 +66,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Encrypt: void incorrect()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -80,8 +82,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", NeverTypeOfError.class, 0);
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", ImpreciseValueExtractionError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 
@@ -125,10 +127,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<main.Main: void interproceduralTypestate()>", ConstraintError.class, 1);
 
-		
-
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -144,8 +144,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 1);
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 2);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 	
 	@Test
@@ -154,7 +154,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 }

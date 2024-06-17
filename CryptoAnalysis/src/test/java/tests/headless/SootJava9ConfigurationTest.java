@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -40,8 +39,8 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	@Test
@@ -60,10 +59,8 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.fixed.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.fixed.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 
-
-
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	@Test
@@ -75,7 +72,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 }

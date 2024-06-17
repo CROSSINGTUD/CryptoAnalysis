@@ -1,5 +1,6 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import crypto.rules.CrySLRule;
 import soot.jimple.IfStmt;
@@ -41,6 +42,10 @@ public abstract class AbstractError implements IError {
 	}
 
 	public abstract String toErrorMarkerString();
+
+	public Method getMethod() {
+		return errorStmt.getMethod();
+	}
 
 	public Statement getErrorStatement() {
 		return errorStmt;

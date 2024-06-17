@@ -9,6 +9,9 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
+import boomerang.scene.WrappedClass;
+import com.google.common.collect.Table;
+import crypto.analysis.errors.AbstractError;
 import crypto.boomerang.CryptoAnalysisDataFlowScope;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
@@ -27,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class CryptoScanner {
 
@@ -117,8 +121,8 @@ public abstract class CryptoScanner {
 		return analysisReporter;
 	}
 
-	public ErrorCollector getErrorCollector() {
-		return errorCollector;
+	public Table<WrappedClass, Method, Set<AbstractError>> getCollectedErrors() {
+		return errorCollector.getErrorCollection();
 	}
 
 	public Collection<CrySLRule> getRuleset() {

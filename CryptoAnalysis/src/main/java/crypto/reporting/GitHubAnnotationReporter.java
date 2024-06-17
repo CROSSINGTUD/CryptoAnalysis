@@ -7,6 +7,7 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
+import crypto.utils.ErrorUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -100,7 +101,7 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         summary.append(String.format("Number of CrySL rules: %s\n", ruleset.size()));
         summary.append(String.format("Number of Objects Analyzed: %s\n", seeds.size()));
 
-        Map<String, Integer> errorCounts = ReportGenerator.getErrorCounts(errorCollection);
+        Map<String, Integer> errorCounts = ErrorUtils.getErrorCounts(errorCollection);
         int errorCount = errorCounts.values().stream().reduce(0, Integer::sum);
         summary.append(String.format("Number of violations: %s\n", errorCount));
 

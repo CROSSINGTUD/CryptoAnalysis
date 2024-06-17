@@ -24,8 +24,8 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 		setErrorsCount("<Crypto.Enc: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<Crypto.Enc: byte[] decrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 2);
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	
@@ -41,8 +41,8 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", HardCodedError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 }

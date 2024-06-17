@@ -82,8 +82,8 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 		setErrorsCount("<example.InitInMacCalledMoreThanOnceExample: void main(java.lang.String[])>", TypestateError.class, 1);
 		
 		
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 }

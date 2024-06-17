@@ -2,22 +2,31 @@ package tests.headless;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
+import crypto.AnalysisSettings;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
-import crypto.analysis.AnalysisSettings.ReportFormat;
 
 public class ReportFormatTest extends AbstractHeadlessTest{
 
 	private static final String rootPath = "cognicrypt-output/";
+	private static final File outputDir = new File(rootPath);
 	private static final String txtReportPath = rootPath + "CryptoAnalysis-Report.txt";
 	private static final String csvReportPath = rootPath + "CryptoAnalysis-Report.csv";
 	private static final String csvSummaryReportPath = rootPath + "CryptoAnalysis-Report-Summary.csv";
 	private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
-	
+
+	@Before
+	public void setup() {
+		outputDir.mkdir();
+	}
+
 	@Test
 	public void testTXTReportCreation() {
 		File report = new File(txtReportPath);
@@ -26,10 +35,12 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(ReportFormat.TXT);
-		setVISUALIZATION(true);
+
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.exec();
+		scanner.setReportDirectory(outputDir.getAbsolutePath());
+		scanner.setReportFormats(AnalysisSettings.ReportFormat.TXT);
+		scanner.run();
+
 		Assert.assertTrue(report.exists());
 	}
 	
@@ -41,10 +52,12 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(ReportFormat.CSV);
-		setVISUALIZATION(true);
+
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.exec();
+		scanner.setReportDirectory(outputDir.getAbsolutePath());
+		scanner.setReportFormats(AnalysisSettings.ReportFormat.CSV);
+		scanner.run();
+
 		Assert.assertTrue(report.exists());
 	}
 	
@@ -58,11 +71,12 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(ReportFormat.CSV_SUMMARY);
-		setVISUALIZATION(true);
 		
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.exec();
+		scanner.setReportDirectory(outputDir.getAbsolutePath());
+		scanner.setReportFormats(AnalysisSettings.ReportFormat.CSV_SUMMARY);
+		scanner.run();
+
 		Assert.assertTrue(report.exists());
 	}
 	
@@ -74,10 +88,12 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		}
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		setReportFormat(ReportFormat.SARIF);
-		setVISUALIZATION(true);
+
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.exec();
+		scanner.setReportDirectory(outputDir.getAbsolutePath());
+		scanner.setReportFormats(AnalysisSettings.ReportFormat.SARIF);
+		scanner.run();
+
 		Assert.assertTrue(report.exists());
 	}
 	
@@ -110,11 +126,17 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		
-		setReportFormat(ReportFormat.CMD, ReportFormat.TXT, ReportFormat.CSV, ReportFormat.CSV_SUMMARY, ReportFormat.SARIF);
-		setVISUALIZATION(true);
+		Collection<AnalysisSettings.ReportFormat> formats = Arrays.asList(
+				AnalysisSettings.ReportFormat.CMD,
+				AnalysisSettings.ReportFormat.TXT,
+				AnalysisSettings.ReportFormat.CSV,
+				AnalysisSettings.ReportFormat.CSV_SUMMARY,
+				AnalysisSettings.ReportFormat.SARIF);
 		
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.exec();
+		scanner.setReportDirectory(outputDir.getAbsolutePath());
+		scanner.setReportFormats(formats);
+		scanner.run();
 		
 		Assert.assertTrue(txtReport.exists());
 		Assert.assertTrue(csvReport.exists());

@@ -6,6 +6,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
+import crypto.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class ReportGenerator {
             report.append("\n");
         }
 
-        Map<String, Integer> errorCounts = getErrorCounts(errorCollection);
+        Map<String, Integer> errorCounts = ErrorUtils.getErrorCounts(errorCollection);
         report.append("======================= CryptoAnalysis Summary ==========================\n");
         report.append("\tNumber of CrySL rules: ").append(ruleset.size()).append("\n");
         report.append("\tNumber of Objects analyzed: ").append(seeds.size()).append("\n");
@@ -73,18 +74,5 @@ public class ReportGenerator {
         }
 
         return report.toString();
-    }
-
-    public static Map<String, Integer> getErrorCounts(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
-        Map<String, Integer> errorCounts = new HashMap<>();
-
-        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
-            for (AbstractError error : cell.getValue()) {
-                String errorClass = error.getClass().getSimpleName();
-                errorCounts.put(errorClass, errorCounts.containsKey(errorClass) ? errorCounts.get(errorClass) + 1 : 1);
-            }
-        }
-
-        return errorCounts;
     }
 }
