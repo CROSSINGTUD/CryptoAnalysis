@@ -1,11 +1,11 @@
-SPEC tests.custom.customclass.A
+SPEC tests.error.predicate.requiredpredicate.A
 
 OBJECTS
 	byte[] attr1;
 	byte[] attr2;
 	byte[] attr3;
-	tests.custom.customclass.B b;
-	tests.custom.customclass.C c;
+	tests.error.predicate.requiredpredicate.B b;
+	tests.error.predicate.requiredpredicate.C c;
 	
 EVENTS
 	cons : A();

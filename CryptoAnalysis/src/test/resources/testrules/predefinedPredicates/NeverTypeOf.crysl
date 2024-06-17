@@ -1,4 +1,4 @@
-SPEC tests.custom.predefinedpredicates.nevertypeof.NeverTypeOf
+SPEC tests.error.nevertypeof.NeverTypeOf
 
 OBJECTS
     boolean condition;

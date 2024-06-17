@@ -1,4 +1,4 @@
-SPEC tests.custom.predicate.SimpleTarget
+SPEC tests.error.predicate.requiredpredicateswiththis.SimpleTarget
 
 EVENTS
     Con: SimpleTarget();

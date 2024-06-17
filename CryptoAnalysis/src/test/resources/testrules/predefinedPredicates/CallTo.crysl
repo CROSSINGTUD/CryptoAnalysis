@@ -1,4 +1,4 @@
-SPEC tests.custom.predefinedpredicates.callto.CallTo
+SPEC tests.error.callto.CallTo
 
 OBJECTS
     boolean condition;

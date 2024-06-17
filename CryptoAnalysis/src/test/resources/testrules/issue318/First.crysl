@@ -1,7 +1,7 @@
-SPEC tests.custom.issue318.First
+SPEC tests.issues.issue318.First
 
 OBJECTS
-	tests.custom.issue318.First f;
+	tests.issues.issue318.First f;
 
 EVENTS
 	c: f = First();

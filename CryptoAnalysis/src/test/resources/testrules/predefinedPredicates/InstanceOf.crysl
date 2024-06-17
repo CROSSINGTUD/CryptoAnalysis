@@ -1,8 +1,8 @@
-SPEC tests.custom.predefinedpredicates.instance.InstanceOf
+SPEC tests.error.instance.InstanceOf
 
 OBJECTS
-    tests.custom.predefinedpredicates.instance.SuperClass superClass1;
-    tests.custom.predefinedpredicates.instance.SuperClass superClass2;
+    tests.error.instance.SuperClass superClass1;
+    tests.error.instance.SuperClass superClass2;
 
 EVENTS
     Con: InstanceOf();
@@ -10,5 +10,5 @@ EVENTS
     op2: operation2(superClass2);
 
 CONSTRAINTS
-    instanceOf[superClass1, tests.custom.predefinedpredicates.instance.SuperClass];
-    instanceOf[superClass2, tests.custom.predefinedpredicates.instance.SubClass];
+    instanceOf[superClass1, tests.error.instance.SuperClass];
+    instanceOf[superClass2, tests.error.instance.SubClass];

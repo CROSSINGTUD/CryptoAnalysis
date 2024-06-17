@@ -1,4 +1,4 @@
-SPEC tests.custom.predefinedpredicates.nothardcoded.NotHardCoded
+SPEC tests.error.nothardcoded.NotHardCoded
 
 OBJECTS
     int hardCodedInt;

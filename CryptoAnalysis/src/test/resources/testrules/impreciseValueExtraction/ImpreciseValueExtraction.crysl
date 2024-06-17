@@ -1,4 +1,4 @@
-SPEC tests.custom.imprecisevalueextraction.ImpreciseValueExtraction
+SPEC tests.error.imprecisevalueextraction.ImpreciseValueExtraction
 
 OBJECTS
     int consParam;

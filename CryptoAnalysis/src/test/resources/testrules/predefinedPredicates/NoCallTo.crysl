@@ -1,4 +1,4 @@
-SPEC tests.custom.predefinedpredicates.nocallto.NoCallTo
+SPEC tests.error.nocallto.NoCallTo
 
 OBJECTS
     boolean condition;
