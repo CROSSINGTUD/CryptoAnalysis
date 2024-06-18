@@ -13,12 +13,12 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     @Override
     public void beforeAnalysis() {
-        LOGGER.info("Starting Analysis...");
+        LOGGER.debug("Starting Scan...");
     }
 
     @Override
     public void afterAnalysis() {
-        LOGGER.debug("Finished Analysis");
+        LOGGER.debug("Finished Scan");
     }
 
     @Override

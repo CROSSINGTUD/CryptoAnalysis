@@ -3,6 +3,7 @@ package tests.headless;
 import java.io.File;
 
 import crypto.analysis.errors.CallToError;
+import crypto.reporting.Reporter;
 import org.junit.Test;
 
 import crypto.HeadlessCryptoScanner;
@@ -770,6 +771,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void negativeTestCase()>", ConstraintError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintDHPrivKey1: void negativeTestCase()>", RequiredPredicateError.class, 16);
 
+		scanner.setReportFormats(Reporter.ReportFormat.CMD);
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());
 	}

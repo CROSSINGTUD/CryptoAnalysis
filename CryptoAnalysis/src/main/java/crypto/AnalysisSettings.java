@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 
 import com.google.common.io.Files;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.reporting.Reporter;
 import picocli.CommandLine;
 import picocli.CommandLine.ExitCode;
 
@@ -93,17 +94,13 @@ public class AnalysisSettings implements Callable<Integer> {
 		CHA, SPARK, SPARK_LIB,
 	}
 
-	public enum ReportFormat {
-		CMD, TXT, SARIF, CSV, CSV_SUMMARY, GITHUB_ANNOTATION
-	}
-
 	private AnalysisCallGraph analysisCallGraph;
-	private Set<ReportFormat> reportFormats;
+	private Set<Reporter.ReportFormat> reportFormats;
 	private Collection<String> ignoredSections;
 	
 	public AnalysisSettings() {
 		analysisCallGraph = AnalysisCallGraph.CHA;
-		reportFormats = new HashSet<>(Arrays.asList(ReportFormat.CMD));
+		reportFormats = new HashSet<>(Arrays.asList(Reporter.ReportFormat.CMD));
 		ignoredSections = new ArrayList<>();
 	}
 
@@ -160,22 +157,22 @@ public class AnalysisSettings implements Callable<Integer> {
 
 			switch (reportFormatValue) {
 				case "cmd":
-					reportFormats.add(ReportFormat.CMD);
+					reportFormats.add(Reporter.ReportFormat.CMD);
 					break;
 				case "txt":
-					reportFormats.add(ReportFormat.TXT);
+					reportFormats.add(Reporter.ReportFormat.TXT);
 					break;
 				case "sarif":
-					reportFormats.add(ReportFormat.SARIF);
+					reportFormats.add(Reporter.ReportFormat.SARIF);
 					break;
 				case "csv":
-					reportFormats.add(ReportFormat.CSV);
+					reportFormats.add(Reporter.ReportFormat.CSV);
 					break;
 				case "csv_summary":
-					reportFormats.add(ReportFormat.CSV_SUMMARY);
+					reportFormats.add(Reporter.ReportFormat.CSV_SUMMARY);
 					break;
 				case "github_annotation":
-					reportFormats.add(ReportFormat.GITHUB_ANNOTATION);
+					reportFormats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
 					break;
 				default:
 					throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
@@ -247,11 +244,11 @@ public class AnalysisSettings implements Callable<Integer> {
 		this.reportPath = reportDirectory;
 	}
 	
-	public Set<ReportFormat> getReportFormats() {
+	public Set<Reporter.ReportFormat> getReportFormats() {
 		return reportFormats;
 	}
 
-	public void setReportFormats(Collection<ReportFormat> reportFormats) {
+	public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
 		this.reportFormats = new HashSet<>(reportFormats);
 	}
 

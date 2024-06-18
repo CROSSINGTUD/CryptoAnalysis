@@ -1,18 +1,16 @@
 package tests.headless;
 
-import java.io.File;
-
-import crypto.AnalysisSettings;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import org.junit.Test;
-
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.HardCodedError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import org.junit.Test;
+
+import java.io.File;
 
 public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 
@@ -141,7 +139,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 				.withTPs(RequiredPredicateError.class, 1)
 				.build());
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 1);
-		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 2);
+		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);
 
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());

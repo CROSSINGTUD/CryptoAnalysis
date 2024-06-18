@@ -149,12 +149,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 	@Override
 	public List<String> excludedPackages() {
 		return new ArrayList<>();
-		/*List<String> excludedPackages = super.excludedPackages();
-
-		for (CrySLRule r : rules) {
-			excludedPackages.add(r.getClassName());
-		}
-		return excludedPackages;*/
 	}
 
 

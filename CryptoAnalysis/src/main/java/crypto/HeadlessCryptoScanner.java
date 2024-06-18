@@ -11,7 +11,6 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import crypto.AnalysisSettings.AnalysisCallGraph;
-import crypto.AnalysisSettings.ReportFormat;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -31,10 +30,7 @@ import soot.EntryPoints;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
-import soot.SceneTransformer;
 import soot.SootMethod;
-import soot.Transform;
-import soot.Transformer;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
@@ -45,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class HeadlessCryptoScanner {
@@ -90,120 +85,104 @@ public class HeadlessCryptoScanner {
 
 	public void run() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-
 		LOGGER.info("Setup Soot...");
-		try {
-			initializeSootWithEntryPointAllReachable();
-		} catch (CryptoAnalysisException e) {
-			throw new RuntimeException("Error happened when executing HeadlessCryptoScanner: " + e.getMessage());
-		}
+		setupSoot();
 		LOGGER.info("Soot setup done in {} ", stopwatch);
 
 		LOGGER.info("Starting analysis...");
-		analyse();
+		analyze();
 		LOGGER.info("Analysis finished in {}", stopwatch);
 		stopwatch.stop();
 	}
 
-	private void analyse() {
-		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
-		PackManager.v().getPack("wjtp").add(transform);
-
+	private void setupSoot() {
+		try {
+			initializeSootWithEntryPointAllReachable();
+		} catch (CryptoAnalysisException e) {
+			throw new RuntimeException("Error happened while setting up Soot: " + e.getMessage());
+		}
 		PackManager.v().getPack("cg").apply();
-		PackManager.v().getPack("wjtp").apply();
-	}
-	
-	public String toString() {
-		String s = "HeadlessCryptoScanner: \n";
-		s += "\tSoftwareIdentifier: " + getSoftwareIdentifier() + "\n";
-		s += "\tApplicationClassPath: " + getApplicationPath() + "\n";
-		s += "\tSootClassPath: " + getSootClassPath() + "\n\n";
-		return s;
 	}
 
-	private Transformer createAnalysisTransformer() {
-		return new SceneTransformer() {
-			
+	private void analyze() {
+		// Create ruleset and reporter
+		LOGGER.info("Reading rules from {}", getRulesetDirectory());
+		Collection<CrySLRule> ruleset;
+		try {
+			RulesetReader reader = new RulesetReader();
+			ruleset = reader.readRulesFromPath(getRulesetDirectory());
+		} catch (IOException e) {
+			throw new RuntimeException("Could not read rules: " + e.getMessage());
+		}
+		LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
+
+		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
+
+		// Prepare for Boomerang
+		TransformerSetup.v().setupPreTransformer(ruleset);
+		CallGraph callGraph = new SootCallGraph();
+
+		// Initialize scanner
+		CryptoScanner scanner = new CryptoScanner(ruleset) {
+
 			@Override
-			protected void internalTransform(String phaseName, Map<String, String> options) {
-				// Create ruleset and reporter
+			public CallGraph callGraph() {
+				return callGraph;
+			}
 
-				LOGGER.info("Reading rules from {}", getRulesetDirectory());
-				Collection<CrySLRule> ruleset;
-				try {
-					RulesetReader reader = new RulesetReader();
-					ruleset = reader.readRulesFromPath(getRulesetDirectory());
-				} catch (IOException e) {
-					throw new RuntimeException("Could not read rules: " + e.getMessage());
-				}
-				LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
-
-				Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
-
-				// Initialize scanner
-				TransformerSetup.v().setupPreTransformer(ruleset);
-				CallGraph callGraph = new SootCallGraph();
-				
-				CryptoScanner scanner = new CryptoScanner(ruleset) {
-
-					@Override
-					public CallGraph callGraph() {
-						return callGraph;
-					}
-					
-					@Override
-					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
-						if (!isVisualization()) {
-							return super.debugger(solver, seed);
-						}
-
-						if (getReportDirectory() == null) {
-							LOGGER.error("The visualization requires the --reportDir option");
-							return super.debugger(solver, seed);
-						}
-
-						File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
-						boolean created = vizFile.getParentFile().mkdirs();
-
-						if (!created) {
-							LOGGER.error("Could not create directory {}", vizFile.getAbsolutePath());
-							return new Debugger<>();
-						}
-							
-						return new IDEVizDebugger<>(vizFile);
-					}
-
-				};
-
-				for (IAnalysisListener analysisListener : analysisListeners) {
-					scanner.addAnalysisListener(analysisListener);
+			@Override
+			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
+				if (!isVisualization()) {
+					return super.debugger(solver, seed);
 				}
 
-				for (IErrorListener errorListener : errorListeners) {
-					scanner.addErrorListener(errorListener);
+				if (getReportDirectory() == null) {
+					LOGGER.error("The visualization requires the --reportDir option");
+					return super.debugger(solver, seed);
 				}
 
-				scanner.scan();
+				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
+				boolean created = vizFile.getParentFile().mkdirs();
 
-				// Report the findings
-				Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
-				Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-				errorCollection.putAll(errors);
-
-				for (Reporter reporter : reporters) {
-					reporter.createAnalysisReport(discoveredSeeds, errors);
+				if (!created) {
+					LOGGER.error("Could not create directory {}", vizFile.getAbsolutePath());
+					return new Debugger<>();
 				}
 
-				
-				/*if (providerDetection()) {
+				return new IDEVizDebugger<>(vizFile);
+			}
+
+		};
+
+		for (IAnalysisListener analysisListener : analysisListeners) {
+			scanner.addAnalysisListener(analysisListener);
+		}
+
+		for (IErrorListener errorListener : errorListeners) {
+			scanner.addErrorListener(errorListener);
+		}
+
+		// Run scanner
+		scanner.scan();
+
+		// Report the findings
+		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
+		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+		errorCollection.putAll(errors);
+
+		for (Reporter reporter : reporters) {
+			reporter.createAnalysisReport(discoveredSeeds, errors);
+		}
+
+		/*if (providerDetection()) {
 					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
 
 					if(rulesetRootPath == null) {
 						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
 					}
-					
+
 					String detectedProvider = providerDetection.doAnalysis(scanner.icfg(), rulesetRootPath);
-					
+
 					if(detectedProvider != null) {
 						rules.clear();
 						switch(settings.getRulesetPathType()) {
@@ -213,14 +192,19 @@ public class HeadlessCryptoScanner {
 							case ZIP:
 								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath + File.separator + detectedProvider + ".zip"));
 								break;
-							default: 
+							default:
 								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
 						}
 					}
 				}*/
-
-			}
-		};
+	}
+	
+	public String toString() {
+		String s = "HeadlessCryptoScanner: \n";
+		s += "\tSoftwareIdentifier: " + getSoftwareIdentifier() + "\n";
+		s += "\tApplicationClassPath: " + getApplicationPath() + "\n";
+		s += "\tSootClassPath: " + getSootClassPath() + "\n\n";
+		return s;
 	}
 
 	private void initializeSootWithEntryPointAllReachable() throws CryptoAnalysisException {
@@ -277,6 +261,8 @@ public class HeadlessCryptoScanner {
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
+
+		additionalSootSetup();
 	}
 
 	private List<SootMethod> getEntryPoints() {
@@ -287,6 +273,8 @@ public class HeadlessCryptoScanner {
 
 		return entryPoints;
 	}
+
+	public void additionalSootSetup() {}
 
 	public void addAnalysisListener(IAnalysisListener analysisListener) {
 		analysisListeners.add(analysisListener);
@@ -348,15 +336,15 @@ public class HeadlessCryptoScanner {
 		settings.setVisualization(visualization);
 	}
 	
-	public Set<ReportFormat> getReportFormats() {
+	public Set<Reporter.ReportFormat> getReportFormats() {
 		return settings.getReportFormats();
 	}
 
-	public void setReportFormats(ReportFormat... formats) {
+	public void setReportFormats(Reporter.ReportFormat... formats) {
 		setReportFormats(Arrays.asList(formats));
 	}
 
-	public void setReportFormats(Collection<ReportFormat> reportFormats) {
+	public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
 		settings.setReportFormats(reportFormats);
 	}
 	

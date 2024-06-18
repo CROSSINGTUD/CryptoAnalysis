@@ -87,6 +87,15 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 			}
 		}
 
+		// Extract cast value from cast expressions (e.g. (int) 65000 -> 65000)
+		if (rightOp.isCast()) {
+			Val castOp = rightOp.getCastOp();
+
+			if (isAllocationVal(castOp)) {
+				return Optional.of(new AllocVal(leftOp, stmt, castOp));
+			}
+		}
+
 		// Extract the length value of length expressions
 		if (rightOp.isLengthExpr()) {
 			return Optional.of(new AllocVal(leftOp, stmt, rightOp));

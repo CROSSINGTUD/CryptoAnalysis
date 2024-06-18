@@ -13,10 +13,10 @@ public class ReporterFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReporterFactory.class);
 
-    public static Collection<Reporter> createReporters(Collection<AnalysisSettings.ReportFormat> reportFormats, String outputDir, Collection<CrySLRule> rules) {
+    public static Collection<Reporter> createReporters(Collection<Reporter.ReportFormat> reportFormats, String outputDir, Collection<CrySLRule> rules) {
         Collection<Reporter> reporters = new HashSet<>();
 
-        for (AnalysisSettings.ReportFormat format : reportFormats) {
+        for (Reporter.ReportFormat format : reportFormats) {
             try {
                 switch (format) {
                     case CMD:

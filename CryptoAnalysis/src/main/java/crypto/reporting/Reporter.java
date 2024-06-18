@@ -19,6 +19,10 @@ public abstract class Reporter {
     protected static final Logger LOGGER = LoggerFactory.getLogger(Reporter.class);
     protected static final String REPORT_NAME = "CryptoAnalysis-Report";
 
+    public enum ReportFormat {
+        CMD, TXT, SARIF, CSV, CSV_SUMMARY, GITHUB_ANNOTATION
+    }
+
     protected final File outputFile;
     protected final Collection<CrySLRule> ruleset;
 
