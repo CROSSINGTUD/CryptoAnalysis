@@ -3,7 +3,6 @@ package crypto.typestate;
 import boomerang.scene.DeclaredMethod;
 import crypto.rules.CrySLMethod;
 import crypto.utils.MatcherUtils;
-import soot.SootMethod;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
 

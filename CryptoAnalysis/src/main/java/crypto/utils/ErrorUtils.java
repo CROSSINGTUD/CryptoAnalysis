@@ -5,7 +5,11 @@ import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,5 +48,12 @@ public class ErrorUtils {
         }
 
         return result;
+    }
+
+    public static List<AbstractError> orderErrorsByLineNumber(Collection<AbstractError> errors) {
+        List<AbstractError> errorList = new ArrayList<>(errors);
+        errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));
+
+        return errorList;
     }
 }

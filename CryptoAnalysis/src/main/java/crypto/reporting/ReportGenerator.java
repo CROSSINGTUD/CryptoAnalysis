@@ -10,6 +10,7 @@ import crypto.utils.ErrorUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,7 +50,8 @@ public class ReportGenerator {
             for (Map.Entry<Method, Set<AbstractError>> entry : errorCollection.row(wrappedClass).entrySet()) {
                 report.append("\n\tin Method: ").append(entry.getKey().toString()).append("\n");
 
-                for (AbstractError error : entry.getValue()) {
+                List<AbstractError> orderedErrors = ErrorUtils.orderErrorsByLineNumber(entry.getValue());
+                for (AbstractError error : orderedErrors) {
                     report.append("\t\t").append(error.getClass().getSimpleName()).append(" violating CrySL rule for ").append(error.getRule().getClassName()).append("\n");
                     report.append("\t\t\t").append(error.toErrorMarkerString()).append("\n");
                     report.append("\t\t\tat statement: ").append(error.getErrorStatement()).append("\n");

@@ -136,10 +136,14 @@ public class TypestateAnalysisScope extends AnalysisScope {
         AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
 
         String leftSideType = leftOp.getType().toString();
-        RuleTransitions leftSideRule = ruleTransitions.get(leftSideType);
-
-        ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
-        seeds.add(seed);
+        if (ruleTransitions.containsKey(leftSideType)) {
+            RuleTransitions leftSideRule = ruleTransitions.get(leftSideType);
+            ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
+            seeds.add(seed);
+        } else {
+            ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, rightSideRule);
+            seeds.add(seed);
+        }
 
         return seeds;
     }

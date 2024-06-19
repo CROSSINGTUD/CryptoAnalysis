@@ -153,7 +153,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 
     @Override
 	public int analysisTimeoutMS() {
-		return 60000000;
+		return 10000;
 	}
 	
 	@Override

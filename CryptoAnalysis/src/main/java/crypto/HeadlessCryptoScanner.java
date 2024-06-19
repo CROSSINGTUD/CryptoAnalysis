@@ -238,7 +238,7 @@ public class HeadlessCryptoScanner {
 		 * it is disabled.
 		 */
 		Options.v().setPhaseOption("jb.sils", "enabled:false");
-		Options.v().setPhaseOption("jb", "use-original-names:true");
+		// Options.v().setPhaseOption("jb", "use-original-names:true");
 
 		// JAVA 8
 		if (getJavaVersion() < 9) {

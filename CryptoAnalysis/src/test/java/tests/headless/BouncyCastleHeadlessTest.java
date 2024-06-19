@@ -1,10 +1,5 @@
 package tests.headless;
 
-import java.io.File;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
@@ -12,8 +7,11 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import org.junit.Test;
 import test.TestConstants;
 import tests.headless.FindingsType.TruePositives;
+
+import java.io.File;
 
 public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	
@@ -29,20 +27,16 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<animamea.AmAESCrypto: void <init>()>", RequiredPredicateError.class, 1);
 		
 		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", ForbiddenMethodError.class, 1);
-		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", NeverTypeOfError.class, 2);
+		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", NeverTypeOfError.class, 1);
 		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", RequiredPredicateError.class, 4);
 		setErrorsCount("<gwt_crypto.GMacTest: void performTestOne()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.SkeinMacTest: void performTestOne()>", RequiredPredicateError.class, 1);
 		
-		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", TypestateError.class, 1);
+		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", TypestateError.class, 2);
 		setErrorsCount("<bunkr.PBKDF2Descriptor: int calculateRounds(int)>", IncompleteOperationError.class, 1);
 		
 		setErrorsCount("<pattern.MacTest: void testMac1()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pattern.MacTest: void testMac2()>", RequiredPredicateError.class, 3);
-
-		// Class from BouncyCastle should not be analyzed
-		//setErrorsCount("<org.bouncycastle.crypto.macs.GMac: void init(org.bouncycastle.crypto.CipherParameters)>", RequiredPredicateError.class, 1);
-		setErrorsCount(RequiredPredicateError.class, new FindingsType.FalsePositives(1, "Analysis should not go into BouncyCastle class"), "<org.bouncycastle.crypto.macs.GMac: void init(org.bouncycastle.crypto.CipherParameters)>");
 
 		scanner.run();
 	  	assertErrors(scanner.getErrorCollection());
@@ -117,26 +111,18 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		scanner.run();
 	  	assertErrors(scanner.getErrorCollection());
 	}
-	
-	@Ignore
+
 	@Test
 	public void testBCSignerExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSignerExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject, TestConstants.BOUNCY_CASTLE_RULESET_PATH);
 		
-		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,int,boolean)>", IncompleteOperationError.class, 2);
-		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2PSSSigner: void updateWithRecoveredMessage(byte[])>", IncompleteOperationError.class, 2);
-		setErrorsCount("<org.bouncycastle.crypto.signers.PSSSigner: void init(boolean,org.bouncycastle.crypto.CipherParameters)>", IncompleteOperationError.class, 2);
-		setErrorsCount("<org.bouncycastle.crypto.signers.PSSSigner: void init(boolean,org.bouncycastle.crypto.CipherParameters)>", RequiredPredicateError.class, 2);
-		setErrorsCount("<org.bouncycastle.crypto.signers.X931Signer: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,boolean)>", IncompleteOperationError.class, 3);
-		setErrorsCount("<org.bouncycastle.crypto.signers.ISO9796d2Signer: void <init>(org.bouncycastle.crypto.AsymmetricBlockCipher,org.bouncycastle.crypto.Digest,boolean)>", IncompleteOperationError.class, 1);
-		
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doShortPartialTest()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", HardCodedError.class, 1);
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestOne()>", IncompleteOperationError.class, 1);
@@ -278,10 +264,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(new ErrorSpecification.Builder("<generators.ECKeyPairGeneratorTest: void testThree(java.lang.String)>")
 				.withTPs(IncompleteOperationError.class, 1)
 				.build());
-		
-		setErrorsCount(new ErrorSpecification.Builder("<constants.Constants: void <clinit>()>")
-				.withTPs(RequiredPredicateError.class, 2)
-				.build());
+
 		setErrorsCount(new ErrorSpecification.Builder("<constants.Constants: void <clinit>()>")
 				.withTPs(HardCodedError.class, 1)
 				.build());

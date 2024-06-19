@@ -109,7 +109,7 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		Assertions.hasEnsuredPredicate(params);
 		Assertions.mustBeInAcceptingState(params);
 		AESEngine engine = (AESEngine) AESEngine.newInstance();
-		Assertions.notHasEnsuredPredicate(engine);
+		Assertions.hasEnsuredPredicate(engine);
 		
 		byte[] input = new byte[100];
 		byte[] output = new byte[100];

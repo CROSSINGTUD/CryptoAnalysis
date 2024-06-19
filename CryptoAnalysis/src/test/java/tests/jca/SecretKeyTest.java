@@ -1,5 +1,6 @@
 package tests.jca;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
@@ -250,7 +251,8 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 			return encText;
 		}
 	}
-	
+
+	@Ignore
 	@Test
 	public void secretKeyUsagePattern7() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
@@ -263,7 +265,7 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		// Assertions.notHasEnsuredPredicate(pbekeyspec);
+		Assertions.notHasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");

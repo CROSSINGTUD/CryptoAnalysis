@@ -165,6 +165,7 @@ public class ExtractParameterAnalysis {
 		public void solve() {
 			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions());
 			res = boomerang.solve(this);
+
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
 			}

@@ -1,15 +1,15 @@
 package tests.headless;
 
-import java.io.File;
-
-import crypto.analysis.errors.TypestateError;
-import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
+import crypto.analysis.errors.TypestateError;
+import org.junit.Test;
+
+import java.io.File;
 
 public class ReportedIssueTest extends AbstractHeadlessTest {
 
@@ -50,14 +50,12 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		// TODO toCharArray() is not currently not considered when evaluating HardCodedErrors
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", HardCodedError.class, 0);
 		setErrorsCount("<issue68.AESCryptor: javax.crypto.SecretKeyFactory getFactory()>", ConstraintError.class, 1);
-		// TODO False Positive due to reopened Issue 208
-		setErrorsCount("<issue68.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<issue68.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", ConstraintError.class, 2);
 		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", TypestateError.class, 1);
-		// TODO False Positive due to reopened Issue 208
-		setErrorsCount("<issue68.simplified.field.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", TypestateError.class, 0);
+		setErrorsCount("<issue68.simplified.field.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 0);
 
 		setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
 		setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", RequiredPredicateError.class, 2);

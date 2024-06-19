@@ -3,6 +3,7 @@ package tests.headless;
 import java.io.File;
 
 import crypto.analysis.errors.CallToError;
+import crypto.reporting.Reporter;
 import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.HardCodedError;
@@ -34,12 +35,12 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/UserAuthenticator").getAbsolutePath();
 	  	MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		scanner.setReportFormats(Reporter.ReportFormat.CMD);
 
-		//All the following errors are false positives
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 3);
-		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", HardCodedError.class, 1);
-		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", RequiredPredicateError.class, 2);
-		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", HardCodedError.class, 1);
+		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", HardCodedError.class, 0);
+		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", RequiredPredicateError.class, 0);
+		setErrorsCount("<Crypto.PWHasher: java.lang.String createPWHash(char[])>", HardCodedError.class, 0);
 
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());

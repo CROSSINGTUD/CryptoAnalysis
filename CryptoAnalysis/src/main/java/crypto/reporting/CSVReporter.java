@@ -7,6 +7,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
+import crypto.utils.ErrorUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -43,7 +44,8 @@ public class CSVReporter extends Reporter {
             for (Map.Entry<Method, Set<AbstractError>> entry : errorCollection.row(wrappedClass).entrySet()) {
                 String methodName = entry.getKey().toString();
 
-                for (AbstractError error : entry.getValue()) {
+                List<AbstractError> orderedErrors = ErrorUtils.orderErrorsByLineNumber(entry.getValue());
+                for (AbstractError error : orderedErrors) {
                     List<String> lineFields = Arrays.asList(
                             String.valueOf(idCount),                // id
                             error.getClass().getSimpleName(),       // error type

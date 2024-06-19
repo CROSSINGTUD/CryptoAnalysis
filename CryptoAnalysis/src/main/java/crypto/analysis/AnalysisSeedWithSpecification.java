@@ -89,7 +89,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// Timeout occured.
 			return;
 		}
-		//scanner.getAnalysisListener().seedStarted(this);
+
 		scanner.getAnalysisReporter().onSeedStarted(this);
 
 		this.allCallsOnObject = analysisResults.getInvokedMethodOnInstance();
@@ -111,8 +111,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		checkConstraintsAndEnsurePredicates();
 
 		scanner.getAnalysisReporter().onSeedFinished(this);
-		//scanner.getAnalysisListener().onSeedFinished(this, analysisResults);
-		//scanner.getAnalysisListener().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
 
 	public void registerResultsHandler(ResultsHandler handler) {
@@ -179,11 +177,27 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		for (Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
 			ControlFlowGraph.Edge curr = c.getRowKey();
 
+			// For some reason, constructors are the start and not the target statement...
+			Statement errorStatement;
+			Statement start = curr.getStart();
+			Statement target = curr.getTarget();
+			if (start.containsInvokeExpr()) {
+				DeclaredMethod declaredMethod = start.getInvokeExpr().getMethod();
+
+				if (declaredMethod.isConstructor()) {
+					errorStatement = start;
+				} else {
+					errorStatement = target;
+				}
+			} else {
+				errorStatement = target;
+			}
+
 			if (allTypestateChangeStatements.contains(curr)) {
 				Collection<? extends State> targetStates = getTargetStates(c.getValue());
 
 				for (State newStateAtCurr : targetStates) {
-					typeStateChangeAtStatement(curr.getTarget(), newStateAtCurr);
+					typeStateChangeAtStatement(errorStatement, newStateAtCurr);
 				}
 			}
 		}
