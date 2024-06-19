@@ -207,7 +207,6 @@ public class PredicateHandler {
 		reportRequiredPredicateErrors();
 		checkForContradictions();
 		cryptoScanner.getAnalysisReporter().ensuredPredicates(existingPredicates);
-		//cryptoScanner.getAnalysisListener().ensuredPredicates(this.existingPredicates, expectedPredicateObjectBased, computeMissingPredicates());
 	}
 
 	private void collectMissingRequiredPredicates() {

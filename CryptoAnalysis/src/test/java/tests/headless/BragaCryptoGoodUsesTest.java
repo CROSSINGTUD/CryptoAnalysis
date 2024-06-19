@@ -308,12 +308,12 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<example.UseSHA2_1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<example.UseSHA2_2: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
+		setErrorsCount("<example.UseSHA2_1: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.UseSHA2_2: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<example.UseSHA2_2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", ConstraintError.class, 4);
-		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", IncompleteOperationError.class, 4);
-		setErrorsCount("<example.UseSHA3_2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<example.UseSHA3_1: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.UseSHA3_2: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());
@@ -585,8 +585,11 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.BC_128bits_DSA3072xSHA256: void main(java.lang.String[])>", ConstraintError.class, 0);
 		
 		setErrorsCount("<example.BC_ECDSAprime192: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.BC_ECDSAprime192: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.BC_ECDSAprime239: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.BC_ECDSAprime239: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<example.BC_ECDSAprime256: void main(java.lang.String[])>", ConstraintError.class, 2);
+		setErrorsCount("<example.BC_ECDSAprime256: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 
 		// TODO False positives
 		setErrorsCount(RequiredPredicateError.class, new FalsePositives(2, "setSeed is correctly called (cf. https://github.com/CROSSINGTUD/CryptoAnalysis/issues/295"), "<example.RandomMessageNonceECDSA: void main(java.lang.String[])>");
@@ -803,7 +806,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void negativeTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void negativeTestCase()>", TypestateError.class, 1);
-		
+
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_2: void main(java.lang.String[])>", TypestateError.class, 1);
 		
@@ -816,7 +820,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", ConstraintError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void negativeTestCase()>", TypestateError.class, 1);
-		
+
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_2: void main(java.lang.String[])>", TypestateError.class, 1);
 		

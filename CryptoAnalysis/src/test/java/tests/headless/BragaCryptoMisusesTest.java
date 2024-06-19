@@ -4,6 +4,7 @@ import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -32,14 +33,15 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", ConstraintError.class, 3);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes2: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 1);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes2: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes3: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes4: void main(java.lang.String[])>", ConstraintError.class, 1);
-		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes5: void main(java.lang.String[])>", ConstraintError.class, 1);
 
 		scanner.run();
@@ -56,7 +58,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", ConstraintError.class, 8);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 8);
-		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", ConstraintError.class, 8);
+		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", ConstraintError.class, 0);
+		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", ConstraintError.class, 4);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC3: void main(java.lang.String[])>", RequiredPredicateError.class, 4);

@@ -50,6 +50,18 @@ public class ErrorUtils {
         return result;
     }
 
+    public static int getErrorsOfType(Class<?> errorType, Collection<AbstractError> errors) {
+        int result = 0;
+
+        for (AbstractError error : errors) {
+            if (error.getClass().getSimpleName().equals(errorType.getSimpleName())) {
+                result++;
+            }
+        }
+
+        return result;
+    }
+
     public static List<AbstractError> orderErrorsByLineNumber(Collection<AbstractError> errors) {
         List<AbstractError> errorList = new ArrayList<>(errors);
         errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));

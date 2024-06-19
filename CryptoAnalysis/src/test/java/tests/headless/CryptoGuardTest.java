@@ -139,8 +139,9 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase2.java
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", IncompleteOperationError.class, 2);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void go(java.security.KeyPairGenerator,java.security.KeyPair)>", RequiredPredicateError.class, 4);
-		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", ConstraintError.class, 1);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", ConstraintError.class, 0);
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2: void main(java.lang.String[])>", ImpreciseValueExtractionError.class, 1);
 		// In the case above, misuse is caught correctly, but the keysize is reported to be 0
 		// and not 1024, as it really is. This is caused because of the structure of the project
 		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
@@ -172,11 +173,13 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABHCase1.java
-		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABHCase1: void key2()>", ConstraintError.class, 1);
+		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABHCase1: void key2()>", ConstraintError.class, 0);
+		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABHCase1: void key2()>", ImpreciseValueExtractionError.class, 1);
 				
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABICase2.java
-		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABICase2: void key2()>", ConstraintError.class, 1);
+		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABICase2: void key2()>", ConstraintError.class, 0);
+		setErrorsCount("<example.pbeiteration.LessThan1000IterationPBEABICase2: void key2()>", ImpreciseValueExtractionError.class, 1);
 		// In the case above, misuse is caught correctly, but the count is reported to be 0
 		// and not 20, as it really is. This is caused because of the structure of the project
 		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163

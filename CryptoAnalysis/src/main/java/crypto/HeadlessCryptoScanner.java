@@ -131,17 +131,17 @@ public class HeadlessCryptoScanner {
 			}
 
 			@Override
-			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
+			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 				if (!isVisualization()) {
-					return super.debugger(solver, seed);
+					return super.debugger(solver);
 				}
 
 				if (getReportDirectory() == null) {
 					LOGGER.error("The visualization requires the --reportDir option");
-					return super.debugger(solver, seed);
+					return super.debugger(solver);
 				}
 
-				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + seed.getObjectId() + ".json");
+				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + ".json");
 				boolean created = vizFile.getParentFile().mkdirs();
 
 				if (!created) {

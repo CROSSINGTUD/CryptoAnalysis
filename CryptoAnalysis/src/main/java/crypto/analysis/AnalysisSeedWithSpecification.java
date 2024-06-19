@@ -151,7 +151,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				DeclaredMethod declaredMethod = calledMethod.getValue();
 
 				ForbiddenMethodError error = new ForbiddenMethodError(statement, specification, declaredMethod, alternatives);
-				//scanner.getAnalysisListener().reportError(this, error);
 				scanner.getAnalysisReporter().reportError(this, error);
 			}
 		}
@@ -210,7 +209,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 				TypestateError typestateError = new TypestateError(statement, specification, this, errorStateNode.getExpectedCalls());
 				this.addError(typestateError);
-				//scanner.getAnalysisListener().reportError(this, typestateError);
 				scanner.getAnalysisReporter().reportError(this, typestateError);
 			}
 		}

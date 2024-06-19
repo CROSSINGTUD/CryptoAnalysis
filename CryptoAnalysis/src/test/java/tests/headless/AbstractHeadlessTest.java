@@ -47,6 +47,7 @@ public abstract class AbstractHeadlessTest {
 	protected void assertErrors(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
 		StringBuilder report = new StringBuilder();
 
+		// Compare expected errors to actual errors
 		for (Table.Cell<String, Class<?>, Integer> cell : errorMarkerCountPerErrorTypeAndMethod.cellSet()) {
 			String methodName = cell.getRowKey();
 			Class<?> errorType = cell.getColumnKey();
@@ -59,6 +60,22 @@ public abstract class AbstractHeadlessTest {
 				report.append("\n\tFound ").append(Math.abs(difference)).append(" too many errors of type ").append(errorType.getSimpleName()).append(" in method ").append(methodName);
 			} else if (difference > 0) {
 				report.append("\n\tFound ").append(difference).append(" too few errors of type ").append(errorType.getSimpleName()).append(" in method ").append(methodName);
+			}
+		}
+
+		// Compare actual errors to unexpected errors
+		for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
+			String methodName = cell.getColumnKey().toString();
+			Set<AbstractError> errors = cell.getValue();
+
+			for (AbstractError error : errors) {
+				Class<?> errorType = error.getClass();
+				if (errorMarkerCountPerErrorTypeAndMethod.contains(methodName, errorType)) {
+					continue;
+				}
+
+				int unexpectedErrors = ErrorUtils.getErrorsOfType(errorType, errors);
+				report.append("\n\tFound ").append(unexpectedErrors).append(" too many errors of type ").append(errorType.getSimpleName()).append(" in method ").append(methodName);
 			}
 		}
 

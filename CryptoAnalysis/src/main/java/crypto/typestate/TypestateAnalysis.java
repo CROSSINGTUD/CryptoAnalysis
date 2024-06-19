@@ -81,7 +81,7 @@ public abstract class TypestateAnalysis {
 
             @Override
             public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return new Debugger<>();
+                return TypestateAnalysis.this.debugger(idealSeedSolver);
             }
 
             @Override
@@ -118,4 +118,6 @@ public abstract class TypestateAnalysis {
     public abstract CallGraph callGraph();
 
     public abstract DataFlowScope getDataFlowScope();
+
+    public abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver);
 }

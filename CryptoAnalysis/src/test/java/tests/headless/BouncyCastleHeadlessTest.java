@@ -3,6 +3,7 @@ package tests.headless;
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -96,6 +97,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pattern.DigestTest: void digestWithoutUpdate()>", TypestateError.class, 1);
 		setErrorsCount("<pattern.DigestTest: void digestWithMultipleUpdates()>", TypestateError.class, 1);
+		setErrorsCount("<pattern.DigestTest: void digestWithMultipleUpdates()>", ImpreciseValueExtractionError.class, 1);
 		
 		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: java.util.Optional unwrapAES(byte[],byte[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<inflatable_donkey.KeyBlobCurve25519Unwrap: java.util.Optional unwrapAES(byte[],byte[])>", RequiredPredicateError.class, 1);
@@ -130,6 +132,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestTwo()>", IncompleteOperationError.class, 2);
 		
 		setErrorsCount("<iso9796_signer_verifier.Main: byte[] sign()>", IncompleteOperationError.class, 1);
+		setErrorsCount("<iso9796_signer_verifier.Main: byte[] sign()>", ImpreciseValueExtractionError.class, 1);
 		
 		setErrorsCount("<diqube.TicketSignatureService: void signTicket()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<diqube.TicketSignatureService: boolean isValidTicketSignature(byte[])>", RequiredPredicateError.class, 1);

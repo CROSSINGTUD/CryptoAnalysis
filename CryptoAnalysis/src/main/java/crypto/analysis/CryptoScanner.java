@@ -77,7 +77,7 @@ public abstract class CryptoScanner {
 		return dataFlowScope;
 	}
 
-	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed analyzedObject) {
+	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 		return new Debugger<>();
 	}
 

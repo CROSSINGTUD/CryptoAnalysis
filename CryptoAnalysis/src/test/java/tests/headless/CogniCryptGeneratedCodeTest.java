@@ -1,13 +1,12 @@
 package tests.headless;
 
-import java.io.File;
-
-import crypto.analysis.errors.CallToError;
-import crypto.reporting.Reporter;
-import org.junit.Test;
 import crypto.HeadlessCryptoScanner;
+import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.RequiredPredicateError;
+import org.junit.Test;
+
+import java.io.File;
 
 public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 
@@ -35,7 +34,6 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/UserAuthenticator").getAbsolutePath();
 	  	MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		scanner.setReportFormats(Reporter.ReportFormat.CMD);
 
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", HardCodedError.class, 0);
