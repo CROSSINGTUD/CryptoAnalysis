@@ -1,7 +1,6 @@
 package crypto.utils;
 
 import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
 import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleType;
 import soot.Scene;
@@ -35,8 +34,7 @@ public class SootUtils {
         return result;
     }
 
-    public static JimpleType getParameterType(InvokeExpr invokeExpr, int position) {
-        DeclaredMethod declaredMethod = invokeExpr.getMethod();
+    public static JimpleType getParameterType(DeclaredMethod declaredMethod, int position) {
         if (!(declaredMethod instanceof JimpleDeclaredMethod)) {
             throw new RuntimeException("DeclaredMethod is not a JimpleDeclaredMethod");
         }

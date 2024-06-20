@@ -104,7 +104,7 @@ public abstract class EvaluableConstraint {
 							}
 						}
 
-						if (pos > -1 && SootUtils.getParameterType(invoker, pos).isBooleanType()) {
+						if (pos > -1 && SootUtils.getParameterType(invoker.getMethod(), pos).isBooleanType()) {
 							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true", new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
 						} else {
 							varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));

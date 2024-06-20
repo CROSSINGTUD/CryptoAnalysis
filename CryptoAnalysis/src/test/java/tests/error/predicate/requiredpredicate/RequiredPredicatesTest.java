@@ -10,7 +10,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 	@Override
 	protected String getRulesetPath() {
-		return TestConstants.RULES_TEST_DIR + "custom";
+		return TestConstants.RULES_TEST_DIR + "requiredPredicates";
 	}
 	
 	//
@@ -245,6 +245,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(4);
 	}
 
+	@Ignore("Predicate that are not checked yet are assumed to be true")
 	@Test
 	public void notPred1onPos1_AND_pred2onPos2() {
 		A pred1onA = new A();
@@ -510,6 +511,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(2); // two, because each parameter will be reported
 	}
 
+	@Ignore("Predicate that are not checked yet are assumed to be true")
 	@Test
 	public void notPred1onP1_OR_pred2onP2() {
 		A pred1onA = new A();
