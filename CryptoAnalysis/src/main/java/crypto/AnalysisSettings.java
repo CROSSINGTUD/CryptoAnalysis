@@ -149,9 +149,6 @@ public class AnalysisSettings implements Callable<Integer> {
 
 
 	private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
-		// reset the report formats
-		this.reportFormats = new HashSet<>();
-
 		for (String format : settings) {
 			String reportFormatValue = format.toLowerCase();
 
