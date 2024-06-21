@@ -1,13 +1,11 @@
 package crypto.analysis;
 
 import boomerang.scene.Statement;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ISLConstraint;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AlternativeReqPredicate implements ISLConstraint {
@@ -71,8 +69,8 @@ public class AlternativeReqPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> involvedVarNames = new HashSet<>();
+	public List<String> getInvolvedVarNames() {
+		List<String> involvedVarNames = new ArrayList<>();
 		for (CrySLPredicate alt : alternatives) {
 			involvedVarNames.addAll(alt.getInvolvedVarNames());
 		}

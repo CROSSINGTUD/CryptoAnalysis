@@ -7,18 +7,17 @@ import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.ICrySLPredicateParameter;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ICrySLPredicateParameter;
+import crypto.rules.ISLConstraint;
 import crypto.utils.MatcherUtils;
 
 import java.util.ArrayList;
@@ -86,7 +85,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 		if (!isCalled) {
 			IAnalysisSeed seed = context.getObject();
-			CallToError callToError = new CallToError(seed.getOrigin(), seed, context.getSpecification(), methods);
+			CallToError callToError = new CallToError(seed, context.getSpecification(), methods);
 			errors.add(callToError);
 		}
 	}
@@ -102,7 +101,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
 				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
-					NoCallToError noCallToError = new NoCallToError(statement, context.getObject(), context.getSpecification());
+					NoCallToError noCallToError = new NoCallToError(context.getObject(), statement, context.getSpecification());
 					errors.add(noCallToError);
 				}
 			}
@@ -133,7 +132,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(callSite, context.getSpecification(), context.getObject(), neverTypeOfPredicate);
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getObject(), callSite, context.getSpecification(), neverTypeOfPredicate);
 				errors.add(neverTypeOfError);
 			}
 		}
@@ -166,7 +165,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
 					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
-					HardCodedError hardCodedError = new HardCodedError(callSiteWithExtractedValue, context.getSpecification(), context.getObject(), hardCodedPredicate);
+					HardCodedError hardCodedError = new HardCodedError(context.getObject(), callSiteWithExtractedValue, context.getSpecification(), hardCodedPredicate);
 					errors.add(hardCodedError);
 				}
 			}
@@ -204,7 +203,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 			if (!isSubType) {
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				InstanceOfError instanceOfError = new InstanceOfError(callSite, context.getSpecification(), context.getObject(), instanceOfPredicate);
+				InstanceOfError instanceOfError = new InstanceOfError(context.getObject(), callSite, context.getSpecification(), instanceOfPredicate);
 				errors.add(instanceOfError);
 			}
 		}

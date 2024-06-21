@@ -1,10 +1,9 @@
 package crypto.rules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CrySLPredicate extends CrySLLiteral {
@@ -110,18 +109,18 @@ public class CrySLPredicate extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<String>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		if (Arrays.asList(new String[] {"neverTypeOf", "instanceOf"}).contains(predName)) {
 			varNames.add(parameters.get(0).getName());
 		} else {
-		for (ICrySLPredicateParameter var : parameters) {
-			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
-				varNames.add(var.getName());
+			for (ICrySLPredicateParameter var : parameters) {
+				if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
+					varNames.add(var.getName());
+				}
 			}
 		}
-		}
-		if(getBaseObject() != null)
+		if (getBaseObject() != null)
 			varNames.add(getBaseObject().getName());
 		return varNames;
 	}

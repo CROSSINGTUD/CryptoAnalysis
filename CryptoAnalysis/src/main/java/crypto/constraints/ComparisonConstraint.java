@@ -29,21 +29,23 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
-				errors.add(new ConstraintError(entry.getValue(), context.getSpecification(), context.getObject(),
-						compConstraint));
+				ConstraintError error = new ConstraintError(context.getObject(), entry.getValue(), context.getSpecification(), compConstraint);
+				errors.add(error);
+
 				return;
 			}
 		}
 
 		for (Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
-				errors.add(new ConstraintError(leftie.getValue(), context.getSpecification(), context.getObject(),
-						compConstraint));
+				ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), compConstraint);
+				errors.add(error);
+
 				return;
 			}
 			for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
 
-				boolean cons = true;
+				boolean cons;
 				switch (compConstraint.getOperator()) {
 					case eq:
 						cons = leftie.getKey().equals(rightie.getKey());
@@ -67,7 +69,9 @@ public class ComparisonConstraint extends EvaluableConstraint {
 						cons = false;
 				}
 				if (!cons) {
-					errors.add(new ConstraintError(leftie.getValue(), context.getSpecification(), context.getObject(), origin));
+					ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), origin);
+					errors.add(error);
+
 					return;
 				}
 			}
@@ -90,7 +94,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			}
 
 			for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
-				int sum = 0;
+				int sum;
 				switch (arith.getOperator()) {
 					case n:
 						sum = leftie.getKey() - rightie.getKey();
@@ -121,11 +125,11 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			predicateConstraint.evaluate();
 			if (!predicateConstraint.getErrors().isEmpty()) {
 				for (AbstractError err : predicateConstraint.getErrors()) {
-					errors.add(new ImpreciseValueExtractionError(arith, err.getErrorStatement(), err.getRule()));
+					errors.add(new ImpreciseValueExtractionError(context.getObject(), err.getErrorStatement(), err.getRule(), arith));
 				}
 				predicateConstraint.errors.clear();
 			}
-			return new HashMap<Integer, CallSiteWithExtractedValue>();
+			return new HashMap<>();
 		} else {
 			return extractValueAsInt(par.getName(), arith);
 		}

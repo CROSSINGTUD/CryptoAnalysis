@@ -1,6 +1,6 @@
 package crypto.rules;
 
-import java.util.Set;
+import java.util.List;
 
 public class CrySLComparisonConstraint extends CrySLLiteral {
 
@@ -61,8 +61,8 @@ public class CrySLComparisonConstraint extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = left.getInvolvedVarNames();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = left.getInvolvedVarNames();
 		varNames.addAll(right.getInvolvedVarNames());
 		return varNames;
 	}

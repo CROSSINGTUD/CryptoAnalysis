@@ -251,7 +251,7 @@ public abstract class EvaluableConstraint {
 			Val extractedVal = callSite.getVal().getValue();
 
 			if (extractedVal.equals(Val.zero())) {
-				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(constraint, statement, context.getSpecification());
+				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(context.getObject(), statement, context.getSpecification(), constraint);
 				errors.add(extractionError);
 				return true;
 			}

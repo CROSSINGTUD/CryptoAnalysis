@@ -1,30 +1,60 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 
+import java.util.Arrays;
 import java.util.Collection;
 
-// TODO Adapt messages
-public class CallToError extends ErrorWithObjectAllocation {
+public class CallToError extends AbstractError {
 
     private final Collection<CrySLMethod> requiredMethods;
 
-    public CallToError(Statement statement, IAnalysisSeed seed, CrySLRule rule, Collection<CrySLMethod> requiredMethods) {
-        super(statement, rule, seed);
+    public CallToError(IAnalysisSeed seed, CrySLRule rule, Collection<CrySLMethod> requiredMethods) {
+        super(seed, seed.getOrigin(), rule);
 
         this.requiredMethods = requiredMethods;
     }
 
-    @Override
-    public String toErrorMarkerString() {
-        return "Call to " + requiredMethods + " is missing";
+    public Collection<CrySLMethod> getRequiredMethods() {
+        return requiredMethods;
     }
 
     @Override
-    public void accept(ErrorVisitor visitor) {
-        visitor.visit(this);
+    public String toErrorMarkerString() {
+        return "Call to one of the methods " +
+                formatMethodNames(requiredMethods) +
+                getObjectType() +
+                " is missing";
     }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[]{
+                super.hashCode(),
+                requiredMethods
+        });
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+
+        CallToError other = (CallToError) obj;
+        if (!super.equals(other)) return false;
+        if (requiredMethods == null) {
+            return other.getRequiredMethods() == null;
+        } else {
+            return requiredMethods.equals(other.getRequiredMethods());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "CallToError: " + toErrorMarkerString();
+    }
+
 }

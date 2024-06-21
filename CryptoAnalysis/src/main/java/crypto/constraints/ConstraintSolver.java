@@ -117,7 +117,7 @@ public class ConstraintSolver {
 	 */
 	private void partitionConstraints() {
 		for (ISLConstraint cons : getAllConstraints()) {
-			Set<String> involvedVarNames = cons.getInvolvedVarNames();
+			Set<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
 
 			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 				involvedVarNames.remove(cwpi.getVarName());

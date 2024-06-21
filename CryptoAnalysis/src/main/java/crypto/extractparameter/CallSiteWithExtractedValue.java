@@ -2,16 +2,20 @@ package crypto.extractparameter;
 
 import boomerang.scene.Val;
 
+import java.util.Arrays;
+
 /**
  * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
- *
- *  CallSiteWithParamIndex gives position of the location index of the error
+ *	<p>
+ *  CallSiteWithParamIndex gives position of the location index of the error<br>
  *  ExtractedValue gives the value of the call site
+ *  </p>
  */
 
 public class CallSiteWithExtractedValue {
-	private CallSiteWithParamIndex cs;
-	private ExtractedValue val;
+
+	private final CallSiteWithParamIndex cs;
+	private final ExtractedValue val;
 
 	public CallSiteWithExtractedValue(CallSiteWithParamIndex cs, ExtractedValue val){
 		this.cs = cs;
@@ -28,7 +32,7 @@ public class CallSiteWithExtractedValue {
 	
 	@Override
 	public String toString() {
-		String res = "";
+		String res;
 		switch(cs.getIndex()) {
 			case -1:
 				return "Return value";
@@ -55,12 +59,42 @@ public class CallSiteWithExtractedValue {
 				break;
 		}
 		res += "parameter";
-		if (val != null && !val.getValue().isNull()) {
+		if (val != null) {
 			Val allocVal = val.getValue();
 			if (allocVal.isConstant()) {
 				res += " (with value " + allocVal.getVariableName() +")";
 			}
 		}
 		return res;
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(new Object[]{
+				cs,
+				val
+		});
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+
+		CallSiteWithExtractedValue other = (CallSiteWithExtractedValue) obj;
+		if (cs == null) {
+			if (other.getCallSite() != null) return false;
+		} else if (!cs.equals(other.getCallSite())) {
+			return false;
+		}
+
+		if (val == null) {
+			if (other.getVal() != null) return false;
+		} else if (!val.equals(other.getVal())) {
+			return false;
+		}
+
+		return true;
 	}
 }

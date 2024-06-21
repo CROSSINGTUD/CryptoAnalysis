@@ -1,7 +1,7 @@
 package crypto.rules;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CrySLArithmeticConstraint extends CrySLLiteral {
 
@@ -47,8 +47,8 @@ public class CrySLArithmeticConstraint extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		String name = left.getName();
 		if(!isIntOrBoolean(name)) {
 			varNames.add(name);

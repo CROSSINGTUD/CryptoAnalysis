@@ -13,10 +13,10 @@ import com.google.common.collect.Table.Cell;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -227,15 +227,16 @@ public class PredicateHandler {
 	private void collectMissingPred(AnalysisSeedWithSpecification seed, RequiredCrySLPredicate missingPred) {
 		// Check for predicate errors with 'this' as parameter
 		if (missingPred.getPred().getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this"))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(Collections.singletonList(missingPred.getPred()), missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
+			RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null), Collections.singletonList(missingPred.getPred()));
 			addRequiredPredicateErrorOnSeed(reqPredError, seed);
 
 			return;
 		}
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
+
 			if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(Collections.singletonList(missingPred.getPred()), missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null), Collections.singletonList(missingPred.getPred()));
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}
@@ -244,7 +245,7 @@ public class PredicateHandler {
 	private void collectMissingPred(AnalysisSeedWithSpecification seed, AlternativeReqPredicate missingPred) {
 		// Check for predicate errors with 'this' as parameter in all alternatives
 		if (missingPred.getAlternatives().parallelStream().anyMatch(p -> p.getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this")))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null));
+			RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null), missingPred.getAlternatives());
 			addRequiredPredicateErrorOnSeed(reqPredError, seed);
 
 			return;
@@ -252,7 +253,7 @@ public class PredicateHandler {
 
 		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
 			if (missingPred.getAlternatives().parallelStream().anyMatch(e -> e.getInvolvedVarNames().contains(v.getVarName())) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(missingPred.getAlternatives(), missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null));
+				RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null), missingPred.getAlternatives());
 				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}

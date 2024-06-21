@@ -1,9 +1,9 @@
 package crypto.rules;
 
-import java.util.Collections;
-import java.util.Set;
-
 import boomerang.scene.Statement;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Constraint expressing, that a {@link CrySLMethod} throws an
@@ -63,8 +63,8 @@ public class CrySLExceptionConstraint implements ISLConstraint {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		return Collections.emptySet();
+	public List<String> getInvolvedVarNames() {
+		return Collections.emptyList();
 	}
 
 	@Override

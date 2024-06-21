@@ -150,7 +150,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Statement statement = calledMethod.getKey().getStart();
 				DeclaredMethod declaredMethod = calledMethod.getValue();
 
-				ForbiddenMethodError error = new ForbiddenMethodError(statement, specification, declaredMethod, alternatives);
+				ForbiddenMethodError error = new ForbiddenMethodError(this, statement, specification, declaredMethod, alternatives);
 				scanner.getAnalysisReporter().reportError(this, error);
 			}
 		}
@@ -207,7 +207,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (stateNode instanceof ReportingErrorStateNode) {
 				ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
 
-				TypestateError typestateError = new TypestateError(statement, specification, this, errorStateNode.getExpectedCalls());
+				TypestateError typestateError = new TypestateError(this, statement, specification, errorStateNode.getExpectedCalls());
 				this.addError(typestateError);
 				scanner.getAnalysisReporter().reportError(this, typestateError);
 			}

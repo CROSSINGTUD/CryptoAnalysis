@@ -2,42 +2,32 @@ package crypto.analysis.errors;
 
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 public class ForbiddenMethodError extends AbstractError {
 
 	private final DeclaredMethod calledMethod;
 	private final Collection<CrySLMethod> alternatives;
-	private final Set<String> alternativesSet = Sets.newHashSet();
 
-	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod) {
-		this(errorLocation, rule, calledMethod, new HashSet<>());
+	public ForbiddenMethodError(IAnalysisSeed seed, Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod) {
+		this(seed, errorLocation, rule, calledMethod, new HashSet<>());
 	}
 
-	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod,
-								Collection<CrySLMethod> alternatives) {
-		super(errorLocation, rule);
+	public ForbiddenMethodError(IAnalysisSeed seed, Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod, Collection<CrySLMethod> alternatives) {
+		super(seed, errorLocation, rule);
+
 		this.calledMethod = calledMethod;
 		this.alternatives = alternatives;
-		
-		for (CrySLMethod method : alternatives) {
-			this.alternativesSet.add(method.getName());
-		}	
 	}
 
 	public Collection<CrySLMethod> getAlternatives() {
 		return alternatives;
-	}
-
-	public void accept(ErrorVisitor visitor) {
-		visitor.visit(this);
 	}
 
 	public DeclaredMethod getCalledMethod() {
@@ -48,46 +38,51 @@ public class ForbiddenMethodError extends AbstractError {
 	public String toErrorMarkerString() {
 		final StringBuilder msg = new StringBuilder();
 		msg.append("Detected call to forbidden method ");
-		msg.append(getCalledMethod().getSubSignature());
+		msg.append(getCalledMethod().getSignature());
 		msg.append(" of class ");
 		msg.append(getCalledMethod().getDeclaringClass());
+
 		if (!getAlternatives().isEmpty()) {
-			msg.append(". Instead, call method ");
-			Collection<CrySLMethod> subSignatures = getAlternatives();
-			msg.append(Joiner.on(", ").join(subSignatures));
-			msg.append(".");
+			msg.append(". Instead, call one of the methods ");
+			String altMethods = formatMethodNames(alternatives);
+			msg.append(altMethods);
 		}
 		return msg.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((alternativesSet == null) ? 0 : alternativesSet.hashCode());
-		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getName().hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				calledMethod,
+				alternatives
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ForbiddenMethodError other = (ForbiddenMethodError) obj;
-		if (alternativesSet == null) {
-			if (other.alternativesSet != null)
-				return false;
-		} else if (!alternativesSet.equals(other.alternativesSet))
-			return false;
 		if (calledMethod == null) {
-			if (other.calledMethod != null)
-				return false;
-		} else if (!calledMethod.getName().equals(other.calledMethod.getName()))
+			if (other.getCalledMethod() != null) return false;
+		} else if (!calledMethod.equals(other.getCalledMethod())) {
 			return false;
+		}
+
+		if (alternatives == null) {
+			if (other.getAlternatives() != null) return false;
+		} else if (!alternatives.equals(other.getAlternatives())) {
+			return false;
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ForbiddenMethodError: " + toErrorMarkerString();
 	}
 }

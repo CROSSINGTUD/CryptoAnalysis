@@ -6,35 +6,32 @@ import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLComparisonConstraint.CompOp;
 import crypto.rules.CrySLConstraint;
-import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
+import crypto.rules.ISLConstraint;
 
+import java.util.Arrays;
 import java.util.Collection;
 
-public class ConstraintError extends ErrorWithObjectAllocation {
+public class ConstraintError extends AbstractError {
 
-	private final ISLConstraint brokenConstraint;
 	private final CallSiteWithExtractedValue callSiteWithParamIndex;
+	private final ISLConstraint violatedConstraint;
 
-	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs.getCallSite().stmt(), rule, objectLocation);
+	public ConstraintError(IAnalysisSeed seed, CallSiteWithExtractedValue cs, CrySLRule rule, ISLConstraint constraint) {
+		super(seed, cs.getCallSite().stmt(), rule);
+
 		this.callSiteWithParamIndex = cs;
-		this.brokenConstraint = con;
+		this.violatedConstraint = constraint;
 	}
 	
-	public ISLConstraint getBrokenConstraint() {
-		return brokenConstraint;
-	}
-
-	public void accept(ErrorVisitor visitor){
-		visitor.visit(this);
+	public ISLConstraint getViolatedConstraint() {
+		return violatedConstraint;
 	}
 
 	public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
@@ -43,44 +40,30 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 
 	@Override
 	public String toErrorMarkerString() {
-		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(brokenConstraint);
+		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(violatedConstraint);
 	}
 
-	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint) {
+	private String evaluateBrokenConstraint(final ISLConstraint constraint) {
 		StringBuilder msg = new StringBuilder();
-		if (brokenConstraint instanceof CrySLPredicate) {
-
-			CrySLPredicate brokenPred = (CrySLPredicate) brokenConstraint;
-
-			switch (brokenPred.getPredName()) {
-				case "neverTypeOf":
-					msg.append(" should never be of type ");
-					msg.append(brokenPred.getParameters().get(0).getName());
-					msg.append(".");
-					break;
-				case "notHardCoded":
-					msg.append(" should never be hardcoded.");
-					break;
-			}
-		} else if (brokenConstraint instanceof CrySLValueConstraint) {
-			return evaluateValueConstraint((CrySLValueConstraint) brokenConstraint);
-		} else if (brokenConstraint instanceof CrySLArithmeticConstraint) {
-			final CrySLArithmeticConstraint brokenArthConstraint = (CrySLArithmeticConstraint) brokenConstraint;
+		if (constraint instanceof CrySLValueConstraint) {
+			return evaluateValueConstraint((CrySLValueConstraint) constraint);
+		} else if (constraint instanceof CrySLArithmeticConstraint) {
+			final CrySLArithmeticConstraint brokenArthConstraint = (CrySLArithmeticConstraint) constraint;
 			msg.append(brokenArthConstraint.getLeft());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getOperator());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getRight());
-		} else if (brokenConstraint instanceof CrySLComparisonConstraint) {
-			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) brokenConstraint;
+		} else if (constraint instanceof CrySLComparisonConstraint) {
+			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) constraint;
 			msg.append(" Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
 			msg.append(" must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
 			msg.append(" ");
 			msg.append(brokenCompCons.getRight().getLeft().getName());
-		} else if (brokenConstraint instanceof CrySLConstraint) {
-			final CrySLConstraint crySLConstraint = (CrySLConstraint) brokenConstraint;
+		} else if (constraint instanceof CrySLConstraint) {
+			final CrySLConstraint crySLConstraint = (CrySLConstraint) constraint;
 			final ISLConstraint leftSide = crySLConstraint.getLeft();
 			final ISLConstraint rightSide = crySLConstraint.getRight();
 			switch (crySLConstraint.getOperator()) {
@@ -174,35 +157,40 @@ public class ConstraintError extends ErrorWithObjectAllocation {
 	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int paramIndex = callSiteWithParamIndex.getCallSite().getIndex();
-		final Val parameterValue = callSiteWithParamIndex.getVal().getValue();
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + paramIndex;
-		result = prime * result + ((parameterValue == null) ? 0 : parameterValue.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				callSiteWithParamIndex,
+				violatedConstraint
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ConstraintError other = (ConstraintError) obj;
-		if (callSiteWithParamIndex.getCallSite().getIndex() != other.callSiteWithParamIndex.getCallSite().getIndex()) {
+		if (callSiteWithParamIndex == null) {
+			if (other.getCallSiteWithExtractedValue() != null) return false;
+		} else if (!callSiteWithParamIndex.equals(other.getCallSiteWithExtractedValue())) {
 			return false;
-		} 
-		if (callSiteWithParamIndex.getVal().getValue() == null) {
-			if (other.callSiteWithParamIndex.getVal().getValue() != null)
-				return false;
-		} else if (!callSiteWithParamIndex.getVal().getValue().equals(other.callSiteWithParamIndex.getVal().getValue()))
+		}
+
+		if (violatedConstraint == null) {
+			if (other.getViolatedConstraint() != null) return false;
+		} else if (!violatedConstraint.equals(other.getViolatedConstraint())) {
 			return false;
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ConstraintError: " + toErrorMarkerString();
 	}
 }

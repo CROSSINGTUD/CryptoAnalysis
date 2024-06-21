@@ -1,10 +1,10 @@
 package crypto.analysis;
 
-import java.util.Set;
-
 import boomerang.scene.Statement;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ISLConstraint;
+
+import java.util.List;
 
 public class RequiredCrySLPredicate implements ISLConstraint {
 
@@ -63,7 +63,7 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
+	public List<String> getInvolvedVarNames() {
 		return predicate.getInvolvedVarNames();
 	}
 

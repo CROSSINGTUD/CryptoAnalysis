@@ -68,7 +68,8 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     @Override
     public void onReportedError(IAnalysisSeed analysisSeed, AbstractError error) {
-        LOGGER.debug("Found error {} on {}",error, analysisSeed);
+        LOGGER.debug("Found {} on {}", error.getClass().getSimpleName(), analysisSeed);
+        // LOGGER.info(error.toString());
     }
 
     @Override

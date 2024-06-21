@@ -4,11 +4,10 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLRule;
 
-// TODO Fill with content
-public class NoCallToError extends ErrorWithObjectAllocation {
+public class NoCallToError extends AbstractError {
 
-    public NoCallToError(Statement statement, IAnalysisSeed seed, CrySLRule rule) {
-        super(statement, rule, seed);
+    public NoCallToError(IAnalysisSeed seed, Statement statement, CrySLRule rule) {
+        super(seed, statement, rule);
     }
 
     @Override
@@ -17,7 +16,18 @@ public class NoCallToError extends ErrorWithObjectAllocation {
     }
 
     @Override
-    public void accept(ErrorVisitor visitor) {
-        visitor.visit(this);
+    public int hashCode() {
+        return super.hashCode();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return "NoCallToError: " + toErrorMarkerString();
+    }
+
 }
