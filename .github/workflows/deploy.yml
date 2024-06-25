@@ -27,7 +27,7 @@ jobs:
         with:
           maven-version: 3.6.3
       - name: Build & Deploy CryptoAnalysis
-        run: mvn -B -U clean deploy -Pdeployment -DskipTests
+        run: mvn -B -U clean deploy -Pdeployment -DskipTests -f CryptoAnalysis
         env:
           SIGN_KEY_PASS: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
           OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
