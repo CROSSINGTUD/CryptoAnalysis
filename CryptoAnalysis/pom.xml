@@ -4,7 +4,38 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>2.7.2</version>
+	<name>CryptoAnalysis</name>
+	<description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler</description>
+	<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License - v2.0</name>
+			<url>https://www.eclipse.org/legal/epl-2.0/</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>CogniCrypt</id>
+			<name>CogniCrypt</name>
+			<email>cognicrypt@eim.upb.de</email>
+		</developer>
+	</developers>
+	
+	<scm>
+		<connection>scm:git:git@github.com:CROSSINGTUD/CryptoAnalysis.git</connection>
+		<developerConnection>scm:git:ssh://github.com:CROSSINGTUD/CryptoAnalysis.git</developerConnection>
+		<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+	</scm>
+
+	<parent>
+		<groupId>de.fraunhofer.iem</groupId>
+		<artifactId>CryptoAnalysis-Parent</artifactId>
+		<version>2.7.2</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spdsVersion>2.5.1</spdsVersion>
