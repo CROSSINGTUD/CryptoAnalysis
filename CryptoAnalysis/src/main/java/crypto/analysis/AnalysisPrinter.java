@@ -1,5 +1,7 @@
 package crypto.analysis;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.IAnalysisListener;
 import org.slf4j.Logger;
@@ -44,6 +46,16 @@ public class AnalysisPrinter implements IAnalysisListener {
     @Override
     public void onSeedFinished(IAnalysisSeed analysisSeed) {
         LOGGER.debug("Finished analyzing {}", analysisSeed);
+    }
+
+    @Override
+    public void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed) {
+        LOGGER.warn("Seed {} timed out while typestate analysis. Consider increasing the timeout with '--timeout' or 'setTimeout'", analysisSeed);
+    }
+
+    @Override
+    public void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val param, Statement statement) {
+        LOGGER.warn("Seed {} timed out while extracting parameter {} @ {}. Consider increasing the timeout with '--timeout' or 'setTimeout'", analysisSeed, param, statement);
     }
 
     @Override

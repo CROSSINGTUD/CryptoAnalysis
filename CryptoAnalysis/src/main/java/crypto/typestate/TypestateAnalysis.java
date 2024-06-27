@@ -96,7 +96,7 @@ public abstract class TypestateAnalysis {
 
             @Override
             public BoomerangOptions boomerangOptions() {
-                return super.boomerangOptions();
+                return new TypestateAnalysisOptions(getTimeout());
             }
         };
     }
@@ -120,4 +120,6 @@ public abstract class TypestateAnalysis {
     public abstract DataFlowScope getDataFlowScope();
 
     public abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver);
+
+    public abstract int getTimeout();
 }

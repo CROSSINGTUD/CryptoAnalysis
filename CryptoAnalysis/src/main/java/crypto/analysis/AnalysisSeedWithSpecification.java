@@ -133,7 +133,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 
 	private void runExtractParameterAnalysis() {
-		this.parameterAnalysis = new ExtractParameterAnalysis(this.scanner, allCallsOnObject, specification);
+		this.parameterAnalysis = new ExtractParameterAnalysis(this);
 		this.parameterAnalysis.run();
 		scanner.getAnalysisReporter().collectedValues(this, parameterAnalysis.getCollectedValues());
 	}
@@ -927,6 +927,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public ExtractParameterAnalysis getParameterAnalysis() {
 		return parameterAnalysis;
+	}
+
+	public Map<ControlFlowGraph.Edge, DeclaredMethod> getAllCallsOnObject() {
+		return allCallsOnObject;
 	}
 
 	@Override

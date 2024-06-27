@@ -15,9 +15,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import crypto.analysis.CryptoScanner;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLRule;
 import crypto.typestate.LabeledMatcherTransition;
 import crypto.typestate.MatcherTransitionCollection;
 import heros.utilities.DefaultValueMap;
@@ -32,29 +31,28 @@ import java.util.Optional;
 
 public class ExtractParameterAnalysis {
 
-	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
-	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
-	private CryptoScanner cryptoScanner;
-	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
-	private Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
-	private Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
-	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
+	private final Collection<LabeledMatcherTransition> events = Sets.newHashSet();
+	private final Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
+	private final Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
+	private final Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
+	private final DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
 		@Override
 		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
 			return key;
 		}
 	};
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject, CrySLRule rule) {
-		this.cryptoScanner = cryptoScanner;
-		this.allCallsOnObject = allCallsOnObject;
+	private final AnalysisSeedWithSpecification seed;
 
-		MatcherTransitionCollection matcherTransitions = MatcherTransitionCollection.makeCollection(rule.getUsagePattern());
+	public ExtractParameterAnalysis(AnalysisSeedWithSpecification seed) {
+		this.seed = seed;
+
+		MatcherTransitionCollection matcherTransitions = MatcherTransitionCollection.makeCollection(seed.getSpecification().getUsagePattern());
 		this.events.addAll(matcherTransitions.getAllTransitions());
 	}
 
 	public void run() {
-		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : allCallsOnObject.entrySet()) {
+		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : seed.getAllCallsOnObject().entrySet()) {
 			Statement statement = stmt.getKey().getStart();
 
 			if (!statement.containsInvokeExpr()) {
@@ -108,7 +106,6 @@ public class ExtractParameterAnalysis {
 		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
 		for (Statement pred : predecessors) {
 			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
-			// TODO Edge to getStart()
 			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpecification);
 			querySites.add(callSiteWithParamIndex);
 			query.addListener((q, res) -> {
@@ -125,7 +122,6 @@ public class ExtractParameterAnalysis {
 					ExtractedValue extractedValue;
                     if (v.var() instanceof AllocVal) {
                         AllocVal allocVal = (AllocVal) v.var();
-                        // TODO ExtractValue constructor: Edge to Statement
                         extractedValue = new ExtractedValue(v.cfgEdge().getStart(), allocVal.getAllocVal());
                     } else {
                         extractedValue = new ExtractedValue(v.cfgEdge().getStart(), v.var());
@@ -148,23 +144,24 @@ public class ExtractParameterAnalysis {
 		}
 	}
 
-	public void addAdditionalBoomerangQuery(AdditionalBoomerangQuery q, QueryListener listener) {
-		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(q);
-		query.addListener(listener);
-	}
+	private class AdditionalBoomerangQuery extends BackwardQuery {
 
-	public class AdditionalBoomerangQuery extends BackwardQuery {
+		private final List<QueryListener> listeners = Lists.newLinkedList();
+		private BackwardBoomerangResults<NoWeight> res;
+		private boolean solved;
+
 		public AdditionalBoomerangQuery(ControlFlowGraph.Edge stmt, Val variable) {
 			super(stmt, variable);
 		}
 
-		protected boolean solved;
-		private List<QueryListener> listeners = Lists.newLinkedList();
-		private BackwardBoomerangResults<NoWeight> res;
-
 		public void solve() {
-			Boomerang boomerang = new Boomerang(cryptoScanner.callGraph(), cryptoScanner.getDataFlowScope(), new CogniCryptIntAndStringBoomerangOptions());
+			ExtractParameterOptions options = new ExtractParameterOptions(seed.getScanner().getTimeout());
+			Boomerang boomerang = new Boomerang(seed.getScanner().callGraph(), seed.getScanner().getDataFlowScope(), options);
 			res = boomerang.solve(this);
+
+			if (res.isTimedout()) {
+				seed.getScanner().getAnalysisReporter().onExtractParameterAnalysisTimeout(seed, var(), cfgEdge().getTarget());
+			}
 
 			for (QueryListener l : Lists.newLinkedList(listeners)) {
 				l.solved(this, res);
@@ -183,8 +180,8 @@ public class ExtractParameterAnalysis {
 
 	}
 
-	private static interface QueryListener {
-		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
+	private interface QueryListener {
+		void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
 	}
 
 }

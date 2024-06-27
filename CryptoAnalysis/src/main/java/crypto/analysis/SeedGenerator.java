@@ -37,6 +37,11 @@ public class SeedGenerator {
             }
 
             @Override
+            public int getTimeout() {
+                return scanner.getTimeout();
+            }
+
+            @Override
             public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
                 return scanner.debugger(idealSeedSolver);
             }
@@ -78,6 +83,10 @@ public class SeedGenerator {
                 seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, entry.getValue());
             }
             seeds.add(seed);
+
+            if (entry.getValue().isTimedout()) {
+                scanner.getAnalysisReporter().onTypestateAnalysisTimeout(seed);
+            }
 
             scanner.getAnalysisReporter().typestateAnalysisResults(seed, entry.getValue());
         }

@@ -90,6 +90,13 @@ public class AnalysisSettings implements Callable<Integer> {
 	)
 	private String ignoreSectionsPath = null;
 
+	@CommandLine.Option(
+			names = {"--timeout"},
+			description = "Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the " +
+					"typestate and extract parameter analysis and continues with the results computed so far. (default: 10000)"
+	)
+	private int timeout = 10000;
+
 	public enum AnalysisCallGraph {
 		CHA, SPARK, SPARK_LIB,
 	}
@@ -287,6 +294,14 @@ public class AnalysisSettings implements Callable<Integer> {
 
 	public void setIgnoredSections(Collection<String> ignoredSections) {
 		this.ignoredSections = new HashSet<>(ignoredSections);
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
 
 	@Override
