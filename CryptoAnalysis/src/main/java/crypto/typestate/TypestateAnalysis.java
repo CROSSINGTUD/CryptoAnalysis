@@ -34,7 +34,7 @@ public abstract class TypestateAnalysis {
             transitions.put(rule.getClassName(), RuleTransitions.of(rule));
         }
 
-        analysisScope = new TypestateAnalysisScope(callGraph(), transitions);
+        analysisScope = new TypestateAnalysisScope(callGraph(), transitions, getDataFlowScope());
         resultHandler = new StoreIDEALResultHandler<>();
     }
 

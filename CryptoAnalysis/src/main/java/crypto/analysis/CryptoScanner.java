@@ -12,8 +12,6 @@ import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import typestate.TransitionFunction;
 
 import java.util.ArrayList;
@@ -26,8 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class CryptoScanner {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CryptoScanner.class);
 
 	private final AnalysisReporter analysisReporter;
 	private final ErrorCollector errorCollector;
@@ -46,7 +42,7 @@ public abstract class CryptoScanner {
 		addErrorListener(errorCollector);
 
 		ruleset = new HashSet<>(rules);
-		dataFlowScope = new CryptoAnalysisDataFlowScope(rules);
+		dataFlowScope = new CryptoAnalysisDataFlowScope(rules, getIgnoredSections());
 	}
 
 	public void scan() {
@@ -107,33 +103,6 @@ public abstract class CryptoScanner {
 
 	public Collection<IAnalysisSeed> getDiscoveredSeeds() {
 		return discoveredSeeds.keySet();
-	}
-
-	protected boolean isOnIgnoreSectionList(Method method) {
-		String declaringClass = method.getDeclaringClass().getName();
-		String methodName = declaringClass + "." + method.getName();
-
-		for (String ignoredSection : getIgnoredSections()) {
-			// Check for class name
-			if (ignoredSection.equals(declaringClass)) {
-				LOGGER.info("Ignoring seeds in class " + declaringClass);
-				return true;
-			}
-
-			// Check for method name
-			if (ignoredSection.equals(methodName)) {
-				LOGGER.info("Ignoring seeds in method " + methodName);
-				return true;
-			}
-
-			// Check for wildcards (i.e. *)
-			if (ignoredSection.endsWith(".*") && declaringClass.startsWith(ignoredSection.substring(0, ignoredSection.length() - 2))) {
-				LOGGER.info("Ignoring seeds in class " + declaringClass + " and method " + methodName);
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public Collection<AnalysisSeedWithSpecification> getAnalysisSeedsWithSpec() {

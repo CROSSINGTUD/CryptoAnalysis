@@ -5,14 +5,15 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.AnalysisScope;
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import crypto.rules.ICrySLPredicateParameter;
 import crypto.utils.MatcherUtils;
 
 import java.util.Collection;
@@ -23,11 +24,13 @@ import java.util.Map;
 public class TypestateAnalysisScope extends AnalysisScope {
 
     private final Map<String, RuleTransitions> ruleTransitions;
+    private final DataFlowScope dataFlowScope;
 
-    public TypestateAnalysisScope(CallGraph callGraph, Map<String, RuleTransitions> ruleTransitions) {
+    public TypestateAnalysisScope(CallGraph callGraph, Map<String, RuleTransitions> ruleTransitions, DataFlowScope dataFlowScope) {
         super(callGraph);
 
         this.ruleTransitions = ruleTransitions;
+        this.dataFlowScope = dataFlowScope;
     }
 
     @Override
@@ -35,6 +38,11 @@ public class TypestateAnalysisScope extends AnalysisScope {
         Statement statement = stmt.getStart();
 
         if (!statement.containsInvokeExpr()) {
+            return Collections.emptySet();
+        }
+
+        // Check if method should not be analyzed
+        if (dataFlowScope.isExcluded(statement.getMethod())) {
             return Collections.emptySet();
         }
 

@@ -155,14 +155,6 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 			Collection<ExtractedValue> extractedValues = context.getParsAndVals().get(cs);
 			for (ExtractedValue extractedValue : extractedValues) {
-				// Check if value for predicate could be extracted
-				/*if (extractedValue.getValue().equals(Val.zero())) {
-					Statement statement = cs.stmt();
-					ImpreciseValueExtractionError error = new ImpreciseValueExtractionError(hardCodedPredicate, statement, context.getSpecification());
-					errors.add(error);
-					continue;
-				} */
-
 				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
 					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
 					HardCodedError hardCodedError = new HardCodedError(context.getObject(), callSiteWithExtractedValue, context.getSpecification(), hardCodedPredicate);

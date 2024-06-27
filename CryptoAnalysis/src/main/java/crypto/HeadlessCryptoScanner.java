@@ -131,6 +131,11 @@ public class HeadlessCryptoScanner {
 			}
 
 			@Override
+			public Collection<String> getIgnoredSections() {
+				return settings.getIgnoredSections();
+			}
+
+			@Override
 			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
 				if (!isVisualization()) {
 					return super.debugger(solver);
@@ -151,7 +156,6 @@ public class HeadlessCryptoScanner {
 
 				return new IDEVizDebugger<>(vizFile);
 			}
-
 		};
 
 		for (IAnalysisListener analysisListener : analysisListeners) {
