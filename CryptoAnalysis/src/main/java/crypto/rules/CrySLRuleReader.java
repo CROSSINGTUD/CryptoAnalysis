@@ -42,17 +42,6 @@ public class CrySLRuleReader {
 	public CrySLRule readFromSourceFile(File file) throws CryptoAnalysisException {
 		return reader.readRule(file);
 	}
-	
-	/**
-	 * Returns a list with {@link CrySLRule} objects from the files.
-	 * 
-	 * @param files	The files to read from
-	 * @return The list with {@link CrySLRule} objects
-	 * @throws CryptoAnalysisException	If a file could not get processed to a {@link CrySLRule}
-	 */
-	public List<CrySLRule> readFromSourceFiles(List<File> files) throws CryptoAnalysisException {
-		return reader.readRulesFromFiles(files);
-	}
 
 	/**
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a directory
@@ -61,7 +50,7 @@ public class CrySLRuleReader {
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
-	public List<CrySLRule> readFromDirectory(File directory) throws CryptoAnalysisException {
+	public Collection<CrySLRule> readFromDirectory(File directory) throws CryptoAnalysisException {
 		return readFromDirectory(directory, false);
 	}
 
@@ -75,7 +64,7 @@ public class CrySLRuleReader {
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
-	public List<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
+	public Collection<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
 		if (!directory.exists() || !directory.isDirectory())
 			throw new CryptoAnalysisException("The specified path is not a directory " + directory.getAbsolutePath());
 

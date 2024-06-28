@@ -7,10 +7,9 @@ import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -18,16 +17,16 @@ import java.util.stream.Collectors;
  */
 public class RequiredPredicateError extends AbstractError {
 
-	private final List<CrySLPredicate> contradictedPredicate;
+	private final Collection<CrySLPredicate> contradictedPredicate;
 	private final CallSiteWithExtractedValue extractedValues;
-	private final List<HiddenPredicate> hiddenPredicates;
+	private final Collection<HiddenPredicate> hiddenPredicates;
 
-	public RequiredPredicateError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CallSiteWithExtractedValue cs, List<CrySLPredicate> contradictedPredicates) {
+	public RequiredPredicateError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CallSiteWithExtractedValue cs, Collection<CrySLPredicate> contradictedPredicates) {
 		super(seed, errorStmt, rule);
 
 		this.contradictedPredicate = contradictedPredicates;
 		this.extractedValues = cs;
-		this.hiddenPredicates = new ArrayList<>();
+		this.hiddenPredicates = new HashSet<>();
 	}
 
 	public void addHiddenPredicates(Collection<HiddenPredicate> hiddenPredicates) {
@@ -46,7 +45,7 @@ public class RequiredPredicateError extends AbstractError {
 	 * This method returns a list of contradicting predicates
 	 * @return list of contradicting predicates
 	 */
-	public List<CrySLPredicate> getContradictedPredicates() {
+	public Collection<CrySLPredicate> getContradictedPredicates() {
 		return contradictedPredicate;
 	}
 	
@@ -54,7 +53,7 @@ public class RequiredPredicateError extends AbstractError {
 		return extractedValues;
 	}
 
-	public List<HiddenPredicate> getHiddenPredicates() {
+	public Collection<HiddenPredicate> getHiddenPredicates() {
 		return hiddenPredicates;
 	}
 

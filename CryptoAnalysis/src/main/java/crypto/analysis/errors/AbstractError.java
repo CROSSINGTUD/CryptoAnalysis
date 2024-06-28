@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class AbstractError {
 
@@ -18,8 +17,8 @@ public abstract class AbstractError {
 	private final Statement errorStmt;
 	private final CrySLRule rule;
 
-	private final Set<AbstractError> causedByErrors; // preceding
-	private final Set<AbstractError> willCauseErrors; // subsequent
+	private final Collection<AbstractError> causedByErrors; // preceding
+	private final Collection<AbstractError> willCauseErrors; // subsequent
 
 	public AbstractError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule) {
 		this.seed = seed;
@@ -64,11 +63,11 @@ public abstract class AbstractError {
 		willCauseErrors.add(subsequentError);
 	}
 
-	public Set<AbstractError> getSubsequentErrors(){
+	public Collection<AbstractError> getSubsequentErrors(){
 		return this.willCauseErrors;
 	}
 
-	public Set<AbstractError> getRootErrors(){
+	public Collection<AbstractError> getRootErrors(){
 		return this.causedByErrors;
 	}
 

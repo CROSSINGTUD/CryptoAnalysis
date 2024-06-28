@@ -8,11 +8,11 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table.Cell;
 import typestate.TransitionFunction;
 
-import java.util.Set;
+import java.util.Collection;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
-	private final Set<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
+	private final Collection<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
 
 	public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
 		super(scanner, statement, fact, results);

@@ -24,9 +24,7 @@ import soot.Scene;
 import wpds.impl.Weight.NoWeight;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 public class ExtractParameterAnalysis {
@@ -86,7 +84,7 @@ public class ExtractParameterAnalysis {
 
 	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
 		int index = 0;
-		for (Entry<String, String> param : match.getParameters())
+		for (Map.Entry<String, String> param : match.getParameters())
 			addQueryAtCallSite(param.getKey(), callSite, index++);
 	}
 
@@ -146,7 +144,7 @@ public class ExtractParameterAnalysis {
 
 	private class AdditionalBoomerangQuery extends BackwardQuery {
 
-		private final List<QueryListener> listeners = Lists.newLinkedList();
+		private final Collection<QueryListener> listeners = Lists.newLinkedList();
 		private BackwardBoomerangResults<NoWeight> res;
 		private boolean solved;
 

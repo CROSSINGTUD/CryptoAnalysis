@@ -120,9 +120,7 @@ public class ConstraintError extends AbstractError {
 				} else if (stmt.containsInvokeExpr()) {
 					Collection<Val> parameters = stmt.getInvokeExpr().getArgs();
 
-					// TODO Refactor
 					for (Val parameter : parameters) {
-						//if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
 						Type parameterType = parameter.getType();
 						String javaType = brokenConstraint.getVar().getJavaType();
 

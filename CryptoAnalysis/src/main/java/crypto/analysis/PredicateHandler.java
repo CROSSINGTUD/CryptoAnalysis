@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class PredicateHandler {
@@ -49,7 +48,7 @@ public class PredicateHandler {
 
 		@Override
 		public void done(ForwardBoomerangResults<TransitionFunction> results) {
-			for (Entry<ControlFlowGraph.Edge, Map<Val, TransitionFunction>> row : results.asStatementValWeightTable().rowMap().entrySet()) {
+			for (Map.Entry<ControlFlowGraph.Edge, Map<Val, TransitionFunction>> row : results.asStatementValWeightTable().rowMap().entrySet()) {
 				if (row.getKey().getStart().equals(statement)) {
 					Map<Val, TransitionFunction> entry = row.getValue();
 
@@ -58,9 +57,6 @@ public class PredicateHandler {
 					}
 				}
 			}
-			/*if (results.asStatementValWeightTable().row(statement).containsKey(base)) {
-				secondSeed.addEnsuredPredicate(ensPred);
-			}*/
 		}
 
 		@Override
@@ -266,7 +262,7 @@ public class PredicateHandler {
 	}
 
 	private void reportRequiredPredicateErrors() {
-		for (Entry<AnalysisSeedWithSpecification, List<RequiredPredicateError>> entry : requiredPredicateErrors.entrySet()) {
+		for (Map.Entry<AnalysisSeedWithSpecification, List<RequiredPredicateError>> entry : requiredPredicateErrors.entrySet()) {
 			AnalysisSeedWithSpecification seed = entry.getKey();
 
 			for (RequiredPredicateError reqPredError : entry.getValue()) {
@@ -277,24 +273,24 @@ public class PredicateHandler {
 	}
 
 	private void checkForContradictions() {
-		Set<Entry<CrySLPredicate, CrySLPredicate>> contradictionPairs = new HashSet<>();
+		Set<Map.Entry<CrySLPredicate, CrySLPredicate>> contradictionPairs = new HashSet<>();
 		for (CrySLRule rule : cryptoScanner.getRuleset()) {
 			if(!rule.getPredicates().isEmpty()) {
 				for (ISLConstraint cons : rule.getConstraints()) {
 					if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {
 						// TODO This is weird; why is it always get(0)?
-						contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
+						// contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
 					}
 				}
 			}
 		}
 		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
-			for (Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
+			for (Map.Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
 				Set<String> preds = new HashSet<String>();
 				for (EnsuredCrySLPredicate exPred : exPredCell.getValue()) {
 					preds.add(exPred.getPredicate().getPredName());
 				}
-				for (Entry<CrySLPredicate, CrySLPredicate> disPair : contradictionPairs) {
+				for (Map.Entry<CrySLPredicate, CrySLPredicate> disPair : contradictionPairs) {
 					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
 						// TODO Rule should not be null
 						//cryptoScanner.getAnalysisListener().reportError(null, new PredicateContradictionError(generatingPredicateStmt, null, disPair));

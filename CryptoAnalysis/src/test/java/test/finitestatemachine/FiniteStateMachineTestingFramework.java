@@ -93,7 +93,7 @@ public abstract class FiniteStateMachineTestingFramework{
 	
 	private boolean isPathOfMethodsInSMG(List<String> methodPath) {
 		final Set<StateNode> current = Sets.newHashSet();
-		current.add(smg.getInitialTransition().getLeft());
+		// current.add(smg.getInitialTransition().getLeft());
 		for(String event: methodPath) {
 			List<TransitionEdge> matchingEdges = smg.getAllTransitions().stream().filter(edge -> current.contains(edge.getLeft()) && edge.getLabel().stream().anyMatch(label -> label.getName().contains(event))).collect(Collectors.toList());
 			if(matchingEdges.size() == 0) {

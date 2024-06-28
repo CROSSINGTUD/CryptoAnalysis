@@ -3,17 +3,17 @@ package crypto.typestate;
 import crypto.rules.CrySLMethod;
 import typestate.finiteautomata.State;
 
-import java.util.Set;
+import java.util.Collection;
 
 public class ReportingErrorStateNode implements State {
 
-	private final Set<CrySLMethod> expectedCalls;
+	private final Collection<CrySLMethod> expectedCalls;
 
-	public ReportingErrorStateNode(Set<CrySLMethod> expectedCalls) {
+	public ReportingErrorStateNode(Collection<CrySLMethod> expectedCalls) {
 		this.expectedCalls = expectedCalls;
 	}
 
-	public Set<CrySLMethod> getExpectedCalls() {
+	public Collection<CrySLMethod> getExpectedCalls() {
 		return expectedCalls;
 	}
 

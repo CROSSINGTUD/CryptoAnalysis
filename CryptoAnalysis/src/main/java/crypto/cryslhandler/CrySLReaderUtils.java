@@ -1,23 +1,12 @@
 package crypto.cryslhandler;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.eclipse.xtext.common.types.JvmTypeParameter;
-
-import crypto.rules.ICrySLPredicateParameter;
-import crypto.rules.CrySLException;
-import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLObject;
 import crypto.rules.CrySLArithmeticConstraint.ArithOp;
 import crypto.rules.CrySLComparisonConstraint.CompOp;
 import crypto.rules.CrySLConstraint.LogOps;
+import crypto.rules.CrySLException;
+import crypto.rules.CrySLMethod;
+import crypto.rules.CrySLObject;
+import crypto.rules.ICrySLPredicateParameter;
 import de.darmstadt.tu.crossing.crySL.Aggregate;
 import de.darmstadt.tu.crossing.crySL.AnyParameterType;
 import de.darmstadt.tu.crossing.crySL.BooleanLiteral;
@@ -34,10 +23,20 @@ import de.darmstadt.tu.crossing.crySL.Method;
 import de.darmstadt.tu.crossing.crySL.Object;
 import de.darmstadt.tu.crossing.crySL.Operator;
 import de.darmstadt.tu.crossing.crySL.StringLiteral;
+import org.eclipse.xtext.common.types.JvmTypeParameter;
+
+import java.io.File;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CrySLReaderUtils {
 
-	public static List<CrySLMethod> resolveEventToCryslMethods(final Event event) {
+	public static Collection<CrySLMethod> resolveEventToCryslMethods(final Event event) {
 		return resolveEventToCryslMethodsStream(event).collect(Collectors.toList());
 	}
 
@@ -45,7 +44,7 @@ public class CrySLReaderUtils {
 		return resolveEventToCryslMethodsStream(event).collect(Collectors.toList());
 	}
 
-	public static List<CrySLMethod> resolveEventsToCryslMethods(final Collection<Event> events) {
+	public static Collection<CrySLMethod> resolveEventsToCryslMethods(final Collection<Event> events) {
 		return resolveEventsToCryslMethodsStream(events).collect(Collectors.toList());
 	}
 
@@ -73,7 +72,7 @@ public class CrySLReaderUtils {
 
 	public static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
 		String name = method.getMethod().getQualifiedName();
-		List<Entry<String, String>> parameters = method.getParameters().stream()
+		List<Map.Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
 				.collect(Collectors.toList());
 		return new CrySLMethod(name, parameters, resolveObject(null));
@@ -81,7 +80,7 @@ public class CrySLReaderUtils {
 
 	public static CrySLMethod toCrySLMethod(final Method method) {
 		String name = method.getMethod().getQualifiedName();
-		List<Entry<String, String>> parameters = method.getParameters().stream()
+		List<Map.Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> parameter instanceof AnyParameterType
 						? new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.ANY_TYPE)
 						: resolveObject((parameter.getValue())))
@@ -127,7 +126,7 @@ public class CrySLReaderUtils {
 		return new CrySLException(exception.getException().getIdentifier());
 	}
 
-	public static Entry<String, String> resolveObject(final Object o) {
+	public static Map.Entry<String, String> resolveObject(final Object o) {
 		if (o == null) {
 			return new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.VOID);
 		}

@@ -5,7 +5,6 @@ import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.JimpleType;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-import crypto.rules.TransitionEdge;
 import soot.Scene;
 import soot.SootClass;
 
@@ -13,17 +12,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MatcherUtils {
 
     public static Collection<CrySLMethod> getMatchingCryslMethodsToDeclaredMethod(CrySLRule rule, DeclaredMethod declaredMethod) {
-        Set<CrySLMethod> allMethods = new HashSet<>();
-        for (TransitionEdge edge : rule.getUsagePattern().getAllTransitions()) {
-            allMethods.addAll(edge.getLabel());
-        }
-
-        Set<CrySLMethod> matchingMethods = new HashSet<>();
+        Collection<CrySLMethod> matchingMethods = new HashSet<>();
         for (CrySLMethod method : rule.getEvents()) {
             if (matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {
                 matchingMethods.add(method);

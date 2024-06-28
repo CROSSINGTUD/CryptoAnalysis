@@ -13,24 +13,22 @@ import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.ICrySLPredicateParameter;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
+import crypto.rules.ICrySLPredicateParameter;
+import crypto.rules.ISLConstraint;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class ConstraintSolver {
 
-	public final static List<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length",
+	public final static Collection<String> predefinedPreds = Arrays.asList("callTo", "noCallTo", "neverTypeOf", "length",
 			"notHardCoded", "instanceOf");
-	private final Set<ISLConstraint> relConstraints = Sets.newHashSet();
-	private final List<ISLConstraint> requiredPredicates = Lists.newArrayList();
+	private final Collection<ISLConstraint> relConstraints = Sets.newHashSet();
+	private final Collection<ISLConstraint> requiredPredicates = Lists.newArrayList();
 	private final Collection<Statement> collectedCalls;
 	private final AnalysisReporter analysisReporter;
 	private final AnalysisSeedWithSpecification object;
@@ -74,18 +72,18 @@ public class ConstraintSolver {
 	/**
 	 * @return the allConstraints
 	 */
-	public List<ISLConstraint> getAllConstraints() {
+	public Collection<ISLConstraint> getAllConstraints() {
 		return getSpecification().getConstraints();
 	}
 
 	/**
 	 * @return the relConstraints
 	 */
-	public Set<ISLConstraint> getRelConstraints() {
+	public Collection<ISLConstraint> getRelConstraints() {
 		return relConstraints;
 	}
 
-	public List<ISLConstraint> getRequiredPredicates() {
+	public Collection<ISLConstraint> getRequiredPredicates() {
 		return requiredPredicates;
 	}
 
@@ -94,18 +92,10 @@ public class ConstraintSolver {
 		for (ISLConstraint con : getRelConstraints()) {
 			EvaluableConstraint currentConstraint = EvaluableConstraint.getInstance(con, this);
 			currentConstraint.evaluate();
+
 			for (AbstractError error : currentConstraint.getErrors()) {
 				analysisReporter.reportError(object, error);
 				fail++;
-				/*if (e instanceof ImpreciseValueExtractionError) {
-					reporter.reportError(getObject(), new ImpreciseValueExtractionError(con, e.getErrorStatement(), e.getRule()));
-					fail++;
-					//break;
-				} else {
-					fail++;
-					this.object.addError(e);
-					getReporter().reportError(getObject(), e);
-				}*/
 			}
 		}
 		return fail;
@@ -117,7 +107,7 @@ public class ConstraintSolver {
 	 */
 	private void partitionConstraints() {
 		for (ISLConstraint cons : getAllConstraints()) {
-			Set<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
+			Collection<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
 
 			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 				involvedVarNames.remove(cwpi.getVarName());
@@ -125,7 +115,7 @@ public class ConstraintSolver {
 
 			if (!involvedVarNames.isEmpty()) {
 				continue;
-			}// || (cons.toString().contains("speccedKey") && involvedVarNames.size() == 1)) {
+			}
 
 			if (cons instanceof CrySLPredicate) {
 				CrySLPredicate predicate = (CrySLPredicate) cons;
@@ -134,7 +124,7 @@ public class ConstraintSolver {
 					continue;
 				}
 
-				List<RequiredCrySLPredicate> preds = retrieveValuesForPred(predicate);
+				Collection<RequiredCrySLPredicate> preds = retrieveValuesForPred(predicate);
 
 				for (RequiredCrySLPredicate pred : preds) {
 					CrySLPredicate innerPred = pred.getPred();
@@ -158,7 +148,7 @@ public class ConstraintSolver {
 		}
 	}
 
-	private List<AlternativeReqPredicate> collectAlternativePredicates(CrySLConstraint cons, List<AlternativeReqPredicate> alts) {
+	private Collection<AlternativeReqPredicate> collectAlternativePredicates(CrySLConstraint cons, Collection<AlternativeReqPredicate> alts) {
 		CrySLPredicate left = (CrySLPredicate) cons.getLeft();
 		
 		if (alts.isEmpty()) {
@@ -188,8 +178,8 @@ public class ConstraintSolver {
 		return alts;
 	}
 
-	private List<RequiredCrySLPredicate> retrieveValuesForPred(CrySLPredicate pred) {
-		List<RequiredCrySLPredicate> result = Lists.newArrayList();
+	private Collection<RequiredCrySLPredicate> retrieveValuesForPred(CrySLPredicate pred) {
+		Collection<RequiredCrySLPredicate> result = Lists.newArrayList();
 		
 		for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 			for (ICrySLPredicateParameter p : pred.getParameters()) {

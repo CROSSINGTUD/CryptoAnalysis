@@ -5,7 +5,6 @@ import crypto.rules.CrySLRule;
 import typestate.TransitionFunction;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public class RuleTransitions {
 

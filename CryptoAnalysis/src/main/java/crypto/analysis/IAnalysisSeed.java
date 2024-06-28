@@ -13,9 +13,8 @@ import typestate.TransitionFunction;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 
 public abstract class IAnalysisSeed {
 
@@ -38,7 +37,7 @@ public abstract class IAnalysisSeed {
 		this.analysisResults = results;
 
 		this.predicateHandler = scanner.getPredicateHandler();
-		this.errorCollection = new ArrayList<>();
+		this.errorCollection = new HashSet<>();
 	}
 	public abstract void execute();
 
@@ -74,8 +73,8 @@ public abstract class IAnalysisSeed {
 		this.errorCollection.add(e);
 	}
 
-	public List<AbstractError> getErrors(){
-		return new ArrayList<>(errorCollection);
+	public Collection<AbstractError> getErrors(){
+		return new HashSet<>(errorCollection);
 	}
 
 	public CryptoScanner getScanner() {
