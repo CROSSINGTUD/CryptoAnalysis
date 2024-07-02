@@ -50,6 +50,8 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue68.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
 
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", ConstraintError.class, 2);
+
 		setErrorsCount("<issue68.AESCryptor: byte[] decryptImpl(byte[])>", RequiredPredicateError.class, 2);
 
 		setErrorsCount("<issue49.Main: java.security.PrivateKey getPrivateKey()>", ConstraintError.class, 1);
