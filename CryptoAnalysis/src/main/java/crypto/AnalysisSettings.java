@@ -61,7 +61,7 @@ public class AnalysisSettings implements Callable<Integer> {
 
 	@CommandLine.Option(
 			names = {"--preanalysis"},
-			description = "Enable a preanalysis")
+			description = "Enable a preanalysis. @Deprecated since 3.2.0, not supported anymore")
 	private boolean preanalysis = false;
 
 	@CommandLine.Option(
@@ -71,7 +71,7 @@ public class AnalysisSettings implements Callable<Integer> {
 
 	@CommandLine.Option(
 			names = {"--providerdetection"},
-			description = "Enable provider detection")
+			description = "Enable provider detection. @Deprecated since 3.2.0, not supported anymore")
 	private boolean providerDetection = false;
 
 	@CommandLine.Option(
@@ -256,14 +256,6 @@ public class AnalysisSettings implements Callable<Integer> {
 		this.reportFormats = new HashSet<>(reportFormats);
 	}
 
-	public boolean isPreAnalysis() {
-		return preanalysis;
-	}
-
-	public void setPreAnalysis(boolean preAnalysis) {
-		this.preanalysis = preAnalysis;
-	}
-
 	public boolean isVisualization() {
 		return visualization;
 	}
@@ -272,14 +264,6 @@ public class AnalysisSettings implements Callable<Integer> {
 		this.visualization = visualization;
 	}
 
-	public boolean isProviderDetectionAnalysis() {
-		return providerDetection;
-	}
-
-	public void setProviderDetection(boolean providerDetection) {
-		this.providerDetection = providerDetection;
-	}
-	
 	public boolean isIncludeStatistics() {
 		return includeStatistics;
 	}
