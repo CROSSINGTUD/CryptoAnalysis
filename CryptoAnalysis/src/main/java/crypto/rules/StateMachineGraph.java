@@ -1,28 +1,24 @@
 package crypto.rules;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
+public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 
-import crypto.interfaces.FiniteStateMachine;
-
-public final class StateMachineGraph implements FiniteStateMachine<StateNode>, java.io.Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private final Set<StateNode> nodes;
-	private final List<TransitionEdge> edges;
+	private StateNode startNode;
+	private final Collection<StateNode> nodes;
+	private final Collection<TransitionEdge> edges;
+	private final Collection<TransitionEdge> initialEdges;
 	private int nodeNameCounter = 0;
 
 	public StateMachineGraph() {
-		nodes = new HashSet<StateNode>();
-		edges = new ArrayList<TransitionEdge>();
+		nodes = new HashSet<>();
+		edges = new ArrayList<>();
+		initialEdges = new ArrayList<>();
 	}
 	
 	public StateNode createNewNode() {
@@ -31,7 +27,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 		return node;
 	}
 	
-	public boolean createNewEdge(List<CrySLMethod> methods, StateNode left, StateNode right) {
+	public boolean createNewEdge(Collection<CrySLMethod> methods, StateNode left, StateNode right) {
 		return this.addEdge(new TransitionEdge(methods, left, right));
 	}
 
@@ -45,6 +41,11 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 			return false;
 		}
 		edges.add(edge);
+		
+		if (left.isInitialState()) {
+			initialEdges.add(edge);
+		}
+		
 		return true;
 	}
 
@@ -55,22 +56,22 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 		});
 	}
 	
-	public Set<TransitionEdge> getAllOutgoingEdges(StateNode node){
+	public Collection<TransitionEdge> getAllOutgoingEdges(StateNode node){
 		return edges.parallelStream().filter(edge -> edge.from().equals(node)).collect(Collectors.toSet());
 	}
 	
 	public void addAllOutgoingEdgesFromOneNodeToOtherNodes(StateNode node, Collection<StateNode> otherNodes) {
-		List<TransitionEdge> edgesFromNode = edges.parallelStream().filter(e -> node.equals(e.from())).collect(Collectors.toList());
+		Collection<TransitionEdge> edgesFromNode = edges.parallelStream().filter(e -> node.equals(e.from())).collect(Collectors.toList());
 		otherNodes.forEach(otherNode -> edgesFromNode.forEach(edge -> this.createNewEdge(edge.getLabel(), otherNode, edge.getLeft())));
 	}
 	
-	public StateNode aggregateNodesToOneNode(Set<StateNode> endNodes, StateNode newNode) {
-		this.aggregateNodestoOtherNodes(endNodes, Lists.newArrayList(newNode));
+	public StateNode aggregateNodesToOneNode(Collection<StateNode> endNodes, StateNode newNode) {
+		this.aggregateNodesToOtherNodes(endNodes, Lists.newArrayList(newNode));
 		return newNode;
 	}
 	
-	public Collection<StateNode> aggregateNodestoOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
-		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
+	public Collection<StateNode> aggregateNodesToOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
+		Collection<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
 		// Add new edges to newNode instead of Aggr Node 
 		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.createNewEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node)));
 		nodesToAggr.removeAll(startNodes);
@@ -79,7 +80,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 	
 	private void removeNodesWithAllEdges(Collection<StateNode> nodesToRemove) {
-		nodesToRemove.forEach(node -> removeNodeWithAllEdges(node));
+		nodesToRemove.forEach(this::removeNodeWithAllEdges);
 	}
 	
 	private void removeNodeWithAllEdges(StateNode node) {
@@ -88,7 +89,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 	
 	private void removeAllEdgesHavingNode(StateNode node) {
-		List<TransitionEdge> filteredEdges = edges.parallelStream().filter(e -> node.equals(e.to()) || node.equals(e.from())).collect(Collectors.toList());
+		Collection<TransitionEdge> filteredEdges = edges.parallelStream().filter(e -> node.equals(e.to()) || node.equals(e.from())).collect(Collectors.toList());
 		edges.removeAll(filteredEdges);
 	}
 
@@ -104,6 +105,9 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 	}
 
 	public Boolean addNode(StateNode node) {
+		if (node.isInitialState()) {
+			this.startNode = node;
+		}
 		return nodes.parallelStream().anyMatch(n -> n.getName().equals(node.getName())) ? false : nodes.add(node);
 	}
 
@@ -122,20 +126,28 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode>, j
 		return graphSB.toString();
 	}
 
-	public Set<StateNode> getNodes() {
+	public Collection<StateNode> getNodes() {
 		return nodes;
 	}
 
-	public List<TransitionEdge> getEdges() {
+	public StateNode getStartNode() {
+		return startNode;
+	}
+
+	public Collection<TransitionEdge> getEdges() {
 		return edges;
 	}
 
 	public TransitionEdge getInitialTransition() {
-		return edges.get(0);
+		throw new UnsupportedOperationException("There is no single initial transition. Use getInitialTransitions()");
+	}
+	
+	public Collection<TransitionEdge> getInitialTransitions() {
+		return initialEdges;
 	}
 
 	public Collection<StateNode> getAcceptingStates() {
-		return nodes.parallelStream().filter(node -> node.getAccepting()).collect(Collectors.toList());
+		return nodes.parallelStream().filter(StateNode::getAccepting).collect(Collectors.toList());
 	}
 
 	public Collection<TransitionEdge> getAllTransitions() {

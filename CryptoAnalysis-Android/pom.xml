@@ -5,28 +5,53 @@
 
 	<artifactId>CryptoAnalysis-Android</artifactId>
 
+	<name>CryptoAnalysis-Android</name>
+	<description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler</description>
+	<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License - v2.0</name>
+			<url>https://www.eclipse.org/legal/epl-2.0/</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>CogniCrypt</id>
+			<name>CogniCrypt</name>
+			<email>cognicrypt@eim.upb.de</email>
+		</developer>
+	</developers>
+	
+	<scm>
+		<connection>scm:git:git@github.com:CROSSINGTUD/CryptoAnalysis.git</connection>
+		<developerConnection>scm:git:ssh://github.com:CROSSINGTUD/CryptoAnalysis.git</developerConnection>
+		<url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+	</scm>
+
 	<parent>
 		<groupId>de.fraunhofer.iem</groupId>
 		<artifactId>CryptoAnalysis-Parent</artifactId>
-		<version>${revision}</version>
+		<version>3.0.3</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flowDroidVersion>2.7.1</flowDroidVersion>
+		<flowDroidVersion>2.13.0</flowDroidVersion>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.13.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
@@ -41,7 +66,7 @@
 					<archive>
 						<manifest>
 							<mainClass>
-								de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis
+								de.fraunhofer.iem.crypto.HeadlessAndroidScanner
 							</mainClass>
 						</manifest>
 					</archive>
@@ -54,65 +79,44 @@
 					<outputDirectory>build</outputDirectory>
 				</configuration>
 			</plugin>
-
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${versions.maven-jar-plugin}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
-
 
 	<dependencies>
 		<dependency>
-			<groupId>de.fraunhofer.iem</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>CryptoAnalysis</artifactId>
-			<version>${revision}</version>
 		</dependency>
 		<dependency>
-			<groupId>de.tud.sse</groupId>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
 			<artifactId>soot-infoflow</artifactId>
 			<version>${flowDroidVersion}</version>
 		</dependency>
 		<dependency>
-			<groupId>de.tud.sse</groupId>
-			<artifactId>soot-infoflow-android</artifactId>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-summaries</artifactId>
 			<version>${flowDroidVersion}</version>
 		</dependency>
 		<dependency>
-			<groupId>de.tud.sse</groupId>
-			<artifactId>soot-infoflow-cmd</artifactId>
+			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+			<artifactId>soot-infoflow-android</artifactId>
 			<version>${flowDroidVersion}</version>
 		</dependency>
 	</dependencies>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>soot-snapshot</id>
-			<name>Soot snapshot repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<layout>default</layout>
-		</snapshotRepository>
-		<repository>
-			<uniqueVersion>true</uniqueVersion>
-			<id>soot-release</id>
-			<name>Soot release repository</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-			<layout>default</layout>
-		</repository>
-	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>soot-snapshot</id>
-			<name>soot snapshots</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-snapshot/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-
-		<repository>
-			<id>soot-release</id>
-			<name>soot release</name>
-			<url>https://soot-build.cs.uni-paderborn.de/nexus/repository/soot-release/</url>
-		</repository>
-	</repositories>
-
 </project>

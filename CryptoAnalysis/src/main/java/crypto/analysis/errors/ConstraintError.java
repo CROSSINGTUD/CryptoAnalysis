@@ -1,54 +1,38 @@
 package crypto.analysis.errors;
 
-import java.util.List;
-import java.util.Set;
-
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
+import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
-
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLComparisonConstraint.CompOp;
 import crypto.rules.CrySLConstraint;
-import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.CrySLSplitter;
 import crypto.rules.CrySLValueConstraint;
-import soot.Value;
-import soot.jimple.AssignStmt;
-import soot.jimple.Constant;
-import soot.jimple.Stmt;
-import soot.jimple.internal.AbstractInvokeExpr;
-import sync.pds.solver.nodes.Node;
+import crypto.rules.ISLConstraint;
 
-public class ConstraintError extends ErrorWithObjectAllocation{
+import java.util.Arrays;
+import java.util.Collection;
 
-	private ISLConstraint brokenConstraint;
-	private CallSiteWithExtractedValue callSiteWithParamIndex;
+public class ConstraintError extends AbstractError {
 
-	public ConstraintError(CallSiteWithExtractedValue cs,  CrySLRule rule, IAnalysisSeed objectLocation, ISLConstraint con) {
-		super(cs.getCallSite().stmt(), rule, objectLocation);
+	private final CallSiteWithExtractedValue callSiteWithParamIndex;
+	private final ISLConstraint violatedConstraint;
+
+	public ConstraintError(IAnalysisSeed seed, CallSiteWithExtractedValue cs, CrySLRule rule, ISLConstraint constraint) {
+		super(seed, cs.getCallSite().stmt(), rule);
+
 		this.callSiteWithParamIndex = cs;
-		this.brokenConstraint = con;
+		this.violatedConstraint = constraint;
 	}
 	
-	public ISLConstraint getBrokenConstraint() {
-		return brokenConstraint;
+	public ISLConstraint getViolatedConstraint() {
+		return violatedConstraint;
 	}
-
-	public void accept(ErrorVisitor visitor){
-		visitor.visit(this);
-	}
-	
-	@Override
-	public Set<Node<Statement, Val>> getDataFlowPath() {
-		return callSiteWithParamIndex.getVal().getDataFlowPath();
-	}
-
 
 	public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
 		return callSiteWithParamIndex;
@@ -56,45 +40,30 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 
 	@Override
 	public String toErrorMarkerString() {
-		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(brokenConstraint);
+		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(violatedConstraint);
 	}
-	
-	
 
-	private String evaluateBrokenConstraint(final ISLConstraint brokenConstraint) {
+	private String evaluateBrokenConstraint(final ISLConstraint constraint) {
 		StringBuilder msg = new StringBuilder();
-		if (brokenConstraint instanceof CrySLPredicate) {
-
-			CrySLPredicate brokenPred = (CrySLPredicate) brokenConstraint;
-
-			switch (brokenPred.getPredName()) {
-				case "neverTypeOf":
-					msg.append(" should never be of type ");
-					msg.append(brokenPred.getParameters().get(1).getName());
-					msg.append(".");
-					break;
-				case "notHardCoded":
-					msg.append(" should never be hardcoded.");
-					break;
-			}
-		} else if (brokenConstraint instanceof CrySLValueConstraint) {
-			return evaluateValueConstraint((CrySLValueConstraint) brokenConstraint);
-		} else if (brokenConstraint instanceof CrySLArithmeticConstraint) {
-			final CrySLArithmeticConstraint brokenArthConstraint = (CrySLArithmeticConstraint) brokenConstraint;
+		if (constraint instanceof CrySLValueConstraint) {
+			return evaluateValueConstraint((CrySLValueConstraint) constraint);
+		} else if (constraint instanceof CrySLArithmeticConstraint) {
+			final CrySLArithmeticConstraint brokenArthConstraint = (CrySLArithmeticConstraint) constraint;
 			msg.append(brokenArthConstraint.getLeft());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getOperator());
 			msg.append(" ");
 			msg.append(brokenArthConstraint.getRight());
-		} else if (brokenConstraint instanceof CrySLComparisonConstraint) {
-			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) brokenConstraint;
-			msg.append("Variable ");
+		} else if (constraint instanceof CrySLComparisonConstraint) {
+			final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) constraint;
+			msg.append(" Variable ");
 			msg.append(brokenCompCons.getLeft().getLeft().getName());
-			msg.append("must be ");
+			msg.append(" must be ");
 			msg.append(evaluateCompOp(brokenCompCons.getOperator()));
+			msg.append(" ");
 			msg.append(brokenCompCons.getRight().getLeft().getName());
-		} else if (brokenConstraint instanceof CrySLConstraint) {
-			final CrySLConstraint crySLConstraint = (CrySLConstraint) brokenConstraint;
+		} else if (constraint instanceof CrySLConstraint) {
+			final CrySLConstraint crySLConstraint = (CrySLConstraint) constraint;
 			final ISLConstraint leftSide = crySLConstraint.getLeft();
 			final ISLConstraint rightSide = crySLConstraint.getRight();
 			switch (crySLConstraint.getOperator()) {
@@ -122,16 +91,19 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	private String evaluateCompOp(CompOp operator) {
 		switch (operator) {
 			case ge:
-				return " at least ";
+				return "at least";
 			case g:
-				return " greater than ";
+				return "greater than";
 			case l:
-				return " lesser than ";
+				return "lesser than";
 			case le:
-				return " at most ";
-			default:
+				return "at most";
+			case eq:
 				return "equal to";
+			case neq:
+				return "not equal to";
 		}
+		return "";
 	}
 
 	private String evaluateValueConstraint(final CrySLValueConstraint brokenConstraint) {
@@ -139,23 +111,27 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 		msg.append(" should be any of ");
 		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Stmt stmt = callSiteWithParamIndex.getVal().stmt().getUnit().get();
+			Statement stmt = callSiteWithParamIndex.getVal().stmt();
 			String[] splitValues = new String[] { "" };
-			if (stmt instanceof AssignStmt) {
-				Value rightSide = ((AssignStmt) stmt).getRightOp();
-				if (rightSide instanceof Constant) {
-					splitValues = filterQuotes(rightSide.toString()).split(splitter.getSplitter());
-				} else if (rightSide instanceof AbstractInvokeExpr) {
-					List<Value> args = ((AbstractInvokeExpr) rightSide).getArgs();
-					for (Value arg : args) {
-						if (arg.getType().toQuotedString().equals(brokenConstraint.getVar().getJavaType())) {
-							splitValues = filterQuotes(arg.toString()).split(splitter.getSplitter());
+			if (stmt.isAssign()) {
+				Val rightSide = stmt.getRightOp();
+				if (rightSide.isConstant()) {
+					splitValues = filterQuotes(rightSide.getVariableName()).split(splitter.getSplitter());
+				} else if (stmt.containsInvokeExpr()) {
+					Collection<Val> parameters = stmt.getInvokeExpr().getArgs();
+
+					for (Val parameter : parameters) {
+						Type parameterType = parameter.getType();
+						String javaType = brokenConstraint.getVar().getJavaType();
+
+						if (parameterType.toString().equals(javaType)) {
+							splitValues = filterQuotes(parameter.getVariableName()).split(splitter.getSplitter());
 							break;
 						}
 					}
 				}
 			} else {
-				splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
+				//splitValues = filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
 			}
 			if (splitValues.length >= splitter.getIndex()) {
 				for (int i = 0; i < splitter.getIndex(); i++) {
@@ -179,35 +155,40 @@ public class ConstraintError extends ErrorWithObjectAllocation{
 	public static String filterQuotes(final String dirty) {
 		return CharMatcher.anyOf("\"").removeFrom(dirty);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int paramIndex = callSiteWithParamIndex.getCallSite().getIndex();
-		final Value parameterValue = callSiteWithParamIndex.getVal().getValue();
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + paramIndex;
-		result = prime * result + ((parameterValue == null) ? 0 : parameterValue.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				callSiteWithParamIndex,
+				violatedConstraint
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ConstraintError other = (ConstraintError) obj;
-		if (callSiteWithParamIndex.getCallSite().getIndex() != other.callSiteWithParamIndex.getCallSite().getIndex()) {
+		if (callSiteWithParamIndex == null) {
+			if (other.getCallSiteWithExtractedValue() != null) return false;
+		} else if (!callSiteWithParamIndex.equals(other.getCallSiteWithExtractedValue())) {
 			return false;
-		} 
-		if (callSiteWithParamIndex.getVal().getValue() == null) {
-			if (other.callSiteWithParamIndex.getVal().getValue() != null)
-				return false;
-		} else if (!callSiteWithParamIndex.getVal().getValue().equals(other.callSiteWithParamIndex.getVal().getValue()))
+		}
+
+		if (violatedConstraint == null) {
+			if (other.getViolatedConstraint() != null) return false;
+		} else if (!violatedConstraint.equals(other.getViolatedConstraint())) {
 			return false;
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ConstraintError: " + toErrorMarkerString();
 	}
 }

@@ -1,134 +1,133 @@
 package crypto.analysis.errors;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.InvokeExpr;
+import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-import soot.SootMethod;
-import soot.jimple.InvokeExpr;
-import soot.jimple.Stmt;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 
-/** This class defines-IncompleteOperationError:
+/** <p>This class defines-IncompleteOperationError:</p>
  *
- *Found when the usage of an object may be incomplete
+ * <p>Found when the usage of an object may be incomplete. If there are
+ * multiple paths, and at least one path introduces an incomplete operation,
+ * the analysis indicates that there is a potential path with missing calls.</p>
  *
- *For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
- *This error heavily depends on the computed call graph (CHA by default)
- *
- * */
+ * <p>For example a Cipher object may be initialized but never been used for encryption or decryption, this may render the code dead.
+ * This error heavily depends on the computed call graph (CHA by default).</p>
+ */
+public class IncompleteOperationError extends AbstractError {
 
-public class IncompleteOperationError extends ErrorWithObjectAllocation{
+	private final Collection<CrySLMethod> expectedMethodCalls;
+	private final boolean multiplePaths;
 
-	private Val errorVariable;
-	private Collection<SootMethod> expectedMethodCalls;
-	private Set<String> expectedMethodCallsSet = Sets.newHashSet();
-
-	public IncompleteOperationError(Statement errorLocation,
-			Val errorVariable, CrySLRule rule, IAnalysisSeed objectLocation, Collection<SootMethod> expectedMethodsToBeCalled) {
-		super(errorLocation, rule, objectLocation);
-		this.errorVariable = errorVariable;
-		this.expectedMethodCalls = expectedMethodsToBeCalled;	
-		
-		for (SootMethod method : expectedMethodCalls) {
-			this.expectedMethodCallsSet.add(method.getSignature());
-		}	
+	/**
+	 * Create an IncompleteOperationError, if there is only one dataflow path, where the
+	 * incomplete operation occurs.
+	 *
+	 * @param seed the seed for the incomplete operation
+	 * @param errorStmt the statement of the last usage of the seed
+	 * @param rule the CrySL rule for the seed
+	 * @param expectedMethodsToBeCalled the methods that are expected to be called
+	 */
+	public IncompleteOperationError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, Collection<CrySLMethod> expectedMethodsToBeCalled) {
+		this(seed, errorStmt, rule, expectedMethodsToBeCalled, false);
 	}
 
-	public Val getErrorVariable() {
-		return errorVariable;
+	/**
+	 * Create an IncompleteOperationError, if there is at least one dataflow path, where an
+	 * incomplete operation occurs.
+	 *
+	 * @param seed the seed for the incomplete operation
+	 * @param errorStmt the statement of the last usage of the seed
+	 * @param rule the CrySL rule for the seed
+	 * @param expectedMethodsToBeCalled the methods that are expected to be called
+	 * @param multiplePaths set to true, if there are multiple paths (default: false)
+	 */
+	public IncompleteOperationError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, Collection<CrySLMethod> expectedMethodsToBeCalled, boolean multiplePaths) {
+		super(seed, errorStmt, rule);
+
+		this.expectedMethodCalls = expectedMethodsToBeCalled;
+		this.multiplePaths = multiplePaths;
 	}
-	
-	public Collection<SootMethod> getExpectedMethodCalls() {
+
+	public Collection<CrySLMethod> getExpectedMethodCalls() {
 		return expectedMethodCalls;
 	}
-	
-	public void accept(ErrorVisitor visitor){
-		visitor.visit(this);
+
+	public boolean isMultiplePaths() {
+		return multiplePaths;
 	}
 
 	@Override
 	public String toErrorMarkerString() {
-		Collection<SootMethod> expectedCalls = getExpectedMethodCalls();
-		final StringBuilder msg = new StringBuilder();
+		if (multiplePaths) {
+			return getErrorMarkerStringForMultipleDataflowPaths();
+		} else {
+			return getErrorMarkerStringForSingleDataflowPath();
+		}
+	}
+
+	private String getErrorMarkerStringForSingleDataflowPath() {
+		StringBuilder msg = new StringBuilder();
 		msg.append("Operation");
 		msg.append(getObjectType());
-		msg.append(" object not completed. Expected call to ");
-		final Set<String> altMethods = new HashSet<>();
-		for (final SootMethod expectedCall : expectedCalls) {
-			if (stmtInvokesExpectedCallName(expectedCall.getName())){
-				altMethods.add(expectedCall.getSignature().replace("<", "").replace(">", ""));
-			} else {
-				altMethods.add(expectedCall.getName().replace("<", "").replace(">", ""));
-			}
-		}
-		msg.append(Joiner.on(", ").join(altMethods));
+		msg.append(" not completed. Expected call to one of the methods ");
+
+		String altMethods = formatMethodNames(expectedMethodCalls);
+		msg.append(altMethods);
 		return msg.toString();
 	}
 
-	/**
-	 * This method checks whether the statement at which the error is located already calls a method with the same name.
-	 * This occurs when a call to the method with the correct name, but wrong signature is invoked.
-	 */
-	private boolean stmtInvokesExpectedCallName(String expectedCallName){
-		Statement errorLocation = getErrorLocation();
-		if (errorLocation.isCallsite()){
-			Optional<Stmt> stmtOptional = errorLocation.getUnit();
-			if (stmtOptional.isPresent()){
-				Stmt stmt = stmtOptional.get();
-				if (stmt.containsInvokeExpr()){
-					InvokeExpr call = stmt.getInvokeExpr();
-					SootMethod calledMethod = call.getMethod();
-					if (calledMethod.getName().equals(expectedCallName)){
-						return true;
-					}
-				}
-			}
+	private String getErrorMarkerStringForMultipleDataflowPaths() {
+		Statement statement = getErrorStatement();
+		if (!statement.containsInvokeExpr()) {
+			return "Unable to describe error";
 		}
-		return false;
+		StringBuilder msg = new StringBuilder();
+		msg.append("Call to ");
+
+		InvokeExpr invokeExpr = statement.getInvokeExpr();
+		msg.append(invokeExpr.getMethod().getName());
+		msg.append(getObjectType());
+		msg.append(" is on a dataflow path with an incomplete operation. Potential missing call to one of the methods ");
+
+		String altMethods = formatMethodNames(expectedMethodCalls);
+		msg.append(altMethods);
+		return msg.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((expectedMethodCallsSet == null) ? 0 : expectedMethodCallsSet.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				expectedMethodCalls,
+				multiplePaths
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		IncompleteOperationError other = (IncompleteOperationError) obj;
 		if (expectedMethodCalls == null) {
-			if (other.expectedMethodCalls != null)
-				return false;
-		} else if (expectedMethodCallsSet != other.expectedMethodCallsSet)
+			if (other.getExpectedMethodCalls() != null) return false;
+		} else if (expectedMethodCalls != other.getExpectedMethodCalls()) {
 			return false;
-		
-		return true;
-	}
-	
-	private int expectedMethodCallsHashCode(Collection<SootMethod> expectedMethodCalls) {		
-		Set<String> expectedMethodCallsSet = Sets.newHashSet();
-		for (SootMethod method : expectedMethodCalls) {
-			expectedMethodCallsSet.add(method.getSignature());
 		}
-		return expectedMethodCallsSet.hashCode();
+
+        return multiplePaths == other.isMultiplePaths();
+    }
+
+	@Override
+	public String toString() {
+		return "IncompleteOperationError: " + toErrorMarkerString();
 	}
-	
-	
+
 }

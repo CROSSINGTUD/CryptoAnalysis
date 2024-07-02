@@ -1,83 +1,120 @@
 package crypto.analysis.errors;
 
-import boomerang.jimple.Statement;
+import boomerang.scene.Statement;
+import crypto.analysis.HiddenPredicate;
+import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.reporting.SARIFReporter;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 /**
- * Creates {@link RequiredPredicateError} for all Required Predicate error generates RequiredPredicateError
- *
- *
- * contradictedPredicate a {@link CrySLPredicate} holds the contradicted required predicate or parameter
- * extractedValues a {@link CallSiteWithExtractedValue} hold the location value of the missing required predicate or parameter
+ * <p>Creates {@link RequiredPredicateError} for all Required Predicate error generates RequiredPredicateError</p>
  */
+public class RequiredPredicateError extends AbstractError {
 
-public class RequiredPredicateError extends AbstractError{
+	private final Collection<CrySLPredicate> contradictedPredicate;
+	private final CallSiteWithExtractedValue extractedValues;
+	private final Collection<HiddenPredicate> hiddenPredicates;
 
-	private CrySLPredicate contradictedPredicate;
-	private CallSiteWithExtractedValue extractedValues;
+	public RequiredPredicateError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CallSiteWithExtractedValue cs, Collection<CrySLPredicate> contradictedPredicates) {
+		super(seed, errorStmt, rule);
 
-	public RequiredPredicateError(CrySLPredicate contradictedPredicate, Statement location, CrySLRule rule, CallSiteWithExtractedValue multimap) {
-		super(location, rule);
-		this.contradictedPredicate = contradictedPredicate;
-		this.extractedValues = multimap;
+		this.contradictedPredicate = contradictedPredicates;
+		this.extractedValues = cs;
+		this.hiddenPredicates = new HashSet<>();
 	}
 
-	public CrySLPredicate getContradictedPredicate() {
+	public void addHiddenPredicates(Collection<HiddenPredicate> hiddenPredicates) {
+		this.hiddenPredicates.addAll(hiddenPredicates);
+	}
+
+	public void mapPrecedingErrors() {
+		for (HiddenPredicate hiddenPredicate : hiddenPredicates) {
+			Collection<AbstractError> precedingErrors = hiddenPredicate.getPrecedingErrors();
+			this.addCausingError(precedingErrors);
+			precedingErrors.forEach(e -> e.addSubsequentError(this));
+		}
+	}
+
+	/**
+	 * This method returns a list of contradicting predicates
+	 * @return list of contradicting predicates
+	 */
+	public Collection<CrySLPredicate> getContradictedPredicates() {
 		return contradictedPredicate;
 	}
 	
 	public CallSiteWithExtractedValue getExtractedValues() {
 		return extractedValues;
 	}
-	
-	public void accept(ErrorVisitor visitor){
-		visitor.visit(this);
-	}
 
+	public Collection<HiddenPredicate> getHiddenPredicates() {
+		return hiddenPredicates;
+	}
 
 	@Override
 	public String toErrorMarkerString() {
-		String msg = extractedValues.toString();
-		msg += " was not properly generated as ";
-		String predicateName = getContradictedPredicate().getPredName();
+		StringBuilder msg = new StringBuilder(extractedValues.toString());
+		msg.append(" was not properly generated as ");
+		String predicateName = getContradictedPredicates().stream().map(CrySLPredicate::getPredName).collect(Collectors.joining(" OR "));
 		String[] parts = predicateName.split("(?=[A-Z])");
-		msg += parts[0];
-		for(int i=1; i<parts.length; i++)
-			msg +=  parts[i];
-
-		if (predicateName.equals("preparedIV") && extractedValues.toString().equals("Third parameter"))
-		{
-			msg += " [ with CBC, It's required to use IVParameterSpec]";
+		msg.append(parts[0]);
+		for (int i = 1; i < parts.length; i++) {
+			msg.append(parts[i]);
 		}
-		return msg;
+
+		if (predicateName.equals("preparedIV") && extractedValues.toString().equals("Third parameter")) {
+			msg.append(" [ with CBC, It's required to use IVParameterSpec]");
+		}
+		return msg.toString();
 	}
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((contradictedPredicate == null) ? 0 : contradictedPredicate.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				contradictedPredicate,
+				extractedValues,
+				hiddenPredicates
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		RequiredPredicateError other = (RequiredPredicateError) obj;
 		if (contradictedPredicate == null) {
-			if (other.contradictedPredicate != null)
-				return false;
-		} else if (!contradictedPredicate.equals(other.contradictedPredicate))
+			if (other.getContradictedPredicates() != null) return false;
+		} else if (!contradictedPredicate.equals(other.getContradictedPredicates())) {
 			return false;
+		}
+
+		if (extractedValues == null) {
+			if (other.getExtractedValues() != null) return false;
+		} else if (!extractedValues.equals(other.getExtractedValues())) {
+			return false;
+		}
+
+		if (hiddenPredicates == null) {
+			if (other.getHiddenPredicates() != null) return false;
+		} else if (!hiddenPredicates.equals(other.getHiddenPredicates())) {
+			return false;
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "RequiredPredicateError: " + toErrorMarkerString();
 	}
 
 }

@@ -1,30 +1,25 @@
 package crypto.rules;
 
-public class StateNode implements java.io.Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class StateNode  {
 
 	private final String name;
 
-	private Boolean init = false;
-	private Boolean accepting = false;
+	private final Boolean init;
+	private Boolean accepting;
 	private int hopsToAccepting = Integer.MAX_VALUE;
 
-	public StateNode(String _name) {
-		name = _name;
+	public StateNode(String name) {
+		this(name, false, false);
 	}
 	
-	public StateNode(String _name, Boolean _init) {
-		this(_name);
-		init = _init;
+	public StateNode(String name, Boolean init) {
+		this(name, init, false);
 	}
 
-	public StateNode(String _name, Boolean _init, Boolean _accepting) {
-		this(_name, _init);
-		accepting = _accepting;
+	public StateNode(String name, Boolean init, Boolean accepting) {
+		this.name = name;
+		this.init = init;
+		this.accepting = accepting;
 	}
 
 	public String getName() {
@@ -39,8 +34,12 @@ public class StateNode implements java.io.Serializable {
 		return accepting;
 	}
 	
-	public void setAccepting(Boolean _accepting) {
-		accepting = _accepting;
+	public void makeAccepting() {
+		this.accepting = true;
+	}
+
+	public void setAccepting(Boolean accepting) {
+		this.accepting = accepting;
 	}
 	
 	public String toString() {

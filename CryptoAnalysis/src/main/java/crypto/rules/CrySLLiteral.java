@@ -1,19 +1,14 @@
 package crypto.rules;
 
-import java.io.Serializable;
+import boomerang.scene.Statement;
 
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+public abstract class CrySLLiteral implements ISLConstraint {
 
-public abstract class CrySLLiteral implements ISLConstraint, Serializable {
-
-	private static final long serialVersionUID = 1L;
 	private Statement location;
 
-	public void setLocation(Statement location) {
-		this.location = location;
+	protected CrySLLiteral() {
 	}
-	
+
 	public Statement getLocation() {
 		return location;
 	}

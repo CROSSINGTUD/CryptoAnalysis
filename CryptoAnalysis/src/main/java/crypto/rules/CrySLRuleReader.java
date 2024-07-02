@@ -2,7 +2,6 @@ package crypto.rules;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -20,19 +19,17 @@ import crypto.exceptions.CryptoAnalysisException;
 
 public class CrySLRuleReader {
 	
-	private static CrySLModelReader csmr;
-	
-	private static CrySLModelReader getReader(){
-		if (csmr == null)
-		{
-			try {
-				csmr = new CrySLModelReader();
-			}
-			catch (MalformedURLException e){
-				e.printStackTrace();
-			}
+	private final CrySLModelReader reader;
+
+	public CrySLRuleReader() {
+		reader = new CrySLModelReader();
+	}
+
+	public CrySLRuleReader(CrySLModelReader reader) {
+		if (reader == null){
+			throw new IllegalArgumentException("CrySLModelReader must not be null");
 		}
-		return csmr;
+		this.reader = reader;
 	}
 
 	/**
@@ -42,8 +39,8 @@ public class CrySLRuleReader {
 	 * @return the {@link CrySLRule} object
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
-	public static CrySLRule readFromSourceFile(File file) throws CryptoAnalysisException {
-		return getReader().readRule(file);
+	public CrySLRule readFromSourceFile(File file) throws CryptoAnalysisException {
+		return reader.readRule(file);
 	}
 
 	/**
@@ -53,7 +50,7 @@ public class CrySLRuleReader {
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
-	public static List<CrySLRule> readFromDirectory(File directory) throws CryptoAnalysisException {
+	public Collection<CrySLRule> readFromDirectory(File directory) throws CryptoAnalysisException {
 		return readFromDirectory(directory, false);
 	}
 
@@ -67,44 +64,31 @@ public class CrySLRuleReader {
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
 	 * @throws CryptoAnalysisException Throws when a file could not get processed to a {@link CrySLRule}
 	 */
-	public static List<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
-		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
-
+	public Collection<CrySLRule> readFromDirectory(File directory, boolean recursive) throws CryptoAnalysisException {
 		if (!directory.exists() || !directory.isDirectory())
 			throw new CryptoAnalysisException("The specified path is not a directory " + directory.getAbsolutePath());
 
-		List<File> cryptSLFiles = new ArrayList<>();
-		findCryptSLFiles(directory, recursive, cryptSLFiles);
+		List<File> crySLFiles = new ArrayList<>();
+		findCrySLFiles(directory, recursive, crySLFiles);
 
-		CrySLModelReader reader = getReader();
-		for (File file : cryptSLFiles) {
-			CrySLRule rule = reader.readRule(file);
-
-			if(rule != null) {
-				if(!ruleMap.containsKey(rule.getClassName())) {
-					ruleMap.put(rule.getClassName(), rule);
-				}
-			}
-		}
-		
-		return new ArrayList<>(ruleMap.values());
+		return reader.readRulesFromFiles(crySLFiles);
 	}
 
 	/**
 	 * Returns a {@link List} of {@link CrySLRule} objects read from a Zip {@link File}.
 	 * @param file Zip that contains the CrySL files
 	 * @return the {@link List} with {@link CrySLRule} objects. If no rules are found it returns an empty list.
-	 * @throws CryptoAnalysisException 
+	 * @throws CryptoAnalysisException If the directory is not a zip file
 	 */
-	public static List<CrySLRule> readFromZipFile(File file) throws CryptoAnalysisException {
+	public List<CrySLRule> readFromZipFile(File file) throws CryptoAnalysisException {
 		if (!file.exists() || !file.isFile() || !file.getName().endsWith(".zip"))
 			throw new CryptoAnalysisException("The specified path is not a ZIP file " + file.getAbsolutePath());
 
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		try {
 			ZipFile zip = new ZipFile(file);
-			for (Enumeration e = zip.entries(); e.hasMoreElements(); ) {
-				ZipEntry entry = (ZipEntry) e.nextElement();
+			for (Enumeration<? extends ZipEntry> e = zip.entries(); e.hasMoreElements(); ) {
+				ZipEntry entry = e.nextElement();
 				if (!entry.isDirectory()) {
 					CrySLRule rule = getCrySLRuleFromZipEntry(entry, zip, file);
 					if(rule != null) {
@@ -122,26 +106,24 @@ public class CrySLRuleReader {
 		return new ArrayList<>(ruleMap.values());
 	}	
 
-	private static void findCryptSLFiles(File directory, boolean recursive, Collection<File> resultCollection) {
-		for (File file: directory.listFiles())
-		{
+	private static void findCrySLFiles(File directory, boolean recursive, Collection<File> resultCollection) {
+		for (File file: directory.listFiles()) {
 			if (file.isFile() && file.getName().endsWith(CrySLModelReader.cryslFileEnding))
 				resultCollection.add(file);
 
 			if (recursive && file.isDirectory())
-				findCryptSLFiles(file, recursive, resultCollection);
+				findCrySLFiles(file, recursive, resultCollection);
 		}
 	}
 
-	private static CrySLRule getCrySLRuleFromZipEntry(ZipEntry entry, ZipFile zip, File zipFile) throws CryptoAnalysisException
-	{
+	private CrySLRule getCrySLRuleFromZipEntry(ZipEntry entry, ZipFile zip, File zipFile) throws CryptoAnalysisException {
 		if (entry.isDirectory() || !entry.getName().endsWith(CrySLModelReader.cryslFileEnding))
 			throw new CryptoAnalysisException("ZIP entry is a directory or not a CrySL file");
 		
 		CrySLRule rule = null;
 		try {
 			String name = createUniqueZipEntryName(zipFile, entry);
-			rule = getReader().readRule(zip.getInputStream(entry), name);
+			rule = new CrySLModelReader().readRule(zip.getInputStream(entry), name);
 		}
 		catch (IllegalArgumentException | IOException | NoSuchAlgorithmException ex) {
 			ex.printStackTrace();

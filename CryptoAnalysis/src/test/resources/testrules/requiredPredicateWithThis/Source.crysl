@@ -1,0 +1,24 @@
+SPEC tests.error.predicate.requiredpredicateswiththis.Source
+
+OBJECTS
+    boolean constraintError;
+    tests.error.predicate.requiredpredicateswiththis.SimpleTarget target1;
+    tests.error.predicate.requiredpredicateswiththis.TargetWithAlternatives target2;
+
+EVENTS
+    Con: Source();
+    causeError: causeConstraintError(constraintError);
+    passPred1: target1 = generateTarget();
+    passPred2: target2 = generateTargetWithAlternatives();
+
+    passPred := passPred1 | passPred2;
+
+ORDER
+    Con, causeError, passPred
+
+CONSTRAINTS
+    constraintError in {false};
+
+ENSURES
+    generatedTarget[target1];
+    generatedTargetWithAlternatives[target2];

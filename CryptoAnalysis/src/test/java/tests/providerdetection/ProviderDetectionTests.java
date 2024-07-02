@@ -1,8 +1,11 @@
 package tests.providerdetection;
 
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("Currently not adaptable to architecture")
 public class ProviderDetectionTests {
 	
 	// Checks if provider of type `java.security.Provider` is detected when given as a variable

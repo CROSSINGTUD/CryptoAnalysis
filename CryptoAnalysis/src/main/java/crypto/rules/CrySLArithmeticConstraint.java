@@ -1,13 +1,9 @@
 package crypto.rules;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import crypto.interfaces.ICrySLPredicateParameter;
-
-public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class CrySLArithmeticConstraint extends CrySLLiteral {
 
 	public enum ArithOp { p, n, m}
 	/* p = +
@@ -15,9 +11,9 @@ public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.S
 	 * m = % 
 	 */
 	
-	private ArithOp operator;
-	private ICrySLPredicateParameter  left;
-	private ICrySLPredicateParameter  right;
+	private final ArithOp operator;
+	private final ICrySLPredicateParameter  left;
+	private final ICrySLPredicateParameter  right;
 	
 	public CrySLArithmeticConstraint(ICrySLPredicateParameter l, ICrySLPredicateParameter  r, ArithOp op) {
 		left = l;
@@ -51,8 +47,8 @@ public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.S
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<String>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		String name = left.getName();
 		if(!isIntOrBoolean(name)) {
 			varNames.add(name);
@@ -70,9 +66,8 @@ public class CrySLArithmeticConstraint extends CrySLLiteral implements java.io.S
 			Integer.parseInt(name);
 			return true;
 		} catch(NumberFormatException ex) {
+			return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
 		}
-		
-		return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
 	}
 
 	@Override

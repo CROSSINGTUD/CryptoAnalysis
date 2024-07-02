@@ -1,0 +1,14 @@
+SPEC tests.error.predicate.requiredpredicateswiththis.TargetWithAlternatives
+
+OBJECTS
+    java.lang.String word;
+
+EVENTS
+    Con: TargetWithAlternatives();
+    dN: doNothing(word);
+
+ORDER
+    Con, dN*
+
+REQUIRES
+    generatedTargetWithAlternatives[this] || generatedWord[word];

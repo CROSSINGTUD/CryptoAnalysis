@@ -1,23 +1,17 @@
 package crypto.rules;
 
-import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import boomerang.scene.Statement;
 
-public class CrySLConstraint implements ISLConstraint, Serializable{
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class CrySLConstraint implements ISLConstraint {
 
 	public enum LogOps { and , or , implies , eq}
 	
-	private LogOps operator;
-	private ISLConstraint left;
-	private ISLConstraint right;
+	private final LogOps operator;
+	private final ISLConstraint left;
+	private final ISLConstraint right;
 	private Statement location;
 
 	public CrySLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
@@ -57,8 +51,8 @@ public class CrySLConstraint implements ISLConstraint, Serializable{
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = left.getInvolvedVarNames();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = left.getInvolvedVarNames();
 		varNames.addAll(right.getInvolvedVarNames());
 		return varNames;
 	}
@@ -68,12 +62,7 @@ public class CrySLConstraint implements ISLConstraint, Serializable{
 		return toString();
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		this.location = location;
-	}
-
-	@Override
+    @Override
 	public Statement getLocation() {
 		return location;
 	}

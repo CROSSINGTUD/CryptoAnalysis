@@ -2,41 +2,35 @@ package crypto.rules;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Map.Entry;
+import java.util.Map;
 
-import com.google.common.collect.Sets;
-
-import crypto.interfaces.ISLConstraint;
-import soot.SootMethod;
-
-public class CrySLRule implements java.io.Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class CrySLRule {
 
 	private final String className;
 	
-	private final List<Entry<String, String>> objects;  
+	private final Collection<Map.Entry<String, String>> objects;
 	
-	protected final List<CrySLForbiddenMethod> forbiddenMethods;
+	private final Collection<CrySLForbiddenMethod> forbiddenMethods;
+
+	private final Collection<CrySLMethod> events;
 	
-	protected final StateMachineGraph usagePattern;
+	private final StateMachineGraph usagePattern;
 	
-	protected final List<ISLConstraint> constraints;
+	private final Collection<ISLConstraint> constraints;
 	
-	protected final List<CrySLPredicate> predicates;
+	private final Collection<CrySLPredicate> predicates;
 	
-	public CrySLRule(String _className, List<Entry<String, String>> defObjects, List<CrySLForbiddenMethod> _forbiddenMethods, StateMachineGraph _usagePattern, List<ISLConstraint> _constraints, List<CrySLPredicate> _predicates) {
-		className = _className;
-		objects = defObjects;
-		forbiddenMethods = _forbiddenMethods;
-		usagePattern = _usagePattern;
-		constraints = _constraints;
-		predicates = _predicates;
+	private final Collection<CrySLPredicate> negatedPredicates;
+	
+	public CrySLRule(String className, Collection<Map.Entry<String, String>> objects, Collection<CrySLForbiddenMethod> forbiddenMethods, Collection<CrySLMethod> events, StateMachineGraph usagePattern, Collection<ISLConstraint> constraints, Collection<CrySLPredicate> predicates, Collection<CrySLPredicate> negatedPredicates) {
+		this.className = className;
+		this.objects = objects;
+		this.forbiddenMethods = forbiddenMethods;
+		this.events = events;
+		this.usagePattern = usagePattern;
+		this.constraints = constraints;
+		this.predicates = predicates;
+		this.negatedPredicates = negatedPredicates;
 	}
 	
 	
@@ -48,16 +42,6 @@ public class CrySLRule implements java.io.Serializable {
 		return false;
 	}
 
-
-	public boolean isLeafRule() {
-		for (ISLConstraint con : constraints) {
-			if (con instanceof CrySLPredicate) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	@Override
 	public int hashCode() {
 		return 31 * className.hashCode();
@@ -75,17 +59,24 @@ public class CrySLRule implements java.io.Serializable {
 	/**
 	 * @return the objects
 	 */
-	public List<Entry<String, String>> getObjects() {
+	public Collection<Map.Entry<String, String>> getObjects() {
 		return objects;
 	}
 	
 	/**
 	 * @return the forbiddenMethods
 	 */
-	public List<CrySLForbiddenMethod> getForbiddenMethods() {
+	public Collection<CrySLForbiddenMethod> getForbiddenMethods() {
 		return forbiddenMethods;
 	}
-	
+
+	/**
+	 * @return the events
+	 */
+	public Collection<CrySLMethod> getEvents() {
+		return events;
+	}
+
 	/**
 	 * @return the usagePattern
 	 */
@@ -96,21 +87,29 @@ public class CrySLRule implements java.io.Serializable {
 	/**
 	 * @return the constraints
 	 */
-	public List<ISLConstraint> getConstraints() {
+	public Collection<ISLConstraint> getConstraints() {
 		return constraints;
 	}
 	
 	/**
 	 * @return the predicates
 	 */
-	public List<CrySLPredicate> getPredicates() {
+	public Collection<CrySLPredicate> getPredicates() {
 		return predicates;
 	}
+	
+	/**
+	 * @return the negated predicates
+	 */
+	public Collection<CrySLPredicate> getNegatedPredicates() {
+		return negatedPredicates;
+	}
+	
 	/**
 	 * @return the constraints
 	 */
-	public List<CrySLPredicate> getRequiredPredicates() {
-		List<CrySLPredicate> requires = new LinkedList<CrySLPredicate>();
+	public Collection<CrySLPredicate> getRequiredPredicates() {
+		Collection<CrySLPredicate> requires = new LinkedList<>();
 		for (ISLConstraint con : constraints) {
 			if (con instanceof CrySLPredicate) {
 				requires.add((CrySLPredicate) con);
@@ -118,17 +117,23 @@ public class CrySLRule implements java.io.Serializable {
 		}
 		return requires;
 	}
-	
+
+	@Override
 	public String toString() {
 		StringBuilder outputSB = new StringBuilder();
 		
 		outputSB.append(this.className);
 		
 		outputSB.append("\nforbiddenMethods:");
-		for (CrySLForbiddenMethod forbMethSig : this.forbiddenMethods) {
-			
-			outputSB.append(forbMethSig);
-			outputSB.append(",");
+		for (CrySLForbiddenMethod forMethSig : this.forbiddenMethods) {
+			outputSB.append(forMethSig);
+			outputSB.append(", ");
+		}
+
+		outputSB.append("\nEvents:");
+		for (CrySLMethod method : events) {
+			outputSB.append(method);
+			outputSB.append(", ");
 		}
 		
 		outputSB.append("\nUsage Pattern:");
@@ -137,26 +142,26 @@ public class CrySLRule implements java.io.Serializable {
 		outputSB.append("\nConstraints:");
 		for (ISLConstraint constraint : this.constraints) {
 			outputSB.append(constraint);
-			outputSB.append(",");
+			outputSB.append(", ");
 		}
 
 		if (this.predicates != null) {
 			outputSB.append("\nPredicates:");
 			for (CrySLPredicate predicate : this.predicates) {
 				outputSB.append(predicate);
-				outputSB.append(",");
+				outputSB.append(", ");
+			}
+		}
+		
+		if (this.negatedPredicates != null) {
+			outputSB.append("\nNegated predicates:");
+			for (CrySLPredicate predicate : this.negatedPredicates) {
+				outputSB.append(predicate);
+				outputSB.append(", ");
 			}
 		}
 		
 		return outputSB.toString();
 	}
-	
-	public static Collection<String> toSubSignatures(Collection<SootMethod> methods) {
-		Set<String> subSignatures = Sets.newHashSet();
-		for(SootMethod m : methods){
-			subSignatures.add(m.getName());
-		}
-		return subSignatures;
-	}
-	
+
 }

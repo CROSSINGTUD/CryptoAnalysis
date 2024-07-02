@@ -1,13 +1,13 @@
 package tests.providerdetection;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import boomerang.callgraph.BoomerangResolver;
 import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.preanalysis.BoomerangPretransformer;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
+import boomerang.controlflowgraph.DynamicCFG;
+import boomerang.scene.CallGraph;
+import boomerang.scene.DataFlowScope;
+import boomerang.scene.SootDataFlowScope;
+import boomerang.scene.jimple.BoomerangPretransformer;
+import boomerang.scene.jimple.SootCallGraph;
 import crypto.providerdetection.ProviderDetection;
 import soot.G;
 import soot.PackManager;
@@ -18,11 +18,15 @@ import soot.Transform;
 import soot.Transformer;
 import soot.options.Options;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 public class ProviderDetectionTestingFramework extends ProviderDetection {
-	
-	private static final Ruleset defaultRuleset = Ruleset.JavaCryptographicArchitecture;
+
 	private static final String rootRulesDirectory = System.getProperty("user.dir")+File.separator+"src"+File.separator+"main"+File.separator+"resources";
-	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+defaultRuleset;
+	private static final String defaultRulesDirectory = rootRulesDirectory+File.separator+ "JavaCryptographicArchitecture";
 	private static final String sootClassPath = System.getProperty("user.dir") + File.separator+"target"+File.separator+"test-classes";
 	
 	/**
@@ -43,7 +47,7 @@ public class ProviderDetectionTestingFramework extends ProviderDetection {
 	 * This method is used to setup Soot
 	 */
 	public void setupSoot(String sootClassPath, String mainClass) {
-		G.v().reset();
+		G.reset();
 		Options.v().set_whole_program(true);
 		Options.v().setPhaseOption("cg.cha", "on");
 //		Options.v().setPhaseOption("cg", "all-reachable:true");
@@ -88,10 +92,12 @@ public class ProviderDetectionTestingFramework extends ProviderDetection {
 		return new SceneTransformer() {
 			
 			@Override
-			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+			protected void internalTransform(String phaseName, Map<String, String> options) {
 				BoomerangPretransformer.v().reset();
 				BoomerangPretransformer.v().apply();
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
+				CallGraph callGraph = new SootCallGraph();
+				DataFlowScope dataFlowScope = SootDataFlowScope.make(Scene.v());
+				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(new DynamicCFG(), new BoomerangResolver(callGraph, dataFlowScope));
 				setRulesDirectory(defaultRulesDirectory);
 				doAnalysis(observableDynamicICFG, rootRulesDirectory);
 			}

@@ -1,14 +1,14 @@
 package test.assertions;
 
-import soot.Unit;
+import boomerang.scene.Statement;
 import test.Assertion;
 
 public class ConstraintViolationAssertion implements Assertion {
 	
-	private Unit stmt;
+	private Statement stmt;
 	private boolean satisfied;
 
-	public ConstraintViolationAssertion(Unit stmt) {
+	public ConstraintViolationAssertion(Statement stmt) {
 		this.stmt = stmt;
 	}
 
@@ -27,7 +27,7 @@ public class ConstraintViolationAssertion implements Assertion {
 		return "Expected to report that a constraint is broken at this statement: " + this.stmt;
 	}
 
-	public void reported(Unit callSite) {
+	public void reported(Statement callSite) {
 		satisfied |= callSite.equals(stmt);
 	}
 

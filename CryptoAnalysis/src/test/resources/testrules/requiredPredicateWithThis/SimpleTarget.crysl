@@ -1,0 +1,11 @@
+SPEC tests.error.predicate.requiredpredicateswiththis.SimpleTarget
+
+EVENTS
+    Con: SimpleTarget();
+    dN: doNothing();
+
+ORDER
+    Con, dN*
+
+REQUIRES
+    generatedTarget[this];

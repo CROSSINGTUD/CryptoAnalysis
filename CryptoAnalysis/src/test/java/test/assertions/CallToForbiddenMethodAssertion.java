@@ -1,14 +1,14 @@
 package test.assertions;
 
-import soot.Unit;
+import boomerang.scene.Statement;
 import test.Assertion;
 
 public class CallToForbiddenMethodAssertion implements Assertion {
 
-	private Unit stmt;
+	private Statement stmt;
 	private boolean satisfied;
 
-	public CallToForbiddenMethodAssertion(Unit stmt) {
+	public CallToForbiddenMethodAssertion(Statement stmt) {
 		this.stmt = stmt;
 	}
 
@@ -27,7 +27,7 @@ public class CallToForbiddenMethodAssertion implements Assertion {
 		return "Expected to report a call to a forbidden method at this statement: " + stmt;
 	}
 
-	public void reported(Unit callSite) {
+	public void reported(Statement callSite) {
 		satisfied |= callSite.equals(stmt);
 	}
 }

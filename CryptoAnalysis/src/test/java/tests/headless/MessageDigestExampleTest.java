@@ -1,11 +1,10 @@
 package tests.headless;
 
-import java.io.File;
-
-import org.junit.Test;
-
 import crypto.HeadlessCryptoScanner;
 import crypto.analysis.errors.IncompleteOperationError;
+import org.junit.Test;
+
+import java.io.File;
 
 public class MessageDigestExampleTest extends AbstractHeadlessTest{
 
@@ -14,12 +13,11 @@ public class MessageDigestExampleTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/MessageDigestExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
-		
-		//false positive
+
 		setErrorsCount("<MessageDigestExample.MessageDigestExample.Main: java.lang.String getSHA256(java.io.InputStream)>", IncompleteOperationError.class, 2);
-		
-		scanner.exec();
-		assertErrors();
+
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 }
