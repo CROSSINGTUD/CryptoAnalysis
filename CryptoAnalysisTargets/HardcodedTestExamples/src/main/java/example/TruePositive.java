@@ -2,20 +2,14 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.SecureRandom;
 
-public class Main {
-    public static void main(String[] args) {
-        byte[] pass = new byte[256];
+public class TruePositive {
+
+    public void truePositive() {
+        char[] passwd = {'t','h','i','s'};
         byte[] salt = new byte[256];
 
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(salt);
-        secureRandom.nextBytes(pass);
-
-        // convert byte array to char array
-        char[] passwd = new char[pass.length];
-        for(int i=0; i < pass.length; i++){
-            passwd[i] = (char) (pass[i]&0xff);
-        }
 
         byte[] key = getKey(passwd, salt, 10000, 256);
     }

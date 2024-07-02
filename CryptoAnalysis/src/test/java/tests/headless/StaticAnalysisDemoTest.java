@@ -144,6 +144,22 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());
 	}
+
+	@Test
+	public void hardCodedExample() {
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/HardcodedTestExamples/").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+
+		setErrorsCount("<TruePositive: byte[] getKey(char[],byte[],int,int)>", HardCodedError.class, 1);
+		setErrorsCount("<TruePositive: byte[] getKey(char[],byte[],int,int)>", RequiredPredicateError.class, 2);
+
+		setErrorsCount("<TrueNegative: byte[] getKey(char[],byte[],int,int)>", HardCodedError.class, 0);
+		setErrorsCount("<TrueNegative: byte[] getKey(char[],byte[],int,int)>", RequiredPredicateError.class, 0);
+
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
+	}
 	
 	@Test
 	public void sslExample() {
