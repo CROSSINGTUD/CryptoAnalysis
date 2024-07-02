@@ -1,15 +1,12 @@
 package tests.crysl;
 
 import crypto.cryslhandler.RulesetReader;
-import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -70,17 +67,16 @@ public class RulesetReaderTest {
 
     @Test
     @Ignore
-    public void TestPerformanceReducesSignificantlySecondTime() throws CryptoAnalysisException {
-        File zipFile = new File(jcaRulesetZipFilePath);
+    public void TestPerformanceReducesSignificantlySecondTime() throws IOException {
         StopWatch watch = new StopWatch();
         watch.start();
-        CrySLRuleReader reader = new CrySLRuleReader();
-        reader.readFromZipFile(zipFile);
+        RulesetReader reader = new RulesetReader();
+        reader.readRulesFromZipArchive(jcaRulesetZipFilePath);
         watch.stop();
         long firstRun = watch.getTime();
         watch.reset();
         watch.start();
-        reader.readFromZipFile(zipFile);
+        reader.readRulesFromZipArchive(jcaRulesetZipFilePath);
         watch.stop();
         long secondRun = watch.getTime();
         Assert.assertTrue(secondRun * 100 < firstRun);
