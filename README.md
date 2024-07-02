@@ -51,9 +51,9 @@ Other additional arguments that can be used are as follows:
 --identifier <identifier_for_labeling_output_files>
 --reportPath <directory_location_for_cryptoanalysis_report>
 --reportFormat <format of cryptoanalysis_report> (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
---preanalysis (enables pre-analysis)
+--preanalysis (enables pre-analysis. @Deprecated since 3.2.0)
 --visualization (enables the visualization, but also requires --reportPath option to be set)
---providerDetection (enables provider detection analysis)
+--providerDetection (enables provider detection analysis. @Deprecated since 3.2.0)
 --dstats (disables the output of the analysis statistics in the reports)
 --ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
 --help (show more information for the CLI arguments)

@@ -177,30 +177,6 @@ public class HeadlessCryptoScanner {
 		for (Reporter reporter : reporters) {
 			reporter.createAnalysisReport(discoveredSeeds, errors);
 		}
-
-		/*if (providerDetection()) {
-					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
-
-					if(rulesetRootPath == null) {
-						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
-					}
-
-					String detectedProvider = providerDetection.doAnalysis(scanner.icfg(), rulesetRootPath);
-
-					if(detectedProvider != null) {
-						rules.clear();
-						switch(settings.getRulesetPathType()) {
-							case DIR:
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
-								break;
-							case ZIP:
-								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath + File.separator + detectedProvider + ".zip"));
-								break;
-							default:
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
-						}
-					}
-				}*/
 	}
 	
 	public String toString() {
@@ -350,14 +326,6 @@ public class HeadlessCryptoScanner {
 
 	public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
 		settings.setReportFormats(reportFormats);
-	}
-	
-	public boolean isProviderDetection() {
-		return settings.isProviderDetectionAnalysis();
-	}
-
-	public void setProviderDetection(boolean providerDetection) {
-		settings.setProviderDetection(providerDetection);
 	}
 
 	public Collection<String> getIgnoredSections() {
