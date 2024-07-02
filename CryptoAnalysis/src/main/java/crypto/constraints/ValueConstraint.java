@@ -1,18 +1,18 @@
 package crypto.constraints;
 
+import crypto.analysis.errors.ConstraintError;
+import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.rules.ISLConstraint;
+import crypto.rules.CrySLObject;
+import crypto.rules.CrySLSplitter;
+import crypto.rules.CrySLValueConstraint;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import crypto.analysis.errors.ConstraintError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.interfaces.ISLConstraint;
-import crypto.rules.CrySLObject;
-import crypto.rules.CrySLSplitter;
-import crypto.rules.CrySLValueConstraint;
 
 public class ValueConstraint extends EvaluableConstraint {
 
@@ -23,30 +23,29 @@ public class ValueConstraint extends EvaluableConstraint {
 	@Override
 	public void evaluate() {
 		CrySLValueConstraint valCons = (CrySLValueConstraint) origin;
-
-		CrySLObject var = valCons.getVar();
-		final List<Entry<String, CallSiteWithExtractedValue>> vals = getValFromVar(var, valCons);
-		if (vals.isEmpty()) {
-			// TODO: Check whether this works as desired
+		List<Entry<String, CallSiteWithExtractedValue>> values = getValFromVar(valCons.getVar(), valCons);
+		if (values.isEmpty()) {
 			return;
 		}
-		for (Entry<String, CallSiteWithExtractedValue> val : vals) {
-			List<String> values = valCons.getValueRange().parallelStream().map(e -> e.toLowerCase())
-					.collect(Collectors.toList());
-			if (!values.contains(val.getKey().toLowerCase())) {
-				errors.add(new ConstraintError(val.getValue(), context.getClassSpec().getRule(), context.getObject(), valCons));
+
+		List<String> lowerCaseValues = valCons.getValueRange().parallelStream().map(String::toLowerCase).collect(Collectors.toList());
+		for (Entry<String, CallSiteWithExtractedValue> val : values) {
+			if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
+				ConstraintError error = new ConstraintError(context.getObject(), val.getValue(), context.getSpecification(), valCons);
+				errors.add(error);
 			}
 		}
-		return;
-	}
+    }
 
 	private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CrySLObject var, ISLConstraint cons) {
 		final String varName = var.getVarName();
-		final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName, cons);
-		List<Entry<String, CallSiteWithExtractedValue>> vals = new ArrayList<>();
-		if (valueCollection.isEmpty()) {
-			return vals;
+		final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName);
+
+		List<Entry<String, CallSiteWithExtractedValue>> values = new ArrayList<>();
+		if (couldNotExtractValues(valueCollection, cons)) {
+			return values;
 		}
+
 		for (Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
 			CrySLSplitter splitter = var.getSplitter();
 			final CallSiteWithExtractedValue location = e.getValue();
@@ -57,18 +56,18 @@ public class ValueConstraint extends EvaluableConstraint {
 				if (ind > 0) {
 					String[] splits = val.split(splitElement);
 					if (splits.length > ind) {
-						vals.add(new AbstractMap.SimpleEntry<>(splits[ind], location));
+						values.add(new AbstractMap.SimpleEntry<>(splits[ind], location));
 					} else {
-						vals.add(new AbstractMap.SimpleEntry<>("", location));
+						values.add(new AbstractMap.SimpleEntry<>("", location));
 					}
 				} else {
-					vals.add(new AbstractMap.SimpleEntry<>(val.split(splitElement)[ind], location));
+					values.add(new AbstractMap.SimpleEntry<>(val.split(splitElement)[ind], location));
 				}
 			} else {
-				vals.add(new AbstractMap.SimpleEntry<>(val, location));
+				values.add(new AbstractMap.SimpleEntry<>(val, location));
 			}
 		}
-		return vals;
+		return values;
 	}
 
 }

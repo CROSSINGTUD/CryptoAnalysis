@@ -12,15 +12,5 @@ public class CryptoAnalysisParserException extends CryptoAnalysisException {
 	public CryptoAnalysisParserException(String message) {
 		super(message);
 	}
-	
-	/**
-	 * Constructs a new exception with the specified detail message and cause.
-	 * 
-	 * @param message a detail message.
-	 * @param cause the cause of the exception.
-	 */
-	public CryptoAnalysisParserException(String message, Throwable cause) {
-		super(message, cause);
-	}
 
 }

@@ -1,19 +1,19 @@
 package crypto.analysis;
 
-import java.util.Set;
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import boomerang.scene.Statement;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ISLConstraint;
+
+import java.util.List;
 
 public class RequiredCrySLPredicate implements ISLConstraint {
 
-	private static final long serialVersionUID = 9111353268603202392L;
 	private final CrySLPredicate predicate;
-	private final Statement stmt;
+	private final Statement statement;
 
-	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement stmt) {
+	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement statement) {
 		this.predicate = predicate;
-		this.stmt = stmt;
+		this.statement = statement;
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
-		result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
+		result = prime * result + ((statement == null) ? 0 : statement.hashCode());
 		return result;
 	}
 
@@ -39,26 +39,22 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 				return false;
 		} else if (!predicate.equals(other.predicate))
 			return false;
-		if (stmt == null) {
-			if (other.stmt != null)
-				return false;
-		} else if (!stmt.equals(other.stmt))
-			return false;
-		return true;
-	}
+		if (statement == null) {
+            return other.statement == null;
+		} else return statement.equals(other.statement);
+    }
 
 	public CrySLPredicate getPred() {
 		return predicate;
 	}
 
 	public Statement getLocation() {
-		return stmt;
+		return statement;
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return "misses " + predicate + " @ " + stmt.toString();
+		return "misses " + predicate + " @ " + statement.toString();
 	}
 
 	@Override
@@ -67,12 +63,8 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
+	public List<String> getInvolvedVarNames() {
 		return predicate.getInvolvedVarNames();
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		throw new UnsupportedOperationException();
-	}
 }

@@ -1,14 +1,12 @@
 package crypto.rules;
+
 import java.util.List;
 
-import crypto.interfaces.Transition;
+public class TransitionEdge implements Transition<StateNode> {
 
-public class TransitionEdge implements Transition<StateNode>, java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;
-	private StateNode left = null;
-	private StateNode right = null;
-	private List<CrySLMethod> methods = null;
+	private final StateNode left;
+	private final StateNode right;
+	private final List<CrySLMethod> methods;
 
 	public TransitionEdge(List<CrySLMethod> _methods, StateNode _left, StateNode _right) {
 		left = _left;

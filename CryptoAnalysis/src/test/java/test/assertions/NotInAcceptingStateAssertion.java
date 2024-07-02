@@ -1,28 +1,33 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
-import soot.Unit;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import test.Assertion;
-import test.ComparableResult;
 import typestate.finiteautomata.State;
 
-public class NotInAcceptingStateAssertion implements Assertion, ComparableResult<State,Val> {
+import java.util.Collection;
 
-	private Unit unit;
-	private Val val;
+public class NotInAcceptingStateAssertion implements Assertion, StateResult {
+
+	private final Statement unit;
+	private final Collection<Val> val;
 	private boolean satisfied;
 
-	public NotInAcceptingStateAssertion(Unit unit, Val accessGraph) {
+	public NotInAcceptingStateAssertion(Statement unit, Collection<Val> accessGraph) {
 		this.unit = unit;
 		this.val = accessGraph;
 	}
 
-	public void computedResults(State s) {
-		satisfied |= !s.isAccepting();
+	public Collection<Val> getVal() {
+		return val;
 	}
 
-	public Unit getStmt() {
+	public Statement getStmt() {
 		return unit;
+	}
+
+	public void computedResults(State s) {
+		satisfied |= !s.isAccepting();
 	}
 
 	@Override
@@ -37,11 +42,7 @@ public class NotInAcceptingStateAssertion implements Assertion, ComparableResult
 
 	@Override
 	public String toString() {
-		return "[" + getVal() + "@" + getStmt() + " must not be in error state]";
+		return "[" + val + "@" + unit + " must not be in error state]";
 	}
 
-	@Override
-	public Val getVal() {
-		return val;
-	}
 }

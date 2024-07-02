@@ -1,17 +1,14 @@
 package crypto.rules;
 
-import java.util.Set;
+import java.util.List;
 
 public class CrySLComparisonConstraint extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
-
 	public enum CompOp { l, g, le, ge, eq, neq}
 	
-	private CompOp operator;
-	
-	private CrySLArithmeticConstraint left;
-	private CrySLArithmeticConstraint right;
+	private final CompOp operator;
+	private final CrySLArithmeticConstraint left;
+	private final CrySLArithmeticConstraint right;
 	
 	public CrySLComparisonConstraint(CrySLArithmeticConstraint l, CrySLArithmeticConstraint r, CompOp op) {
 		left = l;
@@ -23,15 +20,12 @@ public class CrySLComparisonConstraint extends CrySLLiteral {
 		return left + " " + getOperatorString() + " " + right;
 	}
 
-	/**
-	 * @return
-	 */
 	private String getOperatorString() {
 		switch (operator) {
 			case l:
 				return "<";
 			case le:
-				return "<";
+				return "<=";
 			case g:
 				return ">";
 			case ge:
@@ -67,8 +61,8 @@ public class CrySLComparisonConstraint extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = left.getInvolvedVarNames();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = left.getInvolvedVarNames();
 		varNames.addAll(right.getInvolvedVarNames());
 		return varNames;
 	}

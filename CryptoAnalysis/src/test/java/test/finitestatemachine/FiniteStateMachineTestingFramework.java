@@ -1,34 +1,31 @@
 package test.finitestatemachine;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import crypto.cryslhandler.RulesetReader;
+import crypto.rules.CrySLRule;
+import crypto.rules.StateMachineGraph;
+import crypto.rules.StateNode;
+import crypto.rules.TransitionEdge;
+import org.junit.Before;
+import test.TestConstants;
+
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import crypto.analysis.CrySLRulesetSelector;
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import crypto.exceptions.CryptoAnalysisException;
-import crypto.rules.StateMachineGraph;
-import crypto.rules.StateNode;
-import crypto.rules.TransitionEdge;
-import test.IDEALCrossingTestingFramework;
-
 public abstract class FiniteStateMachineTestingFramework{
 
 	private StateMachineGraph smg;
 	private String crySLRule;
-	private Ruleset ruleset;
 	protected Order order;
 	protected static int maxRepeat;
 	
-	public FiniteStateMachineTestingFramework(String crySLRule, Ruleset ruleset) {
+	public FiniteStateMachineTestingFramework(String crySLRule) {
 		this.crySLRule = crySLRule;
-		this.ruleset = ruleset;
 	}
 	
 	// uncomment "@Test" to test the StatemachineBuilder.
@@ -111,12 +108,18 @@ public abstract class FiniteStateMachineTestingFramework{
 	
 	@Before
 	public void createSMG() {
-		if(this.smg == null) {
-			try {
-				this.smg = CrySLRulesetSelector.makeSingleRule(IDEALCrossingTestingFramework.RULES_BASE_DIR, this.ruleset, this.crySLRule).getUsagePattern();
-			} catch (CryptoAnalysisException e) {
-				e.printStackTrace();
+		RulesetReader reader = new RulesetReader();
+
+		try {
+			Collection<CrySLRule> rules = reader.readRulesFromPath(TestConstants.JCA_RULESET_PATH);
+
+			for (CrySLRule rule : rules) {
+				if (rule.getClassName().equals(crySLRule)) {
+					smg = rule.getUsagePattern();
+				}
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 	

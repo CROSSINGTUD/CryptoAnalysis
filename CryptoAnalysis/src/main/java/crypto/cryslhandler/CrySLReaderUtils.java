@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.xtext.common.types.JvmTypeParameter;
 
-import crypto.interfaces.ICrySLPredicateParameter;
+import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.CrySLException;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;

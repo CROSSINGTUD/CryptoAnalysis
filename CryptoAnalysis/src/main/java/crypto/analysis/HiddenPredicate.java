@@ -75,7 +75,8 @@ public class HiddenPredicate extends EnsuredCrySLPredicate {
                 // In this case, preceding errors are not reported yet because the predicate condition wasn't required to be satisfied.
                 // Since the hidden predicate is required to be an ensured predicate, we can assume the condition required to be satisfied.
                 // Thus, we report all errors that causes the condition to be not satisfied.
-                precedingErrors.forEach(e -> this.generatingSeed.cryptoScanner.getAnalysisListener().reportError(generatingSeed, e));
+                //precedingErrors.forEach(e -> this.generatingSeed.scanner.getAnalysisListener().reportError(generatingSeed, e));
+                precedingErrors.forEach(e -> this.generatingSeed.scanner.getAnalysisReporter().reportError(generatingSeed, e));
                 // Further, preceding errors can be of type RequiredPredicateError.
                 // Thus, we have to recursively map preceding errors for the newly reported errors.
                 for(AbstractError e: precedingErrors) {

@@ -1,69 +1,61 @@
 package crypto.extractparameter;
 
-import java.util.Set;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import soot.Value;
-import sync.pds.solver.nodes.Node;
+import java.util.Arrays;
 
 public class ExtractedValue {
-	private Statement stmt;
-	private Value val;
-	private Set<Node<Statement, Val>> dataFlowPath;
 
-	public ExtractedValue(Statement stmt, Value val, Set<Node<Statement, Val>> dataFlowPath) {
+	private final Statement stmt;
+	private final Val val;
+
+	public ExtractedValue(Statement stmt, Val val) {
 		this.stmt = stmt;
 		this.val = val;
-		this.dataFlowPath = dataFlowPath;
 	}
 
 	public Statement stmt() {
 		return stmt;
 	}
 	
-	public Value getValue() {
+	public Val getValue() {
 		return val;
 	}
 	
 	@Override
 	public String toString() {
-		return "Extracted Value: " + val + " at " +stmt;
-	}
-	
-	public Set<Node<Statement, Val>> getDataFlowPath() {
-		return dataFlowPath;
+		return "Extracted Value: " + val + " at " + stmt;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
-		result = prime * result + ((val == null) ? 0 : val.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				val,
+				stmt
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ExtractedValue other = (ExtractedValue) obj;
 		if (stmt == null) {
-			if (other.stmt != null)
-				return false;
-		} else if (!stmt.equals(other.stmt))
+			if (other.stmt() != null) return false;
+		} else if (!stmt.equals(other.stmt())) {
 			return false;
+		}
+
 		if (val == null) {
-			if (other.val != null)
-				return false;
-		} else if (!val.equals(other.val))
+            if (other.getValue() != null) return false;
+		} else if (!val.equals(other.val)) {
 			return false;
+		}
+
 		return true;
-	}
+    }
 	
 }

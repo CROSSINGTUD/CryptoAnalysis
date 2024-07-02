@@ -1,15 +1,10 @@
 package crypto.rules;
 
-import java.io.Serializable;
+public class CrySLObject implements ICrySLPredicateParameter {
 
-import crypto.interfaces.ICrySLPredicateParameter;
-
-public class CrySLObject implements Serializable, ICrySLPredicateParameter {
-
-	private static final long serialVersionUID = 1L;
-	private String varName;
-	private String javaType;
-	private CrySLSplitter splitter;
+	private final String varName;
+	private final String javaType;
+	private final CrySLSplitter splitter;
 
 	public CrySLObject(String name, String type) {
 		this(name, type, null);

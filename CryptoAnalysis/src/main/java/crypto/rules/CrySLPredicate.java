@@ -1,18 +1,13 @@
 package crypto.rules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
 
 public class CrySLPredicate extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
@@ -46,17 +41,21 @@ public class CrySLPredicate extends CrySLLiteral {
 	
 	}
 
+	// TODO Make comparison with parameters here
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
+		}
 
-		if (!(obj instanceof CrySLPredicate))
+		if (!(obj instanceof CrySLPredicate)) {
 			return false;
+		}
 
 		CrySLPredicate other = (CrySLPredicate) obj;
-		if(!getPredName().equals(other.getPredName()))
-				return false;
+		if (!getPredName().equals(other.getPredName())) {
+			return false;
+		}
 
 		return true;
 	}
@@ -110,18 +109,18 @@ public class CrySLPredicate extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<String>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		if (Arrays.asList(new String[] {"neverTypeOf", "instanceOf"}).contains(predName)) {
 			varNames.add(parameters.get(0).getName());
 		} else {
-		for (ICrySLPredicateParameter var : parameters) {
-			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
-				varNames.add(var.getName());
+			for (ICrySLPredicateParameter var : parameters) {
+				if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
+					varNames.add(var.getName());
+				}
 			}
 		}
-		}
-		if(getBaseObject() != null)
+		if (getBaseObject() != null)
 			varNames.add(getBaseObject().getName());
 		return varNames;
 	}

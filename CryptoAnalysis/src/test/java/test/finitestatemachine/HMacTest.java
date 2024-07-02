@@ -1,11 +1,9 @@
 package test.finitestatemachine;
 
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-
 public class HMacTest extends FiniteStateMachineTestingFramework{
 
 	public HMacTest() {
-		super("HMac", Ruleset.BouncyCastle);
+		super("HMac");
 		this.order = new Simple(new E("HMac"), new Plus(new Simple(new E("init"), new Plus(new E("update")), new E("doFinal"))));
 	}
 	// Cons, (Init, Updates+, Finals)+

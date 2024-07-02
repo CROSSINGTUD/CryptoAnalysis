@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -39,8 +39,8 @@ import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
+import crypto.rules.ICrySLPredicateParameter;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
 import crypto.rules.CrySLArithmeticConstraint.ArithOp;
 import crypto.rules.CrySLComparisonConstraint;
@@ -131,9 +131,8 @@ public class CrySLModelReader {
 	 * 
 	 * @param files	a list of files to read from
 	 * @return	the list with the parsed CrySLRules
-	 * @throws CryptoAnalysisException If a file cannot be read or there is a problem with a rule
 	 */
-	public List<CrySLRule> readRulesFromFiles(List<File> files) throws CryptoAnalysisException {
+	public List<CrySLRule> readRulesFromFiles(List<File> files) {
 		Map<String, CrySLRule> ruleMap = new HashMap<String, CrySLRule>();
 		
 		for (File file : files) {
@@ -177,7 +176,7 @@ public class CrySLModelReader {
 	 * @throws IOException If there is a problem with reading the file
 	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
-	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IllegalArgumentException, IOException, CryptoAnalysisException {
+	public CrySLRule readRule(InputStream stream, String virtualFileName) throws IOException, CryptoAnalysisException {
 		if (!virtualFileName.endsWith(cryslFileEnding)) {
 			throw new CryptoAnalysisException("The extension of " + virtualFileName + " does not match " + cryslFileEnding);
 		}
@@ -201,13 +200,7 @@ public class CrySLModelReader {
 	 * @throws CryptoAnalysisException If the file is not a .crysl file
 	 */
 	public CrySLRule readRule(File ruleFile) throws CryptoAnalysisException {
-		final String fileName = ruleFile.getName();
-		
-		if (!fileName.endsWith(cryslFileEnding)) {
-			throw new CryptoAnalysisException("The extension of " + fileName + "  does not match " + cryslFileEnding);
-		}
-		
-		final Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
+		Resource resource = resourceSet.getResource(URI.createFileURI(ruleFile.getAbsolutePath()), true);
 
 		return createRuleFromResource(resource);
 	}
@@ -252,7 +245,7 @@ public class CrySLModelReader {
 		try {
 			return createRuleFromDomainmodel((Domainmodel) resource.getContents().get(0));
 		} catch (Exception e) {
-			throw new CryptoAnalysisException("An error occured while reading the rule " + resource.getURI(), e);
+			throw new CryptoAnalysisException("An error occurred while reading the rule " + resource.getURI(), e);
 		}
 	}
 
@@ -279,7 +272,9 @@ public class CrySLModelReader {
 		constraints.addAll(getRequiredPredicates(model.getRequires()));
 		
 		// Since 3.0.0: All sections are optional
+		final Collection<CrySLMethod> eventMethods = new HashSet<>();
 		if (eventsBlock != null) {
+			eventMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(events));
 			constraints.addAll(ExceptionsReader.getExceptionConstraints(eventsBlock));
 		}
 
@@ -291,7 +286,7 @@ public class CrySLModelReader {
 		predicates.addAll(getEnsuredPredicates(ensuresBlock));
 		negatedPredicates.addAll(getNegatedPredicates(negatesBlock));
 
-		return new CrySLRule(currentClass, objects, forbiddenMethods, this.smg, constraints, predicates, negatedPredicates);
+		return new CrySLRule(currentClass, objects, forbiddenMethods, eventMethods, this.smg, constraints, predicates, negatedPredicates);
 	}
 
 	private List<Event> changeDeclaringClass(JvmTypeReference currentClass, EventsBlock eventsBlock) {
@@ -329,7 +324,7 @@ public class CrySLModelReader {
 		for (final ForbiddenMethod method : forbidden.getForbiddenMethods()) {
 			CrySLMethod cryslMethod = CrySLReaderUtils.toCrySLMethod(method);
 			List<CrySLMethod> alternatives = CrySLReaderUtils.resolveEventToCryslMethods(method.getReplacement());
-			forbiddenMethods.add(new CrySLForbiddenMethod(cryslMethod, false, alternatives));
+			forbiddenMethods.add(new CrySLForbiddenMethod(cryslMethod, alternatives));
 		}
 		return forbiddenMethods;
 	}
@@ -488,7 +483,7 @@ public class CrySLModelReader {
 				// NOT operator was only implemented for Predicates, which were
 				// not reachable from the Constraint rule.
 				// Add it to LogOps?
-				throw new NotImplementedException("The NOT operator is not implemented.");
+				throw new UnsupportedOperationException("The NOT operator is not implemented.");
 			case IMPLY:
 			case OR:
 			case AND: {
@@ -516,7 +511,7 @@ public class CrySLModelReader {
 			case DIVIDE:
 				// These were specified in Syntax, but not implemented here.
 				// Add it to ArithOp?
-				throw new NotImplementedException("The multiplication operators are not implemented.");
+				throw new UnsupportedOperationException("The multiplication operators are not implemented.");
 			case PLUS:
 			case MINUS:
 			case MODULO: {

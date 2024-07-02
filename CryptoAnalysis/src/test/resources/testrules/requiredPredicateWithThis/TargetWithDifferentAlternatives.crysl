@@ -1,4 +1,4 @@
-SPEC tests.custom.predicate.TargetWithAlternatives
+SPEC tests.error.predicate.requiredpredicateswiththis.TargetWithAlternatives
 
 OBJECTS
     java.lang.String word;

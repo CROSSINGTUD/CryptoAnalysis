@@ -1,12 +1,10 @@
 package crypto.preanalysis;
 
+import boomerang.scene.Method;
+import boomerang.scene.jimple.JimpleMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.constraints.ExceptionConstraint;
-import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLRule;
-import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.LabeledMatcherTransition;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -31,19 +29,20 @@ public class ExceptionAwareTransformer extends PreTransformer {
 
 	private final SootClass spec;
 
-	private final Multimap<SootMethod, SootClass> exceptions;
+	private final Multimap<Method, SootClass> exceptions;
 
-	private final Map<SootMethod, SootMethod> lookupCache = new HashMap<>();
+	private final Map<Method, Method> lookupCache = new HashMap<>();
 
 	public ExceptionAwareTransformer(final CrySLRule rule) {
 		this.exceptions = HashMultimap.create();
 		this.spec = Scene.v().getSootClass(rule.getClassName());
-		rule.getConstraints().stream()
+		// TODO Refactoring
+		/*rule.getConstraints().stream()
 				.filter(constraint -> constraint instanceof CrySLExceptionConstraint)
 				.map(constraint -> (CrySLExceptionConstraint) constraint)
 				.forEach(constraint -> CrySLMethodToSootMethod.v().convert(constraint.getMethod()).stream()
 						.forEach(
-								method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));
+								method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));*/
 	}
 
 	protected void internalTransform(final Body body, final String phase, final Map<String, String> options) {
@@ -61,14 +60,21 @@ public class ExceptionAwareTransformer extends PreTransformer {
 
 			final SootMethod called = ((Stmt) unit).getInvokeExpr().getMethod();
 
+			if (!called.hasActiveBody()) {
+				return;
+			}
+
 			if (!called.getDeclaringClass().equals(this.spec))
 				return;
 
-			lookup(called).ifPresent(declared -> {
+			// TODO Refactor
+			//Statement statement = JimpleStatement.create();
+			JimpleMethod calledMethod = JimpleMethod.of(called);
+			/*lookup(calledMethod).ifPresent(declared -> {
 				for (final SootClass exception : exceptions.get(declared))
-					ExceptionConstraint.getTrap(body, unit, exception)
+					ExceptionConstraint.getTrap(body, unit, new JimpleWrappedClass(exception))
 							.ifPresent(trap -> addBranch(units, unit, trap.getHandlerUnit()));
-			});
+			});*/
 		});
 	}
 
@@ -77,14 +83,15 @@ public class ExceptionAwareTransformer extends PreTransformer {
 		units.insertOnEdge(new JIfStmt(condition, to), after, null);
 	}
 
-	private Optional<SootMethod> lookup(final SootMethod called) {
+	private Optional<Method> lookup(final Method called) {
 		if (lookupCache.containsKey(called))
 			return Optional.of(lookupCache.get(called));
-		for (final SootMethod declared : exceptions.keySet()) {
-			if (LabeledMatcherTransition.matches(called, declared)) {
+		for (final Method declared : exceptions.keySet()) {
+			// TODO Refactoring
+			/*if (LabeledMatcherTransitionOld.matches(called, declared)) {
 				lookupCache.put(called, declared);
 				return Optional.of(declared);
-			}
+			}*/
 		}
 		return Optional.empty();
 	}

@@ -1,37 +1,41 @@
 package crypto.extractparameter;
 
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 
-public class CallSiteWithParamIndex{
+public class CallSiteWithParamIndex {
 
-	private String varName;
-	
-	/**
-	 * @return the varName
-	 */
-	public String getVarName() {
-		return varName;
-	}
+	private final Statement statement;
+	private final Val fact;
+	private final String varName;
+	private final int index;
 
-	private int index;
-	private Val fact;
-	private Statement statement;
-
-	public CallSiteWithParamIndex(Statement u, Val fact, int index, String varName) {
+	public CallSiteWithParamIndex(Statement statement, Val fact, int index, String varName) {
+		this.statement = statement;
 		this.fact = fact;
 		this.index = index;
 		this.varName = varName;
-		this.statement = u;
+	}
+
+	public Statement stmt() {
+		return statement;
+	}
+
+	public Val fact() {
+		return fact;
 	}
 
 	public int getIndex() {
 		return index;
 	}
+
+	public String getVarName() {
+		return varName;
+	}
 	
 	@Override
 	public String toString() {
-		return varName +" at " +stmt() + " and " +index;
+		return varName + " at " + stmt() + " and " + index;
 	}
 
 	@Override
@@ -61,21 +65,8 @@ public class CallSiteWithParamIndex{
 		} else if (!statement.equals(other.statement))
 			return false;
 		if (varName == null) {
-			if (other.varName != null)
-				return false;
-		} else if (!varName.equals(other.varName))
-			return false;
-		return true;
-	}
-
-	public Val fact() {
-		return fact;
-	}
-
-	public Statement stmt() {
-		return statement;
-	}
-
-	
+            return other.varName == null;
+		} else return varName.equals(other.varName);
+    }
 	
 }

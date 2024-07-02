@@ -1,16 +1,16 @@
 package test.assertions;
 
-import soot.Unit;
-import soot.jimple.Stmt;
+import boomerang.scene.Statement;
 import test.Assertion;
 
 /**
  * Created by johannesspath on 24.12.17.
  */
-public class NoMissingTypestateChange implements Assertion{
-    private final Stmt stmt;
+public class NoMissingTypestateChange implements Assertion {
 
-    public NoMissingTypestateChange(Stmt stmt) {
+    private final Statement stmt;
+
+    public NoMissingTypestateChange(Statement stmt) {
         this.stmt = stmt;
     }
 
@@ -29,7 +29,7 @@ public class NoMissingTypestateChange implements Assertion{
         return "Expected a missing typestate change @ " + stmt;
     }
 
-	public Unit getStmt() {
+	public Statement getStmt() {
 		return stmt;
 	}
 }

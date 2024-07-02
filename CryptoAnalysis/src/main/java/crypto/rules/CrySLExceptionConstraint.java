@@ -1,18 +1,15 @@
 package crypto.rules;
 
-import java.util.Collections;
-import java.util.Set;
+import boomerang.scene.Statement;
 
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Constraint expressing, that a {@link CrySLMethod} throws an
  * {@link CrySLException}, that must be caught.
  * */
 public class CrySLExceptionConstraint implements ISLConstraint {
-
-	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The Method throwing the Exception.
@@ -60,19 +57,14 @@ public class CrySLExceptionConstraint implements ISLConstraint {
 		return String.format("%s(%s, %s)", this.getClass().getName(), getMethod(), getException());
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		this.location = location;
-	}
-
-	@Override
+    @Override
 	public Statement getLocation() {
 		return this.location;
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		return Collections.emptySet();
+	public List<String> getInvolvedVarNames() {
+		return Collections.emptyList();
 	}
 
 	@Override

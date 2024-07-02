@@ -38,6 +38,20 @@ public class Assertions {
 
 	public static void incompleteOperationErrors(int i) {}
 
+	public static void forbiddenMethodErrors(int i) {}
+
+	public static void impreciseValueExtractionErrors(int i) {}
+
+	public static void callToErrors(int i) {}
+
+	public static void noCallToErrors(int i) {}
+
+	public static void neverTypeOfErrors(int i) {}
+
+	public static void notHardCodedErrors(int i) {}
+
+	public static void instanceOfErrors(int i) {}
+
 	public static void dependentError(int thisErrorNr) {}
 
 	public static void dependentError(int thisErrorNr, int precedingError1) {}

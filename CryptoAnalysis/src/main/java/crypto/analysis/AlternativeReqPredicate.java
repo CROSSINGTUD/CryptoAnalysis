@@ -1,28 +1,26 @@
 package crypto.analysis;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import boomerang.scene.Statement;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ISLConstraint;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AlternativeReqPredicate implements ISLConstraint {
 
-	private static final long serialVersionUID = 9111353268603202392L;
+	private final Statement stmt;
 	private final List<CrySLPredicate> alternatives;
-	private Statement stmt;
 
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne,  Statement stmt) {
-		this.alternatives = new ArrayList<CrySLPredicate>();
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, Statement stmt) {
+		this.alternatives = new ArrayList<>();
 		this.alternatives.add(alternativeOne);
 		this.stmt = stmt;	
 	}
 	
 	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, Statement stmt) {
-		this.alternatives = new ArrayList<CrySLPredicate>();
+		this.alternatives = new ArrayList<>();
 		this.alternatives.add(alternativeOne);
 		this.alternatives.add(alternativeTwo);
 		this.stmt = stmt;
@@ -52,12 +50,9 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		} else if (!alternatives.equals(other.alternatives))
 			return false;
 		if (stmt == null) {
-			if (other.stmt != null)
-				return false;
-		} else if (!stmt.equals(other.stmt))
-			return false;
-		return true;
-	}
+            return other.stmt == null;
+		} else return stmt.equals(other.stmt);
+    }
 
 	public Statement getLocation() {
 		return stmt;
@@ -65,29 +60,24 @@ public class AlternativeReqPredicate implements ISLConstraint {
 
 	@Override
 	public String toString() {
-		return "misses " + alternatives.stream().map(e -> e.toString()).collect(Collectors.joining(" OR ")) + ((stmt != null) ? " @ " + stmt.toString() : "");
+		return "misses " + alternatives.stream().map(CrySLPredicate::toString).collect(Collectors.joining(" OR ")) + ((stmt != null) ? " @ " + stmt : "");
 	}
 
 	@Override
 	public String getName() {
-		return alternatives.stream().map(e -> e.getName()).collect(Collectors.joining(" OR "));
+		return alternatives.stream().map(CrySLPredicate::getName).collect(Collectors.joining(" OR "));
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> involvedVarNames = new HashSet<>();
+	public List<String> getInvolvedVarNames() {
+		List<String> involvedVarNames = new ArrayList<>();
 		for (CrySLPredicate alt : alternatives) {
 			involvedVarNames.addAll(alt.getInvolvedVarNames());
 		}
 		return involvedVarNames;
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		throw new UnsupportedOperationException();
-	}
-
-	public List<CrySLPredicate> getAlternatives() {
+    public List<CrySLPredicate> getAlternatives() {
 		return alternatives;
 	}
 	
