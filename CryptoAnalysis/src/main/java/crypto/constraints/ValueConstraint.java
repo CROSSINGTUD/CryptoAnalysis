@@ -11,7 +11,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class ValueConstraint extends EvaluableConstraint {
@@ -23,13 +22,13 @@ public class ValueConstraint extends EvaluableConstraint {
 	@Override
 	public void evaluate() {
 		CrySLValueConstraint valCons = (CrySLValueConstraint) origin;
-		List<Entry<String, CallSiteWithExtractedValue>> values = getValFromVar(valCons.getVar(), valCons);
+		List<Map.Entry<String, CallSiteWithExtractedValue>> values = getValFromVar(valCons.getVar(), valCons);
 		if (values.isEmpty()) {
 			return;
 		}
 
 		List<String> lowerCaseValues = valCons.getValueRange().parallelStream().map(String::toLowerCase).collect(Collectors.toList());
-		for (Entry<String, CallSiteWithExtractedValue> val : values) {
+		for (Map.Entry<String, CallSiteWithExtractedValue> val : values) {
 			if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
 				ConstraintError error = new ConstraintError(context.getObject(), val.getValue(), context.getSpecification(), valCons);
 				errors.add(error);
@@ -37,16 +36,16 @@ public class ValueConstraint extends EvaluableConstraint {
 		}
     }
 
-	private List<Entry<String, CallSiteWithExtractedValue>> getValFromVar(CrySLObject var, ISLConstraint cons) {
+	private List<Map.Entry<String, CallSiteWithExtractedValue>> getValFromVar(CrySLObject var, ISLConstraint cons) {
 		final String varName = var.getVarName();
 		final Map<String, CallSiteWithExtractedValue> valueCollection = extractValueAsString(varName);
 
-		List<Entry<String, CallSiteWithExtractedValue>> values = new ArrayList<>();
+		List<Map.Entry<String, CallSiteWithExtractedValue>> values = new ArrayList<>();
 		if (couldNotExtractValues(valueCollection, cons)) {
 			return values;
 		}
 
-		for (Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
+		for (Map.Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
 			CrySLSplitter splitter = var.getSplitter();
 			final CallSiteWithExtractedValue location = e.getValue();
 			String val = e.getKey();

@@ -1,11 +1,9 @@
 package crypto.rules;
 
-import java.util.List;
-
-import crypto.rules.CrySLMethod;
+import java.util.Collection;
 
 public interface Transition<State>{
 	State from();
 	State to();
-	List<CrySLMethod> getLabel();
+	Collection<CrySLMethod> getLabel();
 }

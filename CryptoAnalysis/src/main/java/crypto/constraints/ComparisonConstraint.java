@@ -2,7 +2,6 @@ package crypto.constraints;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
@@ -27,7 +26,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 		Map<Integer, CallSiteWithExtractedValue> left = evaluate(compConstraint.getLeft());
 		Map<Integer, CallSiteWithExtractedValue> right = evaluate(compConstraint.getRight());
 
-		for (Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
+		for (Map.Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
 				ConstraintError error = new ConstraintError(context.getObject(), entry.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
@@ -36,14 +35,14 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			}
 		}
 
-		for (Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
+		for (Map.Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
 				ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
 
 				return;
 			}
-			for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
+			for (Map.Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
 
 				boolean cons;
 				switch (compConstraint.getOperator()) {
@@ -81,19 +80,19 @@ public class ComparisonConstraint extends EvaluableConstraint {
 	private Map<Integer, CallSiteWithExtractedValue> evaluate(CrySLArithmeticConstraint arith) {
 		Map<Integer, CallSiteWithExtractedValue> left = extractValueAsInt(arith.getLeft(), arith);
 		Map<Integer, CallSiteWithExtractedValue> right = extractValueAsInt(arith.getRight(), arith);
-		for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
+		for (Map.Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
 			if (rightie.getKey() == Integer.MIN_VALUE) {
 				return left;
 			}
 		}
 
 		Map<Integer, CallSiteWithExtractedValue> results = new HashMap<>();
-		for (Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
+		for (Map.Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
 				return left;
 			}
 
-			for (Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
+			for (Map.Entry<Integer, CallSiteWithExtractedValue> rightie : right.entrySet()) {
 				int sum;
 				switch (arith.getOperator()) {
 					case n:
@@ -159,7 +158,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			}
 
 			try {
-				for (Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
+				for (Map.Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
 					if (value.getKey().equals("true"))
 						valuesInt.put(1, value.getValue());
 					else if (value.getKey().equals("false"))

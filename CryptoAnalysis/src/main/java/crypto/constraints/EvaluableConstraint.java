@@ -20,12 +20,12 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLComparisonConstraint;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLValueConstraint;
+import crypto.rules.ISLConstraint;
 import crypto.utils.SootUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class EvaluableConstraint {
 
@@ -54,7 +53,7 @@ public abstract class EvaluableConstraint {
 		throw new RuntimeException("Type of constraint is not supported");
 	}
 
-	final Set<AbstractError> errors = Sets.newHashSet();
+	final Collection<AbstractError> errors = Sets.newHashSet();
 
 	final ConstraintSolver context;
 

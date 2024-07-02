@@ -1,20 +1,18 @@
 package crypto.rules;
 
+import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
 
 public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 
 	private StateNode startNode;
-	private final Set<StateNode> nodes;
-	private final List<TransitionEdge> edges;
-	private final List<TransitionEdge> initialEdges;
+	private final Collection<StateNode> nodes;
+	private final Collection<TransitionEdge> edges;
+	private final Collection<TransitionEdge> initialEdges;
 	private int nodeNameCounter = 0;
 
 	public StateMachineGraph() {
@@ -29,7 +27,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 		return node;
 	}
 	
-	public boolean createNewEdge(List<CrySLMethod> methods, StateNode left, StateNode right) {
+	public boolean createNewEdge(Collection<CrySLMethod> methods, StateNode left, StateNode right) {
 		return this.addEdge(new TransitionEdge(methods, left, right));
 	}
 
@@ -58,22 +56,22 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 		});
 	}
 	
-	public Set<TransitionEdge> getAllOutgoingEdges(StateNode node){
+	public Collection<TransitionEdge> getAllOutgoingEdges(StateNode node){
 		return edges.parallelStream().filter(edge -> edge.from().equals(node)).collect(Collectors.toSet());
 	}
 	
 	public void addAllOutgoingEdgesFromOneNodeToOtherNodes(StateNode node, Collection<StateNode> otherNodes) {
-		List<TransitionEdge> edgesFromNode = edges.parallelStream().filter(e -> node.equals(e.from())).collect(Collectors.toList());
+		Collection<TransitionEdge> edgesFromNode = edges.parallelStream().filter(e -> node.equals(e.from())).collect(Collectors.toList());
 		otherNodes.forEach(otherNode -> edgesFromNode.forEach(edge -> this.createNewEdge(edge.getLabel(), otherNode, edge.getLeft())));
 	}
 	
-	public StateNode aggregateNodesToOneNode(Set<StateNode> endNodes, StateNode newNode) {
+	public StateNode aggregateNodesToOneNode(Collection<StateNode> endNodes, StateNode newNode) {
 		this.aggregateNodesToOtherNodes(endNodes, Lists.newArrayList(newNode));
 		return newNode;
 	}
 	
 	public Collection<StateNode> aggregateNodesToOtherNodes(Collection<StateNode> nodesToAggr, Collection<StateNode> startNodes){
-		List<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
+		Collection<TransitionEdge> edgesToAnyAggrNode = edges.parallelStream().filter(e -> nodesToAggr.contains(e.to())).collect(Collectors.toList());
 		// Add new edges to newNode instead of Aggr Node 
 		startNodes.forEach(node -> edgesToAnyAggrNode.forEach(edgeToAggrNode -> this.createNewEdge(edgeToAggrNode.getLabel(), edgeToAggrNode.getLeft(), node)));
 		nodesToAggr.removeAll(startNodes);
@@ -91,7 +89,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 	}
 	
 	private void removeAllEdgesHavingNode(StateNode node) {
-		List<TransitionEdge> filteredEdges = edges.parallelStream().filter(e -> node.equals(e.to()) || node.equals(e.from())).collect(Collectors.toList());
+		Collection<TransitionEdge> filteredEdges = edges.parallelStream().filter(e -> node.equals(e.to()) || node.equals(e.from())).collect(Collectors.toList());
 		edges.removeAll(filteredEdges);
 	}
 
@@ -128,7 +126,7 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 		return graphSB.toString();
 	}
 
-	public Set<StateNode> getNodes() {
+	public Collection<StateNode> getNodes() {
 		return nodes;
 	}
 
@@ -136,12 +134,12 @@ public final class StateMachineGraph implements FiniteStateMachine<StateNode> {
 		return startNode;
 	}
 
-	public List<TransitionEdge> getEdges() {
+	public Collection<TransitionEdge> getEdges() {
 		return edges;
 	}
 
 	public TransitionEdge getInitialTransition() {
-		return edges.get(0);
+		throw new UnsupportedOperationException("There is no single initial transition. Use getInitialTransitions()");
 	}
 	
 	public Collection<TransitionEdge> getInitialTransitions() {

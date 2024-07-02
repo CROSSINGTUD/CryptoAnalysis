@@ -2,31 +2,30 @@ package crypto.rules;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 
 public class CrySLRule {
 
 	private final String className;
 	
-	private final List<Entry<String, String>> objects;
+	private final Collection<Map.Entry<String, String>> objects;
 	
-	private final List<CrySLForbiddenMethod> forbiddenMethods;
+	private final Collection<CrySLForbiddenMethod> forbiddenMethods;
 
 	private final Collection<CrySLMethod> events;
 	
 	private final StateMachineGraph usagePattern;
 	
-	private final List<ISLConstraint> constraints;
+	private final Collection<ISLConstraint> constraints;
 	
-	private final List<CrySLPredicate> predicates;
+	private final Collection<CrySLPredicate> predicates;
 	
-	private final List<CrySLPredicate> negatedPredicates;
+	private final Collection<CrySLPredicate> negatedPredicates;
 	
-	public CrySLRule(String className, List<Entry<String, String>> objects, List<CrySLForbiddenMethod> forbiddenMethods, Collection<CrySLMethod> events, StateMachineGraph usagePattern, List<ISLConstraint> constraints, List<CrySLPredicate> predicates, List<CrySLPredicate> negatedPredicates) {
+	public CrySLRule(String className, Collection<Map.Entry<String, String>> objects, Collection<CrySLForbiddenMethod> forbiddenMethods, Collection<CrySLMethod> events, StateMachineGraph usagePattern, Collection<ISLConstraint> constraints, Collection<CrySLPredicate> predicates, Collection<CrySLPredicate> negatedPredicates) {
 		this.className = className;
 		this.objects = objects;
-		this.forbiddenMethods =forbiddenMethods;
+		this.forbiddenMethods = forbiddenMethods;
 		this.events = events;
 		this.usagePattern = usagePattern;
 		this.constraints = constraints;
@@ -60,14 +59,14 @@ public class CrySLRule {
 	/**
 	 * @return the objects
 	 */
-	public List<Entry<String, String>> getObjects() {
+	public Collection<Map.Entry<String, String>> getObjects() {
 		return objects;
 	}
 	
 	/**
 	 * @return the forbiddenMethods
 	 */
-	public List<CrySLForbiddenMethod> getForbiddenMethods() {
+	public Collection<CrySLForbiddenMethod> getForbiddenMethods() {
 		return forbiddenMethods;
 	}
 
@@ -88,29 +87,29 @@ public class CrySLRule {
 	/**
 	 * @return the constraints
 	 */
-	public List<ISLConstraint> getConstraints() {
+	public Collection<ISLConstraint> getConstraints() {
 		return constraints;
 	}
 	
 	/**
 	 * @return the predicates
 	 */
-	public List<CrySLPredicate> getPredicates() {
+	public Collection<CrySLPredicate> getPredicates() {
 		return predicates;
 	}
 	
 	/**
 	 * @return the negated predicates
 	 */
-	public List<CrySLPredicate> getNegatedPredicates() {
+	public Collection<CrySLPredicate> getNegatedPredicates() {
 		return negatedPredicates;
 	}
 	
 	/**
 	 * @return the constraints
 	 */
-	public List<CrySLPredicate> getRequiredPredicates() {
-		List<CrySLPredicate> requires = new LinkedList<CrySLPredicate>();
+	public Collection<CrySLPredicate> getRequiredPredicates() {
+		Collection<CrySLPredicate> requires = new LinkedList<>();
 		for (ISLConstraint con : constraints) {
 			if (con instanceof CrySLPredicate) {
 				requires.add((CrySLPredicate) con);
