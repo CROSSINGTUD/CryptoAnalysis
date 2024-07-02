@@ -1,5 +1,7 @@
 package crypto.listener;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 
@@ -20,6 +22,10 @@ public interface IAnalysisListener {
     void onSeedStarted(IAnalysisSeed analysisSeed);
 
     void onSeedFinished(IAnalysisSeed analysisSeed);
+
+    void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed);
+
+    void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val parameter, Statement statement);
 
     void beforeConstraintsCheck(IAnalysisSeed analysisSeed);
 

@@ -15,7 +15,13 @@ import java.util.Optional;
 /**
  * Created by johannesspath on 23.12.17.
  */
-public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomerangOptions {
+public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
+
+	private final int timeout;
+
+	public ExtractParameterOptions(int timeout) {
+		this.timeout = timeout;
+	}
 
 	@Override
 	public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
@@ -153,7 +159,7 @@ public class CogniCryptIntAndStringBoomerangOptions extends IntAndStringBoomeran
 
     @Override
 	public int analysisTimeoutMS() {
-		return 10000;
+		return timeout;
 	}
 	
 	@Override

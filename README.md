@@ -56,6 +56,7 @@ Other additional arguments that can be used are as follows:
 --providerDetection (enables provider detection analysis. @Deprecated since 3.2.0)
 --dstats (disables the output of the analysis statistics in the reports)
 --ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
+--timeout <timeout in milliseconds> (Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the typestate and extract parameter analysis and continues with the results computed so far. (default: 10000))
 --help (show more information for the CLI arguments)
 ```
 

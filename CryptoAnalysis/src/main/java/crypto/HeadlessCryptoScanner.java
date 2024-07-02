@@ -132,7 +132,12 @@ public class HeadlessCryptoScanner {
 
 			@Override
 			public Collection<String> getIgnoredSections() {
-				return settings.getIgnoredSections();
+				return HeadlessCryptoScanner.this.getIgnoredSections();
+			}
+
+			@Override
+			public int getTimeout() {
+				return HeadlessCryptoScanner.this.getTimeout();
 			}
 
 			@Override
@@ -334,6 +339,14 @@ public class HeadlessCryptoScanner {
 
 	public void setIgnoredSections(Collection<String> ignoredSections) {
 		settings.setIgnoredSections(ignoredSections);
+	}
+
+	public int getTimeout() {
+		return settings.getTimeout();
+	}
+
+	public void setTimeout(int timeout) {
+		settings.setTimeout(timeout);
 	}
 
 	private static String pathToJCE() {

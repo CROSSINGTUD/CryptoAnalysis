@@ -47,8 +47,10 @@ public abstract class CryptoScanner {
 
 	public void scan() {
 		this.getAnalysisReporter().beforeAnalysis();
+
 		SeedGenerator generator = new SeedGenerator(this, ruleset);
 		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
+		this.getAnalysisReporter().onDiscoveredSeeds(seeds);
 
 		for (IAnalysisSeed seed : seeds) {
 			discoveredSeeds.put(seed, seed);
@@ -138,5 +140,9 @@ public abstract class CryptoScanner {
 
 	public Collection<String> getIgnoredSections() {
 		return new ArrayList<>();
+	}
+
+	public int getTimeout() {
+		return 10000;
 	}
 }

@@ -21,10 +21,10 @@ import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.ISLConstraint;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
+import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 
 import java.util.Collection;
@@ -94,6 +94,18 @@ public class AnalysisReporter {
     public void onSeedFinished(IAnalysisSeed analysisSeed) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onSeedFinished(analysisSeed);
+        }
+    }
+
+    public void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed) {
+        for (IAnalysisListener analysisListener : analysisListeners) {
+            analysisListener.onTypestateAnalysisTimeout(analysisSeed);
+        }
+    }
+
+    public void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val parameter, Statement statement) {
+        for (IAnalysisListener analysisListener : analysisListeners) {
+            analysisListener.onExtractParameterAnalysisTimeout(analysisSeed, parameter, statement);
         }
     }
 
