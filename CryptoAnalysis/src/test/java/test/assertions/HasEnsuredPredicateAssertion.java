@@ -1,30 +1,28 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
-import soot.jimple.Stmt;
 import test.Assertion;
+
+import java.util.Collection;
 
 public class HasEnsuredPredicateAssertion implements Assertion {
 
-	private Stmt stmt;
-	private Val val;
+	private final Statement stmt;
+	private final Collection<Val> val;
+	private final String predName;
 	private boolean satisfied;
-	private String predName;
 
-	public HasEnsuredPredicateAssertion(Stmt stmt,  Val val) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val) {
 		this(stmt, val, null);
 	}
 
-	public HasEnsuredPredicateAssertion(Stmt stmt, Val val, String predName) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val, String predName) {
 		this.stmt = stmt;
 		this.val = val;
 		this.predName = predName;
-	}
-	
-	public Val getAccessGraph() {
-		return val;
 	}
 
 	@Override
@@ -38,12 +36,12 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 	}
 
 
-	public Stmt getStmt() {
+	public Statement getStmt() {
 		return stmt;
 	}
 
 	public void reported(Val seed, EnsuredCrySLPredicate pred) {
-		if (!seed.equals(val) || pred instanceof HiddenPredicate) {
+		if (!val.contains(seed) || pred instanceof HiddenPredicate) {
 			return;
 		}
 

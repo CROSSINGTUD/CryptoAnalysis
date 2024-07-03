@@ -21,7 +21,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		List<String> ignoredSections = Collections.emptyList();
-		setIgnoredSections(ignoredSections);
+		scanner.setIgnoredSections(ignoredSections);
 
 		// No sections are ignored, i.e. all errors are be reported
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -31,8 +31,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 				"example.PredicateMissingExample.main",
 				"example.TypestateErrorExample.main"
 		);
-		setIgnoredSections(ignoredMethods);
+		scanner.setIgnoredSections(ignoredMethods);
 
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -56,8 +56,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 0);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 				"example.ConstraintErrorExample",
 				"example.IncompleteOperationErrorExample"
 		);
-		setIgnoredSections(ignoredClasses);
+		scanner.setIgnoredSections(ignoredClasses);
 
 		// Errors are not reported because classes 'ConstraintErrorExample' and 'IncompleteOperationErrorExample' are ignored
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 0);
@@ -81,8 +81,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		List<String> ignoredWildcards = Collections.singletonList(
                 "example.*"
         );
-		setIgnoredSections(ignoredWildcards);
+		scanner.setIgnoredSections(ignoredWildcards);
 
 		// No errors are reported because the package 'example' is ignored
 		setErrorsCount("<example.ConstraintErrorExample: void main(java.lang.String[])>", ConstraintError.class, 0);
@@ -104,8 +104,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.PredicateMissingExample: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 0);
 
-		scanner.exec();
-		assertErrors();
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
 	}
 
 }

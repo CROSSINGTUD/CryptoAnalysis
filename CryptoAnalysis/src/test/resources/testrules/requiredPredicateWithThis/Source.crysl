@@ -1,9 +1,9 @@
-SPEC tests.custom.predicate.Source
+SPEC tests.error.predicate.requiredpredicateswiththis.Source
 
 OBJECTS
     boolean constraintError;
-    tests.custom.predicate.SimpleTarget target1;
-    tests.custom.predicate.TargetWithAlternatives target2;
+    tests.error.predicate.requiredpredicateswiththis.SimpleTarget target1;
+    tests.error.predicate.requiredpredicateswiththis.TargetWithAlternatives target2;
 
 EVENTS
     Con: Source();

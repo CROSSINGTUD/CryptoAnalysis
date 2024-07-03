@@ -1,13 +1,8 @@
 package crypto.cryslhandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
-
 import crypto.rules.CrySLMethod;
+import crypto.rules.FiniteStateMachine;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import de.darmstadt.tu.crossing.crySL.Event;
@@ -15,8 +10,12 @@ import de.darmstadt.tu.crossing.crySL.Order;
 import de.darmstadt.tu.crossing.crySL.OrderOperator;
 import de.darmstadt.tu.crossing.crySL.Primary;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+
 /**
- * This class will build a {@link crypto.interfaces.FiniteStateMachine} for a given ORDER expression from crysl rules.
+ * This class will build a {@link FiniteStateMachine} for a given ORDER expression from crysl rules.
  * @author marvinvogel
  *
  */
@@ -24,15 +23,15 @@ public class StateMachineGraphBuilder {
 	
 	private final Order order;
 	private final StateMachineGraph result;
-	private final List<Event> events;
-	private final Set<CrySLMethod> allMethods = Sets.newHashSet();
+	private final Collection<Event> events;
+	private final Collection<CrySLMethod> allMethods = Sets.newHashSet();
 	
-	public static StateMachineGraph buildSMG(final Order order, final List<Event> events) {
+	public static StateMachineGraph buildSMG(final Order order, final Collection<Event> events) {
 		return (new StateMachineGraphBuilder(order, events))
 				.buildSMG();
 	}
 
-	protected StateMachineGraphBuilder(final Order order, final List<Event> events) {
+	protected StateMachineGraphBuilder(final Order order, final Collection<Event> events) {
 		this.order = order;
 		this.events = events;
 		this.result = new StateMachineGraph();
@@ -47,26 +46,27 @@ public class StateMachineGraphBuilder {
 	}
 
 	/**
-	 * Helper class to store a {@link Set} of endNodes and startNodes.
+	 * Helper class to store a {@link Collection} of endNodes and startNodes.
 	 */
 	private static class SubStateMachine {
 
-		private final Set<StateNode> startNodes;
-		private final Set<StateNode> endNodes;
+		private final Collection<StateNode> startNodes;
+		private final Collection<StateNode> endNodes;
 
 		public SubStateMachine(final StateNode startNode, final StateNode endNode) {
 			this(Collections.singleton(startNode), Collections.singleton(endNode));
 		}
 
-		public SubStateMachine(final Set<StateNode> startNodes, final Set<StateNode> endNodes) {
-			this.startNodes = Collections.unmodifiableSet(startNodes);
-			this.endNodes = Collections.unmodifiableSet(endNodes);
+		public SubStateMachine(final Collection<StateNode> startNodes, final Collection<StateNode> endNodes) {
+			this.startNodes = startNodes;
+			this.endNodes = endNodes;
 		}
 
-		public Set<StateNode> getStartNodes() {
+		public Collection<StateNode> getStartNodes() {
 			return this.startNodes;
 		}
-		public Set<StateNode> getEndNodes() {
+
+		public Collection<StateNode> getEndNodes() {
 			return this.endNodes;
 		}
 	}
@@ -182,15 +182,15 @@ public class StateMachineGraphBuilder {
 	 *
 	 */
 
-	private SubStateMachine buildSubSMG(final Order order, final Set<StateNode> startNodes) {
+	private SubStateMachine buildSubSMG(final Order order, final Collection<StateNode> startNodes) {
 
 		if (order == null) {
-			// This is the case if the ORDER section was ommited.
+			// This is the case if the ORDER section was omitted.
 			// It implies, that any method may be called in any sequence.
-			// We therefore create a Node and a Transistion from all startNodes
+			// We therefore create a Node and a transition from all startNodes
 			// to this node and a loop from the node to itself.
 			StateNode node = this.result.createNewNode();
-			List<CrySLMethod> label = new ArrayList<>(retrieveAllMethodsFromEvents());
+			Collection<CrySLMethod> label = new HashSet<>(retrieveAllMethodsFromEvents());
 			
 			for (StateNode startNode : startNodes) {
 				this.result.createNewEdge(label, startNode, node);
@@ -203,7 +203,7 @@ public class StateMachineGraphBuilder {
 		if (order instanceof Primary) {
 			Event event = ((Primary) order).getEvent();
 			StateNode node = this.result.createNewNode();
-			List<CrySLMethod> label = CrySLReaderUtils.resolveEventToCryslMethods(event);
+			Collection<CrySLMethod> label = CrySLReaderUtils.resolveEventToCryslMethods(event);
 			
 			for (StateNode startNode : startNodes) {
 				this.result.createNewEdge(label, startNode, node);
@@ -212,8 +212,8 @@ public class StateMachineGraphBuilder {
 			return new SubStateMachine(node, node);
 		}
 
-		Set<StateNode> end = Sets.newHashSet();
-		Set<StateNode> start = Sets.newHashSet();
+		Collection<StateNode> end = Sets.newHashSet();
+		Collection<StateNode> start = Sets.newHashSet();
 
 		final SubStateMachine left;
 		final SubStateMachine right;
@@ -252,7 +252,7 @@ public class StateMachineGraphBuilder {
 				end.addAll(left.getEndNodes());
 				if (order.getOp() == OrderOperator.ZERO_OR_MORE || order.getOp() == OrderOperator.ONE_OR_MORE) {
 					startNodes.stream()
-							.map(this.result::getAllOutgoingEdges).flatMap(Set::stream)
+							.map(this.result::getAllOutgoingEdges).flatMap(Collection::stream)
 							.filter(edge -> left.getStartNodes().contains(edge.getRight()))
 							.forEach(edge -> left.getEndNodes().stream()
 									.forEach(endNode -> this.result.createNewEdge(edge.getLabel(), endNode, edge.getRight())));
@@ -265,7 +265,7 @@ public class StateMachineGraphBuilder {
 		return new SubStateMachine(start, end);
 	}
 
-	private Set<CrySLMethod> retrieveAllMethodsFromEvents() {
+	private Collection<CrySLMethod> retrieveAllMethodsFromEvents() {
 		if (this.allMethods.isEmpty())
 			this.allMethods.addAll(CrySLReaderUtils.resolveEventsToCryslMethods(this.events));
 		return this.allMethods;

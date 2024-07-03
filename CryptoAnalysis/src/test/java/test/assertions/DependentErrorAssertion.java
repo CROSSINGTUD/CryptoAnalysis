@@ -1,9 +1,9 @@
 package test.assertions;
 
+import boomerang.scene.Statement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import crypto.analysis.errors.AbstractError;
-import soot.jimple.Stmt;
 import test.Assertion;
 
 import java.util.Collection;
@@ -12,14 +12,14 @@ import java.util.Map;
 
 public class DependentErrorAssertion implements Assertion {
 
-    private final Stmt errorLocation;
+    private final Statement errorLocation;
     private final List<AbstractError> extractedErrors = Lists.newArrayList();
     private final int thisAssertionID;
     private final int[] precedingAssertionIDs;
     private final Map<Integer,List<AbstractError>> idToErrors = Maps.newHashMap();
     private final List<DependentErrorAssertion> listener = Lists.newArrayList();
 
-    public DependentErrorAssertion(Stmt stmt, int thisAssertionID, int... precedingAssertionIDs) {
+    public DependentErrorAssertion(Statement stmt, int thisAssertionID, int... precedingAssertionIDs) {
         this.errorLocation = stmt;
         this.thisAssertionID = thisAssertionID;
         this.precedingAssertionIDs = precedingAssertionIDs;
@@ -59,10 +59,7 @@ public class DependentErrorAssertion implements Assertion {
     }
 
     public void addError(AbstractError error) {
-        if (!error.getErrorLocation().getUnit().isPresent()) {
-            return;
-        }
-        if (error.getErrorLocation().getUnit().get() == errorLocation) {
+        if (error.getErrorStatement().equals(errorLocation)) {
             extractedErrors.add(error);
             listener.forEach(a -> a.addErrorOfOtherLocations(error, thisAssertionID));
         }

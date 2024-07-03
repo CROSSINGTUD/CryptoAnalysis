@@ -1,51 +1,56 @@
 package crypto.rules;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-public class CrySLForbiddenMethod implements Serializable{
+public class CrySLForbiddenMethod {
 
-	private static final long serialVersionUID = 1L;
-	private CrySLMethod meth;
-	private Boolean silent;// = false;
-	private List<CrySLMethod> alternate;
-	
-	public CrySLForbiddenMethod(CrySLMethod method, Boolean silent) {
-		this(method, silent, new ArrayList<CrySLMethod>());
-	}
-	
-	public CrySLForbiddenMethod(CrySLMethod method, Boolean silent, List<CrySLMethod> alternatives) {
-		this.meth = method;
-		this.silent = silent;
-		this.alternate = alternatives;
+	private final CrySLMethod method;
+	private final Collection<CrySLMethod> alternatives;
+
+	public CrySLForbiddenMethod(CrySLMethod method, Collection<CrySLMethod> alternatives) {
+		this.method = method;
+		this.alternatives = alternatives;
 	}
 
 	public CrySLMethod getMethod() {
-		return meth;
+		return method;
 	}
 	
-	public Boolean getSilent() {
-		return silent;
+	public Collection<CrySLMethod> getAlternatives() {
+		return alternatives;
 	}
-	
-	public List<CrySLMethod> getAlternatives() {
-		return alternate;
-	}
-	
+
+	@Override
 	public String toString() {
-		final StringBuilder forbMethod = new StringBuilder();
-		forbMethod.append(meth.toString());
-		forbMethod.append("( silent: " + silent + ")");
-		if (!alternate.isEmpty()) {
-			forbMethod.append(" Alternatives: ");
+		final StringBuilder forbiddenMethod = new StringBuilder();
+		forbiddenMethod.append(method.toString());
+		if (!alternatives.isEmpty()) {
+			forbiddenMethod.append(" Alternatives: ");
 		}
 		
-		for (CrySLMethod meth : alternate) {
-			forbMethod.append(meth.toString());
+		for (CrySLMethod meth : alternatives) {
+			forbiddenMethod.append(meth.toString());
 		}
 		
-		return forbMethod.toString();
+		return forbiddenMethod.toString();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof CrySLForbiddenMethod)) {
+			return false;
+		}
+
+		CrySLForbiddenMethod other = (CrySLForbiddenMethod) obj;
+		if (!method.equals(other.getMethod())) {
+			return false;
+		}
+
+        return alternatives.equals(other.getAlternatives());
+    }
 	
 }

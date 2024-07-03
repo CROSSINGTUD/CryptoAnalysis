@@ -15,7 +15,7 @@ import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CrySLPredicate;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class HiddenPredicate extends EnsuredCrySLPredicate {
@@ -47,12 +47,12 @@ public class HiddenPredicate extends EnsuredCrySLPredicate {
      * Node: Errors are only in complete count at the end of the analysis.
      * @return errors list of all preceding errors
      */
-    public List<AbstractError> getPrecedingErrors(){
-        List<AbstractError> results = Lists.newArrayList();
-        List<AbstractError> allErrors = generatingSeed.getErrors();
+    public Collection<AbstractError> getPrecedingErrors(){
+        Collection<AbstractError> results = Lists.newArrayList();
+        Collection<AbstractError> allErrors = generatingSeed.getErrors();
         switch(type) {
             case GeneratingStateIsNeverReached:
-                List<AbstractError> typestateErrors = allErrors.stream().filter(e -> (e instanceof IncompleteOperationError || e instanceof TypestateError)).collect(Collectors.toList());
+                Collection<AbstractError> typestateErrors = allErrors.stream().filter(e -> (e instanceof IncompleteOperationError || e instanceof TypestateError)).collect(Collectors.toList());
                 if(typestateErrors.isEmpty()) {
                     // Seed object has no typestate errors that might be responsible for this hidden predicate
                     // TODO: report new info error type to report,
@@ -70,12 +70,13 @@ public class HiddenPredicate extends EnsuredCrySLPredicate {
             case ConditionIsNotSatisfied:
                 // Generating state was reached but the predicates condition is not satisfied.
                 // Thus, return all errors that causes the condition to be not satisfied
-                List<AbstractError> precedingErrors = Lists.newArrayList(generatingSeed.retrieveErrorsForPredCondition(this.getPredicate()));
+                Collection<AbstractError> precedingErrors = Lists.newArrayList(generatingSeed.retrieveErrorsForPredCondition(this.getPredicate()));
                 // This method is called from a RequiredPredicateError that wants to retrieve its preceding errors.
                 // In this case, preceding errors are not reported yet because the predicate condition wasn't required to be satisfied.
                 // Since the hidden predicate is required to be an ensured predicate, we can assume the condition required to be satisfied.
                 // Thus, we report all errors that causes the condition to be not satisfied.
-                precedingErrors.forEach(e -> this.generatingSeed.cryptoScanner.getAnalysisListener().reportError(generatingSeed, e));
+                //precedingErrors.forEach(e -> this.generatingSeed.scanner.getAnalysisListener().reportError(generatingSeed, e));
+                precedingErrors.forEach(e -> this.generatingSeed.scanner.getAnalysisReporter().reportError(generatingSeed, e));
                 // Further, preceding errors can be of type RequiredPredicateError.
                 // Thus, we have to recursively map preceding errors for the newly reported errors.
                 for(AbstractError e: precedingErrors) {

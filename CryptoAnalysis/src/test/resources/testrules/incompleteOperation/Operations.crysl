@@ -1,4 +1,4 @@
-SPEC tests.custom.incompleteoperation.Operations
+SPEC tests.error.incompleteoperation.Operations
 
 EVENTS
     Con: Operations();

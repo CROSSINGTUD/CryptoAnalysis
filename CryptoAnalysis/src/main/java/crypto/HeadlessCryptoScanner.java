@@ -1,336 +1,217 @@
 package crypto;
 
-import boomerang.callgraph.ObservableDynamicICFG;
-import boomerang.callgraph.ObservableICFG;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
+import boomerang.scene.CallGraph;
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
-import crypto.analysis.CrySLAnalysisListener;
-import crypto.analysis.CrySLResultsReporter;
+import com.google.common.collect.Table;
+import crypto.AnalysisSettings.AnalysisCallGraph;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.CryptoScannerSettings;
-import crypto.analysis.CryptoScannerSettings.ControlGraph;
-import crypto.analysis.CryptoScannerSettings.ReportFormat;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
+import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
-import crypto.preanalysis.SeedFactory;
+import crypto.listener.IAnalysisListener;
+import crypto.listener.IErrorListener;
 import crypto.preanalysis.TransformerSetup;
-import crypto.providerdetection.ProviderDetection;
-import crypto.reporting.CSVReporter;
-import crypto.reporting.CSVSummaryReporter;
-import crypto.reporting.CommandLineReporter;
-import crypto.reporting.GitHubAnnotationReporter;
 import crypto.reporting.Reporter;
-import crypto.reporting.SARIFReporter;
-import crypto.reporting.TXTReporter;
+import crypto.reporting.ReporterFactory;
 import crypto.rules.CrySLRule;
-import crypto.rules.CrySLRuleReader;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import soot.Body;
-import soot.BodyTransformer;
 import soot.EntryPoints;
 import soot.G;
 import soot.PackManager;
-import soot.PhaseOptions;
 import soot.Scene;
-import soot.SceneTransformer;
 import soot.SootMethod;
-import soot.Transform;
-import soot.Transformer;
-import soot.Unit;
 import soot.options.Options;
 import typestate.TransitionFunction;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
-public abstract class HeadlessCryptoScanner {
+public class HeadlessCryptoScanner {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
-	private static final CryptoScannerSettings settings = new CryptoScannerSettings();
-	private static Stopwatch callGraphWatch;
-	private static List<CrySLRule> rules = Lists.newArrayList();
-	private static String rulesetRootPath;
-	private static final CrySLRuleReader ruleReader = new CrySLRuleReader();
-	private boolean hasSeeds;
+
+	private final AnalysisSettings settings;
+	private final Collection<IAnalysisListener> analysisListeners = new HashSet<>();
+	private final Collection<IErrorListener> errorListeners = new HashSet<>();
+	private final Table<WrappedClass, Method, Set<AbstractError>> errorCollection = HashBasedTable.create();
 
 	public static int exitCode = 0;
 
+	public HeadlessCryptoScanner(String applicationPath, String rulesetDirectory) {
+		settings = new AnalysisSettings();
+
+		settings.setApplicationPath(applicationPath);
+		settings.setRulesetPath(rulesetDirectory);
+		settings.setReportFormats(new HashSet<>());
+	}
+
+	private HeadlessCryptoScanner(AnalysisSettings settings) {
+		this.settings = settings;
+	}
+
 	public static void main(String[] args) {
-		HeadlessCryptoScanner scanner = createFromCLISettings(args);
-		scanner.exec();
+		try {
+			HeadlessCryptoScanner scanner = createFromCLISettings(args);
+			scanner.run();
+		} catch (CryptoAnalysisParserException e) {
+			throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
+		}
 		System.exit(exitCode);
 	}
 
-	public static HeadlessCryptoScanner createFromCLISettings(String[] args) {
-		try {
-			settings.parseSettingsFromCLI(args);
-		} catch (CryptoAnalysisParserException e) {
-			LOGGER.error("Parser failed with error: " + e.getClass().toString(), e);
-			System.exit(-1);
-		}
-		
-		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner() {
+	public static HeadlessCryptoScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
+		AnalysisSettings analysisSettings = new AnalysisSettings();
+		analysisSettings.parseSettingsFromCLI(args);
 
-			@Override
-			protected String applicationClassPath() {
-				return settings.getApplicationPath();
-			}
-
-			@Override
-			protected List<CrySLRule> getRules() {
-				switch(settings.getRulesetPathType()) {
-					case DIR:
-						try {
-							File ruleSetDir = new File(settings.getRulesetPathDir());
-							rules.addAll(ruleReader.readFromDirectory(ruleSetDir));
-							rulesetRootPath = ruleSetDir.getParent();
-						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified directory: " + settings.getRulesetPathDir(), e);
-						}
-						break;
-					case ZIP:
-						try {
-							File ruleSetZip = new File(settings.getRulesetPathDir());
-							rules.addAll(ruleReader.readFromZipFile(ruleSetZip));
-							rulesetRootPath = ruleSetZip.getParent();
-						} catch (CryptoAnalysisException e) {
-							LOGGER.error("Error happened when getting the CrySL rules from the specified file: " + settings.getRulesetPathDir(), e);
-						}
-						break;
-					default:
-						LOGGER.error("Error happened when getting the CrySL rules from the specified file.");
-				}
-				return rules;
-			}
-			
-		};
-		return scanner;
+		return new HeadlessCryptoScanner(analysisSettings);
 	}
 
-	public void exec() {
+	public void run() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		if(isPreAnalysis()){
-			try {
-				initializeSootWithEntryPointAllReachable(false);
-			} catch (CryptoAnalysisException e) {
-				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
-			}
-			LOGGER.info("Pre-Analysis soot setup done in {} ", stopwatch);
-			checkIfUsesObject();
-			LOGGER.info("Pre-Analysis  finished in {}", stopwatch);
+		LOGGER.info("Setup Soot...");
+		setupSoot();
+		LOGGER.info("Soot setup done in {} ", stopwatch);
+
+		LOGGER.info("Starting analysis...");
+		analyze();
+		LOGGER.info("Analysis finished in {}", stopwatch);
+		stopwatch.stop();
+	}
+
+	private void setupSoot() {
+		try {
+			initializeSootWithEntryPointAllReachable();
+		} catch (CryptoAnalysisException e) {
+			throw new RuntimeException("Error happened while setting up Soot: " + e.getMessage());
 		}
-		if (!isPreAnalysis() || hasSeeds()) {
-			LOGGER.info("Using call graph algorithm {}", callGraphAlgorithm());
-			try {
-				initializeSootWithEntryPointAllReachable(true);
-			} catch (CryptoAnalysisException e) {
-				LOGGER.error("Error happened when executing HeadlessCryptoScanner.", e);
-			}
-
-			LOGGER.info("Analysis soot setup done in {} ", stopwatch);
-			analyse();
-			LOGGER.info("Analysis finished in {}", stopwatch);
-		}
-	}
-
-	public boolean hasSeeds(){
-		return hasSeeds;
-	}
-	
-	private void checkIfUsesObject() {
-		final SeedFactory seedFactory = new SeedFactory(HeadlessCryptoScanner.rules);
-		PackManager.v().getPack("jap").add(new Transform("jap.myTransform", new BodyTransformer() {
-			protected void internalTransform(Body body, String phase, Map<String, String> options) {
-				if (!body.getMethod().getDeclaringClass().isApplicationClass()) {
-					return;
-				}
-				for (Unit u : body.getUnits()) {
-					seedFactory.generate(body.getMethod(), u);
-				}
-			}
-		}));
-		PhaseOptions.v().setPhaseOption("jap.npc", "on");
-		PackManager.v().runPacks();
-		hasSeeds = seedFactory.hasSeeds();
-	}
-
-	private void analyse() {
-		Transform transform = new Transform("wjtp.ifds", createAnalysisTransformer());
-		PackManager.v().getPack("wjtp").add(transform);
-		callGraphWatch = Stopwatch.createStarted();
-		
 		PackManager.v().getPack("cg").apply();
-		PackManager.v().getPack("wjtp").apply();
-		// PackManager.v().runPacks();
+	}
+
+	private void analyze() {
+		// Create ruleset and reporter
+		LOGGER.info("Reading rules from {}", getRulesetDirectory());
+		Collection<CrySLRule> ruleset;
+		try {
+			RulesetReader reader = new RulesetReader();
+			ruleset = reader.readRulesFromPath(getRulesetDirectory());
+		} catch (IOException e) {
+			throw new RuntimeException("Could not read rules: " + e.getMessage());
+		}
+		LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
+
+		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
+
+		// Prepare for Boomerang
+		TransformerSetup.v().setupPreTransformer(ruleset);
+		CallGraph callGraph = new SootCallGraph();
+
+		// Initialize scanner
+		CryptoScanner scanner = new CryptoScanner(ruleset) {
+
+			@Override
+			public CallGraph callGraph() {
+				return callGraph;
+			}
+
+			@Override
+			public Collection<String> getIgnoredSections() {
+				return HeadlessCryptoScanner.this.getIgnoredSections();
+			}
+
+			@Override
+			public int getTimeout() {
+				return HeadlessCryptoScanner.this.getTimeout();
+			}
+
+			@Override
+			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+				if (!isVisualization()) {
+					return super.debugger(solver);
+				}
+
+				if (getReportDirectory() == null) {
+					LOGGER.error("The visualization requires the --reportDir option");
+					return super.debugger(solver);
+				}
+
+				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + ".json");
+				boolean created = vizFile.getParentFile().mkdirs();
+
+				if (!created) {
+					LOGGER.error("Could not create directory {}", vizFile.getAbsolutePath());
+					return new Debugger<>();
+				}
+
+				return new IDEVizDebugger<>(vizFile);
+			}
+		};
+
+		for (IAnalysisListener analysisListener : analysisListeners) {
+			scanner.addAnalysisListener(analysisListener);
+		}
+
+		for (IErrorListener errorListener : errorListeners) {
+			scanner.addErrorListener(errorListener);
+		}
+
+		// Run scanner
+		scanner.scan();
+
+		// Report the findings
+		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
+		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+		errorCollection.putAll(errors);
+
+		for (Reporter reporter : reporters) {
+			reporter.createAnalysisReport(discoveredSeeds, errors);
+		}
 	}
 	
 	public String toString() {
 		String s = "HeadlessCryptoScanner: \n";
-		s += "\tSoftwareIdentifier: " + softwareIdentifier() + "\n";
-		s += "\tApplicationClassPath: " + applicationClassPath() + "\n";
-		s += "\tSootClassPath: " + sootClassPath() + "\n\n";
+		s += "\tSoftwareIdentifier: " + getSoftwareIdentifier() + "\n";
+		s += "\tApplicationClassPath: " + getApplicationPath() + "\n";
+		s += "\tSootClassPath: " + getSootClassPath() + "\n\n";
 		return s;
 	}
 
-	private Transformer createAnalysisTransformer() {
-		return new SceneTransformer() {
-			
-			@Override
-			protected void internalTransform(String phaseName, Map<String, String> options) {
-				TransformerSetup.v().setupPreTransformer(rules);
-
-				ObservableDynamicICFG observableDynamicICFG = new ObservableDynamicICFG(false);
-				List<CrySLRule> rules = HeadlessCryptoScanner.rules;
-				
-				long callgraphConstructionTime = callGraphWatch.elapsed(TimeUnit.MILLISECONDS);
-				
-				final CrySLResultsReporter reporter = new CrySLResultsReporter();
-				Reporter fileReporter;
-				
-				Set<ReportFormat> formats = reportFormats();
-				
-				if (!formats.isEmpty()) {
-					for (ReportFormat format : formats) {
-						switch (format) {
-							case CMD:
-								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case TXT:
-								fileReporter = new TXTReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case SARIF:
-								fileReporter = new SARIFReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case CSV:
-								fileReporter = new CSVReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case CSV_SUMMARY:
-								fileReporter = new CSVSummaryReporter(getOutputFolder(), softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							case GITHUB_ANNOTATION:
-								fileReporter = new GitHubAnnotationReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-								break;
-							default:
-								fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-								reporter.addReportListener(fileReporter);
-						}
-					}
-				} else {
-					// if the --reportformat flag is not set or no format is specified, use the command line reporter as default
-					fileReporter = new CommandLineReporter(softwareIdentifier(), rules, callgraphConstructionTime, includeStatistics());
-					reporter.addReportListener(fileReporter);
-				}
-				
-				if(getAdditionalListener() != null) {
-					reporter.addReportListener(getAdditionalListener());	
-				}
-				
-				CryptoScanner scanner = new CryptoScanner() {
-
-					@Override
-					public ObservableICFG<Unit, SootMethod> icfg() {
-						return observableDynamicICFG;
-					}
-
-					@Override
-					public CrySLResultsReporter getAnalysisListener() {
-						return reporter;
-					}
-					
-					@Override
-					public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver, IAnalysisSeed seed) {
-						if(enableVisualization()) {
-							if(getOutputFolder() == null) {
-								LOGGER.error("The visualization requires the --reportDir option.");
-							}
-							
-							File vizFile = new File(getOutputFolder() + "/viz/ObjectId#" + seed.getObjectId() + ".json");
-							vizFile.getParentFile().mkdirs();
-							
-							return new IDEVizDebugger<>(vizFile, icfg());
-						}
-						return super.debugger(solver, seed);
-					}
-
-					@Override
-					public Collection<String> getForbiddenPredicates() {
-						return forbiddenPredicates();
-					}
-
-					@Override
-					public Collection<String> getIgnoredSections() {
-						return ignoredSections();
-					}
-
-				};
-				
-				if (providerDetection()) {
-					ProviderDetection providerDetection = new ProviderDetection(ruleReader);
-
-					if(rulesetRootPath == null) {
-						rulesetRootPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources";
-					}
-					
-					String detectedProvider = providerDetection.doAnalysis(observableDynamicICFG, rulesetRootPath);
-					
-					if(detectedProvider != null) {
-						rules.clear();
-						switch(settings.getRulesetPathType()) {
-							case DIR:
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
-								break;
-							case ZIP:
-								rules.addAll(providerDetection.chooseRulesZip(rulesetRootPath + File.separator + detectedProvider + ".zip"));
-								break;
-							default: 
-								rules.addAll(providerDetection.chooseRules(rulesetRootPath + File.separator + detectedProvider));
-						}
-					}
-				}
-				
-				scanner.scan(rules);
-			}
-		};
-	}
-
-	protected CrySLAnalysisListener getAdditionalListener() {
-		return null;
-	}
-
-	private void initializeSootWithEntryPointAllReachable(boolean wholeProgram) throws CryptoAnalysisException {
+	private void initializeSootWithEntryPointAllReachable() throws CryptoAnalysisException {
 		G.reset();
-		Options.v().set_whole_program(wholeProgram);
-		switch (callGraphAlgorithm()) {
-		case CHA:
-			Options.v().setPhaseOption("cg.cha", "on");
-			break;
-		case SPARKLIB:
-			Options.v().setPhaseOption("cg.spark", "on");
-			Options.v().setPhaseOption("cg", "library:any-subtype");
-			break;
-		case SPARK:
-			Options.v().setPhaseOption("cg.spark", "on");
-			break;
-		default:
-			throw new CryptoAnalysisException("No call graph option selected out of: CHA, SPARK_LIBRARY and SPARK");
+		Options.v().set_whole_program(true);
+
+		switch (getCallGraphAlgorithm()) {
+			case CHA:
+				Options.v().setPhaseOption("cg.cha", "on");
+				break;
+			case SPARK_LIB:
+				Options.v().setPhaseOption("cg.spark", "on");
+				Options.v().setPhaseOption("cg", "library:any-subtype");
+				break;
+			case SPARK:
+				Options.v().setPhaseOption("cg.spark", "on");
+				break;
+			default:
+				throw new CryptoAnalysisException("No call graph option selected out of: CHA, SPARK_LIB and SPARK");
 		}
+		LOGGER.info("Using call graph algorithm: {}", getCallGraphAlgorithm());
+
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);
 		Options.v().set_allow_phantom_refs(true);
@@ -342,116 +223,130 @@ public abstract class HeadlessCryptoScanner {
 		 * it is disabled.
 		 */
 		Options.v().setPhaseOption("jb.sils", "enabled:false");
+		// Options.v().setPhaseOption("jb", "use-original-names:true");
 
 		// JAVA 8
-		if(getJavaVersion() < 9)
-		{
+		if (getJavaVersion() < 9) {
 			Options.v().set_prepend_classpath(true);
-			Options.v().set_soot_classpath(sootClassPath()+ File.pathSeparator + pathToJCE());
+			Options.v().set_soot_classpath(getSootClassPath() + File.pathSeparator + pathToJCE());
 		}
 		// JAVA VERSION 9 && IS A CLASSPATH PROJECT
-		else if(getJavaVersion() >= 9 && !isModularProject())
-		{
-			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath());
+		else if(getJavaVersion() >= 9 && !isModularProject()) {
+			Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + getSootClassPath());
 		}
 		// JAVA VERSION 9 && IS A MODULEPATH PROJECT
-		else if(getJavaVersion() >= 9 && isModularProject())
-		{
+		else if(getJavaVersion() >= 9 && isModularProject()) {
 			Options.v().set_prepend_classpath(true);
-			Options.v().set_soot_modulepath(sootClassPath());
+			Options.v().set_soot_modulepath(getSootClassPath());
 		}
-		Options.v().set_process_dir(Arrays.asList(applicationClassPath().split(File.pathSeparator)));
-		Options.v().set_include(getIncludeList());
-		Options.v().set_exclude(getExcludeList());
+
+		Options.v().set_process_dir(Arrays.asList(settings.getApplicationPath().split(File.pathSeparator)));
+		Options.v().set_include(new ArrayList<>());
+		Options.v().set_exclude(new ArrayList<>());
 		Options.v().set_full_resolver(true);
 		Scene.v().loadNecessaryClasses();
 		Scene.v().setEntryPoints(getEntryPoints());
+
+		additionalSootSetup();
 	}
 
 	private List<SootMethod> getEntryPoints() {
 		List<SootMethod> entryPoints = Lists.newArrayList();
+
 		entryPoints.addAll(EntryPoints.v().application());
 		entryPoints.addAll(EntryPoints.v().methodsOfApplicationClasses());
+
 		return entryPoints;
 	}
-	
-	private List<String> getIncludeList() {
-		List<String> includeList = new LinkedList<String>();
-		includeList.add("java.lang.AbstractStringBuilder");
-		includeList.add("java.lang.Boolean");
-		includeList.add("java.lang.Byte");
-		includeList.add("java.lang.Class");
-		includeList.add("java.lang.Integer");
-		includeList.add("java.lang.Long");
-		includeList.add("java.lang.Object");
-		includeList.add("java.lang.String");
-		includeList.add("java.lang.StringCoding");
-		includeList.add("java.lang.StringIndexOutOfBoundsException");
-		return new LinkedList<>();
+
+	public void additionalSootSetup() {}
+
+	public void addAnalysisListener(IAnalysisListener analysisListener) {
+		analysisListeners.add(analysisListener);
 	}
 
-	private List<String> getExcludeList() {
-		List<String> exList = new LinkedList<String>();
-		List<CrySLRule> rules = getRules();
-
-		for (CrySLRule r : rules) {
-			exList.add(r.getClassName());
-		}
-		return exList;
-	}
-	
-	protected abstract List<CrySLRule> getRules();
-	
-	// used to set the rules when they are loaded from headless
-	// tests and not from CLI
-	public static void setRules(List<CrySLRule> rules) {
-		HeadlessCryptoScanner.rules = rules;
+	public void addErrorListener(IErrorListener errorListener) {
+		errorListeners.add(errorListener);
 	}
 
-	protected abstract String applicationClassPath();
-
-	protected ControlGraph callGraphAlgorithm() {
-		return settings.getControlGraph();
+	public Table<WrappedClass, Method, Set<AbstractError>> getErrorCollection() {
+		return errorCollection;
 	}
 
-	protected String sootClassPath() {
+	public AnalysisCallGraph getCallGraphAlgorithm() {
+		return settings.getCallGraph();
+	}
+
+	public void setCallGraphAlgorithm(AnalysisCallGraph analysisCallGraph) {
+		settings.setCallGraph(analysisCallGraph);
+	}
+
+	public String getSootClassPath() {
 		return settings.getSootPath();
 	}
+
+	public void setSootClassPath(String sootClassPath) {
+		settings.setSootPath(sootClassPath);
+	}
 	
-	protected String softwareIdentifier(){
+	public String getSoftwareIdentifier(){
 		return settings.getIdentifier();
 	}
+
+	public void setSoftwareIdentifier(String softwareIdentifier) {
+		settings.setIdentifier(softwareIdentifier);
+	}
 	
-	protected String getOutputFolder(){
+	public String getReportDirectory(){
 		return settings.getReportDirectory();
 	}
-	
-	protected boolean isPreAnalysis() {
-		return settings.isPreAnalysis();
+
+	public void setReportDirectory(String reportDirectory) {
+		settings.setReportDirectory(reportDirectory);
 	}
 
-	protected boolean enableVisualization(){
+	public String getApplicationPath() {
+		return settings.getApplicationPath();
+	}
+
+	public String getRulesetDirectory() {
+		return settings.getRulesetPath();
+	}
+
+	public boolean isVisualization(){
 		return settings.isVisualization();
 	}
+
+	public void setVisualization(boolean visualization) {
+		settings.setVisualization(visualization);
+	}
 	
-	protected Set<ReportFormat> reportFormats() {
+	public Set<Reporter.ReportFormat> getReportFormats() {
 		return settings.getReportFormats();
 	}
-	
-	protected boolean providerDetection() {
-		return settings.isProviderDetectionAnalysis();
-	}
-	
-	protected boolean includeStatistics() {
-		return settings.isIncludeStatistics();
+
+	public void setReportFormats(Reporter.ReportFormat... formats) {
+		setReportFormats(Arrays.asList(formats));
 	}
 
-	protected Collection<String> forbiddenPredicates() {
-		return settings.getForbiddenPredicates();
+	public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
+		settings.setReportFormats(reportFormats);
 	}
 
-	protected Collection<String> ignoredSections() {
+	public Collection<String> getIgnoredSections() {
 		return settings.getIgnoredSections();
+	}
+
+	public void setIgnoredSections(Collection<String> ignoredSections) {
+		settings.setIgnoredSections(ignoredSections);
+	}
+
+	public int getTimeout() {
+		return settings.getTimeout();
+	}
+
+	public void setTimeout(int timeout) {
+		settings.setTimeout(timeout);
 	}
 
 	private static String pathToJCE() {
@@ -461,19 +356,21 @@ public abstract class HeadlessCryptoScanner {
 	
 	private static int getJavaVersion() {
 	    String version = System.getProperty("java.version");
-	    if(version.startsWith("1.")) {
+	    if (version.startsWith("1.")) {
 	        version = version.substring(2, 3);
 	    } else {
 	        int dot = version.indexOf(".");
-	        if(dot != -1) { version = version.substring(0, dot); }
-	    } return Integer.parseInt(version);
+	        if (dot != -1) {
+				version = version.substring(0, dot);
+			}
+	    }
+		return Integer.parseInt(version);
 	}
 	
 	private boolean isModularProject() {
-		String applicationClassPath = applicationClassPath();
+		String applicationClassPath = settings.getApplicationPath();
 		File dirName = new File(applicationClassPath);
-	    String moduleFile = dirName + File.separator + "module-info.class";
-	    boolean check = new File(moduleFile).exists();
-	    return check;
+		String moduleFile = dirName + File.separator + "module-info.class";
+		return new File(moduleFile).exists();
 	}
 }

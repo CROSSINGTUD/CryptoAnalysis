@@ -1,12 +1,13 @@
 package crypto.reporting;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.HeadlessCryptoScanner;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.tagkit.Host;
+import crypto.utils.ErrorUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,19 +18,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
 public class GitHubAnnotationReporter extends CommandLineReporter {
+
     /**
      * Path to relate paths in the analyzed jar and the source tree.
      * <p>
      * Example:
-     * Relating the class {@code "example.IncompleOperationErrorExample"}
-     * to the source file {@code "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example/IncompleOperationErrorExample.java"}
+     * Relating the class {@code "example.IncompleteOperationErrorExample"}
+     * to the source file {@code "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example/IncompleteOperationErrorExample.java"}
      * requires a {@code basePath} of {@code "CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java"}.
      */
     private final String basePath;
@@ -39,26 +42,21 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
      * have to call this constructor.
      * TODO describe
      *
-     * @param softwareID                A {@link String} for the analyzed software.
-     * @param rules                     A {@link List} of {@link CrySLRule} containing the rules the program is analyzed with.
-     * @param callgraphConstructionTime The time in milliseconds for the construction of the callgraph.
-     * @param includeStatistics         Set this value to true, if the analysis report should contain some
-     *                                  analysis statistics (e.g. the callgraph construction time). If this value is set
-     *                                  to false, no statistics will be output.
+     * @param ruleset the ruleset used in the analysis
      */
-    public GitHubAnnotationReporter(String softwareID, List<CrySLRule> rules, long callgraphConstructionTime, boolean includeStatistics) {
-        super(softwareID, rules, callgraphConstructionTime, includeStatistics);
+    public GitHubAnnotationReporter(Collection<CrySLRule> ruleset) {
+        super(ruleset);
 
         basePath = getInput("basePath");
     }
 
     @Override
-    public void handleAnalysisResults() {
+    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
         System.out.println("::group::Annotations");
 
         // report errors on individual lines
-        for (Table.Cell<SootClass, SootMethod, Set<AbstractError>> cell : errorMarkers.cellSet()) {
-            SootClass clazz = cell.getRowKey();
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
+            WrappedClass clazz = cell.getRowKey();
             Path path = classToSourcePath(clazz);
 
             boolean sourceExists = Files.exists(path);
@@ -66,18 +64,18 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
             for (AbstractError error : cell.getValue()) {
                 String title = error.getClass().getSimpleName() + " violating CrySL rule for " + error.getRule().getClassName();
 
-                Integer line = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartLineNumber).or(-1);
+                Integer line = error.getErrorStatement().getStartLineNumber();
                 if (line == -1) {
                     line = null;
                 }
 
-                Integer column = error.getErrorLocation().getUnit().transform(Host::getJavaSourceStartColumnNumber).or(-1);
+                Integer column = error.getErrorStatement().getStartColumnNumber();
                 if (column == -1) {
                     column = null;
                 }
 
                 if (sourceExists) {
-                    ActionsAnnotation.printAnnotation(error.toErrorMarkerString(), title, path.toString(), line, null, column, null);
+                    GitHubAnnotationReporter.ActionsAnnotation.printAnnotation(error.toErrorMarkerString(), title, path.toString(), line, null, column, null);
                 } else {
                     // fall back to a "global" annotation when the corresponding source file could not be found
                     StringBuilder message = new StringBuilder(error.toErrorMarkerString());
@@ -92,7 +90,7 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
 
                     message.append(System.lineSeparator()).append(System.lineSeparator()).append("Corresponding source file could not be found (at ").append(path).append("). The base path might be set incorrectly.");
 
-                    ActionsAnnotation.printAnnotation(message.toString(), title, null, null, null, null, null);
+                    GitHubAnnotationReporter.ActionsAnnotation.printAnnotation(message.toString(), title, null, null, null, null, null);
                 }
             }
         }
@@ -100,22 +98,12 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         // report summary
         StringBuilder summary = new StringBuilder();
 
-        summary.append(String.format("Number of CrySL rules: %s\n", getRules().size()));
-        summary.append(String.format("Number of Objects Analyzed: %s\n", getObjects().size()));
-        int errorCount = errorMarkerCount.values().stream().reduce(0, Integer::sum);
-        summary.append(String.format("Number of violations: %s\n", errorCount));
+        summary.append(String.format("Number of CrySL rules: %s\n", ruleset.size()));
+        summary.append(String.format("Number of Objects Analyzed: %s\n", seeds.size()));
 
-        if (includeStatistics() && statistics != null) {
-            // add statistics to summary
-            summary.append("\nAdditional analysis statistics:\n");
-            summary.append(String.format("SoftwareID: %s\n", statistics.getSoftwareID()));
-            summary.append(String.format("SeedObjectCount: %d\n", statistics.getSeedObjectCount()));
-            summary.append(String.format("CryptoAnalysisTime (in ms): %d\n", statistics.getAnalysisTime()));
-            summary.append(String.format("CallgraphConstructionTime (in ms): %d\n", statistics.getCallgraphTime()));
-            summary.append(String.format("CallgraphReachableMethods: %d\n", statistics.getCallgraphReachableMethods()));
-            summary.append(String.format("CallgraphReachableMethodsWithActiveBodies: %d\n", statistics.getCallgraphReachableMethodsWithActiveBodies()));
-            summary.append(String.format("DataflowVisitedMethods: %d\n", statistics.getDataflowVisitedMethods()));
-        }
+        Map<String, Integer> errorCounts = ErrorUtils.getErrorCounts(errorCollection);
+        int errorCount = errorCounts.values().stream().reduce(0, Integer::sum);
+        summary.append(String.format("Number of violations: %s\n", errorCount));
 
         // GitHub only displays 10 error annotations and silently drops the rest.
         // https://github.com/orgs/community/discussions/26680
@@ -135,12 +123,11 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
 
         System.out.println("::endgroup::");
 
-        super.handleAnalysisResults();
+        super.createAnalysisReport(seeds, errorCollection);
     }
 
-    private Path classToSourcePath(SootClass clazz) {
-        return Paths.get(basePath, clazz.getName().replace('.', File.separatorChar) +
-                ".java");
+    private Path classToSourcePath(WrappedClass clazz) {
+        return Paths.get(basePath, clazz.getName().replace('.', File.separatorChar) + ".java");
     }
 
     /**

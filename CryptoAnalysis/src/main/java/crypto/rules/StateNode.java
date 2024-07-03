@@ -1,15 +1,10 @@
 package crypto.rules;
 
-public class StateNode implements java.io.Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class StateNode  {
 
 	private final String name;
 
-	private Boolean init;
+	private final Boolean init;
 	private Boolean accepting;
 	private int hopsToAccepting = Integer.MAX_VALUE;
 

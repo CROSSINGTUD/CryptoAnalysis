@@ -1,5 +1,10 @@
 package crypto.cryslhandler;
 
+import com.google.common.base.Splitter;
+import crypto.HeadlessCryptoScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -9,17 +14,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Splitter;
-
-import crypto.HeadlessCryptoScanner;
 
 /**
  * Appendable, virtual classpath extension, allowing to add custom elements, even after the actual classpath was already set.
@@ -29,13 +25,13 @@ public class CrySLModelReaderClassPath {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
     private final static URL[] javaRuntimeClassPath;
-    private final Set<URL> virtualClassPath;
+    private final Collection<URL> virtualClassPath;
 
     public static final CrySLModelReaderClassPath JAVA_CLASS_PATH = new CrySLModelReaderClassPath();
 
     static {
 
-        List<String> runtimeClassPath = Splitter.on(File.pathSeparatorChar).splitToList(System.getProperty("java.class.path"));
+        Collection<String> runtimeClassPath = Splitter.on(File.pathSeparatorChar).splitToList(System.getProperty("java.class.path"));
         javaRuntimeClassPath = runtimeClassPath.stream()
                 .map((it) -> {
                     try {
@@ -61,7 +57,7 @@ public class CrySLModelReaderClassPath {
      * 
      * @param virtualClassPath the virtual class path
      */
-    public CrySLModelReaderClassPath(Set<URL> virtualClassPath) {
+    public CrySLModelReaderClassPath(Collection<URL> virtualClassPath) {
         this.virtualClassPath = virtualClassPath;
     }
 
@@ -72,7 +68,7 @@ public class CrySLModelReaderClassPath {
      * @return the model reader class path instance for the given virtual class path
      */
     public static CrySLModelReaderClassPath createFromPaths(Collection<Path> virtualClassPath) {
-        Set<URL> urlClassPath = virtualClassPath.stream()
+        Collection<URL> urlClassPath = virtualClassPath.stream()
                 .map((it) -> {
                     try {
                         return it.toAbsolutePath().toUri().toURL();
@@ -93,7 +89,7 @@ public class CrySLModelReaderClassPath {
      * @return the model reader class path instance for the given virtual class path
      */
     public static CrySLModelReaderClassPath createFromURIs(Collection<URI> virtualClassPath) {
-        Set<URL> urlClassPath = virtualClassPath.stream()
+        Collection<URL> urlClassPath = virtualClassPath.stream()
                 .map((it) -> {
                     try {
                         return it.toURL();
@@ -113,9 +109,9 @@ public class CrySLModelReaderClassPath {
      * @return A copy of the current state of the classpath.
      */
     public URL[] getClassPath() {
-        if (virtualClassPath.size() == 0)
+        if (virtualClassPath.isEmpty())
             return javaRuntimeClassPath.clone();
-        Set<URL> classPath = new HashSet<>();
+        Collection<URL> classPath = new HashSet<>();
         classPath.addAll(Arrays.asList(javaRuntimeClassPath));
         classPath.addAll(virtualClassPath);
         return classPath.toArray(new URL[0]);
