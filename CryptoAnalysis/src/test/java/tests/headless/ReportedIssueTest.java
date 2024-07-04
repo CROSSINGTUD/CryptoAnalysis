@@ -20,6 +20,9 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<issueseeds.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+
+		setErrorsCount("<issue208.Issue208WithSingleEntryPoint: void encryptImpl()>", RequiredPredicateError.class, 0);
+		setErrorsCount("<issue208.Issue208WithMultipleEntryPoints: void encryptImpl()>", RequiredPredicateError.class, 1);
 		
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", ConstraintError.class, 1);
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
