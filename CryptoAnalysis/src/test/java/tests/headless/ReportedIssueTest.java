@@ -43,6 +43,9 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
 		setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
 
+		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", IncompleteOperationError.class, 1);
+		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", RequiredPredicateError.class, 4);
+
 		// TODO toCharArray() is not currently not considered when evaluating NeverTypeOfErrors
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", NeverTypeOfError.class, 0);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 3);
