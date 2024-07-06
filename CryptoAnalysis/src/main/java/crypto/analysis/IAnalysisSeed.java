@@ -6,8 +6,6 @@ import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import typestate.TransitionFunction;
 
 import java.math.BigInteger;
@@ -17,8 +15,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public abstract class IAnalysisSeed {
-
-	protected static final Logger LOGGER = LoggerFactory.getLogger(IAnalysisSeed.class);
 
 	protected final CryptoScanner scanner;
 	protected final PredicateHandler predicateHandler;
