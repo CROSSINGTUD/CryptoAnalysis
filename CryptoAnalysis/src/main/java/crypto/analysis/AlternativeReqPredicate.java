@@ -10,20 +10,15 @@ import java.util.stream.Collectors;
 
 public class AlternativeReqPredicate implements ISLConstraint {
 
-	private final Statement stmt;
 	private final List<CrySLPredicate> alternatives;
+	private final Statement stmt;
+	private final int paramIndex;
 
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne, Statement stmt) {
+	public AlternativeReqPredicate(CrySLPredicate alternativeOne, Statement stmt, int paramIndex) {
 		this.alternatives = new ArrayList<>();
 		this.alternatives.add(alternativeOne);
-		this.stmt = stmt;	
-	}
-	
-	public AlternativeReqPredicate(CrySLPredicate alternativeOne, CrySLPredicate alternativeTwo, Statement stmt) {
-		this.alternatives = new ArrayList<>();
-		this.alternatives.add(alternativeOne);
-		this.alternatives.add(alternativeTwo);
 		this.stmt = stmt;
+		this.paramIndex = paramIndex;
 	}
 
 	@Override
@@ -32,6 +27,7 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		int result = 1;
 		result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
 		result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
+		result = prime * result + paramIndex;
 		return result;
 	}
 
@@ -51,16 +47,24 @@ public class AlternativeReqPredicate implements ISLConstraint {
 			return false;
 		if (stmt == null) {
             return other.stmt == null;
-		} else return stmt.equals(other.stmt);
+		} else if (!stmt.equals(other.stmt)) {
+			return false;
+		}
+
+		return paramIndex == other.paramIndex;
     }
 
 	public Statement getLocation() {
 		return stmt;
 	}
 
+	public int getParamIndex() {
+		return paramIndex;
+	}
+
 	@Override
 	public String toString() {
-		return "misses " + alternatives.stream().map(CrySLPredicate::toString).collect(Collectors.joining(" OR ")) + ((stmt != null) ? " @ " + stmt : "");
+		return alternatives.stream().map(CrySLPredicate::toString).collect(Collectors.joining(" OR ")) + " @ " + stmt + " @ index " + paramIndex;
 	}
 
 	@Override
@@ -81,8 +85,8 @@ public class AlternativeReqPredicate implements ISLConstraint {
 		return alternatives;
 	}
 	
-	public boolean addAlternative(CrySLPredicate newAlt) {
-		return alternatives.add(newAlt);
+	public void addAlternative(CrySLPredicate newAlt) {
+		alternatives.add(newAlt);
 	}
 
 }

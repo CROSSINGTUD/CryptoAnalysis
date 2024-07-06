@@ -190,6 +190,7 @@ public class StateMachineGraphBuilder {
 			// We therefore create a Node and a transition from all startNodes
 			// to this node and a loop from the node to itself.
 			StateNode node = this.result.createNewNode();
+			node.setAccepting(true);
 			Collection<CrySLMethod> label = new HashSet<>(retrieveAllMethodsFromEvents());
 			
 			for (StateNode startNode : startNodes) {

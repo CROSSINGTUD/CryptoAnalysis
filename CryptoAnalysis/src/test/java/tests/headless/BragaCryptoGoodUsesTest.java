@@ -182,7 +182,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", TypestateError.class, 1);
 				
 		// negative test case
@@ -202,7 +203,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", TypestateError.class, 1);
 
 		// negative test case
@@ -216,7 +218,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
@@ -230,7 +233,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
@@ -240,7 +244,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", TypestateError.class, 1);
 				
 		// negative test case
@@ -343,7 +348,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<example.OAEP_2048x256_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.OAEP_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.OAEP_2048x256_1: void positiveTestCase()>", TypestateError.class, 1);
 
 		// negative test case
@@ -363,7 +369,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.OAEP_2048x384_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x384_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.OAEP_2048x384_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.OAEP_2048x384_1: void positiveTestCase()>", TypestateError.class, 1);
 
 		// negative test case
@@ -383,7 +390,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<example.OAEP_2048x512_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.OAEP_2048x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.OAEP_2048x512_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.OAEP_2048x512_1: void positiveTestCase()>", TypestateError.class, 1);
 
 		// negative test case
@@ -779,7 +787,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
 		// positive test case
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig112bitsRSA_2048x256_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
@@ -799,7 +808,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_3072x384_1: void positiveTestCase()>", TypestateError.class, 1);
 
 		// negative test case
@@ -813,7 +823,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig128bitsRSA_4096x512_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
@@ -827,7 +838,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x384_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case
@@ -847,7 +859,8 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 		
 		// positive test case
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		// This is correct because there are two different 'SHA-256' variables, i.e. the pred is ensured on the first but not on the second one
+		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<example.SecureConfig192bitsRSA_7680x512_1: void positiveTestCase()>", TypestateError.class, 1);
 		
 		// negative test case

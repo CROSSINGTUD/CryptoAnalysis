@@ -16,7 +16,7 @@ ORDER
 
 REQUIRES
     generatedTarget[target1];
-    generatedTargetWithAlternatives[target2];
+    generatedTargetWithAlternatives[target2] || generatedAlternative1[target2] || generatedAlternative2[target2];
 
 ENSURES
     usedTarget[this];

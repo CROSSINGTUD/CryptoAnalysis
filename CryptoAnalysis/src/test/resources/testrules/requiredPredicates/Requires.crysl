@@ -191,7 +191,11 @@ REQUIRES
 	pred1[p1inO2] || !pred1[p2inO2];
 	!pred1[p1inO3] || pred1[p2inO3];
 	!pred1[p1inO4] || !pred1[p2inO4];
-	pred1[p1inO5] || pred2[p2inO5];
+
+	// pred1[p1inO5] or pred2[p2inO5];
+	// !pred1[p1inO5] => pred2[p2inO5];   negated condition not supported
+	// !pred2[p2inO5] => pred1[p1inO5];   negated condition not supported
+
 	pred1[p1inO6] || !pred2[p2inO6];
 	!pred1[p1inO7] || pred2[p2inO7];
 	!pred1[p1inO8] || !pred2[p2inO8];

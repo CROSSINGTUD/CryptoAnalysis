@@ -39,6 +39,7 @@ import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
@@ -61,7 +63,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
 	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
 
-	private final Collection<EnsuredCrySLPredicate> ensuredPredicates = Sets.newHashSet();
+	private final Map<Statement, Set<Map.Entry<EnsuredCrySLPredicate, Integer>>> ensuredPredicates = new HashMap<>();
 	private final Collection<EnsuredCrySLPredicate> indirectlyEnsuredPredicates = Sets.newHashSet();
 	private final Collection<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
 
@@ -323,17 +325,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * predicate checks
 	 *
 	 * @param ensPred the ensured predicate
+	 * @param statement the statement where the predicate should be ensured
+	 * @param paramIndex the parameter index where the predicate is ensured (-1 for predicates on this seed)
 	 */
-	public void addEnsuredPredicate(EnsuredCrySLPredicate ensPred) {
-		// Hidden predicates do not satisfy any constraints
+	public void addEnsuredPredicate(EnsuredCrySLPredicate ensPred, Statement statement, int paramIndex) {
 		if (ensPred instanceof HiddenPredicate) {
 			HiddenPredicate hiddenPredicate = (HiddenPredicate) ensPred;
 			hiddenPredicates.add(hiddenPredicate);
 			return;
 		}
 
-		// If the predicate was not ensured before, ensure it and check the constraints
-		if (ensuredPredicates.add(ensPred)) {
+		Map.Entry<EnsuredCrySLPredicate, Integer> predAtIndex = new AbstractMap.SimpleEntry<>(ensPred, paramIndex);
+		if (ensuredPredicates.computeIfAbsent(statement, k -> new HashSet<>()).add(predAtIndex)) {
 			checkConstraintsAndEnsurePredicates();
 		}
 	}
@@ -359,7 +362,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 				isPredicateGeneratingStateAvailable = true;
 				EnsuredCrySLPredicate ensPred;
-				if (!satisfiesConstraintSystem && !predToBeEnsured.getConstraint().isPresent()) {
+				if (!satisfiesConstraintSystem && predToBeEnsured.getConstraint().isEmpty()) {
 					// predicate has no condition, but the constraint system is not satisfied
 					ensPred = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConstraintsAreNotSatisfied);
 				} else if (predToBeEnsured.getConstraint().isPresent() && !isPredConditionSatisfied(predToBeEnsured)) {
@@ -502,7 +505,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (baseType.getWrappedClass().getName().equals(rule.getClassName())) {
 				Optional<AnalysisSeedWithSpecification> seed = scanner.getSeedWithSpec(AnalysisSeedWithSpecification.makeSeedForComparison(scanner, statement, fact, rule));
 
-				if (!seed.isPresent()) {
+				if (seed.isEmpty()) {
 					LOGGER.debug("{} has not been discovered in the Typestate Analysis", seed);
 					continue;
 				}
@@ -516,7 +519,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		if (!specificationExists) {
 			Optional<AnalysisSeedWithEnsuredPredicate> seed = scanner.getSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate.makeSeedForComparison(scanner, statement, fact));
 
-			if (!seed.isPresent()) {
+			if (seed.isEmpty()) {
 				LOGGER.debug("{} has not been discovered in the Typestate Analysis", seed);
 				return;
 			}
@@ -569,7 +572,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			/* Add the predicate with 'this' to the ensured predicates, check the required predicate constraints
 			 * and ensure it in all accepting states that do not negate it
 			 */
-			addEnsuredPredicate(predWithThis);
 			for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
 				Collection<? extends State> states = getTargetStates(c.getValue());
 
@@ -694,7 +696,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 */
 	private boolean isConstraintSystemSatisfied() {
 		if (internalConstraintsSatisfied) {
-			return checkPredicates().isEmpty();
+			return computeMissingPredicates().isEmpty();
 		}
 		return false;
 	}
@@ -705,25 +707,24 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 *
 	 * @return remainingPredicates predicates that are not satisfied
 	 */
-	public Collection<ISLConstraint> checkPredicates() {
-		Collection<ISLConstraint> requiredPredicates = Lists.newArrayList();
-		for (ISLConstraint con : constraintSolver.getRequiredPredicates()) {
-			if (!ConstraintSolver.predefinedPreds.contains((con instanceof RequiredCrySLPredicate) ? ((RequiredCrySLPredicate) con).getPred().getPredName()
-					: ((AlternativeReqPredicate) con).getAlternatives().get(0).getPredName())) {
-				requiredPredicates.add(con);
-			}
-		}
-		Collection<ISLConstraint> remainingPredicates = Sets.newHashSet(requiredPredicates);
+	public Collection<ISLConstraint> computeMissingPredicates() {
+		Collection<ISLConstraint> requiredPredicates = constraintSolver.getRequiredPredicates();
+		Collection<ISLConstraint> remainingPredicates = new HashSet<>(requiredPredicates);
 
 		for (ISLConstraint pred : requiredPredicates) {
+			Set<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement = ensuredPredicates.getOrDefault(pred.getLocation(), new HashSet<>());
+
 			if (pred instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
+				int reqParamIndex = reqPred.getParamIndex();
 
 				if (reqPred.getPred().isNegated()) {
+					// Check for negated predicates, e.g. !randomized
 					boolean violated = false;
 
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
+					// Negated predicates are violated if the corresponding predicate is ensured
+					for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+						if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
 							violated = true;
 						}
 					}
@@ -732,29 +733,31 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						remainingPredicates.remove(pred);
 					}
 				} else {
-					for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-						if (reqPred.getPred().equals(ensPred.getPredicate()) && doPredsMatch(reqPred.getPred(), ensPred)) {
+					// Check for basic required predicates, e.g. randomized
+					for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+						if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
 							remainingPredicates.remove(pred);
 						}
 					}
 				}
 			} else if (pred instanceof AlternativeReqPredicate) {
-				AlternativeReqPredicate alt = (AlternativeReqPredicate) pred;
-				Collection<CrySLPredicate> alternatives = alt.getAlternatives();
+				AlternativeReqPredicate altPred = (AlternativeReqPredicate) pred;
+				Collection<CrySLPredicate> alternatives = altPred.getAlternatives();
 				Collection<CrySLPredicate> positives = alternatives.stream().filter(e -> !e.isNegated()).collect(Collectors.toList());
 				Collection<CrySLPredicate> negatives = alternatives.stream().filter(CrySLPredicate::isNegated).collect(Collectors.toList());
+				int altParamIndex = altPred.getParamIndex();
 
 				boolean satisfied = false;
 				Collection<CrySLPredicate> ensuredNegatives = alternatives.stream().filter(CrySLPredicate::isNegated).collect(Collectors.toList());
 
-				for (EnsuredCrySLPredicate ensPred : ensuredPredicates) {
-					// Check if any positive alternative is satisfied by the ensured predicate
-					if (positives.stream().anyMatch(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred))) {
+				for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+					// If any positive alternative is satisfied, the whole predicate is satisfied
+					if (positives.stream().anyMatch(e -> doReqPredAndEnsPredMatch(e, altParamIndex, ensPredAtIndex))) {
 						satisfied = true;
 					}
 
-					// Negated alternatives that are ensured are not satisfied
-					Collection<CrySLPredicate> violatedNegAlternatives = negatives.stream().filter(e -> e.equals(ensPred.getPredicate()) && doPredsMatch(e, ensPred)).collect(Collectors.toList());
+					// Remove all negated alternatives that are ensured
+					Collection<CrySLPredicate> violatedNegAlternatives = negatives.stream().filter(e -> doReqPredAndEnsPredMatch(e, altParamIndex, ensPredAtIndex)).collect(Collectors.toList());
 					ensuredNegatives.removeAll(violatedNegAlternatives);
 				}
 
@@ -764,20 +767,28 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			}
 		}
 
-		for (ISLConstraint rem : Lists.newArrayList(remainingPredicates)) {
+		// Check conditional required predicates
+		for (ISLConstraint rem : new HashSet<>(remainingPredicates)) {
 			if (rem instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate singlePred = (RequiredCrySLPredicate) rem;
+
 				if (isPredConditionSatisfied(singlePred.getPred())) {
 					remainingPredicates.remove(singlePred);
 				}
 			} else if (rem instanceof AlternativeReqPredicate) {
 				Collection<CrySLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
+
 				if (altPred.parallelStream().anyMatch(this::isPredConditionSatisfied)) {
 					remainingPredicates.remove(rem);
 				}
 			}
 		}
+
 		return remainingPredicates;
+	}
+
+	private boolean doReqPredAndEnsPredMatch(CrySLPredicate reqPred, int reqPredIndex, Map.Entry<EnsuredCrySLPredicate, Integer> ensPred) {
+		return reqPred.equals(ensPred.getKey().getPredicate()) && doPredsMatch(reqPred, ensPred.getKey()) && reqPredIndex == ensPred.getValue();
 	}
 
 	/**
