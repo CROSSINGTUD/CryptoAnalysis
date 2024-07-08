@@ -4,13 +4,14 @@ import com.google.crypto.tink.HybridDecrypt;
 import com.google.crypto.tink.HybridEncrypt;
 import com.google.crypto.tink.KeysetHandle;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import com.google.crypto.tink.hybrid.HybridKeyTemplates;
 import com.google.crypto.tink.proto.EcPointFormat;
 import com.google.crypto.tink.proto.EllipticCurveType;
 import com.google.crypto.tink.proto.HashType;
-import com.google.crypto.tink.proto.KeyTemplate;
+import com.google.crypto.tink.KeyTemplate;
 import org.junit.Ignore;
 import org.junit.Test;
 import test.TestConstants;
@@ -28,12 +29,9 @@ public class TestHybridEncryption extends TestTinkPrimitives {
 
 	@Test
 	public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_GCMKeySet() throws GeneralSecurityException {
-		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(EllipticCurveType.NIST_P256,
-		          HashType.SHA256,
-		          EcPointFormat.UNCOMPRESSED,
-		          AeadKeyTemplates.AES128_GCM,
-		          new byte[0]);
-		          
+
+		KeyTemplate kt = EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128GcmTemplate();
+
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.hasEnsuredPredicate(kt);
 		Assertions.mustBeInAcceptingState(kt);
@@ -42,13 +40,10 @@ public class TestHybridEncryption extends TestTinkPrimitives {
 	
 	@Test
 	public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256KeySet() throws GeneralSecurityException {
-		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
-		          EllipticCurveType.NIST_P256,
-		          HashType.SHA256,
-		          EcPointFormat.UNCOMPRESSED,
-		          AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-		          new byte[0]);
-		          
+
+
+
+		KeyTemplate kt = EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template();
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		Assertions.hasEnsuredPredicate(kt);
 		Assertions.mustBeInAcceptingState(kt);
@@ -61,15 +56,10 @@ public class TestHybridEncryption extends TestTinkPrimitives {
 		Assertions.notHasEnsuredPredicate(kt);
 	}
 	
-	
+
 	@Test
 	public void encryptUsingECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256KeySet() throws GeneralSecurityException {
-		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
-		          EllipticCurveType.NIST_P256,
-		          HashType.SHA256,
-		          EcPointFormat.UNCOMPRESSED,
-		          AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-		          new byte[0]);
+		KeyTemplate kt = EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template();
 		          
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		KeysetHandle publicKsh = ksh.getPublicKeysetHandle();
@@ -88,13 +78,7 @@ public class TestHybridEncryption extends TestTinkPrimitives {
 	
 	@Test
 	public void decryptUsingECIES_P256_HKDF_HMAC_SHA256_AES128_CTR_HMAC_SHA256KeySet() throws GeneralSecurityException {
-		KeyTemplate kt = HybridKeyTemplates.createEciesAeadHkdfKeyTemplate(
-		          EllipticCurveType.NIST_P256,
-		          HashType.SHA256,
-		          EcPointFormat.UNCOMPRESSED,
-		          AeadKeyTemplates.AES128_CTR_HMAC_SHA256,
-		          new byte[0]);
-		          
+		KeyTemplate kt = EciesAeadHkdfPrivateKeyManager.eciesP256HkdfHmacSha256Aes128CtrHmacSha256Template();
 		KeysetHandle ksh = KeysetHandle.generateNew(kt);
 		
 		HybridDecrypt cipher = HybridDecryptFactory.getPrimitive(ksh);
