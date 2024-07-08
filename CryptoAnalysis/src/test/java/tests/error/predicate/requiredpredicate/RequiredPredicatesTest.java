@@ -63,7 +63,6 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 	// AND
 	
 	// same predicate
-	@Ignore
 	@Test
 	public void pred1onPos1_AND_pred1onPos2() {
 		A pred1onA = new A();
@@ -314,6 +313,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 	// OR
 	
 	// same predicate
+	@Ignore("Requires negated conditional predicates. Alternative predicate have to belong to the same object")
 	@Test
 	public void pred1onPos1_OR_pred1onPos2(){
 		A pred1onA = new A();
@@ -442,6 +442,9 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 	}
 
 	// multi predicates
+	@Ignore("Can be tested since negated conditions in the REQUIRES section are not supported" +
+			"Alternative predicates on different objects o1 and o2 (p1[o1] || p2[o2] have to be rewritten as" +
+			"!p1[o1] => p2[o2]; and !p2[o2] => p1[o1];")
 	@Test
 	public void pred1onPos1_OR_pred2onPos2() {
 		A pred1onA = new A();
@@ -582,7 +585,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 	}
 	
 	// 3 cases same predicate
-	
+	@Ignore("Negated conditions are not supported see above")
 	@Test
 	public void pred1onPos1_OR_pred1onPos2_OR_pred1onPos3() {
 		A pred1onA = new A();

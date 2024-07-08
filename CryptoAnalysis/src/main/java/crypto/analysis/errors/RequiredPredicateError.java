@@ -1,14 +1,14 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.Statement;
+import crypto.analysis.AlternativeReqPredicate;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.HiddenPredicate;
-import crypto.analysis.IAnalysisSeed;
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.analysis.RequiredCrySLPredicate;
 import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -17,16 +17,24 @@ import java.util.stream.Collectors;
  */
 public class RequiredPredicateError extends AbstractError {
 
-	private final Collection<CrySLPredicate> contradictedPredicate;
-	private final CallSiteWithExtractedValue extractedValues;
 	private final Collection<HiddenPredicate> hiddenPredicates;
+	private final Collection<CrySLPredicate> contradictedPredicates;
+	private final int paramIndex;
 
-	public RequiredPredicateError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CallSiteWithExtractedValue cs, Collection<CrySLPredicate> contradictedPredicates) {
-		super(seed, errorStmt, rule);
+	public RequiredPredicateError(AnalysisSeedWithSpecification seed, RequiredCrySLPredicate violatedPred) {
+		super(seed, violatedPred.getLocation(), seed.getSpecification());
 
-		this.contradictedPredicate = contradictedPredicates;
-		this.extractedValues = cs;
 		this.hiddenPredicates = new HashSet<>();
+		this.contradictedPredicates = Collections.singletonList(violatedPred.getPred());
+		this.paramIndex = violatedPred.getParamIndex();
+	}
+
+	public RequiredPredicateError(AnalysisSeedWithSpecification seed, AlternativeReqPredicate violatedPred) {
+		super(seed, violatedPred.getLocation(), seed.getSpecification());
+
+		this.hiddenPredicates = new HashSet<>();
+		this.contradictedPredicates = violatedPred.getAlternatives();
+		this.paramIndex = violatedPred.getParamIndex();
 	}
 
 	public void addHiddenPredicates(Collection<HiddenPredicate> hiddenPredicates) {
@@ -46,20 +54,20 @@ public class RequiredPredicateError extends AbstractError {
 	 * @return list of contradicting predicates
 	 */
 	public Collection<CrySLPredicate> getContradictedPredicates() {
-		return contradictedPredicate;
-	}
-	
-	public CallSiteWithExtractedValue getExtractedValues() {
-		return extractedValues;
+		return contradictedPredicates;
 	}
 
 	public Collection<HiddenPredicate> getHiddenPredicates() {
 		return hiddenPredicates;
 	}
 
+	public int getParamIndex() {
+		return paramIndex;
+	}
+
 	@Override
 	public String toErrorMarkerString() {
-		StringBuilder msg = new StringBuilder(extractedValues.toString());
+		StringBuilder msg = new StringBuilder(getParamIndexAsText());
 		msg.append(" was not properly generated as ");
 		String predicateName = getContradictedPredicates().stream().map(CrySLPredicate::getPredName).collect(Collectors.joining(" OR "));
 		String[] parts = predicateName.split("(?=[A-Z])");
@@ -67,20 +75,47 @@ public class RequiredPredicateError extends AbstractError {
 		for (int i = 1; i < parts.length; i++) {
 			msg.append(parts[i]);
 		}
-
-		if (predicateName.equals("preparedIV") && extractedValues.toString().equals("Third parameter")) {
-			msg.append(" [ with CBC, It's required to use IVParameterSpec]");
-		}
 		return msg.toString();
+	}
+
+	private String getParamIndexAsText() {
+		String res;
+		switch(paramIndex) {
+			case -1:
+				return "Return value";
+			case 0:
+				res = "First ";
+				break;
+			case 1:
+				res = "Second ";
+				break;
+			case 2:
+				res = "Third ";
+				break;
+			case 3:
+				res = "Fourth ";
+				break;
+			case 4:
+				res = "Fifth ";
+				break;
+			case 5:
+				res = "Sixth ";
+				break;
+			default:
+				res = (paramIndex + 1) + "th ";
+				break;
+		}
+		res += "parameter";
+		return res;
 	}
 	
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(new Object[]{
 				super.hashCode(),
-				contradictedPredicate,
-				extractedValues,
-				hiddenPredicates
+				hiddenPredicates,
+				contradictedPredicates,
+				paramIndex
 		});
 	}
 
@@ -91,26 +126,20 @@ public class RequiredPredicateError extends AbstractError {
 		if (getClass() != obj.getClass()) return false;
 
 		RequiredPredicateError other = (RequiredPredicateError) obj;
-		if (contradictedPredicate == null) {
-			if (other.getContradictedPredicates() != null) return false;
-		} else if (!contradictedPredicate.equals(other.getContradictedPredicates())) {
-			return false;
-		}
-
-		if (extractedValues == null) {
-			if (other.getExtractedValues() != null) return false;
-		} else if (!extractedValues.equals(other.getExtractedValues())) {
-			return false;
-		}
-
 		if (hiddenPredicates == null) {
 			if (other.getHiddenPredicates() != null) return false;
-		} else if (!hiddenPredicates.equals(other.getHiddenPredicates())) {
+		} else if (!hiddenPredicates.equals(other.hiddenPredicates)) {
 			return false;
 		}
 
-		return true;
-	}
+		if (contradictedPredicates == null) {
+			if (other.getContradictedPredicates() != null) return false;
+		} else if (!contradictedPredicates.equals(other.getContradictedPredicates())) {
+			return false;
+		}
+
+        return paramIndex == other.getParamIndex();
+    }
 
 	@Override
 	public String toString() {

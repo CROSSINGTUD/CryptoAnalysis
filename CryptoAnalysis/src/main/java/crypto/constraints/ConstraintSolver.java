@@ -19,6 +19,7 @@ import crypto.rules.CrySLRule;
 import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.ISLConstraint;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -138,7 +139,7 @@ public class ConstraintSolver {
 				ISLConstraint left = ((CrySLConstraint) cons).getLeft();
 
 				if (left instanceof CrySLPredicate && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
-					requiredPredicates.addAll(collectAlternativePredicates((CrySLConstraint) cons, Lists.newArrayList()));
+					requiredPredicates.addAll(collectAlternativePredicates((CrySLConstraint) cons, new ArrayList<>()));
 				} else {
 					relConstraints.add(cons);
 				}
@@ -154,11 +155,22 @@ public class ConstraintSolver {
 		if (alts.isEmpty()) {
 			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
 				for (ICrySLPredicateParameter p : left.getParameters()) {
-					if (p.getName().equals("transformation"))
+					if (p.getName().equals("transformation")) {
 						continue;
-					if (cwpi.getVarName().equals(p.getName())) {
-						alts.add(new AlternativeReqPredicate(left, cwpi.stmt()));
 					}
+
+					if (cwpi.getVarName().equals(p.getName())) {
+						alts.add(new AlternativeReqPredicate(left, cwpi.stmt(), cwpi.getIndex()));
+					}
+				}
+			}
+
+			// Extract predicates with 'this' as parameter
+			if (left.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
+				AlternativeReqPredicate altPred = new AlternativeReqPredicate(left, object.getOrigin(), -1);
+
+				if (!alts.contains(altPred)) {
+					alts.add(altPred);
 				}
 			}
 		} else {
@@ -194,14 +206,18 @@ public class ConstraintSolver {
 				}
 				
 				if (cwpi.getVarName().equals(p.getName())) {
-					result.add(new RequiredCrySLPredicate(pred, cwpi.stmt()));
+					result.add(new RequiredCrySLPredicate(pred, cwpi.stmt(), cwpi.getIndex()));
 				}
 			}
 		}
 
 		// Extract predicates with 'this' as parameter
 		if (pred.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
-			result.add(new RequiredCrySLPredicate(pred, object.getOrigin()));
+			RequiredCrySLPredicate reqPred = new RequiredCrySLPredicate(pred, object.getOrigin(), -1);
+
+			if (!result.contains(reqPred)) {
+				result.add(reqPred);
+			}
 		}
 		
 		return result;

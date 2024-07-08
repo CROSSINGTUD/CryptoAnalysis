@@ -3,26 +3,19 @@ package crypto.analysis;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import com.google.common.collect.Table.Cell;
 import crypto.analysis.errors.RequiredPredicateError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,16 +27,16 @@ public class PredicateHandler {
 	private final class AddPredicateToOtherSeed implements ResultsHandler {
 		private final Statement statement;
 		private final Val base;
-		private final Method callerMethod;
 		private final EnsuredCrySLPredicate ensPred;
-		private final AnalysisSeedWithSpecification secondSeed;
+		private final AnalysisSeedWithSpecification otherSeed;
+		private final int paramIndex;
 
-		private AddPredicateToOtherSeed(Statement statement, Val base, Method callerMethod, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification secondSeed) {
+		private AddPredicateToOtherSeed(Statement statement, Val base, EnsuredCrySLPredicate ensPred, AnalysisSeedWithSpecification otherSeed, int paramIndex) {
 			this.statement = statement;
 			this.base = base;
-			this.callerMethod = callerMethod;
 			this.ensPred = ensPred;
-			this.secondSeed = secondSeed;
+			this.otherSeed = otherSeed;
+			this.paramIndex = paramIndex;
 		}
 
 		@Override
@@ -53,7 +46,7 @@ public class PredicateHandler {
 					Map<Val, TransitionFunction> entry = row.getValue();
 
 					if (entry.containsKey(base)) {
-						secondSeed.addEnsuredPredicate(ensPred);
+						otherSeed.addEnsuredPredicate(ensPred, statement, paramIndex);
 					}
 				}
 			}
@@ -65,9 +58,8 @@ public class PredicateHandler {
 			int result = 1;
 			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((base == null) ? 0 : base.hashCode());
-			result = prime * result + ((callerMethod == null) ? 0 : callerMethod.hashCode());
 			result = prime * result + ((ensPred == null) ? 0 : ensPred.hashCode());
-			result = prime * result + ((secondSeed == null) ? 0 : secondSeed.hashCode());
+			result = prime * result + ((otherSeed == null) ? 0 : otherSeed.hashCode());
 			result = prime * result + ((statement == null) ? 0 : statement.hashCode());
 			return result;
 		}
@@ -88,20 +80,15 @@ public class PredicateHandler {
 					return false;
 			} else if (!base.equals(other.base))
 				return false;
-			if (callerMethod == null) {
-				if (other.callerMethod != null)
-					return false;
-			} else if (!callerMethod.equals(other.callerMethod))
-				return false;
 			if (ensPred == null) {
 				if (other.ensPred != null)
 					return false;
 			} else if (!ensPred.equals(other.ensPred))
 				return false;
-			if (secondSeed == null) {
-				if (other.secondSeed != null)
+			if (otherSeed == null) {
+				if (other.otherSeed != null)
 					return false;
-			} else if (!secondSeed.equals(other.secondSeed))
+			} else if (!otherSeed.equals(other.otherSeed))
 				return false;
 			if (statement == null) {
                 return other.statement == null;
@@ -150,41 +137,49 @@ public class PredicateHandler {
 		return set;
 	}
 
-	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val seed, EnsuredCrySLPredicate ensPred) {
+	private void onPredicateAdded(IAnalysisSeed seedObj, Statement statement, Val fact, EnsuredCrySLPredicate ensPred) {
+		if (seedObj instanceof AnalysisSeedWithSpecification) {
+			AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) seedObj;
+
+			if (seedWithSpec.getFact().getVariableName().equals(fact.getVariableName())) {
+				seedWithSpec.addEnsuredPredicate(ensPred, statement, -1);
+			}
+		}
+
 		if (statement.containsInvokeExpr()) {
 			InvokeExpr invokeExpr = statement.getInvokeExpr();
 
 			if (invokeExpr.isInstanceInvokeExpr()) {
-				Method callerMethod = statement.getMethod();
 				Val base = invokeExpr.getBase();
-				boolean paramMatch = false;
-				for (Val arg : invokeExpr.getArgs()) {
-					if (!seed.isNull() && seed.getType().equals(arg.getType()) && seed.getVariableName().equals(arg.getVariableName())) {
-						paramMatch = true;
+
+				for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
+					Val arg = invokeExpr.getArg(i);
+
+					if (!fact.getVariableName().equals(arg.getVariableName())) {
+						continue;
 					}
-				}
-				if (paramMatch) {
-					for (AnalysisSeedWithSpecification secondSeed : cryptoScanner.getAnalysisSeedsWithSpec()) {
-						secondSeed.registerResultsHandler(new AddPredicateToOtherSeed(statement, base, callerMethod, ensPred, secondSeed));
+
+					for (AnalysisSeedWithSpecification otherSeed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+						otherSeed.registerResultsHandler(new AddPredicateToOtherSeed(statement, base, ensPred, otherSeed, i));
 					}
 				}
 			}
 
 			if (invokeExpr.isStaticInvokeExpr() && statement.isAssign()) {
-				boolean paramMatch = false;
-				for (Val arg : invokeExpr.getArgs()) {
-					if (!seed.isNull() && seed.equals(arg))
-						paramMatch = true;
-				}
-				if (paramMatch) {
-					for (AnalysisSeedWithSpecification spec : cryptoScanner.getAnalysisSeedsWithSpec()) {
-						if (spec.getOrigin().equals(statement)) {
-							spec.addEnsuredPredicate(ensPred);
+				for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
+					Val arg = invokeExpr.getArg(i);
+
+					if (!fact.getVariableName().equals(arg.getVariableName())) {
+						continue;
+					}
+
+					for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+						if (seed.getOrigin().equals(statement)) {
+							seed.addEnsuredPredicate(ensPred, statement, i);
 						}
 					}
 				}
 			}
-
 		}
 	}
 
@@ -208,49 +203,20 @@ public class PredicateHandler {
 	private void collectMissingRequiredPredicates() {
 		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
 			requiredPredicateErrors.put(seed, new ArrayList<>());
-			Collection<ISLConstraint> missingPredicates = seed.checkPredicates();
+			Collection<ISLConstraint> missingPredicates = seed.computeMissingPredicates();
 
 			for (ISLConstraint pred : missingPredicates) {
 				if (pred instanceof RequiredCrySLPredicate) {
-					collectMissingPred(seed, (RequiredCrySLPredicate) pred);
+					RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
+
+					RequiredPredicateError reqPredError = new RequiredPredicateError(seed, reqPred);
+					addRequiredPredicateErrorOnSeed(reqPredError, seed);
 				} else if (pred instanceof AlternativeReqPredicate) {
-					collectMissingPred(seed, (AlternativeReqPredicate) pred);
+					AlternativeReqPredicate altReqPred = (AlternativeReqPredicate) pred;
+
+					RequiredPredicateError reqPredError = new RequiredPredicateError(seed, altReqPred);
+					addRequiredPredicateErrorOnSeed(reqPredError, seed);
 				}
-			}
-		}
-	}
-
-	private void collectMissingPred(AnalysisSeedWithSpecification seed, RequiredCrySLPredicate missingPred) {
-		// Check for predicate errors with 'this' as parameter
-		if (missingPred.getPred().getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this"))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null), Collections.singletonList(missingPred.getPred()));
-			addRequiredPredicateErrorOnSeed(reqPredError, seed);
-
-			return;
-		}
-
-		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
-
-			if (missingPred.getPred().getInvolvedVarNames().contains(v.getVarName()) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null), Collections.singletonList(missingPred.getPred()));
-				addRequiredPredicateErrorOnSeed(reqPredError, seed);
-			}
-		}
-	}
-	
-	private void collectMissingPred(AnalysisSeedWithSpecification seed, AlternativeReqPredicate missingPred) {
-		// Check for predicate errors with 'this' as parameter in all alternatives
-		if (missingPred.getAlternatives().parallelStream().anyMatch(p -> p.getParameters().stream().anyMatch(param -> param instanceof CrySLObject && param.getName().equals("this")))) {
-			RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(new CallSiteWithParamIndex(missingPred.getLocation(), null, -1, "this"), null), missingPred.getAlternatives());
-			addRequiredPredicateErrorOnSeed(reqPredError, seed);
-
-			return;
-		}
-
-		for (CallSiteWithParamIndex v : seed.getParameterAnalysis().getAllQuerySites()) {
-			if (missingPred.getAlternatives().parallelStream().anyMatch(e -> e.getInvolvedVarNames().contains(v.getVarName())) && v.stmt().equals(missingPred.getLocation())) {
-				RequiredPredicateError reqPredError = new RequiredPredicateError(seed, missingPred.getLocation(), seed.getSpecification(), new CallSiteWithExtractedValue(v, null), missingPred.getAlternatives());
-				addRequiredPredicateErrorOnSeed(reqPredError, seed);
 			}
 		}
 	}
@@ -286,7 +252,7 @@ public class PredicateHandler {
 		}
 		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
 			for (Map.Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
-				Set<String> preds = new HashSet<String>();
+				Set<String> preds = new HashSet<>();
 				for (EnsuredCrySLPredicate exPred : exPredCell.getValue()) {
 					preds.add(exPred.getPredicate().getPredName());
 				}
@@ -300,24 +266,4 @@ public class PredicateHandler {
 		}
 	}
 
-	private Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> computeMissingPredicates() {
-		Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> res = HashBasedTable.create();
-		for (Cell<Statement, IAnalysisSeed, Set<CrySLPredicate>> c : expectedPredicateObjectBased.cellSet()) {
-			Set<EnsuredCrySLPredicate> exPreds = existingPredicatesObjectBased.get(c.getRowKey(), c.getColumnKey());
-			if (c.getValue() == null)
-				continue;
-			HashSet<CrySLPredicate> expectedPreds = new HashSet<>(c.getValue());
-			if (exPreds == null) {
-				exPreds = Sets.newHashSet();
-			}
-			for (EnsuredCrySLPredicate p : exPreds) {
-				expectedPreds.remove(p.getPredicate());
-			}
-			if (!expectedPreds.isEmpty()) {
-				res.put(c.getRowKey(), c.getColumnKey(), expectedPreds);
-			}
-		}
-		return res;
-	}
-	
 }

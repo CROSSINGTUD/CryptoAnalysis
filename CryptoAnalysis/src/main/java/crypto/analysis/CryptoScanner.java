@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public abstract class CryptoScanner {
@@ -116,22 +115,6 @@ public abstract class CryptoScanner {
 			}
 		}
 		return seeds;
-	}
-
-	public Optional<AnalysisSeedWithSpecification> getSeedWithSpec(AnalysisSeedWithSpecification seedAtStatement) {
-		if (discoveredSeeds.containsKey(seedAtStatement)) {
-			AnalysisSeedWithSpecification seed = (AnalysisSeedWithSpecification) discoveredSeeds.get(seedAtStatement);
-			return Optional.of(seed);
-		}
-		return Optional.empty();
-	}
-
-	public Optional<AnalysisSeedWithEnsuredPredicate> getSeedWithoutSpec(AnalysisSeedWithEnsuredPredicate seedAtStatement) {
-		if (discoveredSeeds.containsKey(seedAtStatement)) {
-			AnalysisSeedWithEnsuredPredicate seed = (AnalysisSeedWithEnsuredPredicate) discoveredSeeds.get(seedAtStatement);
-			return Optional.of(seed);
-		}
-		return Optional.empty();
 	}
 
 	public PredicateHandler getPredicateHandler() {

@@ -18,10 +18,6 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 		super(scanner, statement, fact, results);
 	}
 
-	public static AnalysisSeedWithEnsuredPredicate makeSeedForComparison(CryptoScanner scanner, Statement statement, Val fact) {
-		return new AnalysisSeedWithEnsuredPredicate(scanner, statement, fact, null);
-	}
-
 	@Override
 	public void execute() {
 		if (analysisResults == null) {

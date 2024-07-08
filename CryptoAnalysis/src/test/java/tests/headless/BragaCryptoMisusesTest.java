@@ -894,7 +894,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -904,7 +904,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_512x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -914,7 +914,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -924,7 +924,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_768x256_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -934,7 +934,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -944,7 +944,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 		
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x256_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -954,7 +954,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_1024x384_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -964,7 +964,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void positiveTestCase()>", ConstraintError.class, 2);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void positiveTestCase()>", RequiredPredicateError.class, 5);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void positiveTestCase()>", RequiredPredicateError.class, 6);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_2048x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -974,7 +974,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_3072x160_1: void negativeTestCase()>", TypestateError.class, 1);
@@ -984,7 +984,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void positiveTestCase()>", TypestateError.class, 1);
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void positiveTestCase()>", ConstraintError.class, 1);
-		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void positiveTestCase()>", RequiredPredicateError.class, 0);
+		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void positiveTestCase()>", RequiredPredicateError.class, 1);
 
 		// negative test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_4096x160_1: void negativeTestCase()>", TypestateError.class, 1);

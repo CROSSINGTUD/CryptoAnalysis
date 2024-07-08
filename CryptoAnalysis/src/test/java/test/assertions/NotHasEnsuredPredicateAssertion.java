@@ -4,10 +4,10 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
-import soot.jimple.Stmt;
 import test.Assertion;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class NotHasEnsuredPredicateAssertion implements Assertion {
 
@@ -53,10 +53,12 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 
 	@Override
 	public String toString() {
+		Collection<String> aliases = val.stream().map(Val::getVariableName).collect(Collectors.toList());
+
 		if (predName == null) {
-			return "Did not expect a predicate for " + val + " @ " + stmt;
+			return "Did not expect a predicate for " + aliases + " @ " + stmt;
 		} else {
-			return "Did not expect '" + predName + "' ensured on " + val + " @ " + stmt;
+			return "Did not expect '" + predName + "' ensured on " + aliases + " @ " + stmt;
 		}
 	}
 }
