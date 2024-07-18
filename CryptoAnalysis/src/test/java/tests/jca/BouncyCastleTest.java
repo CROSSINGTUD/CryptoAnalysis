@@ -117,6 +117,9 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 		GCMBlockCipher cipher1 = (GCMBlockCipher) GCMBlockCipher.newInstance(engine);
 		cipher1.init(false, params);
 		cipher1.processAADBytes(input, 0, input.length);
+		Assertions.hasEnsuredPredicate(cipher1);
+
+		// Missing call to 'processBytes' causes TypestateError -> No predicate at 'doFinal' call
 		cipher1.doFinal(output, 0);
 		Assertions.notHasEnsuredPredicate(cipher1);
 		Assertions.mustNotBeInAcceptingState(cipher1);
