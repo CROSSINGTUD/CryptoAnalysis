@@ -77,4 +77,21 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());
 	}
+
+	@Test
+	public void issue271Test() {
+		// Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/271
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/KotlinExamples/Issue271").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+
+		setErrorsCount("<example.Issue271Java: void testFail(java.lang.String)>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.Issue271Java: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);
+
+		setErrorsCount("<example.Issue271Kotlin: void testFail(java.lang.String)>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.Issue271Kotlin: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);
+
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
+	}
 }
