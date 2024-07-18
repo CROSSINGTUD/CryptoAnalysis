@@ -21,6 +21,8 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<issueseeds.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 
+		setErrorsCount("<issue227.WrappedHasher: byte[] hash()>", TypestateError.class, 0);
+
 		setErrorsCount("<issue208.Issue208WithSingleEntryPoint: void encryptImpl()>", RequiredPredicateError.class, 0);
 		setErrorsCount("<issue208.Issue208WithMultipleEntryPoints: void encryptImpl()>", RequiredPredicateError.class, 1);
 		
