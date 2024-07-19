@@ -83,7 +83,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 		
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 }

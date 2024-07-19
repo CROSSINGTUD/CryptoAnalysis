@@ -60,7 +60,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private boolean internalConstraintsSatisfied;
 
 	private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
-	private Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
+	private final Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
 
 	private final Map<Statement, Set<Map.Entry<EnsuredCrySLPredicate, Integer>>> ensuredPredicates = new HashMap<>();
 	private final Collection<HiddenPredicate> hiddenPredicates = Sets.newHashSet();
@@ -69,7 +69,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public AnalysisSeedWithSpecification(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results, CrySLRule specification) {
 		super(scanner, statement, fact, results);
+
 		this.specification = specification;
+		this.allCallsOnObject = results.getInvokedMethodOnInstance();
 	}
 
 	@Override
@@ -84,8 +86,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 
 		scanner.getAnalysisReporter().onSeedStarted(this);
-
-		this.allCallsOnObject = analysisResults.getInvokedMethodOnInstance();
 		notifyResultsHandler();
 		runExtractParameterAnalysis();
 

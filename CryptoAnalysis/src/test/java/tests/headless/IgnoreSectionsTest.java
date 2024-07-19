@@ -32,7 +32,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.TypestateErrorExample: void main(java.lang.String[])>", TypestateError.class, 0);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 }

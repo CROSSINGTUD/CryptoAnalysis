@@ -33,7 +33,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.IncompleteOperationErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 
@@ -64,7 +64,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Encrypt: void incorrect()>", RequiredPredicateError.class, 2);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -80,7 +80,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<org.glassfish.grizzly.config.ssl.JSSESocketFactory: java.security.KeyStore getStore(java.lang.String,java.lang.String,java.lang.String)>", ImpreciseValueExtractionError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 
@@ -125,7 +125,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void interproceduralTypestate()>", ConstraintError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -142,7 +142,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<TrueNegative: byte[] getKey(char[],byte[],int,int)>", RequiredPredicateError.class, 0);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -168,6 +168,6 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

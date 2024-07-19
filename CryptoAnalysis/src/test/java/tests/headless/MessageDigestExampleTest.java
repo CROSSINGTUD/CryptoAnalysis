@@ -17,7 +17,7 @@ public class MessageDigestExampleTest extends AbstractHeadlessTest{
 		setErrorsCount("<MessageDigestExample.MessageDigestExample.Main: java.lang.String getSHA256(java.io.InputStream)>", IncompleteOperationError.class, 2);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 }

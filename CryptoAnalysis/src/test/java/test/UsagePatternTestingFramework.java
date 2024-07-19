@@ -18,6 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
+import crypto.analysis.ScannerDefinition;
 import crypto.cryslhandler.RulesetReader;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
@@ -90,19 +91,25 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				IErrorListener errorListener = new UsagePatternErrorListener(assertions);
 				IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
 
-				// Setup scanner
-				CryptoScanner scanner = new CryptoScanner(ruleset) {
-
+				ScannerDefinition scannerDefinition = new ScannerDefinition() {
 					@Override
-					public CallGraph callGraph() {
+					public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
 						return callGraph;
 					}
 
 					@Override
-					public DataFlowScope getDataFlowScope() {
+					public Collection<CrySLRule> readRuleset() {
+						return ruleset;
+					}
+
+					@Override
+					public DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
 						return dataFlowScope;
 					}
 				};
+
+				// Setup scanner
+				CryptoScanner scanner = new CryptoScanner(scannerDefinition);
 
 				scanner.addErrorListener(errorListener);
 				scanner.addResultsListener(resultsListener);

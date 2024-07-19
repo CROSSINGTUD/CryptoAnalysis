@@ -40,7 +40,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pattern.MacTest: void testMac2()>", RequiredPredicateError.class, 3);
 
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -56,7 +56,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<cbc_aes_example.CBCAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 1);
 
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -86,7 +86,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1),"<params.ParametersWithRandomTest: void testTwo()>");
 		
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -111,7 +111,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", TypestateError.class, 4);
 		
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -144,7 +144,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<pattern.SignerTest: void testSignerVerify()>", RequiredPredicateError.class, 3);
 		
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -273,6 +273,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 				.build());
 
 		scanner.run();
-	  	assertErrors(scanner.getErrorCollection());
+	  	assertErrors(scanner.getCollectedErrors());
 	}
 }

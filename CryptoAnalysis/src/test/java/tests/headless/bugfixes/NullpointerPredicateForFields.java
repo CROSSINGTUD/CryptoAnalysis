@@ -23,6 +23,6 @@ public class NullpointerPredicateForFields extends AbstractHeadlessTest {
 
 		// Must not throw NullPointerException in ConstraintSolver:init()!
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

@@ -40,7 +40,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<ConstraintErrorExample: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.fixed.PredicateMissingExample: void main(java.lang.String[])>", ConstraintError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -73,6 +73,6 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 		setErrorsCount("<org.demo.jpms.MainClass: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

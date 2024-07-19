@@ -62,7 +62,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/ecbcrypto
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -87,7 +87,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// BBCase1, -3, -4 not included due to being similar to BBCase2 above
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -119,7 +119,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.ecbcrypto.EcbInSymmCryptoCorrected: void go()>", ConstraintError.class, 1);
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -153,7 +153,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.insecureasymmetriccrypto.InsecureAsymmetricCipherBBCase1: void go()>", RequiredPredicateError.class, 5);
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	
@@ -185,7 +185,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 						
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -215,7 +215,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.predictablecryptographickey.PredictableCryptographicKeyABICase2: void go()>", RequiredPredicateError.class, 1);
 	
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -233,7 +233,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// ABH1, ABI2, BB1 are other similar test cases that were not included
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -264,7 +264,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// ABHCase1, BBCase1 are similar to the case above
 		
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	// Headless test cases regarding the CryptoGuard projects `predictableseeds` 
@@ -314,7 +314,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 
 			
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 	
 	@Test
@@ -340,6 +340,6 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 		// ABICase1 is similar to the examples above	
 					
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

@@ -75,7 +75,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 
 	@Test
@@ -92,6 +92,6 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<example.Issue271Kotlin: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);
 
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

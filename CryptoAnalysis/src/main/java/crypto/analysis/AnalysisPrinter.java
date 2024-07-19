@@ -35,7 +35,7 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     @Override
     public void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds) {
-        LOGGER.info("Discovered {} seeds", discoveredSeeds.size());
+        LOGGER.info("Analyzing {} seeds", discoveredSeeds.size());
     }
 
     @Override
@@ -81,7 +81,6 @@ public class AnalysisPrinter implements IAnalysisListener {
     @Override
     public void onReportedError(IAnalysisSeed analysisSeed, AbstractError error) {
         LOGGER.debug("Found {} on {}", error.getClass().getSimpleName(), analysisSeed);
-        // LOGGER.info(error.toString());
     }
 
     @Override

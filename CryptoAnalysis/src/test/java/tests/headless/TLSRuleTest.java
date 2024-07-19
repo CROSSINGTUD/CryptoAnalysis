@@ -16,6 +16,6 @@ public class TLSRuleTest extends AbstractHeadlessTest{
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 	
 		scanner.run();
-		assertErrors(scanner.getErrorCollection());
+		assertErrors(scanner.getCollectedErrors());
 	}
 }

@@ -5,15 +5,13 @@ import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.ScannerDefinition;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisParserException;
-import crypto.listener.IAnalysisListener;
-import crypto.listener.IErrorListener;
 import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
@@ -28,7 +26,6 @@ import soot.options.Options;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 public class HeadlessAndroidScanner {
@@ -36,19 +33,22 @@ public class HeadlessAndroidScanner {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessAndroidScanner.class);
 
 	private final AndroidSettings settings;
-	private final Collection<IAnalysisListener> analysisListeners = new HashSet<>();
-	private final Collection<IErrorListener> errorListeners = new HashSet<>();
-	private final Table<WrappedClass, Method, Set<AbstractError>> errorCollection = HashBasedTable.create();
+	private final CryptoScanner scanner;
 
 	public HeadlessAndroidScanner(String apkFile, String platformsDirectory, String rulesetDirectory) {
 		settings = new AndroidSettings();
+
 		settings.setApkFile(apkFile);
 		settings.setPlatformDirectory(platformsDirectory);
 		settings.setRulesetDirectory(rulesetDirectory);
+
+		scanner = new CryptoScanner(createScannerDefinition());
 	}
 
 	private HeadlessAndroidScanner(AndroidSettings settings) {
 		this.settings = settings;
+
+		scanner = new CryptoScanner(createScannerDefinition());
 	}
 
 	public static void main(String[] args) {
@@ -65,6 +65,32 @@ public class HeadlessAndroidScanner {
 		androidSettings.parseSettingsFromCLI(args);
 
 		return new HeadlessAndroidScanner(androidSettings);
+	}
+
+	public ScannerDefinition createScannerDefinition() {
+		return new ScannerDefinition() {
+			@Override
+			public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
+				TransformerSetup.v().setupPreTransformer(ruleset);
+
+				return new SootCallGraph();
+			}
+
+			@Override
+			public Collection<CrySLRule> readRuleset() {
+				LOGGER.info("Reading rules from {}", getRulesetDirectory());
+				Collection<CrySLRule> ruleset;
+				try {
+					RulesetReader reader = new RulesetReader();
+					ruleset = reader.readRulesFromPath(getRulesetDirectory());
+				} catch (IOException e) {
+					throw new RuntimeException("Could not read rules: " + e.getMessage());
+				}
+				LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
+
+				return ruleset;
+			}
+		};
 	}
 
 	public void run() {
@@ -104,64 +130,29 @@ public class HeadlessAndroidScanner {
 		LOGGER.info("Running static analysis on APK file " + getApkFile());
 		LOGGER.info("with Android Platforms dir " + getPlatformDirectory());
 
-		LOGGER.info("Reading rules from {}", getRulesetDirectory());
-		Collection<CrySLRule> ruleset;
-		try {
-			RulesetReader reader = new RulesetReader();
-			ruleset = reader.readRulesFromPath(getRulesetDirectory());
-		} catch (IOException e) {
-			throw new RuntimeException("Could not read rules: " + e.getMessage());
-		}
-		LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
-
-		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
-
-		// Prepare for Boomerang
-		TransformerSetup.v().setupPreTransformer(ruleset);
-		CallGraph callGraph = new SootCallGraph();
-
-		// Initialize scanner
-		CryptoScanner scanner = new CryptoScanner(ruleset) {
-			@Override
-			public CallGraph callGraph() {
-				return callGraph;
-			}
-		};
-
-		for (IAnalysisListener analysisListener : analysisListeners) {
-			scanner.addAnalysisListener(analysisListener);
-		}
-
-		for (IErrorListener errorListener : errorListeners) {
-			scanner.addErrorListener(errorListener);
-		}
-
 		// Run scanner
 		scanner.scan();
 
 		// Report the findings
+		Collection<CrySLRule> ruleset = scanner.getRuleset();
 		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
 		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-		errorCollection.putAll(errors);
+		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
 
 		for (Reporter reporter : reporters) {
 			reporter.createAnalysisReport(discoveredSeeds, errors);
 		}
 	}
 
-	public void addAnalysisListener(IAnalysisListener analysisListener) {
-		analysisListeners.add(analysisListener);
+	public CryptoScanner getScanner() {
+		return scanner;
 	}
 
-	public void addErrorListener(IErrorListener errorListener) {
-		errorListeners.add(errorListener);
+	public Table<WrappedClass, Method, Set<AbstractError>> getCollectedErrors() {
+		return scanner.getCollectedErrors();
 	}
 
-	public Table<WrappedClass, Method, Set<AbstractError>> getErrorCollection() {
-		return errorCollection;
-	}
-
-	public String getApkFile(){
+	public String getApkFile() {
 		return settings.getApkFile();
 	}
 

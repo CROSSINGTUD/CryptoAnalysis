@@ -3,22 +3,22 @@ package crypto;
 import boomerang.debugger.Debugger;
 import boomerang.debugger.IDEVizDebugger;
 import boomerang.scene.CallGraph;
+import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import crypto.AnalysisSettings.AnalysisCallGraph;
+import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.ScannerDefinition;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
-import crypto.listener.IAnalysisListener;
-import crypto.listener.IErrorListener;
 import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
@@ -48,9 +48,7 @@ public class HeadlessCryptoScanner {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
 
 	private final AnalysisSettings settings;
-	private final Collection<IAnalysisListener> analysisListeners = new HashSet<>();
-	private final Collection<IErrorListener> errorListeners = new HashSet<>();
-	private final Table<WrappedClass, Method, Set<AbstractError>> errorCollection = HashBasedTable.create();
+	private final CryptoScanner scanner;
 
 	public static int exitCode = 0;
 
@@ -60,10 +58,14 @@ public class HeadlessCryptoScanner {
 		settings.setApplicationPath(applicationPath);
 		settings.setRulesetPath(rulesetDirectory);
 		settings.setReportFormats(new HashSet<>());
+
+		scanner = new CryptoScanner(createScannerDefinition());
 	}
 
 	private HeadlessCryptoScanner(AnalysisSettings settings) {
 		this.settings = settings;
+
+		scanner = new CryptoScanner(createScannerDefinition());
 	}
 
 	public static void main(String[] args) {
@@ -83,10 +85,70 @@ public class HeadlessCryptoScanner {
 		return new HeadlessCryptoScanner(analysisSettings);
 	}
 
+	public ScannerDefinition createScannerDefinition() {
+		return new ScannerDefinition() {
+
+			@Override
+			public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
+				TransformerSetup.v().setupPreTransformer(ruleset);
+
+				return new SootCallGraph();
+			}
+
+			@Override
+			public Collection<CrySLRule> readRuleset() {
+				LOGGER.info("Reading rules from {}", getRulesetDirectory());
+				Collection<CrySLRule> ruleset;
+				try {
+					RulesetReader reader = new RulesetReader();
+					ruleset = reader.readRulesFromPath(getRulesetDirectory());
+				} catch (IOException e) {
+					throw new CryptoAnalysisException("Could not read rules: " + e.getMessage());
+				}
+				LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
+
+				return ruleset;
+			}
+
+			@Override
+			public DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
+				return new CryptoAnalysisDataFlowScope(ruleset, getIgnoredSections());
+			}
+
+			@Override
+			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> seedSolver) {
+				if (!isVisualization()) {
+					return new Debugger<>();
+				}
+
+				if (getReportDirectory() == null) {
+					LOGGER.error("The visualization requires the --reportDir option. Disabling visualization...");
+					return new Debugger<>();
+				}
+
+				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + ".json");
+				boolean created = vizFile.getParentFile().mkdirs();
+
+				if (!created) {
+					LOGGER.error("Could not create directory {}. Disabling visualization...", vizFile.getAbsolutePath());
+					return new Debugger<>();
+				}
+
+				return new IDEVizDebugger<>(vizFile);
+			}
+
+			@Override
+			public int timeout() {
+				return getTimeout();
+			}
+		};
+	}
+
 	public void run() {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		LOGGER.info("Setup Soot...");
-		setupSoot();
+		initializeSootWithEntryPointAllReachable();
+		PackManager.v().getPack("cg").apply();
 		LOGGER.info("Soot setup done in {} ", stopwatch);
 
 		LOGGER.info("Starting analysis...");
@@ -95,89 +157,15 @@ public class HeadlessCryptoScanner {
 		stopwatch.stop();
 	}
 
-	private void setupSoot() {
-		try {
-			initializeSootWithEntryPointAllReachable();
-		} catch (CryptoAnalysisException e) {
-			throw new RuntimeException("Error happened while setting up Soot: " + e.getMessage());
-		}
-		PackManager.v().getPack("cg").apply();
-	}
-
 	private void analyze() {
-		// Create ruleset and reporter
-		LOGGER.info("Reading rules from {}", getRulesetDirectory());
-		Collection<CrySLRule> ruleset;
-		try {
-			RulesetReader reader = new RulesetReader();
-			ruleset = reader.readRulesFromPath(getRulesetDirectory());
-		} catch (IOException e) {
-			throw new RuntimeException("Could not read rules: " + e.getMessage());
-		}
-		LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
-
-		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
-
-		// Prepare for Boomerang
-		TransformerSetup.v().setupPreTransformer(ruleset);
-		CallGraph callGraph = new SootCallGraph();
-
-		// Initialize scanner
-		CryptoScanner scanner = new CryptoScanner(ruleset) {
-
-			@Override
-			public CallGraph callGraph() {
-				return callGraph;
-			}
-
-			@Override
-			public Collection<String> getIgnoredSections() {
-				return HeadlessCryptoScanner.this.getIgnoredSections();
-			}
-
-			@Override
-			public int getTimeout() {
-				return HeadlessCryptoScanner.this.getTimeout();
-			}
-
-			@Override
-			public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-				if (!isVisualization()) {
-					return super.debugger(solver);
-				}
-
-				if (getReportDirectory() == null) {
-					LOGGER.error("The visualization requires the --reportDir option");
-					return super.debugger(solver);
-				}
-
-				File vizFile = new File(getReportDirectory() + File.separator + "viz" + File.separator + "ObjectId#" + ".json");
-				boolean created = vizFile.getParentFile().mkdirs();
-
-				if (!created) {
-					LOGGER.error("Could not create directory {}", vizFile.getAbsolutePath());
-					return new Debugger<>();
-				}
-
-				return new IDEVizDebugger<>(vizFile);
-			}
-		};
-
-		for (IAnalysisListener analysisListener : analysisListeners) {
-			scanner.addAnalysisListener(analysisListener);
-		}
-
-		for (IErrorListener errorListener : errorListeners) {
-			scanner.addErrorListener(errorListener);
-		}
-
 		// Run scanner
 		scanner.scan();
 
 		// Report the findings
+		Collection<CrySLRule> ruleset = scanner.getRuleset();
 		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
 		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-		errorCollection.putAll(errors);
+		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
 
 		for (Reporter reporter : reporters) {
 			reporter.createAnalysisReport(discoveredSeeds, errors);
@@ -192,7 +180,7 @@ public class HeadlessCryptoScanner {
 		return s;
 	}
 
-	private void initializeSootWithEntryPointAllReachable() throws CryptoAnalysisException {
+	private void initializeSootWithEntryPointAllReachable() {
 		G.reset();
 		Options.v().set_whole_program(true);
 
@@ -261,16 +249,12 @@ public class HeadlessCryptoScanner {
 
 	public void additionalSootSetup() {}
 
-	public void addAnalysisListener(IAnalysisListener analysisListener) {
-		analysisListeners.add(analysisListener);
+	public CryptoScanner getScanner() {
+		return scanner;
 	}
 
-	public void addErrorListener(IErrorListener errorListener) {
-		errorListeners.add(errorListener);
-	}
-
-	public Table<WrappedClass, Method, Set<AbstractError>> getErrorCollection() {
-		return errorCollection;
+	public Table<WrappedClass, Method, Set<AbstractError>> getCollectedErrors() {
+		return scanner.getCollectedErrors();
 	}
 
 	public AnalysisCallGraph getCallGraphAlgorithm() {

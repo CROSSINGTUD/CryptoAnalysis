@@ -63,7 +63,7 @@ public abstract class TypestateAnalysis {
     }
 
     private IDEALAnalysisDefinition<TransitionFunction> getIdealAnalysisDefinition(TypestateFunction typestateFunction) {
-        return new IDEALAnalysisDefinition<TransitionFunction>() {
+        return new IDEALAnalysisDefinition<>() {
             @Override
             public Collection<WeightedForwardQuery<TransitionFunction>> generate(ControlFlowGraph.Edge stmt) {
                 return typestateFunction.generateSeed(stmt);
