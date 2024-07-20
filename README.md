@@ -25,12 +25,12 @@ A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/
 
 ## Usage
 
-CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
+CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `de.fraunhofer.iem.scanner.HeadlessCryptoScanner`. It requires two arguments: 
 * The path to the directory of the CrySL (source code format) rule files. The source code for the rules which contain specification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 * The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner 
+java -cp <path-to-analysis-jar> de.fraunhofer.iem.scanner.HeadlessCryptoScanner 
       --rulesDir <path-to-crysl-source-code-format-rules> 
       --appPath <application-path>
 ```
@@ -38,7 +38,7 @@ java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar crypto.HeadlessCryptoScanner 
+java -cp CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar de.fraunhofer.iem.scanner.HeadlessCryptoScanner 
   --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture 
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
