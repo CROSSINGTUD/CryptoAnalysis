@@ -22,18 +22,10 @@ inputs:
     description: The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY.
       Multiple formats should be split with a comma (e.g. CMD,TXT,CSV).
       Running this action will also implicitly enable the output as GitHub Annotations.
-  preanalysis:
-    description: Enables pre-analysis
   visualization :
     description: Enables the visualization, but also requires reportPath option to be set
   providerDetection :
     description: Enables provider detection analysis
-  dstats:
-    description: Disables the output of the analysis statistics in the reports
-  forbiddenPredicates:
-    description: Facilitates the specification of forbidden predicates.
-      Any occurrence will be flagged by the analysis.
-      This input expects a path to a file containing one predicate per line
   ignoreSections:
     description: Names of packages, classes and methods to be ignored during the analysis.
       This input expects path to a file containing one name per line.
@@ -42,6 +34,9 @@ inputs:
       and 'de.example.*' ignores all classes and methods in the package 'example'.
       Using this option may increase the analysis performance.
       Note that constructors are methods that can be specified with '<init>'.
+  timeout:
+    description: Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the
+      typestate and extract parameter analysis and continues with the results computed so far. (default 10000)
 
 runs:
   using: "composite"
@@ -116,7 +111,7 @@ runs:
     - name: Copy JAR to convenient path
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-      run: cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis/build/CryptoAnalysis-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
+      run: cp CryptoAnalysisBuild_98e04be6/HeadlessCryptoScanner/build/HeadlessCryptoScanner-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
     - name: Save CryptoAnalysis Cache
       uses: actions/cache/save@v3
       if: steps.cache.outputs.cache-hit != 'true'
@@ -125,7 +120,7 @@ runs:
         key: ${{ steps.cache-key.outputs.cache-key }}
 
     - run: |
-        java -cp CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar crypto.HeadlessCryptoScanner \
+        java -jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar \
         --rulesDir ${{ inputs.rulesDir }} \
         --appPath ${{ inputs.appPath }} \
         --reportFormat github_annotation${{ inputs.reportFormat && format(',{0}', inputs.reportFormat) || '' }} \
@@ -133,12 +128,10 @@ runs:
         ${{ inputs.sootPath && format('{0} {1}', '--sootPath', inputs.sootPath) || '' }} \
         ${{ inputs.identifier && format('{0} {1}', '--identifier', inputs.identifier) || '' }} \
         ${{ inputs.reportPath && format('{0} {1}', '--reportPath', inputs.reportPath) || '' }} \
-        ${{ inputs.preanalysis == 'true' && '--preanalysis' || '' }} \
         ${{ inputs.visualization  == 'true' && '--visualization ' || '' }} \
         ${{ inputs.providerDetection  == 'true' && '--providerDetection ' || '' }} \
-        ${{ inputs.dstats == 'true' && '--dstats' || '' }} \
-        ${{ inputs.forbiddenPredicates && format('{0} {1}', '--forbiddenPredicates', inputs.forbiddenPredicates) || '' }} \
-        ${{ inputs.ignoreSections && format('{0} {1}', '--ignoreSections', inputs.ignoreSections) || '' }}
+        ${{ inputs.ignoreSections && format('{0} {1}', '--ignoreSections', inputs.ignoreSections) || '' }} \
+        ${{ inputs.timeout && format('{0} {1}', '--timeout', inputs.timeout) || '' }}
       shell: bash
       # workaround for https://github.com/actions/runner/issues/665
       env:
