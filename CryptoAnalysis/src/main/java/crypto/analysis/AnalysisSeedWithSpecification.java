@@ -162,33 +162,26 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	private void evaluateTypestateOrder() {
 		Collection<ControlFlowGraph.Edge> allTypestateChangeStatements = new HashSet<>();
 		for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : analysisResults.asStatementValWeightTable().cellSet()) {
-			allTypestateChangeStatements.addAll(cell.getValue().getLastStateChangeStatements());
+			Collection<ControlFlowGraph.Edge> edges = cell.getValue().getLastStateChangeStatements();
+			allTypestateChangeStatements.addAll(edges);
 		}
 
 		for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c : analysisResults.asStatementValWeightTable().cellSet()) {
 			ControlFlowGraph.Edge curr = c.getRowKey();
 
-			// For some reason, constructors are the start and not the target statement...
-			Statement errorStatement;
-			Statement start = curr.getStart();
-			Statement target = curr.getTarget();
-			if (start.containsInvokeExpr()) {
-				DeclaredMethod declaredMethod = start.getInvokeExpr().getMethod();
-
-				if (declaredMethod.isConstructor()) {
-					errorStatement = start;
-				} else {
-					errorStatement = target;
-				}
+			// The initial statement is always the start of the CFG edge, all other statements are targets
+			Statement typestateChangeStatement;
+			if (curr.getStart().equals(getOrigin())) {
+				typestateChangeStatement = curr.getStart();
 			} else {
-				errorStatement = target;
+				typestateChangeStatement = curr.getTarget();
 			}
 
 			if (allTypestateChangeStatements.contains(curr)) {
 				Collection<? extends State> targetStates = getTargetStates(c.getValue());
 
 				for (State newStateAtCurr : targetStates) {
-					typeStateChangeAtStatement(errorStatement, newStateAtCurr);
+					typeStateChangeAtStatement(typestateChangeStatement, newStateAtCurr);
 				}
 			}
 		}
@@ -465,7 +458,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		return getTargetStates(value).contains(stateNode);
 	}
 
-	private Collection<? extends State> getTargetStates(TransitionFunction value) {
+	private Collection<State> getTargetStates(TransitionFunction value) {
 		Collection<State> res = Sets.newHashSet();
 		for (ITransition t : value.values()) {
 			if (t.to() != null)
