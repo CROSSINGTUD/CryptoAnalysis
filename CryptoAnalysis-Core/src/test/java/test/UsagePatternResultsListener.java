@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.rules.ISLConstraint;
@@ -79,7 +80,7 @@ public class UsagePatternResultsListener implements IResultsListener {
     }
 
     @Override
-    public void checkedConstraints(IAnalysisSeed analysisSeed, Collection<ISLConstraint> constraints) {}
+    public void checkedConstraints(IAnalysisSeed analysisSeed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {}
 
     @Override
     public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates) {

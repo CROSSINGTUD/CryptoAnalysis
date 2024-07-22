@@ -19,7 +19,6 @@ import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CrySLCondPredicate;
 import crypto.rules.CrySLForbiddenMethod;
@@ -55,8 +54,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	private final CrySLRule specification;
 
-	private ExtractParameterAnalysis parameterAnalysis;
-	private ConstraintSolver constraintSolver;
+	private final ConstraintSolver constraintSolver;
 	private boolean internalConstraintsSatisfied;
 
 	private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
@@ -72,6 +70,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 		this.specification = specification;
 		this.allCallsOnObject = results.getInvokedMethodOnInstance();
+		this.constraintSolver = new ConstraintSolver(this);
 	}
 
 	@Override
@@ -81,16 +80,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public void execute() {
 		if (analysisResults == null) {
-			// Timeout occured.
 			return;
 		}
 
 		scanner.getAnalysisReporter().onSeedStarted(this);
 		notifyResultsHandler();
-		runExtractParameterAnalysis();
 
 		// Check the CONSTRAINTS section
-		this.internalConstraintsSatisfied = checkInternalConstraints();
+		checkInternalConstraints();
 
 		// Check the FORBIDDEN section
 		evaluateForbiddenMethods();
@@ -122,13 +119,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 *                                Typestate checks                                   *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-	private void runExtractParameterAnalysis() {
-		this.parameterAnalysis = new ExtractParameterAnalysis(this);
-		this.parameterAnalysis.run();
-		scanner.getAnalysisReporter().collectedValues(this, parameterAnalysis.getCollectedValues());
-	}
 
 	/**
 	 * Check the FORBIDDEN section and report corresponding errors
@@ -350,23 +340,23 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				EnsuredCrySLPredicate ensPred;
 				if (!satisfiesConstraintSystem && predToBeEnsured.getConstraint().isEmpty()) {
 					// predicate has no condition, but the constraint system is not satisfied
-					ensPred = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConstraintsAreNotSatisfied);
+					ensPred = new HiddenPredicate(predToBeEnsured, constraintSolver.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConstraintsAreNotSatisfied);
 				} else if (predToBeEnsured.getConstraint().isPresent() && !isPredConditionSatisfied(predToBeEnsured)) {
 					// predicate has condition, but condition is not satisfied
-					ensPred = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConditionIsNotSatisfied);
+					ensPred = new HiddenPredicate(predToBeEnsured, constraintSolver.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConditionIsNotSatisfied);
 				} else {
 					// constraints are satisfied and predicate has no condition or the condition is satisfied
-					ensPred = new EnsuredCrySLPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues());
+					ensPred = new EnsuredCrySLPredicate(predToBeEnsured, constraintSolver.getCollectedValues());
 				}
 				ensurePredicate(ensPred, statement, entry.getValue());
 			}
 
-			if (parameterAnalysis != null && !isPredicateGeneratingStateAvailable) {
+			if (!isPredicateGeneratingStateAvailable) {
 				/* The predicate is not ensured in any state. However, we propagate a hidden predicate
 				 * for all typestate changing statements because the predicate could have been ensured
 				 * if a generating state had been reached
 				 */
-				HiddenPredicate hiddenPredicate = new HiddenPredicate(predToBeEnsured, parameterAnalysis.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.GeneratingStateIsNeverReached);
+				HiddenPredicate hiddenPredicate = new HiddenPredicate(predToBeEnsured, constraintSolver.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.GeneratingStateIsNeverReached);
 
 				for (Map.Entry<Statement, State> entry : typeStateChange.entries()) {
 					Statement statement = entry.getKey();
@@ -631,16 +621,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	/**
 	 * Check the constraints from the CONSTRAINTS section
 	 */
-	private boolean checkInternalConstraints() {
+	private void checkInternalConstraints() {
 		scanner.getAnalysisReporter().beforeConstraintsCheck(this);
 
-		constraintSolver = new ConstraintSolver(this, allCallsOnObject.keySet(), scanner.getAnalysisReporter());
-		int violatedConstraints = constraintSolver.evaluateRelConstraints();
+		Collection<AbstractError> violatedConstraints = constraintSolver.evaluateConstraints();
+		for (AbstractError violatedConstraint : violatedConstraints) {
+			scanner.getAnalysisReporter().reportError(this, violatedConstraint);
+		}
 
-		scanner.getAnalysisReporter().checkedConstraints(this, constraintSolver.getRelConstraints());
-		scanner.getAnalysisReporter().afterConstraintsCheck(this, violatedConstraints);
+		scanner.getAnalysisReporter().checkedConstraints(this, constraintSolver.getRelConstraints(), violatedConstraints);
+		scanner.getAnalysisReporter().afterConstraintsCheck(this, violatedConstraints.size());
 
-		return violatedConstraints == 0;
+		this.internalConstraintsSatisfied = violatedConstraints.isEmpty();
 	}
 
 	/**
@@ -762,7 +754,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public Collection<AbstractError> retrieveErrorsForPredCondition(CrySLPredicate pred) {
 		// Check, whether the predicate has a condition
-		if (!pred.getConstraint().isPresent()) {
+		if (pred.getConstraint().isEmpty()) {
 			return Collections.emptyList();
 		}
 
@@ -788,9 +780,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
 					}
 				}
-				for (CallSiteWithParamIndex cswpi : parameterAnalysis.getCollectedValues().keySet()) {
+				for (CallSiteWithParamIndex cswpi : constraintSolver.getCollectedValues().keySet()) {
 					if (cswpi.getVarName().equals(var)) {
-						expVals = retrieveValueFromUnit(cswpi, parameterAnalysis.getCollectedValues().get(cswpi));
+						expVals = retrieveValueFromUnit(cswpi, constraintSolver.getCollectedValues().get(cswpi));
 					}
 				}
 
@@ -886,10 +878,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 	public CrySLRule getSpecification() {
 		return specification;
-	}
-
-	public ExtractParameterAnalysis getParameterAnalysis() {
-		return parameterAnalysis;
 	}
 
 	public Map<ControlFlowGraph.Edge, DeclaredMethod> getAllCallsOnObject() {

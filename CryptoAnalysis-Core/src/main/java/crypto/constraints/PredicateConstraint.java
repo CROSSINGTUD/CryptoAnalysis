@@ -84,7 +84,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 
 		if (!isCalled) {
-			IAnalysisSeed seed = context.getObject();
+			IAnalysisSeed seed = context.getSeed();
 			CallToError callToError = new CallToError(seed, context.getSpecification(), methods);
 			errors.add(callToError);
 		}
@@ -101,7 +101,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
 				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
-					NoCallToError noCallToError = new NoCallToError(context.getObject(), statement, context.getSpecification());
+					NoCallToError noCallToError = new NoCallToError(context.getSeed(), statement, context.getSpecification());
 					errors.add(noCallToError);
 				}
 			}
@@ -132,7 +132,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getObject(), callSite, context.getSpecification(), neverTypeOfPredicate);
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getSeed(), callSite, context.getSpecification(), neverTypeOfPredicate);
 				errors.add(neverTypeOfError);
 			}
 		}
@@ -148,16 +148,16 @@ public class PredicateConstraint extends EvaluableConstraint {
 		// notHardCoded[$variable]
 		CrySLObject variable = objects.get(0);
 
-		for (CallSiteWithParamIndex cs : context.getParsAndVals().keySet()) {
+		for (CallSiteWithParamIndex cs : context.getCollectedValues().keySet()) {
 			if (!variable.getVarName().equals(cs.getVarName())) {
 				continue;
 			}
 
-			Collection<ExtractedValue> extractedValues = context.getParsAndVals().get(cs);
+			Collection<ExtractedValue> extractedValues = context.getCollectedValues().get(cs);
 			for (ExtractedValue extractedValue : extractedValues) {
 				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
 					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
-					HardCodedError hardCodedError = new HardCodedError(context.getObject(), callSiteWithExtractedValue, context.getSpecification(), hardCodedPredicate);
+					HardCodedError hardCodedError = new HardCodedError(context.getSeed(), callSiteWithExtractedValue, context.getSpecification(), hardCodedPredicate);
 					errors.add(hardCodedError);
 				}
 			}
@@ -195,7 +195,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 			if (!isSubType) {
 				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
 				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				InstanceOfError instanceOfError = new InstanceOfError(context.getObject(), callSite, context.getSpecification(), instanceOfPredicate);
+				InstanceOfError instanceOfError = new InstanceOfError(context.getSeed(), callSite, context.getSpecification(), instanceOfPredicate);
 				errors.add(instanceOfError);
 			}
 		}

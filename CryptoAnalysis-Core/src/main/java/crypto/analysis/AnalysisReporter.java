@@ -151,9 +151,9 @@ public class AnalysisReporter {
         }
     }
 
-    public void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints) {
+    public void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {
         for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.checkedConstraints(seed, constraints);
+            resultsListener.checkedConstraints(seed, constraints, errors);
         }
     }
 

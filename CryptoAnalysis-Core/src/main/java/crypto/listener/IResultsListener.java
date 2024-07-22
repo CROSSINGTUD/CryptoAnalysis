@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
 import crypto.rules.ISLConstraint;
@@ -21,7 +22,7 @@ public interface IResultsListener {
 
     void collectedValues(IAnalysisSeed seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues);
 
-    void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints);
+    void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors);
 
     void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates);
 }

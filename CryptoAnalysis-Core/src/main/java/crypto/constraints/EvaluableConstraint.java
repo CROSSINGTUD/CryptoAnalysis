@@ -76,10 +76,10 @@ public abstract class EvaluableConstraint {
 
 	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
-		for (CallSiteWithParamIndex wrappedCallSite : context.getParsAndVals().keySet()) {
+		for (CallSiteWithParamIndex wrappedCallSite : context.getCollectedValues().keySet()) {
 			final Statement callSite = wrappedCallSite.stmt();
 
-			for (ExtractedValue wrappedAllocSite : context.getParsAndVals().get(wrappedCallSite)) {
+			for (ExtractedValue wrappedAllocSite : context.getCollectedValues().get(wrappedCallSite)) {
 				final Statement allocSite = wrappedAllocSite.stmt();
 				if (!wrappedCallSite.getVarName().equals(varName))
 					continue;
@@ -194,7 +194,7 @@ public abstract class EvaluableConstraint {
 		for (Statement successor : statement.getMethod().getControlFlowGraph().getSuccsOf(statement)) {
 			ForwardQuery forwardQuery = new ForwardQuery(new ControlFlowGraph.Edge(statement, successor), allocVal);
 
-			Boomerang solver = new Boomerang(context.getObject().getScanner().callGraph(), context.getObject().getScanner().getDataFlowScope());
+			Boomerang solver = new Boomerang(context.getSeed().getScanner().callGraph(), context.getSeed().getScanner().getDataFlowScope());
 			ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
 
 			for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry : results.asStatementValWeightTable().cellSet()) {
@@ -213,7 +213,7 @@ public abstract class EvaluableConstraint {
 				ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream().findFirst().get(), stmt);
 				BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
 
-				Boomerang indexSolver = new Boomerang(context.getObject().getScanner().callGraph(), context.getObject().getScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
+				Boomerang indexSolver = new Boomerang(context.getSeed().getScanner().callGraph(), context.getSeed().getScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
 				BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
 
 				for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {
@@ -250,7 +250,7 @@ public abstract class EvaluableConstraint {
 			Val extractedVal = callSite.getVal().getValue();
 
 			if (extractedVal.equals(Val.zero())) {
-				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(context.getObject(), statement, context.getSpecification(), constraint);
+				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(context.getSeed(), statement, context.getSpecification(), constraint);
 				errors.add(extractionError);
 				return true;
 			}

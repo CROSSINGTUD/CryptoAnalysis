@@ -28,7 +28,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Map.Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
-				ConstraintError error = new ConstraintError(context.getObject(), entry.getValue(), context.getSpecification(), compConstraint);
+				ConstraintError error = new ConstraintError(context.getSeed(), entry.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
 
 				return;
@@ -37,7 +37,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Map.Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
-				ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), compConstraint);
+				ConstraintError error = new ConstraintError(context.getSeed(), leftie.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
 
 				return;
@@ -68,7 +68,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 						cons = false;
 				}
 				if (!cons) {
-					ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), origin);
+					ConstraintError error = new ConstraintError(context.getSeed(), leftie.getValue(), context.getSpecification(), origin);
 					errors.add(error);
 
 					return;
@@ -124,7 +124,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 			predicateConstraint.evaluate();
 			if (!predicateConstraint.getErrors().isEmpty()) {
 				for (AbstractError err : predicateConstraint.getErrors()) {
-					errors.add(new ImpreciseValueExtractionError(context.getObject(), err.getErrorStatement(), err.getRule(), arith));
+					errors.add(new ImpreciseValueExtractionError(context.getSeed(), err.getErrorStatement(), err.getRule(), arith));
 				}
 				predicateConstraint.errors.clear();
 			}
