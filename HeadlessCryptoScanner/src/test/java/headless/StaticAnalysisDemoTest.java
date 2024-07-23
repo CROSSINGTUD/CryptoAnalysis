@@ -109,7 +109,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 
 
 		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", ConstraintError.class, 1);
-		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 1);
+		setErrorsCount("<main.Main: void incorrectKeyForWrongCipher()>", RequiredPredicateError.class, 0);
 
 		setErrorsCount("<main.Main: void useWrongDoFinal()>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void useWrongDoFinal()>", ConstraintError.class, 1);
@@ -136,7 +136,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.CipherExample: void cipherExampleOne()>")
 				.withTPs(ConstraintError.class, 1)
-				.withTPs(RequiredPredicateError.class, 1)
+				.withTPs(RequiredPredicateError.class, 0)
 				.build());
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", ConstraintError.class, 1);
 		setErrorsCount("<crypto.CipherExample: void cipherExampleTwo()>", RequiredPredicateError.class, 0);

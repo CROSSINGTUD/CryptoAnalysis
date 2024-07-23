@@ -76,41 +76,42 @@ public abstract class EvaluableConstraint {
 
 	protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName) {
 		Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
-		for (CallSiteWithParamIndex wrappedCallSite : context.getCollectedValues().keySet()) {
-			final Statement callSite = wrappedCallSite.stmt();
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex wrappedCallSite = callSite.getCallSiteWithParam();
+			Statement statement = wrappedCallSite.stmt();
 
-			for (ExtractedValue wrappedAllocSite : context.getCollectedValues().get(wrappedCallSite)) {
-				final Statement allocSite = wrappedAllocSite.stmt();
-				if (!wrappedCallSite.getVarName().equals(varName))
-					continue;
+			if (!wrappedCallSite.getVarName().equals(varName)) {
+				continue;
+			}
 
-				InvokeExpr invoker = callSite.getInvokeExpr();
-				if (callSite.equals(allocSite)) {
-					// TODO no retrieve
-					varVal.put(retrieveConstantFromValue(invoker.getArg(wrappedCallSite.getIndex())),
-							new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
-				} else if (allocSite.isAssign()) {
-					if (wrappedAllocSite.getValue().isConstant()) {
-						String retrieveConstantFromValue = retrieveConstantFromValue(wrappedAllocSite.getValue());
-						int pos = -1;
+			ExtractedValue extractedValue = callSite.getExtractedValue();
+			Statement allocSite = extractedValue.getInitialStatement();
 
-						for (int i = 0; i < invoker.getArgs().size(); i++) {
-							Val allocVal = allocSite.getLeftOp();
-							Val parameterVal = invoker.getArg(i);
+			InvokeExpr invoker = statement.getInvokeExpr();
+			if (statement.equals(allocSite)) {
+				String constant = retrieveConstantFromValue(invoker.getArg(wrappedCallSite.getIndex()));
+				varVal.put(constant, callSite);
+			} else if (allocSite.isAssign()) {
+				if (extractedValue.getVal().isConstant()) {
+					String retrieveConstantFromValue = retrieveConstantFromValue(extractedValue.getVal());
+					int pos = -1;
 
-							if (allocVal.equals(parameterVal)) {
-								pos = i;
-							}
+					for (int i = 0; i < invoker.getArgs().size(); i++) {
+						Val allocVal = allocSite.getLeftOp();
+						Val parameterVal = invoker.getArg(i);
+
+						if (allocVal.equals(parameterVal)) {
+							pos = i;
 						}
-
-						if (pos > -1 && SootUtils.getParameterType(invoker.getMethod(), pos).isBooleanType()) {
-							varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true", new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
-						} else {
-							varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, wrappedAllocSite));
-						}
-					} else if (wrappedAllocSite.getValue().isNewExpr()) {
-						varVal.putAll(extractSootArray(wrappedCallSite, wrappedAllocSite));
 					}
+
+					if (pos > -1 && SootUtils.getParameterType(invoker.getMethod(), pos).isBooleanType()) {
+						varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true", new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
+					} else {
+						varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
+					}
+				} else if (extractedValue.getVal().isNewExpr()) {
+					varVal.putAll(extractSootArray(wrappedCallSite, extractedValue));
 				}
 			}
 		}
@@ -124,10 +125,9 @@ public abstract class EvaluableConstraint {
 	 * @param allocSite  allocation site at which sootValue is involved
 	 * @return extracted array values
 	 */
-	protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite,
-			ExtractedValue allocSite) {
-		Val arrayLocal = allocSite.getValue();
-		Method method = allocSite.stmt().getMethod();
+	protected Map<String, CallSiteWithExtractedValue> extractSootArray(CallSiteWithParamIndex callSite, ExtractedValue allocSite) {
+		Val arrayLocal = allocSite.getVal();
+		Method method = callSite.stmt().getMethod();
 
 		Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
 
@@ -179,7 +179,7 @@ public abstract class EvaluableConstraint {
 	protected Map<Integer, Val> extractArray(ExtractedValue extractedValue) {
 		Map<Integer, Val> result = new HashMap<>();
 
-		Statement statement = extractedValue.stmt();
+		Statement statement = extractedValue.getInitialStatement();
 		if (!statement.isAssign()) {
 			return result;
 		}
@@ -227,7 +227,6 @@ public abstract class EvaluableConstraint {
 				}
 			}
 		}
-
 		return result;
 	}
 
@@ -246,8 +245,8 @@ public abstract class EvaluableConstraint {
 		}
 
 		for (CallSiteWithExtractedValue callSite : extractedValueMap.values()) {
-			Statement statement = callSite.getCallSite().stmt();
-			Val extractedVal = callSite.getVal().getValue();
+			Statement statement = callSite.getCallSiteWithParam().stmt();
+			Val extractedVal = callSite.getExtractedValue().getVal();
 
 			if (extractedVal.equals(Val.zero())) {
 				ImpreciseValueExtractionError extractionError = new ImpreciseValueExtractionError(context.getSeed(), statement, context.getSpecification(), constraint);

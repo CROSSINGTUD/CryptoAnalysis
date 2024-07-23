@@ -91,6 +91,18 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 		Assertions.predicateErrors(4);
 	}
 
+	@Test
+	public void test() {
+		A noPred1onA = new A();
+		Assertions.notHasEnsuredPredicate(noPred1onA);
+
+		Requires r4 = new Requires();
+		r4.pred1onPos1_AND_pred1onPos2(noPred1onA, noPred1onA);
+		Assertions.notHasEnsuredPredicate(r4);
+
+		Assertions.predicateErrors(2);
+	}
+
 	@Ignore
 	@Test
 	public void pred1onPos1_AND_notPred1onPos2(){

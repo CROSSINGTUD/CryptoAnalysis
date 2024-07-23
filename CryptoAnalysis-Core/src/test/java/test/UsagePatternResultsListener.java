@@ -1,5 +1,6 @@
 package test;
 
+import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
@@ -10,16 +11,17 @@ import com.google.common.collect.Table;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import crypto.rules.ISLConstraint;
+import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractParameterQuery;
 import crypto.listener.IResultsListener;
+import crypto.rules.ISLConstraint;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.StateResult;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.ITransition;
+import wpds.impl.Weight;
 
 import java.util.Collection;
 import java.util.Map;
@@ -70,7 +72,10 @@ public class UsagePatternResultsListener implements IResultsListener {
     }
 
     @Override
-    public void collectedValues(IAnalysisSeed seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
+    public void extractedBoomerangResults(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
+
+    @Override
+    public void collectedValues(IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
         for (Assertion a : assertions) {
             if (a instanceof ExtractedValueAssertion) {
                 ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;

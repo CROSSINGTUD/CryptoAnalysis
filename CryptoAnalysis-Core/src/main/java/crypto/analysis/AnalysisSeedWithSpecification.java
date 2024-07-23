@@ -18,8 +18,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintSolver;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.rules.CrySLCondPredicate;
 import crypto.rules.CrySLForbiddenMethod;
 import crypto.rules.CrySLMethod;
@@ -775,14 +774,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				Collection<String> actVals = Collections.emptySet();
 				Collection<String> expVals = Collections.emptySet();
 
-				for (CallSiteWithParamIndex cswpi : ensPred.getParametersToValues().keySet()) {
-					if (cswpi.getVarName().equals(parameterI)) {
-						actVals = retrieveValueFromUnit(cswpi, ensPred.getParametersToValues().get(cswpi));
+				for (CallSiteWithExtractedValue cswpi : ensPred.getParametersToValues()) {
+					if (cswpi.getCallSiteWithParam().getVarName().equals(parameterI)) {
+						actVals = retrieveValueFromUnit(cswpi);
 					}
 				}
-				for (CallSiteWithParamIndex cswpi : constraintSolver.getCollectedValues().keySet()) {
-					if (cswpi.getVarName().equals(var)) {
-						expVals = retrieveValueFromUnit(cswpi, constraintSolver.getCollectedValues().get(cswpi));
+				for (CallSiteWithExtractedValue cswpi : constraintSolver.getCollectedValues()) {
+					if (cswpi.getCallSiteWithParam().getVarName().equals(var)) {
+						expVals = retrieveValueFromUnit(cswpi);
 					}
 				}
 
@@ -816,29 +815,22 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private Collection<String> retrieveValueFromUnit(CallSiteWithParamIndex cswpi, Collection<ExtractedValue> collection) {
+	private Collection<String> retrieveValueFromUnit(CallSiteWithExtractedValue callSite) {
 		Collection<String> values = new ArrayList<>();
-		for (ExtractedValue q : collection) {
-			Statement statement = q.stmt();
+		Statement statement = callSite.getCallSiteWithParam().stmt();
 
-			if (cswpi.stmt().equals(q.stmt())) {
-				if (statement.isAssign()) {
-					Val leftOp = statement.getLeftOp();
-					//values.add(retrieveConstantFromValue(((AssignStmt) u).getRightOp().getUseBoxes().get(cswpi.getIndex()).getValue()));
-				} else {
-					//values.add(retrieveConstantFromValue(u.getUseBoxes().get(cswpi.getIndex()).getValue()));
-				}
-			} else if (statement.isAssign()) {
-				Val rightSide = statement.getRightOp();
-				if (rightSide.isConstant()) {
-					values.add(retrieveConstantFromValue(rightSide));
-				} else {
+		if (statement.isAssign()) {
+			Val rightSide = statement.getRightOp();
+
+			if (rightSide.isConstant()) {
+				values.add(retrieveConstantFromValue(rightSide));
+			} else {
 					// final List<ValueBox> useBoxes = rightSide.getUseBoxes();
 
 					// varVal.put(callSite.getVarName(),
 					// retrieveConstantFromValue(useBoxes.get(callSite.getIndex()).getValue()));
-				}
 			}
+		}
 			// if (u instanceof AssignStmt) {
 			// final List<ValueBox> useBoxes = ((AssignStmt) u).getRightOp().getUseBoxes();
 			// if (!(useBoxes.size() <= cswpi.getIndex())) {
@@ -847,7 +839,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			// } else if (cswpi.getStmt().equals(u)) {
 			// values.add(retrieveConstantFromValue(cswpi.getStmt().getUseBoxes().get(cswpi.getIndex()).getValue()));
 			// }
-		}
 		return values;
 	}
 

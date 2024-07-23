@@ -2,12 +2,10 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import com.google.common.collect.Multimap;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import test.Assertion;
 
-import java.util.Map.Entry;
+import java.util.Collection;
 
 public class ExtractedValueAssertion implements Assertion {
 
@@ -20,15 +18,15 @@ public class ExtractedValueAssertion implements Assertion {
 		this.index = index;
 	}
 	
-	public void computedValues(Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues){
-		for (Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()) {
-			Statement callSite = e.getKey().stmt();
+	public void computedValues(Collection<CallSiteWithExtractedValue> collectedValues){
+		for (CallSiteWithExtractedValue callSite : collectedValues) {
+			Statement statement = callSite.getCallSiteWithParam().stmt();
 
-			if (e.getValue().getValue().equals(Val.zero())) {
+			if (callSite.getExtractedValue().getVal().equals(Val.zero())) {
 				continue;
 			}
 
-			if (callSite.equals(stmt) && e.getKey().getIndex() == index) {
+			if (statement.equals(stmt) && callSite.getCallSiteWithParam().getIndex() == index) {
 				satisfied = true;
 			}
 		}

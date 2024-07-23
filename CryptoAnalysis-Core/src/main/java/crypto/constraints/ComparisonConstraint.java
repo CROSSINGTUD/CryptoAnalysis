@@ -3,10 +3,12 @@ package crypto.constraints;
 import java.util.HashMap;
 import java.util.Map;
 
+import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractedValue;
 import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -118,7 +120,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 	}
 
 	private Map<Integer, CallSiteWithExtractedValue> extractValueAsInt(ICrySLPredicateParameter par,
-			CrySLArithmeticConstraint arith) {
+                                                                        CrySLArithmeticConstraint arith) {
 		if (par instanceof CrySLPredicate) {
 			PredicateConstraint predicateConstraint = new PredicateConstraint((CrySLPredicate) par, context);
 			predicateConstraint.evaluate();
@@ -159,6 +161,11 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 			try {
 				for (Map.Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
+					ExtractedValue extractedValue = value.getValue().getExtractedValue();
+					if (extractedValue.getVal().equals(Val.zero())) {
+						continue;
+					}
+
 					if (value.getKey().equals("true"))
 						valuesInt.put(1, value.getValue());
 					else if (value.getKey().equals("false"))

@@ -3,6 +3,7 @@ package crypto.analysis;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
+import crypto.extractparameter.ExtractParameterQuery;
 import crypto.listener.IAnalysisListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +55,18 @@ public class AnalysisPrinter implements IAnalysisListener {
     }
 
     @Override
-    public void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val param, Statement statement) {
-        LOGGER.warn("Seed {} timed out while extracting parameter {} @ {}. Consider increasing the timeout with '--timeout' or 'setTimeout'", analysisSeed, param, statement);
+    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
+        LOGGER.debug("Triggering Boomerang query for value {} @ {}", query.var(), query.cfgEdge().getTarget());
+    }
+
+    @Override
+    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
+        LOGGER.debug("Finished Boomerang query for value {} @ {}", query.var(), query.cfgEdge().getTarget());
+    }
+
+    @Override
+    public void onExtractParameterAnalysisTimeout(Val param, Statement statement) {
+        LOGGER.warn("Seed timed out while extracting parameter {} @ {}. Consider increasing the timeout with '--timeout' or 'setTimeout'", param, statement);
     }
 
     @Override

@@ -15,7 +15,7 @@ public class TransformerSetup {
         setupExceptionAwareTransformer(rules);
 
         // Transformer related to Boomerang
-        setupBoomerangTransformer();
+        setupUpdatedBoomerangPreTransformer();
     }
 
     public void setupEmptyStatementTransformer(Collection<CrySLRule> rules) {
@@ -33,6 +33,11 @@ public class TransformerSetup {
     public void setupBoomerangTransformer() {
         BoomerangPretransformer.v().reset();
         BoomerangPretransformer.v().apply();
+    }
+
+    public void setupUpdatedBoomerangPreTransformer() {
+        UpdatedBoomerangPreTransformer.v().reset();
+        UpdatedBoomerangPreTransformer.v().apply();
     }
 
     public static TransformerSetup v() {

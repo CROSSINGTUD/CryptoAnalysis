@@ -1,185 +1,107 @@
 package crypto.extractparameter;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
 import boomerang.ForwardQuery;
-import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import boomerang.scene.jimple.JimpleType;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.CryptoScanner;
 import crypto.rules.CrySLMethod;
-import crypto.typestate.LabeledMatcherTransition;
-import crypto.typestate.MatcherTransitionCollection;
-import heros.utilities.DefaultValueMap;
-import soot.Scene;
-import wpds.impl.Weight.NoWeight;
+import crypto.rules.CrySLRule;
+import crypto.utils.MatcherUtils;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.HashSet;
 
 public class ExtractParameterAnalysis {
 
-	private final Collection<LabeledMatcherTransition> events = Sets.newHashSet();
-	private final Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
-	private final Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
-	private final Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
-	private final DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
-		@Override
-		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
-			return key;
-		}
-	};
+    private final CryptoScanner scanner;
+    private final Collection<Statement> collectedCalls;
+    private final CrySLRule rule;
+    private final Collection<ExtractParameterQuery> queries;
+    private final Collection<CallSiteWithExtractedValue> collectedValues;
 
-	private final AnalysisSeedWithSpecification seed;
+    public ExtractParameterAnalysis(CryptoScanner scanner, Collection<Statement> collectedCalls, CrySLRule rule) {
+        this.scanner = scanner;
+        this.collectedCalls = collectedCalls;
+        this.rule = rule;
 
-	public ExtractParameterAnalysis(AnalysisSeedWithSpecification seed) {
-		this.seed = seed;
+        queries = new HashSet<>();
+        collectedValues = new HashSet<>();
+    }
 
-		MatcherTransitionCollection matcherTransitions = MatcherTransitionCollection.makeCollection(seed.getSpecification().getUsagePattern());
-		this.events.addAll(matcherTransitions.getAllTransitions());
-	}
+    public void run() {
+        for (Statement statement : collectedCalls) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-	public void run() {
-		for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> stmt : seed.getAllCallsOnObject().entrySet()) {
-			Statement statement = stmt.getKey().getStart();
+            DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+            Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rule, declaredMethod);
 
-			if (!statement.containsInvokeExpr()) {
-				continue;
-			}
+            for (CrySLMethod method : methods) {
+                injectQueryAtCallSite(statement, method);
+            }
+        }
 
-			DeclaredMethod declaredMethod = stmt.getValue();
-			for (LabeledMatcherTransition e : events) {
-				Optional<CrySLMethod> matchingMethod = e.getMatching(declaredMethod);
+        for (ExtractParameterQuery query : queries) {
+            scanner.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
+            query.solve();
+            scanner.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
+        }
+    }
 
-                matchingMethod.ifPresent(crySLMethod -> injectQueryAtCallSite(crySLMethod, statement));
-			}
-		}
+    private void injectQueryAtCallSite(Statement statement, CrySLMethod method) {
+        for (int i = 0; i < method.getParameters().size(); i++) {
+            String parameter = method.getParameters().get(i).getKey();
 
-		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
-			q.solve();
-		}
-	}
+            addQueryAtCallSite(statement, parameter, i);
+        }
+    }
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
-		return collectedValues;
-	}
+    private void addQueryAtCallSite(Statement statement, String varNameInSpec, int index) {
+        Val parameter = statement.getInvokeExpr().getArg(index);
 
-	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
-		return propagatedTypes;
-	}
+        Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+        for (Statement pred : predecessors) {
+            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
-		return querySites;
-	}
+            ExtractParameterQuery query = new ExtractParameterQuery(scanner, edge, parameter, index);
+            query.addListener(results -> {
+                CallSiteWithParamIndex callSiteWithParam = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpec);
+                Collection<Type> types = results.getPropagationType();
 
-	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
-		int index = 0;
-		for (Map.Entry<String, String> param : match.getParameters())
-			addQueryAtCallSite(param.getKey(), callSite, index++);
-	}
+                if (results.getAllocationSites().isEmpty()) {
+                    ExtractedValue zeroVal = new ExtractedValue(Val.zero(), statement, types);
 
-	public void addQueryAtCallSite(String varNameInSpecification, Statement statement, int index) {
-		if (!statement.containsInvokeExpr()) {
-			return;
-		}
+                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, zeroVal);
+                    collectedValues.add(callSite);
+                    return;
+                }
 
-		Val parameter = statement.getInvokeExpr().getArg(index);
-		if (!parameter.isLocal()) {
-			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpecification);
-			collectedValues.put(cs, new ExtractedValue(statement, parameter));
-			querySites.add(cs);
-			return;
-		}
+                for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
+                    Val val = forwardQuery.var();
 
-		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
-		for (Statement pred : predecessors) {
-			AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(new AdditionalBoomerangQuery(new ControlFlowGraph.Edge(pred, statement), parameter));
-			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpecification);
-			querySites.add(callSiteWithParamIndex);
-			query.addListener((q, res) -> {
-                propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
-
-				// If the allocation site could not be extracted, add the zero value for indication
-				if (res.getAllocationSites().keySet().isEmpty()) {
-					ExtractedValue zeroValue = new ExtractedValue(callSiteWithParamIndex.stmt(), Val.zero());
-					collectedValues.put(callSiteWithParamIndex, zeroValue);
-					return;
-				}
-
-                for (ForwardQuery v : res.getAllocationSites().keySet()) {
-					ExtractedValue extractedValue;
-                    if (v.var() instanceof AllocVal) {
-                        AllocVal allocVal = (AllocVal) v.var();
-                        extractedValue = new ExtractedValue(v.cfgEdge().getStart(), allocVal.getAllocVal());
+                    ExtractedValue extractedValue;
+                    if (val instanceof AllocVal) {
+                        AllocVal allocVal = (AllocVal) val;
+                        extractedValue = new ExtractedValue(allocVal.getAllocVal(), forwardQuery.cfgEdge().getStart(), types);
                     } else {
-                        extractedValue = new ExtractedValue(v.cfgEdge().getStart(), v.var());
+                        extractedValue = new ExtractedValue(val, forwardQuery.cfgEdge().getStart(), types);
                     }
-                    collectedValues.put(callSiteWithParamIndex, extractedValue);
 
-					// TODO This seems to be odd; char[] is not a String
-                    // Special handling for toCharArray method (required for NeverTypeOf constraint)
-					Statement allocStmt = v.cfgEdge().getStart();
-					if (!allocStmt.isAssign()) {
-						continue;
-					}
-
-					Val rightOp = allocStmt.getRightOp();
-					if (rightOp.getVariableName().contains("<java.lang.String: char[] toCharArray()>")) {
-						propagatedTypes.put(callSiteWithParamIndex, new JimpleType(Scene.v().getType("java.lang.String")));
-					}
+                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);
+                    collectedValues.add(callSite);
                 }
             });
-		}
-	}
+            queries.add(query);
+        }
+    }
 
-	private class AdditionalBoomerangQuery extends BackwardQuery {
 
-		private final Collection<QueryListener> listeners = Lists.newLinkedList();
-		private BackwardBoomerangResults<NoWeight> res;
-		private boolean solved;
-
-		public AdditionalBoomerangQuery(ControlFlowGraph.Edge stmt, Val variable) {
-			super(stmt, variable);
-		}
-
-		public void solve() {
-			ExtractParameterOptions options = new ExtractParameterOptions(seed.getScanner().getTimeout());
-			Boomerang boomerang = new Boomerang(seed.getScanner().callGraph(), seed.getScanner().getDataFlowScope(), options);
-			res = boomerang.solve(this);
-
-			if (res.isTimedout()) {
-				seed.getScanner().getAnalysisReporter().onExtractParameterAnalysisTimeout(seed, var(), cfgEdge().getTarget());
-			}
-
-			for (QueryListener l : Lists.newLinkedList(listeners)) {
-				l.solved(this, res);
-			}
-			solved = true;
-			boomerang.unregisterAllListeners();
-		}
-
-		public void addListener(QueryListener q) {
-			if (solved) {
-				q.solved(this, res);
-				return;
-			}
-			listeners.add(q);
-		}
-
-	}
-
-	private interface QueryListener {
-		void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
-	}
-
+    public Collection<CallSiteWithExtractedValue> getExtractedValues() {
+        return collectedValues;
+    }
 }

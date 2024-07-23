@@ -2,16 +2,14 @@ package crypto.constraints;
 
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
-import boomerang.scene.Type;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
-import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
@@ -44,7 +42,7 @@ public class ConstraintSolver {
 
 		relConstraints = new HashSet<>();
 		requiredPredicates = new HashSet<>();
-		parameterAnalysis = new ExtractParameterAnalysis(seed);
+		parameterAnalysis = new ExtractParameterAnalysis(seed.getScanner(), collectedCalls, seed.getSpecification());
 	}
 
 	/**
@@ -62,15 +60,7 @@ public class ConstraintSolver {
 
 	private void extractValuesFromCollectedCalls() {
 		parameterAnalysis.run();
-		seed.getScanner().getAnalysisReporter().collectedValues(seed, parameterAnalysis.getCollectedValues());
-	}
-
-	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
-		return parameterAnalysis.getPropagatedTypes();
-	}
-
-	public Collection<CallSiteWithParamIndex> getParameterAnalysisQuerySites() {
-		return parameterAnalysis.getAllQuerySites();
+		seed.getScanner().getAnalysisReporter().collectedValues(seed, parameterAnalysis.getExtractedValues());
 	}
 
 	public CrySLRule getSpecification() {
@@ -85,8 +75,8 @@ public class ConstraintSolver {
 		return seed;
 	}
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
-		return parameterAnalysis.getCollectedValues();
+	public Collection<CallSiteWithExtractedValue> getCollectedValues() {
+		return parameterAnalysis.getExtractedValues();
 	}
 
 	public Collection<ISLConstraint> getRelConstraints() {
@@ -117,8 +107,9 @@ public class ConstraintSolver {
 		for (ISLConstraint cons : seed.getSpecification().getConstraints()) {
 			Collection<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
 
-			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
-				involvedVarNames.remove(cwpi.getVarName());
+			for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
+				CallSiteWithParamIndex callSiteWithParamIndex = callSite.getCallSiteWithParam();
+				involvedVarNames.remove(callSiteWithParamIndex.getVarName());
 			}
 
 			if (!involvedVarNames.isEmpty()) {
@@ -160,7 +151,9 @@ public class ConstraintSolver {
 		CrySLPredicate left = (CrySLPredicate) cons.getLeft();
 		
 		if (alts.isEmpty()) {
-			for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
+			for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
+				CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+
 				for (ICrySLPredicateParameter p : left.getParameters()) {
 					if (p.getName().equals("transformation")) {
 						continue;
@@ -200,7 +193,9 @@ public class ConstraintSolver {
 	private Collection<RequiredCrySLPredicate> retrieveValuesForPred(CrySLPredicate pred) {
 		Collection<RequiredCrySLPredicate> result = Lists.newArrayList();
 		
-		for (CallSiteWithParamIndex cwpi : this.getParameterAnalysisQuerySites()) {
+		for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
+			CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+
 			for (ICrySLPredicateParameter p : pred.getParameters()) {
 				// TODO: FIX Cipher rule
 				if (p.getName().equals("transformation")) {

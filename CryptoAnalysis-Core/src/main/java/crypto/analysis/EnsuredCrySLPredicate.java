@@ -1,17 +1,18 @@
 package crypto.analysis;
 
 import com.google.common.collect.Multimap;
-
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CrySLPredicate;
+
+import java.util.Collection;
 
 public class EnsuredCrySLPredicate {
 
 	private final CrySLPredicate predicate;
-	private final Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues;
+	private final Collection<CallSiteWithExtractedValue> parametersToValues;
 
-	public EnsuredCrySLPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues) {
+	public EnsuredCrySLPredicate(CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues) {
 		this.predicate = predicate;
 		this.parametersToValues = parametersToValues;
 	}
@@ -21,7 +22,7 @@ public class EnsuredCrySLPredicate {
 	}
 	
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getParametersToValues() {
+	public Collection<CallSiteWithExtractedValue> getParametersToValues() {
 		return  parametersToValues;
 	}
 	

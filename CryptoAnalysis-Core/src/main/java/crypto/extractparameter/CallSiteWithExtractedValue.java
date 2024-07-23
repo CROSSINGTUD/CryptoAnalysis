@@ -4,97 +4,90 @@ import boomerang.scene.Val;
 
 import java.util.Arrays;
 
-/**
- * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
- *	<p>
- *  CallSiteWithParamIndex gives position of the location index of the error<br>
- *  ExtractedValue gives the value of the call site
- *  </p>
- */
-
 public class CallSiteWithExtractedValue {
 
-	private final CallSiteWithParamIndex cs;
-	private final ExtractedValue val;
+    private final CallSiteWithParamIndex callSiteWithParam;
+    private final ExtractedValue extractedValue;
 
-	public CallSiteWithExtractedValue(CallSiteWithParamIndex cs, ExtractedValue val){
-		this.cs = cs;
-		this.val = val;
-	}
+    public CallSiteWithExtractedValue(CallSiteWithParamIndex callSiteWithParam, ExtractedValue extractedValue) {
+        this.callSiteWithParam = callSiteWithParam;
+        this.extractedValue = extractedValue;
+    }
 
-	public CallSiteWithParamIndex getCallSite() {
-		return cs;
-	}
+    public CallSiteWithParamIndex getCallSiteWithParam() {
+        return callSiteWithParam;
+    }
 
-	public ExtractedValue getVal() {
-		return val;
-	}
-	
-	@Override
-	public String toString() {
-		String res;
-		switch(cs.getIndex()) {
-			case -1:
-				return "Return value";
-			case 0: 
-				res = "First ";
-				break;
-			case 1: 
-				res = "Second ";
-				break;
-			case 2: 
-				res = "Third ";
-				break;
-			case 3: 
-				res = "Fourth ";
-				break;
-			case 4: 
-				res = "Fifth ";
-				break;
-			case 5: 
-				res = "Sixth ";
-				break;
-			default:
-				res = (cs.getIndex()+1) + "th ";
-				break;
-		}
-		res += "parameter";
-		if (val != null) {
-			Val allocVal = val.getValue();
-			if (allocVal.isConstant()) {
-				res += " (with value " + allocVal.getVariableName() +")";
-			}
-		}
-		return res;
-	}
+    public ExtractedValue getExtractedValue() {
+        return extractedValue;
+    }
 
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(new Object[]{
-				cs,
-				val
-		});
-	}
+    @Override
+    public String toString() {
+        String res;
+        switch(callSiteWithParam.getIndex()) {
+            case -1:
+                return "Return value";
+            case 0:
+                res = "First ";
+                break;
+            case 1:
+                res = "Second ";
+                break;
+            case 2:
+                res = "Third ";
+                break;
+            case 3:
+                res = "Fourth ";
+                break;
+            case 4:
+                res = "Fifth ";
+                break;
+            case 5:
+                res = "Sixth ";
+                break;
+            default:
+                res = (callSiteWithParam.getIndex() + 1) + "th ";
+                break;
+        }
+        res += "parameter";
+        if (extractedValue != null) {
+            Val allocVal = extractedValue.getVal();
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+            if (allocVal.isConstant()) {
+                res += " (with value " + allocVal.getVariableName() +")";
+            }
+        }
+        return res;
+    }
 
-		CallSiteWithExtractedValue other = (CallSiteWithExtractedValue) obj;
-		if (cs == null) {
-			if (other.getCallSite() != null) return false;
-		} else if (!cs.equals(other.getCallSite())) {
-			return false;
-		}
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[]{
+                callSiteWithParam,
+                extractedValue
+        });
+    }
 
-		if (val == null) {
-			if (other.getVal() != null) return false;
-		} else if (!val.equals(other.getVal())) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
 
-		return true;
-	}
+        CallSiteWithExtractedValue other = (CallSiteWithExtractedValue) obj;
+        if (callSiteWithParam == null) {
+            if (other.getCallSiteWithParam() != null) return false;
+        } else if (!callSiteWithParam.equals(other.getCallSiteWithParam())) {
+            return false;
+        }
+
+        if (extractedValue == null) {
+            if (other.getExtractedValue() != null) return false;
+        } else if (!extractedValue.equals(other.getExtractedValue())) {
+            return false;
+        }
+
+        return true;
+    }
 }
