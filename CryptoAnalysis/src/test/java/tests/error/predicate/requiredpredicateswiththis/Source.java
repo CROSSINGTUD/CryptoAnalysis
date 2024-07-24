@@ -12,4 +12,12 @@ public class Source {
         return new TargetWithAlternatives();
     }
 
+    public TargetAlternative1 generateTargetAlternative1() {
+        return new TargetAlternative1();
+    }
+
+    public TargetAlternative2 generateTargetAlternative2() {
+        return new TargetAlternative2();
+    }
+
 }

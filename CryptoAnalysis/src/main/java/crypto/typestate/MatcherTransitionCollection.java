@@ -85,11 +85,7 @@ public class MatcherTransitionCollection {
         return new TransitionFunction(initialTransitions, Collections.singleton(stmt));
     }
 
-    public Collection<TransitionEdge> getInitialTransitions() {
-        return smg.getInitialTransitions();
-    }
-
-    public Set<LabeledMatcherTransition> getAllTransitions() {
+    public Collection<LabeledMatcherTransition> getAllTransitions() {
         return transitions;
     }
 
@@ -115,18 +111,18 @@ public class MatcherTransitionCollection {
 
         for (StateNode node : smg.getNodes()) {
             // Collect the methods that are on an outgoing edge
-            Set<CrySLMethod> existingMethods = new HashSet<>();
+            Collection<CrySLMethod> existingMethods = new HashSet<>();
             for (TransitionEdge edge : smg.getAllOutgoingEdges(node)) {
                 existingMethods.addAll(edge.getLabel());
             }
 
             // Remove the existing methods; all remaining methods lead to an error state
-            Set<CrySLMethod> remainingMethods = new HashSet<>(allMethods);
+            Collection<CrySLMethod> remainingMethods = new HashSet<>(allMethods);
             remainingMethods.removeAll(existingMethods);
 
             // Create the error state, where typestate errors are reported
             WrappedState state = createWrappedState(node);
-            ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(remainingMethods);
+            ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(existingMethods);
             LabeledMatcherTransition repErrorTransition = new LabeledMatcherTransition(state, remainingMethods, repErrorState);
             transitions.add(repErrorTransition);
 

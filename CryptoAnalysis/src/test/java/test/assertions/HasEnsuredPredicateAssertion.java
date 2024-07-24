@@ -7,6 +7,7 @@ import crypto.analysis.HiddenPredicate;
 import test.Assertion;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class HasEnsuredPredicateAssertion implements Assertion {
 
@@ -52,10 +53,12 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 
 	@Override
 	public String toString() {
+		Collection<String> aliases = val.stream().map(Val::getVariableName).collect(Collectors.toList());
+
 		if (predName == null) {
-			return "Expected a predicate for "+ val +" @ " + stmt;
+			return "Expected a predicate for " + aliases +" @ " + stmt;
 		} else {
-			return "Expected '" + predName + "' ensured on " + val + " @ " + stmt;
+			return "Expected '" + predName + "' ensured on " + aliases + " @ " + stmt;
 		}
 	}
 }

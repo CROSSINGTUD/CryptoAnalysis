@@ -20,6 +20,11 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		HeadlessCryptoScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<issueseeds.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+
+		setErrorsCount("<issue227.WrappedHasher: byte[] hash()>", TypestateError.class, 0);
+
+		setErrorsCount("<issue208.Issue208WithSingleEntryPoint: void encryptImpl()>", RequiredPredicateError.class, 0);
+		setErrorsCount("<issue208.Issue208WithMultipleEntryPoints: void encryptImpl()>", RequiredPredicateError.class, 1);
 		
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", ConstraintError.class, 1);
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
@@ -43,6 +48,9 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", ConstraintError.class, 1);
 		setErrorsCount("<issue70.ClientProtocolDecoder: byte[] decryptAES(byte[])>", RequiredPredicateError.class, 3);
 
+		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", IncompleteOperationError.class, 1);
+		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", RequiredPredicateError.class, 4);
+
 		// TODO toCharArray() is not currently not considered when evaluating NeverTypeOfErrors
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", NeverTypeOfError.class, 0);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 3);
@@ -65,6 +73,23 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<issue137.Program: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
+
+		scanner.run();
+		assertErrors(scanner.getErrorCollection());
+	}
+
+	@Test
+	public void issue271Test() {
+		// Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/271
+		String mavenProjectPath = new File("../CryptoAnalysisTargets/KotlinExamples/Issue271").getAbsolutePath();
+		MavenProject mavenProject = createAndCompile(mavenProjectPath);
+		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+
+		setErrorsCount("<example.Issue271Java: void testFail(java.lang.String)>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.Issue271Java: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);
+
+		setErrorsCount("<example.Issue271Kotlin: void testFail(java.lang.String)>", IncompleteOperationError.class, 0);
+		setErrorsCount("<example.Issue271Kotlin: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);
 
 		scanner.run();
 		assertErrors(scanner.getErrorCollection());

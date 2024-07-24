@@ -10,10 +10,12 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 
 	private final CrySLPredicate predicate;
 	private final Statement statement;
+	private final int paramIndex;
 
-	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement statement) {
+	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement statement, int paramIndex) {
 		this.predicate = predicate;
 		this.statement = statement;
+		this.paramIndex = paramIndex;
 	}
 
 	@Override
@@ -22,6 +24,7 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		int result = 1;
 		result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
 		result = prime * result + ((statement == null) ? 0 : statement.hashCode());
+		result = prime * result + paramIndex;
 		return result;
 	}
 
@@ -40,8 +43,13 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		} else if (!predicate.equals(other.predicate))
 			return false;
 		if (statement == null) {
-            return other.statement == null;
-		} else return statement.equals(other.statement);
+			if (other.statement != null) {
+				return false;
+			}
+		} else if (!statement.equals(other.statement)) {
+			return false;
+		}
+        return paramIndex == other.paramIndex;
     }
 
 	public CrySLPredicate getPred() {
@@ -52,9 +60,13 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		return statement;
 	}
 
+	public int getParamIndex() {
+		return paramIndex;
+	}
+
 	@Override
 	public String toString() {
-		return "misses " + predicate + " @ " + statement.toString();
+		return predicate + " @ " + statement.toString() + " @ index " + paramIndex;
 	}
 
 	@Override
