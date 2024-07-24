@@ -95,9 +95,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		evaluateTypestateOrder();
 		evaluateIncompleteOperations();
 
-		// Check the REQUIRES section and ensure predicates in ENSURES section
-		checkConstraintsAndEnsurePredicates();
-
 		scanner.getAnalysisReporter().onSeedFinished(this);
 	}
 
@@ -316,7 +313,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		}
 	}
 
-	private void checkConstraintsAndEnsurePredicates() {
+	public void checkConstraintsAndEnsurePredicates() {
 		boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
 
 		for (CrySLPredicate predToBeEnsured : specification.getPredicates()) {
@@ -340,7 +337,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 				if (!satisfiesConstraintSystem && predToBeEnsured.getConstraint().isEmpty()) {
 					// predicate has no condition, but the constraint system is not satisfied
 					ensPred = new HiddenPredicate(predToBeEnsured, constraintSolver.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConstraintsAreNotSatisfied);
-				} else if (predToBeEnsured.getConstraint().isPresent() && !isPredConditionSatisfied(predToBeEnsured)) {
+				} else if (predToBeEnsured.getConstraint().isPresent() && isPredConditionViolated(predToBeEnsured)) {
 					// predicate has condition, but condition is not satisfied
 					ensPred = new HiddenPredicate(predToBeEnsured, constraintSolver.getCollectedValues(), this, HiddenPredicate.HiddenPredicateType.ConditionIsNotSatisfied);
 				} else {
@@ -379,7 +376,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 		// TODO only for first parameter?
 		for (ICrySLPredicateParameter predicateParam : ensuredPred.getPredicate().getParameters()) {
 			if (predicateParam.getName().equals("this")) {
-				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode, statement);
+				expectPredicateWhenThisObjectIsInState(ensuredPred, stateNode);
 			}
 		}
 
@@ -431,11 +428,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 *
 	 * @param ensuredPred the predicate to ensure on this seed
 	 * @param stateNode the state, where the predicate is expected to be ensured
-	 * @param statement the statement that leads to the state
 	 */
-	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode, Statement statement) {
-		predicateHandler.expectPredicate(this, statement, ensuredPred.getPredicate());
-
+	private void expectPredicateWhenThisObjectIsInState(EnsuredCrySLPredicate ensuredPred, State stateNode) {
 		for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> e : analysisResults.asStatementValWeightTable().cellSet()) {
 			if (containsTargetState(e.getValue(), stateNode)) {
 				predicateHandler.addNewPred(this, e.getRowKey().getStart(), e.getColumnKey(), ensuredPred);
@@ -474,7 +468,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 					AnalysisSeedWithEnsuredPredicate seedWithoutSpec = (AnalysisSeedWithEnsuredPredicate) otherSeed;
 
 					seedWithoutSpec.addEnsuredPredicate(ensPred);
-					predicateHandler.expectPredicate(seedWithoutSpec, statement, ensPred.getPredicate());
 				}
 			}
 		}
@@ -642,7 +635,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 */
 	private boolean isConstraintSystemSatisfied() {
 		if (internalConstraintsSatisfied) {
-			return computeMissingPredicates().isEmpty();
+			return computeMissingPredicates().isEmpty() && computeContradictedPredicates().isEmpty();
 		}
 		return false;
 	}
@@ -662,28 +655,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
 			if (pred instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
-				int reqParamIndex = reqPred.getParamIndex();
 
+				// If a negated predicate is ensured, a PredicateContradictionError has to be reported
 				if (reqPred.getPred().isNegated()) {
-					// Check for negated predicates, e.g. !randomized
-					boolean violated = false;
+					remainingPredicates.remove(pred);
+					continue;
+				}
 
-					// Negated predicates are violated if the corresponding predicate is ensured
-					for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
-						if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
-							violated = true;
-						}
-					}
-
-					if (!violated) {
+				// Check for basic required predicates, e.g. randomized
+				int reqParamIndex = reqPred.getParamIndex();
+				for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+					if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
 						remainingPredicates.remove(pred);
-					}
-				} else {
-					// Check for basic required predicates, e.g. randomized
-					for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
-						if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
-							remainingPredicates.remove(pred);
-						}
 					}
 				}
 			} else if (pred instanceof AlternativeReqPredicate) {
@@ -718,19 +701,51 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 			if (rem instanceof RequiredCrySLPredicate) {
 				RequiredCrySLPredicate singlePred = (RequiredCrySLPredicate) rem;
 
-				if (isPredConditionSatisfied(singlePred.getPred())) {
+				if (isPredConditionViolated(singlePred.getPred())) {
 					remainingPredicates.remove(singlePred);
 				}
 			} else if (rem instanceof AlternativeReqPredicate) {
 				Collection<CrySLPredicate> altPred = ((AlternativeReqPredicate) rem).getAlternatives();
 
-				if (altPred.parallelStream().anyMatch(this::isPredConditionSatisfied)) {
+				if (altPred.parallelStream().anyMatch(this::isPredConditionViolated)) {
 					remainingPredicates.remove(rem);
 				}
 			}
 		}
 
 		return remainingPredicates;
+	}
+
+	public Collection<RequiredCrySLPredicate> computeContradictedPredicates() {
+		Collection<ISLConstraint> requiredPredicates = constraintSolver.getRequiredPredicates();
+		Collection<RequiredCrySLPredicate> contradictedPredicates = new HashSet<>();
+
+		for (ISLConstraint pred : requiredPredicates) {
+			if (pred instanceof RequiredCrySLPredicate) {
+				RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
+
+				// Only negated predicates can be contradicted
+				if (!reqPred.getPred().isNegated()) {
+					continue;
+				}
+
+				if (isPredConditionViolated(reqPred.getPred())) {
+					continue;
+				}
+
+				// Check for basic negated required predicates, e.g. randomized
+				CrySLPredicate invertedPred = reqPred.getPred().invertNegation();
+				Set<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement = ensuredPredicates.getOrDefault(pred.getLocation(), new HashSet<>());
+
+				for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+					if (doReqPredAndEnsPredMatch(invertedPred, reqPred.getParamIndex(), ensPredAtIndex)) {
+						contradictedPredicates.add(reqPred);
+					}
+				}
+			}
+		}
+
+		return contradictedPredicates;
 	}
 
 	private boolean doReqPredAndEnsPredMatch(CrySLPredicate reqPred, int reqPredIndex, Map.Entry<EnsuredCrySLPredicate, Integer> ensPred) {
@@ -743,7 +758,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 	 * @param pred the predicate to be checked
 	 * @return true if the condition is satisfied
 	 */
-	private boolean isPredConditionSatisfied(CrySLPredicate pred) {
+	private boolean isPredConditionViolated(CrySLPredicate pred) {
 		return pred.getConstraint().map(conditional -> {
 			EvaluableConstraint evalCons = EvaluableConstraint.getInstance(conditional, constraintSolver);
 			evalCons.evaluate();

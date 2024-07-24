@@ -47,7 +47,7 @@ import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
-import test.assertions.PredicateContradiction;
+import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
@@ -286,10 +286,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 			}
 
-			if (invocationName.startsWith("predicateContradiction")) {
-				queries.add(new PredicateContradiction());
-			}
-
 			if (invocationName.startsWith("missingTypestateChange")) {
 				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
 					queries.add(new MissingTypestateChange(pred));
@@ -301,13 +297,21 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					queries.add(new NoMissingTypestateChange(pred));
 				}
 			}
-			
+
 			if (invocationName.startsWith("predicateErrors")) {
 				Val param = invokeExpr.getArg(0);
 				if (!param.isIntConstant()) {
 					continue;
 				}
 				queries.add(new PredicateErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("predicateContradictionErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new PredicateContradictionErrorCountAssertion(param.getIntValue()));
 			}
 
 			if (invocationName.startsWith("constraintErrors")) {

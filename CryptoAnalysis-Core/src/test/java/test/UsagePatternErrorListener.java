@@ -1,6 +1,5 @@
 package test;
 
-import crypto.listener.IErrorListener;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
@@ -15,6 +14,7 @@ import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
+import crypto.listener.IErrorListener;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
@@ -28,7 +28,7 @@ import test.assertions.NeverTypeOfErrorCountAssertion;
 import test.assertions.NoCallToErrorCountAssertion;
 import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHardCodedErrorCountAssertion;
-import test.assertions.PredicateContradiction;
+import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
 
@@ -163,9 +163,9 @@ public class UsagePatternErrorListener implements IErrorListener {
     @Override
     public void reportError(PredicateContradictionError predicateContradictionError) {
         for (Assertion e : assertions) {
-            if (e instanceof PredicateContradiction) {
-                PredicateContradiction p = (PredicateContradiction) e;
-                p.trigger();
+            if (e instanceof PredicateContradictionErrorCountAssertion) {
+                PredicateContradictionErrorCountAssertion a = (PredicateContradictionErrorCountAssertion) e;
+                a.increaseCount();
             }
         }
     }

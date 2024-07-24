@@ -12,17 +12,13 @@ public class CrySLPredicate extends CrySLLiteral {
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
 	protected final boolean negated;
-	protected final Optional<ISLConstraint> constraint;
+	protected final ISLConstraint constraint;
 	
 	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated) {
-		this(baseObject, name, parameters, negated, Optional.empty());
+		this(baseObject, name, parameters, negated, null);
 	}
 	
 	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, ISLConstraint constraint) {
-		this(baseObject, name, parameters, negated, Optional.ofNullable(constraint));
-	}
-
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, Optional<ISLConstraint> constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
 		this.parameters = parameters;
@@ -41,7 +37,6 @@ public class CrySLPredicate extends CrySLLiteral {
 	
 	}
 
-	// TODO Make comparison with parameters here
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -53,12 +48,26 @@ public class CrySLPredicate extends CrySLLiteral {
 		}
 
 		CrySLPredicate other = (CrySLPredicate) obj;
-		if (!getPredName().equals(other.getPredName())) {
+		if (baseObject == null) {
+			if (other.getBaseObject() != null) return false;
+		} else if (!baseObject.equals(other.getBaseObject())) {
 			return false;
 		}
 
-		return true;
-	}
+		if (predName == null) {
+			if (other.getPredName() != null) return false;
+		} else if (!predName.equals(other.getPredName())) {
+			return false;
+		}
+
+		if (parameters == null) {
+			if (other.getParameters() != null) return false;
+		} else if (parameters.size() != other.getParameters().size()) {
+			return false;
+		}
+
+		return negated == other.isNegated();
+    }
 
 	/**
 	 * @return the baseObject
@@ -78,7 +87,7 @@ public class CrySLPredicate extends CrySLLiteral {
 	 * @return the optConstraint
 	 */
 	public Optional<ISLConstraint> getConstraint() {
-		return this.constraint;
+		return Optional.ofNullable(constraint);
 	}
 
 	/**
@@ -94,14 +103,15 @@ public class CrySLPredicate extends CrySLLiteral {
 	public Boolean isNegated() {
 		return negated;
 	}
-	
+
+	@Override
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
 		if (negated)
 			predSB.append("!");
 		predSB.append(predName);
 		predSB.append("(");
-		predSB.append(parameters.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
+		predSB.append(parameters.stream().map(Object::toString).collect(Collectors.joining(", ")));
 		predSB.append(")");
 		
 		
@@ -125,12 +135,8 @@ public class CrySLPredicate extends CrySLLiteral {
 		return varNames;
 	}
 	
-	public CrySLPredicate setNegated(boolean negated){
-		if (negated == this.negated) {
-			return this;
-		} else {
-			return new CrySLPredicate(baseObject, predName, parameters, negated);
-		}
+	public CrySLPredicate invertNegation(){
+		return new CrySLPredicate(baseObject, predName, parameters, !negated);
 	}
 
 	@Override

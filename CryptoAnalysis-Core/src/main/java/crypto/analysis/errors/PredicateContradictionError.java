@@ -6,35 +6,31 @@ import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 
 import java.util.Arrays;
-import java.util.Map.Entry;
 
 public class PredicateContradictionError extends AbstractError {
 
-	private final Entry<CrySLPredicate, CrySLPredicate> mismatchedPreds;
+	private final CrySLPredicate contradictedPredicate;
 
-	public PredicateContradictionError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
+	public PredicateContradictionError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CrySLPredicate contradictedPredicate) {
 		super(seed, errorStmt, rule);
 
-		this.mismatchedPreds = disPair;
+		this.contradictedPredicate = contradictedPredicate;
 	}
 
-	public Entry<CrySLPredicate, CrySLPredicate> getMismatchedPreds() {
-		return mismatchedPreds;
+	public CrySLPredicate getContradictedPredicate() {
+		return contradictedPredicate;
 	}
 
 	@Override
 	public String toErrorMarkerString() {
-		return "There is a predicate mismatch on the predicates " +
-				mismatchedPreds.getKey() +
-				" and " +
-				mismatchedPreds.getValue();
+		return "Predicate " + contradictedPredicate + " is ensured although it should not";
 	}
 	
 	@Override
 	public int hashCode() {
 		return Arrays.hashCode(new Object[]{
 				super.hashCode(),
-				mismatchedPreds
+				contradictedPredicate
 		});
 	}
 
@@ -45,9 +41,9 @@ public class PredicateContradictionError extends AbstractError {
 		if (getClass() != obj.getClass()) return false;
 
 		PredicateContradictionError other = (PredicateContradictionError) obj;
-		if (mismatchedPreds == null) {
-			if (other.getMismatchedPreds() != null) return false;
-		} else if (!mismatchedPreds.equals(other.getMismatchedPreds())) {
+		if (contradictedPredicate == null) {
+			if (other.getContradictedPredicate() != null) return false;
+		} else if (!contradictedPredicate.equals(other.getContradictedPredicate())) {
 			return false;
 		}
 
