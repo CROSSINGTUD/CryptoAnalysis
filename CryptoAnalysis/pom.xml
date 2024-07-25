@@ -38,7 +38,7 @@
 	</parent>
 
 	<properties>
-		<spdsVersion>3.1.2</spdsVersion>
+		<spdsVersion>3.1.2-Sparse</spdsVersion>
 		<sootVersion>4.5.0</sootVersion>
 	</properties>
 	<build>
