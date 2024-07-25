@@ -7,7 +7,7 @@
 
 	<groupId>de.fraunhofer.iem</groupId>
 	<artifactId>CryptoAnalysis</artifactId>
-	<version>3.0.3</version>
+	<version>3.2.1</version>
 	<packaging>pom</packaging>
 	
 	<name>CryptoAnalysis</name>
@@ -326,7 +326,7 @@
 					 it has to be correct. -->	
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadoc</id>

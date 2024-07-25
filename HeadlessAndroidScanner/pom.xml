@@ -33,7 +33,7 @@
 	<parent>
 		<groupId>de.fraunhofer.iem</groupId>
 		<artifactId>CryptoAnalysis</artifactId>
-		<version>3.0.3</version>
+		<version>3.2.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
