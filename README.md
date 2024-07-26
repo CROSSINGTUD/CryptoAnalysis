@@ -81,6 +81,8 @@ Class `com.example` is searched for at `basePath/com/example`.
 
 See [`action.yml`](action.yml) for all input options.
 
+An example of how to use the GitHub action can be found in the [CryptoAnalysis-demo repository](https://github.com/CROSSINGTUD/CryptoAnalysis-demo/actions).
+
 ## Report and Error Types
 
 CogniCrypt<sub>SAST</sub> reports misuses when the code is not compliant with the CrySL rules. For each misuse, CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
