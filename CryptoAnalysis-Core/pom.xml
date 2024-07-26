@@ -108,11 +108,30 @@
 					<check/>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptors>
+						<!-- custom descriptor is copied from jar-with-dependencies -->
+						<!-- This also copies the rules from test resources as default rules
+							into the jar -->
+						<descriptor>build/descriptor.xml</descriptor>
+					</descriptors>
+					<outputDirectory>../apps</outputDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>de.fraunhofer.iem</groupId>
 			<artifactId>WPDS</artifactId>

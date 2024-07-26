@@ -235,9 +235,7 @@
 						<argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
 						<reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
 						<trimStackTrace>false</trimStackTrace>
-						<parallel>classes</parallel>
-						<forkCount>3</forkCount>
-						<reuseForks>true</reuseForks>
+						<reuseForks>false</reuseForks>
 					</configuration>
 					<dependencies>
 						<dependency>

@@ -111,7 +111,7 @@
                             into the jar -->
                         <descriptor>build/descriptor.xml</descriptor>
                     </descriptors>
-                    <outputDirectory>build</outputDirectory>
+                    <outputDirectory>../apps</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
