@@ -30,7 +30,7 @@ CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from E
 * The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -jar HeadlessCryptoScanner-3.2.1-jar-with-dependencies.jar 
+java -jar HeadlessCryptoScanner-x.y.z-jar-with-dependencies.jar 
       --rulesDir <path-to-crysl-source-code-format-rules> 
       --appPath <application-path>
 ```
@@ -38,7 +38,7 @@ java -jar HeadlessCryptoScanner-3.2.1-jar-with-dependencies.jar
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command.
 
 ```
-java -jar HeadlessCryptoScanner-3.2.1-jar-with-dependencies
+java -jar HeadlessCryptoScanner-x.y.z-jar-with-dependencies
   --rulesDir $(pwd)/CryptoAnalysis-Core/src/main/resources/JavaCryptographicArchitecture
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
@@ -115,13 +115,13 @@ Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/Cogn
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 
-CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android scanner `HeadlessAndroidScanner-3.2.1-jar-with-dependencies.jar`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. It requires three arguments: 
+CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android scanner `HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. It requires three arguments: 
 * `--apkFile`: The absolute path to the .apk file
 * `--platformDirectory`: The absolute path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/studio/releases/platforms). Under the Android SDK location you find a folder `platforms`. Supply CogniCrypt<sub>SAST</sub> with the path to this folder.
 * `--rulesDir`: The absolute path to the directory of the CrySL rules.
 
 ```
-java -jar HeadlessAndroidScanner-3.2.1-jar-with-dependencies.jar
+java -jar HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar
       --rulesDir <path-to-crysl-source-code-format-rules>
 	  --platformDirectory <path-to-android-platform>
       --appPath <application-path>
