@@ -46,7 +46,7 @@
 		<versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
 		<java.version>11</java.version>
 
-		<spdsVersion>3.1.2</spdsVersion>
+		<spdsVersion>3.1.2-Sparse</spdsVersion>
 		<sootVersion>4.5.0</sootVersion>
 		<cryslVersion>3.0.1</cryslVersion>
 	</properties>
@@ -195,7 +195,37 @@
 					</configuration>
 				</plugin>
 
-				<!-- Adding The Surefire Maven Plugin to The POM File so it can generate
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.3.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<!-- This plugin is required for releases to Maven Central. If Javadoc is used,
+                         it has to be correct. -->
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
+					<executions>
+						<execution>
+							<id>attach-javadoc</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
                     test reports -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -308,34 +338,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- This plugin is required for releases to Maven Central. If Javadoc is used,
-					 it has to be correct. -->	
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.8.0</version>
-				<executions>
-					<execution>
-						<id>attach-javadoc</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -391,7 +393,7 @@
 
 	<profiles>
 		<!-- This profile is used to avoid running the deployment in non-deployment
-			contexts because they require specific keys from the Github remote. Include
+			contexts because they require specific keys from the GitHub remote. Include
 			this profile by setting the -Pdeployment flag. -->
 		<profile>
 			<id>deployment</id>

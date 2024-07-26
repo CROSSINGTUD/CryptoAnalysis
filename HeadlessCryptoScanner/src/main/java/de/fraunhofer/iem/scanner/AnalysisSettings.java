@@ -1,20 +1,20 @@
 package de.fraunhofer.iem.scanner;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
 
 import com.google.common.io.Files;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
 import picocli.CommandLine;
 import picocli.CommandLine.ExitCode;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 @CommandLine.Command(mixinStandardHelpOptions = true)
 public class AnalysisSettings implements Callable<Integer> {
@@ -107,7 +107,7 @@ public class AnalysisSettings implements Callable<Integer> {
 	
 	public AnalysisSettings() {
 		analysisCallGraph = AnalysisCallGraph.CHA;
-		reportFormats = new HashSet<>(Arrays.asList(Reporter.ReportFormat.CMD));
+		reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
 		ignoredSections = new ArrayList<>();
 	}
 
@@ -156,6 +156,8 @@ public class AnalysisSettings implements Callable<Integer> {
 
 
 	private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
+		reportFormats.clear();
+
 		for (String format : settings) {
 			String reportFormatValue = format.toLowerCase();
 

@@ -33,7 +33,7 @@
 	<parent>
 		<groupId>de.fraunhofer.iem</groupId>
 		<artifactId>CryptoAnalysis</artifactId>
-		<version>3.0.3</version>
+		<version>3.2.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -73,19 +73,25 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 			</plugin>
-			<!-- Adding The Surefire Maven Plugin to The POM File so it can generate
-				test reports -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
-			<!-- Adding The Cobertura Maven Plugin to The POM File so it can generate
+			<!-- Adding The Cobertura Maven Plugin to the POM file, so it can generate
 				coverage reports -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
