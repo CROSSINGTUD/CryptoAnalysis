@@ -8,7 +8,7 @@ import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
-import soot.Scene;
+import crypto.extractparameter.transformation.StringTransformation;
 
 import java.util.Optional;
 
@@ -17,19 +17,30 @@ import java.util.Optional;
  */
 public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
-	private final int timeout;
+	private final ExtractParameterDefinition definition;
 
-	public ExtractParameterOptions(int timeout) {
-		this.timeout = timeout;
+	public ExtractParameterOptions(ExtractParameterDefinition definition) {
+		this.definition = definition;
 	}
 
 	@Override
 	public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
-		if (stmt.containsInvokeExpr() && stmt.isAssign()) {
+		if (stmt.isAssign()) {
 			Val leftOp = stmt.getLeftOp();
 			Val rightOp = stmt.getRightOp();
 
-			if (leftOp.equals(fact)) {
+			if (!leftOp.equals(fact)) {
+				return Optional.empty();
+			}
+
+			if (stmt.containsInvokeExpr()) {
+				StringTransformation stringTransformation = new StringTransformation(definition);
+				Optional<AllocVal> extractedStringValue = stringTransformation.evaluateExpression(stmt);
+
+				if (extractedStringValue.isPresent()) {
+					return extractedStringValue;
+				}
+
 				DeclaredMethod method = stmt.getInvokeExpr().getMethod();
 				String sig = method.getSignature();
 
@@ -38,96 +49,52 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 					return Optional.of(new AllocVal(leftOp, stmt, arg));
 				}
 
-				// TODO Special handling for toCharArray required; trigger new BackwardQuery?
-				if (sig.equals("<java.lang.String: char[] toCharArray()>")) {
-					//Val rightBase = stmt.getInvokeExpr().getBase();
-					//return Optional.of(new AllocVal(leftOp, stmt, rightOp));
-				}
-
 				if (sig.equals("<java.lang.String: byte[] getBytes()>")) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
-				
+
 				if (stmt.getInvokeExpr().getMethod().isNative()) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
+			} else {
+				// Extract static fields
+				if (rightOp instanceof JimpleVal) {
+					JimpleVal jimpleRightOp = (JimpleVal) rightOp;
 
-				String className = stmt.getInvokeExpr().getMethod().getDeclaringClass().getName();
-				if (Scene.v().isExcluded(className)) {
-					//return Optional.of(new AllocVal(leftOp, stmt, rightOp));
+					if (jimpleRightOp.isStaticFieldRef()) {
+						AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+						return Optional.of(allocVal);
+
+					}
 				}
 
-				/*if (!Scene.v().getCallGraph().edgesOutOf(stmt).hasNext()) {
+				// Extract cast value from cast expressions (e.g. (int) 65000 -> 65000)
+				if (rightOp.isCast()) {
+					Val castOp = rightOp.getCastOp();
+
+					if (isAllocationVal(castOp)) {
+						return Optional.of(new AllocVal(leftOp, stmt, castOp));
+					}
+				}
+
+				// Extract the length value of length expressions
+				if (rightOp.isLengthExpr()) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
-				}*/
-			}
-		}
-		if (stmt.containsInvokeExpr()) {
-			if (stmt.getInvokeExpr().getMethod().isConstructor() && (stmt.getInvokeExpr().isInstanceInvokeExpr())) {
-				Val base = stmt.getInvokeExpr().getBase();
+				}
 
-				if (base.equals(fact)) {
-					//return Optional.of(new AllocVal(base, stmt, base));
+				// Strings are initialized with a concrete value
+				if (rightOp.isNewExpr()) {
+					Type type = rightOp.getNewExprType();
+
+					if (type.toString().equals("java.lang.String")) {
+						return Optional.empty();
+					}
+				}
+
+				if (isAllocationVal(rightOp)) {
+					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 			}
-		}
-
-		if (!stmt.isAssign()) {
-			return Optional.empty();
-		}
-
-		Val leftOp = stmt.getLeftOp();
-		Val rightOp = stmt.getRightOp();
-		if (!leftOp.equals(fact)) {
-			return Optional.empty();
-		}
-
-		// Extract static fields
-		if (rightOp instanceof JimpleVal) {
-			JimpleVal jimpleRightOp = (JimpleVal) rightOp;
-
-			if (jimpleRightOp.isStaticFieldRef()) {
-				AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
-				return Optional.of(allocVal);
-
-			}
-		}
-
-		// Extract cast value from cast expressions (e.g. (int) 65000 -> 65000)
-		if (rightOp.isCast()) {
-			Val castOp = rightOp.getCastOp();
-
-			if (isAllocationVal(castOp)) {
-				return Optional.of(new AllocVal(leftOp, stmt, castOp));
-			}
-		}
-
-		// Extract the length value of length expressions
-		if (rightOp.isLengthExpr()) {
-			return Optional.of(new AllocVal(leftOp, stmt, rightOp));
-		}
-
-		// Strings are initialized with a concrete value
-		if (rightOp.isNewExpr()) {
-			Type type = rightOp.getNewExprType();
-
-			if (type.toString().equals("java.lang.String")) {
-				return Optional.empty();
-			}
-		}
-
-//		if (as.containsInvokeExpr()) {
-//			for (SootMethod callee : icfg.getCalleesOfCallAt(as)) {
-//				for (Unit u : icfg.getEndPointsOf(callee)) {
-//					if (u instanceof ReturnStmt && isAllocationVal(((ReturnStmt) u).getOp())) {
-//						return Optional.of(
-//								new AllocVal(as.getLeftOp(), m, ((ReturnStmt) u).getOp(), new Statement((Stmt) u, m)));
-//					}
-//				}
-//			}
-//		}
-		if (isAllocationVal(rightOp)) {
-			return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 		}
 
 		return Optional.empty();
@@ -159,7 +126,8 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
     @Override
 	public int analysisTimeoutMS() {
-		return timeout;
+		//return definition.getTimeout();
+		return 100000000;
 	}
 	
 	@Override

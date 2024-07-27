@@ -1,12 +1,17 @@
 package crypto.utils;
 
 import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Val;
 import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleType;
+import boomerang.scene.jimple.JimpleVal;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
+import soot.Value;
+import soot.jimple.StringConstant;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,4 +109,10 @@ public class SootUtils {
 
         return result;
     }
+
+    public static Val toStringConstant(String string, Method method) {
+        Value value = StringConstant.v(string);
+        return new JimpleVal(value, method);
+    }
+
 }

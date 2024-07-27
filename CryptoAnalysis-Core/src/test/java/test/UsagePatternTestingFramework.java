@@ -32,6 +32,7 @@ import test.assertions.Assertions;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
+import test.assertions.ConstraintViolationAssertion;
 import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
@@ -220,9 +221,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 			}
 			
-			//if (invocationName.startsWith("violatedConstraint")) {
-			//	queries.add(new ConstraintViolationAssertion(statement));
-			//}
+			if (invocationName.startsWith("violatedConstraint")) {
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new ConstraintViolationAssertion(pred));
+				}
+			}
 
 			if (invocationName.startsWith("hasEnsuredPredicate")){
 				Val param = invokeExpr.getArg(0);

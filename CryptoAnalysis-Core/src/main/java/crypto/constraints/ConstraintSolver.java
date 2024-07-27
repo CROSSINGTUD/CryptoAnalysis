@@ -1,15 +1,19 @@
 package crypto.constraints;
 
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import com.google.common.collect.Lists;
 import crypto.analysis.AlternativeReqPredicate;
+import crypto.analysis.AnalysisReporter;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
+import crypto.extractparameter.ExtractParameterDefinition;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
@@ -42,7 +46,39 @@ public class ConstraintSolver {
 
 		relConstraints = new HashSet<>();
 		requiredPredicates = new HashSet<>();
-		parameterAnalysis = new ExtractParameterAnalysis(seed.getScanner(), collectedCalls, seed.getSpecification());
+
+		ExtractParameterDefinition definition = new ExtractParameterDefinition() {
+			@Override
+			public CallGraph getCallGraph() {
+				return seed.getScanner().callGraph();
+			}
+
+			@Override
+			public DataFlowScope getDataFlowScope() {
+				return seed.getScanner().getDataFlowScope();
+			}
+
+			@Override
+			public Collection<Statement> getCollectedCalls() {
+				return collectedCalls;
+			}
+
+			@Override
+			public CrySLRule getRule() {
+				return seed.getSpecification();
+			}
+
+			@Override
+			public AnalysisReporter getAnalysisReporter() {
+				return seed.getScanner().getAnalysisReporter();
+			}
+
+			@Override
+			public int getTimeout() {
+				return seed.getScanner().getTimeout();
+			}
+		};
+		parameterAnalysis = new ExtractParameterAnalysis(definition);
 	}
 
 	/**

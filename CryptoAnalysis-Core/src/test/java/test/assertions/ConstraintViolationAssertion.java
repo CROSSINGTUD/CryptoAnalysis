@@ -5,7 +5,7 @@ import test.Assertion;
 
 public class ConstraintViolationAssertion implements Assertion {
 	
-	private Statement stmt;
+	private final Statement stmt;
 	private boolean satisfied;
 
 	public ConstraintViolationAssertion(Statement stmt) {
@@ -24,7 +24,7 @@ public class ConstraintViolationAssertion implements Assertion {
 
 	@Override
 	public String toString() {
-		return "Expected to report that a constraint is broken at this statement: " + this.stmt;
+		return "Expected to report a violated constraint @ " + this.stmt;
 	}
 
 	public void reported(Statement callSite) {

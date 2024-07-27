@@ -1,0 +1,18 @@
+SPEC tests.misc.transformation.StringConstraint
+
+OBJECTS
+    char[] toCharArray;
+    java.lang.String replaceString;
+
+EVENTS
+    Con: StringConstraint();
+    ToCharArray: toCharArrayConstraint(toCharArray);
+    Replace: replaceConstraint(replaceString);
+    All := Replace;
+
+ORDER
+    Con, All
+
+CONSTRAINTS
+    notHardCoded[toCharArray];
+    replaceString in {"AES"};

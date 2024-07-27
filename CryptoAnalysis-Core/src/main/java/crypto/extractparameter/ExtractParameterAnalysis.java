@@ -7,39 +7,36 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import crypto.analysis.CryptoScanner;
+import crypto.extractparameter.transformation.TransformedAllocVal;
 import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLRule;
 import crypto.utils.MatcherUtils;
 
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 
 public class ExtractParameterAnalysis {
 
-    private final CryptoScanner scanner;
-    private final Collection<Statement> collectedCalls;
-    private final CrySLRule rule;
     private final Collection<ExtractParameterQuery> queries;
     private final Collection<CallSiteWithExtractedValue> collectedValues;
+    private final ExtractParameterDefinition definition;
 
-    public ExtractParameterAnalysis(CryptoScanner scanner, Collection<Statement> collectedCalls, CrySLRule rule) {
-        this.scanner = scanner;
-        this.collectedCalls = collectedCalls;
-        this.rule = rule;
+    public ExtractParameterAnalysis(ExtractParameterDefinition definition) {
+        this.definition = definition;
 
         queries = new HashSet<>();
         collectedValues = new HashSet<>();
     }
 
     public void run() {
-        for (Statement statement : collectedCalls) {
+        for (Statement statement : definition.getCollectedCalls()) {
             if (!statement.containsInvokeExpr()) {
                 continue;
             }
 
             DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
-            Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rule, declaredMethod);
+            Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(definition.getRule(), declaredMethod);
 
             for (CrySLMethod method : methods) {
                 injectQueryAtCallSite(statement, method);
@@ -47,9 +44,9 @@ public class ExtractParameterAnalysis {
         }
 
         for (ExtractParameterQuery query : queries) {
-            scanner.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
+            definition.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
             query.solve();
-            scanner.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
+            definition.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
         }
     }
 
@@ -68,12 +65,30 @@ public class ExtractParameterAnalysis {
         for (Statement pred : predecessors) {
             ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-            ExtractParameterQuery query = new ExtractParameterQuery(scanner, edge, parameter, index);
+            ExtractParameterQuery query = new ExtractParameterQuery(definition, edge, parameter, index);
             query.addListener(results -> {
+                Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
+
+                Collection<ForwardQuery> filteredQueries = filterBoomerangResults(results.getAllocationSites().keySet());
+                for (ForwardQuery paramQuery : filteredQueries) {
+                    Val val = paramQuery.var();
+
+                    if (val instanceof AllocVal) {
+                        AllocVal allocVal = (AllocVal) val;
+
+                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), paramQuery.cfgEdge().getStart());
+                        extractedParameters.add(entry);
+                    } else {
+                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, paramQuery.cfgEdge().getStart());
+                        extractedParameters.add(entry);
+                    }
+                }
+
                 CallSiteWithParamIndex callSiteWithParam = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpec);
                 Collection<Type> types = results.getPropagationType();
 
-                if (results.getAllocationSites().isEmpty()) {
+                // If no value could be extracted, add the zero value to indicate it
+                if (extractedParameters.isEmpty()) {
                     ExtractedValue zeroVal = new ExtractedValue(Val.zero(), statement, types);
 
                     CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, zeroVal);
@@ -81,16 +96,8 @@ public class ExtractParameterAnalysis {
                     return;
                 }
 
-                for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
-                    Val val = forwardQuery.var();
-
-                    ExtractedValue extractedValue;
-                    if (val instanceof AllocVal) {
-                        AllocVal allocVal = (AllocVal) val;
-                        extractedValue = new ExtractedValue(allocVal.getAllocVal(), forwardQuery.cfgEdge().getStart(), types);
-                    } else {
-                        extractedValue = new ExtractedValue(val, forwardQuery.cfgEdge().getStart(), types);
-                    }
+                for (Map.Entry<Val, Statement> entry : extractedParameters) {
+                    ExtractedValue extractedValue = new ExtractedValue(entry.getKey(), entry.getValue(), types);
 
                     CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);
                     collectedValues.add(callSite);
@@ -100,6 +107,23 @@ public class ExtractParameterAnalysis {
         }
     }
 
+    private Collection<ForwardQuery> filterBoomerangResults(Collection<ForwardQuery> resultQueries) {
+        Collection<ForwardQuery> transformedQueries = new HashSet<>();
+
+        for (ForwardQuery query : resultQueries) {
+            Val val = query.var();
+
+            if (val instanceof TransformedAllocVal) {
+                transformedQueries.add(query);
+            }
+        }
+
+        if (transformedQueries.isEmpty()) {
+            return resultQueries;
+        }
+
+        return transformedQueries;
+    }
 
     public Collection<CallSiteWithExtractedValue> getExtractedValues() {
         return collectedValues;
