@@ -7,6 +7,7 @@ import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
+import crypto.definition.ScannerDefinition;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;

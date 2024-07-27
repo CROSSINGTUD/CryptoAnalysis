@@ -8,7 +8,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Table;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.ScannerDefinition;
+import crypto.definition.ScannerDefinition;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisParserException;

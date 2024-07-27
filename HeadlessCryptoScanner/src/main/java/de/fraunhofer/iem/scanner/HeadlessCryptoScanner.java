@@ -14,7 +14,7 @@ import de.fraunhofer.iem.scanner.AnalysisSettings.AnalysisCallGraph;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.ScannerDefinition;
+import crypto.definition.ScannerDefinition;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;

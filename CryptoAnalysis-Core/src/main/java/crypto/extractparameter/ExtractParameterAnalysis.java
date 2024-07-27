@@ -7,6 +7,7 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
+import crypto.definition.ExtractParameterDefinition;
 import crypto.extractparameter.transformation.TransformedAllocVal;
 import crypto.rules.CrySLMethod;
 import crypto.utils.MatcherUtils;

@@ -13,7 +13,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.definition.ExtractParameterDefinition;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;

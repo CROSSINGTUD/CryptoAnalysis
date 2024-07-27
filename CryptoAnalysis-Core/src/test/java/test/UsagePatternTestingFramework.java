@@ -18,7 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.ScannerDefinition;
+import crypto.definition.ScannerDefinition;
 import crypto.cryslhandler.RulesetReader;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;

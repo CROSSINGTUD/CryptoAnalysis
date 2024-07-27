@@ -8,7 +8,7 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.definition.ExtractParameterDefinition;
 import crypto.extractparameter.ExtractParameterOptions;
 import wpds.impl.Weight;
 

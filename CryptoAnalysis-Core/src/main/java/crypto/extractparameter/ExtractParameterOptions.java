@@ -8,6 +8,7 @@ import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
+import crypto.definition.ExtractParameterDefinition;
 import crypto.extractparameter.transformation.StringTransformation;
 
 import java.util.Optional;

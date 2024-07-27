@@ -5,6 +5,7 @@ import boomerang.Boomerang;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
+import crypto.definition.ExtractParameterDefinition;
 import wpds.impl.Weight;
 
 import java.util.Arrays;
