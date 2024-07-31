@@ -10,6 +10,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.definition.ExtractParameterDefinition;
 import crypto.extractparameter.ExtractParameterOptions;
+import crypto.utils.SootUtils;
 import wpds.impl.Weight;
 
 import java.util.Collection;
@@ -25,6 +26,31 @@ public abstract class Transformation {
     }
 
     public abstract Optional<AllocVal> evaluateExpression(Statement statement);
+
+    protected Optional<String> extractStringFromVal(Statement statement, Val val) {
+        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
+
+        if (forwardQuery.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return extractStringFromBoomerangResult(forwardQuery.get());
+    }
+
+    protected Optional<String> extractStringFromBoomerangResult(ForwardQuery query) {
+        Statement statement = query.cfgEdge().getStart();
+
+        if (!statement.isAssign()) {
+            return Optional.empty();
+        }
+
+        Val rightOp = statement.getRightOp();
+        if (!rightOp.isStringConstant()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(rightOp.getStringValue());
+    }
 
     protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
         Collection<ForwardQuery> extractedValues = new HashSet<>();
@@ -49,4 +75,19 @@ public abstract class Transformation {
         ForwardQuery forwardQuery = extractedValues.stream().iterator().next();
         return Optional.of(forwardQuery);
     }
+
+    protected AllocVal createTransformedAllocVal(String string, Statement statement) {
+        Val leftOp = statement.getLeftOp();
+        Val resultOp = SootUtils.toStringConstant(string, statement.getMethod());
+
+        return new TransformedAllocVal(leftOp, statement, resultOp);
+    }
+
+    protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
+        Val leftOp = statement.getLeftOp();
+        Val resultOp = SootUtils.toIntConstant(intValue, statement.getMethod());
+
+        return new TransformedAllocVal(leftOp, statement, resultOp);
+    }
+
 }

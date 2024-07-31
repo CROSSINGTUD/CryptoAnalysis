@@ -1,12 +1,10 @@
 package crypto.extractparameter.transformation;
 
-import boomerang.ForwardQuery;
 import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.definition.ExtractParameterDefinition;
-import crypto.utils.SootUtils;
 
 import java.util.Optional;
 
@@ -77,35 +75,4 @@ public class StringTransformation extends Transformation {
         return Optional.of(allocVal);
     }
 
-    private Optional<String> extractStringFromVal(Statement statement, Val val) {
-        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
-
-        if (forwardQuery.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return extractStringFromBoomerangResult(forwardQuery.get());
-    }
-
-    private Optional<String> extractStringFromBoomerangResult(ForwardQuery query) {
-        Statement statement = query.cfgEdge().getStart();
-
-        if (!statement.isAssign()) {
-            return Optional.empty();
-        }
-
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isStringConstant()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(rightOp.getStringValue());
-    }
-
-    private AllocVal createTransformedAllocVal(String string, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toStringConstant(string, statement.getMethod());
-
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
 }

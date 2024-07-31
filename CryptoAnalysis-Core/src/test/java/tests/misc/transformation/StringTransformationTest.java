@@ -11,7 +11,7 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
 
     @Override
     protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "stringTransformation";
+        return TestConstants.RULES_TEST_DIR + "transformation";
     }
 
     @Test

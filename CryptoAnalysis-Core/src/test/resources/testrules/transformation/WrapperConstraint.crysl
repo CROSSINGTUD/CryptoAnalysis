@@ -1,0 +1,11 @@
+SPEC tests.misc.transformation.WrapperConstraint
+
+OBJECTS
+    int intValue;
+
+EVENTS
+    Con: WrapperConstraint();
+    IntParseInt: integerParseIntConstraint(intValue);
+
+CONSTRAINTS
+    intValue in {10};

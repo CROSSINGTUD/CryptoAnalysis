@@ -11,6 +11,7 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
 import soot.Value;
+import soot.jimple.IntConstant;
 import soot.jimple.StringConstant;
 
 import java.util.ArrayList;
@@ -112,6 +113,11 @@ public class SootUtils {
 
     public static Val toStringConstant(String string, Method method) {
         Value value = StringConstant.v(string);
+        return new JimpleVal(value, method);
+    }
+
+    public static Val toIntConstant(int intValue, Method method) {
+        Value value = IntConstant.v(intValue);
         return new JimpleVal(value, method);
     }
 

@@ -10,6 +10,7 @@ import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
 import crypto.definition.ExtractParameterDefinition;
 import crypto.extractparameter.transformation.StringTransformation;
+import crypto.extractparameter.transformation.WrapperTransformation;
 
 import java.util.Optional;
 
@@ -42,6 +43,14 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 					return extractedStringValue;
 				}
 
+				WrapperTransformation wrapperTransformation = new WrapperTransformation(definition);
+				Optional<AllocVal> extractedWrapperValue = wrapperTransformation.evaluateExpression(stmt);
+
+				if (extractedWrapperValue.isPresent()) {
+					return extractedWrapperValue;
+				}
+
+				// TODO Move this into transformation package
 				DeclaredMethod method = stmt.getInvokeExpr().getMethod();
 				String sig = method.getSignature();
 
@@ -127,8 +136,7 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
     @Override
 	public int analysisTimeoutMS() {
-		//return definition.getTimeout();
-		return 100000000;
+		return definition.getTimeout();
 	}
 	
 	@Override
