@@ -98,6 +98,9 @@ public class ExtractParameterAnalysis {
                 }
 
                 for (Map.Entry<Val, Statement> entry : extractedParameters) {
+                    // The extracted value may be transformed, i.e. not the propagated type
+                    types.add(entry.getKey().getType());
+
                     ExtractedValue extractedValue = new ExtractedValue(entry.getKey(), entry.getValue(), types);
 
                     CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);

@@ -29,4 +29,17 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
 
         Assertions.neverTypeOfErrors(1);
     }
+
+    @Test
+    public void toCharArrayTest() {
+        // Special case: toCharArray() is transformed from a string
+        String string = "password";
+        char[] transformedString = string.toCharArray();
+
+        NeverTypeOf neverTypeOf = new NeverTypeOf();
+        neverTypeOf.operation(transformedString);
+        Assertions.extValue(0);
+
+        Assertions.neverTypeOfErrors(1);
+    }
 }
