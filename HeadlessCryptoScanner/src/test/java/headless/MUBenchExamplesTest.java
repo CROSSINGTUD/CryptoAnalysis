@@ -2,6 +2,7 @@ package headless;
 
 import java.io.File;
 
+import crypto.analysis.errors.NeverTypeOfError;
 import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
 import org.junit.Test;
 
@@ -60,6 +61,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 		// This test case corresponds to the following project in MUBench having this misuse:
 		// https://github.com/akwick/MUBench/blob/master/data/chensun/misuses/2/misuse.yml
 		setErrorsCount("<example.CipherUsesNonRandomKeyExample: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<example.CipherUsesNonRandomKeyExample: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 		
 		// This test case corresponds to the following project in MUBench having this misuse:
 		// https://github.com/akwick/MUBench/blob/master/data/minecraft-launcher/misuses/1/misuse.yml

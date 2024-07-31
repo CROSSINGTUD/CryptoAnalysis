@@ -83,7 +83,6 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		scanner.run();
 		assertErrors(scanner.getCollectedErrors());
 	}
-	
 
 	@Test
 	public void oracleExample() {
@@ -94,9 +93,10 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<main.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<main.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
+
 		setErrorsCount("<main.Main: void keyStoreExample()>", ConstraintError.class, 1);
 		setErrorsCount("<main.Main: void keyStoreExample()>", NeverTypeOfError.class, 1);
-
 		setErrorsCount("<main.Main: void keyStoreExample()>", HardCodedError.class, 1);
 		setErrorsCount("<main.Main: void cipherUsageExample()>", ConstraintError.class, 1);
 

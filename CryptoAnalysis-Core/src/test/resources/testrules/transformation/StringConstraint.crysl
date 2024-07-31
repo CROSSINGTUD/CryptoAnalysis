@@ -3,11 +3,13 @@ SPEC tests.misc.transformation.StringConstraint
 OBJECTS
     char[] toCharArray;
     java.lang.String replaceString;
+    byte[] getBytes;
 
 EVENTS
     Con: StringConstraint();
     ToCharArray: toCharArrayConstraint(toCharArray);
     Replace: replaceConstraint(replaceString);
+    GetBytes: getBytesConstraint(getBytes);
     All := Replace;
 
 ORDER
@@ -16,3 +18,4 @@ ORDER
 CONSTRAINTS
     notHardCoded[toCharArray];
     replaceString in {"AES"};
+    notHardCoded[getBytes];

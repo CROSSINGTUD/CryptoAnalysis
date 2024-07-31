@@ -10,8 +10,9 @@ import java.util.Optional;
 
 public class StringTransformation extends Transformation {
 
-    private static final String TO_CHAR_ARRAY = "<java.lang.String: char[] toCharArray()>";
     private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE = "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
+    private static final String TO_CHAR_ARRAY = "<java.lang.String: char[] toCharArray()>";
+    private static final String GET_BYTES = "<java.lang.String: byte[] getBytes()>";
 
     public StringTransformation(ExtractParameterDefinition definition) {
         super(definition);
@@ -26,30 +27,19 @@ public class StringTransformation extends Transformation {
         InvokeExpr invokeExpr = statement.getInvokeExpr();
         String signature = invokeExpr.getMethod().getSignature();
 
-        if (signature.equals(TO_CHAR_ARRAY)) {
-            return evaluateToCharArray(statement, invokeExpr);
-        }
-
         if (signature.equals(REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE)) {
             return evaluateReplaceCharSequenceCharSequence(statement, invokeExpr);
         }
 
-        return Optional.empty();
-    }
-
-    private Optional<AllocVal> evaluateToCharArray(Statement statement, InvokeExpr invokeExpr) {
-        Val base = invokeExpr.getBase();
-
-        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
-
-        if (baseStringOpt.isEmpty()) {
-            return Optional.empty();
+        if (signature.equals(TO_CHAR_ARRAY)) {
+            return evaluateToCharArray(statement, invokeExpr);
         }
 
-        String baseString = baseStringOpt.get();
+        if (signature.equals(GET_BYTES)) {
+            return evaluateGetBytes(statement, invokeExpr);
+        }
 
-        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
-        return Optional.of(allocVal);
+        return Optional.empty();
     }
 
     private Optional<AllocVal> evaluateReplaceCharSequenceCharSequence(Statement statement, InvokeExpr invokeExpr) {
@@ -72,6 +62,36 @@ public class StringTransformation extends Transformation {
         String result = baseString.replace(arg1String, arg2String);
 
         AllocVal allocVal = createTransformedAllocVal(result, statement);
+        return Optional.of(allocVal);
+    }
+
+    private Optional<AllocVal> evaluateToCharArray(Statement statement, InvokeExpr invokeExpr) {
+        Val base = invokeExpr.getBase();
+
+        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
+
+        if (baseStringOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String baseString = baseStringOpt.get();
+
+        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
+        return Optional.of(allocVal);
+    }
+
+    private Optional<AllocVal> evaluateGetBytes(Statement statement, InvokeExpr invokeExpr) {
+        Val base = invokeExpr.getBase();
+
+        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
+
+        if (baseStringOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String baseString = baseStringOpt.get();
+
+        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
         return Optional.of(allocVal);
     }
 

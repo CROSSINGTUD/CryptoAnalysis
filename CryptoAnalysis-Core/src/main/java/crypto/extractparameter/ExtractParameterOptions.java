@@ -59,10 +59,6 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 					return Optional.of(new AllocVal(leftOp, stmt, arg));
 				}
 
-				if (sig.equals("<java.lang.String: byte[] getBytes()>")) {
-					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
-				}
-
 				if (stmt.getInvokeExpr().getMethod().isNative()) {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}

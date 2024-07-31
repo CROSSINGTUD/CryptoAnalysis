@@ -15,6 +15,31 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
     }
 
     @Test
+    public void positiveReplaceCharSequenceTest() {
+        // Test replace(CharSequence, CharSequence) with replacing incorrect to correct String
+        String string = "DES".replace("D", "A");
+
+        StringConstraint constraint1 = new StringConstraint();
+        constraint1.replaceConstraint(string);
+        Assertions.extValue(0);
+
+        Assertions.constraintErrors(0);
+    }
+
+    @Test
+    public void negativeReplaceCharSequenceTest() {
+        // Test replace(CharSequence, CharSequence) with replacing correct with incorrect String
+        String string = "AES".replace("A", "D");
+
+        StringConstraint constraint = new StringConstraint();
+        constraint.replaceConstraint(string);
+        Assertions.extValue(0);
+        Assertions.violatedConstraint();
+
+        Assertions.constraintErrors(1);
+    }
+
+    @Test
     public void positiveToCharArrayTest() {
         // Test toCharArray() with a random String -> not hard coded
         char[] password = UUID.randomUUID().toString().toCharArray();
@@ -38,27 +63,25 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
     }
 
     @Test
-    public void positiveReplaceCharSequenceTest() {
-        // Test replace(CharSequence, CharSequence) with replacing incorrect to correct String
-        String string = "DES".replace("D", "A");
+    public void positiveGetBytesTest() {
+        // Test getBytes() with a random String -> not hard coded
+        byte[] password = UUID.randomUUID().toString().getBytes();
 
-        StringConstraint constraint1 = new StringConstraint();
-        constraint1.replaceConstraint(string);
-        Assertions.extValue(0);
+        StringConstraint constraint = new StringConstraint();
+        constraint.getBytesConstraint(password);
 
-        Assertions.constraintErrors(0);
+        Assertions.notHardCodedErrors(0);
     }
 
     @Test
-    public void negativeReplaceCharSequenceTest() {
-        // Test replace(CharSequence, CharSequence) with replacing correct with incorrect String
-        String string = "AES".replace("A", "D");
+    public void negativeGetBytesTest() {
+        // Test getBytes() with a fixed String -> hard coded
+        byte[] password = "password".getBytes();
 
         StringConstraint constraint = new StringConstraint();
-        constraint.replaceConstraint(string);
+        constraint.getBytesConstraint(password);
         Assertions.extValue(0);
-        Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.notHardCodedErrors(1);
     }
 }
