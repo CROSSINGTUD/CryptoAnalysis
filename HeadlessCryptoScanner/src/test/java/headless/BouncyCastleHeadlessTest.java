@@ -73,10 +73,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testEncryptTwo()>");
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
-
-		// Since version 3.0.0: Predicates with same name in the same statement are distinguished
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(3), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
+		setErrorsCount(ImpreciseValueExtractionError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptOne(byte[])>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
+		setErrorsCount(ImpreciseValueExtractionError.class, new TruePositives(1), "<crypto.RSAEngineTest: void testDecryptTwo(byte[])>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(2), "<params.RSAPrivateCrtKeyParametersTest: void testOne()>");
 		
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<generators.RSAKeyPairGeneratorTest: void testThree()>");
@@ -127,6 +127,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 3);
+		setErrorsCount("<gwt_crypto.PSSBlindTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", ImpreciseValueExtractionError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.PSSTest: void testSig(int,org.bouncycastle.crypto.params.RSAKeyParameters,org.bouncycastle.crypto.params.RSAKeyParameters,byte[],byte[],byte[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<gwt_crypto.X931SignerTest: void shouldPassSignatureTestOne()>", IncompleteOperationError.class, 1);
@@ -138,6 +139,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<diqube.TicketSignatureService: void signTicket()>", RequiredPredicateError.class, 1);
 		setErrorsCount("<diqube.TicketSignatureService: boolean isValidTicketSignature(byte[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<diqube.TicketSignatureService: boolean isValidTicketSignature(byte[])>", ImpreciseValueExtractionError.class, 1);
 		
 		setErrorsCount("<bop_bitcoin_client.ECKeyPair: bop_bitcoin_client.ECKeyPair createNew(boolean)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<bop_bitcoin_client.ECKeyPair: byte[] sign(byte[])>", RequiredPredicateError.class, 1);

@@ -6,14 +6,23 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.definition.ExtractParameterDefinition;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 public class StringTransformation extends Transformation {
 
+    private final Collection<String> baseStringSignatures = Arrays.asList(
+            "<java.lang.String: char[] toCharArray()>",
+            "<java.lang.String: byte[] getBytes()>",
+            "<java.lang.String: byte[] getBytes(java.lang.String)>"
+    );
+
+    private final Collection<String> paramStringSignatures = Arrays.asList(
+            "<org.bouncycastle.util.encoders.Hex: byte[] decode(java.lang.String)>"
+    );
+
     private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE = "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
-    private static final String TO_CHAR_ARRAY = "<java.lang.String: char[] toCharArray()>";
-    private static final String GET_BYTES = "<java.lang.String: byte[] getBytes()>";
-    private static final String GET_BYTES_WITH_PARAM = "<java.lang.String: byte[] getBytes(java.lang.String)>";
 
     public StringTransformation(ExtractParameterDefinition definition) {
         super(definition);
@@ -28,19 +37,34 @@ public class StringTransformation extends Transformation {
         InvokeExpr invokeExpr = statement.getInvokeExpr();
         String signature = invokeExpr.getMethod().getSignature();
 
+        if (baseStringSignatures.contains(signature)) {
+            Val base = invokeExpr.getBase();
+            return evaluateVal(statement, base);
+        }
+
+        if (paramStringSignatures.contains(signature)) {
+            Val param = invokeExpr.getArg(0);
+            return evaluateVal(statement, param);
+        }
+
         if (signature.equals(REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE)) {
             return evaluateReplaceCharSequenceCharSequence(statement, invokeExpr);
         }
 
-        if (signature.equals(TO_CHAR_ARRAY)) {
-            return evaluateToCharArray(statement, invokeExpr);
-        }
-
-        if (signature.equals(GET_BYTES) || signature.equals(GET_BYTES_WITH_PARAM)) {
-            return evaluateGetBytes(statement, invokeExpr);
-        }
-
         return Optional.empty();
+    }
+
+    private Optional<AllocVal> evaluateVal(Statement statement, Val val) {
+        Optional<String> baseStringOpt = extractStringFromVal(statement, val);
+
+        if (baseStringOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String baseString = baseStringOpt.get();
+
+        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
+        return Optional.of(allocVal);
     }
 
     private Optional<AllocVal> evaluateReplaceCharSequenceCharSequence(Statement statement, InvokeExpr invokeExpr) {
@@ -63,36 +87,6 @@ public class StringTransformation extends Transformation {
         String result = baseString.replace(arg1String, arg2String);
 
         AllocVal allocVal = createTransformedAllocVal(result, statement);
-        return Optional.of(allocVal);
-    }
-
-    private Optional<AllocVal> evaluateToCharArray(Statement statement, InvokeExpr invokeExpr) {
-        Val base = invokeExpr.getBase();
-
-        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
-
-        if (baseStringOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String baseString = baseStringOpt.get();
-
-        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
-        return Optional.of(allocVal);
-    }
-
-    private Optional<AllocVal> evaluateGetBytes(Statement statement, InvokeExpr invokeExpr) {
-        Val base = invokeExpr.getBase();
-
-        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
-
-        if (baseStringOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String baseString = baseStringOpt.get();
-
-        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
         return Optional.of(allocVal);
     }
 
