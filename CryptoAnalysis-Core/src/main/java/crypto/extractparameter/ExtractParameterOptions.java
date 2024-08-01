@@ -9,6 +9,7 @@ import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
 import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.transformation.OperatorTransformation;
 import crypto.extractparameter.transformation.StringTransformation;
 import crypto.extractparameter.transformation.WrapperTransformation;
 
@@ -63,6 +64,13 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 			} else {
+				OperatorTransformation operatorTransformation = new OperatorTransformation(definition);
+				Optional<AllocVal> extractedOperatorValue = operatorTransformation.evaluateExpression(stmt);
+
+				if (extractedOperatorValue.isPresent()) {
+					return extractedOperatorValue;
+				}
+
 				// Extract static fields
 				if (rightOp instanceof JimpleVal) {
 					JimpleVal jimpleRightOp = (JimpleVal) rightOp;
@@ -81,11 +89,6 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 					if (isAllocationVal(castOp)) {
 						return Optional.of(new AllocVal(leftOp, stmt, castOp));
 					}
-				}
-
-				// Extract the length value of length expressions
-				if (rightOp.isLengthExpr()) {
-					return Optional.of(new AllocVal(leftOp, stmt, rightOp));
 				}
 
 				// Strings are initialized with a concrete value

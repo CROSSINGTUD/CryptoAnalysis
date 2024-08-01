@@ -12,6 +12,7 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Value;
 import soot.jimple.IntConstant;
+import soot.jimple.NewArrayExpr;
 import soot.jimple.StringConstant;
 
 import java.util.ArrayList;
@@ -119,6 +120,16 @@ public class SootUtils {
     public static Val toIntConstant(int intValue, Method method) {
         Value value = IntConstant.v(intValue);
         return new JimpleVal(value, method);
+    }
+
+    public static Val toArraySize(Val arrayAllocVal, Method method) {
+        JimpleVal jimpleVal = (JimpleVal) arrayAllocVal;
+        Value value = jimpleVal.getDelegate();
+
+        NewArrayExpr newArrayExpr = (NewArrayExpr) value;
+        Value size = newArrayExpr.getSize();
+
+        return new JimpleVal(size, method);
     }
 
 }
