@@ -8,8 +8,8 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
-import org.junit.Test;
 import headless.FindingsType.TruePositives;
+import org.junit.Test;
 
 import java.io.File;
 
@@ -108,6 +108,9 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 		
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void TestSHA256DigestOne()>", TypestateError.class, 2);
 		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", TypestateError.class, 4);
+		setErrorsCount("<pluotsorbet.BouncyCastleSHA256: void testSHA256DigestTwo()>", ImpreciseValueExtractionError.class, 1);
+
+		setErrorsCount("<ipack.JPAKEExample: java.math.BigInteger deriveSessionKey(java.math.BigInteger)>", ImpreciseValueExtractionError.class, 1);
 		
 		scanner.run();
 	  	assertErrors(scanner.getCollectedErrors());

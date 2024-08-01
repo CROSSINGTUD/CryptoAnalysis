@@ -52,6 +52,31 @@ public abstract class Transformation {
         return Optional.of(rightOp.getStringValue());
     }
 
+    protected Optional<Long> extractLongFromVal(Statement statement, Val val) {
+        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
+
+        if (forwardQuery.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return extractLongFromBoomerangResult(forwardQuery.get());
+    }
+
+    protected Optional<Long> extractLongFromBoomerangResult(ForwardQuery query) {
+        Statement statement = query.cfgEdge().getStart();
+
+        if (!statement.isAssign()) {
+            return Optional.empty();
+        }
+
+        Val rightOp = statement.getRightOp();
+        if (!rightOp.isLongConstant()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(rightOp.getLongValue());
+    }
+
     protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
         Collection<ForwardQuery> extractedValues = new HashSet<>();
 
@@ -86,6 +111,13 @@ public abstract class Transformation {
     protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
         Val leftOp = statement.getLeftOp();
         Val resultOp = SootUtils.toIntConstant(intValue, statement.getMethod());
+
+        return new TransformedAllocVal(leftOp, statement, resultOp);
+    }
+
+    protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
+        Val leftOp = statement.getLeftOp();
+        Val resultOp = SootUtils.toLongConstant(longValue, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }

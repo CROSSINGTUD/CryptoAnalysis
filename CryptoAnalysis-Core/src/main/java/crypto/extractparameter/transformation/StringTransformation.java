@@ -13,6 +13,7 @@ public class StringTransformation extends Transformation {
     private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE = "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
     private static final String TO_CHAR_ARRAY = "<java.lang.String: char[] toCharArray()>";
     private static final String GET_BYTES = "<java.lang.String: byte[] getBytes()>";
+    private static final String GET_BYTES_WITH_PARAM = "<java.lang.String: byte[] getBytes(java.lang.String)>";
 
     public StringTransformation(ExtractParameterDefinition definition) {
         super(definition);
@@ -35,7 +36,7 @@ public class StringTransformation extends Transformation {
             return evaluateToCharArray(statement, invokeExpr);
         }
 
-        if (signature.equals(GET_BYTES)) {
+        if (signature.equals(GET_BYTES) || signature.equals(GET_BYTES_WITH_PARAM)) {
             return evaluateGetBytes(statement, invokeExpr);
         }
 

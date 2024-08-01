@@ -12,6 +12,7 @@ import soot.SootMethod;
 import soot.Type;
 import soot.Value;
 import soot.jimple.IntConstant;
+import soot.jimple.LongConstant;
 import soot.jimple.NewArrayExpr;
 import soot.jimple.StringConstant;
 
@@ -119,6 +120,11 @@ public class SootUtils {
 
     public static Val toIntConstant(int intValue, Method method) {
         Value value = IntConstant.v(intValue);
+        return new JimpleVal(value, method);
+    }
+
+    public static Val toLongConstant(long longValue, Method method) {
+        Value value = LongConstant.v(longValue);
         return new JimpleVal(value, method);
     }
 

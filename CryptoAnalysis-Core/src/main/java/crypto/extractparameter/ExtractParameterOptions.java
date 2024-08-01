@@ -1,7 +1,6 @@
 package crypto.extractparameter;
 
 import boomerang.scene.AllocVal;
-import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
@@ -49,15 +48,6 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
 				if (extractedWrapperValue.isPresent()) {
 					return extractedWrapperValue;
-				}
-
-				// TODO Move this into transformation package
-				DeclaredMethod method = stmt.getInvokeExpr().getMethod();
-				String sig = method.getSignature();
-
-				if (sig.equals("<java.math.BigInteger: java.math.BigInteger valueOf(long)>")) {
-					Val arg = stmt.getInvokeExpr().getArg(0);
-					return Optional.of(new AllocVal(leftOp, stmt, arg));
 				}
 
 				if (stmt.getInvokeExpr().getMethod().isNative()) {

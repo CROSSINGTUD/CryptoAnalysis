@@ -5,6 +5,8 @@ import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
 
+import java.math.BigInteger;
+
 public class WrapperTransformationTest extends UsagePatternTestingFramework {
 
     @Override
@@ -14,11 +16,10 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
 
     @Test
     public void positiveIntegerParseIntTest() {
-        String correctValue = "10";
-        int intValue = Integer.parseInt(correctValue);
+        int correctValue = Integer.parseInt("10");
 
         WrapperConstraint constraint = new WrapperConstraint();
-        constraint.integerParseIntConstraint(intValue);
+        constraint.integerParseIntConstraint(correctValue);
         Assertions.extValue(0);
 
         Assertions.constraintErrors(0);
@@ -26,11 +27,33 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
 
     @Test
     public void negativeIntegerParseIntTest() {
-        String incorrectValue = "9999";
-        int intValue = Integer.parseInt(incorrectValue);
+        int incorrectValue = Integer.parseInt("9999");
 
         WrapperConstraint constraint = new WrapperConstraint();
-        constraint.integerParseIntConstraint(intValue);
+        constraint.integerParseIntConstraint(incorrectValue);
+        Assertions.extValue(0);
+        Assertions.violatedConstraint();
+
+        Assertions.constraintErrors(1);
+    }
+
+    @Test
+    public void positiveBigIntegerValueOfTest() {
+        BigInteger correctValue = BigInteger.valueOf(100000);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.bigIntegerValueOfConstraint(correctValue);
+        Assertions.extValue(0);
+
+        Assertions.constraintErrors(0);
+    }
+
+    @Test
+    public void negativeBigIntegerValueOfTest() {
+        BigInteger incorrectValue = BigInteger.valueOf(10);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.bigIntegerValueOfConstraint(incorrectValue);
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
