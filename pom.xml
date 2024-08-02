@@ -395,6 +395,13 @@
                         <fileset>
                             <directory>${basedir}/src/main/resources/BouncyCastle-JCA</directory>
                         </fileset>
+                        <fileset>
+                            <directory>apps</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>
