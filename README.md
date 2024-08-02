@@ -131,3 +131,9 @@ java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCry
 If specified, the analysis generates a report file `CogniCrypt-Report.txt` along with the `.jimple` output of the classes the analysis found misuses in. The format of the report file follows that described above.
 
 Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
+
+## How can I contribute?
+We hare happy for every contribution from the community!
+
+* [Contributing](CONTRIBUTING.md) for details on issues and merge requests.
+* [Coding Guidles](CODING.md) for this project.
