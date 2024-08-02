@@ -3,7 +3,6 @@ package crypto.reporting;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
-import crypto.HeadlessCryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLRule;
@@ -117,13 +116,13 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
 
         setSummary(summary.toString());
 
-        if (errorCount != 0) {
-            HeadlessCryptoScanner.exitCode = 1;
-        }
-
         System.out.println("::endgroup::");
 
         super.createAnalysisReport(seeds, errorCollection);
+
+        if (errorCount != 0) {
+            System.exit(1);
+        }
     }
 
     private Path classToSourcePath(WrappedClass clazz) {

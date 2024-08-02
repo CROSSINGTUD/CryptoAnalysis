@@ -20,13 +20,13 @@ import java.util.Collection;
 
 public class ConstraintError extends AbstractError {
 
-	private final CallSiteWithExtractedValue callSiteWithParamIndex;
+	private final CallSiteWithExtractedValue callSite;
 	private final ISLConstraint violatedConstraint;
 
 	public ConstraintError(IAnalysisSeed seed, CallSiteWithExtractedValue cs, CrySLRule rule, ISLConstraint constraint) {
-		super(seed, cs.getCallSite().stmt(), rule);
+		super(seed, cs.getCallSiteWithParam().stmt(), rule);
 
-		this.callSiteWithParamIndex = cs;
+		this.callSite = cs;
 		this.violatedConstraint = constraint;
 	}
 	
@@ -35,12 +35,12 @@ public class ConstraintError extends AbstractError {
 	}
 
 	public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
-		return callSiteWithParamIndex;
+		return callSite;
 	}
 
 	@Override
 	public String toErrorMarkerString() {
-		return callSiteWithParamIndex.toString() + evaluateBrokenConstraint(violatedConstraint);
+		return callSite.toString() + evaluateBrokenConstraint(violatedConstraint);
 	}
 
 	private String evaluateBrokenConstraint(final ISLConstraint constraint) {
@@ -111,7 +111,7 @@ public class ConstraintError extends AbstractError {
 		msg.append(" should be any of ");
 		CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
 		if (splitter != null) {
-			Statement stmt = callSiteWithParamIndex.getVal().stmt();
+			Statement stmt = callSite.getCallSiteWithParam().stmt();
 			String[] splitValues = new String[] { "" };
 			if (stmt.isAssign()) {
 				Val rightSide = stmt.getRightOp();
@@ -160,7 +160,7 @@ public class ConstraintError extends AbstractError {
 	public int hashCode() {
 		return Arrays.hashCode(new Object[]{
 				super.hashCode(),
-				callSiteWithParamIndex,
+				callSite,
 				violatedConstraint
 		});
 	}
@@ -172,9 +172,9 @@ public class ConstraintError extends AbstractError {
 		if (getClass() != obj.getClass()) return false;
 
 		ConstraintError other = (ConstraintError) obj;
-		if (callSiteWithParamIndex == null) {
+		if (callSite == null) {
 			if (other.getCallSiteWithExtractedValue() != null) return false;
-		} else if (!callSiteWithParamIndex.equals(other.getCallSiteWithExtractedValue())) {
+		} else if (!callSite.equals(other.getCallSiteWithExtractedValue())) {
 			return false;
 		}
 

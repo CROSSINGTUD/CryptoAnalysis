@@ -84,7 +84,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 
 		if (!isCalled) {
-			IAnalysisSeed seed = context.getObject();
+			IAnalysisSeed seed = context.getSeed();
 			CallToError callToError = new CallToError(seed, context.getSpecification(), methods);
 			errors.add(callToError);
 		}
@@ -101,7 +101,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 
 				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
 				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
-					NoCallToError noCallToError = new NoCallToError(context.getObject(), statement, context.getSpecification());
+					NoCallToError noCallToError = new NoCallToError(context.getSeed(), statement, context.getSpecification());
 					errors.add(noCallToError);
 				}
 			}
@@ -119,20 +119,20 @@ public class PredicateConstraint extends EvaluableConstraint {
 		CrySLObject variable = objects.get(0);
 		CrySLObject parameterType = objects.get(1);
 
-		for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
 			if (!variable.getName().equals(cs.getVarName())) {
 				continue;
 			}
 
-			Collection<Type> types = context.getPropagatedTypes().get(cs);
+			Collection<Type> types = callSite.getExtractedValue().getTypes();
 			for (Type type : types) {
 				if (!parameterType.getJavaType().equals(type.toString())) {
 					continue;
 				}
 
-				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
-				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getObject(), callSite, context.getSpecification(), neverTypeOfPredicate);
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getSeed(), callSite, context.getSpecification(), neverTypeOfPredicate);
 				errors.add(neverTypeOfError);
 			}
 		}
@@ -148,18 +148,17 @@ public class PredicateConstraint extends EvaluableConstraint {
 		// notHardCoded[$variable]
 		CrySLObject variable = objects.get(0);
 
-		for (CallSiteWithParamIndex cs : context.getParsAndVals().keySet()) {
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
 			if (!variable.getVarName().equals(cs.getVarName())) {
 				continue;
 			}
 
-			Collection<ExtractedValue> extractedValues = context.getParsAndVals().get(cs);
-			for (ExtractedValue extractedValue : extractedValues) {
-				if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
-					CallSiteWithExtractedValue callSiteWithExtractedValue = new CallSiteWithExtractedValue(cs, extractedValue);
-					HardCodedError hardCodedError = new HardCodedError(context.getObject(), callSiteWithExtractedValue, context.getSpecification(), hardCodedPredicate);
-					errors.add(hardCodedError);
-				}
+			ExtractedValue extractedValue = callSite.getExtractedValue();
+			if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
+				HardCodedError hardCodedError = new HardCodedError(context.getSeed(), callSite, context.getSpecification(), hardCodedPredicate);
+				errors.add(hardCodedError);
 			}
 		}
 	}
@@ -175,13 +174,15 @@ public class PredicateConstraint extends EvaluableConstraint {
 		CrySLObject variable = objects.get(0);
 		CrySLObject parameterType = objects.get(1);
 
-		for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
 			if (!variable.getName().equals(cs.getVarName())) {
 				continue;
 			}
 
 			boolean isSubType = false;
-			Collection<Type> types = context.getPropagatedTypes().get(cs);
+			Collection<Type> types = callSite.getExtractedValue().getTypes();
 			for (Type type : types) {
 				if (type.isNullType()) {
 					continue;
@@ -193,9 +194,7 @@ public class PredicateConstraint extends EvaluableConstraint {
 			}
 
 			if (!isSubType) {
-				ExtractedValue extractedValue = new ExtractedValue(cs.stmt(), cs.fact());
-				CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(cs, extractedValue);
-				InstanceOfError instanceOfError = new InstanceOfError(context.getObject(), callSite, context.getSpecification(), instanceOfPredicate);
+				InstanceOfError instanceOfError = new InstanceOfError(context.getSeed(), callSite, context.getSpecification(), instanceOfPredicate);
 				errors.add(instanceOfError);
 			}
 		}
@@ -229,47 +228,33 @@ public class PredicateConstraint extends EvaluableConstraint {
 		return objects;
 	}
 
-	private boolean isSubType(String subType, String superType) {
-		boolean subTypes = subType.equals(superType);
-		subTypes |= (subType + "[]").equals(superType);
-
-		if (subTypes) {
-			return true;
-		}
-
-        try {
-            return Class.forName(superType).isAssignableFrom(Class.forName(subType));
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-	}
-
 	public boolean isHardCodedVariable(ExtractedValue val) {
 		// Check for basic constants
-		if (val.getValue().isConstant()) {
-			LOGGER.debug("Value {} is hard coded", val.getValue());
+		if (val.getVal().isConstant()) {
+			LOGGER.debug("Value {} is hard coded", val.getVal());
 			return true;
 		}
 
+		Statement statement = val.getInitialStatement();
+
 		// Objects initialized with 'new' are hard coded
-		Statement statement = val.stmt();
 		if (!statement.isAssign()) {
-			LOGGER.debug("Value {} is not hard coded", val.getValue());
+			LOGGER.debug("Value {} is not hard coded", val.getVal());
 			return false;
 		}
 
 		Val rightOp = statement.getRightOp();
 		if (rightOp.isNewExpr()) {
-			LOGGER.debug("Value {} is hard coded", val.getValue());
+			LOGGER.debug("Value {} is hard coded", val.getVal());
 			return true;
 		}
 
-		LOGGER.debug("Value {} is not hard coded", val.getValue());
+		LOGGER.debug("Value {} is not hard coded", val.getVal());
 		return false;
 	}
 
-	private boolean isHardCodedArray(ExtractedValue value) {
-		Map<Integer, Val> extractedArray = extractArray(value);
+	private boolean isHardCodedArray(ExtractedValue extractedValue) {
+		Map<Integer, Val> extractedArray = extractArray(extractedValue);
 
 		return !extractedArray.keySet().isEmpty();
 	}

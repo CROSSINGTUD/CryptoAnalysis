@@ -1,6 +1,5 @@
 package crypto.reporting;
 
-import crypto.AnalysisSettings;
 import crypto.rules.CrySLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

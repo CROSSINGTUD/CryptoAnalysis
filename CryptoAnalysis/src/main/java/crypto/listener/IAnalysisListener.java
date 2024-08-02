@@ -4,6 +4,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.extractparameter.ExtractParameterQuery;
 
 import java.util.Collection;
 
@@ -17,6 +18,10 @@ public interface IAnalysisListener {
 
     void afterTypestateAnalysis();
 
+    void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
+
+    void afterTriggeringBoomerangQuery(ExtractParameterQuery query);
+
     void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds);
 
     void onSeedStarted(IAnalysisSeed analysisSeed);
@@ -25,7 +30,7 @@ public interface IAnalysisListener {
 
     void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed);
 
-    void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val parameter, Statement statement);
+    void onExtractParameterAnalysisTimeout(Val parameter, Statement statement);
 
     void beforeConstraintsCheck(IAnalysisSeed analysisSeed);
 

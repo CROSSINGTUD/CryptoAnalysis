@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.fraunhofer.iem</groupId>
+        <artifactId>CryptoAnalysis-Parent</artifactId>
+        <version>3.2.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>HeadlessAndroidScanner</artifactId>
+
+    <name>HeadlessAndroidScanner</name>
+    <description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler for Android Applications</description>
+    <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>CogniCrypt</id>
+            <name>CogniCrypt</name>
+            <email>cognicrypt@eim.upb.de</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:CROSSINGTUD/CryptoAnalysis.git</connection>
+        <developerConnection>scm:git:ssh://github.com:CROSSINGTUD/CryptoAnalysis.git</developerConnection>
+        <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
+    </scm>
+
+    <properties>
+        <flowDroidVersion>2.13.0</flowDroidVersion>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>CryptoAnalysis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow-summaries</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+            <artifactId>soot-infoflow-android</artifactId>
+            <version>${flowDroidVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.6</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>de.fraunhofer.iem.android.HeadlessAndroidScanner</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptors>
+                        <!-- custom descriptor is copied from jar-with-dependencies -->
+                        <!-- This also copies the rules from test resources as default rules
+							into the jar -->
+                        <descriptor>build/descriptor.xml</descriptor>
+                    </descriptors>
+                    <outputDirectory>../apps</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -13,7 +13,7 @@ public class HardCodedError extends AbstractError {
 	private final ISLConstraint violatedConstraint;
 
 	public HardCodedError(IAnalysisSeed seed, CallSiteWithExtractedValue cs, CrySLRule rule, ISLConstraint constraint) {
-		super(seed, cs.getCallSite().stmt(), rule);
+		super(seed, cs.getCallSiteWithParam().stmt(), rule);
 
 		this.extractedValue = cs;
 		this.violatedConstraint = constraint;

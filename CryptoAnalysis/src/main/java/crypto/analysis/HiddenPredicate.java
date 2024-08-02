@@ -11,8 +11,8 @@ import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
 import crypto.rules.CrySLPredicate;
 
 import java.util.Collection;
@@ -23,8 +23,8 @@ public class HiddenPredicate extends EnsuredCrySLPredicate {
     private final AnalysisSeedWithSpecification generatingSeed;
     private final HiddenPredicateType type;
 
-    public HiddenPredicate(CrySLPredicate predicate, Multimap<CallSiteWithParamIndex, ExtractedValue> parametersToValues2, AnalysisSeedWithSpecification generatingSeed, HiddenPredicateType type) {
-        super(predicate, parametersToValues2);
+    public HiddenPredicate(CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues, AnalysisSeedWithSpecification generatingSeed, HiddenPredicateType type) {
+        super(predicate, parametersToValues);
         this.generatingSeed = generatingSeed;
         this.type = type;
     }

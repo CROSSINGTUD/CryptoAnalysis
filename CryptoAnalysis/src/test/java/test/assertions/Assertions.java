@@ -28,7 +28,7 @@ public class Assertions {
 
 	public static void noMissingTypestateChange() {}
 
-	public static void predicateContradiction() {}
+	public static void predicateContradictionErrors(int i) {}
 
 	public static void predicateErrors(int i) {}
 

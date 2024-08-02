@@ -6,11 +6,9 @@ import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
 import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 
@@ -101,10 +99,8 @@ public class PredicateHandler {
 
 	}
 
-	private final Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
-	private final Table<Statement, IAnalysisSeed, Set<EnsuredCrySLPredicate>> existingPredicatesObjectBased = HashBasedTable.create();
-	private final Table<Statement, IAnalysisSeed, Set<CrySLPredicate>> expectedPredicateObjectBased = HashBasedTable.create();
 	private final CryptoScanner cryptoScanner;
+	private final Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates = HashBasedTable.create();
 	private final Map<AnalysisSeedWithSpecification, List<RequiredPredicateError>> requiredPredicateErrors;
 
 	public PredicateHandler(CryptoScanner cryptoScanner) {
@@ -112,26 +108,19 @@ public class PredicateHandler {
 		this.requiredPredicateErrors = new HashMap<>();
 	}
 
-	public boolean addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCrySLPredicate ensPred) {
+	public void addNewPred(IAnalysisSeed seedObj, Statement statement, Val variable, EnsuredCrySLPredicate ensPred) {
 		Set<EnsuredCrySLPredicate> set = getExistingPredicates(statement, variable);
 		boolean added = set.add(ensPred);
 
 		if (added) {
 			onPredicateAdded(seedObj, statement, variable, ensPred);
 		}
-
-		Set<EnsuredCrySLPredicate> predsObjBased = existingPredicatesObjectBased.get(statement, seedObj);
-		if (predsObjBased == null)
-			predsObjBased = Sets.newHashSet();
-		predsObjBased.add(ensPred);
-		existingPredicatesObjectBased.put(statement, seedObj, predsObjBased);
-		return added;
 	}
 	
 	public Set<EnsuredCrySLPredicate> getExistingPredicates(Statement stmt, Val seed) {
 		Set<EnsuredCrySLPredicate> set = existingPredicates.get(stmt, seed);
 		if (set == null) {
-			set = Sets.newHashSet();
+			set = new HashSet<>();
 			existingPredicates.put(stmt, seed, set);
 		}
 		return set;
@@ -183,21 +172,18 @@ public class PredicateHandler {
 		}
 	}
 
-	public void expectPredicate(IAnalysisSeed object, Statement stmt, CrySLPredicate predToBeEnsured) {
-		for (Statement successor : stmt.getMethod().getControlFlowGraph().getSuccsOf(stmt)) {
-			Set<CrySLPredicate> set = expectedPredicateObjectBased.get(successor, object);
-			if (set == null)
-				set = Sets.newHashSet();
-			set.add(predToBeEnsured);
-			expectedPredicateObjectBased.put(stmt, object, set);
-		}
+	public void checkPredicates() {
+		runPredicateMechanism();
+		collectMissingRequiredPredicates();
+		collectContradictingPredicates();
+		reportRequiredPredicateErrors();
+		cryptoScanner.getAnalysisReporter().ensuredPredicates(existingPredicates);
 	}
 
-	public void checkPredicates() {
-		collectMissingRequiredPredicates();
-		reportRequiredPredicateErrors();
-		checkForContradictions();
-		cryptoScanner.getAnalysisReporter().ensuredPredicates(existingPredicates);
+	private void runPredicateMechanism() {
+		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+			seed.checkConstraintsAndEnsurePredicates();
+		}
 	}
 
 	private void collectMissingRequiredPredicates() {
@@ -238,30 +224,14 @@ public class PredicateHandler {
 		}
 	}
 
-	private void checkForContradictions() {
-		Set<Map.Entry<CrySLPredicate, CrySLPredicate>> contradictionPairs = new HashSet<>();
-		for (CrySLRule rule : cryptoScanner.getRuleset()) {
-			if(!rule.getPredicates().isEmpty()) {
-				for (ISLConstraint cons : rule.getConstraints()) {
-					if (cons instanceof CrySLPredicate && ((CrySLPredicate) cons).isNegated()) {
-						// TODO This is weird; why is it always get(0)?
-						// contradictionPairs.add(new SimpleEntry<CrySLPredicate, CrySLPredicate>(rule.getPredicates().get(0), ((CrySLPredicate) cons).setNegated(false)));
-					}
-				}
-			}
-		}
-		for (Statement generatingPredicateStmt : expectedPredicateObjectBased.rowKeySet()) {
-			for (Map.Entry<Val, Set<EnsuredCrySLPredicate>> exPredCell : existingPredicates.row(generatingPredicateStmt).entrySet()) {
-				Set<String> preds = new HashSet<>();
-				for (EnsuredCrySLPredicate exPred : exPredCell.getValue()) {
-					preds.add(exPred.getPredicate().getPredName());
-				}
-				for (Map.Entry<CrySLPredicate, CrySLPredicate> disPair : contradictionPairs) {
-					if (preds.contains(disPair.getKey().getPredName()) && preds.contains(disPair.getValue().getPredName())) {
-						// TODO Rule should not be null
-						//cryptoScanner.getAnalysisListener().reportError(null, new PredicateContradictionError(generatingPredicateStmt, null, disPair));
-					}
-				}
+	private void collectContradictingPredicates() {
+		for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+			Collection<RequiredCrySLPredicate> contradictedPredicates = seed.computeContradictedPredicates();
+
+			for (RequiredCrySLPredicate pred : contradictedPredicates) {
+				PredicateContradictionError error = new PredicateContradictionError(seed, pred.getLocation(), seed.getSpecification(), pred.getPred());
+				seed.addError(error);
+				cryptoScanner.getAnalysisReporter().reportError(seed, error);
 			}
 		}
 	}

@@ -1,9 +1,9 @@
 package crypto.analysis;
 
+import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.CallToError;
@@ -19,13 +19,14 @@ import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractParameterQuery;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
+import wpds.impl.Weight;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -79,6 +80,24 @@ public class AnalysisReporter {
         }
     }
 
+    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.beforeTriggeringBoomerangQuery(query);
+        }
+    }
+
+    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.afterTriggeringBoomerangQuery(query);
+        }
+    }
+
+    public void extractedBoomerangResults(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.extractedBoomerangResults(query, results);
+        }
+    }
+
     public void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onDiscoveredSeeds(discoveredSeeds);
@@ -103,9 +122,9 @@ public class AnalysisReporter {
         }
     }
 
-    public void onExtractParameterAnalysisTimeout(IAnalysisSeed analysisSeed, Val parameter, Statement statement) {
+    public void onExtractParameterAnalysisTimeout(Val parameter, Statement statement) {
         for (IAnalysisListener analysisListener : analysisListeners) {
-            analysisListener.onExtractParameterAnalysisTimeout(analysisSeed, parameter, statement);
+            analysisListener.onExtractParameterAnalysisTimeout(parameter, statement);
         }
     }
 
@@ -145,15 +164,15 @@ public class AnalysisReporter {
         }
     }
 
-    public void collectedValues(IAnalysisSeed seed, Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues) {
+    public void collectedValues(IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.collectedValues(seed, collectedValues);
         }
     }
 
-    public void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints) {
+    public void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {
         for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.checkedConstraints(seed, constraints);
+            resultsListener.checkedConstraints(seed, constraints, errors);
         }
     }
 

@@ -5,6 +5,13 @@ The static analysis CogniCrypt<sub>SAST</sub> takes rules written in the specifi
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
 libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/java-cryptography-architecture-jca-reference-guide.html) in particular). More information on CrySL and the static analysis may be found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
+## Structure
+
+We provide two SAST tools that allow the analysis of Java and Android applications: 
+* `CryptoAnalysis` contains the components for the actual analysis
+* `HeadlessJavaScanner` contains the SAST tool that analyzes Java applications (see below)
+* `HeadlessAndroidScanner` contains the SAST tool that analyzes Android applications (see below)
+
 ## Releases
 
 You can checkout a pre-compiled version of CogniCrypt<sub>SAST</sub> [here](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). We recommend using the latest version.
@@ -19,27 +26,27 @@ You can find CogniCrypt<sub>SAST</sub> also on [Maven Central](https://central.s
 
 CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile and build this project via
 
-```mvn package -DskipTests=true```.
+```mvn clean package -DskipTests=true```.
 
-A packaged  `jar` artifact including all dependency is found in `CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar`. Building requires at least Java 11.
+The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 11.
 
-## Usage
+## CogniCrypt<sub>SAST</sub> for Java Applications
 
-CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the class `crypto.HeadlessCryptoScanner`. It requires two arguments: 
+CogniCrypt<sub>SAST</sub> can be started in headless mode (i.e., detached from Eclipse) via the file `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar`. It requires two arguments: 
 * The path to the directory of the CrySL (source code format) rule files. The source code for the rules which contain specification for the JCA is found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 * The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories)
 
 ```
-java -cp <path-to-analysis-jar> crypto.HeadlessCryptoScanner 
+java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar 
       --rulesDir <path-to-crysl-source-code-format-rules> 
       --appPath <application-path>
 ```
 
-For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command (on a linux based system).
+For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command.
 
 ```
-java -cp CryptoAnalysis/build/CryptoAnalysis-x.y.z-jar-with-dependencies.jar crypto.HeadlessCryptoScanner 
-  --rulesDir $(pwd)/CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture 
+java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies
+  --rulesDir $(pwd)/CryptoAnalysis-Core/src/main/resources/JavaCryptographicArchitecture
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
 
@@ -81,6 +88,8 @@ Class `com.example` is searched for at `basePath/com/example`.
 
 See [`action.yml`](action.yml) for all input options.
 
+An example of how to use the GitHub action can be found in the [CryptoAnalysis-demo repository](https://github.com/CROSSINGTUD/CryptoAnalysis-demo/actions).
+
 ## Report and Error Types
 
 CogniCrypt<sub>SAST</sub> reports misuses when the code is not compliant with the CrySL rules. For each misuse, CogniCrypt<sub>SAST</sub> reports the class and the method the misuse is contained in. There are multiple misuse types:
@@ -113,21 +122,17 @@ Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/Cogn
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
 
-CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android version for CogniCrypt<sub>SAST</sub> in `CryptoAnalysis-Android`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. CogniCrypt_SAST for Android can be started via the class `de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis`. It requires three arguments in this order: 
-* The absolute path to the .apk file
-* The absolute path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/studio/releases/platforms). Under the Android SDK location you find a folder `platforms`. Supply CogniCrypt<sub>SAST</sub> with the path to this folder.
-* The absolute path to the directory of the CrySL rules.
+CogniCrypt<sub>SAST</sub> can also be run on Android Applications using the Android scanner `HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar`. Its usage does not deviate much from regular CogniCrypt<sub>SAST</sub>'s. It requires three arguments: 
+* `--apkFile`: The absolute path to the .apk file
+* `--platformDirectory`: The absolute path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/studio/releases/platforms). Under the Android SDK location you find a folder `platforms`. Supply CogniCrypt<sub>SAST</sub> with the path to this folder.
+* `--rulesDir`: The absolute path to the directory of the CrySL rules.
 
 ```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
-      <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules>
+java -jar HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar
+      --rulesDir <path-to-crysl-source-code-format-rules>
+	  --platformDirectory <path-to-android-platform>
+      --appPath <application-path>
 ```
-As an optional fourth parameter one can specify an output folder: 
-```
-java -cp <path-to-analysis-jar> -Xmx8g -Xss60m de.fraunhofer.iem.crypto.CogniCryptAndroidAnalysis \
-      <path-to-apk> <path-to-android-platforms> <path-to-crysl-rules> <output-dir>
-```
+Optional parameters are `--reportPath` and `--reportFormat`. They have the same functionality as the `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar` (see above).
 
-If specified, the analysis generates a report file `CogniCrypt-Report.txt` along with the `.jimple` output of the classes the analysis found misuses in. The format of the report file follows that described above.
-
-Note, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
+Again, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
