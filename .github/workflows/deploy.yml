@@ -5,6 +5,7 @@ on: [workflow_dispatch]
 jobs:
   deployment:
     runs-on: ubuntu-latest
+    environment: Deploy
     name: CryptoAnalysis deployment
     steps:
       - name: Checkout source code

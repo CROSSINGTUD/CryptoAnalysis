@@ -2,7 +2,7 @@ package headless.bugfixes;
 
 import java.io.File;
 
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import headless.AbstractHeadlessTest;
 import headless.MavenProject;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class NullpointerPredicateForFields extends AbstractHeadlessTest {
 	public void issue270() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/Bugfixes/issue270").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.Launcher: void <init>()>", ConstraintError.class, 1);
 

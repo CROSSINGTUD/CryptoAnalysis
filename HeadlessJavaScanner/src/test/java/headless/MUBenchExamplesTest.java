@@ -3,7 +3,7 @@ package headless;
 import java.io.File;
 
 import crypto.analysis.errors.NeverTypeOfError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Test;
 
 import crypto.analysis.errors.ConstraintError;
@@ -25,7 +25,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest{
 	public void muBenchExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/MUBenchExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		/*
 		 * The links for each test case redirect to the description of the misuse, 

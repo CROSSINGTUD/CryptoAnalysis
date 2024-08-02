@@ -4,7 +4,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 	public void ignoreNoPackages() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/IgnorePackagesExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		List<String> ignoredSections = Collections.emptyList();
 		scanner.setIgnoredSections(ignoredSections);
@@ -39,7 +39,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 	public void ignoreMethodsExample() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/IgnorePackagesExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		List<String> ignoredMethods = Arrays.asList(
 				"example.PredicateMissingExample.main",
@@ -64,7 +64,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 	public void ignoreClassesExample() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/IgnorePackagesExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		List<String> ignoredClasses = Arrays.asList(
 				"example.ConstraintErrorExample",
@@ -89,7 +89,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
 	public void ignoreWildcardExample() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/IgnorePackagesExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		List<String> ignoredWildcards = Collections.singletonList(
                 "example.*"

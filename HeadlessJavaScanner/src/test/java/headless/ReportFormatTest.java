@@ -1,7 +1,7 @@
 package headless;
 
 import crypto.reporting.Reporter;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -36,7 +36,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		scanner.setReportDirectory(outputDir.getAbsolutePath());
 		scanner.setReportFormats(Reporter.ReportFormat.TXT);
 		scanner.run();
@@ -53,7 +53,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		scanner.setReportDirectory(outputDir.getAbsolutePath());
 		scanner.setReportFormats(Reporter.ReportFormat.CSV);
 		scanner.run();
@@ -72,7 +72,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		scanner.setReportDirectory(outputDir.getAbsolutePath());
 		scanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
 		scanner.run();
@@ -89,7 +89,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		scanner.setReportDirectory(outputDir.getAbsolutePath());
 		scanner.setReportFormats(Reporter.ReportFormat.SARIF);
 		scanner.run();
@@ -133,7 +133,7 @@ public class ReportFormatTest extends AbstractHeadlessTest{
 				Reporter.ReportFormat.CSV_SUMMARY,
 				Reporter.ReportFormat.SARIF);
 		
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		scanner.setReportDirectory(outputDir.getAbsolutePath());
 		scanner.setReportFormats(formats);
 		scanner.run();

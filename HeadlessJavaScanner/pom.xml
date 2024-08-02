@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>HeadlessCryptoScanner</artifactId>
+    <parent>
+        <groupId>de.fraunhofer.iem</groupId>
+        <artifactId>CryptoAnalysis-Parent</artifactId>
+        <version>3.2.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-    <name>HeadlessCryptoScanner</name>
+    <artifactId>HeadlessJavaScanner</artifactId>
+
+    <name>HeadlessJavaScanner</name>
     <description>CogniCrypt_SAST: CrySL-to-Static Analysis Compiler for Java Applications</description>
     <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
 
@@ -31,13 +37,6 @@
         <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
     </scm>
 
-    <parent>
-        <groupId>de.fraunhofer.iem</groupId>
-        <artifactId>CryptoAnalysis</artifactId>
-        <version>3.2.1</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
     <dependencies>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
@@ -45,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>CryptoAnalysis-Core</artifactId>
+            <artifactId>CryptoAnalysis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
@@ -88,21 +87,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>
-                                de.fraunhofer.iem.scanner.HeadlessCryptoScanner
-                            </mainClass>
+                            <mainClass>de.fraunhofer.iem.scanner.HeadlessJavaScanner</mainClass>
                         </manifest>
                     </archive>
                     <descriptors>
@@ -113,6 +102,14 @@
                     </descriptors>
                     <outputDirectory>../apps</outputDirectory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

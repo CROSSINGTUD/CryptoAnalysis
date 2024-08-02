@@ -100,18 +100,18 @@ runs:
     # This also makes the action work for non-releases,
     # meaning any ref that can be resolved by https://github.com/actions/checkout.
     - name: Compile CryptoAnalysis
-      if: steps.cache.outputs.cache-hit != 'true' && steps.download.outcome != 'success'
+      # if: steps.cache.outputs.cache-hit != 'true' && steps.download.outcome != 'success'
       shell: bash
       run: |
         echo "::group::Compile"
-        mvn package -DskipTests=true
+        mvn clean package -DskipTests=true
         echo "::endgroup::"
       working-directory: CryptoAnalysisBuild_98e04be6
 
     - name: Copy JAR to convenient path
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-      run: cp CryptoAnalysisBuild_98e04be6/apps/HeadlessCryptoScanner-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
+      run: cp CryptoAnalysisBuild_98e04be6/apps/HeadlessJavaScanner-*-jar-with-dependencies.jar CryptoAnalysisBuild_98e04be6/CryptoAnalysis.jar
     - name: Save CryptoAnalysis Cache
       uses: actions/cache/save@v3
       if: steps.cache.outputs.cache-hit != 'true'

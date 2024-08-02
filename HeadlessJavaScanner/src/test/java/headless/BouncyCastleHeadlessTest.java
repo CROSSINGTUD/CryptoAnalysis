@@ -7,7 +7,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import headless.FindingsType.TruePositives;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCMacExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCMacExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount("<animamea.AmAESCrypto: byte[] getMACOne(byte[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<animamea.AmAESCrypto: byte[] getMACTwo(byte[],byte[])>", ForbiddenMethodError.class, 1);
@@ -46,7 +46,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCSymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processing(byte[],boolean)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<gcm_aes_example.GCMAESBouncyCastle: byte[] processingCorrect(byte[],boolean)>", RequiredPredicateError.class, 0);
@@ -62,7 +62,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCAsymmetricCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCAsymmetricCipherExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount(TypestateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Encrypt(byte[],org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
 		setErrorsCount(RequiredPredicateError.class, new TruePositives(1), "<rsa_misuse.RSATest: java.lang.String Decrypt(java.lang.String,org.bouncycastle.crypto.params.AsymmetricKeyParameter)>");
@@ -92,7 +92,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCDigestExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCDigestExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount("<pattern.DigestTest: void digestWithoutUpdate()>", TypestateError.class, 1);
 		setErrorsCount("<pattern.DigestTest: void digestWithMultipleUpdates()>", TypestateError.class, 1);
@@ -120,7 +120,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCSignerExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCSignerExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doShortPartialTest()>", IncompleteOperationError.class, 1);
 		setErrorsCount("<gwt_crypto.ISO9796SignerTest: void doFullMessageTest()>", HardCodedError.class, 1);
@@ -155,7 +155,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 	public void testBCEllipticCurveExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BCEllipticCurveExamples").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
+		HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 		
 		setErrorsCount(new ErrorSpecification.Builder("<crypto.ECElGamalEncryptorTest: void testOne()>")
 				.withTPs(RequiredPredicateError.class, 1)
