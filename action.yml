@@ -104,7 +104,7 @@ runs:
       shell: bash
       run: |
         echo "::group::Compile"
-        mvn package -DskipTests=true
+        mvn clean package -DskipTests=true
         echo "::endgroup::"
       working-directory: CryptoAnalysisBuild_98e04be6
 
