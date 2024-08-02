@@ -7,7 +7,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Test;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void brokenCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/brokencrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokencrypto/BrokenCryptoABICase1.java
@@ -69,7 +69,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void brokenHashExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/brokenhash").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/brokenhash/BrokenHashABICase1.java
@@ -94,7 +94,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void ecbCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/ecbcrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase1.java
@@ -126,7 +126,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void insecureAsymmetricCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/insecureasymmetriccrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/insecureasymmetriccrypto/InsecureAsymmetricCipherABICase1.java
@@ -161,7 +161,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void pbeIterationExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/pbeiteration").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/pbeiteration/LessThan1000IterationPBEABICase1.java
@@ -192,7 +192,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void predictableCryptographicKeyExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablecryptographickey").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablecryptographickey/PredictableCryptographicKeyABHCase1.java
@@ -222,7 +222,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void predictableKeyStorePasswordExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablekeystorepassword").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablekeystorepassword/PredictableKeyStorePasswordABICase1.java
@@ -240,7 +240,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void predictablePBEPasswordExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/predictablepbepassword").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/predictablepbepassword/PredictablePBEPasswordBBCase2.java
@@ -278,7 +278,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void staticInitializationVectorExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticinitializationvector").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/staticinitializationvector/StaticInitializationVectorABHCase1.java
@@ -321,7 +321,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
 	public void staticSaltsExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/CryptoGuardExamples/staticsalts").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// This test case corresponds to the following project in CryptoGuard:
 		// https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/staticsalts/StaticSaltsABHCase1.java

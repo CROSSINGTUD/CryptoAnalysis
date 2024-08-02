@@ -43,14 +43,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class HeadlessCryptoScanner {
+public class HeadlessJavaScanner {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessJavaScanner.class);
 
 	private final AnalysisSettings settings;
 	private final CryptoScanner scanner;
 
-	public HeadlessCryptoScanner(String applicationPath, String rulesetDirectory) {
+	public HeadlessJavaScanner(String applicationPath, String rulesetDirectory) {
 		settings = new AnalysisSettings();
 
 		settings.setApplicationPath(applicationPath);
@@ -60,7 +60,7 @@ public class HeadlessCryptoScanner {
 		scanner = new CryptoScanner(createScannerDefinition());
 	}
 
-	private HeadlessCryptoScanner(AnalysisSettings settings) {
+	private HeadlessJavaScanner(AnalysisSettings settings) {
 		this.settings = settings;
 
 		scanner = new CryptoScanner(createScannerDefinition());
@@ -68,18 +68,18 @@ public class HeadlessCryptoScanner {
 
 	public static void main(String[] args) {
 		try {
-			HeadlessCryptoScanner scanner = createFromCLISettings(args);
+			HeadlessJavaScanner scanner = createFromCLISettings(args);
 			scanner.run();
 		} catch (CryptoAnalysisParserException e) {
 			throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
 		}
 	}
 
-	public static HeadlessCryptoScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
+	public static HeadlessJavaScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
 		AnalysisSettings analysisSettings = new AnalysisSettings();
 		analysisSettings.parseSettingsFromCLI(args);
 
-		return new HeadlessCryptoScanner(analysisSettings);
+		return new HeadlessJavaScanner(analysisSettings);
 	}
 
 	public ScannerDefinition createScannerDefinition() {

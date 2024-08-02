@@ -7,7 +7,7 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void brokenInsecureHashExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/brokenInsecureHash").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", IncompleteOperationError.class, 0);
 		setErrorsCount("<wc.brokenInsecureHash.InsecureHashes1: void main(java.lang.String[])>", ConstraintError.class, 3);
@@ -54,7 +54,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void brokenInsecureMACExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/brokenInsecureMAC").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", ConstraintError.class, 8);
 		setErrorsCount("<wc.brokenInsecureMAC.InsecureMAC1: void main(java.lang.String[])>", RequiredPredicateError.class, 8);
@@ -76,7 +76,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void brokenSSLorTLSExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/brokenSSLorTLS").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<icv.brokenSSLorTLS.SSLctxNoKeyMgmtNoTrustMgmt1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<icv.brokenSSLorTLS.SSLctxNoKeyMgmtNoTrustMgmt1: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -101,7 +101,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void buggyIVgenExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/buggyIVgen").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", TypestateError.class, 2);
 		setErrorsCount("<cib.buggyIVgen.BuggyIVGen1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
@@ -123,7 +123,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void constantIVExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/constantIV").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", IncompleteOperationError.class, 2);
 		setErrorsCount("<ivm.constantIV.FixedIV1: void main(java.lang.String[])>", TypestateError.class, 2);
@@ -145,7 +145,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void constantKeyExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/constantKey").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkm.constantKey.ConstantKey3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkm.constantKey.ConstantKey3DES: void main(java.lang.String[])>", ConstraintError.class, 2);
@@ -170,7 +170,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void constPwd4PBEExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/constPwd4PBE").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", ConstraintError.class, 2);
@@ -194,7 +194,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void customCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/customCrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.customCrypto.Manual3DES: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<wc.customCrypto.Manual3DES: void main(java.lang.String[])>", ConstraintError.class, 2);
@@ -222,7 +222,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void deterministicCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/deterministicCrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ForbiddenMethodError.class, 0);
 		setErrorsCount("<pkc.enc.deterministicCrypto.DeterministicEncryptionRSA: void main(java.lang.String[])>", ConstraintError.class, 7);
@@ -252,7 +252,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void deterministicSymEncExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/deterministicSymEnc").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", ConstraintError.class, 6);
 		setErrorsCount("<wc.deterministicSymEnc.DeterministicEncryptionAESwECB1: void main(java.lang.String[])>", IncompleteOperationError.class, 6);
@@ -272,7 +272,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void fixedSeedExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/fixedSeed").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", TypestateError.class, 4);
 		setErrorsCount("<br.fixedSeed.FixedSeed1: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
@@ -292,7 +292,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void improperKeyLenExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/ImproperKeyLen").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pkm.ImproperKeyLen.ImproperKeySizeRSA1: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
@@ -315,7 +315,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void incompleteValidationExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/incompleteValidation").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<icv.incompleteValidation.ValidateCertChainButNoCRL: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 
@@ -329,7 +329,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecureComboHashEncExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecureComboHashEnc").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptAndHash: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureComboHashEnc.ManualComboEncryptAndHash: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -350,7 +350,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecureComboMacEncExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecureComboMacEnc").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptAndMAC: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pdf.insecureComboMacEnc.ManualComboEncryptAndMAC: void main(java.lang.String[])>", TypestateError.class, 2);
@@ -371,7 +371,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecurecurvesExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecurecurves").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// negative test case
 		setErrorsCount("<pkc.ecc.insecurecurves.InsecureCurve_secp112r1: void negativeTestCase()>", ConstraintError.class, 1);
@@ -415,7 +415,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecureDefaultExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecureDefault").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -459,7 +459,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecurePaddingExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecurePadding").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		// positive test case
 		setErrorsCount("<pkc.enc.insecurePadding.InsecurePaddingRSA1: void positiveTestCase()>", TypestateError.class, 0);
@@ -507,7 +507,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecurePaddingSignExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecurePaddingSign").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		// positive test case
 		setErrorsCount("<pkc.sign.insecurePaddingSign.PKCS1Signature: void positiveTestCase()>", ConstraintError.class, 1);
@@ -571,7 +571,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void insecureStreamCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/insecureStreamCipher").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
@@ -589,7 +589,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void issuesDHandECDHExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/issuesDHandECDH").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		// positive test case
 		setErrorsCount("<pkc.ka.issuesDHandECDH.NonAuthenticatedEphemeralDH_1024: void positiveTestCase()>", ConstraintError.class, 0);
@@ -629,7 +629,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void keyReuseInStreamCipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/keyReuseInStreamCipher").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -661,7 +661,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void nonceReuseExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/nonceReuse").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<ivm.nonceReuse.NonceReuse1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<ivm.nonceReuse.NonceReuse1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
@@ -677,7 +677,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void nullcipherExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/nullcipher").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		scanner.run();
 		assertErrors(scanner.getCollectedErrors());
@@ -689,7 +689,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void paramsPBEExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/paramsPBE").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", ConstraintError.class, 1);
@@ -717,7 +717,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void predictableSeedExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/predictableSeed").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<br.predictableSeed.ReusedSeed: void main(java.lang.String[])>", TypestateError.class, 0);
 		setErrorsCount("<br.predictableSeed.ReusedSeed: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
@@ -736,7 +736,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void printPrivSecKeyExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/printPrivSecKey").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<cib.printPrivSecKey.PrintECDHPrivKey1: void main(java.lang.String[])>", RequiredPredicateError.class, 16);
@@ -784,7 +784,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void riskyInsecureCryptoExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/riskyInsecureCrypto").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
@@ -816,7 +816,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void sideChannelAttacksExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/sideChannelAttacks").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pdf.sideChannelAttacks.HashVerificationVariableTime: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.sideChannelAttacks.MacVerificationVariableTime: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -836,7 +836,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void staticCounterCTRExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/staticCounterCTR").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<ivm.staticCounterCTR.StaticCounterCTR1: void main(java.lang.String[])>", RequiredPredicateError.class, 6);
 		setErrorsCount("<ivm.staticCounterCTR.StaticCounterCTR1: void main(java.lang.String[])>", TypestateError.class, 2);
@@ -851,7 +851,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void statisticPRNGExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/statisticPRNG").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		scanner.run();
 		assertErrors(scanner.getCollectedErrors());
@@ -863,7 +863,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void undefinedCSPExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/undefinedCSP").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider1: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
 		setErrorsCount("<cai.undefinedCSP.UndefinedProvider2: void main(java.lang.String[])>", IncompleteOperationError.class, 3);
@@ -889,7 +889,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void weakConfigsRSAExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/weakConfigsRSA").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 		
 		// positive test case
 		setErrorsCount("<pkc.enc.weakConfigsRSA.ImproperConfigRSA_384x160_1: void positiveTestCase()>", TypestateError.class, 1);
@@ -1001,7 +1001,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void weakSignatureECDSAExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/weakSignatureECDSA").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_1: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
 		setErrorsCount("<pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_2: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
@@ -1024,7 +1024,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 	public void weakSignatureRSAExamples() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/BragaCryptoBench/cryptomisuses/weakSignatureRSA").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<pkc.sign.weakSignatureRSA.PKCS1Sign1024xSHA1_1: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pkc.sign.weakSignatureRSA.PKCS1Sign1024xSHA1_1: void main(java.lang.String[])>", ConstraintError.class, 2);

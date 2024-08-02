@@ -6,7 +6,7 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 	public void reportedIssues() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/ReportedIssues").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<issueseeds.Main: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 
@@ -83,7 +83,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		// Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/271
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/KotlinExamples/Issue271").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<example.Issue271Java: void testFail(java.lang.String)>", IncompleteOperationError.class, 0);
 		setErrorsCount("<example.Issue271Java: void testOk(java.lang.String)>", IncompleteOperationError.class, 0);

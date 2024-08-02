@@ -6,7 +6,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.utils.ErrorUtils;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import headless.FindingsType.FalseNegatives;
 import headless.FindingsType.FalsePositives;
 import headless.FindingsType.NoFalseNegatives;
@@ -36,14 +36,14 @@ public abstract class AbstractHeadlessTest {
 		return mi;
 	}
 
-	protected static HeadlessCryptoScanner createScanner(MavenProject mp) {
+	protected static HeadlessJavaScanner createScanner(MavenProject mp) {
 		return createScanner(mp, JCA_RULESET_PATH);
 	}
 
-	protected static HeadlessCryptoScanner createScanner(MavenProject mp, String rulesetPath) {
+	protected static HeadlessJavaScanner createScanner(MavenProject mp, String rulesetPath) {
 		String applicationPath = mp.getBuildDirectory();
 
-		HeadlessCryptoScanner scanner = new HeadlessCryptoScanner(applicationPath, rulesetPath);
+		HeadlessJavaScanner scanner = new HeadlessJavaScanner(applicationPath, rulesetPath);
 		scanner.setSootClassPath(mp.getBuildDirectory() + (mp.getFullClassPath().isEmpty() ? "" : File.pathSeparator + mp.getFullClassPath()));
 
 		return scanner;

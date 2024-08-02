@@ -3,7 +3,7 @@ package headless;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.RequiredPredicateError;
-import de.fraunhofer.iem.scanner.HeadlessCryptoScanner;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Test;
 
 import java.io.File;
@@ -14,7 +14,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 	public void fileEncryptor() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/FileEncryptor").getAbsolutePath();
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<Crypto.Enc: byte[] encrypt(byte[],javax.crypto.SecretKey)>", CallToError.class, 1);
 
@@ -33,7 +33,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 	public void userAuthenticator() {
 		String mavenProjectPath = new File("../CryptoAnalysisTargets/UserAuthenticator").getAbsolutePath();
 	  	MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessCryptoScanner scanner = createScanner(mavenProject);
+		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<Crypto.PWHasher: java.lang.Boolean verifyPWHash(char[],java.lang.String)>", HardCodedError.class, 0);
