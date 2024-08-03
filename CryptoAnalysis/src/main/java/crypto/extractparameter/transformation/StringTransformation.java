@@ -15,7 +15,11 @@ public class StringTransformation extends Transformation {
     private final Collection<String> baseStringSignatures = Arrays.asList(
             "<java.lang.String: char[] toCharArray()>",
             "<java.lang.String: byte[] getBytes()>",
-            "<java.lang.String: byte[] getBytes(java.lang.String)>"
+            "<java.lang.String: byte[] getBytes(java.lang.String)>",
+            "<java.lang.String: String toUpperCase()>",
+            "<java.lang.String: String toUpperCase(java.util.Locale)>",
+            "<java.lang.String: String toLowerCase()>",
+            "<java.lang.String: String toLowerCase(java.util.Locale)>"
     );
 
     private final Collection<String> paramStringSignatures = Arrays.asList(
