@@ -12,6 +12,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.definition.ScannerDefinition;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.listener.AnalysisStatistics;
 import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
@@ -137,10 +138,11 @@ public class HeadlessAndroidScanner {
 		Collection<CrySLRule> ruleset = scanner.getRuleset();
 		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
 		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+		AnalysisStatistics statistics = scanner.getStatistics();
 		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
 
 		for (Reporter reporter : reporters) {
-			reporter.createAnalysisReport(discoveredSeeds, errors);
+			reporter.createAnalysisReport(discoveredSeeds, errors, statistics);
 		}
 	}
 

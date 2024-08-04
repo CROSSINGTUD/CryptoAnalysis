@@ -1,4 +1,4 @@
-package crypto.analysis;
+package crypto.listener;
 
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;

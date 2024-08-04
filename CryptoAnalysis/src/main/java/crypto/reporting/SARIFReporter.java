@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -60,7 +61,7 @@ public class SARIFReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
             addFile(wrappedClass);
 

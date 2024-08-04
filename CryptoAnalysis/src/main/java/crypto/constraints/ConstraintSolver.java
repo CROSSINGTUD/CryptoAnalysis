@@ -6,7 +6,7 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import com.google.common.collect.Lists;
 import crypto.analysis.AlternativeReqPredicate;
-import crypto.analysis.AnalysisReporter;
+import crypto.listener.AnalysisReporter;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;

@@ -1,10 +1,12 @@
-package crypto.analysis;
+package crypto.listener;
 
+import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import com.google.common.base.Stopwatch;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
-import crypto.listener.IAnalysisListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,24 +16,75 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalysisPrinter.class);
 
+    private final AnalysisStatistics statistics = new AnalysisStatistics();
+
+    private final Stopwatch analysisWatch = Stopwatch.createUnstarted();
+    private final Stopwatch callGraphWatch = Stopwatch.createUnstarted();
+    private final Stopwatch typestateWatch = Stopwatch.createUnstarted();
+
+    public AnalysisStatistics getStatistics() {
+        return statistics;
+    }
+
     @Override
     public void beforeAnalysis() {
-        LOGGER.debug("Starting Scan...");
+        LOGGER.info("Starting analysis...");
+
+        if (!analysisWatch.isRunning()) {
+            analysisWatch.start();
+        }
     }
 
     @Override
     public void afterAnalysis() {
-        LOGGER.debug("Finished Scan");
+        if (analysisWatch.isRunning()) {
+            analysisWatch.stop();
+        }
+
+        statistics.setAnalysisTime(analysisWatch.toString());
+
+        LOGGER.info("Finished Analysis in {}", analysisWatch);
+    }
+
+    @Override
+    public void beforeCallGraphConstruction() {
+        LOGGER.info("Constructing Call Graph...");
+
+        if (!callGraphWatch.isRunning()) {
+            callGraphWatch.start();
+        }
+    }
+
+    @Override
+    public void afterCallGraphConstruction(CallGraph callGraph) {
+        if (callGraphWatch.isRunning()) {
+            callGraphWatch.stop();
+        }
+
+        statistics.setCallGraphTime(callGraphWatch.toString());
+        statistics.setCallGraph(callGraph);
+
+        LOGGER.info("Constructed Call Graph in {}", callGraphWatch);
     }
 
     @Override
     public void beforeTypestateAnalysis() {
-        LOGGER.debug("Starting Typestate Analysis");
+        LOGGER.info("Starting Typestate Analysis...");
+
+        if (!typestateWatch.isRunning()) {
+            typestateWatch.start();
+        }
     }
 
     @Override
     public void afterTypestateAnalysis() {
-        LOGGER.debug("Typestate Analysis finished");
+        if (typestateWatch.isRunning()) {
+            typestateWatch.stop();
+        }
+
+        statistics.setTypestateTime(typestateWatch.toString());
+
+        LOGGER.info("Finished Typestate Analysis in {}", typestateWatch);
     }
 
     @Override

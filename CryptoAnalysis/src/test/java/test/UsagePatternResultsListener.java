@@ -2,6 +2,7 @@ package test;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
@@ -34,6 +35,9 @@ public class UsagePatternResultsListener implements IResultsListener {
     public UsagePatternResultsListener(Collection<Assertion> assertions) {
         this.assertions = assertions;
     }
+
+    @Override
+    public void constructedCallGraph(CallGraph callGraph) {}
 
     @Override
     public void typestateAnalysisResults(IAnalysisSeed analysisSeed, ForwardBoomerangResults<TransitionFunction> results) {

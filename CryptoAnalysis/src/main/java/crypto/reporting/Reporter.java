@@ -5,6 +5,7 @@ import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,5 +48,5 @@ public abstract class Reporter {
         this.ruleset = ruleset;
     }
 
-    public abstract void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection);
+    public abstract void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics);
 }

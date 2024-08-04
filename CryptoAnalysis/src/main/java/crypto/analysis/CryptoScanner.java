@@ -9,6 +9,10 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.definition.ScannerDefinition;
 import crypto.exceptions.CryptoAnalysisException;
+import crypto.listener.AnalysisReporter;
+import crypto.listener.AnalysisStatistics;
+import crypto.listener.AnalysisPrinter;
+import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
@@ -28,6 +32,7 @@ public class CryptoScanner {
 
 	private final ScannerDefinition scannerDefinition;
 	private final AnalysisReporter analysisReporter;
+	private final AnalysisPrinter analysisPrinter;
 	private final ErrorCollector errorCollector;
 	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds;
 	private final PredicateHandler predicateHandler;
@@ -43,7 +48,7 @@ public class CryptoScanner {
 		this.discoveredSeeds = new HashMap<>();
 		this.predicateHandler = new PredicateHandler(this);
 
-		AnalysisPrinter analysisPrinter = new AnalysisPrinter();
+		analysisPrinter = new AnalysisPrinter();
 		addAnalysisListener(analysisPrinter);
 
 		errorCollector = new ErrorCollector();
@@ -51,24 +56,25 @@ public class CryptoScanner {
 	}
 
 	public void scan() {
-		// Initialize fields
 		this.ruleset = scannerDefinition.readRuleset();
 		if (ruleset == null) {
 			throw new CryptoAnalysisException("Cannot start the scan. The ruleset must not be null");
 		}
 
+		// Start analysis
+		analysisReporter.beforeAnalysis();
+
+		analysisReporter.beforeCallGraphConstruction();
 		this.callGraph = scannerDefinition.constructCallGraph(ruleset);
 		if (callGraph == null) {
 			throw new CryptoAnalysisException("Cannot start the scan. The call graph must not be null");
 		}
+		analysisReporter.afterCallGraphConstruction(callGraph);
 
 		this.dataFlowScope = scannerDefinition.createDataFlowScope(ruleset);
 		if (dataFlowScope == null) {
 			throw new CryptoAnalysisException("Cannot start the scan. The dataflow scope must not be null");
 		}
-
-		// Start analysis
-		analysisReporter.beforeAnalysis();
 
 		SeedGenerator generator = new SeedGenerator(this, ruleset);
 		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
@@ -147,5 +153,9 @@ public class CryptoScanner {
 
 	public int getTimeout() {
 		return scannerDefinition.timeout();
+	}
+
+	public AnalysisStatistics getStatistics() {
+		return analysisPrinter.getStatistics();
 	}
 }
