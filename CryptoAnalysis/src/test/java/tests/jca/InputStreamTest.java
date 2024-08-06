@@ -132,7 +132,8 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		InputStream is = Files.newInputStream(Paths.get(".\\resources\\cis.txt"));
 		CipherInputStream cis = new CipherInputStream(is, cipher);
 		int result = cis.read("input".getBytes(), 100, "input".getBytes().length);
-		Assertions.violatedConstraint(cis);
+		Assertions.extValue(0);
+		Assertions.extValue(2);
 		Assertions.mustNotBeInAcceptingState(cis);
 		cis.close();
 		System.out.println(result);
@@ -183,7 +184,8 @@ public class InputStreamTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		DigestInputStream dis = new DigestInputStream(is, md);
 		int result = dis.read("input".getBytes(), 100, "input".getBytes().length);
-		Assertions.violatedConstraint(dis);
+		Assertions.extValue(0);
+		Assertions.extValue(2);
 		System.out.println(result);
 	}
 

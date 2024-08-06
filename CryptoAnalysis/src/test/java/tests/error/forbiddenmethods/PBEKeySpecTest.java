@@ -1,4 +1,4 @@
-package tests.forbiddenmethods;
+package tests.error.forbiddenmethods;
 
 import org.junit.Test;
 import test.TestConstants;

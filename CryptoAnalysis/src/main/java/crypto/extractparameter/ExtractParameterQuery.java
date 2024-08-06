@@ -5,7 +5,7 @@ import boomerang.Boomerang;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
-import crypto.analysis.CryptoScanner;
+import crypto.definition.ExtractParameterDefinition;
 import wpds.impl.Weight;
 
 import java.util.Arrays;
@@ -14,28 +14,28 @@ import java.util.HashSet;
 
 public class ExtractParameterQuery extends BackwardQuery {
 
-    private final CryptoScanner scanner;
+    private final ExtractParameterDefinition definition;
     private final Collection<QueryListener> listeners;
     private final int index;
 
-    public ExtractParameterQuery(CryptoScanner scanner, ControlFlowGraph.Edge statement, Val val, int index) {
+    public ExtractParameterQuery(ExtractParameterDefinition definition, ControlFlowGraph.Edge statement, Val val, int index) {
         super(statement, val);
 
-        this.scanner = scanner;
+        this.definition = definition;
         this.index = index;
         this.listeners = new HashSet<>();
     }
 
     public void solve() {
-        ExtractParameterOptions options = new ExtractParameterOptions(scanner.getTimeout());
-        Boomerang boomerang = new Boomerang(scanner.callGraph(), scanner.getDataFlowScope(), options);
+        ExtractParameterOptions options = new ExtractParameterOptions(definition);
+        Boomerang boomerang = new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
 
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(this);
 
         if (results.isTimedout()) {
-            scanner.getAnalysisReporter().onExtractParameterAnalysisTimeout(var(), cfgEdge().getTarget());
+            definition.getAnalysisReporter().onExtractParameterAnalysisTimeout(var(), cfgEdge().getTarget());
         }
-        scanner.getAnalysisReporter().extractedBoomerangResults(this, results);
+        definition.getAnalysisReporter().extractedBoomerangResults(this, results);
 
         for (QueryListener listener : listeners) {
             listener.solved(results);

@@ -30,16 +30,12 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue81.Encryption: byte[] encrypt(byte[],javax.crypto.SecretKey)>", RequiredPredicateError.class, 1);
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", IncompleteOperationError.class, 1);
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", RequiredPredicateError.class, 4);
-		// TODO toCharArray() is not currently not considered when evaluating NeverTypeOfErrors
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", NeverTypeOfError.class, 0);
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", ConstraintError.class, 1);
-		// TODO toCharArray() is not currently not considered when evaluating HardCodedErrors
 		setErrorsCount("<issue81.Encryption: javax.crypto.SecretKey generateKey(java.lang.String)>", HardCodedError.class, 0);
 		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		// TODO toCharArray() is not currently not considered when evaluating NeverTypeOfErrors
-		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 0);
-		// TODO toCharArray() is not currently not considered when evaluating HardCodedErrors
-		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", HardCodedError.class, 0);
+		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
+		setErrorsCount("<issue81.Main: void main(java.lang.String[])>", HardCodedError.class, 1);
 
 		setErrorsCount("<issuecognicrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", ConstraintError.class, 0);
 		setErrorsCount("<issuecognicrypt210.CogniCryptSecretKeySpec: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
@@ -51,12 +47,10 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", IncompleteOperationError.class, 1);
 		setErrorsCount("<issue69.Issue69: void encryptByPublicKey(java.lang.String)>", RequiredPredicateError.class, 4);
 
-		// TODO toCharArray() is not currently not considered when evaluating NeverTypeOfErrors
-		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", NeverTypeOfError.class, 0);
+		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", NeverTypeOfError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", RequiredPredicateError.class, 3);
 		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", IncompleteOperationError.class, 1);
-		// TODO toCharArray() is not currently not considered when evaluating HardCodedErrors
-		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", HardCodedError.class, 0);
+		setErrorsCount("<issue68.AESCryptor: byte[] getKey(java.lang.String)>", HardCodedError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: javax.crypto.SecretKeyFactory getFactory()>", ConstraintError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: byte[] encryptImpl(byte[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<issue68.AESCryptor: void <init>(byte[])>", RequiredPredicateError.class, 1);

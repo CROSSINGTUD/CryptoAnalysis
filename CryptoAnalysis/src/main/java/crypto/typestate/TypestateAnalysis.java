@@ -9,6 +9,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Val;
+import crypto.definition.TypestateDefinition;
 import crypto.rules.CrySLRule;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
@@ -22,19 +23,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TypestateAnalysis {
+public class TypestateAnalysis {
 
-    private final StoreIDEALResultHandler<TransitionFunction> resultHandler;
+    private final TypestateDefinition definition;
     private final TypestateAnalysisScope analysisScope;
+    private final StoreIDEALResultHandler<TransitionFunction> resultHandler;
 
-    public TypestateAnalysis(Collection<CrySLRule> rules) {
+    public TypestateAnalysis(TypestateDefinition definition) {
+        this.definition = definition;
+
         Map<String, RuleTransitions> transitions = new HashMap<>();
-
-        for (CrySLRule rule : rules) {
+        for (CrySLRule rule : definition.getRuleset()) {
             transitions.put(rule.getClassName(), RuleTransitions.of(rule));
         }
 
-        analysisScope = new TypestateAnalysisScope(callGraph(), transitions, getDataFlowScope());
+        analysisScope = new TypestateAnalysisScope(definition.getCallGraph(), transitions, definition.getDataFlowScope());
         resultHandler = new StoreIDEALResultHandler<>();
     }
 
@@ -76,17 +79,17 @@ public abstract class TypestateAnalysis {
 
             @Override
             public CallGraph callGraph() {
-                return TypestateAnalysis.this.callGraph();
+                return definition.getCallGraph();
             }
 
             @Override
             public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return TypestateAnalysis.this.debugger(idealSeedSolver);
+                return definition.getDebugger(idealSeedSolver);
             }
 
             @Override
             protected DataFlowScope getDataFlowScope() {
-                return TypestateAnalysis.this.getDataFlowScope();
+                return definition.getDataFlowScope();
             }
 
             @Override
@@ -96,7 +99,7 @@ public abstract class TypestateAnalysis {
 
             @Override
             public BoomerangOptions boomerangOptions() {
-                return new TypestateAnalysisOptions(getTimeout());
+                return new TypestateAnalysisOptions(definition.getTimeout());
             }
         };
     }
@@ -115,11 +118,4 @@ public abstract class TypestateAnalysis {
         return results;
     }
 
-    public abstract CallGraph callGraph();
-
-    public abstract DataFlowScope getDataFlowScope();
-
-    public abstract Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver);
-
-    public abstract int getTimeout();
 }

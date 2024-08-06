@@ -18,6 +18,7 @@ import crypto.listener.IErrorListener;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
+import test.assertions.ConstraintViolationAssertion;
 import test.assertions.DependentErrorAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
@@ -58,6 +59,11 @@ public class UsagePatternErrorListener implements IErrorListener {
             if (a instanceof ConstraintErrorCountAssertion) {
                 ConstraintErrorCountAssertion errorCountAssertion = (ConstraintErrorCountAssertion) a;
                 errorCountAssertion.increaseCount();
+            }
+
+            if (a instanceof ConstraintViolationAssertion) {
+                ConstraintViolationAssertion violationAssertion = (ConstraintViolationAssertion) a;
+                violationAssertion.reported(constraintError.getErrorStatement());
             }
         }
     }

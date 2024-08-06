@@ -1,8 +1,9 @@
-package crypto.analysis;
+package crypto.definition;
 
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
+import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;

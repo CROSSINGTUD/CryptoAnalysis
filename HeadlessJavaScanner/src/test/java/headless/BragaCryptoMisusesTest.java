@@ -5,6 +5,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -154,8 +155,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkm.constantKey.ConstantKeyAES1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.constantKey.ConstantKeyAES2: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pkm.constantKey.ConstantKeyAES2: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.constantKey.ConstantKeyAES2: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 		setErrorsCount("<pkm.constantKey.ConstantKeyAES3: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkm.constantKey.ConstantKeyAES3: void main(java.lang.String[])>", TypestateError.class, 1);
+		setErrorsCount("<pkm.constantKey.ConstantKeyAES3: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 		setErrorsCount("<pkm.constantKey.HardCodedKey: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
 		setErrorsCount("<pkm.constantKey.ConstantKeyforMAC: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
 		setErrorsCount("<pkm.constantKey.ConstantKeyforMAC: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -575,9 +578,11 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
+		setErrorsCount("<pdf.insecureStreamCipher.ConfusingBlockAndStream: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", RequiredPredicateError.class, 5);
 		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", TypestateError.class, 2);
+		setErrorsCount("<pdf.insecureStreamCipher.MalealableStreamCipher: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 
 		scanner.run();
 		assertErrors(scanner.getCollectedErrors());
@@ -634,6 +639,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", CallToError.class, 1);
+		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1: void main(java.lang.String[])>", NeverTypeOfError.class, 1);
 
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", RequiredPredicateError.class, 7);
 		setErrorsCount("<pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2: void main(java.lang.String[])>", TypestateError.class, 1);

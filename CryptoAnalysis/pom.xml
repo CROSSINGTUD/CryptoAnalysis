@@ -117,9 +117,6 @@
                                             <goal>unpack</goal>
                                         </goals>
                                     </pluginExecutionFilter>
-                                    <action>
-                                        <execute></execute>
-                                    </action>
                                 </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>

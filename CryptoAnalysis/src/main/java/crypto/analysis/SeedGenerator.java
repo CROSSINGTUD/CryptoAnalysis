@@ -6,6 +6,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import crypto.definition.TypestateDefinition;
 import crypto.rules.CrySLRule;
 import crypto.typestate.ForwardSeedQuery;
 import crypto.typestate.TypestateAnalysis;
@@ -25,9 +26,14 @@ public class SeedGenerator {
     public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
         this.scanner = scanner;
 
-        typestateAnalysis = new TypestateAnalysis(rules) {
+        TypestateDefinition definition = new TypestateDefinition() {
             @Override
-            public CallGraph callGraph() {
+            public Collection<CrySLRule> getRuleset() {
+                return rules;
+            }
+
+            @Override
+            public CallGraph getCallGraph() {
                 return scanner.callGraph();
             }
 
@@ -37,15 +43,17 @@ public class SeedGenerator {
             }
 
             @Override
-            public int getTimeout() {
-                return scanner.getTimeout();
+            public Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
+                return scanner.debugger(idealSeedSolver);
             }
 
             @Override
-            public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return scanner.debugger(idealSeedSolver);
+            public int getTimeout() {
+                return scanner.getTimeout();
             }
         };
+
+        typestateAnalysis = new TypestateAnalysis(definition);
     }
 
     public Collection<IAnalysisSeed> computeSeeds() {

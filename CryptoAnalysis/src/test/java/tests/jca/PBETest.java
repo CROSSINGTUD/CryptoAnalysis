@@ -96,7 +96,6 @@ public class PBETest extends UsagePatternTestingFramework {
 		Assertions.hasEnsuredPredicate(salt);
 		char[] corPwd = generateRandomPassword();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);

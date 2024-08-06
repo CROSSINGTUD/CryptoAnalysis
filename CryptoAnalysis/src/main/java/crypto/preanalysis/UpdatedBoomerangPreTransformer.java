@@ -93,12 +93,6 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
                     && !u.toString().contains("test.assertions.Assertions:")
                     && !u.toString().contains("intQueryFor")) {
                 Stmt stmt = (Stmt) u;
-                if (stmt.getInvokeExpr()
-                        .getMethod()
-                        .getSignature()
-                        .equals("<java.math.BigInteger: java.math.BigInteger valueOf(long)>")) {
-                    continue;
-                }
 
                 List<ValueBox> useBoxes = stmt.getInvokeExpr().getUseBoxes();
                 List<Map.Entry<Integer, Value>> newArgs = new ArrayList<>();

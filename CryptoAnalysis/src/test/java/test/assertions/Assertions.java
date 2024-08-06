@@ -12,7 +12,7 @@ public class Assertions {
 	
 	public static void mustBeInAcceptingState(Object o) {}
 	
-	public static void violatedConstraint(Object o) {}
+	public static void violatedConstraint() {}
 	
 	public static void callToForbiddenMethod() {}
 
