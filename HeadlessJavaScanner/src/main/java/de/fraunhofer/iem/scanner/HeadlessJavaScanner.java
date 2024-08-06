@@ -7,22 +7,22 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.SootCallGraph;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import crypto.definition.ScannerDefinition;
-import de.fraunhofer.iem.scanner.AnalysisSettings.AnalysisCallGraph;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
+import crypto.definition.ScannerDefinition;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
+import crypto.listener.AnalysisStatistics;
 import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.rules.CrySLRule;
+import de.fraunhofer.iem.scanner.AnalysisSettings.AnalysisCallGraph;
 import ideal.IDEALSeedSolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +87,7 @@ public class HeadlessJavaScanner {
 
 			@Override
 			public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
+				PackManager.v().getPack("cg").apply();
 				TransformerSetup.v().setupPreTransformer(ruleset);
 
 				return new SootCallGraph();
@@ -142,16 +143,8 @@ public class HeadlessJavaScanner {
 	}
 
 	public void run() {
-		Stopwatch stopwatch = Stopwatch.createStarted();
-		LOGGER.info("Setup Soot...");
 		initializeSootWithEntryPointAllReachable();
-		PackManager.v().getPack("cg").apply();
-		LOGGER.info("Soot setup done in {} ", stopwatch);
-
-		LOGGER.info("Starting analysis...");
 		analyze();
-		LOGGER.info("Analysis finished in {}", stopwatch);
-		stopwatch.stop();
 	}
 
 	private void analyze() {
@@ -162,10 +155,11 @@ public class HeadlessJavaScanner {
 		Collection<CrySLRule> ruleset = scanner.getRuleset();
 		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
 		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+		AnalysisStatistics statistics = scanner.getStatistics();
 		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
 
 		for (Reporter reporter : reporters) {
-			reporter.createAnalysisReport(discoveredSeeds, errors);
+			reporter.createAnalysisReport(discoveredSeeds, errors, statistics);
 		}
 	}
 	
@@ -195,7 +189,6 @@ public class HeadlessJavaScanner {
 			default:
 				throw new CryptoAnalysisException("No call graph option selected out of: CHA, SPARK_LIB and SPARK");
 		}
-		LOGGER.info("Using call graph algorithm: {}", getCallGraphAlgorithm());
 
 		Options.v().set_output_format(Options.output_format_none);
 		Options.v().set_no_bodies_for_excluded(true);

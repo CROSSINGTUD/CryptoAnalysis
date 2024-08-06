@@ -1,5 +1,6 @@
 package crypto.listener;
 
+import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
@@ -17,6 +18,10 @@ public interface IAnalysisListener {
     void beforeTypestateAnalysis();
 
     void afterTypestateAnalysis();
+
+    void beforeCallGraphConstruction();
+
+    void afterCallGraphConstruction(CallGraph callGraph);
 
     void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
 

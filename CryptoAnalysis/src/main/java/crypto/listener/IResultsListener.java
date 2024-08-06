@@ -2,6 +2,7 @@ package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
@@ -20,6 +21,8 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface IResultsListener {
+
+    void constructedCallGraph(CallGraph callGraph);
 
     void typestateAnalysisResults(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results);
 

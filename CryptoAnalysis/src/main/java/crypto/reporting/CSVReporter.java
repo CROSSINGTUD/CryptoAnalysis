@@ -6,6 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import crypto.utils.ErrorUtils;
 
@@ -34,7 +35,7 @@ public class CSVReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
         int idCount = 0;
         List<String> lineContents = new ArrayList<>();
 

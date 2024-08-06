@@ -1,10 +1,13 @@
-package crypto.analysis;
+package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
+import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Table;
+import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
@@ -65,6 +68,22 @@ public class AnalysisReporter {
     public void afterAnalysis() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterAnalysis();
+        }
+    }
+
+    public void beforeCallGraphConstruction() {
+        for (IAnalysisListener analysisListener : analysisListeners) {
+            analysisListener.beforeCallGraphConstruction();
+        }
+    }
+
+    public void afterCallGraphConstruction(CallGraph callGraph) {
+        for (IAnalysisListener analysisListener : analysisListeners) {
+            analysisListener.afterCallGraphConstruction(callGraph);
+        }
+
+        for (IResultsListener resultsListener : resultsListeners) {
+            resultsListener.constructedCallGraph(callGraph);
         }
     }
 

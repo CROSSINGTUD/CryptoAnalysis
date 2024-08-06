@@ -5,6 +5,7 @@ import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import crypto.utils.ErrorUtils;
 
@@ -21,9 +22,10 @@ public class ReportGenerator {
      * @param seeds the analyzed seeds
      * @param ruleset the ruleset used in the analysis
      * @param errorCollection the table containing the errors
+     * @param statistics the statistics from the analysis
      * @return the formatted report for the {@link CommandLineReporter} and {@link TXTReporter}
      */
-    public static String generateReport(Collection<IAnalysisSeed> seeds, Collection<CrySLRule> ruleset, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    public static String generateReport(Collection<IAnalysisSeed> seeds, Collection<CrySLRule> ruleset, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
         StringBuilder report = new StringBuilder();
 
         report.append("Ruleset:\n");
@@ -73,6 +75,16 @@ public class ReportGenerator {
             for (Map.Entry<String, Integer> entry : errorCounts.entrySet()) {
                 report.append("\t").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             }
+        }
+
+        if (statistics != null) {
+            report.append("\n");
+            report.append("\tTotal Analysis Time: ").append(statistics.getAnalysisTime()).append("\n");
+            report.append("\tCall Graph Construction Time: ").append(statistics.getCallGraphTime()).append("\n");
+            report.append("\tTypestate Analysis Time: ").append(statistics.getTypestateTime()).append("\n");
+            report.append("\tReachable Methods: ").append(statistics.getReachableMethods()).append("\n");
+            report.append("\tEdges in Call Graph: ").append(statistics.getEdges()).append("\n");
+            report.append("\tEntry Points: ").append(statistics.getEntryPoints()).append("\n");
         }
 
         return report.toString();

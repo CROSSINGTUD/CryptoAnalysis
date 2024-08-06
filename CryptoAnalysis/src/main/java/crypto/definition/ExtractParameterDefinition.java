@@ -3,7 +3,7 @@ package crypto.definition;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
-import crypto.analysis.AnalysisReporter;
+import crypto.listener.AnalysisReporter;
 import crypto.rules.CrySLRule;
 
 import java.util.Collection;
