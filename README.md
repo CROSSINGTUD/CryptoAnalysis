@@ -8,6 +8,7 @@ libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/jav
 ## Structure
 We provide the implementation of the static analysis of CogniCrypt in:
 * `CryptoAnalysis` contains the components for the actual analysis
+* `CryptoAnalysis-Targets` contains various example applications that are also used to test the correctness of CryptoAnalyis
   
 We further provide two SAST tools that allow the analysis of Java and Android applications: 
 
