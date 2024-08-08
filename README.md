@@ -6,9 +6,12 @@ and performs a static analysis based on the specification of the rules. CrySL is
 libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/java-cryptography-architecture-jca-reference-guide.html) in particular). More information on CrySL and the static analysis may be found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
 ## Structure
-
-We provide two SAST tools that allow the analysis of Java and Android applications: 
+We provide the implementation of the static analysis of CogniCrypt in:
 * `CryptoAnalysis` contains the components for the actual analysis
+* `CryptoAnalysisTargets` contains various example applications that are also used to test the correctness of CryptoAnalyis
+  
+We further provide two SAST tools that allow the analysis of Java and Android applications: 
+
 * `HeadlessJavaScanner` contains the SAST tool that analyzes Java applications (see below)
 * `HeadlessAndroidScanner` contains the SAST tool that analyzes Android applications (see below)
 
