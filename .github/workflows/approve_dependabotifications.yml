@@ -18,8 +18,7 @@ jobs:
 
       # Note: If you use status checks to test pull requests, you should enable Require status checks to pass before merging for the target branch for Dependabot pull requests. This branch protection rule ensures that pull requests are not merged unless all the required status checks pass. For more information, see "Managing a branch protection rule."
       - name: Enable auto-merge for Dependabot PRs
-        # to filter certain dependencies: contains(steps.metadata.outputs.dependency-names, 'my-dependency')
-        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        # if: steps.metadata.outputs.update-type == 'version-update:semver-patch' && contains(steps.metadata.outputs.dependency-names, 'my-dependency')
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
