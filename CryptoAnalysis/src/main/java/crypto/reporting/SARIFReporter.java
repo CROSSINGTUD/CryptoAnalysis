@@ -2,7 +2,6 @@ package crypto.reporting;
 
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.Table;
@@ -19,7 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,34 +31,15 @@ public class SARIFReporter extends Reporter {
 
     private final JSONObject files = new JSONObject();
     private final JSONObject resources = new JSONObject();
-    private final JSONObject rules = new JSONObject();
     private final JSONArray results = new JSONArray();
+    private final JSONObject stats = new JSONObject();
 
-    private final SARIFHelper sarifHelper;
     private final Map<String, Integer> errorCountMap;
 
     public SARIFReporter(String outputDir, Collection<CrySLRule> ruleset) throws IOException {
         super(outputDir, ruleset);
 
-        this.sarifHelper = new SARIFHelper();
         this.errorCountMap = new HashMap<>();
-        initializeMap();
-    }
-
-    private void initializeMap() {
-        this.errorCountMap.put(SARIFConfig.CALL_TO_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.CONSTRAINT_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.FORBIDDEN_METHOD_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.HARD_CODED_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.IMPRECISE_VALUE_EXTRACTION_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.INCOMPLETE_OPERATION_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.INSTANCE_OF_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.NEVER_TYPE_OF_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.NO_CALL_TO_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.PREDICATE_CONTRADICTION_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.REQUIRED_PREDICATE_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.TYPESTATE_ERROR_KEY, 0);
-        this.errorCountMap.put(SARIFConfig.UNCAUGHT_EXCEPTION_ERROR_KEY, 0);
     }
 
     @Override
@@ -69,16 +51,18 @@ public class SARIFReporter extends Reporter {
                 String methodName = entry.getKey().toString();
 
                 for (AbstractError error : entry.getValue()) {
+                    String violatedRule = error.getRule().getClassName();
                     String errorType = error.getClass().getSimpleName();
                     String richText = errorType + " violating CrySL rule for " + error.getRule().getClassName();
                     String errorMarker = error.toErrorMarkerString();
                     int lineNumber = error.getLineNumber();
                     String statement = error.getErrorStatement().toString();
 
-                    addResults(errorType, wrappedClass, methodName, lineNumber, methodName, statement, errorMarker, richText);
+                    addResults(violatedRule, errorType, wrappedClass, methodName, lineNumber, methodName, statement, errorMarker, richText);
                 }
             }
         }
+        setStatistics(statistics);
 
         JSONObject sarif = makeSARIF();
 
@@ -90,8 +74,8 @@ public class SARIFReporter extends Reporter {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(Paths.get(fileName).toFile(), sarif);
+            ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+            writer.writeValue(Paths.get(fileName).toFile(), sarif.toMap());
 
             LOGGER.info("SARIF report generated to file {}", fileName);
         } catch (IOException e) {
@@ -100,7 +84,11 @@ public class SARIFReporter extends Reporter {
     }
 
     private JSONObject makeSARIF() {
-        this.resources.put(SARIFConfig.RULES_KEY, this.rules);
+        Collection<String> ruleNames = new HashSet<>();
+        for (CrySLRule rule : ruleset) {
+            ruleNames.add(rule.getClassName());
+        }
+        resources.put(SARIFConfig.RULES_KEY, ruleNames);
 
         JSONObject sarif = new JSONObject();
         sarif.put(SARIFConfig.SARIF_VERSION, SARIFConfig.SARIF_VERSION_NUMBER);
@@ -108,11 +96,11 @@ public class SARIFReporter extends Reporter {
         JSONArray runs = new JSONArray();
         JSONObject run = new JSONObject();
 
-        run.put(SARIFConfig.TOOL_KEY, this.sarifHelper.getToolInfo());
-
-        run.put(SARIFConfig.FILES_KEY, this.files);
-        run.put(SARIFConfig.RESULTS_KEY, this.results);
-        run.put(SARIFConfig.RESOURCES_KEY, this.resources);
+        run.put(SARIFConfig.TOOL_KEY, getToolInfo());
+        run.put(SARIFConfig.FILES_KEY, files);
+        run.put(SARIFConfig.RESULTS_KEY, results);
+        run.put(SARIFConfig.RESOURCES_KEY, resources);
+        run.put(SARIFConfig.SUMMARY_KEY, getSummary());
         runs.put(run);
 
         sarif.put(SARIFConfig.RUNS_KEY, runs);
@@ -120,41 +108,103 @@ public class SARIFReporter extends Reporter {
         return sarif;
     }
 
-
-    private void addResults(String errorType, WrappedClass c, String methodName, int lineNumber, String method, String statement, String text, String richText) {
+    private void addResults(String violatedRule, String errorType, WrappedClass c, String methodName, int lineNumber, String method, String statement, String text, String richText) {
         JSONObject result = new JSONObject();
-        String finalErrorType = addRules(errorType);
 
-        result.put(SARIFConfig.RULE_ID_KEY, finalErrorType);
-        result.put(SARIFConfig.MESSAGE_KEY, this.sarifHelper.getMessage(text, richText));
-        result.put(SARIFConfig.LOCATIONS_KEY, this.sarifHelper.getLocations(c, methodName, lineNumber, method, statement));
+        addError(errorType);
+        result.put(SARIFConfig.VIOLATED_RULE_ID_KEY, violatedRule);
+        result.put(SARIFConfig.ERROR_TYPE_KEY, errorType);
+        result.put(SARIFConfig.MESSAGE_KEY, getMessage(text, richText));
+        result.put(SARIFConfig.LOCATIONS_KEY, getLocations(c, methodName, lineNumber, method, statement));
         results.put(result);
     }
 
-
-    private String addRules(String errorType) {
-        if (rules.has(errorType)) {
-            int count = errorCountMap.get(errorType);
-            errorCountMap.put(errorType, count + 1);
-            JSONObject ruleInfo = new JSONObject();
-            JSONObject fullDescription = new JSONObject();
-            fullDescription.put(SARIFConfig.TEXT_KEY, sarifHelper.getRuleDescription(errorType));
-            ruleInfo.put(SARIFConfig.RULES_ID_KEY, errorType);
-            ruleInfo.put(SARIFConfig.FULL_DESCRIPTION_KEY, fullDescription);
-
-            if (count == 0) {
-                rules.put(errorType, ruleInfo);
-            }
+    private void addError(String errorType) {
+        if (errorCountMap.containsKey(errorType)) {
+            int errorCount = errorCountMap.get(errorType);
+            errorCountMap.put(errorType, errorCount + 1);
+        } else {
+            errorCountMap.put(errorType, 1);
         }
-        return errorType;
     }
 
     private void addFile(WrappedClass c) {
-        String filePath = this.sarifHelper.getFileName(c);
+        String filePath = getFileName(c);
         JSONObject mimeType = new JSONObject();
         mimeType.put(SARIFConfig.MIME_TYPE_KEY, SARIFConfig.MIME_TYPE_VALUE);
 
         files.put(filePath, mimeType);
     }
 
+    public JSONObject getToolInfo() {
+        JSONObject tool = new JSONObject();
+
+        // TODO Put correct CryptoAnalysis version in report
+        tool.put(SARIFConfig.ANALYSIS_TOOL_NAME_KEY, SARIFConfig.ANALYSIS_TOOL_NAME_VALUE);
+        tool.put(SARIFConfig.VERSION, getClass().getPackage().getImplementationVersion());
+        tool.put(SARIFConfig.SEMANTIC_VERSION_KEY, getClass().getPackage().getImplementationVersion());
+        tool.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
+
+        return tool;
+    }
+
+    public JSONObject getMessage(String text, String richText) {
+        JSONObject message = new JSONObject();
+
+        message.put(SARIFConfig.TEXT_KEY, text);
+        message.put(SARIFConfig.RICH_TEXT_KEY, richText);
+
+        return message;
+    }
+
+    public String getFileName(WrappedClass c) {
+        return c.getName().replace(".", "/") + ".java";
+    }
+
+    public JSONArray getLocations(WrappedClass c, String methodName, int lineNumber, String method, String statement) {
+        JSONArray locations = new JSONArray();
+        JSONObject location = new JSONObject();
+
+        JSONObject region = new JSONObject();
+        region.put(SARIFConfig.START_LINE_KEY, String.valueOf(lineNumber));
+        region.put(SARIFConfig.METHOD_KEY, method);
+        region.put(SARIFConfig.STATEMENT_KEY, statement);
+
+        JSONObject uri = new JSONObject();
+        uri.put(SARIFConfig.URI_KEY, getFileName(c));
+
+        JSONObject physicalLocation = new JSONObject();
+        physicalLocation.put(SARIFConfig.FILE_LOCATION_KEY, uri);
+        physicalLocation.put(SARIFConfig.REGION_KEY, region);
+
+        location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
+
+        String fullyQualifiedLogicalName = c.getName().replace(".", "::") + "::" + methodName;
+        location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
+
+        locations.put(location);
+
+        return new JSONArray(Collections.singletonList(locations));
+    }
+
+    private JSONObject getSummary() {
+        JSONObject summary = new JSONObject();
+
+        JSONObject errorCounts = new JSONObject(errorCountMap);
+        JSONObject statistics = new JSONObject(stats.toMap());
+
+        summary.put(SARIFConfig.ERROR_COUNTS_KEY, errorCounts);
+        summary.put(SARIFConfig.STATISTICS_KEY, statistics);
+
+        return summary;
+    }
+
+    private void setStatistics(AnalysisStatistics statistics) {
+        stats.put(SARIFConfig.ANALYSIS_TIME_KEY, statistics.getAnalysisTime());
+        stats.put(SARIFConfig.CALL_GRAPH_TIME_KEY, statistics.getCallGraphTime());
+        stats.put(SARIFConfig.TYPESTATE_TIME_KEY, statistics.getTypestateTime());
+        stats.put(SARIFConfig.REACHABLE_METHODS_KEY, statistics.getReachableMethods());
+        stats.put(SARIFConfig.EDGES_IN_CALL_GRAPH_KEY, statistics.getEdges());
+        stats.put(SARIFConfig.ENTRY_POINTS_KEY, statistics.getEntryPoints());
+    }
 }
