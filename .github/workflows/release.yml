@@ -1,85 +1,68 @@
-name: Create Release
+name: Generate Release Notes
 
-on:
-  workflow_run:
-    workflows: ["Deploy CryptoAnalysis"]
-    types:
-      - completed
+on: push
 
 jobs:
-  release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  release-notes:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # Ensure all tags and history are fetched
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Fetch all tags
-      run: git fetch --tags
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'adopt'
-        java-version: '11'
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "LATEST_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
+      - name: Get merged PRs since the latest tag
+        id: get_merged_prs
+        run: |
+          # Get the latest tag from the environment
+          LATEST_TAG=${{ env.LATEST_TAG }}
+          echo "Fetching merged PRs since $LATEST_TAG..."
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml -DskipTests
+          # Get the list of merged PRs since the latest tag, excluding Dependabot PRs
+          git log $LATEST_TAG..HEAD --merges --pretty=format:"%h" > merged_prs.txt
 
-    - name: Find built JARs
-      id: find_jars
-      run: |
-        CA_JAR=$(ls CryptoAnalysis/build/*.jar | grep -v 'sources\|javadoc' | head -n 1)
-        ANDROID_JAR=$(ls CryptoAnalysis-Android/build/*.jar | head -n 1)
-        echo "CA_JAR=$CA_JAR" >> $GITHUB_ENV
-        echo "ANDROID_JAR=$ANDROID_JAR" >> $GITHUB_ENV
-        CA_JAR_BASENAME=$(basename $CA_JAR)
-        ANDROID_JAR_BASENAME=$(basename $ANDROID_JAR)
-        echo "CA_JAR_BASENAME=$CA_JAR_BASENAME" >> $GITHUB_ENV
-        echo "ANDROID_JAR_BASENAME=$ANDROID_JAR_BASENAME" >> $GITHUB_ENV
-      shell: bash
+          RELEASE_NOTES="Release Notes:\n\n"
+          
+          # Iterate over each merge commit hash
+          while IFS= read -r commit_hash; do
+            # Check if the commit is from Dependabot, skip if it is
+            if git log -1 --pretty=format:"%s" $commit_hash | grep -iq "dependabot"; then
+              continue
+            fi
 
-    - name: Extract Version from pom.xml
-      id: extract_version
-      run: |
-        VERSION=$(sed -n 's/.*<version>\(.*\)<\/version>.*/\1/p' pom.xml | head -n 1)
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+            # Extract the PR number from the merge commit message
+            PR_NUMBER=$(git log -1 --pretty=format:"%s" $commit_hash | grep -oE "#[0-9]+" | head -n 1 | tr -d '#')
 
-    - name: Generate Release Notes
-      id: generate_notes
-      run: |
-        LAST_TAG=$(git tag --sort=-creatordate | head -n 1)
-        if [ -z "$LAST_TAG" ]; then
-          echo "No previous tags found. Listing all merged PR descriptions."
-          PRS=$(gh pr list --state merged --json body --jq '.[] | .body')
-        else
-          echo "Previous tag found: $LAST_TAG"
-          PRS=$(gh pr list --state merged --search "is:pr merged:>=$LAST_TAG" --json body --jq '.[] | .body')
-        fi
-        echo "$PRS" > release_notes.txt
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Get the first comment of the PR
+            FIRST_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq '.comments[0].body')
 
-    - name: Create and Upload Release Assets
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ env.VERSION }}
-        name: ${{ env.VERSION }}
-        body_path: release_notes.txt
-        files: |
-          ${{ env.CA_JAR }}
-          ${{ env.ANDROID_JAR }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Append PR details to the release notes
+            if [ -n "$FIRST_COMMENT" ]; then
+              RELEASE_NOTES+="- PR #$PR_NUMBER: $FIRST_COMMENT\n"
+            fi
+          done < merged_prs.txt
+
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Display Release Notes
+        run: |
+          echo -e "${{ env.RELEASE_NOTES }}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.LATEST_TAG }}
+          release_name: "Release ${{ env.LATEST_TAG }}"
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
