@@ -19,7 +19,7 @@ AndroidZooAPIKey.txt
 AndroidZooApps/
 *.iml
 .idea/
-shippable/
+*/shippable/
 .loadpath
 .recommenders
 

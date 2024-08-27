@@ -1,0 +1,3 @@
+src/main/resources/**/*.crysl
+src/test/resources/platforms/*
+!src/test/resources/platforms/.gitkeep

@@ -3,9 +3,9 @@ package crypto.reporting;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
-import crypto.HeadlessCryptoScanner;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import crypto.utils.ErrorUtils;
 
@@ -51,7 +51,7 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
         System.out.println("::group::Annotations");
 
         // report errors on individual lines
@@ -105,6 +105,16 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         int errorCount = errorCounts.values().stream().reduce(0, Integer::sum);
         summary.append(String.format("Number of violations: %s\n", errorCount));
 
+        if (statistics != null) {
+            summary.append("\n");
+            summary.append("Total Analysis Time: ").append(statistics.getAnalysisTime()).append("\n");
+            summary.append("Call Graph Construction Time: ").append(statistics.getCallGraphTime()).append("\n");
+            summary.append("Typestate Analysis Time: ").append(statistics.getTypestateTime()).append("\n");
+            summary.append("Reachable Methods: ").append(statistics.getReachableMethods()).append("\n");
+            summary.append("Edges in Call Graph: ").append(statistics.getEdges()).append("\n");
+            summary.append("Entry Points: ").append(statistics.getEntryPoints()).append("\n");
+        }
+
         // GitHub only displays 10 error annotations and silently drops the rest.
         // https://github.com/orgs/community/discussions/26680
         // https://github.com/orgs/community/discussions/68471
@@ -117,13 +127,13 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
 
         setSummary(summary.toString());
 
-        if (errorCount != 0) {
-            HeadlessCryptoScanner.exitCode = 1;
-        }
-
         System.out.println("::endgroup::");
 
-        super.createAnalysisReport(seeds, errorCollection);
+        super.createAnalysisReport(seeds, errorCollection, statistics);
+
+        if (errorCount != 0) {
+            System.exit(1);
+        }
     }
 
     private Path classToSourcePath(WrappedClass clazz) {

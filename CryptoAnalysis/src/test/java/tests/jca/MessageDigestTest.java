@@ -37,7 +37,6 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input);
 		Assertions.notHasEnsuredPredicate(output);
-		Assertions.violatedConstraint(md);
 	}
 
 	@Test

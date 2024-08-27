@@ -1,7 +1,6 @@
 package crypto.cryslhandler;
 
 import com.google.common.base.Splitter;
-import crypto.HeadlessCryptoScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class CrySLModelReaderClassPath {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCryptoScanner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrySLModelReaderClassPath.class);
 
     private final static URL[] javaRuntimeClassPath;
     private final Collection<URL> virtualClassPath;

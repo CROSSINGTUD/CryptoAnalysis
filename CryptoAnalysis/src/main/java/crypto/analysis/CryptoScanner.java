@@ -5,8 +5,15 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
+import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
+import crypto.definition.ScannerDefinition;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.listener.AnalysisReporter;
+import crypto.listener.AnalysisStatistics;
+import crypto.listener.AnalysisPrinter;
+import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
@@ -22,60 +29,84 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class CryptoScanner {
+public class CryptoScanner {
 
+	private final ScannerDefinition scannerDefinition;
 	private final AnalysisReporter analysisReporter;
+	private final AnalysisPrinter analysisPrinter;
 	private final ErrorCollector errorCollector;
-	private final Collection<CrySLRule> ruleset;
-	private final DataFlowScope dataFlowScope;
-	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds = new HashMap<>();
-	private final PredicateHandler predicateHandler = new PredicateHandler(this);
+	private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds;
+	private final PredicateHandler predicateHandler;
 
-	public CryptoScanner(Collection<CrySLRule> rules) {
-		analysisReporter = new AnalysisReporter();
+	private CallGraph callGraph;
+	private Collection<CrySLRule> ruleset;
+	private DataFlowScope dataFlowScope;
 
-		AnalysisPrinter analysisPrinter = new AnalysisPrinter();
+	public CryptoScanner(ScannerDefinition scannerDefinition) {
+		this.scannerDefinition = scannerDefinition;
+
+		this.analysisReporter = new AnalysisReporter();
+		this.discoveredSeeds = new HashMap<>();
+		this.predicateHandler = new PredicateHandler(this);
+
+		analysisPrinter = new AnalysisPrinter();
 		addAnalysisListener(analysisPrinter);
 
 		errorCollector = new ErrorCollector();
 		addErrorListener(errorCollector);
-
-		ruleset = new HashSet<>(rules);
-		dataFlowScope = new CryptoAnalysisDataFlowScope(rules, getIgnoredSections());
 	}
 
 	public void scan() {
-		this.getAnalysisReporter().beforeAnalysis();
+		this.ruleset = scannerDefinition.readRuleset();
+		if (ruleset == null) {
+			throw new CryptoAnalysisException("Cannot start the scan. The ruleset must not be null");
+		}
+
+		// Start analysis
+		analysisReporter.beforeAnalysis();
+
+		analysisReporter.beforeCallGraphConstruction();
+		this.callGraph = scannerDefinition.constructCallGraph(ruleset);
+		if (callGraph == null) {
+			throw new CryptoAnalysisException("Cannot start the scan. The call graph must not be null");
+		}
+		analysisReporter.afterCallGraphConstruction(callGraph);
+
+		this.dataFlowScope = scannerDefinition.createDataFlowScope(ruleset);
+		if (dataFlowScope == null) {
+			throw new CryptoAnalysisException("Cannot start the scan. The dataflow scope must not be null");
+		}
 
 		SeedGenerator generator = new SeedGenerator(this, ruleset);
 		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
-		this.getAnalysisReporter().onDiscoveredSeeds(seeds);
+		analysisReporter.onDiscoveredSeeds(seeds);
 
 		for (IAnalysisSeed seed : seeds) {
 			discoveredSeeds.put(seed, seed);
 		}
 
-		this.getAnalysisReporter().addProgress(0, seeds.size());
 		for (int i = 0; i < seeds.size(); i++) {
 			seeds.get(i).execute();
-			this.getAnalysisReporter().addProgress(i + 1, seeds.size());
+			analysisReporter.addProgress(i + 1, seeds.size());
 		}
 
-		this.getAnalysisReporter().beforePredicateCheck();
+		analysisReporter.beforePredicateCheck();
 		predicateHandler.checkPredicates();
-		this.getAnalysisReporter().afterPredicateCheck();
+		analysisReporter.afterPredicateCheck();
 
-		this.getAnalysisReporter().afterAnalysis();
+		analysisReporter.afterAnalysis();
 	}
 
-	public abstract CallGraph callGraph();
+	public CallGraph callGraph() {
+		return callGraph;
+	}
 
 	public DataFlowScope getDataFlowScope() {
 		return dataFlowScope;
 	}
 
 	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-		return new Debugger<>();
+		return scannerDefinition.debugger(solver);
 	}
 
 	public void addAnalysisListener(IAnalysisListener analysisListener) {
@@ -121,11 +152,15 @@ public abstract class CryptoScanner {
 		return predicateHandler;
 	}
 
-	public Collection<String> getIgnoredSections() {
-		return new ArrayList<>();
+	public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
+		return scannerDefinition.getSparsificationStrategy();
 	}
 
 	public int getTimeout() {
-		return 10000;
+		return scannerDefinition.timeout();
+	}
+
+	public AnalysisStatistics getStatistics() {
+		return analysisPrinter.getStatistics();
 	}
 }

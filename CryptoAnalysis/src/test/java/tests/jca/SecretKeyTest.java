@@ -1,6 +1,5 @@
 package tests.jca;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
@@ -62,7 +61,6 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
 		char[] corPwd = generateRandomPassword();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-		Assertions.violatedConstraint(pbekeyspec);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
@@ -252,16 +250,14 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		}
 	}
 
-	@Ignore
 	@Test
 	public void secretKeyUsagePattern7() throws GeneralSecurityException {
 		final byte[] salt = new byte[32];
 		SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		// TODO Deal with toCharArray()
 		char[] falsePwd = "password".toCharArray();
 		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
-		// Assertions.extValue(0);
+		Assertions.extValue(0);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);

@@ -15,7 +15,7 @@ public class InstanceOfError extends AbstractError {
 	private final CrySLPredicate violatedConstraint;
 
 	public InstanceOfError(IAnalysisSeed seed, CallSiteWithExtractedValue cs, CrySLRule rule, CrySLPredicate constraint) {
-		super(seed, cs.getCallSite().stmt(), rule);
+		super(seed, cs.getCallSiteWithParam().stmt(), rule);
 
 		this.extractedValue = cs;
 		this.violatedConstraint = constraint;

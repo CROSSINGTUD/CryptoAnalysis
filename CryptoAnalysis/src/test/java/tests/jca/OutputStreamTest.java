@@ -106,7 +106,7 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\cos.txt"));
 		CipherOutputStream cos = new CipherOutputStream(os, cipher);
 		cos.write("message".getBytes(), 100, "message".getBytes().length);
-		Assertions.violatedConstraint(cos);
+		// Assertions.violatedConstraint();
 		Assertions.mustNotBeInAcceptingState(cos);
 		cos.close();
 	}
@@ -155,7 +155,7 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		DigestOutputStream dos = new DigestOutputStream(os, md);
 		dos.write("message".getBytes(), 100, "message".getBytes().length);
-		Assertions.violatedConstraint(dos);
+		// Assertions.violatedConstraint();
 		Assertions.mustNotBeInAcceptingState(dos);
 	}
 

@@ -18,15 +18,16 @@ public class SARIFConfig {
 	public static final String LANGUAGE_KEY = "language";
 	public static final String LANGUAGE_VALUE = "en-US";
 	
-	public static final String ANALYSISTOOL_NAME_KEY = "name";
-	public static final String ANALYSISTOOL_NAME_VALUE = "CryptoAnalysis";
+	public static final String ANALYSIS_TOOL_NAME_KEY = "name";
+	public static final String ANALYSIS_TOOL_NAME_VALUE = "CryptoAnalysis";
 	
 	public static final String FILES_KEY = "files";
 	public static final String MIME_TYPE_KEY = "mimeType";
 	public static final String MIME_TYPE_VALUE = "text/java";
 	
 	public static final String RESULTS_KEY = "results";
-	public static final String RULE_ID_KEY = "ruleId";
+	public static final String VIOLATED_RULE_ID_KEY = "violatedRule";
+	public static final String ERROR_TYPE_KEY = "errorType";
 	public static final String MESSAGE_KEY = "message";
 	public static final String TEXT_KEY = "text";
 	public static final String RICH_TEXT_KEY = "richText";
@@ -42,45 +43,16 @@ public class SARIFConfig {
 	
 	public static final String RESOURCES_KEY = "resources";
 	public static final String RULES_KEY = "rules";
-	public static final String RULES_ID_KEY = "id";
-	public static final String FULL_DESCRIPTION_KEY = "fullDescription";
-	
-	//rules and their descriptions
-	public static final String CALL_TO_ERROR_KEY = "CallToError";
-	public static final String CALL_TO_ERROR_VALUE = "A call to a method is expected";
-	public static final String CONSTRAINT_ERROR_KEY = "ConstraintError";
-	public static final String CONSTRAINT_ERROR_VALUE = "A constraint of a CrySL rule is violated, e.g., a key is generated with the wrong key size.";
-	public static final String NEVER_TYPE_OF_ERROR_KEY = "NeverTypeOfError";
-	public static final String NEVER_TYPE_OF_ERROR_VALUE = "Reported when a value was found to be of a certain reference type: For example, a character array containing a password should never be converted from a String";
-	public static final String HARD_CODED_ERROR_KEY = "HardCodedError";
-	public static final String HARDCODED_ERROR_VALUE = "A hardcoded value was found. Load the value dynamically from a data storage.";
-	public static final String FORBIDDEN_METHOD_ERROR_KEY = "ForbiddenMethodError";
-	public static final String FORBIDDEN_METHOD_ERROR_VALUE = "A method that is forbidden (CrySL block FORBIDDEN) to be called under some circumstances was found.";
-	public static final String IMPRECISE_VALUE_EXTRACTION_ERROR_KEY = "ImpreciseValueExtractionError";
-	public static final String IMPRECISE_VALUE_EXTRACTION_ERROR_VALUE = "The static analysis was not able to extract all information required within the CrySL CONSTRAINT block. For example the key size could be supplied as a value listed in a configuration file. The static analysis does not model the file's content and may not constraint on the value.";
-	public static final String TYPESTATE_ERROR_KEY = "TypestateError";
-	public static final String TYPE_STATE_ERROR_VALUE = "The ORDER block of CrySL is violated, i.e., the expected method sequence call to be made is incorrect. For example, a Signature object expects a call to initSign(key) prior to update(data).";
-	public static final String REQUIRED_PREDICATE_ERROR_KEY = "RequiredPredicateError";
-	public static final String REQUIRED_PREDICATE_ERROR_VALUE = "An object A expects an object B to have been used correctly (CrySL blocks REQUIRES and ENSURES). For example a Cipher object requires a SecretKey object to be correctly and securely generated.";
-	public static final String INCOMPLETE_OPERATION_ERROR_KEY = "IncompleteOperationError";
-	public static final String INCOMPLETE_OPERATION_ERROR_VALUE = "The usage of an object may be incomplete: For example a Cipher object may be initialized but never used for en- or decryption, this may render the code dead. This error heavily depends on the computed call graph (CHA by default)";
-	public static final String UNCAUGHT_EXCEPTION_ERROR_KEY = "UncaughtExceptionError";
-	public static final String UNCAUGHT_EXCEPTION_ERROR_VALUE = "The called method might throw an Exception that is not caught.";
-	public static final String INSTANCE_OF_ERROR_KEY = "InstanceOfError";
-	public static final String INSTANCE_OF_ERROR_VALUE = "Reported when a value was found to not be of a certain instance.";
-	public static final String NO_CALL_TO_ERROR_KEY = "NoCallToError";
-	public static final String NO_CALL_TO_ERROR_VALUE = "A call to a method is not allowed";
-	public static final String PREDICATE_CONTRADICTION_ERROR_KEY = "PredicateContradictionError";
-	public static final String PREDICATE_CONTRADICTION_ERROR_VALUE = "There are predicates that contradict each other";
-	
-	// keys for the statistics
+
+	// keys for the summary and statistics
+	public static final String SUMMARY_KEY = "summary";
+	public static final String ERROR_COUNTS_KEY = "errorCounts";
 	public static final String STATISTICS_KEY = "statistics";
-	public static final String SOFTWAREID_KEY = "SoftwareID";
-	public static final String SEEDOBJECTCOUNT_KEY = "SeedObjectCount";
-	public static final String ANALYSISTIME_KEY = "CryptoAnalysisTime";
-	public static final String CALLGRAPHTIME_KEY = "CallgraphConstructionTime";
-	public static final String CALLGRAPHREACHABLEMETHODS_KEY = "CallgraphReachableMethods";
-	public static final String CALLGRAPGREACHABLEMETHODSWITHACTIVEBODIES_KEY = "CallgraphRechableMethodsWithActiveBodies";
-	public static final String DATAFLOWVISITEDMETHODS_KEY = "DataflowVisitedMethods";
+	public static final String ANALYSIS_TIME_KEY = "analysisTime";
+	public static final String CALL_GRAPH_TIME_KEY = "callGraphConstructionTime";
+	public static final String TYPESTATE_TIME_KEY = "typestateAnalysisTime";
+	public static final String REACHABLE_METHODS_KEY = "reachableMethods";
+	public static final String EDGES_IN_CALL_GRAPH_KEY = "edgesInCallGraph";
+	public static final String ENTRY_POINTS_KEY = "entryPoints";
 	
 }

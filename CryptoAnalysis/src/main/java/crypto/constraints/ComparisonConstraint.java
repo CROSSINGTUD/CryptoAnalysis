@@ -3,10 +3,12 @@ package crypto.constraints;
 import java.util.HashMap;
 import java.util.Map;
 
+import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractedValue;
 import crypto.rules.ICrySLPredicateParameter;
 import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLArithmeticConstraint;
@@ -28,7 +30,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Map.Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
 			if (entry.getKey() == Integer.MIN_VALUE) {
-				ConstraintError error = new ConstraintError(context.getObject(), entry.getValue(), context.getSpecification(), compConstraint);
+				ConstraintError error = new ConstraintError(context.getSeed(), entry.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
 
 				return;
@@ -37,7 +39,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 		for (Map.Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
 			if (leftie.getKey() == Integer.MIN_VALUE) {
-				ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), compConstraint);
+				ConstraintError error = new ConstraintError(context.getSeed(), leftie.getValue(), context.getSpecification(), compConstraint);
 				errors.add(error);
 
 				return;
@@ -68,7 +70,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 						cons = false;
 				}
 				if (!cons) {
-					ConstraintError error = new ConstraintError(context.getObject(), leftie.getValue(), context.getSpecification(), origin);
+					ConstraintError error = new ConstraintError(context.getSeed(), leftie.getValue(), context.getSpecification(), origin);
 					errors.add(error);
 
 					return;
@@ -118,13 +120,13 @@ public class ComparisonConstraint extends EvaluableConstraint {
 	}
 
 	private Map<Integer, CallSiteWithExtractedValue> extractValueAsInt(ICrySLPredicateParameter par,
-			CrySLArithmeticConstraint arith) {
+                                                                        CrySLArithmeticConstraint arith) {
 		if (par instanceof CrySLPredicate) {
 			PredicateConstraint predicateConstraint = new PredicateConstraint((CrySLPredicate) par, context);
 			predicateConstraint.evaluate();
 			if (!predicateConstraint.getErrors().isEmpty()) {
 				for (AbstractError err : predicateConstraint.getErrors()) {
-					errors.add(new ImpreciseValueExtractionError(context.getObject(), err.getErrorStatement(), err.getRule(), arith));
+					errors.add(new ImpreciseValueExtractionError(context.getSeed(), err.getErrorStatement(), err.getRule(), arith));
 				}
 				predicateConstraint.errors.clear();
 			}
@@ -159,6 +161,11 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
 			try {
 				for (Map.Entry<String, CallSiteWithExtractedValue> value : valueCollection.entrySet()) {
+					ExtractedValue extractedValue = value.getValue().getExtractedValue();
+					if (extractedValue.getVal().equals(Val.zero())) {
+						continue;
+					}
+
 					if (value.getKey().equals("true"))
 						valuesInt.put(1, value.getValue());
 					else if (value.getKey().equals("false"))

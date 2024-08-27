@@ -19,10 +19,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.cryslhandler.RulesetReader;
+import crypto.definition.ScannerDefinition;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLRule;
+import org.junit.Assert;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
@@ -30,6 +32,7 @@ import test.assertions.Assertions;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
+import test.assertions.ConstraintViolationAssertion;
 import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
@@ -45,7 +48,7 @@ import test.assertions.NoMissingTypestateChange;
 import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
-import test.assertions.PredicateContradiction;
+import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
@@ -90,19 +93,25 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				IErrorListener errorListener = new UsagePatternErrorListener(assertions);
 				IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
 
-				// Setup scanner
-				CryptoScanner scanner = new CryptoScanner(ruleset) {
-
+				ScannerDefinition scannerDefinition = new ScannerDefinition() {
 					@Override
-					public CallGraph callGraph() {
+					public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
 						return callGraph;
 					}
 
 					@Override
-					public DataFlowScope getDataFlowScope() {
+					public Collection<CrySLRule> readRuleset() {
+						return ruleset;
+					}
+
+					@Override
+					public DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
 						return dataFlowScope;
 					}
 				};
+
+				// Setup scanner
+				CryptoScanner scanner = new CryptoScanner(scannerDefinition);
 
 				scanner.addErrorListener(errorListener);
 				scanner.addResultsListener(resultsListener);
@@ -133,7 +142,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise));
 				}
 				if (!errors.toString().isEmpty()) {
-					throw new RuntimeException(errors.toString());
+					Assert.fail(errors.toString());
 				}
 			}
 		};
@@ -212,9 +221,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 			}
 			
-			//if (invocationName.startsWith("violatedConstraint")) {
-			//	queries.add(new ConstraintViolationAssertion(statement));
-			//}
+			if (invocationName.startsWith("violatedConstraint")) {
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new ConstraintViolationAssertion(pred));
+				}
+			}
 
 			if (invocationName.startsWith("hasEnsuredPredicate")){
 				Val param = invokeExpr.getArg(0);
@@ -278,10 +289,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 				}
 			}
 
-			if (invocationName.startsWith("predicateContradiction")) {
-				queries.add(new PredicateContradiction());
-			}
-
 			if (invocationName.startsWith("missingTypestateChange")) {
 				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
 					queries.add(new MissingTypestateChange(pred));
@@ -293,13 +300,21 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					queries.add(new NoMissingTypestateChange(pred));
 				}
 			}
-			
+
 			if (invocationName.startsWith("predicateErrors")) {
 				Val param = invokeExpr.getArg(0);
 				if (!param.isIntConstant()) {
 					continue;
 				}
 				queries.add(new PredicateErrorCountAssertion(param.getIntValue()));
+			}
+
+			if (invocationName.startsWith("predicateContradictionErrors")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isIntConstant()) {
+					continue;
+				}
+				queries.add(new PredicateContradictionErrorCountAssertion(param.getIntValue()));
 			}
 
 			if (invocationName.startsWith("constraintErrors")) {
