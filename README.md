@@ -118,7 +118,7 @@ If the `--reportformat` option is not specified, CogniCrypt<sub>SAST</sub> defau
 ## Updating CrySL Rules
 
 The tool takes CrySL rules in their source code formats (crysl). You can adapt the rules in any text editor.
-Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt) ships with a CrySL editor to modify the rules with IDE support (e.g., content assist, auto completion, etc.). A step-by-step-explanation on how edit CrySL rules is avialable at the tool's website [cognicrypt.org](https://www.eclipse.org/cognicrypt/documentation/crysl/). 
+Additionaly, the [Eclipse plugin CogniCrypt](https://github.com/CROSSINGTUD/CogniCrypt) (maintainance has stopped) ships with a CrySL editor to modify the rules with IDE support (e.g., content assist, auto completion, etc.). A step-by-step-explanation on how edit CrySL rules is avialable at the tool's website [cognicrypt.org](https://www.eclipse.org/cognicrypt/documentation/crysl/). 
 
 
 ## CogniCrypt<sub>SAST</sub> for Android Applications
