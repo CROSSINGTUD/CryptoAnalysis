@@ -3,6 +3,7 @@ package crypto.definition;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
+import boomerang.scene.sparse.SparseCFGCache;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
@@ -23,6 +24,10 @@ public interface ScannerDefinition {
 
     default Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
         return new Debugger<>();
+    }
+
+    default SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
+        return SparseCFGCache.SparsificationStrategy.NONE;
     }
 
     default int timeout() {
