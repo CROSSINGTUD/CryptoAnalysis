@@ -2,47 +2,113 @@ name: Aggregate Results
 on:
   push:
     branches:
-      - test_gh_pages # Or whichever branch you're working on
+      - test_gh_pages
 
 jobs:
-  build-test-aggregate-deploy:
-    runs-on: ubuntu-latest
-
+  # Builds the project in windows, ubuntu, and macos
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Project build in ${{ matrix.os }}
     steps:
-    - name: Checkout code and history
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: test_gh_pages
+          fetch-depth: 0
+      # Sets up Java version
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: '11'
+      # Sets up Maven version
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.6.3
+      # Restores Maven dependencies
+      - name: Restore local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run maven command
+        run: mvn clean verify
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '11'  
-
-    - name: Build and run tests
-      run: mvn clean install
-
-    - name: Create gh-pages-output directory
-      run: mkdir -p gh-pages-output
-
-    - name: Aggregate test results
-      run: |
-        total_time=$(grep -h "Time elapsed" CryptoAnalysis/shippable/testresults/*.txt | awk '{sum += $3} END {print sum}')
-        timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-        echo "${timestamp}, Total Time: ${total_time} seconds" >> gh-pages-output/history.txt
-
-    - name: Generate HTML report
-      run: |
-        echo "<html><body><h1>Aggregated Test Results</h1><ul>" > gh-pages-output/index.html
-        cat gh-pages-output/history.txt | while read line; do
-          echo "<li>${line}</li>" >> gh-pages-output/index.html
-        done
-        echo "</ul></body></html>" >> gh-pages-output/index.html
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./gh-pages-output
-        keep_files: true  # Keep existing files in the gh-pages branch
+      # Ubuntu-specific steps only
+      - name: Create or update gh-pages-output directory
+        if: matrix.os == 'ubuntu-latest'
+        run: mkdir -p gh-pages-output
+  
+      - name: Aggregate test results from multiple directories
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          total_time=0
+          for dir in CryptoAnalysis/shippable/testresults HeadlessJavaScanner/shippable/testresults; do
+            if [ -d "$dir" ]; then
+              echo "Processing directory: $dir"
+              for file in "$dir"/*.txt; do
+                if [ -f "$file" ]; then
+                  echo "Processing file: $file"
+                  # Extract the time elapsed from each relevant line in the file and sum it up
+                  file_time=$(grep -oP "Time elapsed: \K[\d\.]+" "$file" | awk '{sum += $1} END {print sum}')
+                  if [ -n "$file_time" ]; then
+                    echo "Time found: $file_time seconds"
+                    total_time=$(echo "$total_time + $file_time" | bc)
+                  else
+                    echo "No time elapsed found in file: $file"
+                  fi
+                else
+                  echo "No files found in directory: $dir"
+                fi
+              done
+            else
+              echo "Directory does not exist: $dir"
+            fi
+          done
+  
+          # Convert total time to minutes, seconds, and milliseconds
+          total_time_int=$(printf "%.0f" "$total_time")
+          minutes=$((total_time_int / 60))
+          seconds=$((total_time_int % 60))
+          milliseconds=$(printf "%.0f" "$(echo "($total_time - $total_time_int) * 1000" | bc)")
+  
+          echo "Total Time Calculated: ${minutes}m ${seconds}s ${milliseconds}ms"
+          timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+          run_number=${{ github.run_number }}
+          echo "Run ${run_number}, ${timestamp}, Total Time: ${minutes}m ${seconds}s ${milliseconds}ms" >> gh-pages-output/current_history.txt
+  
+      - name: Combine current and past history
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          git checkout gh-pages
+          if [ -f current_history.txt ]; then
+            echo "current history"
+            git checkout test_gh_pages
+            git checkout gh-pages current_history.txt
+            cat gh-pages-output/current_history.txt >> current_history.txt
+            mv current_history.txt gh-pages-output/current_history.txt
+          fi
+  
+      - name: Generate HTML report
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "<html><body><h1>Aggregated Test Results</h1><ul>" > gh-pages-output/index.html
+          cat gh-pages-output/current_history.txt | while read line; do
+            echo "${line}"
+            echo "<li>${line}</li>" >> gh-pages-output/index.html
+          done
+          echo "</ul></body></html>" >> gh-pages-output/index.html
+  
+      - name: Deploy to GitHub Pages
+        if: matrix.os == 'ubuntu-latest'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages-output
