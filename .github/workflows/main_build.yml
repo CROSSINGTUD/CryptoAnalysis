@@ -1,37 +1,48 @@
-name: CryptoAnalysis build
-
-on: [push, pull_request]
+name: Aggregate Results
+on:
+  push:
+    branches:
+      - test_gh_pages # Or whichever branch you're working on
 
 jobs:
-  # Builds the project in windows, ubuntu and macos
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    name: Project build in ${{ matrix.os }}
+  build-test-aggregate-deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      # Sets up Java version
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-package: jdk
-          java-version: '11'
-      # Sets up Maven version
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.6.3
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Run maven command
-        run: mvn clean verify
+    - name: Checkout code and history
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'  
+
+    - name: Build and run tests
+      run: mvn clean install
+
+    - name: Create gh-pages-output directory
+      run: mkdir -p gh-pages-output
+
+    - name: Aggregate test results
+      run: |
+        total_time=$(grep -h "Time elapsed" CryptoAnalysis/shippable/testresults/*.txt | awk '{sum += $3} END {print sum}')
+        timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+        echo "${timestamp}, Total Time: ${total_time} seconds" >> gh-pages-output/history.txt
+
+    - name: Generate HTML report
+      run: |
+        echo "<html><body><h1>Aggregated Test Results</h1><ul>" > gh-pages-output/index.html
+        cat gh-pages-output/history.txt | while read line; do
+          echo "<li>${line}</li>" >> gh-pages-output/index.html
+        done
+        echo "</ul></body></html>" >> gh-pages-output/index.html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./gh-pages-output
+        keep_files: true  # Keep existing files in the gh-pages branch
