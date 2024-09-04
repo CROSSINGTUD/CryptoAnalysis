@@ -17,6 +17,10 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+        
+    - name: LS Android Platforms to 
+      run: |
+        ls -lhR $ANDROID_SDK_ROOT/platforms/
 
     - name: Copy Android Platforms to Test Resources
       run: |
