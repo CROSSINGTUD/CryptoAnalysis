@@ -17,9 +17,6 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
 
     - name: Copy Android Platforms to Test Resources
       run: |
