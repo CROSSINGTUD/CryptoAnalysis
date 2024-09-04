@@ -31,7 +31,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithCallbackDebugAndroidXAppCompatActivity() {
         // API 28, Debug Build, unsigned, AppCompatActivity using androidx
         // CODE:
-        /*
+
             import androidx.appcompat.app.AppCompatActivity;
 
             public class MainActivity extends AppCompatActivity {
@@ -51,7 +51,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     }
                 }
               }
-         */
+
         HeadlessAndroidScanner scanner = createScanner("AndroidXAppCompatActivityCallbackDebug.apk");
         scanner.run();
 
@@ -64,7 +64,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithCallbackDebugNormalAppCompatActivity() {
         // API 28, Debug Build, unsigned, AppCompatActivity using android.support
         // CODE:
-        /*
+
             import android.support.v7.app.AppCompatActivity;
 
             public class MainActivity extends AppCompatActivity {
@@ -84,7 +84,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     }
                 }
               }
-         */
+
         HeadlessAndroidScanner scanner = createScanner("NormalAppCompatActivityCallbackDebug.apk");
         scanner.run();
 
@@ -97,7 +97,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithCallbackDebugNormalActivity() {
         // API 28, Debug Build, unsigned, normal Activity
         // CODE:
-        /*
+
             import android.app.Activity;
 
             public class MainActivity extends Activity {
@@ -117,7 +117,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     }
                 }
               }
-         */
+
         HeadlessAndroidScanner scanner = createScanner("NormalActivityCallbackDebug.apk");
         scanner.run();
 
@@ -130,7 +130,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithoutCallbackDebug() {
         // API 28, Debug Build, unsigned
         // CODE:
-        /*
+
                 @Override
                 protected void onCreate(Bundle savedInstanceState)
                 {
@@ -143,7 +143,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     } catch (GeneralSecurityException e){
                     }
                 }
-         */
+
         HeadlessAndroidScanner scanner = createScanner("NoCallBackDebug.apk");
         scanner.run();
 
@@ -156,7 +156,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithoutCallbackRelease() {
         // API 28, Release Build, unsigned
         // CODE:
-        /*
+
                 @Override
                 protected void onCreate(Bundle savedInstanceState)
                 {
@@ -169,7 +169,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     } catch (GeneralSecurityException e){
                     }
                 }
-         */
+
         HeadlessAndroidScanner scanner = createScanner("NoCallbackReleaseUnsigned.apk");
         scanner.run();
 
@@ -182,7 +182,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void runAnalysisWithoutCallbackReleaseSigned() {
         // API 28, Release Build, signed
         // CODE:
-        /*
+
                 @Override
                 protected void onCreate(Bundle savedInstanceState)
                 {
@@ -195,7 +195,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                     } catch (GeneralSecurityException e){
                     }
                 }
-         */
+         
         HeadlessAndroidScanner scanner = createScanner("NoCallbackReleaseSigned.apk");
         scanner.run();
 
