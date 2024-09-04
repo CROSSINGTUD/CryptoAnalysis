@@ -21,8 +21,6 @@ jobs:
 
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
-      with:
-        api-level: 28
 
     - name: Copy Android Platforms to Test Resources
       run: |
