@@ -16,7 +16,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     @Test
     public void testFalseCrypt() {
         // From https://github.com/secure-software-engineering/FalseCrypt
-        HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
+        HeadlessAndroidScanner scanner = createScanner("falsecrypt.apk");
         scanner.run();
 
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();

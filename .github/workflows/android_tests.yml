@@ -26,5 +26,11 @@ jobs:
       run: |
         cp -R $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/
 
-    - name: Run Tests
-      run: mvn -f HeadlessAndroidScanner clean install 
+
+    - name: Build all modules (skip tests)
+      run: mvn clean install -DskipTests
+
+    - name: Test Android
+      run: mvn -X -f HeadlessAndroidScanner test
+
+
