@@ -58,7 +58,7 @@
 
         <spdsVersion>3.2.0</spdsVersion>
         <sootVersion>4.5.0</sootVersion>
-        <cryslVersion>3.0.1</cryslVersion>
+        <cryslVersion>3.0.2</cryslVersion>
     </properties>
 
     <dependencyManagement>
