@@ -41,19 +41,6 @@ jobs:
       - name: Fetch all tags
         run: git fetch --tags
 
-      - name: Find built JARs
-        id: find_jars
-        run: |
-          CA_JAR=$(ls CryptoAnalysis/build/*.jar | grep -v 'sources\|javadoc' | head -n 1)
-          ANDROID_JAR=$(ls CryptoAnalysis-Android/build/*.jar | head -n 1)
-          echo "CA_JAR=$CA_JAR" >> $GITHUB_ENV
-          echo "ANDROID_JAR=$ANDROID_JAR" >> $GITHUB_ENV
-          CA_JAR_BASENAME=$(basename $CA_JAR)
-          ANDROID_JAR_BASENAME=$(basename $ANDROID_JAR)
-          echo "CA_JAR_BASENAME=$CA_JAR_BASENAME" >> $GITHUB_ENV
-          echo "ANDROID_JAR_BASENAME=$ANDROID_JAR_BASENAME" >> $GITHUB_ENV
-        shell: bash
-
       - name: Extract Version from pom.xml
         id: extract_version
         run: |
@@ -82,23 +69,19 @@ jobs:
             fi
           done < merged_prs.txt
 
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$RELEASE_NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
           echo -e "$RELEASE_NOTES" > release_notes.txt
           cat release_notes.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create and Upload Release Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.VERSION }}
-          name: ${{ env.VERSION }}
-          body_path: release_notes.txt
-          files: |
-            ${{ env.CA_JAR }}
-            ${{ env.ANDROID_JAR }}
+      - name: Zip JavaCryptographicArchitecture folder
+        run: |
+          echo "Zipping the JavaCryptographicArchitecture folder..."
+          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$VERSION" ./apps/* "CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar" "JavaCryptographicArchitecture.zip" \
+            --title "$VERSION" --notes-file release_notes.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
