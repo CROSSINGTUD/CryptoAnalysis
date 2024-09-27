@@ -1,8 +1,6 @@
-name: Aggregate Results
-on:
-  push:
-    branches:
-      - test_gh_pages
+name: Test and Runtime Results
+
+on: [push, pull_request]
 
 jobs:
   # Builds the project in windows, ubuntu, and macos
@@ -16,7 +14,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          ref: test_gh_pages
+          ref: develop
           fetch-depth: 0
       # Sets up Java version
       - name: Set up Java
