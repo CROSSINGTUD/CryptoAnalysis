@@ -1,0 +1,16 @@
+name: Test Internal Action
+
+on: push
+
+jobs:
+  internal_action:
+    runs-on: ubuntu-latest
+    name: Test CryptoAnalysis Action
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Run CogniCrypt
+        uses: ./
+        with:
+          appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+          basePath: "CryptoAnalysisTargets/HelloWorld"
