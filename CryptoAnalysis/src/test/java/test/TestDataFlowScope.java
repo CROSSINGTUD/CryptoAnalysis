@@ -14,6 +14,7 @@ import java.util.HashSet;
 public class TestDataFlowScope implements DataFlowScope {
 
     private static final String ASSERTION = "Assertion";
+    private static final String STRING_CLASS = "java.lang.String";
     private final Collection<String> ruleNames;
 
     public TestDataFlowScope(Collection<CrySLRule> rules) {
@@ -31,6 +32,10 @@ public class TestDataFlowScope implements DataFlowScope {
             return true;
         }
 
+        if (declaringClass.getName().contains(STRING_CLASS)) {
+            return true;
+        }
+
         JimpleDeclaredMethod jimpleMethod = (JimpleDeclaredMethod) method;
         String declaringClassName = jimpleMethod.getDeclaringClass().getName();
 
@@ -41,6 +46,10 @@ public class TestDataFlowScope implements DataFlowScope {
     public boolean isExcluded(Method method) {
         WrappedClass declaringClass = method.getDeclaringClass();
         if (declaringClass.getName().contains(ASSERTION)) {
+            return true;
+        }
+
+        if (declaringClass.getName().contains(STRING_CLASS)) {
             return true;
         }
 

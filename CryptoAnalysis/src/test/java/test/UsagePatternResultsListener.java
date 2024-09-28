@@ -18,6 +18,8 @@ import crypto.listener.IResultsListener;
 import crypto.rules.ISLConstraint;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
+import test.assertions.HasGeneratedPredicateAssertion;
+import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.StateResult;
 import typestate.TransitionFunction;
@@ -26,7 +28,6 @@ import wpds.impl.Weight;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 public class UsagePatternResultsListener implements IResultsListener {
 
@@ -92,27 +93,83 @@ public class UsagePatternResultsListener implements IResultsListener {
     public void checkedConstraints(IAnalysisSeed analysisSeed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {}
 
     @Override
-    public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates) {
-        for (Table.Cell<Statement, Val, Set<EnsuredCrySLPredicate>> c : existingPredicates.cellSet()) {
-            for (Assertion a : assertions) {
-                if (a instanceof HasEnsuredPredicateAssertion) {
-                    HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
-                    if (assertion.getStmt().equals(c.getRowKey())) {
-                        for (EnsuredCrySLPredicate pred : c.getValue()) {
-                            assertion.reported(c.getColumnKey(),pred);
-                        }
-                    }
-                }
+    public void generatedPredicate(IAnalysisSeed fromSeed, EnsuredCrySLPredicate predicate, IAnalysisSeed toSeed, Statement statement) {
+        for (Assertion a : assertions) {
+            if (a instanceof HasGeneratedPredicateAssertion) {
+                HasGeneratedPredicateAssertion assertion = (HasGeneratedPredicateAssertion) a;
 
-                if (a instanceof NotHasEnsuredPredicateAssertion) {
-                    NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
-                    if (assertion.getStmt().equals(c.getRowKey())) {
-                        for (EnsuredCrySLPredicate pred : c.getValue()) {
-                            assertion.reported(c.getColumnKey(),pred);
-                        }
-                    }
+                // TODO from statement
+                Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                if (assertion.getStatement().equals(statement)) {
+                    assertion.reported(values, predicate);
+                }
+            }
+
+            if (a instanceof HasNotGeneratedPredicateAssertion) {
+                HasNotGeneratedPredicateAssertion assertion = (HasNotGeneratedPredicateAssertion) a;
+
+                // TODO from statement
+                Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                if (assertion.getStatement().equals(statement)) {
+                    assertion.reported(values, predicate);
+                }
+            }
+
+            if (a instanceof HasEnsuredPredicateAssertion) {
+                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
+
+                // TODO from statement
+                Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                if (statement.equals(assertion.getStmt())) {
+                    assertion.reported(values, predicate);
+                }
+            }
+
+            if (a instanceof NotHasEnsuredPredicateAssertion) {
+                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
+
+                // TODO from statement
+                Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                if (statement.equals(assertion.getStmt())) {
+                    assertion.reported(values, predicate);
                 }
             }
         }
     }
+
+    @Override
+    public void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+        for (Assertion a : assertions) {
+            if (a instanceof HasEnsuredPredicateAssertion) {
+                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
+
+                if (!predicates.containsKey(assertion.getStmt())) {
+                    continue;
+                }
+
+                Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
+
+                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+                    assertion.reported(values, ensPred.getKey());
+                }
+            }
+
+            if (a instanceof NotHasEnsuredPredicateAssertion) {
+                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
+
+                if (!predicates.containsKey(assertion.getStmt())) {
+                    continue;
+                }
+
+                Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
+
+                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+                    assertion.reported(values, ensPred.getKey());
+                }
+            }
+        }
+    }
+
 }

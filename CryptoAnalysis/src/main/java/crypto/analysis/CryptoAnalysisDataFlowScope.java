@@ -13,6 +13,7 @@ import java.util.HashSet;
 public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CryptoAnalysisDataFlowScope.class);
+    private static final String STRING_CLASS = "java.lang.String";
 
     private final Collection<String> ruleNames;
     private final Collection<String> ignoredSections;
@@ -34,6 +35,10 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
             return true;
         }
 
+        if (declaringClassName.contains(STRING_CLASS)) {
+            return true;
+        }
+
         if (isOnIgnoredSectionList(method)) {
             return true;
         }
@@ -46,6 +51,10 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
         String declaringClassName = method.getDeclaringClass().getName();
 
         if (!method.getDeclaringClass().isApplicationClass()) {
+            return true;
+        }
+
+        if (declaringClassName.contains(STRING_CLASS)) {
             return true;
         }
 

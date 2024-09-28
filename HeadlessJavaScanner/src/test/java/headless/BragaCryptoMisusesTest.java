@@ -175,13 +175,13 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		
-		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", ConstraintError.class, 2);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<pkm.constPwd4PBE.ConstPassword4PBE2: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
@@ -420,7 +420,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 1);
+		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<pdf.insecureDefault.InsecureDefaultPBE: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
@@ -697,17 +697,17 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		MavenProject mavenProject = createAndCompile(mavenProjectPath);
 		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwConstSalt1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", TypestateError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallCount1: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
-		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 4);
+		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", RequiredPredicateError.class, 3);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ConstraintError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<cib.paramsPBE.PBEwSmallSalt: void main(java.lang.String[])>", TypestateError.class, 1);
@@ -793,7 +793,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 		HeadlessJavaScanner scanner = createScanner(mavenProject);
 
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", ConstraintError.class, 2);
-		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 2);
+		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", RequiredPredicateError.class, 0);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", ForbiddenMethodError.class, 1);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCryptoPBE: void main(java.lang.String[])>", IncompleteOperationError.class, 1);
 		setErrorsCount("<wc.riskyInsecureCrypto.InsecureCrypto3DES: void main(java.lang.String[])>", TypestateError.class, 1);

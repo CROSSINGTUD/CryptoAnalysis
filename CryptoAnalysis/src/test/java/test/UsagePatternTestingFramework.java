@@ -37,6 +37,8 @@ import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
+import test.assertions.HasGeneratedPredicateAssertion;
+import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
@@ -233,8 +235,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
-
 				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
 					Val predNameParam = invokeExpr.getArg(1);
@@ -243,11 +243,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 					String predName = predNameParam.getStringValue();
 					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-						queries.add(new HasEnsuredPredicateAssertion(pred, aliases, predName));
+						queries.add(new HasEnsuredPredicateAssertion(pred, param, predName));
 					}
 				} else {
 					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-						queries.add(new HasEnsuredPredicateAssertion(pred, aliases));
+						queries.add(new HasEnsuredPredicateAssertion(pred, param));
 					}
 				}
 			}
@@ -258,8 +258,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					continue;
 				}
 
-				Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
-
 				if (invokeExpr.getArgs().size() == 2) {
 					// predicate name is passed as parameter
 					Val predNameParam = invokeExpr.getArg(1);
@@ -268,12 +266,34 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 					}
 					String predName = predNameParam.getStringValue();
 					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-						queries.add(new NotHasEnsuredPredicateAssertion(pred, aliases, predName));
+						queries.add(new NotHasEnsuredPredicateAssertion(pred, param, predName));
 					}
 				} else {
 					for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-						queries.add(new NotHasEnsuredPredicateAssertion(pred, aliases));
+						queries.add(new NotHasEnsuredPredicateAssertion(pred, param));
 					}
+				}
+			}
+
+			if (invocationName.startsWith("hasGeneratedPredicate")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isLocal()) {
+					continue;
+				}
+
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new HasGeneratedPredicateAssertion(pred, param));
+				}
+			}
+
+			if (invocationName.startsWith("hasNotGeneratedPredicate")) {
+				Val param = invokeExpr.getArg(0);
+				if (!param.isLocal()) {
+					continue;
+				}
+
+				for (Statement pred : getPredecessorsNotBenchmark(statement)) {
+					queries.add(new HasNotGeneratedPredicateAssertion(pred, param));
 				}
 			}
 			

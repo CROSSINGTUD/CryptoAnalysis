@@ -30,11 +30,11 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 		Requires r1 = new Requires();
 		r1.pred1onPos1(pred1OnA);
-		Assertions.hasEnsuredPredicate(r1);
+		Assertions.hasGeneratedPredicate(r1);
 		
 		Requires r2 = new Requires();
 		r2.pred1onPos1(noPred1OnA);
-		Assertions.notHasEnsuredPredicate(r2);
+		Assertions.hasNotGeneratedPredicate(r2);
 
 		Assertions.predicateErrors(1);
 	}
@@ -51,11 +51,11 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 		Requires r1 = new Requires();
 		r1.notPred1onPos1(noPred1OnA);
-		Assertions.hasEnsuredPredicate(r1);
+		Assertions.hasGeneratedPredicate(r1);
 		
 		Requires r2 = new Requires();
 		r2.notPred1onPos1(pred1OnA);
-		Assertions.notHasEnsuredPredicate(r2);
+		Assertions.hasNotGeneratedPredicate(r2);
 
 		Assertions.predicateErrors(1);
 	}
@@ -74,19 +74,19 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 		Requires r1 = new Requires();
 		r1.pred1onPos1_AND_pred1onPos2(pred1onA, pred1onA);
-		Assertions.hasEnsuredPredicate(r1);
+		Assertions.hasGeneratedPredicate(r1);
 		
 		Requires r2 = new Requires();
 		r2.pred1onPos1_AND_pred1onPos2(pred1onA, noPred1onA);
-		Assertions.notHasEnsuredPredicate(r2);
+		Assertions.hasNotGeneratedPredicate(r2);
 
 		Requires r3 = new Requires();
 		r3.pred1onPos1_AND_pred1onPos2(noPred1onA, pred1onA);
-		Assertions.notHasEnsuredPredicate(r3);
+		Assertions.hasNotGeneratedPredicate(r3);
 
 		Requires r4 = new Requires();
 		r4.pred1onPos1_AND_pred1onPos2(noPred1onA, noPred1onA);
-		Assertions.notHasEnsuredPredicate(r4);
+		Assertions.hasNotGeneratedPredicate(r4);
 
 		Assertions.predicateErrors(4);
 	}
@@ -173,19 +173,19 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 		Requires r1 = new Requires();
 		r1.notPred1onPos1_AND_notPred1onPos2(noPredOnA, noPredOnA);
-		Assertions.hasEnsuredPredicate(r1);
+		Assertions.hasGeneratedPredicate(r1);
 		
 		Requires r2 = new Requires();
 		r2.notPred1onPos1_AND_notPred1onPos2(pred1onA, noPredOnA);
-		Assertions.notHasEnsuredPredicate(r2);
+		Assertions.hasNotGeneratedPredicate(r2);
 		
 		Requires r3 = new Requires();
 		r3.notPred1onPos1_AND_notPred1onPos2(pred1onA, pred1onA);
-		Assertions.notHasEnsuredPredicate(r3);
+		Assertions.hasNotGeneratedPredicate(r3);
 		
 		Requires r4 = new Requires();
 		r4.notPred1onPos1_AND_notPred1onPos2(noPredOnA, pred1onA);
-		Assertions.notHasEnsuredPredicate(r4);
+		Assertions.hasNotGeneratedPredicate(r4);
 
 		Assertions.predicateErrors(3);
 	}
@@ -206,19 +206,19 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
 		Requires r1 = new Requires();
 		r1.pred1onPos1_AND_pred2onPos2(pred1onA, pred2onA);
-		Assertions.hasEnsuredPredicate(r1);
+		Assertions.hasGeneratedPredicate(r1);
 
 		Requires r2 = new Requires();
 		r2.pred1onPos1_AND_pred2onPos2(pred1onA, noPredOnA);
-		Assertions.notHasEnsuredPredicate(r2);
+		Assertions.hasNotGeneratedPredicate(r2);
 
 		Requires r3 = new Requires();
 		r3.pred1onPos1_AND_pred2onPos2(noPredOnA, noPredOnA);
-		Assertions.notHasEnsuredPredicate(r3);
+		Assertions.hasNotGeneratedPredicate(r3);
 
 		Requires r4 = new Requires();
 		r4.pred1onPos1_AND_pred2onPos2(noPredOnA, pred2onA);
-		Assertions.notHasEnsuredPredicate(r4);
+		Assertions.hasNotGeneratedPredicate(r4);
 
 		Assertions.predicateErrors(4);
 	}

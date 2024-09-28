@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -28,6 +29,26 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 	@Override
 	protected String getRulesetPath() {
 		return TestConstants.JCA_RULESET_PATH;
+	}
+
+	@Test
+	public void test() throws GeneralSecurityException {
+		KeyGenerator generator = KeyGenerator.getInstance("AES");
+		SecretKey key = generator.generateKey();
+		byte[] bytes = key.getEncoded();
+
+		SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
+	}
+
+	@Test
+	public void test2() {
+		byte[] bytes = new byte[32];
+
+		SecureRandom random = new SecureRandom();
+		random.nextBytes(bytes);
+
+		SecureRandom random1 = new SecureRandom();
+		random1.setSeed(bytes);
 	}
 	
 	@Test
@@ -87,10 +108,10 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		Assertions.mustBeInAcceptingState(actKey);
 
 		byte[] encText = c.doFinal("TEST_PLAIN".getBytes(StandardCharsets.UTF_8));
+		Assertions.hasEnsuredPredicate(encText);
 		c.getIV();
 
 		Assertions.mustBeInAcceptingState(c);
-		Assertions.hasEnsuredPredicate(encText);
 	}
 
 	@Test
@@ -261,7 +282,6 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.notHasEnsuredPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 
 		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");

@@ -147,10 +147,6 @@ public class CryptoScanner {
 		return seeds;
 	}
 
-	public PredicateHandler getPredicateHandler() {
-		return predicateHandler;
-	}
-
 	public int getTimeout() {
 		return scannerDefinition.timeout();
 	}
