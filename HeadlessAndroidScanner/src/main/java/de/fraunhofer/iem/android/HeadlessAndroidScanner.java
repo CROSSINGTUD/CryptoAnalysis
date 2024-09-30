@@ -109,16 +109,20 @@ public class HeadlessAndroidScanner {
 	private void constructCallGraph() {
 		InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
 		config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
-		config.getCallbackConfig().setEnableCallbacks(false);
 		config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
 		config.getAnalysisFileConfig().setAndroidPlatformDir(getPlatformDirectory());
 		config.getAnalysisFileConfig().setTargetAPKFile(getApkFile());
 		config.setMergeDexFiles(true);
+		config.setTaintAnalysisEnabled(false);
+		config.setIgnoreFlowsInSystemPackages(true);
+		config.setExcludeSootLibraryClasses(true);
+
 		SetupApplication flowDroid = new SetupApplication(config);
 		SootConfigForAndroid sootConfigForAndroid = new SootConfigForAndroid() {
 			@Override
 			public void setSootOptions(Options options, InfoflowConfiguration config) {
 				options.set_keep_line_number(true);
+				options.setPhaseOption("jb.sils", "enabled:false");
 			}
 		};
 		flowDroid.setSootConfig(sootConfigForAndroid);

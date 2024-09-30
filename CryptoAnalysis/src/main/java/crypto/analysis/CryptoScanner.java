@@ -5,6 +5,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
+import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.definition.ScannerDefinition;
@@ -145,6 +146,10 @@ public class CryptoScanner {
 			}
 		}
 		return seeds;
+	}
+
+	public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
+		return scannerDefinition.getSparsificationStrategy();
 	}
 
 	public int getTimeout() {

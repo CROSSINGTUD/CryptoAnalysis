@@ -60,19 +60,9 @@ public class AnalysisSettings implements Callable<Integer> {
 	private String[] reportFormat = null;
 
 	@CommandLine.Option(
-			names = {"--preanalysis"},
-			description = "Enable a preanalysis. @Deprecated since 3.2.0, not supported anymore")
-	private boolean preanalysis = false;
-
-	@CommandLine.Option(
 			names = {"--visualization"},
 			description = "Enable visualization")
 	private boolean visualization = false;
-
-	@CommandLine.Option(
-			names = {"--providerdetection"},
-			description = "Enable provider detection. @Deprecated since 3.2.0, not supported anymore")
-	private boolean providerDetection = false;
 
 	@CommandLine.Option(
 			names = {"--dstats"},
@@ -91,6 +81,13 @@ public class AnalysisSettings implements Callable<Integer> {
 	private String ignoreSectionsPath = null;
 
 	@CommandLine.Option(
+			names = {"--sparseStrategy"},
+			description = "Strategy to sparsify Boomerang queries. Possible values are NONE, TYPE_BASED, and " +
+					"ALIAS_AWARE (default: NONE)"
+	)
+	private String sparseStrategyInput = null;
+
+	@CommandLine.Option(
 			names = {"--timeout"},
 			description = "Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the " +
 					"typestate and extract parameter analysis and continues with the results computed so far. (default: 10000)"
@@ -101,14 +98,20 @@ public class AnalysisSettings implements Callable<Integer> {
 		CHA, SPARK, SPARK_LIB,
 	}
 
+	public enum SparseStrategy {
+		NONE, TYPE_BASED, ALIAS_AWARE,
+	}
+
 	private AnalysisCallGraph analysisCallGraph;
 	private Set<Reporter.ReportFormat> reportFormats;
 	private Collection<String> ignoredSections;
+	private SparseStrategy sparseStrategy;
 	
 	public AnalysisSettings() {
 		analysisCallGraph = AnalysisCallGraph.CHA;
 		reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
 		ignoredSections = new ArrayList<>();
+		sparseStrategy = SparseStrategy.NONE;
 	}
 
 	public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -128,12 +131,14 @@ public class AnalysisSettings implements Callable<Integer> {
 			parseIgnoredSections(ignoreSectionsPath);
 		}
 
+		if (sparseStrategyInput != null) {
+			parseSparseStrategy(sparseStrategyInput);
+		}
+
 		if (exitCode != ExitCode.OK) {
 			throw new CryptoAnalysisParserException("Error while parsing the CLI arguments");
 		}
 	}
-
-
 
 	private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
 		String CGValue = value.toLowerCase();
@@ -199,6 +204,24 @@ public class AnalysisSettings implements Callable<Integer> {
 			}
 		} else {
 			throw new CryptoAnalysisParserException(ignorePackageFile + " is not a file or cannot be read");
+		}
+	}
+
+	private void parseSparseStrategy(String strategy) {
+		String strategyLowerCase = strategy.toLowerCase();
+
+		switch (strategyLowerCase) {
+			case "none":
+				sparseStrategy = SparseStrategy.NONE;
+				break;
+			case "type_based":
+				sparseStrategy = SparseStrategy.TYPE_BASED;
+				break;
+			case "alias_aware":
+				sparseStrategy = SparseStrategy.ALIAS_AWARE;
+				break;
+			default:
+				throw new CryptoAnalysisParserException(sparseStrategy + " is not a valid sparsification strategy");
 		}
 	}
 
@@ -280,6 +303,14 @@ public class AnalysisSettings implements Callable<Integer> {
 
 	public void setIgnoredSections(Collection<String> ignoredSections) {
 		this.ignoredSections = new HashSet<>(ignoredSections);
+	}
+
+	public SparseStrategy getSparseStrategy() {
+		return sparseStrategy;
+	}
+
+	public void setSparseStrategy(SparseStrategy strategy) {
+		this.sparseStrategy = strategy;
 	}
 
 	public int getTimeout() {

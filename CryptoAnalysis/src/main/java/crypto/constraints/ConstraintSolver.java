@@ -4,6 +4,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
+import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Lists;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.listener.AnalysisReporter;
@@ -71,6 +72,11 @@ public class ConstraintSolver {
 			@Override
 			public AnalysisReporter getAnalysisReporter() {
 				return seed.getScanner().getAnalysisReporter();
+			}
+
+			@Override
+			public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
+				return seed.getScanner().getSparsificationStrategy();
 			}
 
 			@Override

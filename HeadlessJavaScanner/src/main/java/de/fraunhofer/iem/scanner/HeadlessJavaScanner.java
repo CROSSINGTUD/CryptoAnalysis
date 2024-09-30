@@ -7,6 +7,7 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.SootCallGraph;
+import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
@@ -133,6 +134,21 @@ public class HeadlessJavaScanner {
 				}
 
 				return new IDEVizDebugger<>(vizFile);
+			}
+
+			@Override
+			public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
+				switch (settings.getSparseStrategy()) {
+					case NONE:
+						return SparseCFGCache.SparsificationStrategy.NONE;
+					case TYPE_BASED:
+						return SparseCFGCache.SparsificationStrategy.TYPE_BASED;
+					case ALIAS_AWARE:
+						return SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
+					default:
+						LOGGER.error("Could not set sparsification strategy {}. Defaulting to NONE...", settings.getSparseStrategy());
+						return SparseCFGCache.SparsificationStrategy.NONE;
+				}
 			}
 
 			@Override
@@ -313,6 +329,14 @@ public class HeadlessJavaScanner {
 
 	public void setIgnoredSections(Collection<String> ignoredSections) {
 		settings.setIgnoredSections(ignoredSections);
+	}
+
+	public AnalysisSettings.SparseStrategy getSparseStrategy() {
+		return settings.getSparseStrategy();
+	}
+
+	public void setSparseStrategy(AnalysisSettings.SparseStrategy strategy) {
+		settings.setSparseStrategy(strategy);
 	}
 
 	public int getTimeout() {

@@ -6,9 +6,12 @@ and performs a static analysis based on the specification of the rules. CrySL is
 libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/java-cryptography-architecture-jca-reference-guide.html) in particular). More information on CrySL and the static analysis may be found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
 ## Structure
-
-We provide two SAST tools that allow the analysis of Java and Android applications: 
+We provide the implementation of the static analysis of CogniCrypt in:
 * `CryptoAnalysis` contains the components for the actual analysis
+* `CryptoAnalysisTargets` contains various example applications that are also used to test the correctness of CryptoAnalyis
+  
+We further provide two SAST tools that allow the analysis of Java and Android applications: 
+
 * `HeadlessJavaScanner` contains the SAST tool that analyzes Java applications (see below)
 * `HeadlessAndroidScanner` contains the SAST tool that analyzes Android applications (see below)
 
@@ -45,7 +48,7 @@ java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar
 For an easy start we prepared a .jar containing classes with crypto misuses. The source code for these misuses is found [here](https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/CryptoAnalysisTargets/CogniCryptDemoExample/src/main/java/example). To run CogniCrypt<sub>SAST</sub> on these classes, simply execute the following command.
 
 ```
-java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies
+java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar
   --rulesDir $(pwd)/CryptoAnalysis-Core/src/main/resources/JavaCryptographicArchitecture
   --appPath $(pwd)/CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar
 ```
@@ -58,9 +61,7 @@ Other additional arguments that can be used are as follows:
 --identifier <identifier_for_labeling_output_files>
 --reportPath <directory_location_for_cryptoanalysis_report>
 --reportFormat <format of cryptoanalysis_report> (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
---preanalysis (enables pre-analysis. @Deprecated since 3.2.0)
 --visualization (enables the visualization, but also requires --reportPath option to be set)
---providerDetection (enables provider detection analysis. @Deprecated since 3.2.0)
 --dstats (disables the output of the analysis statistics in the reports)
 --ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
 --timeout <timeout in milliseconds> (Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the typestate and extract parameter analysis and continues with the results computed so far. (default: 10000))

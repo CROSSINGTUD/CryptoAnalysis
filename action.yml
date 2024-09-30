@@ -34,6 +34,8 @@ inputs:
       and 'de.example.*' ignores all classes and methods in the package 'example'.
       Using this option may increase the analysis performance.
       Note that constructors are methods that can be specified with '<init>'.
+  sparseStrategy:
+    description: Strategy to sparsify Boomerang queries. Possible values are NONE, TYPE_BASED, and ALIAS_AWARE (default NONE)
   timeout:
     description: Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the
       typestate and extract parameter analysis and continues with the results computed so far. (default 10000)
@@ -129,8 +131,8 @@ runs:
         ${{ inputs.identifier && format('{0} {1}', '--identifier', inputs.identifier) || '' }} \
         ${{ inputs.reportPath && format('{0} {1}', '--reportPath', inputs.reportPath) || '' }} \
         ${{ inputs.visualization  == 'true' && '--visualization ' || '' }} \
-        ${{ inputs.providerDetection  == 'true' && '--providerDetection ' || '' }} \
         ${{ inputs.ignoreSections && format('{0} {1}', '--ignoreSections', inputs.ignoreSections) || '' }} \
+        ${{ inputs.sparseStrategy && format('{0} {1}', '--sparseStrategy', inputs.sparseStrategy) || '' }} \
         ${{ inputs.timeout && format('{0} {1}', '--timeout', inputs.timeout) || '' }}
       shell: bash
       # workaround for https://github.com/actions/runner/issues/665
