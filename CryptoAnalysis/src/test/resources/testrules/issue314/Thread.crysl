@@ -1,8 +1,0 @@
-SPEC java.lang.Thread
-
-EVENTS
-    c: Thread();
-    s: start();
-
-ORDER
-    c, s
