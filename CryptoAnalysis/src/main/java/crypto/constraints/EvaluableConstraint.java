@@ -26,7 +26,6 @@ import crypto.rules.CrySLExceptionConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLValueConstraint;
 import crypto.rules.ISLConstraint;
-import crypto.utils.SootUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +104,7 @@ public abstract class EvaluableConstraint {
 						}
 					}
 
-					if (pos > -1 && SootUtils.getParameterType(invoker.getMethod(), pos).isBooleanType()) {
+					if (pos > -1 && invoker.getMethod().getParameterType(pos).isBooleanType()) {
 						varVal.put("0".equals(retrieveConstantFromValue) ? "false" : "true", new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
 					} else {
 						varVal.put(retrieveConstantFromValue, new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
