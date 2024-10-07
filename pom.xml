@@ -122,7 +122,7 @@
             <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>9.7</version>
+            <version>9.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.soot-oss</groupId>
