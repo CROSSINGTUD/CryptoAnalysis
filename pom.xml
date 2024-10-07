@@ -57,7 +57,7 @@
         <java.version>11</java.version>
 
         <spdsVersion>3.2.1</spdsVersion>
-        <sootVersion>4.5.0</sootVersion>
+        <sootVersion>4.6.0</sootVersion>
         <cryslVersion>3.0.2</cryslVersion>
     </properties>
 
