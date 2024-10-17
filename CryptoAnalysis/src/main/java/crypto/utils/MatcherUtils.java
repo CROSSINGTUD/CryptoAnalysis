@@ -42,7 +42,7 @@ public class MatcherUtils {
         // Compare class names
         String cryslClassName = cryslMethod.getDeclaringClassName();
         Type declaringClassType = declaredMethod.getDeclaringClass().getType();
-        if (!declaringClassType.isSupertypeOf(cryslClassName)) {
+        if (!cryslClassName.equals(declaringClassType.toString()) && !declaringClassType.isSupertypeOf(cryslClassName)) {
             return false;
         }
 

@@ -4,7 +4,7 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.ExtractParameterDefinition;
 
 import java.util.Arrays;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package crypto.definition;
+package crypto.extractparameter;
 
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;

@@ -193,7 +193,7 @@ public abstract class EvaluableConstraint {
 		for (Statement successor : statement.getMethod().getControlFlowGraph().getSuccsOf(statement)) {
 			ForwardQuery forwardQuery = new ForwardQuery(new ControlFlowGraph.Edge(statement, successor), allocVal);
 
-			Boomerang solver = new Boomerang(context.getSeed().getScanner().callGraph(), context.getSeed().getScanner().getDataFlowScope());
+			Boomerang solver = new Boomerang(context.getSeed().getScanner().getCallGraph(), context.getSeed().getScanner().getDataFlowScope());
 			ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
 
 			for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry : results.asStatementValWeightTable().cellSet()) {
@@ -212,7 +212,7 @@ public abstract class EvaluableConstraint {
 				ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream().findFirst().get(), stmt);
 				BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
 
-				Boomerang indexSolver = new Boomerang(context.getSeed().getScanner().callGraph(), context.getSeed().getScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
+				Boomerang indexSolver = new Boomerang(context.getSeed().getScanner().getCallGraph(), context.getSeed().getScanner().getDataFlowScope(), new IntAndStringBoomerangOptions());
 				BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
 
 				for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {

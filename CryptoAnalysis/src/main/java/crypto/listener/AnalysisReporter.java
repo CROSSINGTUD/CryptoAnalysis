@@ -24,6 +24,7 @@ import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQuery;
+import crypto.rules.CrySLRule;
 import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
@@ -65,6 +66,18 @@ public class AnalysisReporter {
     public void afterAnalysis() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterAnalysis();
+        }
+    }
+
+    public void beforeReadingRuleset(String rulesetPath) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.beforeReadingRuleset(rulesetPath);
+        }
+    }
+
+    public void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> rules) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.afterReadingRuleset(rulesetPath, rules);
         }
     }
 

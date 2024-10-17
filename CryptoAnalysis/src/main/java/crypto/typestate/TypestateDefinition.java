@@ -1,4 +1,4 @@
-package crypto.definition;
+package crypto.typestate;
 
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;

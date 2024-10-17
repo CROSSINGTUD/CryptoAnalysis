@@ -8,7 +8,7 @@ import boomerang.scene.WrappedClass;
 import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
-import crypto.definition.ScannerDefinition;
+import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.listener.AnalysisReporter;
 import crypto.listener.AnalysisStatistics;
@@ -21,17 +21,18 @@ import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class CryptoScanner {
+public abstract class CryptoScanner {
 
-	private final ScannerDefinition scannerDefinition;
 	private final AnalysisReporter analysisReporter;
 	private final AnalysisPrinter analysisPrinter;
 	private final ErrorCollector errorCollector;
@@ -42,9 +43,7 @@ public class CryptoScanner {
 	private Collection<CrySLRule> ruleset;
 	private DataFlowScope dataFlowScope;
 
-	public CryptoScanner(ScannerDefinition scannerDefinition) {
-		this.scannerDefinition = scannerDefinition;
-
+	protected CryptoScanner() {
 		this.analysisReporter = new AnalysisReporter();
 		this.discoveredSeeds = new HashMap<>();
 		this.predicateHandler = new PredicateHandler(this);
@@ -56,26 +55,40 @@ public class CryptoScanner {
 		addErrorListener(errorCollector);
 	}
 
-	public void scan() {
-		this.ruleset = scannerDefinition.readRuleset();
+	protected final void initialize() {
+		// Read the ruleset
+		analysisReporter.beforeReadingRuleset(getRulesetPath());
+		try {
+			RulesetReader reader = new RulesetReader();
+			ruleset = reader.readRulesFromPath(getRulesetPath());
+		} catch (IOException e) {
+			throw new CryptoAnalysisException("Could not read rules: " + e.getMessage());
+		}
+		analysisReporter.afterReadingRuleset(getRulesetPath(), ruleset);
+
+		// Construct the call graph
+		analysisReporter.beforeCallGraphConstruction();
+		callGraph = constructCallGraph(ruleset);
+		analysisReporter.afterCallGraphConstruction(callGraph);
+
+		// Initialize the dataflow scope
+		dataFlowScope = createDataFlowScope(ruleset);
+	}
+
+	protected final void scan() {
+		// Check whether the fields have been initialized correctly
 		if (ruleset == null) {
 			throw new CryptoAnalysisException("Cannot start the scan. The ruleset must not be null");
+		}
+		if (callGraph == null) {
+			throw new CryptoAnalysisException("Cannot start the scan. The call graph must not be null");
+		}
+		if (dataFlowScope == null) {
+			throw new CryptoAnalysisException("Cannot start the scan. The dataflow scope must not be null");
 		}
 
 		// Start analysis
 		analysisReporter.beforeAnalysis();
-
-		analysisReporter.beforeCallGraphConstruction();
-		this.callGraph = scannerDefinition.constructCallGraph(ruleset);
-		if (callGraph == null) {
-			throw new CryptoAnalysisException("Cannot start the scan. The call graph must not be null");
-		}
-		analysisReporter.afterCallGraphConstruction(callGraph);
-
-		this.dataFlowScope = scannerDefinition.createDataFlowScope(ruleset);
-		if (dataFlowScope == null) {
-			throw new CryptoAnalysisException("Cannot start the scan. The dataflow scope must not be null");
-		}
 
 		SeedGenerator generator = new SeedGenerator(this, ruleset);
 		List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
@@ -97,16 +110,16 @@ public class CryptoScanner {
 		analysisReporter.afterAnalysis();
 	}
 
-	public CallGraph callGraph() {
+	public Collection<CrySLRule> getRuleset() {
+		return ruleset;
+	}
+
+	public CallGraph getCallGraph() {
 		return callGraph;
 	}
 
 	public DataFlowScope getDataFlowScope() {
 		return dataFlowScope;
-	}
-
-	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
-		return scannerDefinition.debugger(solver);
 	}
 
 	public void addAnalysisListener(IAnalysisListener analysisListener) {
@@ -129,10 +142,6 @@ public class CryptoScanner {
 		return errorCollector.getErrorCollection();
 	}
 
-	public Collection<CrySLRule> getRuleset() {
-		return ruleset;
-	}
-
 	public Collection<IAnalysisSeed> getDiscoveredSeeds() {
 		return discoveredSeeds.keySet();
 	}
@@ -148,15 +157,31 @@ public class CryptoScanner {
 		return seeds;
 	}
 
+	public AnalysisStatistics getStatistics() {
+		return analysisPrinter.getStatistics();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *               Methods that may or must be overridden by subclasses                *
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	protected abstract String getRulesetPath();
+
+	protected abstract CallGraph constructCallGraph(Collection<CrySLRule> ruleset);
+
+	protected DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
+		return new CryptoAnalysisDataFlowScope(ruleset, Collections.emptySet());
+	}
+
+	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+		return new Debugger<>();
+	}
+
 	public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
-		return scannerDefinition.getSparsificationStrategy();
+		return SparseCFGCache.SparsificationStrategy.NONE;
 	}
 
 	public int getTimeout() {
-		return scannerDefinition.timeout();
-	}
-
-	public AnalysisStatistics getStatistics() {
-		return analysisPrinter.getStatistics();
+		return 100000;
 	}
 }
