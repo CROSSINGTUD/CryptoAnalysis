@@ -37,15 +37,6 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         this.settings = settings;
     }
 
-    public static void main(String[] args) {
-        try {
-            HeadlessAndroidScanner scanner = createFromCLISettings(args);
-            scanner.run();
-        } catch (CryptoAnalysisParserException e) {
-            throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
-        }
-    }
-
     public static HeadlessAndroidScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
         AndroidSettings androidSettings = new AndroidSettings();
         androidSettings.parseSettingsFromCLI(args);

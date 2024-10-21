@@ -44,7 +44,7 @@ public class SeedGenerator {
 
             @Override
             public Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return scanner.debugger(idealSeedSolver);
+                return scanner.debugger(idealSeedSolver.getSeed());
             }
 
             @Override

@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import boomerang.Query;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
@@ -10,15 +11,14 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
+import crypto.listener.AnalysisPrinter;
 import crypto.listener.AnalysisReporter;
 import crypto.listener.AnalysisStatistics;
-import crypto.listener.AnalysisPrinter;
 import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.rules.CrySLRule;
-import ideal.IDEALSeedSolver;
 import typestate.TransitionFunction;
 
 import java.io.IOException;
@@ -173,7 +173,7 @@ public abstract class CryptoScanner {
 		return new CryptoAnalysisDataFlowScope(ruleset, Collections.emptySet());
 	}
 
-	public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> solver) {
+	public Debugger<TransitionFunction> debugger(Query query) {
 		return new Debugger<>();
 	}
 
