@@ -1,13 +1,12 @@
-package headless.bugfixes;
-
-import java.io.File;
-
-import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
-import headless.AbstractHeadlessTest;
-import headless.MavenProject;
-import org.junit.Test;
+package scanner.bugfixes;
 
 import crypto.analysis.errors.ConstraintError;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import scanner.AbstractHeadlessTest;
+import scanner.MavenProject;
+import org.junit.Test;
+
+import java.io.File;
 
 /**
  * Refers to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/270

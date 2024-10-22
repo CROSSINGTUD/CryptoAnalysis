@@ -1,15 +1,14 @@
-package headless;
-
-import java.io.File;
-
-import crypto.analysis.errors.NeverTypeOfError;
-import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
-import org.junit.Test;
+package scanner;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import org.junit.Test;
+
+import java.io.File;
 
 /**
  * The following Headless tests are deducted from the MUBench benchmarking tool

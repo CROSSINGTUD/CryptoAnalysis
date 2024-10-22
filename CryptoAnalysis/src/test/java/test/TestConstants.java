@@ -4,7 +4,7 @@ import java.io.File;
 
 public class TestConstants {
 
-    public static final String RULES_BASE_DIR = "." + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
+    public static final String RULES_BASE_DIR = "." + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "rules" + File.separator;
 
     public static final String JCA_RULESET_PATH = RULES_BASE_DIR + "JavaCryptographicArchitecture" + File.separator;
 

@@ -1,4 +1,4 @@
-package headless;
+package scanner;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;

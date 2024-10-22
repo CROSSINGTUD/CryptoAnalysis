@@ -1,11 +1,11 @@
-package headless;
+package scanner;
+
+import scanner.FindingsType.FalseNegatives;
+import scanner.FindingsType.FalsePositives;
+import scanner.FindingsType.TruePositives;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import headless.FindingsType.FalseNegatives;
-import headless.FindingsType.FalsePositives;
-import headless.FindingsType.TruePositives;
 
 public class ErrorSpecification {
 	private String methodSignature;

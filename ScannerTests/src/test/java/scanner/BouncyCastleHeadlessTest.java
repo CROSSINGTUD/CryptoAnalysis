@@ -1,4 +1,4 @@
-package headless;
+package scanner;
 
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.HardCodedError;
@@ -8,7 +8,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
-import headless.FindingsType.TruePositives;
+import scanner.FindingsType.TruePositives;
 import org.junit.Test;
 
 import java.io.File;

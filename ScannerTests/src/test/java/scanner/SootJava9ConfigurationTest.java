@@ -1,17 +1,16 @@
-package headless;
-
-import static org.junit.Assume.assumeTrue;
-
-import java.io.File;
-
-import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
-import org.junit.Before;
-import org.junit.Test;
+package scanner;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
+import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+
+import static org.junit.Assume.assumeTrue;
 
 public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 

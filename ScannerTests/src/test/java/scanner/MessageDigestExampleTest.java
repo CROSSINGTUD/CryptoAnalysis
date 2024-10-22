@@ -1,4 +1,4 @@
-package headless;
+package scanner;
 
 import crypto.analysis.errors.IncompleteOperationError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class MessageDigestExampleTest extends AbstractHeadlessTest{
+public class MessageDigestExampleTest extends AbstractHeadlessTest {
 
 	@Test
 	public void loadMessageDigestExample() {

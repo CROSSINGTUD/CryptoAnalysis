@@ -1,4 +1,4 @@
-package headless;
+package scanner;
 
 public class FindingsType {
 	private int numberOfFindings;

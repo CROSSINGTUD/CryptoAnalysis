@@ -1,4 +1,4 @@
-package headless;
+package scanner;
 
 import crypto.reporting.Reporter;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;

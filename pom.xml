@@ -32,6 +32,7 @@
         <module>CryptoAnalysis</module>
         <module>HeadlessAndroidScanner</module>
         <module>HeadlessJavaScanner</module>
+        <module>ScannerTests</module>
     </modules>
 
     <scm>
@@ -281,7 +282,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -291,7 +292,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -301,7 +302,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -311,7 +312,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                 </artifactItems>
@@ -356,44 +357,44 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle</directory>
+                            <directory>${basedir}/src/test/resources/test/BouncyCastle</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA</directory>
                         </fileset>
                         <fileset>
                             <directory>apps</directory>
@@ -417,6 +418,7 @@
                             <include>CryptoAnalysis/pom.xml</include>
                             <include>HeadlessAndroidScanner/pom.xml</include>
                             <include>HeadlessJavaScanner/pom.xml</include>
+                            <include>ScannerTests/pom.xml</include>
                         </includes>
                         <sortPom>
                             <encoding>UTF-8</encoding>
