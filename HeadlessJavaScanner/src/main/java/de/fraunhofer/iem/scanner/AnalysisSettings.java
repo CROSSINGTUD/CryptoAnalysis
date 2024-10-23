@@ -131,6 +131,10 @@ public class AnalysisSettings implements Callable<Integer> {
             parseSparseStrategy(sparseStrategyInput);
         }
 
+        if (timeout < 0) {
+            throw new CryptoAnalysisParserException("Timeout should not be less than 0");
+        }
+
         if (exitCode != ExitCode.OK) {
             throw new CryptoAnalysisParserException("Error while parsing the CLI arguments");
         }

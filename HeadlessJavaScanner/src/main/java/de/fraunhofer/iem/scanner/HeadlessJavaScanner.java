@@ -54,7 +54,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
     }
 
     @Override
-    protected String getRulesetPath() {
+    public String getRulesetPath() {
 		return settings.getRulesetPath();
     }
 
@@ -139,6 +139,10 @@ public class HeadlessJavaScanner extends CryptoScanner {
             default:
                 throw new CryptoAnalysisException("Framework " + settings.getFramework().name() + " is not supported");
         }
+    }
+
+    public String getApplicationPath() {
+        return settings.getApplicationPath();
     }
 
     public AnalysisSettings.Framework getFramework() {

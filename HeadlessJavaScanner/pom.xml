@@ -85,7 +85,7 @@
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>de.fraunhofer.iem.scanner.HeadlessJavaScanner</mainClass>
+                            <mainClass>de.fraunhofer.iem.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptors>

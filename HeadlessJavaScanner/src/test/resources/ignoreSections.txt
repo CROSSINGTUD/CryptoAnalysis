@@ -1,0 +1,3 @@
+example.class
+example.class.method
+example.*

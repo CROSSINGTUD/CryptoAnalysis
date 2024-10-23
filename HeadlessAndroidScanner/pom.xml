@@ -103,7 +103,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>de.fraunhofer.iem.android.HeadlessAndroidScanner</mainClass>
+                            <mainClass>de.fraunhofer.iem.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptors>

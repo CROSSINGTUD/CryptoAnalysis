@@ -77,7 +77,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
         }
 
         @Override
-        protected String getRulesetPath() {
+        public String getRulesetPath() {
             return UsagePatternTestingFramework.this.getRulesetPath();
         }
 

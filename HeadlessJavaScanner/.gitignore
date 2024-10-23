@@ -1,2 +1,3 @@
 src/main/resources/**/*.crysl
-src/test/resources/*
+src/test/resources/rules/*
+!src/test/resources/rules/.gitkeep

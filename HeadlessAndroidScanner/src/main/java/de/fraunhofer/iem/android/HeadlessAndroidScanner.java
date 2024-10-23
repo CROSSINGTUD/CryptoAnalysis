@@ -17,6 +17,7 @@ import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public class HeadlessAndroidScanner extends CryptoScanner {
@@ -119,6 +120,10 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
     public Collection<Reporter.ReportFormat> getReportFormats() {
         return settings.getReportFormats();
+    }
+
+    public void setReportFormats(Reporter.ReportFormat... reportFormats) {
+        setReportFormats(Arrays.asList(reportFormats));
     }
 
     public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
