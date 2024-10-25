@@ -56,6 +56,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
         <java.version>11</java.version>
+        <skipTests>true</skipTests>
 
         <spdsVersion>3.2.1</spdsVersion>
         <sootVersion>4.5.0</sootVersion>
@@ -86,22 +87,12 @@
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>WPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>boomerangPDS</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>idealPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>synchronizedPDS</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
             <dependency>
@@ -236,32 +227,6 @@
                     </executions>
                 </plugin>
 
-                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
-                    test reports -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
-                    <configuration>
-                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
-                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
-                        <trimStackTrace>false</trimStackTrace>
-                        <reuseForks>false</reuseForks>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.surefire</groupId>
-                            <artifactId>surefire-junit4</artifactId>
-                            <version>3.5.0</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>junit</groupId>
-                            <artifactId>junit</artifactId>
-                            <version>4.13.2</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -317,6 +282,46 @@
                                     </artifactItem>
                                 </artifactItems>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
+                    test reports -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.0</version>
+                    <configuration>
+                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
+                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
+                        <trimStackTrace>false</trimStackTrace>
+                        <reuseForks>false</reuseForks>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit4</artifactId>
+                            <version>3.5.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>junit</groupId>
+                            <artifactId>junit</artifactId>
+                            <version>4.13.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.7.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -505,6 +510,28 @@
                         <configuration>
                             <tagNameFormat>@{project.version}</tagNameFormat>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <!-- Use -DrunAllTests to enable running all tests -->
+            <id>allTests</id>
+            <activation>
+                <property>
+                    <name>runAllTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
