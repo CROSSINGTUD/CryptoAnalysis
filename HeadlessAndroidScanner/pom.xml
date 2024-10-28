@@ -114,11 +114,11 @@
 
     <profiles>
         <profile>
-            <!-- This profile enables the tests for the settings -->
-            <id>testOpal</id>
+            <!-- This profile enables the tests for Android -->
+            <id>testAndroid</id>
             <activation>
                 <property>
-                    <name>runAndroidSettingsTests</name>
+                    <name>runAndroidTests</name>
                     <value>true</value>
                 </property>
             </activation>

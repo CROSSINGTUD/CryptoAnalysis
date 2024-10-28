@@ -1,4 +1,0 @@
-src/test/resources/rules/*
-!src/test/resources/rules/.gitkeep
-src/test/resources/platforms/*
-!src/test/resources/platforms/.gitkeep

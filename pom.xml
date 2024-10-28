@@ -32,7 +32,6 @@
         <module>CryptoAnalysis</module>
         <module>HeadlessAndroidScanner</module>
         <module>HeadlessJavaScanner</module>
-        <module>ScannerTests</module>
     </modules>
 
     <scm>
