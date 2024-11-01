@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLRule;
-import de.fraunhofer.iem.scanner.AnalysisSettings;
+import de.fraunhofer.iem.scanner.ScannerSettings;
 import soot.EntryPoints;
 import soot.G;
 import soot.PackManager;
@@ -20,20 +20,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class SootSetup implements FrameworkSetup {
+public class SootSetup extends FrameworkSetup {
 
     private final String sootClassPath;
 
-    public SootSetup(String sootClassPath) {
+    public SootSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm, String sootClassPath) {
+        super(applicationPath, algorithm);
         this.sootClassPath = sootClassPath;
     }
 
     @Override
-    public void initializeFramework(String applicationPath, AnalysisSettings.CallGraphAlgorithm algorithm) {
+    public void initializeFramework() {
+        LOGGER.info("Setting up Soot...");
+
         G.reset();
         Options.v().set_whole_program(true);
 
-        switch (algorithm) {
+        switch (callGraphAlgorithm) {
             case CHA:
                 Options.v().setPhaseOption("cg.cha", "on");
                 break;
@@ -45,7 +48,7 @@ public class SootSetup implements FrameworkSetup {
                 Options.v().setPhaseOption("cg.spark", "on");
                 break;
             default:
-                throw new CryptoAnalysisException("No call graph option selected out of: CHA, SPARK_LIB and SPARK");
+                throw new CryptoAnalysisException("Call Graph algorithm " + callGraphAlgorithm.name() + " for Soot not supported");
         }
 
         Options.v().set_output_format(Options.output_format_none);
@@ -82,6 +85,8 @@ public class SootSetup implements FrameworkSetup {
         Options.v().set_full_resolver(true);
         Scene.v().loadNecessaryClasses();
         Scene.v().setEntryPoints(getEntryPoints());
+
+        LOGGER.info("Soot setup done");
     }
 
     @Override

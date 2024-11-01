@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(mixinStandardHelpOptions = true)
-public class AnalysisSettings implements Callable<Integer> {
+public class ScannerSettings implements Callable<Integer> {
 
     @CommandLine.Option(
             names = {"--appPath"},
@@ -31,6 +31,12 @@ public class AnalysisSettings implements Callable<Integer> {
                     + " using a ZIP file, please make sure that the path ends with '.zip'",
             required = true)
     private String rulesDir = null;
+
+    @CommandLine.Option(
+            names = {"--framework"},
+            description = "The framework to construct the call graph and the intermediate representation"
+    )
+    private String frameworkOption = null;
 
     @CommandLine.Option(
             names = {"--cg"},
@@ -89,7 +95,7 @@ public class AnalysisSettings implements Callable<Integer> {
     }
 
     public enum Framework {
-        SOOT, SOOT_UP
+        SOOT, SOOT_UP, OPAL
     }
 
     public enum SparseStrategy {
@@ -102,7 +108,7 @@ public class AnalysisSettings implements Callable<Integer> {
     private Collection<String> ignoredSections;
     private SparseStrategy sparseStrategy;
 
-    public AnalysisSettings() {
+    public ScannerSettings() {
         callGraphAlgorithm = CallGraphAlgorithm.CHA;
         reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
         framework = Framework.SOOT;
@@ -115,8 +121,12 @@ public class AnalysisSettings implements Callable<Integer> {
         parser.setOptionsCaseInsensitive(true);
         int exitCode = parser.execute(settings);
 
+        if (frameworkOption != null) {
+            parseFrameworkOption(frameworkOption);
+        }
+
         if (cg != null) {
-            parseControlGraphValue(cg);
+            parseControlGraphOption(cg);
         }
 
         if (reportFormat != null) {
@@ -140,7 +150,25 @@ public class AnalysisSettings implements Callable<Integer> {
         }
     }
 
-    private void parseControlGraphValue(String value) throws CryptoAnalysisParserException {
+    private void parseFrameworkOption(String option) throws CryptoAnalysisParserException {
+        String frameworkValue = option.toLowerCase();
+
+        switch (frameworkValue) {
+            case "soot":
+                framework = Framework.SOOT;
+                break;
+            case "soot_up":
+                framework = Framework.SOOT_UP;
+                break;
+            case "opal":
+                framework = Framework.OPAL;
+                break;
+            default:
+                throw new CryptoAnalysisParserException("Framework " + option + " is not supported");
+        }
+    }
+
+    private void parseControlGraphOption(String value) throws CryptoAnalysisParserException {
         String CGValue = value.toLowerCase();
 
         switch (CGValue) {

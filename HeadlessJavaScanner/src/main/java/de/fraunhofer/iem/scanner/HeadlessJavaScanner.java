@@ -14,9 +14,10 @@ import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.rules.CrySLRule;
 import de.fraunhofer.iem.framework.FrameworkSetup;
+import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
 import de.fraunhofer.iem.framework.SootUpSetup;
-import de.fraunhofer.iem.scanner.AnalysisSettings.CallGraphAlgorithm;
+import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import typestate.TransitionFunction;
@@ -31,26 +32,26 @@ public class HeadlessJavaScanner extends CryptoScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessJavaScanner.class);
 
-    private final AnalysisSettings settings;
+    private final ScannerSettings settings;
     private FrameworkSetup frameworkSetup;
 
     public HeadlessJavaScanner(String applicationPath, String rulesetDirectory) {
-        settings = new AnalysisSettings();
+        settings = new ScannerSettings();
 
         settings.setApplicationPath(applicationPath);
         settings.setRulesetPath(rulesetDirectory);
         settings.setReportFormats(new HashSet<>());
     }
 
-    private HeadlessJavaScanner(AnalysisSettings settings) {
+    private HeadlessJavaScanner(ScannerSettings settings) {
         this.settings = settings;
     }
 
     public static HeadlessJavaScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
-        AnalysisSettings analysisSettings = new AnalysisSettings();
-        analysisSettings.parseSettingsFromCLI(args);
+        ScannerSettings scannerSettings = new ScannerSettings();
+        scannerSettings.parseSettingsFromCLI(args);
 
-        return new HeadlessJavaScanner(analysisSettings);
+        return new HeadlessJavaScanner(scannerSettings);
     }
 
     @Override
@@ -73,11 +74,11 @@ public class HeadlessJavaScanner extends CryptoScanner {
         if (settings.isVisualization()) {
 
             if (settings.getReportDirectory() == null) {
-                LOGGER.error("The visualization requires the --reportDir option. Disabling visualization...");
+                LOGGER.error("The visualization requires the --reportPath option. Disabling visualization...");
                 return new Debugger<>();
             }
 
-            File vizFile = new File(settings.getReportDirectory() + File.separator + "viz" + File.separator + query.var() + ".json");
+            File vizFile = new File(settings.getReportDirectory() + File.separator + "viz" + File.separator + query.var().getVariableName() + ".json");
             boolean created = vizFile.getParentFile().mkdirs();
 
             if (!created) {
@@ -114,7 +115,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void run() {
         // Setup Framework
         frameworkSetup = setupFramework();
-        frameworkSetup.initializeFramework(settings.getApplicationPath(), settings.getCallGraph());
+        frameworkSetup.initializeFramework();
         additionalFrameworkSetup();
 
         // Initialize fields and reporters
@@ -133,9 +134,11 @@ public class HeadlessJavaScanner extends CryptoScanner {
     private FrameworkSetup setupFramework() {
         switch (settings.getFramework()) {
             case SOOT:
-                return new SootSetup(settings.getSootPath());
+                return new SootSetup(settings.getApplicationPath(), settings.getCallGraph(), settings.getSootPath());
             case SOOT_UP:
-                return new SootUpSetup();
+                return new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
+            case OPAL:
+                return new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
             default:
                 throw new CryptoAnalysisException("Framework " + settings.getFramework().name() + " is not supported");
         }
@@ -145,11 +148,11 @@ public class HeadlessJavaScanner extends CryptoScanner {
         return settings.getApplicationPath();
     }
 
-    public AnalysisSettings.Framework getFramework() {
+    public ScannerSettings.Framework getFramework() {
         return settings.getFramework();
     }
 
-    public void setFramework(AnalysisSettings.Framework framework) {
+    public void setFramework(ScannerSettings.Framework framework) {
         settings.setFramework(framework);
     }
 
@@ -205,11 +208,11 @@ public class HeadlessJavaScanner extends CryptoScanner {
         settings.setIgnoredSections(ignoredSections);
     }
 
-    public AnalysisSettings.SparseStrategy getSparseStrategy() {
+    public ScannerSettings.SparseStrategy getSparseStrategy() {
         return settings.getSparseStrategy();
     }
 
-    public void setSparseStrategy(AnalysisSettings.SparseStrategy strategy) {
+    public void setSparseStrategy(ScannerSettings.SparseStrategy strategy) {
         settings.setSparseStrategy(strategy);
     }
 

@@ -2,13 +2,25 @@ package de.fraunhofer.iem.framework;
 
 import boomerang.scene.CallGraph;
 import crypto.rules.CrySLRule;
-import de.fraunhofer.iem.scanner.AnalysisSettings;
+import de.fraunhofer.iem.scanner.ScannerSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
-public interface FrameworkSetup {
+public abstract class FrameworkSetup {
 
-    void initializeFramework(String applicationPath, AnalysisSettings.CallGraphAlgorithm algorithm);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(FrameworkSetup.class);
 
-    CallGraph constructCallGraph(Collection<CrySLRule> rules);
+    protected final String applicationPath;
+    protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
+
+    protected FrameworkSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm callGraphAlgorithm) {
+        this.applicationPath = applicationPath;
+        this.callGraphAlgorithm = callGraphAlgorithm;
+    }
+
+    public abstract void initializeFramework();
+
+    public abstract CallGraph constructCallGraph(Collection<CrySLRule> rules);
 }

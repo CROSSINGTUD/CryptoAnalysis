@@ -1,7 +1,7 @@
 package settings;
 
 import crypto.reporting.Reporter;
-import de.fraunhofer.iem.scanner.AnalysisSettings;
+import de.fraunhofer.iem.scanner.ScannerSettings;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,24 +21,39 @@ public class ProgramTest {
 
         Assert.assertEquals(scanner.getApplicationPath(), EXAMPLE_APP_PATH);
         Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
-        Assert.assertEquals(scanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.CHA);
+        Assert.assertEquals(scanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
         Assert.assertEquals(scanner.getReportFormats(), Collections.emptySet());
         Assert.assertFalse(scanner.isVisualization());
     }
 
     @Test
+    public void testFramework() {
+        HeadlessJavaScanner sootScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
+        sootScanner.setFramework(ScannerSettings.Framework.SOOT);
+        Assert.assertEquals(sootScanner.getFramework(), ScannerSettings.Framework.SOOT);
+
+        HeadlessJavaScanner sootUpScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
+        sootUpScanner.setFramework(ScannerSettings.Framework.SOOT_UP);
+        Assert.assertEquals(sootUpScanner.getFramework(), ScannerSettings.Framework.SOOT_UP);
+
+        HeadlessJavaScanner opalScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
+        opalScanner.setFramework(ScannerSettings.Framework.OPAL);
+        Assert.assertEquals(opalScanner.getFramework(), ScannerSettings.Framework.OPAL);
+    }
+
+    @Test
     public void testCallGraph() {
         HeadlessJavaScanner chaScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
-        chaScanner.setCallGraphAlgorithm(AnalysisSettings.CallGraphAlgorithm.CHA);
-        Assert.assertEquals(chaScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.CHA);
+        chaScanner.setCallGraphAlgorithm(ScannerSettings.CallGraphAlgorithm.CHA);
+        Assert.assertEquals(chaScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
 
         HeadlessJavaScanner sparkScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
-        sparkScanner.setCallGraphAlgorithm(AnalysisSettings.CallGraphAlgorithm.SPARK);
-        Assert.assertEquals(sparkScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.SPARK);
+        sparkScanner.setCallGraphAlgorithm(ScannerSettings.CallGraphAlgorithm.SPARK);
+        Assert.assertEquals(sparkScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.SPARK);
 
         HeadlessJavaScanner sparkLibScanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
-        sparkLibScanner.setCallGraphAlgorithm(AnalysisSettings.CallGraphAlgorithm.SPARK_LIB);
-        Assert.assertEquals(sparkLibScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.SPARK_LIB);
+        sparkLibScanner.setCallGraphAlgorithm(ScannerSettings.CallGraphAlgorithm.SPARK_LIB);
+        Assert.assertEquals(sparkLibScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.SPARK_LIB);
     }
 
     @Test

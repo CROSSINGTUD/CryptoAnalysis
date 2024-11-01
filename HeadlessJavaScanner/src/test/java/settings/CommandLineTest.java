@@ -2,7 +2,7 @@ package settings;
 
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
-import de.fraunhofer.iem.scanner.AnalysisSettings;
+import de.fraunhofer.iem.scanner.ScannerSettings;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,6 +18,7 @@ public class CommandLineTest {
     private static final String RULES_DIR = "--rulesDir";
     private static final String EXAMPLE_RULES_DIR = "path/to/rules";
 
+    private static final String FRAMEWORK = "--framework";
     private static final String CALL_GRAPH = "--cg";
     private static final String SOOT_PATH = "--sootPath";
     private static final String REPORT_PATH = "--reportPath";
@@ -33,7 +34,7 @@ public class CommandLineTest {
 
         Assert.assertEquals(scanner.getApplicationPath(), EXAMPLE_APP_PATH);
         Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
-        Assert.assertEquals(scanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.CHA);
+        Assert.assertEquals(scanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
         Assert.assertEquals(scanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
         Assert.assertFalse(scanner.isVisualization());
     }
@@ -55,25 +56,47 @@ public class CommandLineTest {
     }
 
     @Test
+    public void testFramework() {
+        String[] sootArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT"};
+        HeadlessJavaScanner sootScanner = HeadlessJavaScanner.createFromCLISettings(sootArgs);
+        Assert.assertEquals(sootScanner.getFramework(), ScannerSettings.Framework.SOOT);
+
+        String[] sootUpArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT_UP"};
+        HeadlessJavaScanner sootUpScanner = HeadlessJavaScanner.createFromCLISettings(sootUpArgs);
+        Assert.assertEquals(sootUpScanner.getFramework(), ScannerSettings.Framework.SOOT_UP);
+
+        String[] opalArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "OPAL"};
+        HeadlessJavaScanner opalScanner = HeadlessJavaScanner.createFromCLISettings(opalArgs);
+        Assert.assertEquals(opalScanner.getFramework(), ScannerSettings.Framework.OPAL);
+    }
+
+    @Test(expected = CryptoAnalysisParserException.class)
+    public void testInvalidFramework() {
+        String[] args = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "WALA"};
+        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+        Assert.assertEquals(scanner.getFramework(), ScannerSettings.Framework.SOOT);
+    }
+
+    @Test
     public void testCallGraph() {
         String[] chaArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "CHA"};
         HeadlessJavaScanner chaScanner = HeadlessJavaScanner.createFromCLISettings(chaArgs);
-        Assert.assertEquals(chaScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.CHA);
+        Assert.assertEquals(chaScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
 
         String[] sparkArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "SPARK"};
         HeadlessJavaScanner sparkScanner = HeadlessJavaScanner.createFromCLISettings(sparkArgs);
-        Assert.assertEquals(sparkScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.SPARK);
+        Assert.assertEquals(sparkScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.SPARK);
 
         String[] sparkLibArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "SPARKLIB"};
         HeadlessJavaScanner sparkLibScanner = HeadlessJavaScanner.createFromCLISettings(sparkLibArgs);
-        Assert.assertEquals(sparkLibScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.SPARK_LIB);
+        Assert.assertEquals(sparkLibScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.SPARK_LIB);
     }
 
     @Test(expected = CryptoAnalysisParserException.class)
     public void testInvalidCallGraph() {
-        String[] sparkLibArgs = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "RTA"};
-        HeadlessJavaScanner sparkLibScanner = HeadlessJavaScanner.createFromCLISettings(sparkLibArgs);
-        Assert.assertEquals(sparkLibScanner.getCallGraphAlgorithm(), AnalysisSettings.CallGraphAlgorithm.CHA);
+        String[] args = new String[]{APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "RTA"};
+        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+        Assert.assertEquals(scanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
     }
 
     @Test

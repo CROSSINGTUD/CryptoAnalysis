@@ -6,19 +6,19 @@ import de.fraunhofer.iem.scanner.ScannerSettings;
 
 import java.util.Collection;
 
-public class SootUpSetup extends FrameworkSetup {
+public class OpalSetup extends FrameworkSetup {
 
-    public SootUpSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm) {
+    public OpalSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm) {
         super(applicationPath, algorithm);
     }
 
     @Override
     public void initializeFramework() {
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented yet");
     }
 }

@@ -7,6 +7,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.utils.ErrorUtils;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import de.fraunhofer.iem.scanner.ScannerSettings;
 import scanner.FindingsType.FalseNegatives;
 import scanner.FindingsType.FalsePositives;
 import scanner.FindingsType.NoFalseNegatives;
@@ -21,6 +22,10 @@ import java.util.Set;
  * To run these test cases in Eclipse, specify your maven home path as JVM argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
  */
 public abstract class AbstractHeadlessTest {
+
+    private static final String SOOT = "SOOT";
+    private static final String SOOT_UP = "SOOT_UP";
+    private static final String OPAL = "OPAL";
 
     protected static final String RULES_BASE_DIR = "." + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "rules" + File.separator;
 
@@ -46,7 +51,23 @@ public abstract class AbstractHeadlessTest {
         HeadlessJavaScanner scanner = new HeadlessJavaScanner(applicationPath, rulesetPath);
         scanner.setSootClassPath(mp.getBuildDirectory() + (mp.getFullClassPath().isEmpty() ? "" : File.pathSeparator + mp.getFullClassPath()));
 
+        scanner.setFramework(getFramework());
+
         return scanner;
+    }
+
+    private static ScannerSettings.Framework getFramework() {
+        String framework = System.getProperty("framework");
+
+        if (SOOT.equals(framework)) {
+            return ScannerSettings.Framework.SOOT;
+        } else if (SOOT_UP.equals(framework)) {
+            return ScannerSettings.Framework.SOOT_UP;
+        } else if (OPAL.equals(framework)) {
+            return ScannerSettings.Framework.OPAL;
+        } else {
+            return ScannerSettings.Framework.SOOT;
+        }
     }
 
     protected void assertErrors(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
