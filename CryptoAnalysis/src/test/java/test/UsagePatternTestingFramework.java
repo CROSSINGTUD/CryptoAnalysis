@@ -462,7 +462,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
         return res;
     }
 
-    @SuppressWarnings("deprecation")
     private Set<Val> getAliasesForValue(CallGraph callGraph, Statement stmt, Val val) {
         Set<Val> aliases = new HashSet<>();
         aliases.add(val);

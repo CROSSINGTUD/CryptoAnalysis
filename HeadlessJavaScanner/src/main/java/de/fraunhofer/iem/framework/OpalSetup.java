@@ -14,11 +14,11 @@ public class OpalSetup extends FrameworkSetup {
 
     @Override
     public void initializeFramework() {
-        throw new RuntimeException("Not implemented yet");
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
-        throw new RuntimeException("Not implemented yet");
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

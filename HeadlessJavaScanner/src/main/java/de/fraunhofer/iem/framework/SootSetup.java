@@ -32,6 +32,7 @@ public class SootSetup extends FrameworkSetup {
     @Override
     public void initializeFramework() {
         LOGGER.info("Setting up Soot...");
+        WATCH.start();
 
         G.reset();
         Options.v().set_whole_program(true);
@@ -86,7 +87,8 @@ public class SootSetup extends FrameworkSetup {
         Scene.v().loadNecessaryClasses();
         Scene.v().setEntryPoints(getEntryPoints());
 
-        LOGGER.info("Soot setup done");
+        WATCH.stop();
+        LOGGER.info("Soot setup done in {}", WATCH);
     }
 
     @Override

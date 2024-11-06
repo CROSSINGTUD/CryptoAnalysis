@@ -14,11 +14,11 @@ public class SootUpSetup extends FrameworkSetup {
 
     @Override
     public void initializeFramework() {
-        throw new RuntimeException("Not implemented");
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
-        throw new RuntimeException("Not implemented");
+        throw new UnsupportedOperationException("Not implemented");
     }
 }

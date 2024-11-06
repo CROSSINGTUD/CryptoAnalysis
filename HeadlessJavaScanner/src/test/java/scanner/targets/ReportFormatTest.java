@@ -1,4 +1,4 @@
-package scanner;
+package scanner.targets;
 
 import crypto.reporting.Reporter;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -7,13 +7,15 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import scanner.setup.MavenProject;
+import scanner.setup.AbstractHeadlessTest;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class ReportFormatTest extends AbstractHeadlessTest{
+public class ReportFormatTest extends AbstractHeadlessTest {
 
 	private static final String rootPath = "cognicrypt-output/";
 	private static final File outputDir = new File(rootPath);
