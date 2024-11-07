@@ -58,7 +58,7 @@
         <skipTests>true</skipTests>
 
         <spdsVersion>3.2.2</spdsVersion>
-        <sootVersion>4.5.0</sootVersion>
+        <sootVersion>4.6.0</sootVersion>
         <cryslVersion>3.0.2</cryslVersion>
     </properties>
 
@@ -107,13 +107,13 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.0-jre</version>
+            <version>33.3.1-jre</version>
         </dependency>
         <dependency>
             <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>9.7</version>
+            <version>9.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.soot-oss</groupId>
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.16.1</version>
+            <version>2.17.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -215,7 +215,7 @@
                          it has to be correct. -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.10.1</version>
                     <executions>
                         <execution>
                             <id>attach-javadoc</id>
@@ -290,7 +290,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.1</version>
                     <configuration>
                         <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
                         <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
@@ -301,7 +301,7 @@
                         <dependency>
                             <groupId>org.apache.maven.surefire</groupId>
                             <artifactId>surefire-junit4</artifactId>
-                            <version>3.5.0</version>
+                            <version>3.5.1</version>
                         </dependency>
                         <dependency>
                             <groupId>junit</groupId>
@@ -485,7 +485,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.6</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
