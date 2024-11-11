@@ -143,7 +143,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.78.1</version>
+            <version>1.79</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
         <dependency>
