@@ -34,7 +34,7 @@ jobs:
         run: mvn clean verify -DrunAnalysisTests
 
   # Build and test the HeadlessJavaScanner module with Soot
-  build-and-test-analysis:
+  build-and-test-scanner:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
