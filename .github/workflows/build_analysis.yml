@@ -4,12 +4,17 @@ on:
   push:
   pull_request:
     types: [opened, reopened]
+  merge_group:
+    types: [checks_requested]
 
 jobs:
   # Builds the project in ubuntu
-  build:
+  build-and-test-analysis:
     runs-on: ubuntu-latest
-    name: Build and test CryptoAnalysis
+    name: Build and Test Analysis
+
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -29,4 +34,34 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run maven command
-        run: mvn clean verify -DrunAnalysisTests
+        run: mvn clean verify
+  
+  build-and-test-analysis-queue:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Build and Test Analysis on Merge
+
+    if: github.event_name == 'merge_group'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # Sets up Java version
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: '11'
+      # Restores Maven dependecies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run maven command
+        run: mvn clean verify
