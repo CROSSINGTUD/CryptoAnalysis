@@ -5,6 +5,13 @@ updates:
   schedule:
     interval: weekly
     time: "04:00"
+  groups:
+    minor-and-patch-dependencies:
+      patterns:
+        - "*"
+      update-types:
+        - "minor"
+        - "patch"
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: com.google.crypto.tink:tink
