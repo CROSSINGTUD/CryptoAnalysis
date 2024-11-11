@@ -2,19 +2,14 @@ name: Build And Test (Analysis)
 
 on:
   push:
-    branches:
-      - master
-      - develop
   pull_request:
+    types: [opened, reopened]
 
 jobs:
-  # Builds the project in windows, ubuntu and macos
+  # Builds the project in ubuntu
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    name: Project build in ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    name: Project build in ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
