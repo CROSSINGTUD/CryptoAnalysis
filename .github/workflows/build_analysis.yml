@@ -41,7 +41,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    name: Build and Test Analysis on Merge (${{ matrix.os }})
+    name: Build and Test Analysis on Merge
 
     if: github.event_name == 'merge_group'
 
