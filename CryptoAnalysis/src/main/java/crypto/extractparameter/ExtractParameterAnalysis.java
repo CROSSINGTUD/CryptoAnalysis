@@ -18,117 +18,117 @@ import java.util.Map;
 
 public class ExtractParameterAnalysis {
 
-    private final Collection<ExtractParameterQuery> queries;
-    private final Collection<CallSiteWithExtractedValue> collectedValues;
-    private final ExtractParameterDefinition definition;
+	private final Collection<ExtractParameterQuery> queries;
+	private final Collection<CallSiteWithExtractedValue> collectedValues;
+	private final ExtractParameterDefinition definition;
 
-    public ExtractParameterAnalysis(ExtractParameterDefinition definition) {
-        this.definition = definition;
+	public ExtractParameterAnalysis(ExtractParameterDefinition definition) {
+		this.definition = definition;
 
-        queries = new HashSet<>();
-        collectedValues = new HashSet<>();
-    }
+		queries = new HashSet<>();
+		collectedValues = new HashSet<>();
+	}
 
-    public void run() {
-        for (Statement statement : definition.getCollectedCalls()) {
-            if (!statement.containsInvokeExpr()) {
-                continue;
-            }
+	public void run() {
+		for (Statement statement : definition.getCollectedCalls()) {
+			if (!statement.containsInvokeExpr()) {
+				continue;
+			}
 
-            DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
-            Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(definition.getRule(), declaredMethod);
+			DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+			Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(definition.getRule(), declaredMethod);
 
-            for (CrySLMethod method : methods) {
-                injectQueryAtCallSite(statement, method);
-            }
-        }
+			for (CrySLMethod method : methods) {
+				injectQueryAtCallSite(statement, method);
+			}
+		}
 
-        for (ExtractParameterQuery query : queries) {
-            definition.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
-            query.solve();
-            definition.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
-        }
-    }
+		for (ExtractParameterQuery query : queries) {
+			definition.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
+			query.solve();
+			definition.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
+		}
+	}
 
-    private void injectQueryAtCallSite(Statement statement, CrySLMethod method) {
-        for (int i = 0; i < method.getParameters().size(); i++) {
-            String parameter = method.getParameters().get(i).getKey();
+	private void injectQueryAtCallSite(Statement statement, CrySLMethod method) {
+		for (int i = 0; i < method.getParameters().size(); i++) {
+			String parameter = method.getParameters().get(i).getKey();
 
-            addQueryAtCallSite(statement, parameter, i);
-        }
-    }
+			addQueryAtCallSite(statement, parameter, i);
+		}
+	}
 
-    private void addQueryAtCallSite(Statement statement, String varNameInSpec, int index) {
-        Val parameter = statement.getInvokeExpr().getArg(index);
+	private void addQueryAtCallSite(Statement statement, String varNameInSpec, int index) {
+		Val parameter = statement.getInvokeExpr().getArg(index);
 
-        Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
-        for (Statement pred : predecessors) {
-            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
+		Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+		for (Statement pred : predecessors) {
+			ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-            ExtractParameterQuery query = new ExtractParameterQuery(definition, edge, parameter, index);
-            query.addListener(results -> {
-                Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
+			ExtractParameterQuery query = new ExtractParameterQuery(definition, edge, parameter, index);
+			query.addListener(results -> {
+				Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
 
-                Collection<ForwardQuery> filteredQueries = filterBoomerangResults(results.getAllocationSites().keySet());
-                for (ForwardQuery paramQuery : filteredQueries) {
-                    Val val = paramQuery.var();
+				Collection<ForwardQuery> filteredQueries = filterBoomerangResults(results.getAllocationSites().keySet());
+				for (ForwardQuery paramQuery : filteredQueries) {
+					Val val = paramQuery.var();
 
-                    if (val instanceof AllocVal) {
-                        AllocVal allocVal = (AllocVal) val;
+					if (val instanceof AllocVal) {
+						AllocVal allocVal = (AllocVal) val;
 
-                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), paramQuery.cfgEdge().getStart());
-                        extractedParameters.add(entry);
-                    } else {
-                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, paramQuery.cfgEdge().getStart());
-                        extractedParameters.add(entry);
-                    }
-                }
+						Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), paramQuery.cfgEdge().getStart());
+						extractedParameters.add(entry);
+					} else {
+						Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, paramQuery.cfgEdge().getStart());
+						extractedParameters.add(entry);
+					}
+				}
 
-                CallSiteWithParamIndex callSiteWithParam = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpec);
-                Collection<Type> types = results.getPropagationType();
+				CallSiteWithParamIndex callSiteWithParam = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpec);
+				Collection<Type> types = results.getPropagationType();
 
-                // If no value could be extracted, add the zero value to indicate it
-                if (extractedParameters.isEmpty()) {
-                    ExtractedValue zeroVal = new ExtractedValue(Val.zero(), statement, types);
+				// If no value could be extracted, add the zero value to indicate it
+				if (extractedParameters.isEmpty()) {
+					ExtractedValue zeroVal = new ExtractedValue(Val.zero(), statement, types);
 
-                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, zeroVal);
-                    collectedValues.add(callSite);
-                    return;
-                }
+					CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, zeroVal);
+					collectedValues.add(callSite);
+					return;
+				}
 
-                for (Map.Entry<Val, Statement> entry : extractedParameters) {
-                    // The extracted value may be transformed, i.e. not the propagated type
-                    types.add(entry.getKey().getType());
+				for (Map.Entry<Val, Statement> entry : extractedParameters) {
+					// The extracted value may be transformed, i.e. not the propagated type
+					types.add(entry.getKey().getType());
 
-                    ExtractedValue extractedValue = new ExtractedValue(entry.getKey(), entry.getValue(), types);
+					ExtractedValue extractedValue = new ExtractedValue(entry.getKey(), entry.getValue(), types);
 
-                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);
-                    collectedValues.add(callSite);
-                }
-            });
-            queries.add(query);
-        }
-    }
+					CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);
+					collectedValues.add(callSite);
+				}
+			});
+			queries.add(query);
+		}
+	}
 
-    private Collection<ForwardQuery> filterBoomerangResults(Collection<ForwardQuery> resultQueries) {
-        Collection<ForwardQuery> transformedQueries = new HashSet<>();
+	private Collection<ForwardQuery> filterBoomerangResults(Collection<ForwardQuery> resultQueries) {
+		Collection<ForwardQuery> transformedQueries = new HashSet<>();
 
-        for (ForwardQuery query : resultQueries) {
-            Val val = query.var();
+		for (ForwardQuery query : resultQueries) {
+			Val val = query.var();
 
-            if (val instanceof TransformedAllocVal) {
-                transformedQueries.add(query);
-            }
-        }
+			if (val instanceof TransformedAllocVal) {
+				transformedQueries.add(query);
+			}
+		}
 
-        if (transformedQueries.isEmpty()) {
-            return resultQueries;
-        }
+		if (transformedQueries.isEmpty()) {
+			return resultQueries;
+		}
 
-        return transformedQueries;
-    }
+		return transformedQueries;
+	}
 
-    public Collection<CallSiteWithExtractedValue> getExtractedValues() {
-        return collectedValues;
-    }
+	public Collection<CallSiteWithExtractedValue> getExtractedValues() {
+		return collectedValues;
+	}
 }

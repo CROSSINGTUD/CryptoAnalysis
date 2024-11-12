@@ -11,18 +11,18 @@ import java.util.Collection;
 
 public abstract class FrameworkSetup {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(FrameworkSetup.class);
-    protected static final Stopwatch WATCH = Stopwatch.createUnstarted();
+	protected static final Logger LOGGER = LoggerFactory.getLogger(FrameworkSetup.class);
+	protected static final Stopwatch WATCH = Stopwatch.createUnstarted();
 
-    protected final String applicationPath;
-    protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
+	protected final String applicationPath;
+	protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
 
-    protected FrameworkSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm callGraphAlgorithm) {
-        this.applicationPath = applicationPath;
-        this.callGraphAlgorithm = callGraphAlgorithm;
-    }
+	protected FrameworkSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm callGraphAlgorithm) {
+		this.applicationPath = applicationPath;
+		this.callGraphAlgorithm = callGraphAlgorithm;
+	}
 
-    public abstract void initializeFramework();
+	public abstract void initializeFramework();
 
-    public abstract CallGraph constructCallGraph(Collection<CrySLRule> rules);
+	public abstract CallGraph constructCallGraph(Collection<CrySLRule> rules);
 }

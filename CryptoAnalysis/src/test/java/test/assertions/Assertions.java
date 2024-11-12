@@ -28,7 +28,7 @@ public class Assertions {
 
 	public static void hasNotGeneratedPredicate(Object o) {}
 
-    public static void missingTypestateChange() {}
+	public static void missingTypestateChange() {}
 
 	public static void noMissingTypestateChange() {}
 

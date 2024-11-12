@@ -5,12 +5,12 @@ import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 
 public class Main {
 
-    public static void main(String[] args) {
-        try {
-            HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-            scanner.run();
-        } catch (CryptoAnalysisParserException e) {
-            throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
-        }
-    }
+	public static void main(String[] args) {
+		try {
+			HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+			scanner.run();
+		} catch (CryptoAnalysisParserException e) {
+			throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
+		}
+	}
 }

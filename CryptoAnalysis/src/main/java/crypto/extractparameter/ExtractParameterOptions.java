@@ -123,7 +123,7 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 		return val.isNewExpr();
 	}
 
-    @Override
+	@Override
 	public int analysisTimeoutMS() {
 		return definition.getTimeout();
 	}

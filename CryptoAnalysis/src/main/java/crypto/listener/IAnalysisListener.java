@@ -12,45 +12,45 @@ import java.util.Collection;
 
 public interface IAnalysisListener {
 
-    void beforeAnalysis();
+	void beforeAnalysis();
 
-    void afterAnalysis();
+	void afterAnalysis();
 
-    void beforeReadingRuleset(String rulesetPath);
+	void beforeReadingRuleset(String rulesetPath);
 
-    void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> ruleset);
+	void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> ruleset);
 
-    void beforeCallGraphConstruction();
+	void beforeCallGraphConstruction();
 
-    void afterCallGraphConstruction(CallGraph callGraph);
+	void afterCallGraphConstruction(CallGraph callGraph);
 
-    void beforeTypestateAnalysis();
+	void beforeTypestateAnalysis();
 
-    void afterTypestateAnalysis();
+	void afterTypestateAnalysis();
 
-    void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
+	void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
 
-    void afterTriggeringBoomerangQuery(ExtractParameterQuery query);
+	void afterTriggeringBoomerangQuery(ExtractParameterQuery query);
 
-    void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds);
+	void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds);
 
-    void onSeedStarted(IAnalysisSeed analysisSeed);
+	void onSeedStarted(IAnalysisSeed analysisSeed);
 
-    void onSeedFinished(IAnalysisSeed analysisSeed);
+	void onSeedFinished(IAnalysisSeed analysisSeed);
 
-    void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed);
+	void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed);
 
-    void onExtractParameterAnalysisTimeout(Val parameter, Statement statement);
+	void onExtractParameterAnalysisTimeout(Val parameter, Statement statement);
 
-    void beforeConstraintsCheck(IAnalysisSeed analysisSeed);
+	void beforeConstraintsCheck(IAnalysisSeed analysisSeed);
 
-    void afterConstraintsCheck(IAnalysisSeed analysisSeed, int violatedConstraints);
+	void afterConstraintsCheck(IAnalysisSeed analysisSeed, int violatedConstraints);
 
-    void beforePredicateCheck();
+	void beforePredicateCheck();
 
-    void afterPredicateCheck();
+	void afterPredicateCheck();
 
-    void onReportedError(IAnalysisSeed analysisSeed, AbstractError error);
+	void onReportedError(IAnalysisSeed analysisSeed, AbstractError error);
 
-    void addProgress(int current, int total);
+	void addProgress(int current, int total);
 }

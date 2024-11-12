@@ -148,7 +148,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @param catchClause The type of the catch-clause.
 	 * @param exception Exception to be caught.
 	 * @return Wheter a catch clause with the given catchClause, would catch
-	 *         the given exception.
+	 *		 the given exception.
 	 */
 	public static boolean isCaughtAs(WrappedClass catchClause, WrappedClass exception) {
 		return catchClause.getType().isSupertypeOf(exception.getName());
@@ -157,7 +157,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	/**
 	 * @param method The method to compare againts.
 	 * @return Wheter the methods represented in this constraint match the given
-	 *         method.
+	 *		 method.
 	 */
 	public boolean isSameMethod(DeclaredMethod method) {
 		// TODO Refactoring

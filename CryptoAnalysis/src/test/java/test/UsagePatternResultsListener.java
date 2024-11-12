@@ -31,145 +31,145 @@ import java.util.Map;
 
 public class UsagePatternResultsListener implements IResultsListener {
 
-    private final Collection<Assertion> assertions;
+	private final Collection<Assertion> assertions;
 
-    public UsagePatternResultsListener(Collection<Assertion> assertions) {
-        this.assertions = assertions;
-    }
+	public UsagePatternResultsListener(Collection<Assertion> assertions) {
+		this.assertions = assertions;
+	}
 
-    @Override
-    public void constructedCallGraph(CallGraph callGraph) {}
+	@Override
+	public void constructedCallGraph(CallGraph callGraph) {}
 
-    @Override
-    public void typestateAnalysisResults(IAnalysisSeed analysisSeed, ForwardBoomerangResults<TransitionFunction> results) {
-        Multimap<Statement, StateResult> expectedTypestateResults = HashMultimap.create();
+	@Override
+	public void typestateAnalysisResults(IAnalysisSeed analysisSeed, ForwardBoomerangResults<TransitionFunction> results) {
+		Multimap<Statement, StateResult> expectedTypestateResults = HashMultimap.create();
 
-        for (Assertion a : assertions) {
-            if (a instanceof StateResult) {
-                StateResult stateResult = (StateResult) a;
-                expectedTypestateResults.put(stateResult.getStmt(), stateResult);
-            }
-        }
+		for (Assertion a : assertions) {
+			if (a instanceof StateResult) {
+				StateResult stateResult = (StateResult) a;
+				expectedTypestateResults.put(stateResult.getStmt(), stateResult);
+			}
+		}
 
-        for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
-            for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : results.asStatementValWeightTable().cellSet()) {
-                Statement expectedStatement = entry.getKey();
-                Collection<Val> expectedVal = entry.getValue().getVal();
+		for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
+			for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell : results.asStatementValWeightTable().cellSet()) {
+				Statement expectedStatement = entry.getKey();
+				Collection<Val> expectedVal = entry.getValue().getVal();
 
-                Statement analysisResultStatement = cell.getRowKey().getStart();
-                Val analysisResultVal = cell.getColumnKey();
+				Statement analysisResultStatement = cell.getRowKey().getStart();
+				Val analysisResultVal = cell.getColumnKey();
 
-                if (!analysisResultStatement.equals(expectedStatement) || !expectedVal.contains(analysisResultVal)) {
-                    continue;
-                }
+				if (!analysisResultStatement.equals(expectedStatement) || !expectedVal.contains(analysisResultVal)) {
+					continue;
+				}
 
-                for (ITransition transition : cell.getValue().values()) {
-                    if (transition.from() == null || transition.to() == null) {
-                        continue;
-                    }
+				for (ITransition transition : cell.getValue().values()) {
+					if (transition.from() == null || transition.to() == null) {
+						continue;
+					}
 
-                    if (transition.from().isInitialState()) {
-                        entry.getValue().computedResults(transition.to());
-                    }
-                }
-            }
-        }
-    }
+					if (transition.from().isInitialState()) {
+						entry.getValue().computedResults(transition.to());
+					}
+				}
+			}
+		}
+	}
 
-    @Override
-    public void extractedBoomerangResults(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
+	@Override
+	public void extractedBoomerangResults(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
 
-    @Override
-    public void collectedValues(IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
-        for (Assertion a : assertions) {
-            if (a instanceof ExtractedValueAssertion) {
-                ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;
-                assertion.computedValues(collectedValues);
-            }
-        }
-    }
+	@Override
+	public void collectedValues(IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
+		for (Assertion a : assertions) {
+			if (a instanceof ExtractedValueAssertion) {
+				ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;
+				assertion.computedValues(collectedValues);
+			}
+		}
+	}
 
-    @Override
-    public void checkedConstraints(IAnalysisSeed analysisSeed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {}
+	@Override
+	public void checkedConstraints(IAnalysisSeed analysisSeed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {}
 
-    @Override
-    public void generatedPredicate(IAnalysisSeed fromSeed, EnsuredCrySLPredicate predicate, IAnalysisSeed toSeed, Statement statement) {
-        for (Assertion a : assertions) {
-            if (a instanceof HasGeneratedPredicateAssertion) {
-                HasGeneratedPredicateAssertion assertion = (HasGeneratedPredicateAssertion) a;
+	@Override
+	public void generatedPredicate(IAnalysisSeed fromSeed, EnsuredCrySLPredicate predicate, IAnalysisSeed toSeed, Statement statement) {
+		for (Assertion a : assertions) {
+			if (a instanceof HasGeneratedPredicateAssertion) {
+				HasGeneratedPredicateAssertion assertion = (HasGeneratedPredicateAssertion) a;
 
-                // TODO from statement
-                Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (assertion.getStatement().equals(statement)) {
-                    assertion.reported(values, predicate);
-                }
-            }
+				// TODO from statement
+				Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				if (assertion.getStatement().equals(statement)) {
+					assertion.reported(values, predicate);
+				}
+			}
 
-            if (a instanceof HasNotGeneratedPredicateAssertion) {
-                HasNotGeneratedPredicateAssertion assertion = (HasNotGeneratedPredicateAssertion) a;
+			if (a instanceof HasNotGeneratedPredicateAssertion) {
+				HasNotGeneratedPredicateAssertion assertion = (HasNotGeneratedPredicateAssertion) a;
 
-                // TODO from statement
-                Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (assertion.getStatement().equals(statement)) {
-                    assertion.reported(values, predicate);
-                }
-            }
+				// TODO from statement
+				Collection<Val> values = fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				if (assertion.getStatement().equals(statement)) {
+					assertion.reported(values, predicate);
+				}
+			}
 
-            if (a instanceof HasEnsuredPredicateAssertion) {
-                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
+			if (a instanceof HasEnsuredPredicateAssertion) {
+				HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
 
-                // TODO from statement
-                Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (statement.equals(assertion.getStmt())) {
-                    assertion.reported(values, predicate);
-                }
-            }
+				// TODO from statement
+				Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				if (statement.equals(assertion.getStmt())) {
+					assertion.reported(values, predicate);
+				}
+			}
 
-            if (a instanceof NotHasEnsuredPredicateAssertion) {
-                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
+			if (a instanceof NotHasEnsuredPredicateAssertion) {
+				NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
 
-                // TODO from statement
-                Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (statement.equals(assertion.getStmt())) {
-                    assertion.reported(values, predicate);
-                }
-            }
-        }
-    }
+				// TODO from statement
+				Collection<Val> values = toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				if (statement.equals(assertion.getStmt())) {
+					assertion.reported(values, predicate);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
-        for (Assertion a : assertions) {
-            if (a instanceof HasEnsuredPredicateAssertion) {
-                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
+	@Override
+	public void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+		for (Assertion a : assertions) {
+			if (a instanceof HasEnsuredPredicateAssertion) {
+				HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
 
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
+				if (!predicates.containsKey(assertion.getStmt())) {
+					continue;
+				}
 
-                Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
+				Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
 
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
-                    assertion.reported(values, ensPred.getKey());
-                }
-            }
+				for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+					assertion.reported(values, ensPred.getKey());
+				}
+			}
 
-            if (a instanceof NotHasEnsuredPredicateAssertion) {
-                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
+			if (a instanceof NotHasEnsuredPredicateAssertion) {
+				NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
 
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
+				if (!predicates.containsKey(assertion.getStmt())) {
+					continue;
+				}
 
-                Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
+				Collection<Val> values = seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+				Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds = predicates.get(assertion.getStmt());
 
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
-                    assertion.reported(values, ensPred.getKey());
-                }
-            }
-        }
-    }
+				for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+					assertion.reported(values, ensPred.getKey());
+				}
+			}
+		}
+	}
 
 }

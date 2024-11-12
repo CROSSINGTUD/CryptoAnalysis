@@ -21,107 +21,107 @@ import java.util.Optional;
 
 public abstract class Transformation {
 
-    private final ExtractParameterDefinition definition;
+	private final ExtractParameterDefinition definition;
 
-    public Transformation(ExtractParameterDefinition definition) {
-        this.definition = definition;
-    }
+	public Transformation(ExtractParameterDefinition definition) {
+		this.definition = definition;
+	}
 
-    public abstract Optional<AllocVal> evaluateExpression(Statement statement);
+	public abstract Optional<AllocVal> evaluateExpression(Statement statement);
 
-    protected Optional<String> extractStringFromVal(Statement statement, Val val) {
-        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
+	protected Optional<String> extractStringFromVal(Statement statement, Val val) {
+		Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
 
-        if (forwardQuery.isEmpty()) {
-            return Optional.empty();
-        }
+		if (forwardQuery.isEmpty()) {
+			return Optional.empty();
+		}
 
-        return extractStringFromBoomerangResult(forwardQuery.get());
-    }
+		return extractStringFromBoomerangResult(forwardQuery.get());
+	}
 
-    protected Optional<String> extractStringFromBoomerangResult(ForwardQuery query) {
-        Statement statement = query.cfgEdge().getStart();
+	protected Optional<String> extractStringFromBoomerangResult(ForwardQuery query) {
+		Statement statement = query.cfgEdge().getStart();
 
-        if (!statement.isAssign()) {
-            return Optional.empty();
-        }
+		if (!statement.isAssign()) {
+			return Optional.empty();
+		}
 
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isStringConstant()) {
-            return Optional.empty();
-        }
+		Val rightOp = statement.getRightOp();
+		if (!rightOp.isStringConstant()) {
+			return Optional.empty();
+		}
 
-        return Optional.of(rightOp.getStringValue());
-    }
+		return Optional.of(rightOp.getStringValue());
+	}
 
-    protected Optional<Long> extractLongFromVal(Statement statement, Val val) {
-        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
+	protected Optional<Long> extractLongFromVal(Statement statement, Val val) {
+		Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
 
-        if (forwardQuery.isEmpty()) {
-            return Optional.empty();
-        }
+		if (forwardQuery.isEmpty()) {
+			return Optional.empty();
+		}
 
-        return extractLongFromBoomerangResult(forwardQuery.get());
-    }
+		return extractLongFromBoomerangResult(forwardQuery.get());
+	}
 
-    protected Optional<Long> extractLongFromBoomerangResult(ForwardQuery query) {
-        Statement statement = query.cfgEdge().getStart();
+	protected Optional<Long> extractLongFromBoomerangResult(ForwardQuery query) {
+		Statement statement = query.cfgEdge().getStart();
 
-        if (!statement.isAssign()) {
-            return Optional.empty();
-        }
+		if (!statement.isAssign()) {
+			return Optional.empty();
+		}
 
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isLongConstant()) {
-            return Optional.empty();
-        }
+		Val rightOp = statement.getRightOp();
+		if (!rightOp.isLongConstant()) {
+			return Optional.empty();
+		}
 
-        return Optional.of(rightOp.getLongValue());
-    }
+		return Optional.of(rightOp.getLongValue());
+	}
 
-    protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
-        Collection<ForwardQuery> extractedValues = new HashSet<>();
+	protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
+		Collection<ForwardQuery> extractedValues = new HashSet<>();
 
-        Collection<Statement> preds = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
-        for (Statement pred : preds) {
-            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
+		Collection<Statement> preds = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+		for (Statement pred : preds) {
+			ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-            ExtractParameterOptions options = new ExtractParameterOptions(definition);
-            BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
-            Boomerang boomerang = new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
+			ExtractParameterOptions options = new ExtractParameterOptions(definition);
+			BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
+			Boomerang boomerang = new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
 
-            BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
-            extractedValues.addAll(results.getAllocationSites().keySet());
-        }
+			BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
+			extractedValues.addAll(results.getAllocationSites().keySet());
+		}
 
-        // If we have multiple allocation sites, then we cannot correctly evaluate an expression
-        if (extractedValues.size() != 1) {
-            return Optional.empty();
-        }
+		// If we have multiple allocation sites, then we cannot correctly evaluate an expression
+		if (extractedValues.size() != 1) {
+			return Optional.empty();
+		}
 
-        ForwardQuery forwardQuery = extractedValues.stream().iterator().next();
-        return Optional.of(forwardQuery);
-    }
+		ForwardQuery forwardQuery = extractedValues.stream().iterator().next();
+		return Optional.of(forwardQuery);
+	}
 
-    protected AllocVal createTransformedAllocVal(String string, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new StringVal(string, statement.getMethod());
+	protected AllocVal createTransformedAllocVal(String string, Statement statement) {
+		Val leftOp = statement.getLeftOp();
+		Val resultOp = new StringVal(string, statement.getMethod());
 
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
+		return new TransformedAllocVal(leftOp, statement, resultOp);
+	}
 
-    protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new IntVal(intValue, statement.getMethod());
+	protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
+		Val leftOp = statement.getLeftOp();
+		Val resultOp = new IntVal(intValue, statement.getMethod());
 
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
+		return new TransformedAllocVal(leftOp, statement, resultOp);
+	}
 
-    protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new LongVal(longValue, statement.getMethod());
+	protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
+		Val leftOp = statement.getLeftOp();
+		Val resultOp = new LongVal(longValue, statement.getMethod());
 
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
+		return new TransformedAllocVal(leftOp, statement, resultOp);
+	}
 
 }

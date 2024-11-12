@@ -20,85 +20,85 @@ import java.util.Map;
 
 public class SeedGenerator {
 
-    private final CryptoScanner scanner;
-    private final TypestateAnalysis typestateAnalysis;
+	private final CryptoScanner scanner;
+	private final TypestateAnalysis typestateAnalysis;
 
-    public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
-        this.scanner = scanner;
+	public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
+		this.scanner = scanner;
 
-        TypestateDefinition definition = new TypestateDefinition() {
-            @Override
-            public Collection<CrySLRule> getRuleset() {
-                return rules;
-            }
+		TypestateDefinition definition = new TypestateDefinition() {
+			@Override
+			public Collection<CrySLRule> getRuleset() {
+				return rules;
+			}
 
-            @Override
-            public CallGraph getCallGraph() {
-                return scanner.getCallGraph();
-            }
+			@Override
+			public CallGraph getCallGraph() {
+				return scanner.getCallGraph();
+			}
 
-            @Override
-            public DataFlowScope getDataFlowScope() {
-                return scanner.getDataFlowScope();
-            }
+			@Override
+			public DataFlowScope getDataFlowScope() {
+				return scanner.getDataFlowScope();
+			}
 
-            @Override
-            public Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return scanner.debugger(idealSeedSolver.getSeed());
-            }
+			@Override
+			public Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
+				return scanner.debugger(idealSeedSolver.getSeed());
+			}
 
-            @Override
-            public int getTimeout() {
-                return scanner.getTimeout();
-            }
-        };
+			@Override
+			public int getTimeout() {
+				return scanner.getTimeout();
+			}
+		};
 
-        typestateAnalysis = new TypestateAnalysis(definition);
-    }
+		typestateAnalysis = new TypestateAnalysis(definition);
+	}
 
-    public Collection<IAnalysisSeed> computeSeeds() {
-        scanner.getAnalysisReporter().beforeTypestateAnalysis();
-        typestateAnalysis.runTypestateAnalysis();
-        scanner.getAnalysisReporter().afterTypestateAnalysis();
+	public Collection<IAnalysisSeed> computeSeeds() {
+		scanner.getAnalysisReporter().beforeTypestateAnalysis();
+		typestateAnalysis.runTypestateAnalysis();
+		scanner.getAnalysisReporter().afterTypestateAnalysis();
 
-        return extractSeedsFromBoomerangResults();
-    }
+		return extractSeedsFromBoomerangResults();
+	}
 
-    private Collection<IAnalysisSeed> extractSeedsFromBoomerangResults() {
-        Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results = typestateAnalysis.getResults();
+	private Collection<IAnalysisSeed> extractSeedsFromBoomerangResults() {
+		Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results = typestateAnalysis.getResults();
 
-        if (results == null) {
-            return Collections.emptySet();
-        }
+		if (results == null) {
+			return Collections.emptySet();
+		}
 
-        Collection<IAnalysisSeed> seeds = new HashSet<>();
+		Collection<IAnalysisSeed> seeds = new HashSet<>();
 
-        for (Map.Entry<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> entry : results.entrySet()) {
-            if (entry.getValue() == null) {
-                continue;
-            }
+		for (Map.Entry<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> entry : results.entrySet()) {
+			if (entry.getValue() == null) {
+				continue;
+			}
 
-            ForwardSeedQuery forwardQuery = entry.getKey();
-            Statement stmt = forwardQuery.cfgEdge().getStart();
-            Val fact = forwardQuery.var();
+			ForwardSeedQuery forwardQuery = entry.getKey();
+			Statement stmt = forwardQuery.cfgEdge().getStart();
+			Val fact = forwardQuery.var();
 
-            IAnalysisSeed seed;
-            if (forwardQuery.hasSpecification()) {
-                CrySLRule rule = forwardQuery.getRule();
+			IAnalysisSeed seed;
+			if (forwardQuery.hasSpecification()) {
+				CrySLRule rule = forwardQuery.getRule();
 
-                seed = new AnalysisSeedWithSpecification(scanner, stmt, fact, entry.getValue(), rule);
-            } else {
-                seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, entry.getValue());
-            }
-            seeds.add(seed);
+				seed = new AnalysisSeedWithSpecification(scanner, stmt, fact, entry.getValue(), rule);
+			} else {
+				seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, entry.getValue());
+			}
+			seeds.add(seed);
 
-            if (entry.getValue().isTimedout()) {
-                scanner.getAnalysisReporter().onTypestateAnalysisTimeout(seed);
-            }
+			if (entry.getValue().isTimedout()) {
+				scanner.getAnalysisReporter().onTypestateAnalysisTimeout(seed);
+			}
 
-            scanner.getAnalysisReporter().typestateAnalysisResults(seed, entry.getValue());
-        }
+			scanner.getAnalysisReporter().typestateAnalysisResults(seed, entry.getValue());
+		}
 
-        return seeds;
-    }
+		return seeds;
+	}
 }
