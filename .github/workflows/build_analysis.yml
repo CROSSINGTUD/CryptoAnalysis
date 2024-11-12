@@ -9,6 +9,10 @@ jobs:
   # This name has to be equal to the one in the merge queue
   build-and-test-analysis:
     runs-on: ubuntu-latest
+
+    # Do not run this build in the merge queue
+    if: github.event_name != 'merge_group'
+    
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
