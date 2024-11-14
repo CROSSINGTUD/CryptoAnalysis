@@ -14,12 +14,12 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       # Sets up Java version
-      - name: Set up Java
+      - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-package: jdk
-          java-version: $JAVA_VERSION
+          java-version: ${{ env.JAVA_VERSION }}
       # Restores Maven dependecies
       - name: Restore local Maven repository
         uses: actions/cache@v4
@@ -38,12 +38,12 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       # Sets up Java version
-      - name: Set up Java
+      - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-package: jdk
-          java-version: $JAVA_VERSION
+          java-version: ${{ env.JAVA_VERSION }}
       # Restores Maven dependecies
       - name: Restore local Maven repository
         uses: actions/cache@v4
