@@ -1,22 +1,26 @@
 package tests.endoflifecycle;
 
-import java.security.GeneralSecurityException;
+import org.junit.Test;
+import test.TestConstants;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.security.auth.DestroyFailedException;
-
-import org.junit.Test;
-
-import crypto.analysis.CrySLRulesetSelector.Ruleset;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
+import java.security.GeneralSecurityException;
 
 /**
  * Created by johannesspath on 24.12.17.
  */
 public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
+
+	@Override
+	protected String getRulesetPath() {
+		return TestConstants.JCA_RULESET_PATH;
+	}
+
 	@Test
 	public void missingDoFinalCall() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -28,21 +32,17 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 	}
 
 	@Test
-	public void missingGerateKey() throws GeneralSecurityException {
+	public void missingGenerateKey() throws GeneralSecurityException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		keygen.init(128);
 		Assertions.missingTypestateChange();
 	}
 
 	@Test
-	public void missingGerateKeyCatched() {
-		try {
-			KeyGenerator keygen = KeyGenerator.getInstance("AES");
-			keygen.init(128);
-			Assertions.missingTypestateChange();
-		} catch (Exception e) {
-
-		}
+	public void missingGenerateKeyCaught() throws GeneralSecurityException {
+		KeyGenerator keygen = KeyGenerator.getInstance("AES");
+		keygen.init(128);
+		Assertions.missingTypestateChange();
 	}
 
 	@Test
@@ -71,6 +71,7 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 		key.destroy();
 	}
 
+	// TODO Boomerang Error
 	@Test
 	public void missingDoFinalCall5() throws GeneralSecurityException, DestroyFailedException {
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
@@ -87,12 +88,7 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
 		key.destroy();
 	}
 
-	private class Container {
+	private static class Container {
 		Cipher c;
-	}
-
-	@Override
-	protected Ruleset getRuleSet() {
-		return Ruleset.JavaCryptographicArchitecture;
 	}
 }

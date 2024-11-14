@@ -1,21 +1,19 @@
 package crypto.analysis.errors;
 
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import boomerang.scene.Statement;
+import crypto.analysis.IAnalysisSeed;
+import crypto.rules.ISLConstraint;
 import crypto.rules.CrySLRule;
+
+import java.util.Arrays;
 
 public class ImpreciseValueExtractionError extends AbstractError {
 
-	private ISLConstraint violatedConstraint;
+	private final ISLConstraint violatedConstraint;
 
-	public ImpreciseValueExtractionError(ISLConstraint violatedCons, Statement errorLocation, CrySLRule rule) {
-		super(errorLocation, rule);
-		this.violatedConstraint = violatedCons;
-	}
-
-	@Override
-	public void accept(ErrorVisitor visitor) {
-		visitor.visit(this);
+	public ImpreciseValueExtractionError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, ISLConstraint constraint) {
+		super(seed, errorStmt, rule);
+		this.violatedConstraint = constraint;
 	}
 
 	public ISLConstraint getViolatedConstraint() {
@@ -24,35 +22,38 @@ public class ImpreciseValueExtractionError extends AbstractError {
 
 	@Override
 	public String toErrorMarkerString() {
-		StringBuilder msg = new StringBuilder("Constraint ");
-		msg.append(violatedConstraint);
-		msg.append(" could not be evaluted due to insufficient information.");
-		return msg.toString();
+        return "Constraint " +
+				violatedConstraint +
+				" could not be evaluated due to insufficient information.";
 	}
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((violatedConstraint == null) ? 0 : violatedConstraint.hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				violatedConstraint
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ImpreciseValueExtractionError other = (ImpreciseValueExtractionError) obj;
 		if (violatedConstraint == null) {
-			if (other.violatedConstraint != null)
-				return false;
-		} else if (!violatedConstraint.equals(other.violatedConstraint))
+			if (other.violatedConstraint != null) return false;
+		} else if (!violatedConstraint.equals(other.violatedConstraint)) {
 			return false;
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ImpreciseValueExtractionError: " + toErrorMarkerString();
 	}
 
 }

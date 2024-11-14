@@ -1,41 +1,36 @@
 package crypto.analysis.errors;
 
-import java.util.Collection;
-import java.util.Set;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
-
-import boomerang.jimple.Statement;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Statement;
+import crypto.analysis.IAnalysisSeed;
+import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-import soot.SootMethod;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class ForbiddenMethodError extends AbstractError {
 
-	private Collection<SootMethod> alternatives;
-	private SootMethod calledMethod;
-	private Set<String> alternativesSet = Sets.newHashSet();
+	private final DeclaredMethod calledMethod;
+	private final Collection<CrySLMethod> alternatives;
 
-	public ForbiddenMethodError(Statement errorLocation, CrySLRule rule, SootMethod calledMethod,
-			Collection<SootMethod> collection) {
-		super(errorLocation, rule);
-		this.calledMethod = calledMethod;
-		this.alternatives = collection;
-		
-		for (SootMethod method : alternatives) {
-			this.alternativesSet.add(method.getSignature());
-		}	
+	public ForbiddenMethodError(IAnalysisSeed seed, Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod) {
+		this(seed, errorLocation, rule, calledMethod, new HashSet<>());
 	}
 
-	public Collection<SootMethod> getAlternatives() {
+	public ForbiddenMethodError(IAnalysisSeed seed, Statement errorLocation, CrySLRule rule, DeclaredMethod calledMethod, Collection<CrySLMethod> alternatives) {
+		super(seed, errorLocation, rule);
+
+		this.calledMethod = calledMethod;
+		this.alternatives = alternatives;
+	}
+
+	public Collection<CrySLMethod> getAlternatives() {
 		return alternatives;
 	}
 
-	public void accept(ErrorVisitor visitor) {
-		visitor.visit(this);
-	}
-
-	public SootMethod getCalledMethod() {
+	public DeclaredMethod getCalledMethod() {
 		return calledMethod;
 	}
 
@@ -43,49 +38,51 @@ public class ForbiddenMethodError extends AbstractError {
 	public String toErrorMarkerString() {
 		final StringBuilder msg = new StringBuilder();
 		msg.append("Detected call to forbidden method ");
-		msg.append(getCalledMethod().getSubSignature());
-		msg.append(" of class " + getCalledMethod().getDeclaringClass());
+		msg.append(getCalledMethod().getSignature());
+		msg.append(" of class ");
+		msg.append(getCalledMethod().getDeclaringClass());
+
 		if (!getAlternatives().isEmpty()) {
-			msg.append(". Instead, call method ");
-			Collection<SootMethod> subSignatures = getAlternatives();
-			msg.append(Joiner.on(", ").join(subSignatures));
-			msg.append(".");
+			msg.append(". Instead, call one of the methods ");
+			String altMethods = formatMethodNames(alternatives);
+			msg.append(altMethods);
 		}
 		return msg.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((alternativesSet == null) ? 0 : alternativesSet.hashCode());
-		result = prime * result + ((calledMethod == null) ? 0 : calledMethod.getSignature().hashCode());
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				calledMethod,
+				alternatives
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
 		ForbiddenMethodError other = (ForbiddenMethodError) obj;
-		if (alternativesSet == null) {
-			if (other.alternativesSet != null)
-				return false;
-		} else if (!alternativesSet.equals(other.alternativesSet))
-			return false;
 		if (calledMethod == null) {
-			if (other.calledMethod != null)
-				return false;
-		} else if (!calledMethod.getSignature().equals(other.calledMethod.getSignature()))
+			if (other.getCalledMethod() != null) return false;
+		} else if (!calledMethod.equals(other.getCalledMethod())) {
 			return false;
+		}
+
+		if (alternatives == null) {
+			if (other.getAlternatives() != null) return false;
+		} else if (!alternatives.equals(other.getAlternatives())) {
+			return false;
+		}
+
 		return true;
 	}
 
-
-	
-
+	@Override
+	public String toString() {
+		return "ForbiddenMethodError: " + toErrorMarkerString();
+	}
 }

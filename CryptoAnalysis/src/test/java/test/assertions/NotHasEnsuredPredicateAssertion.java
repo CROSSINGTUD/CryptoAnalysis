@@ -1,23 +1,29 @@
 package test.assertions;
 
-import boomerang.jimple.Val;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
-import soot.jimple.Stmt;
+import crypto.analysis.HiddenPredicate;
 import test.Assertion;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class NotHasEnsuredPredicateAssertion implements Assertion {
 
-	private Stmt stmt;
-	private Val val;
+	private final Statement stmt;
+	private final Collection<Val> val;
+	private final String predName;
 	private boolean imprecise = false;
 
-	public NotHasEnsuredPredicateAssertion(Stmt stmt, Val val) {
+	public NotHasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val) {
+		this(stmt, val, null);
+	}
+
+	public NotHasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val, String predName) {
 		this.stmt = stmt;
 		this.val = val;
-	}
-	
-	public Val getAccessGraph() {
-		return val;
+		this.predName = predName;
 	}
 
 	@Override
@@ -31,18 +37,28 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
 	}
 
 
-	public Stmt getStmt() {
+	public Statement getStmt() {
 		return stmt;
 	}
 
 	public void reported(Val value, EnsuredCrySLPredicate pred) {
-		if(value.equals(val)){
+		if (!val.contains(value) || pred instanceof HiddenPredicate) {
+			return;
+		}
+
+		if (predName == null || pred.getPredicate().getPredName().equals(predName)) {
 			imprecise = true;
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "Did not expect a predicate for "+ val +" @ " + stmt;  
+		Collection<String> aliases = val.stream().map(Val::getVariableName).collect(Collectors.toList());
+
+		if (predName == null) {
+			return "Did not expect a predicate for " + aliases + " @ " + stmt;
+		} else {
+			return "Did not expect '" + predName + "' ensured on " + aliases + " @ " + stmt;
+		}
 	}
 }

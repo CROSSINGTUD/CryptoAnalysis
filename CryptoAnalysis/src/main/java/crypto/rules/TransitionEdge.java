@@ -1,16 +1,14 @@
 package crypto.rules;
-import java.util.List;
 
-import crypto.interfaces.Transition;
+import java.util.Collection;
 
-public class TransitionEdge implements Transition<StateNode>, java.io.Serializable {
+public class TransitionEdge implements Transition<StateNode> {
 
-	private static final long serialVersionUID = 1L;
-	private StateNode left = null;
-	private StateNode right = null;
-	private List<CrySLMethod> methods = null;
+	private final StateNode left;
+	private final StateNode right;
+	private final Collection<CrySLMethod> methods;
 
-	public TransitionEdge(List<CrySLMethod> _methods, StateNode _left, StateNode _right) {
+	public TransitionEdge(Collection<CrySLMethod> _methods, StateNode _left, StateNode _right) {
 		left = _left;
 		right = _right;
 		methods = _methods;
@@ -24,19 +22,18 @@ public class TransitionEdge implements Transition<StateNode>, java.io.Serializab
 		return right;
 	}
 
-	public List<CrySLMethod> getLabel() {
+	public Collection<CrySLMethod> getLabel() {
 		return methods;
 	}
 
+	@Override
 	public String toString() {
-		StringBuilder edgeSB = new StringBuilder();
-		edgeSB.append("Left: ");
-		edgeSB.append(this.left.getName());
-		edgeSB.append(" ====");
-		edgeSB.append(methods);
-		edgeSB.append("====> Right:");
-		edgeSB.append(this.right.getName());
-		return edgeSB.toString();
+        return "Left: " +
+				this.left.getName() +
+				" ====" +
+				methods +
+				"====> Right:" +
+				this.right.getName();
 	}
 
 	public StateNode from() {

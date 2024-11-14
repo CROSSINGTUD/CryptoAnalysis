@@ -1,0 +1,87 @@
+name: Deploy and Release CryptoAnalysis
+
+on: [workflow_dispatch]
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: Deploy
+    name: CryptoAnalysis Deployment
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-package: 'jdk'
+          java-version: '11'
+          server-id: 'ossrh' # must match the serverId configured for the nexus-staging-maven-plugin
+          server-username: OSSRH_USERNAME # Env var that holds your OSSRH user name
+          server-password: OSSRH_PASSWORD # Env var that holds your OSSRH user pw
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }} # Substituted with the value stored in the referenced secret
+          gpg-passphrase: SIGN_KEY_PASS # Env var that holds the key's passphrase
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.6.3
+
+      - name: Build & Deploy CryptoAnalysis
+        run: mvn -B -U clean deploy -Pdeployment -DskipTests
+        env:
+          SIGN_KEY_PASS: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
+          OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
+          OSSRH_PASSWORD: ${{ secrets.SONATYPE_PW }}
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Extract Version from pom.xml
+        id: extract_version
+        run: |
+          VERSION=$(sed -n 's/.*<version>\(.*\)<\/version>.*/\1/p' pom.xml | head -n 1)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Generate Release Notes
+        id: generate_notes
+        run: |
+          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
+          git log $LATEST_TAG..HEAD --merges --pretty=format:"%h" > merged_prs.txt
+
+          RELEASE_NOTES="Release Notes:\n\n"
+          
+          while IFS= read -r commit_hash; do
+            if git log -1 --pretty=format:"%s" $commit_hash | grep -iq "dependabot"; then
+              continue
+            fi
+
+            PR_NUMBER=$(git log -1 --pretty=format:"%s" $commit_hash | grep -oE "([Pp][Rr]|pull request) #[0-9]+" | grep -oE "[0-9]+" | head -n 1)
+
+            FIRST_COMMENT=$(gh pr view $PR_NUMBER --json body --jq '.body')
+
+            if [ -n "$FIRST_COMMENT" ]; then
+              RELEASE_NOTES+="- PR #$PR_NUMBER: $FIRST_COMMENT\n"
+            fi
+          done < merged_prs.txt
+
+          echo -e "$RELEASE_NOTES" > release_notes.txt
+          cat release_notes.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Zip JavaCryptographicArchitecture folder
+        run: |
+          echo "Zipping the JavaCryptographicArchitecture folder..."
+          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$VERSION" ./apps/* "CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar" "JavaCryptographicArchitecture.zip" \
+            --title "$VERSION" --notes-file release_notes.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

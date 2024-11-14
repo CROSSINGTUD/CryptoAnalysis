@@ -1,25 +1,19 @@
 package crypto.rules;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
 
 public class CrySLCondPredicate extends CrySLPredicate {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private final Set<StateNode> conditionalNodes;
+	private final Collection<StateNode> conditionalNodes;
 
 	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> parameters,
-			Boolean negated, Set<StateNode> nodes) {
+			Boolean negated, Collection<StateNode> nodes) {
 		this(baseObj, name, parameters, negated, nodes, null);
 	}
 
 	public CrySLCondPredicate(ICrySLPredicateParameter baseObj, String name, List<ICrySLPredicateParameter> parameters,
-			Boolean negated, Set<StateNode> nodes, ISLConstraint constraint) {
+			Boolean negated, Collection<StateNode> nodes, ISLConstraint constraint) {
 		super(baseObj, name, parameters, negated, constraint);
 		this.conditionalNodes = nodes;
 	}
@@ -27,7 +21,7 @@ public class CrySLCondPredicate extends CrySLPredicate {
 	/**
 	 * @return the conditionalMethods
 	 */
-	public Set<StateNode> getConditionalMethods() {
+	public Collection<StateNode> getConditionalMethods() {
 		return conditionalNodes;
 	}
 

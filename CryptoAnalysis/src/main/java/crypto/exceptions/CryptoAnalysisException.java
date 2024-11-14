@@ -5,7 +5,7 @@ package crypto.exceptions;
  * to the CryptoAnalysis tool.
  *
  */
-public class CryptoAnalysisException extends Exception {
+public class CryptoAnalysisException extends RuntimeException {
 	
 	private static final long serialVersionUID = -4977113204413613078L;
 

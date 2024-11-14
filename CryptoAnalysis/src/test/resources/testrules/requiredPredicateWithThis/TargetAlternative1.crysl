@@ -1,0 +1,4 @@
+SPEC tests.error.predicate.requiredpredicateswiththis.TargetAlternative1
+
+REQUIRES
+    generatedAlternative1[this];

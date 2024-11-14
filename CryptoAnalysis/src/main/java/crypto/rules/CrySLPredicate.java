@@ -1,33 +1,24 @@
 package crypto.rules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
 
 public class CrySLPredicate extends CrySLLiteral {
 
-	private static final long serialVersionUID = 1L;
 	protected final ICrySLPredicateParameter baseObject;
 	protected final String predName;
 	protected final List<ICrySLPredicateParameter> parameters;
 	protected final boolean negated;
-	protected final Optional<ISLConstraint> constraint;
+	protected final ISLConstraint constraint;
 	
 	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated) {
-		this(baseObject, name, parameters, negated, Optional.empty());
+		this(baseObject, name, parameters, negated, null);
 	}
 	
 	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, ISLConstraint constraint) {
-		this(baseObject, name, parameters, negated, Optional.ofNullable(constraint));
-	}
-
-	public CrySLPredicate(ICrySLPredicateParameter baseObject, String name, List<ICrySLPredicateParameter> parameters, Boolean negated, Optional<ISLConstraint> constraint) {
 		this.baseObject = baseObject;
 		this.predName = name;
 		this.parameters = parameters;
@@ -48,18 +39,35 @@ public class CrySLPredicate extends CrySLLiteral {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
+		}
 
-		if (!(obj instanceof CrySLPredicate))
+		if (!(obj instanceof CrySLPredicate)) {
 			return false;
+		}
 
 		CrySLPredicate other = (CrySLPredicate) obj;
-		if(!getPredName().equals(other.getPredName()))
-				return false;
+		if (baseObject == null) {
+			if (other.getBaseObject() != null) return false;
+		} else if (!baseObject.equals(other.getBaseObject())) {
+			return false;
+		}
 
-		return true;
-	}
+		if (predName == null) {
+			if (other.getPredName() != null) return false;
+		} else if (!predName.equals(other.getPredName())) {
+			return false;
+		}
+
+		if (parameters == null) {
+			if (other.getParameters() != null) return false;
+		} else if (parameters.size() != other.getParameters().size()) {
+			return false;
+		}
+
+		return negated == other.isNegated();
+    }
 
 	/**
 	 * @return the baseObject
@@ -79,7 +87,7 @@ public class CrySLPredicate extends CrySLLiteral {
 	 * @return the optConstraint
 	 */
 	public Optional<ISLConstraint> getConstraint() {
-		return this.constraint;
+		return Optional.ofNullable(constraint);
 	}
 
 	/**
@@ -95,14 +103,15 @@ public class CrySLPredicate extends CrySLLiteral {
 	public Boolean isNegated() {
 		return negated;
 	}
-	
+
+	@Override
 	public String toString() {
 		StringBuilder predSB = new StringBuilder();
 		if (negated)
 			predSB.append("!");
 		predSB.append(predName);
 		predSB.append("(");
-		predSB.append(parameters.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
+		predSB.append(parameters.stream().map(Object::toString).collect(Collectors.joining(", ")));
 		predSB.append(")");
 		
 		
@@ -110,28 +119,24 @@ public class CrySLPredicate extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<String>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		if (Arrays.asList(new String[] {"neverTypeOf", "instanceOf"}).contains(predName)) {
 			varNames.add(parameters.get(0).getName());
 		} else {
-		for (ICrySLPredicateParameter var : parameters) {
-			if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
-				varNames.add(var.getName());
+			for (ICrySLPredicateParameter var : parameters) {
+				if (!("_".equals(var.getName()) || "this".equals(var.getName()) || var instanceof CrySLMethod)) {
+					varNames.add(var.getName());
+				}
 			}
 		}
-		}
-		if(getBaseObject() != null)
+		if (getBaseObject() != null)
 			varNames.add(getBaseObject().getName());
 		return varNames;
 	}
 	
-	public CrySLPredicate setNegated(boolean negated){
-		if (negated == this.negated) {
-			return this;
-		} else {
-			return new CrySLPredicate(baseObject, predName, parameters, negated);
-		}
+	public CrySLPredicate invertNegation(){
+		return new CrySLPredicate(baseObject, predName, parameters, !negated);
 	}
 
 	@Override

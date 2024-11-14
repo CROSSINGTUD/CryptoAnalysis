@@ -1,190 +1,135 @@
 package crypto.extractparameter;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
 import boomerang.ForwardQuery;
-import boomerang.callgraph.ObservableICFG;
-import boomerang.jimple.AllocVal;
-import boomerang.jimple.Statement;
-import boomerang.jimple.Val;
-import boomerang.results.BackwardBoomerangResults;
-import crypto.analysis.CryptoScanner;
-import crypto.boomerang.CogniCryptIntAndStringBoomerangOptions;
+import boomerang.scene.AllocVal;
+import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
+import boomerang.scene.Val;
+import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.transformation.TransformedAllocVal;
 import crypto.rules.CrySLMethod;
-import crypto.typestate.LabeledMatcherTransition;
-import crypto.typestate.SootBasedStateMachineGraph;
-import heros.utilities.DefaultValueMap;
-import soot.Local;
-import soot.Scene;
-import soot.SootMethod;
-import soot.Type;
-import soot.Unit;
-import soot.Value;
-import soot.jimple.Stmt;
-import sync.pds.solver.nodes.Node;
-import typestate.finiteautomata.MatcherTransition;
-import wpds.impl.Weight.NoWeight;
+import crypto.utils.MatcherUtils;
+
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 
 public class ExtractParameterAnalysis {
 
-	private Map<Statement, SootMethod> allCallsOnObject;
-	private Collection<LabeledMatcherTransition> events = Sets.newHashSet();
-	private CryptoScanner cryptoScanner;
-	private Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues = HashMultimap.create();
-	private Collection<CallSiteWithParamIndex> querySites = Sets.newHashSet();
-	private Multimap<CallSiteWithParamIndex, Type> propagatedTypes = HashMultimap.create();
-	private DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery> additionalBoomerangQuery = new DefaultValueMap<AdditionalBoomerangQuery, AdditionalBoomerangQuery>() {
-		@Override
-		protected AdditionalBoomerangQuery createItem(AdditionalBoomerangQuery key) {
-			return key;
-		}
-	};
+    private final Collection<ExtractParameterQuery> queries;
+    private final Collection<CallSiteWithExtractedValue> collectedValues;
+    private final ExtractParameterDefinition definition;
 
-	public ExtractParameterAnalysis(CryptoScanner cryptoScanner, Map<Statement, SootMethod> allCallsOnObject,
-			SootBasedStateMachineGraph fsm) {
-		this.cryptoScanner = cryptoScanner;
-		this.allCallsOnObject = allCallsOnObject;
-		for (MatcherTransition m : fsm.getAllTransitions()) {
-			if (m instanceof LabeledMatcherTransition) {
-				this.events.add((LabeledMatcherTransition) m);
-			}
-		}
-	}
+    public ExtractParameterAnalysis(ExtractParameterDefinition definition) {
+        this.definition = definition;
 
-	public void run() {
-		for (Map.Entry<Statement,SootMethod> stmt : allCallsOnObject.entrySet()) {
-			if (!stmt.getKey().isCallsite())
-				continue;
+        queries = new HashSet<>();
+        collectedValues = new HashSet<>();
+    }
 
-			for (LabeledMatcherTransition e : events) {
-				e.getMatching(stmt.getValue())
-					.ifPresent(method -> injectQueryAtCallSite(method, stmt.getKey()));
-			}
-		}
+    public void run() {
+        for (Statement statement : definition.getCollectedCalls()) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-		for (AdditionalBoomerangQuery q : additionalBoomerangQuery.keySet()) {
-			q.solve();
-		}
-	}
+            DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+            Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(definition.getRule(), declaredMethod);
 
-	public Multimap<CallSiteWithParamIndex, ExtractedValue> getCollectedValues() {
-		return collectedValues;
-	}
+            for (CrySLMethod method : methods) {
+                injectQueryAtCallSite(statement, method);
+            }
+        }
 
-	public Multimap<CallSiteWithParamIndex, Type> getPropagatedTypes() {
-		return propagatedTypes;
-	}
+        for (ExtractParameterQuery query : queries) {
+            definition.getAnalysisReporter().beforeTriggeringBoomerangQuery(query);
+            query.solve();
+            definition.getAnalysisReporter().afterTriggeringBoomerangQuery(query);
+        }
+    }
 
-	public Collection<CallSiteWithParamIndex> getAllQuerySites() {
-		return querySites;
-	}
+    private void injectQueryAtCallSite(Statement statement, CrySLMethod method) {
+        for (int i = 0; i < method.getParameters().size(); i++) {
+            String parameter = method.getParameters().get(i).getKey();
 
-	private void injectQueryAtCallSite(CrySLMethod match, Statement callSite) {
-		int index = 0;
-		for (Entry<String, String> param : match.getParameters())
-			addQueryAtCallsite(param.getKey(), callSite, index++);
-	}
+            addQueryAtCallSite(statement, parameter, i);
+        }
+    }
 
-	public void addQueryAtCallsite(final String varNameInSpecification, final Statement stmt, final int index) {
-		if (!stmt.isCallsite())
-			return;
-		Value parameter = stmt.getUnit().get().getInvokeExpr().getArg(index);
-		if (!(parameter instanceof Local)) {
-			Val parameterVal = new Val(parameter, stmt.getMethod());
-			CallSiteWithParamIndex cs = new CallSiteWithParamIndex(stmt, parameterVal, index, varNameInSpecification);
-			Set<Node<Statement, Val>> dataFlowPath = Sets.newHashSet();
-			dataFlowPath.add(new Node<Statement, Val>(stmt, parameterVal));
-			collectedValues.put(cs, new ExtractedValue(stmt, parameter, dataFlowPath));
-			querySites.add(cs);
-			return;
-		}
-		Val queryVal = new Val((Local) parameter, stmt.getMethod());
+    private void addQueryAtCallSite(Statement statement, String varNameInSpec, int index) {
+        Val parameter = statement.getInvokeExpr().getArg(index);
 
-		for (Unit pred : cryptoScanner.icfg().getPredsOf(stmt.getUnit().get())) {
-			AdditionalBoomerangQuery query = additionalBoomerangQuery
-					.getOrCreate(new AdditionalBoomerangQuery(new Statement((Stmt) pred, stmt.getMethod()), queryVal));
-			CallSiteWithParamIndex callSiteWithParamIndex = new CallSiteWithParamIndex(stmt, queryVal, index,
-					varNameInSpecification);
-			querySites.add(callSiteWithParamIndex);
-			query.addListener(new QueryListener() {
-				@Override
-				public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res) {
-					propagatedTypes.putAll(callSiteWithParamIndex, res.getPropagationType());
-					for (ForwardQuery v : res.getAllocationSites().keySet()) {
-						ExtractedValue extractedValue = null;
-						if (v.var() instanceof AllocVal) {
-							AllocVal allocVal = (AllocVal) v.var();
-							extractedValue = new ExtractedValue(allocVal.allocationStatement(), allocVal.allocationValue(),
-									res.getDataFlowPath(v));
-						} else {
-							extractedValue = new ExtractedValue(v.stmt(), v.var().value(), res.getDataFlowPath(v));
-						}
-						collectedValues.put(callSiteWithParamIndex,
-								extractedValue);
-						// Special handling for toCharArray method (required for NeverTypeOf constraint)
-						if (v.stmt().isCallsite()) {
-							String calledMethodSignature = v.stmt().getUnit().get().getInvokeExpr().getMethod().getSignature();
-							if (calledMethodSignature.equals("<java.lang.String: char[] toCharArray()>")) {
-								propagatedTypes.put(callSiteWithParamIndex, Scene.v().getType("java.lang.String"));
-							}
-						}
-					}
-				}
-			});
-		}
-	}
+        Collection<Statement> predecessors = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+        for (Statement pred : predecessors) {
+            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-	public void addAdditionalBoomerangQuery(AdditionalBoomerangQuery q, QueryListener listener) {
-		AdditionalBoomerangQuery query = additionalBoomerangQuery.getOrCreate(q);
-		query.addListener(listener);
-	}
+            ExtractParameterQuery query = new ExtractParameterQuery(definition, edge, parameter, index);
+            query.addListener(results -> {
+                Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
 
-	public class AdditionalBoomerangQuery extends BackwardQuery {
-		public AdditionalBoomerangQuery(Statement stmt, Val variable) {
-			super(stmt, variable);
-		}
+                Collection<ForwardQuery> filteredQueries = filterBoomerangResults(results.getAllocationSites().keySet());
+                for (ForwardQuery paramQuery : filteredQueries) {
+                    Val val = paramQuery.var();
 
-		protected boolean solved;
-		private List<QueryListener> listeners = Lists.newLinkedList();
-		private BackwardBoomerangResults<NoWeight> res;
+                    if (val instanceof AllocVal) {
+                        AllocVal allocVal = (AllocVal) val;
 
-		public void solve() {
-			Boomerang boomerang = new Boomerang(new CogniCryptIntAndStringBoomerangOptions()) {
-				@Override
-				public ObservableICFG<Unit, SootMethod> icfg() {
-					return ExtractParameterAnalysis.this.cryptoScanner.icfg();
-				}
-			};
-			res = boomerang.solve(this);
-			for (QueryListener l : Lists.newLinkedList(listeners)) {
-				l.solved(this, res);
-			}
-			solved = true;
-		}
+                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), paramQuery.cfgEdge().getStart());
+                        extractedParameters.add(entry);
+                    } else {
+                        Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, paramQuery.cfgEdge().getStart());
+                        extractedParameters.add(entry);
+                    }
+                }
 
-		public void addListener(QueryListener q) {
-			if (solved) {
-				q.solved(this, res);
-				return;
-			}
-			listeners.add(q);
-		}
+                CallSiteWithParamIndex callSiteWithParam = new CallSiteWithParamIndex(statement, parameter, index, varNameInSpec);
+                Collection<Type> types = results.getPropagationType();
 
-	}
+                // If no value could be extracted, add the zero value to indicate it
+                if (extractedParameters.isEmpty()) {
+                    ExtractedValue zeroVal = new ExtractedValue(Val.zero(), statement, types);
 
-	private static interface QueryListener {
-		public void solved(AdditionalBoomerangQuery q, BackwardBoomerangResults<NoWeight> res);
-	}
+                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, zeroVal);
+                    collectedValues.add(callSite);
+                    return;
+                }
 
+                for (Map.Entry<Val, Statement> entry : extractedParameters) {
+                    // The extracted value may be transformed, i.e. not the propagated type
+                    types.add(entry.getKey().getType());
+
+                    ExtractedValue extractedValue = new ExtractedValue(entry.getKey(), entry.getValue(), types);
+
+                    CallSiteWithExtractedValue callSite = new CallSiteWithExtractedValue(callSiteWithParam, extractedValue);
+                    collectedValues.add(callSite);
+                }
+            });
+            queries.add(query);
+        }
+    }
+
+    private Collection<ForwardQuery> filterBoomerangResults(Collection<ForwardQuery> resultQueries) {
+        Collection<ForwardQuery> transformedQueries = new HashSet<>();
+
+        for (ForwardQuery query : resultQueries) {
+            Val val = query.var();
+
+            if (val instanceof TransformedAllocVal) {
+                transformedQueries.add(query);
+            }
+        }
+
+        if (transformedQueries.isEmpty()) {
+            return resultQueries;
+        }
+
+        return transformedQueries;
+    }
+
+    public Collection<CallSiteWithExtractedValue> getExtractedValues() {
+        return collectedValues;
+    }
 }

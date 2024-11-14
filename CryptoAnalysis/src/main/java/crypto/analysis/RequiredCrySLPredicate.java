@@ -1,19 +1,21 @@
 package crypto.analysis;
 
-import java.util.Set;
-import boomerang.jimple.Statement;
-import crypto.interfaces.ISLConstraint;
+import boomerang.scene.Statement;
 import crypto.rules.CrySLPredicate;
+import crypto.rules.ISLConstraint;
+
+import java.util.List;
 
 public class RequiredCrySLPredicate implements ISLConstraint {
 
-	private static final long serialVersionUID = 9111353268603202392L;
 	private final CrySLPredicate predicate;
-	private final Statement stmt;
+	private final Statement statement;
+	private final int paramIndex;
 
-	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement stmt) {
+	public RequiredCrySLPredicate(CrySLPredicate predicate, Statement statement, int paramIndex) {
 		this.predicate = predicate;
-		this.stmt = stmt;
+		this.statement = statement;
+		this.paramIndex = paramIndex;
 	}
 
 	@Override
@@ -21,7 +23,8 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
-		result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
+		result = prime * result + ((statement == null) ? 0 : statement.hashCode());
+		result = prime * result + paramIndex;
 		return result;
 	}
 
@@ -39,26 +42,31 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 				return false;
 		} else if (!predicate.equals(other.predicate))
 			return false;
-		if (stmt == null) {
-			if (other.stmt != null)
+		if (statement == null) {
+			if (other.statement != null) {
 				return false;
-		} else if (!stmt.equals(other.stmt))
+			}
+		} else if (!statement.equals(other.statement)) {
 			return false;
-		return true;
-	}
+		}
+        return paramIndex == other.paramIndex;
+    }
 
 	public CrySLPredicate getPred() {
 		return predicate;
 	}
 
 	public Statement getLocation() {
-		return stmt;
+		return statement;
+	}
+
+	public int getParamIndex() {
+		return paramIndex;
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return "misses " + predicate + " @ " + stmt.toString();
+		return predicate + " @ " + statement.toString() + " @ index " + paramIndex;
 	}
 
 	@Override
@@ -67,12 +75,8 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
+	public List<String> getInvolvedVarNames() {
 		return predicate.getInvolvedVarNames();
 	}
 
-	@Override
-	public void setLocation(Statement location) {
-		throw new UnsupportedOperationException();
-	}
 }

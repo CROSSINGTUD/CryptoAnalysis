@@ -1,29 +1,29 @@
 package crypto.constraints;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import boomerang.jimple.Statement;
-import crypto.analysis.errors.ForbiddenMethodError;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Statement;
+import boomerang.scene.Type;
+import boomerang.scene.Val;
+import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
+import crypto.analysis.errors.NoCallToError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
-import crypto.interfaces.ICrySLPredicateParameter;
-import crypto.interfaces.ISLConstraint;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLObject;
 import crypto.rules.CrySLPredicate;
-import crypto.typestate.CrySLMethodToSootMethod;
-import soot.SootMethod;
-import soot.Type;
-import soot.jimple.IntConstant;
-import soot.jimple.NewExpr;
-import soot.jimple.Stmt;
-import soot.jimple.StringConstant;
+import crypto.rules.ICrySLPredicateParameter;
+import crypto.rules.ISLConstraint;
+import crypto.utils.MatcherUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class PredicateConstraint extends EvaluableConstraint {
 
@@ -40,136 +40,222 @@ public class PredicateConstraint extends EvaluableConstraint {
 		}
 	}
 
-	public boolean isHardCoded(ExtractedValue val) {
-		return val.getValue() instanceof IntConstant || val.getValue() instanceof StringConstant
-				|| (val.getValue() instanceof NewExpr
-						&& ((NewExpr) val.getValue()).getType().toString().equals("java.math.BigInteger"));
-	}
-
-	protected boolean isSubType(String typeOne, String typeTwo) {
-		boolean subTypes = typeOne.equals(typeTwo);
-		subTypes |= (typeOne + "[]").equals(typeTwo);
-		if (!subTypes) {
-			try {
-				subTypes = Class.forName(typeOne).isAssignableFrom(Class.forName(typeTwo));
-			} catch (ClassNotFoundException e) {
-			}
-		}
-		return subTypes;
-	}
-
-	private void handlePredefinedNames(CrySLPredicate pred) {
-
-		List<ICrySLPredicateParameter> parameters = pred.getParameters();
-		switch (pred.getPredName()) {
+	private void handlePredefinedNames(CrySLPredicate predicate) {
+		switch (predicate.getPredName()) {
 			case "callTo":
-				List<ICrySLPredicateParameter> predMethods = parameters;
-				for (ICrySLPredicateParameter predMethod : predMethods) {
-					// check whether predMethod is in foundMethods, which type-state analysis has to
-					// figure out
-					CrySLMethod reqMethod = (CrySLMethod) predMethod;
-					for (Statement unit : context.getCollectedCalls()) {
-						if (!(unit.isCallsite()))
-							continue;
-						SootMethod foundCall = ((Stmt) unit.getUnit().get()).getInvokeExpr().getMethod();
-						Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(foundCall)) {
-							return;
-						}
-					}
-				}
-				// TODO: Need seed here.
-				return;
+                evaluateCallToPredicate(predicate.getParameters());
+				break;
 			case "noCallTo":
-				if (context.getCollectedCalls().isEmpty()) {
-					return;
-				}
-				List<ICrySLPredicateParameter> predForbiddenMethods = parameters;
-				for (ICrySLPredicateParameter predForbMethod : predForbiddenMethods) {
-					// check whether predForbMethod is in foundForbMethods, which forbidden-methods
-					// analysis has to figure out
-					CrySLMethod reqMethod = ((CrySLMethod) predForbMethod);
-
-					for (Statement call : context.getCollectedCalls()) {
-						if (!call.isCallsite())
-							continue;
-						SootMethod foundCall = call.getUnit().get().getInvokeExpr().getMethod();
-						Collection<SootMethod> convert = CrySLMethodToSootMethod.v().convert(reqMethod);
-						if (convert.contains(foundCall)) {
-							errors.add(new ForbiddenMethodError(call, context.getClassSpec().getRule(), foundCall, convert));
-							return;
-						}
-					}
-				}
-				return;
+                evaluateNoCallToPredicate(predicate.getParameters());
+				break;
 			case "neverTypeOf":
-				// pred looks as follows: neverTypeOf($varName, $type)
-				// -> first parameter is always the variable
-				// -> second parameter is always the type
-				String varName = ((CrySLObject) parameters.get(0)).getVarName();
-				for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
-					if (cs.getVarName().equals(varName)) {
-						Collection<Type> vals = context.getPropagatedTypes().get(cs);
-						for (Type t : vals) {
-							if (t.toQuotedString().equals(parameters.get(1).getName())) {
-								for (ExtractedValue v : context.getParsAndVals().get(cs)) {
-									errors.add(
-											new NeverTypeOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-													context.getObject(),
-													pred));
-								}
-								return;
-							}
-						}
-					}
-				}
-
-				return;
+				evaluateNeverTypeOfPredicate(predicate);
+				break;
 			case "length":
 				// TODO Not implemented!
-				return;
+				break;
 			case "notHardCoded":
-				CrySLObject varNotToBeHardCoded = (CrySLObject) pred.getParameters().get(0);
-				String name = varNotToBeHardCoded.getVarName();
-				String type = varNotToBeHardCoded.getJavaType();
-				for (CallSiteWithParamIndex cs : context.getParsAndVals().keySet()) {
-					if (cs.getVarName().equals(name)) {
-						Collection<ExtractedValue> values = context.getParsAndVals().get(cs);
-						for (ExtractedValue v : values) {
-							if (isSubType(type, v.getValue().getType().toQuotedString())
-									&& (isHardCoded(v) || isHardCodedArray(extractSootArray(cs, v)))) {
-								errors.add(
-										new HardCodedError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-												context.getObject(),
-												pred));
-							}
-						}
-					}
-				}
-				return;
+				evaluateHardCodedPredicate(predicate);
+				break;
 			case "instanceOf":
-				varName = ((CrySLObject) parameters.get(0)).getVarName();
-				for (CallSiteWithParamIndex cs : context.getParameterAnalysisQuerySites()) {
-					if (cs.getVarName().equals(varName)) {
-						Collection<Type> vals = context.getPropagatedTypes().get(cs);
-						if (!vals.parallelStream().anyMatch(e -> isSubType(e.toQuotedString(), parameters.get(1).getName())
-								|| isSubType(parameters.get(1).getName(), e.toQuotedString()))) {
-							for (ExtractedValue v : context.getParsAndVals().get(cs)) {
-								errors.add(
-										new InstanceOfError(new CallSiteWithExtractedValue(cs, v), context.getClassSpec().getRule(),
-												context.getObject(),
-												pred));
-							}
-						}
-					}
-				}
-				return;
+				evaluateInstanceOfPredicate(predicate);
+				break;
 			default:
-				return;
+				LOGGER.error("Cannot evaluate predicate {}", predicate.getPredName());
+        }
+	}
+
+	private void evaluateCallToPredicate(List<ICrySLPredicateParameter> callToMethods) {
+		boolean isCalled = false;
+		Collection<CrySLMethod> methods = parametersToCryslMethods(callToMethods);
+
+		for (CrySLMethod predMethod : methods) {
+			for (Statement statement : context.getCollectedCalls()) {
+				if (!statement.containsInvokeExpr()) {
+					continue;
+				}
+
+				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+				Collection<CrySLMethod> matchingCryslMethods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(context.getSpecification(), foundCall);
+				if (matchingCryslMethods.contains(predMethod)) {
+					isCalled = true;
+				}
+			}
+		}
+
+		if (!isCalled) {
+			IAnalysisSeed seed = context.getSeed();
+			CallToError callToError = new CallToError(seed, context.getSpecification(), methods);
+			errors.add(callToError);
 		}
 	}
 
-	private boolean isHardCodedArray(Map<String, CallSiteWithExtractedValue> extractSootArray) {
-		return !(extractSootArray.keySet().size() == 1 && extractSootArray.containsKey(""));
+	private void evaluateNoCallToPredicate(List<ICrySLPredicateParameter> noCallToMethods) {
+		Collection<CrySLMethod> methods = parametersToCryslMethods(noCallToMethods);
+
+		for (CrySLMethod predMethod : methods) {
+			for (Statement statement : context.getCollectedCalls()) {
+				if (!statement.containsInvokeExpr()) {
+					continue;
+				}
+
+				DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+				if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
+					NoCallToError noCallToError = new NoCallToError(context.getSeed(), statement, context.getSpecification());
+					errors.add(noCallToError);
+				}
+			}
+		}
+	}
+
+	private void evaluateNeverTypeOfPredicate(CrySLPredicate neverTypeOfPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(neverTypeOfPredicate.getParameters());
+
+		if (objects.size() != 2) {
+			return;
+		}
+
+		// neverTypeOf[$variable, $type]
+		CrySLObject variable = objects.get(0);
+		CrySLObject parameterType = objects.get(1);
+
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
+			if (!variable.getName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			Collection<Type> types = callSite.getExtractedValue().getTypes();
+			for (Type type : types) {
+				if (!parameterType.getJavaType().equals(type.toString())) {
+					continue;
+				}
+
+				NeverTypeOfError neverTypeOfError = new NeverTypeOfError(context.getSeed(), callSite, context.getSpecification(), neverTypeOfPredicate);
+				errors.add(neverTypeOfError);
+			}
+		}
+	}
+
+	private void evaluateHardCodedPredicate(CrySLPredicate hardCodedPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(hardCodedPredicate.getParameters());
+
+		if (objects.size() != 1) {
+			return;
+		}
+
+		// notHardCoded[$variable]
+		CrySLObject variable = objects.get(0);
+
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
+			if (!variable.getVarName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			ExtractedValue extractedValue = callSite.getExtractedValue();
+			if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
+				HardCodedError hardCodedError = new HardCodedError(context.getSeed(), callSite, context.getSpecification(), hardCodedPredicate);
+				errors.add(hardCodedError);
+			}
+		}
+	}
+
+	private void evaluateInstanceOfPredicate(CrySLPredicate instanceOfPredicate) {
+		List<CrySLObject> objects = parametersToCryslObjects(instanceOfPredicate.getParameters());
+
+		if (objects.size() != 2) {
+			return;
+		}
+
+		// instanceOf[$variable, $type]
+		CrySLObject variable = objects.get(0);
+		CrySLObject parameterType = objects.get(1);
+
+		for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
+			CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+
+			if (!variable.getName().equals(cs.getVarName())) {
+				continue;
+			}
+
+			boolean isSubType = false;
+			Collection<Type> types = callSite.getExtractedValue().getTypes();
+			for (Type type : types) {
+				if (type.isNullType()) {
+					continue;
+				}
+
+				if (type.isSubtypeOf(parameterType.getJavaType())) {
+					isSubType = true;
+				}
+			}
+
+			if (!isSubType) {
+				InstanceOfError instanceOfError = new InstanceOfError(context.getSeed(), callSite, context.getSpecification(), instanceOfPredicate);
+				errors.add(instanceOfError);
+			}
+		}
+	}
+
+	private Collection<CrySLMethod> parametersToCryslMethods(Collection<ICrySLPredicateParameter> parameters) {
+		List<CrySLMethod> methods = new ArrayList<>();
+
+		for (ICrySLPredicateParameter parameter : parameters) {
+			if (!(parameter instanceof CrySLMethod)) {
+				continue;
+			}
+
+			CrySLMethod crySLMethod = (CrySLMethod) parameter;
+			methods.add(crySLMethod);
+		}
+		return methods;
+	}
+
+	private List<CrySLObject> parametersToCryslObjects(Collection<ICrySLPredicateParameter> parameters) {
+		List<CrySLObject> objects = new ArrayList<>();
+
+		for (ICrySLPredicateParameter parameter : parameters) {
+			if (!(parameter instanceof CrySLObject)) {
+				continue;
+			}
+
+			CrySLObject crySLObject = (CrySLObject) parameter;
+			objects.add(crySLObject);
+		}
+		return objects;
+	}
+
+	public boolean isHardCodedVariable(ExtractedValue val) {
+		// Check for basic constants
+		if (val.getVal().isConstant()) {
+			LOGGER.debug("Value {} is hard coded", val.getVal());
+			return true;
+		}
+
+		Statement statement = val.getInitialStatement();
+
+		// Objects initialized with 'new' are hard coded
+		if (!statement.isAssign()) {
+			LOGGER.debug("Value {} is not hard coded", val.getVal());
+			return false;
+		}
+
+		Val rightOp = statement.getRightOp();
+		if (rightOp.isNewExpr()) {
+			LOGGER.debug("Value {} is hard coded", val.getVal());
+			return true;
+		}
+
+		LOGGER.debug("Value {} is not hard coded", val.getVal());
+		return false;
+	}
+
+	private boolean isHardCodedArray(ExtractedValue extractedValue) {
+		Map<Integer, Val> extractedArray = extractArray(extractedValue);
+
+		return !extractedArray.keySet().isEmpty();
 	}
 }

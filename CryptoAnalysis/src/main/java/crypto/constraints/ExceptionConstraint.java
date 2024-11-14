@@ -1,16 +1,15 @@
 package crypto.constraints;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
-import boomerang.jimple.Statement;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.Method;
+import boomerang.scene.Statement;
+import boomerang.scene.WrappedClass;
+import boomerang.scene.jimple.JimpleMethod;
+import boomerang.scene.jimple.JimpleStatement;
+import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
-import crypto.typestate.CrySLMethodToSootMethod;
-import crypto.typestate.LabeledMatcherTransition;
+import crypto.utils.MatcherUtils;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -20,15 +19,24 @@ import soot.Unit;
 import soot.UnitBox;
 import soot.jimple.Stmt;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 public class ExceptionConstraint extends EvaluableConstraint {
 
-	private final Set<SootMethod> method;
-	private final SootClass exception;
+	private final Set<Method> method;
+	private final WrappedClass exception;
 
 	public ExceptionConstraint(CrySLExceptionConstraint cons, ConstraintSolver context) {
 		super(cons, context);
-		this.method = new HashSet<>(CrySLMethodToSootMethod.v().convert(cons.getMethod()));
-		this.exception = Scene.v().getSootClass(cons.getException().getException());
+		//this.method = new HashSet<>(CrySLMethodToSootMethod.v().convert(cons.getMethod()));
+		this.method = new HashSet<>();
+
+		SootClass exceptionClass = Scene.v().getSootClass(cons.getException().getException());
+		this.exception = new JimpleWrappedClass(exceptionClass);
 	}
 
 	/**
@@ -37,8 +45,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 */
 	@Override
 	public void evaluate() {
-		for (Statement call : context.getCollectedCalls()) {
-			evaluate(call);
+		for (Statement statement : context.getCollectedCalls()) {
+			evaluate(statement);
 		}
 	}
 
@@ -46,15 +54,30 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * Checks if a) the method that is called is the same as the method of
 	 * this constraint and b) if the specified exception is caught.
 	 * 
-	 * @param call	the called statement
+	 * @param stmt	the called statement
 	 */
-	public void evaluate(Statement call) {
+	public void evaluate(Statement stmt) {
 		try {
-			Stmt stmt = call.getUnit().get();
-			if (!isSameMethod(stmt.getInvokeExpr().getMethod()))
+			DeclaredMethod declaredMethod = stmt.getInvokeExpr().getMethod();
+			if (!isSameMethod(declaredMethod))
 				return;
-			if (!getTrap(call.getMethod().getActiveBody(), stmt, this.exception).isPresent())
-				errors.add(new UncaughtExceptionError(call, context.getClassSpec().getRule(), this.exception));
+
+			if (!(stmt.getMethod() instanceof JimpleMethod)) {
+				return;
+			}
+
+			JimpleMethod jimpleMethod = (JimpleMethod) stmt.getMethod();
+			SootMethod sootMethod = jimpleMethod.getDelegate();
+
+			if (!(stmt instanceof JimpleStatement)) {
+				return;
+			}
+
+			JimpleStatement jimpleStatement = (JimpleStatement) stmt;
+			Stmt sootStmt = jimpleStatement.getDelegate();
+
+			if (!getTrap(sootMethod.getActiveBody(), sootStmt, this.exception).isPresent())
+				errors.add(new UncaughtExceptionError(context.getSeed(), stmt, context.getSpecification(), this.exception));
 		} catch (Exception e) {
 		}
 	}
@@ -88,9 +111,9 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @param exception The called Method, throwing the exception.
 	 * @return Returns the handler, that catches the exception thrown by callee in the method.
 	 */
-	public static Optional<Trap> getTrap(final Body body, final Unit unit, final SootClass exception) {
+	public static Optional<Trap> getTrap(final Body body, final Unit unit, final WrappedClass exception) {
 		for (final Trap trap : body.getTraps())
-			if (ExceptionConstraint.isCaughtAs(trap.getException(), exception))
+			if (ExceptionConstraint.isCaughtAs(new JimpleWrappedClass(trap.getException()), exception))
 				if (trapsUnit(body, trap, unit))
 					return Optional.of(trap);
 		return Optional.empty();
@@ -128,8 +151,8 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return Wheter a catch clause with the given catchClause, would catch
 	 *         the given exception.
 	 */
-	public static boolean isCaughtAs(SootClass catchClause, SootClass exception) {
-		return LabeledMatcherTransition.isSubtype(exception, catchClause);
+	public static boolean isCaughtAs(WrappedClass catchClause, WrappedClass exception) {
+		return MatcherUtils.isSubtype(exception, catchClause);
 	}
 
 	/**
@@ -137,7 +160,9 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 * @return Wheter the methods represented in this constraint match the given
 	 *         method.
 	 */
-	public boolean isSameMethod(SootMethod method) {
-		return this.method.stream().anyMatch(declared -> LabeledMatcherTransition.matches(method, declared));
+	public boolean isSameMethod(DeclaredMethod method) {
+		// TODO Refactoring
+		return false;
+		//return this.method.stream().anyMatch(declared -> MatcherUtils.matches(method, declared));
 	}
 }

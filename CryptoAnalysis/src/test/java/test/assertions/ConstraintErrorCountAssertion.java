@@ -4,7 +4,7 @@ import test.Assertion;
 
 public class ConstraintErrorCountAssertion implements Assertion {
 
-	private int expectedErrorCounts;
+	private final int expectedErrorCounts;
 	private int actualErrorCounts;
 
 	public ConstraintErrorCountAssertion(int numberOfCounts) {
@@ -23,6 +23,11 @@ public class ConstraintErrorCountAssertion implements Assertion {
 	@Override
 	public boolean isImprecise() {
 		return expectedErrorCounts != actualErrorCounts;
+	}
+
+	@Override
+	public String toString() {
+		return "Expected " + expectedErrorCounts + " constraint errors, but got " + actualErrorCounts;
 	}
 
 }

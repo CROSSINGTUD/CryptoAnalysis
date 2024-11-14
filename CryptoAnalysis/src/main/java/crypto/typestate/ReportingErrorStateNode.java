@@ -1,22 +1,22 @@
 package crypto.typestate;
 
-import java.util.Collection;
-
-import soot.SootMethod;
+import crypto.rules.CrySLMethod;
 import typestate.finiteautomata.State;
+
+import java.util.Collection;
 
 public class ReportingErrorStateNode implements State {
 
-	private Collection<SootMethod> expectedCalls;
-	private boolean report;
+	private final Collection<CrySLMethod> expectedCalls;
 
-	public ReportingErrorStateNode(Collection<SootMethod> expectedCalls) {
+	public ReportingErrorStateNode(Collection<CrySLMethod> expectedCalls) {
 		this.expectedCalls = expectedCalls;
 	}
 
-	public Collection<SootMethod> getExpectedCalls() {
+	public Collection<CrySLMethod> getExpectedCalls() {
 		return expectedCalls;
 	}
+
 	@Override
 	public boolean isErrorState() {
 		return true;
@@ -30,10 +30,6 @@ public class ReportingErrorStateNode implements State {
 	@Override
 	public boolean isAccepting() {
 		return false;
-	}
-
-	public boolean isReport() {
-		return report;
 	}
 	
 	@Override

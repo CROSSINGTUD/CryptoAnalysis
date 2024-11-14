@@ -1,65 +1,93 @@
 package crypto.extractparameter;
 
-import soot.Value;
-import soot.jimple.Constant;
+import boomerang.scene.Val;
 
-/**
- * Creates {@link CallSiteWithExtractedValue} a constructor with CallSiteWithParamIndex and ExtractedValue as parameter
- *
- *  CallSiteWithParamIndex gives position of the location index of the error
- *  ExtractedValue gives the value of the call site
- */
+import java.util.Arrays;
 
 public class CallSiteWithExtractedValue {
-	private CallSiteWithParamIndex cs;
-	private ExtractedValue val;
 
-	public CallSiteWithExtractedValue(CallSiteWithParamIndex cs, ExtractedValue val){
-		this.cs = cs;
-		this.val = val;
-	}
+    private final CallSiteWithParamIndex callSiteWithParam;
+    private final ExtractedValue extractedValue;
 
-	public CallSiteWithParamIndex getCallSite() {
-		return cs;
-	}
+    public CallSiteWithExtractedValue(CallSiteWithParamIndex callSiteWithParam, ExtractedValue extractedValue) {
+        this.callSiteWithParam = callSiteWithParam;
+        this.extractedValue = extractedValue;
+    }
 
-	public ExtractedValue getVal() {
-		return val;
-	}
-	
-	@Override
-	public String toString() {
-		String res = "";
-		switch(cs.getIndex()) {
-			case 0: 
-				res = "First ";
-				break;
-			case 1: 
-				res = "Second ";
-				break;
-			case 2: 
-				res = "Third ";
-				break;
-			case 3: 
-				res = "Fourth ";
-				break;
-			case 4: 
-				res = "Fiveth ";
-				break;
-			case 5: 
-				res = "Sixth ";
-				break;
-			default:
-				res = (cs.getIndex()+1) + "th ";
-				break;
-		}
-		res += "parameter";
-		if(val != null && val.getValue() != null){
-			Value allocVal = val.getValue();
-			if(allocVal instanceof Constant){
-				res += " (with value " + allocVal +")";
-			}
-		}
-		return res;
-	}
+    public CallSiteWithParamIndex getCallSiteWithParam() {
+        return callSiteWithParam;
+    }
+
+    public ExtractedValue getExtractedValue() {
+        return extractedValue;
+    }
+
+    @Override
+    public String toString() {
+        String res;
+        switch(callSiteWithParam.getIndex()) {
+            case -1:
+                return "Return value";
+            case 0:
+                res = "First ";
+                break;
+            case 1:
+                res = "Second ";
+                break;
+            case 2:
+                res = "Third ";
+                break;
+            case 3:
+                res = "Fourth ";
+                break;
+            case 4:
+                res = "Fifth ";
+                break;
+            case 5:
+                res = "Sixth ";
+                break;
+            default:
+                res = (callSiteWithParam.getIndex() + 1) + "th ";
+                break;
+        }
+        res += "parameter";
+        if (extractedValue != null) {
+            Val allocVal = extractedValue.getVal();
+
+            if (allocVal.isConstant()) {
+                res += " (with value " + allocVal.getVariableName() +")";
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(new Object[]{
+                callSiteWithParam,
+                extractedValue
+        });
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+
+        CallSiteWithExtractedValue other = (CallSiteWithExtractedValue) obj;
+        if (callSiteWithParam == null) {
+            if (other.getCallSiteWithParam() != null) return false;
+        } else if (!callSiteWithParam.equals(other.getCallSiteWithParam())) {
+            return false;
+        }
+
+        if (extractedValue == null) {
+            if (other.getExtractedValue() != null) return false;
+        } else if (!extractedValue.equals(other.getExtractedValue())) {
+            return false;
+        }
+
+        return true;
+    }
 }

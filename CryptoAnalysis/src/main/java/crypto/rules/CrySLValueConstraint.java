@@ -1,22 +1,13 @@
 package crypto.rules;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CrySLValueConstraint extends CrySLLiteral {
-	
-	private static final long serialVersionUID = 1L;
+
 	CrySLObject var;
 	List<String> valueRange;
-	
-	public CrySLValueConstraint(CrySLObject name, String value) { 
-		var = name;
-		valueRange = new ArrayList<String>();
-		valueRange.add(value);
-	}
-	
+
 	public CrySLValueConstraint(CrySLObject name, List<String> values) {
 		var = name;
 		valueRange = values;
@@ -57,8 +48,8 @@ public class CrySLValueConstraint extends CrySLLiteral {
 	}
 
 	@Override
-	public Set<String> getInvolvedVarNames() {
-		Set<String> varNames = new HashSet<String>();
+	public List<String> getInvolvedVarNames() {
+		List<String> varNames = new ArrayList<>();
 		varNames.add(var.getVarName());
 		return varNames;
 	}

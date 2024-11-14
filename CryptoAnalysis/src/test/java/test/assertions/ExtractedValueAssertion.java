@@ -1,27 +1,34 @@
 package test.assertions;
 
-import java.util.Map.Entry;
-
-import com.google.common.collect.Multimap;
-
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
-import soot.Unit;
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
+import crypto.extractparameter.CallSiteWithExtractedValue;
 import test.Assertion;
 
+import java.util.Collection;
+
 public class ExtractedValueAssertion implements Assertion {
-	private Unit stmt;
-	private int index;
+
+	private final Statement stmt;
+	private final int index;
 	private boolean satisfied;
-	public ExtractedValueAssertion(Unit stmt, int index) {
+
+	public ExtractedValueAssertion(Statement stmt, int index) {
 		this.stmt = stmt;
 		this.index = index;
 	}
 	
-	public void computedValues(Multimap<CallSiteWithParamIndex, ExtractedValue> collectedValues){
-		for(Entry<CallSiteWithParamIndex, ExtractedValue> e: collectedValues.entries()){
-			if(e.getKey().stmt().getUnit().get().equals(stmt) && e.getKey().getIndex() == index)
+	public void computedValues(Collection<CallSiteWithExtractedValue> collectedValues){
+		for (CallSiteWithExtractedValue callSite : collectedValues) {
+			Statement statement = callSite.getCallSiteWithParam().stmt();
+
+			if (callSite.getExtractedValue().getVal().equals(Val.zero())) {
+				continue;
+			}
+
+			if (statement.equals(stmt) && callSite.getCallSiteWithParam().getIndex() == index) {
 				satisfied = true;
+			}
 		}
 	}
 	

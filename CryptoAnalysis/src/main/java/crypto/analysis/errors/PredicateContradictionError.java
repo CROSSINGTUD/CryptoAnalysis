@@ -1,50 +1,58 @@
 package crypto.analysis.errors;
 
-import java.util.Map.Entry;
-
-import boomerang.jimple.Statement;
+import boomerang.scene.Statement;
+import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
 
+import java.util.Arrays;
+
 public class PredicateContradictionError extends AbstractError {
 
-	Entry<CrySLPredicate, CrySLPredicate> mismatchedPreds;
+	private final CrySLPredicate contradictedPredicate;
 
-	public PredicateContradictionError(Statement errorLocation, CrySLRule rule, Entry<CrySLPredicate, CrySLPredicate> disPair) {
-		super(errorLocation, rule);
-		mismatchedPreds = disPair;
+	public PredicateContradictionError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, CrySLPredicate contradictedPredicate) {
+		super(seed, errorStmt, rule);
+
+		this.contradictedPredicate = contradictedPredicate;
 	}
 
-	@Override
-	public void accept(ErrorVisitor visitor) {
-		visitor.visit(this);
+	public CrySLPredicate getContradictedPredicate() {
+		return contradictedPredicate;
 	}
 
 	@Override
 	public String toErrorMarkerString() {
-		return "Predicate mismatch";
-	}
-
-	public Entry<CrySLPredicate, CrySLPredicate> getMismatchedPreds() {
-		return mismatchedPreds;
+		return "Predicate " + contradictedPredicate + " is ensured although it should not";
 	}
 	
 	@Override
 	public int hashCode() {
-		int result = super.hashCode();
-		return result;
+		return Arrays.hashCode(new Object[]{
+				super.hashCode(),
+				contradictedPredicate
+		});
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+
+		PredicateContradictionError other = (PredicateContradictionError) obj;
+		if (contradictedPredicate == null) {
+			if (other.getContradictedPredicate() != null) return false;
+		} else if (!contradictedPredicate.equals(other.getContradictedPredicate())) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		
+		}
+
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "PredicateContradictionError: " + toErrorMarkerString();
 	}
 
 }
