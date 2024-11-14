@@ -1,14 +1,12 @@
-name: Build And Test (Analysis)
+name: Build And Test (MacOS)
 
 on:
-  push:
-  pull_request:
-    types: [opened, reopened]
+  merge_group:
 
 jobs:
-  # This name has to be equal to the one in the merge queue
+  # This name must be equal to the corresponding build_analysis job
   build-and-test-analysis:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -28,4 +26,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run maven command
-        run: mvn clean verify -DrunAnalysisTests
+        run: mvn clean verify
