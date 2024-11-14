@@ -163,7 +163,7 @@
                         <format>xml</format>
                     </formats>
                     <outputDirectory>../shippable/codecoverage</outputDirectory>
-                    <check></check>
+                    <check/>
                 </configuration>
             </plugin>
             <plugin>

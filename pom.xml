@@ -424,32 +424,33 @@
                             <nrOfIndentSpace>4</nrOfIndentSpace>
                             <indentBlankLines>false</indentBlankLines>
                             <indentSchemaLocation>true</indentSchemaLocation>
+                            <expandEmptyElements>false</expandEmptyElements>
                         </sortPom>
                     </pom>
-                    <!-- This may be relevant for https://github.com/CROSSINGTUD/CryptoAnalysis/pull/272 -->
-                    <!--<java>
-                        <removeUnusedImports />
-                        <importOrder />
-                        <!- define the steps to apply to those files ->
-                        <trimTrailingWhitespace />
-                        <endWithNewline />
+                    <java>
+                        <removeUnusedImports/>
+                        <importOrder/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
                         <indent>
-                        	<tabs>true</tabs>
-                        	<spacesPerTab>4</spacesPerTab>
+                            <spaces>true</spaces>
+                            <spacesPerTab>4</spacesPerTab>
                         </indent>
                         <googleJavaFormat>
                             <version>1.19.1</version>
                             <style>AOSP</style>
+                            <reflowLongStrings>true</reflowLongStrings>
+                            <formatJavadoc>true</formatJavadoc>
                         </googleJavaFormat>
-                        <!-<licenseHeader>
+                        <!--<licenseHeader>
                             <file>${main.basedir}/license_header_plain.txt</file>
-                        </licenseHeader>->
-                    </java>-->
+                        </licenseHeader>-->
+                    </java>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>check</goal>
+                            <goal>apply</goal>
                         </goals>
                     </execution>
                 </executions>
