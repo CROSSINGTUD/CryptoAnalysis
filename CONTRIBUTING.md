@@ -30,7 +30,7 @@ We aim for the following workflow:
 3. Make and commit your changes to your branch.
     - Keep changes as small as possible.
 4. Add new tests corresponding to your change, if applicable.
-  - Minor changes, like fixing typos, adding documentation or non-critical bugfixes may are excluded.
+  - Minor changes, like fixing typos, adding documentation or non-critical bugfixes may be excluded.
 5. Build the repository with your changes (e.g. by `mvn clean package -DrunAllTests`).
     - Make sure that the builds are clean.
     - Make sure that the tests are all passing, including your new tests.
