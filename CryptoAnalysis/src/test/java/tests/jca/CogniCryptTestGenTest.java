@@ -102,9 +102,9 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
 		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
+		Assertions.hasEnsuredPredicate(key);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(paramStore);
-		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keyStore0);
 	}
 
@@ -127,9 +127,9 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm, (Provider) null);
 		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
+		Assertions.hasEnsuredPredicate(key);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(paramStore);
-		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keyStore0);
 
 	}
@@ -152,9 +152,9 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
 		keyStore0.load(paramLoad);
 		Key key = keyStore0.getKey(alias, passwordKey);
+		Assertions.hasEnsuredPredicate(key);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(paramStore);
-		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keyStore0);
 	}
 
@@ -178,9 +178,9 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 		KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
 		keyStore0.load(fileInput, passwordIn);
 		Key key = keyStore0.getKey(alias, passwordKey);
+		Assertions.hasEnsuredPredicate(key);
 		keyStore0.setEntry(aliasSet, entry, protParamSet);
 		keyStore0.store(fileOutput, passwordOut);
-		Assertions.hasEnsuredPredicate(key);
 		Assertions.mustBeInAcceptingState(keyStore0);
 	}
 

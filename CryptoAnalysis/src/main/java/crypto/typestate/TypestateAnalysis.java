@@ -9,7 +9,6 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Val;
-import crypto.definition.TypestateDefinition;
 import crypto.rules.CrySLRule;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;

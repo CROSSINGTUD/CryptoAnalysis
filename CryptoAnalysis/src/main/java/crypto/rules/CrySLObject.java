@@ -1,5 +1,7 @@
 package crypto.rules;
 
+import java.util.Arrays;
+
 public class CrySLObject implements ICrySLPredicateParameter {
 
 	private final String varName;
@@ -42,6 +44,15 @@ public class CrySLObject implements ICrySLPredicateParameter {
 		return this.getJavaType().equals(object.getJavaType()) &&
 				this.getName().equals(object.getName()) &&
 				(this.getSplitter() == null || this.getSplitter().equals(object.getSplitter()));
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(new Object[] {
+				varName,
+				javaType,
+				splitter
+		});
 	}
 
 	@Override

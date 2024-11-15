@@ -25,7 +25,7 @@ public class PBETest extends UsagePatternTestingFramework {
 		SecureRandom sr = new SecureRandom();
 		sr.nextBytes(salt);
 		PBEKeySpec pbeKeySpec = new PBEKeySpec(defaultKey, salt, 11010, 16);
-		Assertions.notHasEnsuredPredicate(pbeKeySpec);
+		Assertions.hasNotGeneratedPredicate(pbeKeySpec);
 		pbeKeySpec.clearPassword();
 		Assertions.mustBeInAcceptingState(pbeKeySpec);
 	}
@@ -64,14 +64,14 @@ public class PBETest extends UsagePatternTestingFramework {
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.hasEnsuredPredicate(pbekeyspec);
+		Assertions.hasGeneratedPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		pbekeyspec.clearPassword();
 		pbekeyspec = new PBEKeySpec(corPwd, salt, 9999, 128);
 		Assertions.extValue(1);
 		Assertions.extValue(2);
 		Assertions.extValue(3);
-		Assertions.notHasEnsuredPredicate(pbekeyspec);
+		Assertions.hasNotGeneratedPredicate(pbekeyspec);
 		Assertions.mustNotBeInAcceptingState(pbekeyspec);
 		pbekeyspec.clearPassword();
 
@@ -84,8 +84,8 @@ public class PBETest extends UsagePatternTestingFramework {
 		PBEParameterSpec pbeParSpec2 = new PBEParameterSpec(salt, 9999);
 		Assertions.extValue(0);
 		Assertions.extValue(1);
+		Assertions.hasNotGeneratedPredicate(pbeParSpec2);
 		Assertions.mustBeInAcceptingState(pbeParSpec2);
-		Assertions.notHasEnsuredPredicate(pbeParSpec2);
 	}
 	
 	@Test

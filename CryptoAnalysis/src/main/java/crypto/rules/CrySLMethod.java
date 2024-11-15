@@ -11,6 +11,7 @@ public class CrySLMethod implements ICrySLPredicateParameter {
 	public static final String NO_NAME = "_";
 
 	private final String methodName;
+	private final String declaringClassName;
 	private final Entry<String, String> retObject;
 	/**
 	 * List of Parameters, where a Parameter is an {@link java.util.Map.Entry}
@@ -18,8 +19,9 @@ public class CrySLMethod implements ICrySLPredicateParameter {
 	 */
 	private final List<Entry<String, String>> parameters;
 
-	public CrySLMethod(String methodName, List<Entry<String, String>> parameters, Entry<String, String> retObject) {
+	public CrySLMethod(String methodName, String declaringClassName, List<Entry<String, String>> parameters, Entry<String, String> retObject) {
 		this.methodName = methodName;
+		this.declaringClassName = declaringClassName;
 		this.parameters = parameters;
 		this.retObject = retObject;
 	}
@@ -36,6 +38,10 @@ public class CrySLMethod implements ICrySLPredicateParameter {
 	 */
 	public String getShortMethodName() {
 		return methodName.substring(methodName.lastIndexOf(".") + 1);
+	}
+
+	public String getDeclaringClassName() {
+		return declaringClassName;
 	}
 
 	/**

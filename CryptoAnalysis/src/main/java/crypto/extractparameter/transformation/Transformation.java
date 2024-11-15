@@ -8,9 +8,11 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.ExtractParameterDefinition;
 import crypto.extractparameter.ExtractParameterOptions;
-import crypto.utils.SootUtils;
+import crypto.extractparameter.scope.IntVal;
+import crypto.extractparameter.scope.LongVal;
+import crypto.extractparameter.scope.StringVal;
 import wpds.impl.Weight;
 
 import java.util.Collection;
@@ -103,21 +105,21 @@ public abstract class Transformation {
 
     protected AllocVal createTransformedAllocVal(String string, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toStringConstant(string, statement.getMethod());
+        Val resultOp = new StringVal(string, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }
 
     protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toIntConstant(intValue, statement.getMethod());
+        Val resultOp = new IntVal(intValue, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }
 
     protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toLongConstant(longValue, statement.getMethod());
+        Val resultOp = new LongVal(longValue, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }

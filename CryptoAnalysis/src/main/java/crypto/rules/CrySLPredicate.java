@@ -28,13 +28,11 @@ public class CrySLPredicate extends CrySLLiteral {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((predName == null) ? 0 : predName.hashCode());
-		result = prime * result + this.getConstraint().hashCode();
-		result = prime * result + this.getParameters().hashCode();
-		return result;
-	
+		return Arrays.hashCode(new Object[]{
+				predName,
+				parameters.size(),
+				negated
+		});
 	}
 
 	@Override
@@ -137,6 +135,10 @@ public class CrySLPredicate extends CrySLLiteral {
 	
 	public CrySLPredicate invertNegation(){
 		return new CrySLPredicate(baseObject, predName, parameters, !negated);
+	}
+
+	public CrySLPredicate toNormalCrySLPredicate() {
+		return new CrySLPredicate(baseObject, predName, parameters, negated, constraint);
 	}
 
 	@Override

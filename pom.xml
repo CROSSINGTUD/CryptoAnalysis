@@ -55,8 +55,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
         <java.version>11</java.version>
+        <skipTests>true</skipTests>
 
-        <spdsVersion>3.2.1</spdsVersion>
+        <spdsVersion>3.2.2</spdsVersion>
         <sootVersion>4.6.0</sootVersion>
         <cryslVersion>3.0.2</cryslVersion>
     </properties>
@@ -85,22 +86,12 @@
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>WPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>boomerangPDS</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>idealPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>synchronizedPDS</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
             <dependency>
@@ -235,6 +226,65 @@
                     </executions>
                 </plugin>
 
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.8.0</version>
+                    <executions>
+                        <execution>
+                            <id>unpack</id>
+                            <goals>
+                                <goal>unpack</goal>
+                            </goals>
+                            <phase>compile</phase>
+                            <configuration>
+                                <artifactItems>
+                                    <artifactItem>
+                                        <groupId>de.darmstadt.tu.crossing</groupId>
+                                        <artifactId>JavaCryptographicArchitecture</artifactId>
+                                        <version>3.1.2</version>
+                                        <classifier>ruleset</classifier>
+                                        <type>zip</type>
+                                        <overWrite>true</overWrite>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
+                                        <includes>**</includes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>de.fraunhofer.iem</groupId>
+                                        <artifactId>BouncyCastle</artifactId>
+                                        <version>3.1.3</version>
+                                        <classifier>ruleset</classifier>
+                                        <type>zip</type>
+                                        <overWrite>true</overWrite>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
+                                        <includes>**</includes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>de.darmstadt.tu.crossing</groupId>
+                                        <artifactId>Tink</artifactId>
+                                        <version>3.1.1</version>
+                                        <classifier>ruleset</classifier>
+                                        <type>zip</type>
+                                        <overWrite>true</overWrite>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
+                                        <includes>**</includes>
+                                    </artifactItem>
+                                    <artifactItem>
+                                        <groupId>de.paderborn.uni</groupId>
+                                        <artifactId>BouncyCastle-JCA</artifactId>
+                                        <version>3.1.3</version>
+                                        <classifier>ruleset</classifier>
+                                        <type>zip</type>
+                                        <overWrite>true</overWrite>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
+                                        <includes>**</includes>
+                                    </artifactItem>
+                                </artifactItems>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
                     test reports -->
                 <plugin>
@@ -243,8 +293,6 @@
                     <version>3.5.2</version>
                     <configuration>
                         <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
-                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
-                        <trimStackTrace>false</trimStackTrace>
                         <reuseForks>false</reuseForks>
                     </configuration>
                     <dependencies>
@@ -263,59 +311,14 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.7.1</version>
                     <executions>
                         <execution>
-                            <id>unpack</id>
                             <goals>
-                                <goal>unpack</goal>
+                                <goal>single</goal>
                             </goals>
-                            <phase>compile</phase>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>de.darmstadt.tu.crossing</groupId>
-                                        <artifactId>JavaCryptographicArchitecture</artifactId>
-                                        <version>3.1.2</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
-                                        <includes>**</includes>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.fraunhofer.iem</groupId>
-                                        <artifactId>BouncyCastle</artifactId>
-                                        <version>3.1.3</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
-                                        <includes>**</includes>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.darmstadt.tu.crossing</groupId>
-                                        <artifactId>Tink</artifactId>
-                                        <version>3.1.1</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
-                                        <includes>**</includes>
-                                    </artifactItem>
-                                    <artifactItem>
-                                        <groupId>de.paderborn.uni</groupId>
-                                        <artifactId>BouncyCastle-JCA</artifactId>
-                                        <version>3.1.3</version>
-                                        <classifier>ruleset</classifier>
-                                        <type>zip</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
-                                        <includes>**</includes>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -356,44 +359,44 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle</directory>
+                            <directory>${basedir}/src/test/resources/test/BouncyCastle</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA</directory>
                         </fileset>
                         <fileset>
                             <directory>apps</directory>
@@ -417,6 +420,7 @@
                             <include>CryptoAnalysis/pom.xml</include>
                             <include>HeadlessAndroidScanner/pom.xml</include>
                             <include>HeadlessJavaScanner/pom.xml</include>
+                            <include>ScannerTests/pom.xml</include>
                         </includes>
                         <sortPom>
                             <encoding>UTF-8</encoding>
@@ -504,6 +508,28 @@
                         <configuration>
                             <tagNameFormat>@{project.version}</tagNameFormat>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <!-- Use -DrunAllTests to enable running all tests -->
+            <id>allTests</id>
+            <activation>
+                <property>
+                    <name>runAllTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

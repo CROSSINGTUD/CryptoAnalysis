@@ -72,20 +72,22 @@ public class CrySLReaderUtils {
 
 	public static CrySLMethod toCrySLMethod(final ForbiddenMethod method) {
 		String name = method.getMethod().getQualifiedName();
+		String declaringClassType = method.getMethod().getDeclaringType().getQualifiedName();
 		List<Map.Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> new SimpleEntry<>(parameter.getSimpleName(), parameter.getType().getQualifiedName()))
 				.collect(Collectors.toList());
-		return new CrySLMethod(name, parameters, resolveObject(null));
+		return new CrySLMethod(name, declaringClassType, parameters, resolveObject(null));
 	}
 
 	public static CrySLMethod toCrySLMethod(final Method method) {
 		String name = method.getMethod().getQualifiedName();
+		String declaringClassType = method.getMethod().getDeclaringType().getQualifiedName();
 		List<Map.Entry<String, String>> parameters = method.getParameters().stream()
 				.map(parameter -> parameter instanceof AnyParameterType
 						? new SimpleEntry<>(CrySLMethod.NO_NAME, CrySLMethod.ANY_TYPE)
 						: resolveObject((parameter.getValue())))
 				.collect(Collectors.toList());
-		return new CrySLMethod(name, parameters, resolveObject(method.getReturn()));
+		return new CrySLMethod(name, declaringClassType, parameters, resolveObject(method.getReturn()));
 	}
 
 	public static CrySLObject toCrySLObject(Object object) {
