@@ -38,11 +38,11 @@ public abstract class AbstractAndroidTest {
                     + File.separator
                     + "src"
                     + File.separator
-                    + "main"
+                    + "test"
                     + File.separator
                     + "resources"
                     + File.separator
-                    + "JavaCryptoGraphicArchitecture"
+                    + "JavaCryptographicArchitecture"
                     + File.separator;
 
     protected HeadlessAndroidScanner createScanner(String apkFileName) {
