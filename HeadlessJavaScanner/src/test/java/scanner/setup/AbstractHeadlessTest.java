@@ -7,15 +7,15 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
-import org.junit.Assert;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import org.junit.Assert;
 
 /**
- * To run these test cases in Eclipse, specify your maven home path as JVM argument: -Dmaven.home=<PATH_TO_MAVEN_BIN>
+ * To run these test cases in Eclipse, specify your maven home path as JVM argument:
+ * -Dmaven.home=<PATH_TO_MAVEN_BIN>
  */
 public abstract class AbstractHeadlessTest {
 
@@ -23,13 +23,26 @@ public abstract class AbstractHeadlessTest {
     private static final String SOOT_UP = "SOOT_UP";
     private static final String OPAL = "OPAL";
 
-    protected static final String RULES_BASE_DIR = "." + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "rules" + File.separator;
+    protected static final String RULES_BASE_DIR =
+            "."
+                    + File.separator
+                    + "src"
+                    + File.separator
+                    + "test"
+                    + File.separator
+                    + "resources"
+                    + File.separator
+                    + "rules"
+                    + File.separator;
 
-    protected static final String JCA_RULESET_PATH = RULES_BASE_DIR + "JavaCryptographicArchitecture" + File.separator;
+    protected static final String JCA_RULESET_PATH =
+            RULES_BASE_DIR + "JavaCryptographicArchitecture" + File.separator;
 
-    protected static final String BOUNCY_CASTLE_RULESET_PATH = RULES_BASE_DIR + "BouncyCastle" + File.separator;
+    protected static final String BOUNCY_CASTLE_RULESET_PATH =
+            RULES_BASE_DIR + "BouncyCastle" + File.separator;
 
-    private final Table<MethodWrapper, Class<?>, Integer> errorMarkerCounts = HashBasedTable.create();
+    private final Table<MethodWrapper, Class<?>, Integer> errorMarkerCounts =
+            HashBasedTable.create();
 
     protected static MavenProject createAndCompile(String mavenProjectPath) {
         MavenProject mi = new MavenProject(mavenProjectPath);
@@ -45,7 +58,11 @@ public abstract class AbstractHeadlessTest {
         String applicationPath = mp.getBuildDirectory();
 
         HeadlessJavaScanner scanner = new HeadlessJavaScanner(applicationPath, rulesetPath);
-        scanner.setSootClassPath(mp.getBuildDirectory() + (mp.getFullClassPath().isEmpty() ? "" : File.pathSeparator + mp.getFullClassPath()));
+        scanner.setSootClassPath(
+                mp.getBuildDirectory()
+                        + (mp.getFullClassPath().isEmpty()
+                                ? ""
+                                : File.pathSeparator + mp.getFullClassPath()));
 
         scanner.setFramework(getFramework());
 
@@ -71,14 +88,16 @@ public abstract class AbstractHeadlessTest {
 
         for (Map.Entry<Class<?>, Integer> entry : spec.getFindings().entrySet()) {
             if (errorMarkerCounts.contains(wrapper, entry.getKey())) {
-                throw new RuntimeException("Error Type cannot be specified multiple times for the same method");
+                throw new RuntimeException(
+                        "Error Type cannot be specified multiple times for the same method");
             }
 
             errorMarkerCounts.put(wrapper, entry.getKey(), entry.getValue());
         }
     }
 
-    protected final void assertErrors(Table<WrappedClass, Method, Set<AbstractError>> collectedErrors) {
+    protected final void assertErrors(
+            Table<WrappedClass, Method, Set<AbstractError>> collectedErrors) {
         StringBuilder report = new StringBuilder();
 
         // Assert True Positives and False Positives
@@ -91,16 +110,31 @@ public abstract class AbstractHeadlessTest {
 
             int difference = expected - actual;
             if (difference < 0) {
-                report.append("\n\tFound ").append(Math.abs(difference)).append(" too many errors of type ").append(errorType.getSimpleName()).append(" in ").append(methodWrapper);
+                report.append("\n\tFound ")
+                        .append(Math.abs(difference))
+                        .append(" too many errors of type ")
+                        .append(errorType.getSimpleName())
+                        .append(" in ")
+                        .append(methodWrapper);
             } else if (difference > 0) {
-                report.append("\n\tFound ").append(difference).append(" too few errors of type ").append(errorType.getSimpleName()).append(" in ").append(methodWrapper);
+                report.append("\n\tFound ")
+                        .append(difference)
+                        .append(" too few errors of type ")
+                        .append(errorType.getSimpleName())
+                        .append(" in ")
+                        .append(methodWrapper);
             }
         }
 
         // Assert False Negatives
-        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : collectedErrors.cellSet()) {
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell :
+                collectedErrors.cellSet()) {
             Method method = cell.getColumnKey();
-            MethodWrapper methodWrapper = new MethodWrapper(method.getDeclaringClass().getName(), method.getName(), method.getParameterTypes().size());
+            MethodWrapper methodWrapper =
+                    new MethodWrapper(
+                            method.getDeclaringClass().getName(),
+                            method.getName(),
+                            method.getParameterTypes().size());
             Set<AbstractError> errors = cell.getValue();
 
             for (AbstractError error : errors) {
@@ -110,7 +144,12 @@ public abstract class AbstractHeadlessTest {
                 }
 
                 int unexpectedErrors = getErrorsOfType(errorType, errors);
-                report.append("\n\tFound ").append(unexpectedErrors).append(" too many errors of type ").append(errorType.getSimpleName()).append(" in ").append(methodWrapper);
+                report.append("\n\tFound ")
+                        .append(unexpectedErrors)
+                        .append(" too many errors of type ")
+                        .append(errorType.getSimpleName())
+                        .append(" in ")
+                        .append(methodWrapper);
             }
         }
 
@@ -119,12 +158,20 @@ public abstract class AbstractHeadlessTest {
         }
     }
 
-    private int getErrorsOfTypeInMethod(MethodWrapper methodWrapper, Class<?> errorClass, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    private int getErrorsOfTypeInMethod(
+            MethodWrapper methodWrapper,
+            Class<?> errorClass,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
         int result = 0;
 
-        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell :
+                errorCollection.cellSet()) {
             Method method = cell.getColumnKey();
-            MethodWrapper collectedMethodWrapper = new MethodWrapper(method.getDeclaringClass().getName(), method.getName(), method.getParameterTypes().size());
+            MethodWrapper collectedMethodWrapper =
+                    new MethodWrapper(
+                            method.getDeclaringClass().getName(),
+                            method.getName(),
+                            method.getParameterTypes().size());
 
             if (!collectedMethodWrapper.equals(methodWrapper)) {
                 continue;

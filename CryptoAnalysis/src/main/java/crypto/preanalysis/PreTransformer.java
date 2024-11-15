@@ -1,13 +1,12 @@
 package crypto.preanalysis;
 
+import java.util.HashMap;
 import soot.BodyTransformer;
 import soot.MethodOrMethodContext;
 import soot.Scene;
 import soot.SootMethod;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.util.queue.QueueReader;
-
-import java.util.HashMap;
 
 public abstract class PreTransformer extends BodyTransformer {
 

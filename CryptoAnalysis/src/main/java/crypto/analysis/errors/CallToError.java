@@ -3,7 +3,6 @@ package crypto.analysis.errors;
 import crypto.analysis.IAnalysisSeed;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -11,7 +10,8 @@ public class CallToError extends AbstractError {
 
     private final Collection<CrySLMethod> requiredMethods;
 
-    public CallToError(IAnalysisSeed seed, CrySLRule rule, Collection<CrySLMethod> requiredMethods) {
+    public CallToError(
+            IAnalysisSeed seed, CrySLRule rule, Collection<CrySLMethod> requiredMethods) {
         super(seed, seed.getOrigin(), rule);
 
         this.requiredMethods = requiredMethods;
@@ -23,18 +23,15 @@ public class CallToError extends AbstractError {
 
     @Override
     public String toErrorMarkerString() {
-        return "Call to one of the methods " +
-                formatMethodNames(requiredMethods) +
-                getObjectType() +
-                " is missing";
+        return "Call to one of the methods "
+                + formatMethodNames(requiredMethods)
+                + getObjectType()
+                + " is missing";
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{
-                super.hashCode(),
-                requiredMethods
-        });
+        return Arrays.hashCode(new Object[] {super.hashCode(), requiredMethods});
     }
 
     @Override
@@ -56,5 +53,4 @@ public class CallToError extends AbstractError {
     public String toString() {
         return "CallToError: " + toErrorMarkerString();
     }
-
 }

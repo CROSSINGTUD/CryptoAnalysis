@@ -27,6 +27,9 @@ public class ForbiddenMethodErrorCountAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + expectedErrorCount + " forbidden method errors, but got " + actualErrorCount;
+        return "Expected "
+                + expectedErrorCount
+                + " forbidden method errors, but got "
+                + actualErrorCount;
     }
 }

@@ -6,17 +6,16 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.typestate.TypestateDefinition;
 import crypto.rules.CrySLRule;
 import crypto.typestate.ForwardSeedQuery;
 import crypto.typestate.TypestateAnalysis;
+import crypto.typestate.TypestateDefinition;
 import ideal.IDEALSeedSolver;
-import typestate.TransitionFunction;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import typestate.TransitionFunction;
 
 public class SeedGenerator {
 
@@ -26,32 +25,34 @@ public class SeedGenerator {
     public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
         this.scanner = scanner;
 
-        TypestateDefinition definition = new TypestateDefinition() {
-            @Override
-            public Collection<CrySLRule> getRuleset() {
-                return rules;
-            }
+        TypestateDefinition definition =
+                new TypestateDefinition() {
+                    @Override
+                    public Collection<CrySLRule> getRuleset() {
+                        return rules;
+                    }
 
-            @Override
-            public CallGraph getCallGraph() {
-                return scanner.getCallGraph();
-            }
+                    @Override
+                    public CallGraph getCallGraph() {
+                        return scanner.getCallGraph();
+                    }
 
-            @Override
-            public DataFlowScope getDataFlowScope() {
-                return scanner.getDataFlowScope();
-            }
+                    @Override
+                    public DataFlowScope getDataFlowScope() {
+                        return scanner.getDataFlowScope();
+                    }
 
-            @Override
-            public Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return scanner.debugger(idealSeedSolver.getSeed());
-            }
+                    @Override
+                    public Debugger<TransitionFunction> getDebugger(
+                            IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
+                        return scanner.debugger(idealSeedSolver.getSeed());
+                    }
 
-            @Override
-            public int getTimeout() {
-                return scanner.getTimeout();
-            }
-        };
+                    @Override
+                    public int getTimeout() {
+                        return scanner.getTimeout();
+                    }
+                };
 
         typestateAnalysis = new TypestateAnalysis(definition);
     }
@@ -65,7 +66,8 @@ public class SeedGenerator {
     }
 
     private Collection<IAnalysisSeed> extractSeedsFromBoomerangResults() {
-        Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results = typestateAnalysis.getResults();
+        Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results =
+                typestateAnalysis.getResults();
 
         if (results == null) {
             return Collections.emptySet();
@@ -73,7 +75,8 @@ public class SeedGenerator {
 
         Collection<IAnalysisSeed> seeds = new HashSet<>();
 
-        for (Map.Entry<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> entry : results.entrySet()) {
+        for (Map.Entry<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> entry :
+                results.entrySet()) {
             if (entry.getValue() == null) {
                 continue;
             }
@@ -86,7 +89,9 @@ public class SeedGenerator {
             if (forwardQuery.hasSpecification()) {
                 CrySLRule rule = forwardQuery.getRule();
 
-                seed = new AnalysisSeedWithSpecification(scanner, stmt, fact, entry.getValue(), rule);
+                seed =
+                        new AnalysisSeedWithSpecification(
+                                scanner, stmt, fact, entry.getValue(), rule);
             } else {
                 seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, entry.getValue());
             }

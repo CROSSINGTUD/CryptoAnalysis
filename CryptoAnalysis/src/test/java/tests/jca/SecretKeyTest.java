@@ -1,10 +1,15 @@
 package tests.jca;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
-import test.assertions.Assertions;
-
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -12,330 +17,324 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.List;
+import org.junit.Test;
+import test.TestConstants;
+import test.UsagePatternTestingFramework;
+import test.assertions.Assertions;
 
 public class SecretKeyTest extends UsagePatternTestingFramework {
 
-	@Override
-	protected String getRulesetPath() {
-		return TestConstants.JCA_RULESET_PATH;
-	}
+    @Override
+    protected String getRulesetPath() {
+        return TestConstants.JCA_RULESET_PATH;
+    }
 
-	@Test
-	public void test() throws GeneralSecurityException {
-		KeyGenerator generator = KeyGenerator.getInstance("AES");
-		SecretKey key = generator.generateKey();
-		byte[] bytes = key.getEncoded();
+    @Test
+    public void test() throws GeneralSecurityException {
+        KeyGenerator generator = KeyGenerator.getInstance("AES");
+        SecretKey key = generator.generateKey();
+        byte[] bytes = key.getEncoded();
 
-		SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
-	}
+        SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
+    }
 
-	@Test
-	public void test2() {
-		byte[] bytes = new byte[32];
+    @Test
+    public void test2() {
+        byte[] bytes = new byte[32];
 
-		SecureRandom random = new SecureRandom();
-		random.nextBytes(bytes);
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(bytes);
 
-		SecureRandom random1 = new SecureRandom();
-		random1.setSeed(bytes);
-	}
-	
-	@Test
-	public void secretKeyUsagePatternTestReqPredOr() throws GeneralSecurityException {
-		SecureRandom secRand = new SecureRandom();
-		Assertions.hasEnsuredPredicate(secRand);
+        SecureRandom random1 = new SecureRandom();
+        random1.setSeed(bytes);
+    }
 
-		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Assertions.extValue(0);
-		keygen.init(128, secRand);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.hasEnsuredPredicate(key);
-	}
-	
-	@Test
-	public void secretKeyUsagePatternTest1Simple() throws GeneralSecurityException {
-		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Assertions.extValue(0);
-		keygen.init(128);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.hasEnsuredPredicate(key);
-		Assertions.mustBeInAcceptingState(keygen);
-	}
-	
-	@Test
-	public void secretKeyUsagePattern2() throws GeneralSecurityException {
-		final byte[] salt = new byte[32];
-		SecureRandom.getInstanceStrong().nextBytes(salt);
+    @Test
+    public void secretKeyUsagePatternTestReqPredOr() throws GeneralSecurityException {
+        SecureRandom secRand = new SecureRandom();
+        Assertions.hasEnsuredPredicate(secRand);
 
-		char[] corPwd = generateRandomPassword();
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
-		Assertions.extValue(1);
-		Assertions.extValue(2);
-		Assertions.extValue(3);
-		Assertions.hasEnsuredPredicate(pbekeyspec);
-		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+        KeyGenerator keygen = KeyGenerator.getInstance("AES");
+        Assertions.extValue(0);
+        keygen.init(128, secRand);
+        Assertions.extValue(0);
+        SecretKey key = keygen.generateKey();
+        Assertions.hasEnsuredPredicate(key);
+    }
 
-		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-		Assertions.extValue(0);
+    @Test
+    public void secretKeyUsagePatternTest1Simple() throws GeneralSecurityException {
+        KeyGenerator keygen = KeyGenerator.getInstance("AES");
+        Assertions.extValue(0);
+        keygen.init(128);
+        Assertions.extValue(0);
+        SecretKey key = keygen.generateKey();
+        Assertions.hasEnsuredPredicate(key);
+        Assertions.mustBeInAcceptingState(keygen);
+    }
 
-		final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-		Assertions.extValue(0);
+    @Test
+    public void secretKeyUsagePattern2() throws GeneralSecurityException {
+        final byte[] salt = new byte[32];
+        SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
-		Assertions.mustBeInAcceptingState(secFac);
-		pbekeyspec.clearPassword();
+        char[] corPwd = generateRandomPassword();
+        final PBEKeySpec pbekeyspec = new PBEKeySpec(corPwd, salt, 65000, 128);
+        Assertions.extValue(1);
+        Assertions.extValue(2);
+        Assertions.extValue(3);
+        Assertions.hasEnsuredPredicate(pbekeyspec);
+        Assertions.mustNotBeInAcceptingState(pbekeyspec);
 
-		byte[] keyMaterial = tmpKey.getEncoded();
-		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
-		Assertions.extValue(1);
-		Assertions.hasEnsuredPredicate(actKey);
+        final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        Assertions.extValue(0);
 
-		c.init(Cipher.ENCRYPT_MODE, actKey);
-		Assertions.extValue(0);
-		Assertions.mustBeInAcceptingState(actKey);
+        final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+        Assertions.extValue(0);
 
-		byte[] encText = c.doFinal("TEST_PLAIN".getBytes(StandardCharsets.UTF_8));
-		Assertions.hasEnsuredPredicate(encText);
-		c.getIV();
+        SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
+        Assertions.mustBeInAcceptingState(secFac);
+        pbekeyspec.clearPassword();
 
-		Assertions.mustBeInAcceptingState(c);
-	}
+        byte[] keyMaterial = tmpKey.getEncoded();
+        final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
+        Assertions.extValue(1);
+        Assertions.hasEnsuredPredicate(actKey);
 
-	@Test
-	public void secretKeyUsagePattern3() throws GeneralSecurityException {
-		final byte[] salt = new byte[32];
-		SecureRandom.getInstanceStrong().nextBytes(salt);
+        c.init(Cipher.ENCRYPT_MODE, actKey);
+        Assertions.extValue(0);
+        Assertions.mustBeInAcceptingState(actKey);
 
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(generateRandomPassword(), salt, 65000, 128);
-		Assertions.extValue(2);
-		Assertions.extValue(3);
-		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+        byte[] encText = c.doFinal("TEST_PLAIN".getBytes(StandardCharsets.UTF_8));
+        Assertions.hasEnsuredPredicate(encText);
+        c.getIV();
 
-		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-		Assertions.extValue(0);
+        Assertions.mustBeInAcceptingState(c);
+    }
 
-		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
-		Assertions.mustBeInAcceptingState(secFac);
-		pbekeyspec.clearPassword();
+    @Test
+    public void secretKeyUsagePattern3() throws GeneralSecurityException {
+        final byte[] salt = new byte[32];
+        SecureRandom.getInstanceStrong().nextBytes(salt);
 
-		byte[] keyMaterial = tmpKey.getEncoded();
-		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
-		Assertions.extValue(1);
-		Assertions.hasEnsuredPredicate(actKey);
-	}
-	
-	public char[] generateRandomPassword() {
-		SecureRandom rnd = new SecureRandom();
-		char[] defaultKey = new char[20];
-		for (int i = 0; i < 20; i++) {
-			defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
-		}
-		return defaultKey;
-	}
-	
-	@Test
-	public void clearPasswordPredicateTest() throws GeneralSecurityException {
-		Encryption encryption = new Encryption();
-		byte[] encrypted = encryption.encryptData(new byte[] {}, "Test");
-		System.out.println(Arrays.toString(encrypted));
-	}
+        final PBEKeySpec pbekeyspec = new PBEKeySpec(generateRandomPassword(), salt, 65000, 128);
+        Assertions.extValue(2);
+        Assertions.extValue(3);
+        Assertions.mustNotBeInAcceptingState(pbekeyspec);
 
-	public static class Encryption {
-		byte[] salt = {15, -12, 94, 0, 12, 3, -65, 73, -1, -84, -35};
+        final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        Assertions.extValue(0);
 
-		private SecretKey generateKey(String password) throws GeneralSecurityException {
-			PBEKeySpec pBEKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
+        SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
+        Assertions.mustBeInAcceptingState(secFac);
+        pbekeyspec.clearPassword();
 
-			SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithSHA256");
-			Assertions.notHasEnsuredPredicate(pBEKeySpec);
-			SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
-			Assertions.notHasEnsuredPredicate(generateSecret);
-			byte[] keyMaterial = generateSecret.getEncoded();
-			Assertions.notHasEnsuredPredicate(keyMaterial);
-			SecretKey encryptionKey = new SecretKeySpec(keyMaterial, "AES");
-			// pBEKeySpec.clearPassword();
-			Assertions.notHasEnsuredPredicate(encryptionKey);
-			return encryptionKey;
-		}
+        byte[] keyMaterial = tmpKey.getEncoded();
+        final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
+        Assertions.extValue(1);
+        Assertions.hasEnsuredPredicate(actKey);
+    }
 
-		private byte[] encrypt(byte[] plainText, SecretKey encryptionKey) throws GeneralSecurityException {
-			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
-			return cipher.doFinal(plainText);
-		}
+    public char[] generateRandomPassword() {
+        SecureRandom rnd = new SecureRandom();
+        char[] defaultKey = new char[20];
+        for (int i = 0; i < 20; i++) {
+            defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
+        }
+        return defaultKey;
+    }
 
-		public byte[] encryptData(byte[] plainText, String password) throws GeneralSecurityException {
-			return encrypt(plainText, generateKey(password));
-		}
-	}
-	
-	@Test
-	public void clearPasswordPredicateTest2() throws GeneralSecurityException {
-		String password = "test";
-		byte[] salt = {15, -12, 94, 0, 12, 3, -65, 73, -1, -84, -35};
-		PBEKeySpec pBEKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
+    @Test
+    public void clearPasswordPredicateTest() throws GeneralSecurityException {
+        Encryption encryption = new Encryption();
+        byte[] encrypted = encryption.encryptData(new byte[] {}, "Test");
+        System.out.println(Arrays.toString(encrypted));
+    }
 
-		SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithSHA256");
-		Assertions.extValue(0);
-		Assertions.notHasEnsuredPredicate(pBEKeySpec);
-		SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
-		Assertions.notHasEnsuredPredicate(generateSecret);
-		byte[] keyMaterial = generateSecret.getEncoded();
-		Assertions.notHasEnsuredPredicate(keyMaterial);
-	}
-	
-	@Test
-	public void secretKeyTest4() throws NoSuchAlgorithmException, DestroyFailedException {
-		KeyGenerator c = KeyGenerator.getInstance("AES");
-		SecretKey key = c.generateKey();
-		Assertions.mustBeInAcceptingState(key);
-		byte[] enc = key.getEncoded();
-		Assertions.mustBeInAcceptingState(key);
-		enc = key.getEncoded();
-		Assertions.hasEnsuredPredicate(enc);
+    public static class Encryption {
+        byte[] salt = {15, -12, 94, 0, 12, 3, -65, 73, -1, -84, -35};
 
-		Assertions.mustBeInAcceptingState(key);
-		key.destroy();
-		Assertions.mustBeInAcceptingState(key);
-	}
-	
-	@Test
-	@SuppressWarnings("ConstantConditions")
-	public void setEntryKeyStore() throws GeneralSecurityException, IOException {
-		KeyStore keyStore = KeyStore.getInstance("PKCS12");
-		keyStore.load(null, null);
-		Assertions.mustBeInAcceptingState(keyStore);
+        private SecretKey generateKey(String password) throws GeneralSecurityException {
+            PBEKeySpec pBEKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
 
-		// Add private and public key (certificate) to keystore
-		keyStore.setEntry("alias", null, null);
-		keyStore.store(null, "Password".toCharArray());
-		Assertions.mustBeInAcceptingState(keyStore);
-	}
-	
-	@Test
-	public void secretKeyUsagePatternTest5() throws GeneralSecurityException {
-		KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		Assertions.extValue(0);
-		keygen.init(1);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.notHasEnsuredPredicate(key);
-		Assertions.mustBeInAcceptingState(keygen);
-		Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		Assertions.extValue(0);
-		cCipher.init(Cipher.ENCRYPT_MODE, key);
-		Assertions.extValue(0);
+            SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithSHA256");
+            Assertions.notHasEnsuredPredicate(pBEKeySpec);
+            SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
+            Assertions.notHasEnsuredPredicate(generateSecret);
+            byte[] keyMaterial = generateSecret.getEncoded();
+            Assertions.notHasEnsuredPredicate(keyMaterial);
+            SecretKey encryptionKey = new SecretKeySpec(keyMaterial, "AES");
+            // pBEKeySpec.clearPassword();
+            Assertions.notHasEnsuredPredicate(encryptionKey);
+            return encryptionKey;
+        }
 
-		byte[] encText = cCipher.doFinal("".getBytes());
-		Assertions.notHasEnsuredPredicate(encText);
-		Assertions.mustBeInAcceptingState(cCipher);
-	}
-	
-	@Test
-	public void secretKeyUsagePatternTest6() throws GeneralSecurityException {
-		Encryptor enc = new Encryptor();
-		byte[] encText = enc.encrypt("Test");
-		Assertions.notHasEnsuredPredicate(encText);
-	}
+        private byte[] encrypt(byte[] plainText, SecretKey encryptionKey)
+                throws GeneralSecurityException {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
+            return cipher.doFinal(plainText);
+        }
 
-	public static class Encryptor {
+        public byte[] encryptData(byte[] plainText, String password)
+                throws GeneralSecurityException {
+            return encrypt(plainText, generateKey(password));
+        }
+    }
 
-		Cipher cipher;
+    @Test
+    public void clearPasswordPredicateTest2() throws GeneralSecurityException {
+        String password = "test";
+        byte[] salt = {15, -12, 94, 0, 12, 3, -65, 73, -1, -84, -35};
+        PBEKeySpec pBEKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
 
-		public Encryptor() throws GeneralSecurityException {
-			KeyGenerator keygen = KeyGenerator.getInstance("AES");
-			keygen.init(128);
-			SecretKey key = keygen.generateKey();
-			this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			this.cipher.init(Cipher.ENCRYPT_MODE, key);
-			this.cipher.getIV();
-		}
+        SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithSHA256");
+        Assertions.extValue(0);
+        Assertions.notHasEnsuredPredicate(pBEKeySpec);
+        SecretKey generateSecret = secretKeyFactory.generateSecret(pBEKeySpec);
+        Assertions.notHasEnsuredPredicate(generateSecret);
+        byte[] keyMaterial = generateSecret.getEncoded();
+        Assertions.notHasEnsuredPredicate(keyMaterial);
+    }
 
-		public byte[] encrypt(String plainText) throws GeneralSecurityException {
-			byte[] encText = this.cipher.doFinal(plainText.getBytes());
-			Assertions.hasEnsuredPredicate(encText);
-			return encText;
-		}
-	}
+    @Test
+    public void secretKeyTest4() throws NoSuchAlgorithmException, DestroyFailedException {
+        KeyGenerator c = KeyGenerator.getInstance("AES");
+        SecretKey key = c.generateKey();
+        Assertions.mustBeInAcceptingState(key);
+        byte[] enc = key.getEncoded();
+        Assertions.mustBeInAcceptingState(key);
+        enc = key.getEncoded();
+        Assertions.hasEnsuredPredicate(enc);
 
-	@Test
-	public void secretKeyUsagePattern7() throws GeneralSecurityException {
-		final byte[] salt = new byte[32];
-		SecureRandom.getInstanceStrong().nextBytes(salt);
+        Assertions.mustBeInAcceptingState(key);
+        key.destroy();
+        Assertions.mustBeInAcceptingState(key);
+    }
 
-		char[] falsePwd = "password".toCharArray();
-		final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
-		Assertions.extValue(0);
-		Assertions.extValue(1);
-		Assertions.extValue(2);
-		Assertions.extValue(3);
-		Assertions.mustNotBeInAcceptingState(pbekeyspec);
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void setEntryKeyStore() throws GeneralSecurityException, IOException {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(null, null);
+        Assertions.mustBeInAcceptingState(keyStore);
 
-		final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        // Add private and public key (certificate) to keystore
+        keyStore.setEntry("alias", null, null);
+        keyStore.store(null, "Password".toCharArray());
+        Assertions.mustBeInAcceptingState(keyStore);
+    }
 
-		final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-		Assertions.extValue(0);
+    @Test
+    public void secretKeyUsagePatternTest5() throws GeneralSecurityException {
+        KeyGenerator keygen = KeyGenerator.getInstance("AES");
+        Assertions.extValue(0);
+        keygen.init(1);
+        Assertions.extValue(0);
+        SecretKey key = keygen.generateKey();
+        Assertions.notHasEnsuredPredicate(key);
+        Assertions.mustBeInAcceptingState(keygen);
+        Cipher cCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Assertions.extValue(0);
+        cCipher.init(Cipher.ENCRYPT_MODE, key);
+        Assertions.extValue(0);
 
-		SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
-		pbekeyspec.clearPassword();
+        byte[] encText = cCipher.doFinal("".getBytes());
+        Assertions.notHasEnsuredPredicate(encText);
+        Assertions.mustBeInAcceptingState(cCipher);
+    }
 
-		byte[] keyMaterial = tmpKey.getEncoded();
-		final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
-		Assertions.extValue(1);
-		Assertions.notHasEnsuredPredicate(actKey);
+    @Test
+    public void secretKeyUsagePatternTest6() throws GeneralSecurityException {
+        Encryptor enc = new Encryptor();
+        byte[] encText = enc.encrypt("Test");
+        Assertions.notHasEnsuredPredicate(encText);
+    }
 
-		c.init(Cipher.ENCRYPT_MODE, actKey);
-		Assertions.extValue(0);
-		Assertions.mustBeInAcceptingState(actKey);
+    public static class Encryptor {
 
-		byte[] encText = c.doFinal("TEST_PLAIN".getBytes(StandardCharsets.UTF_8));
-		Assertions.notHasEnsuredPredicate(encText);
+        Cipher cipher;
 
-		c.getIV();
-		Assertions.mustBeInAcceptingState(c);
-	}
-	
-	@Test
-	public void exceptionFlowTest() {
-		KeyGenerator keygen;
-		try {
-			keygen = KeyGenerator.getInstance("AES");
-			Assertions.extValue(0);
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println("Error while generating key");
-			return;
-		}
-		keygen.init(128);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.mustBeInAcceptingState(keygen);
-		Assertions.hasEnsuredPredicate(key);
-	}
-	
-	@Test
-	public void secretKeyUsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
-		List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
-		KeyGenerator keygen = KeyGenerator.getInstance(s.get(0));
-		keygen.init(128);
-		Assertions.extValue(0);
-		SecretKey key = keygen.generateKey();
-		Assertions.notHasEnsuredPredicate(key);
-		Assertions.mustBeInAcceptingState(keygen);
+        public Encryptor() throws GeneralSecurityException {
+            KeyGenerator keygen = KeyGenerator.getInstance("AES");
+            keygen.init(128);
+            SecretKey key = keygen.generateKey();
+            this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            this.cipher.init(Cipher.ENCRYPT_MODE, key);
+            this.cipher.getIV();
+        }
 
-		Assertions.impreciseValueExtractionErrors(1);
-	}
+        public byte[] encrypt(String plainText) throws GeneralSecurityException {
+            byte[] encText = this.cipher.doFinal(plainText.getBytes());
+            Assertions.hasEnsuredPredicate(encText);
+            return encText;
+        }
+    }
 
+    @Test
+    public void secretKeyUsagePattern7() throws GeneralSecurityException {
+        final byte[] salt = new byte[32];
+        SecureRandom.getInstanceStrong().nextBytes(salt);
+
+        char[] falsePwd = "password".toCharArray();
+        final PBEKeySpec pbekeyspec = new PBEKeySpec(falsePwd, salt, 65000, 128);
+        Assertions.extValue(0);
+        Assertions.extValue(1);
+        Assertions.extValue(2);
+        Assertions.extValue(3);
+        Assertions.mustNotBeInAcceptingState(pbekeyspec);
+
+        final SecretKeyFactory secFac = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+
+        final Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
+        Assertions.extValue(0);
+
+        SecretKey tmpKey = secFac.generateSecret(pbekeyspec);
+        pbekeyspec.clearPassword();
+
+        byte[] keyMaterial = tmpKey.getEncoded();
+        final SecretKeySpec actKey = new SecretKeySpec(keyMaterial, "AES");
+        Assertions.extValue(1);
+        Assertions.notHasEnsuredPredicate(actKey);
+
+        c.init(Cipher.ENCRYPT_MODE, actKey);
+        Assertions.extValue(0);
+        Assertions.mustBeInAcceptingState(actKey);
+
+        byte[] encText = c.doFinal("TEST_PLAIN".getBytes(StandardCharsets.UTF_8));
+        Assertions.notHasEnsuredPredicate(encText);
+
+        c.getIV();
+        Assertions.mustBeInAcceptingState(c);
+    }
+
+    @Test
+    public void exceptionFlowTest() {
+        KeyGenerator keygen;
+        try {
+            keygen = KeyGenerator.getInstance("AES");
+            Assertions.extValue(0);
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error while generating key");
+            return;
+        }
+        keygen.init(128);
+        Assertions.extValue(0);
+        SecretKey key = keygen.generateKey();
+        Assertions.mustBeInAcceptingState(keygen);
+        Assertions.hasEnsuredPredicate(key);
+    }
+
+    @Test
+    public void secretKeyUsagePatternTestConfigFile() throws GeneralSecurityException, IOException {
+        List<String> s = Files.readAllLines(Paths.get("../../../resources/config.txt"));
+        KeyGenerator keygen = KeyGenerator.getInstance(s.get(0));
+        keygen.init(128);
+        Assertions.extValue(0);
+        SecretKey key = keygen.generateKey();
+        Assertions.notHasEnsuredPredicate(key);
+        Assertions.mustBeInAcceptingState(keygen);
+
+        Assertions.impreciseValueExtractionErrors(1);
+    }
 }

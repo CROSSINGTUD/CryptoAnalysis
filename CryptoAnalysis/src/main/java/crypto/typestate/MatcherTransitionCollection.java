@@ -7,12 +7,11 @@ import crypto.rules.CrySLMethod;
 import crypto.rules.StateMachineGraph;
 import crypto.rules.StateNode;
 import crypto.rules.TransitionEdge;
-import typestate.TransitionFunction;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import typestate.TransitionFunction;
 
 public class MatcherTransitionCollection {
 
@@ -73,8 +72,10 @@ public class MatcherTransitionCollection {
 
     private TransitionFunction getDefaultTransitionFunction(ControlFlowGraph.Edge stmt) {
         for (LabeledMatcherTransition matcherTransition : initialTransitions) {
-            if (matcherTransition.from().isInitialState() && matcherTransition.to().toString().equals("0")) {
-                Collection<Statement> preds = stmt.getMethod().getControlFlowGraph().getPredsOf(stmt.getStart());
+            if (matcherTransition.from().isInitialState()
+                    && matcherTransition.to().toString().equals("0")) {
+                Collection<Statement> preds =
+                        stmt.getMethod().getControlFlowGraph().getPredsOf(stmt.getStart());
 
                 for (Statement pred : preds) {
                     ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, stmt.getStart());
@@ -94,7 +95,8 @@ public class MatcherTransitionCollection {
             WrappedState from = createWrappedState(edge.from());
             WrappedState to = createWrappedState(edge.to());
 
-            LabeledMatcherTransition matcherTransition = new LabeledMatcherTransition(from, edge.getLabel(), to);
+            LabeledMatcherTransition matcherTransition =
+                    new LabeledMatcherTransition(from, edge.getLabel(), to);
             transitions.add(matcherTransition);
 
             if (smg.getInitialTransitions().contains(edge)) {
@@ -123,12 +125,14 @@ public class MatcherTransitionCollection {
             // Create the error state, where typestate errors are reported
             WrappedState state = createWrappedState(node);
             ReportingErrorStateNode repErrorState = new ReportingErrorStateNode(existingMethods);
-            LabeledMatcherTransition repErrorTransition = new LabeledMatcherTransition(state, remainingMethods, repErrorState);
+            LabeledMatcherTransition repErrorTransition =
+                    new LabeledMatcherTransition(state, remainingMethods, repErrorState);
             transitions.add(repErrorTransition);
 
             // Once in an error state, never leave it again
             ErrorStateNode errorState = new ErrorStateNode();
-            LabeledMatcherTransition errorTransition = new LabeledMatcherTransition(repErrorState, allMethods, errorState);
+            LabeledMatcherTransition errorTransition =
+                    new LabeledMatcherTransition(repErrorState, allMethods, errorState);
             transitions.add(errorTransition);
         }
     }

@@ -7,7 +7,6 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
-
 import java.util.Collection;
 import java.util.Set;
 
@@ -18,7 +17,10 @@ public class CommandLineReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
+    public void createAnalysisReport(
+            Collection<IAnalysisSeed> seeds,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
+            AnalysisStatistics statistics) {
         String report = ReportGenerator.generateReport(seeds, ruleset, errorCollection, statistics);
         System.out.println(report);
     }

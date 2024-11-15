@@ -9,6 +9,8 @@ import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.rules.CrySLRule;
+import java.util.Arrays;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import soot.jimple.infoflow.InfoflowConfiguration;
@@ -17,16 +19,14 @@ import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 public class HeadlessAndroidScanner extends CryptoScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessAndroidScanner.class);
 
     private final AndroidSettings settings;
 
-    public HeadlessAndroidScanner(String apkFile, String platformsDirectory, String rulesetDirectory) {
+    public HeadlessAndroidScanner(
+            String apkFile, String platformsDirectory, String rulesetDirectory) {
         settings = new AndroidSettings();
 
         settings.setApkFile(apkFile);
@@ -38,7 +38,8 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         this.settings = settings;
     }
 
-    public static HeadlessAndroidScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
+    public static HeadlessAndroidScanner createFromCLISettings(String[] args)
+            throws CryptoAnalysisParserException {
         AndroidSettings androidSettings = new AndroidSettings();
         androidSettings.parseSettingsFromCLI(args);
 
@@ -81,13 +82,14 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         config.setExcludeSootLibraryClasses(true);
 
         SetupApplication flowDroid = new SetupApplication(config);
-        SootConfigForAndroid sootConfigForAndroid = new SootConfigForAndroid() {
-            @Override
-            public void setSootOptions(Options options, InfoflowConfiguration config) {
-                options.set_keep_line_number(true);
-                options.setPhaseOption("jb.sils", "enabled:false");
-            }
-        };
+        SootConfigForAndroid sootConfigForAndroid =
+                new SootConfigForAndroid() {
+                    @Override
+                    public void setSootOptions(Options options, InfoflowConfiguration config) {
+                        options.set_keep_line_number(true);
+                        options.setPhaseOption("jb.sils", "enabled:false");
+                    }
+                };
         flowDroid.setSootConfig(sootConfigForAndroid);
         LOGGER.info("Constructing call graph");
         flowDroid.constructCallgraph();
@@ -103,10 +105,13 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         super.scan();
 
         // Report the findings
-        Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), super.getRuleset());
+        Collection<Reporter> reporters =
+                ReporterFactory.createReporters(
+                        getReportFormats(), getReportDirectory(), super.getRuleset());
 
         for (Reporter reporter : reporters) {
-            reporter.createAnalysisReport(super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
+            reporter.createAnalysisReport(
+                    super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
         }
     }
 
@@ -137,5 +142,4 @@ public class HeadlessAndroidScanner extends CryptoScanner {
     public void setReportDirectory(String reportDirectory) {
         settings.setReportPath(reportDirectory);
     }
-
 }

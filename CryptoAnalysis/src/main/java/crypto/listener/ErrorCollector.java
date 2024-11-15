@@ -18,14 +18,13 @@ import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
-import crypto.listener.IErrorListener;
-
 import java.util.HashSet;
 import java.util.Set;
 
 public class ErrorCollector implements IErrorListener {
 
-    private final Table<WrappedClass, Method, Set<AbstractError>> errorCollection = HashBasedTable.create();
+    private final Table<WrappedClass, Method, Set<AbstractError>> errorCollection =
+            HashBasedTable.create();
 
     public Table<WrappedClass, Method, Set<AbstractError>> getErrorCollection() {
         return errorCollection;

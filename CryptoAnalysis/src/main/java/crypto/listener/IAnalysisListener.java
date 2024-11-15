@@ -7,7 +7,6 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.rules.CrySLRule;
-
 import java.util.Collection;
 
 public interface IAnalysisListener {

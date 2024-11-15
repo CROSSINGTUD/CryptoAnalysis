@@ -42,7 +42,10 @@ public class ErrorSpecification {
             return this;
         }
 
-        public Builder withFPs(Class<?> errorType, int numberOfFindings, @SuppressWarnings("unused") String explanation) {
+        public Builder withFPs(
+                Class<?> errorType,
+                int numberOfFindings,
+                @SuppressWarnings("unused") String explanation) {
             int count = findings.getOrDefault(errorType, 0);
             findings.put(errorType, count + numberOfFindings);
             return this;

@@ -28,7 +28,7 @@ public class MethodWrapper {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{declaringClass, methodName, argsCount});
+        return Arrays.hashCode(new Object[] {declaringClass, methodName, argsCount});
     }
 
     @Override
@@ -38,11 +38,19 @@ public class MethodWrapper {
         if (getClass() != obj.getClass()) return false;
 
         MethodWrapper other = (MethodWrapper) obj;
-        return declaringClass.equals(other.getDeclaringClass()) && methodName.equals(other.getMethodName()) && argsCount == other.getArgsCount();
+        return declaringClass.equals(other.getDeclaringClass())
+                && methodName.equals(other.getMethodName())
+                && argsCount == other.getArgsCount();
     }
 
     @Override
     public String toString() {
-        return "<Class: " + declaringClass + ", Method: " + methodName + ", #Args: " + argsCount + ">";
+        return "<Class: "
+                + declaringClass
+                + ", Method: "
+                + methodName
+                + ", #Args: "
+                + argsCount
+                + ">";
     }
 }

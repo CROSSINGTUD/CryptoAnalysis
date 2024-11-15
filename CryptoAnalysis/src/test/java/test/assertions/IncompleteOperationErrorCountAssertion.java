@@ -11,7 +11,7 @@ public class IncompleteOperationErrorCountAssertion implements Assertion {
         this.expectedErrorCounts = numberOfCounts;
     }
 
-    public void increaseCount(){
+    public void increaseCount() {
         actualErrorCounts++;
     }
 
@@ -27,6 +27,9 @@ public class IncompleteOperationErrorCountAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + expectedErrorCounts + " incomplete operation errors, but got " + actualErrorCounts;
+        return "Expected "
+                + expectedErrorCounts
+                + " incomplete operation errors, but got "
+                + actualErrorCounts;
     }
 }

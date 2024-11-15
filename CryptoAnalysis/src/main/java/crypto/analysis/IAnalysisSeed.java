@@ -9,21 +9,21 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.errors.AbstractError;
 import crypto.rules.CrySLPredicate;
-import typestate.TransitionFunction;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import typestate.TransitionFunction;
 
 public abstract class IAnalysisSeed {
 
     protected final CryptoScanner scanner;
     protected final Collection<AbstractError> errorCollection;
     protected final ForwardBoomerangResults<TransitionFunction> analysisResults;
-    protected final Multimap<Statement, ExpectedPredicateOnSeed> expectedPredicates = HashMultimap.create();
+    protected final Multimap<Statement, ExpectedPredicateOnSeed> expectedPredicates =
+            HashMultimap.create();
 
     protected static final class ExpectedPredicateOnSeed {
 
@@ -31,7 +31,8 @@ public abstract class IAnalysisSeed {
         private final IAnalysisSeed seed;
         private final int paramIndex;
 
-        public ExpectedPredicateOnSeed(CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
+        public ExpectedPredicateOnSeed(
+                CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
             this.predicate = predicate;
             this.seed = seed;
             this.paramIndex = paramIndex;
@@ -51,7 +52,7 @@ public abstract class IAnalysisSeed {
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(new Object[]{predicate, seed, paramIndex});
+            return Arrays.hashCode(new Object[] {predicate, seed, paramIndex});
         }
 
         @Override
@@ -59,7 +60,9 @@ public abstract class IAnalysisSeed {
             if (getClass() != obj.getClass()) return false;
             ExpectedPredicateOnSeed other = (ExpectedPredicateOnSeed) obj;
 
-            return predicate.equals(other.getPredicate()) && seed.equals(other.getSeed()) && paramIndex == other.getParamIndex();
+            return predicate.equals(other.getPredicate())
+                    && seed.equals(other.getSeed())
+                    && paramIndex == other.getParamIndex();
         }
 
         @Override
@@ -73,7 +76,11 @@ public abstract class IAnalysisSeed {
     private String objectId;
     private boolean secure = true;
 
-    public IAnalysisSeed(CryptoScanner scanner, Statement origin, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
+    public IAnalysisSeed(
+            CryptoScanner scanner,
+            Statement origin,
+            Val fact,
+            ForwardBoomerangResults<TransitionFunction> results) {
         this.scanner = scanner;
         this.origin = origin;
         this.fact = fact;
@@ -84,7 +91,8 @@ public abstract class IAnalysisSeed {
 
     public abstract void execute();
 
-    public abstract void expectPredicate(Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex);
+    public abstract void expectPredicate(
+            Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex);
 
     protected Collection<CrySLPredicate> expectedPredicatesAtStatement(Statement statement) {
         Collection<CrySLPredicate> predicates = new HashSet<>();
@@ -93,7 +101,8 @@ public abstract class IAnalysisSeed {
             return predicates;
         }
 
-        Collection<ExpectedPredicateOnSeed> expectedPredicateOnSeeds = expectedPredicates.get(statement);
+        Collection<ExpectedPredicateOnSeed> expectedPredicateOnSeeds =
+                expectedPredicates.get(statement);
         for (ExpectedPredicateOnSeed expectedPredicateOnSeed : expectedPredicateOnSeeds) {
             predicates.add(expectedPredicateOnSeed.getPredicate());
         }
@@ -166,7 +175,6 @@ public abstract class IAnalysisSeed {
             this.objectId = new BigInteger(1, md.digest(this.toString().getBytes())).toString(16);
         }
         return this.objectId;
-
     }
 
     @Override
@@ -194,5 +202,4 @@ public abstract class IAnalysisSeed {
     public String toString() {
         return fact.getVariableName() + " at " + origin;
     }
-
 }

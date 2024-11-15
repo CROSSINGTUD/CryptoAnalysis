@@ -7,7 +7,6 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,7 +22,10 @@ public class TXTReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
+    public void createAnalysisReport(
+            Collection<IAnalysisSeed> seeds,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
+            AnalysisStatistics statistics) {
         String report = ReportGenerator.generateReport(seeds, ruleset, errorCollection, statistics);
 
         String fileName = outputFile.getAbsolutePath() + File.separator + REPORT_NAME + FILE_ENDING;

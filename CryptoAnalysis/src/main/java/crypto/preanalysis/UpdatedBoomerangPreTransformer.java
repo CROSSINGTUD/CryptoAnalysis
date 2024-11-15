@@ -1,6 +1,11 @@
 package crypto.preanalysis;
 
 import com.google.common.collect.Sets;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import soot.Body;
 import soot.Local;
 import soot.RefType;
@@ -31,12 +36,6 @@ import soot.tagkit.LineNumberTag;
 import soot.tagkit.SourceLnPosTag;
 import soot.tagkit.Tag;
 import soot.util.Chain;
-
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class UpdatedBoomerangPreTransformer extends PreTransformer {
 
@@ -112,7 +111,8 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
                             backPropagateSourceLineTags(b, newUnit);
                         }
 
-                        Map.Entry<Integer, Value> entry = new AbstractMap.SimpleEntry<>(i, paramVal);
+                        Map.Entry<Integer, Value> entry =
+                                new AbstractMap.SimpleEntry<>(i, paramVal);
                         newArgs.add(entry);
                     }
                 }
@@ -151,8 +151,10 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
     private void backPropagateSourceLineTags(ValueBox valueBox, AssignStmt assignStmt) {
         Tag tag = valueBox.getTag(SourceLnPosTag.NAME);
         if (tag != null) {
-            // in case that we copied a line number tag from the original statement, we want to remove
-            // that now since the valueBox contains the correct lin number tag for the assign statement as
+            // in case that we copied a line number tag from the original statement, we want to
+            // remove
+            // that now since the valueBox contains the correct lin number tag for the assign
+            // statement as
             // it was before copy propagation
             assignStmt.removeTag(SourceLnPosTag.NAME);
             assignStmt.addTag(tag);
@@ -206,7 +208,8 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
         for (Unit u : methodBody.getUnits()) {
             if (u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                if (isFieldRef(assignStmt.getLeftOp()) && assignStmt.getRightOp() instanceof Constant) {
+                if (isFieldRef(assignStmt.getLeftOp())
+                        && assignStmt.getRightOp() instanceof Constant) {
                     retMap.add(u);
                 }
             }
@@ -229,7 +232,9 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
     }
 
     private boolean isFieldRef(Value op) {
-        return op instanceof InstanceFieldRef || op instanceof StaticFieldRef || op instanceof ArrayRef;
+        return op instanceof InstanceFieldRef
+                || op instanceof StaticFieldRef
+                || op instanceof ArrayRef;
     }
 
     private static void addNulliefiedFields(SootMethod cons) {
@@ -243,7 +248,8 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
             if (f.getType() instanceof RefType) {
                 JAssignStmt jAssignStmt =
                         new JAssignStmt(
-                                new JInstanceFieldRef(cons.getActiveBody().getThisLocal(), f.makeRef()),
+                                new JInstanceFieldRef(
+                                        cons.getActiveBody().getThisLocal(), f.makeRef()),
                                 NullConstant.v());
 
                 jAssignStmt.addTag(new LineNumberTag(2));
@@ -268,7 +274,8 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
         return null;
     }
 
-    private static Set<SootField> getFieldsDefinedInMethod(SootMethod cons, Set<SootMethod> visited) {
+    private static Set<SootField> getFieldsDefinedInMethod(
+            SootMethod cons, Set<SootMethod> visited) {
         Set<SootField> res = Sets.newHashSet();
         if (!visited.add(cons)) return res;
         if (!cons.hasActiveBody()) return res;
@@ -285,7 +292,9 @@ public class UpdatedBoomerangPreTransformer extends PreTransformer {
                 Stmt stmt = (Stmt) u;
                 if (stmt.containsInvokeExpr()) {
                     if (stmt.getInvokeExpr().getMethod().isConstructor()) {
-                        res.addAll(getFieldsDefinedInMethod(stmt.getInvokeExpr().getMethod(), visited));
+                        res.addAll(
+                                getFieldsDefinedInMethod(
+                                        stmt.getInvokeExpr().getMethod(), visited));
                     }
                 }
             }
