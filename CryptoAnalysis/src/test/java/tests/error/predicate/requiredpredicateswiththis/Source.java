@@ -19,5 +19,4 @@ public class Source {
     public TargetAlternative2 generateTargetAlternative2() {
         return new TargetAlternative2();
     }
-
 }

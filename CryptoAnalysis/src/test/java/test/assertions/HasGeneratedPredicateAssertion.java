@@ -4,9 +4,8 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
-import test.Assertion;
-
 import java.util.Collection;
+import test.Assertion;
 
 public class HasGeneratedPredicateAssertion implements Assertion {
 

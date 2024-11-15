@@ -4,11 +4,10 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import crypto.rules.CrySLRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
@@ -18,7 +17,8 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
     private final Collection<String> ruleNames;
     private final Collection<String> ignoredSections;
 
-    public CryptoAnalysisDataFlowScope(Collection<CrySLRule> rules, Collection<String> ignoredSections) {
+    public CryptoAnalysisDataFlowScope(
+            Collection<CrySLRule> rules, Collection<String> ignoredSections) {
         this.ruleNames = new HashSet<>();
         this.ignoredSections = ignoredSections;
 
@@ -94,8 +94,14 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
             }
 
             // Check for wildcards (i.e. *)
-            if (ignoredSection.endsWith(".*") && declaringClass.startsWith(ignoredSection.substring(0, ignoredSection.length() - 2))) {
-                LOGGER.debug("Ignoring dataflow in class " + declaringClass + " and method " + methodName);
+            if (ignoredSection.endsWith(".*")
+                    && declaringClass.startsWith(
+                            ignoredSection.substring(0, ignoredSection.length() - 2))) {
+                LOGGER.debug(
+                        "Ignoring dataflow in class "
+                                + declaringClass
+                                + " and method "
+                                + methodName);
                 return true;
             }
         }

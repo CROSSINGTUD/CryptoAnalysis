@@ -2,18 +2,18 @@ package tests.crysl;
 
 import crypto.cryslhandler.RulesetReader;
 import crypto.rules.CrySLRule;
+import java.io.IOException;
+import java.util.Collection;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.Collection;
-
 public class RulesetReaderTest {
-	
+
     private static final String emptyZipFilePath = "src/test/resources/crySL/empty.zip";
-    private static final String jcaRulesetZipFilePath = "src/test/resources/crySL/JavaCryptographicArchitecture-3.0.1-ruleset.zip";
+    private static final String jcaRulesetZipFilePath =
+            "src/test/resources/crySL/JavaCryptographicArchitecture-3.0.1-ruleset.zip";
     private static final String junkRuleSet = "src/test/resources/crySL/rulesetWithJunk.zip";
 
     @Test
@@ -23,7 +23,7 @@ public class RulesetReaderTest {
 
         Assert.assertEquals(48, rules.size());
     }
-    
+
     @Test
     public void testNumberOfRules() throws IOException {
         RulesetReader reader = new RulesetReader();
@@ -48,7 +48,7 @@ public class RulesetReaderTest {
     }
 
     @Test
-    public void testFileNoCrySLFiles() throws IOException{
+    public void testFileNoCrySLFiles() throws IOException {
         RulesetReader reader = new RulesetReader();
         Collection<CrySLRule> rules = reader.readRulesFromPath(emptyZipFilePath);
 

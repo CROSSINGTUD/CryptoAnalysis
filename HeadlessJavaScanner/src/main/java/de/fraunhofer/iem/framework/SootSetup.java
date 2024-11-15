@@ -7,6 +7,11 @@ import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLRule;
 import de.fraunhofer.iem.scanner.ScannerSettings;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import soot.EntryPoints;
 import soot.G;
 import soot.PackManager;
@@ -14,17 +19,14 @@ import soot.Scene;
 import soot.SootMethod;
 import soot.options.Options;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 public class SootSetup extends FrameworkSetup {
 
     private final String sootClassPath;
 
-    public SootSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm, String sootClassPath) {
+    public SootSetup(
+            String applicationPath,
+            ScannerSettings.CallGraphAlgorithm algorithm,
+            String sootClassPath) {
         super(applicationPath, algorithm);
         this.sootClassPath = sootClassPath;
     }
@@ -49,7 +51,10 @@ public class SootSetup extends FrameworkSetup {
                 Options.v().setPhaseOption("cg.spark", "on");
                 break;
             default:
-                throw new CryptoAnalysisException("Call Graph algorithm " + callGraphAlgorithm.name() + " for Soot not supported");
+                throw new CryptoAnalysisException(
+                        "Call Graph algorithm "
+                                + callGraphAlgorithm.name()
+                                + " for Soot not supported");
         }
 
         Options.v().set_output_format(Options.output_format_none);
@@ -72,7 +77,8 @@ public class SootSetup extends FrameworkSetup {
         }
         // JAVA VERSION 9 && IS A CLASSPATH PROJECT
         else if (getJavaVersion() >= 9 && !isModularProject(applicationPath)) {
-            Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath);
+            Options.v()
+                    .set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + sootClassPath);
         }
         // JAVA VERSION 9 && IS A MODULEPATH PROJECT
         else if (getJavaVersion() >= 9 && isModularProject(applicationPath)) {
@@ -110,7 +116,11 @@ public class SootSetup extends FrameworkSetup {
 
     private static String pathToJCE() {
         // When whole program mode is disabled, the classpath misses jce.jar
-        return System.getProperty("java.home") + File.separator + "lib" + File.separator + "jce.jar";
+        return System.getProperty("java.home")
+                + File.separator
+                + "lib"
+                + File.separator
+                + "jce.jar";
     }
 
     private static int getJavaVersion() {

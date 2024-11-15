@@ -7,7 +7,6 @@ import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.JimpleDeclaredMethod;
 import boomerang.scene.jimple.JimpleMethod;
 import crypto.rules.CrySLRule;
-
 import java.util.Collection;
 import java.util.HashSet;
 

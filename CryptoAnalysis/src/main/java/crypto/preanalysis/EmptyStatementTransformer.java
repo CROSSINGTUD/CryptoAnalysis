@@ -1,6 +1,9 @@
 package crypto.preanalysis;
 
 import crypto.rules.CrySLRule;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
@@ -12,10 +15,6 @@ import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.internal.AbstractStmt;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
 
 public class EmptyStatementTransformer extends PreTransformer {
 
@@ -37,11 +36,13 @@ public class EmptyStatementTransformer extends PreTransformer {
         }
 
         final UnitPatchingChain units = body.getUnits();
-        units.snapshotIterator().forEachRemaining(unit -> {
-            if (isConstructorCall(unit) || isAssignmentSeed(unit)) {
-                units.insertAfter(new EmptyStatement(), unit);
-            }
-        });
+        units.snapshotIterator()
+                .forEachRemaining(
+                        unit -> {
+                            if (isConstructorCall(unit) || isAssignmentSeed(unit)) {
+                                units.insertAfter(new EmptyStatement(), unit);
+                            }
+                        });
     }
 
     private boolean isConstructorCall(Unit unit) {

@@ -4,13 +4,11 @@ import boomerang.scene.Statement;
 
 public abstract class CrySLLiteral implements ISLConstraint {
 
-	private Statement location;
+    private Statement location;
 
-	protected CrySLLiteral() {
-	}
+    protected CrySLLiteral() {}
 
-	public Statement getLocation() {
-		return location;
-	}
-
+    public Statement getLocation() {
+        return location;
+    }
 }

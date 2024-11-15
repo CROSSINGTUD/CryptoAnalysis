@@ -50,5 +50,4 @@ public class AnalysisStatistics {
     public int getEntryPoints() {
         return callGraph.getEntryPoints().size();
     }
-
 }

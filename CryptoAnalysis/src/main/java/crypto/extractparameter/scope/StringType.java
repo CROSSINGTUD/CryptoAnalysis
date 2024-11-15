@@ -3,7 +3,6 @@ package crypto.extractparameter.scope;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import boomerang.scene.WrappedClass;
-
 import java.util.Arrays;
 
 public class StringType implements Type {

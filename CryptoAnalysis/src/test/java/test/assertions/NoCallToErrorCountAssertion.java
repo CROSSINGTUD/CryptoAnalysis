@@ -11,7 +11,7 @@ public class NoCallToErrorCountAssertion implements Assertion {
         this.expectedErrorCount = numberOfCounts;
     }
 
-    public void increaseCount(){
+    public void increaseCount() {
         actualErrorCount++;
     }
 

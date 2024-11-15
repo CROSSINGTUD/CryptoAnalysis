@@ -1,4 +1,3 @@
 package tests.error.instance;
 
-public class SuperClass {
-}
+public class SuperClass {}

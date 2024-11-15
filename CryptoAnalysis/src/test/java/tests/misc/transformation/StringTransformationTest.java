@@ -1,11 +1,10 @@
 package tests.misc.transformation;
 
+import java.util.UUID;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
-
-import java.util.UUID;
 
 public class StringTransformationTest extends UsagePatternTestingFramework {
 

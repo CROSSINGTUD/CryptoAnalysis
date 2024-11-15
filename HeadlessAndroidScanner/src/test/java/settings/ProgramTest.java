@@ -2,10 +2,9 @@ package settings;
 
 import crypto.reporting.Reporter;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
+import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Set;
 
 public class ProgramTest {
 
@@ -15,7 +14,9 @@ public class ProgramTest {
 
     @Test
     public void testMinimalApplication() {
-        HeadlessAndroidScanner scanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner scanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
 
         Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
         Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
@@ -25,7 +26,9 @@ public class ProgramTest {
     @Test
     public void testReportPath() {
         String reportPath = "path/to/report";
-        HeadlessAndroidScanner scanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner scanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         scanner.setReportDirectory(reportPath);
 
         Assert.assertEquals(scanner.getReportDirectory(), reportPath);
@@ -33,32 +36,55 @@ public class ProgramTest {
 
     @Test
     public void testReportFormat() {
-        HeadlessAndroidScanner cmdScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner cmdScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         cmdScanner.setReportFormats(Reporter.ReportFormat.CMD);
         Assert.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
 
-        HeadlessAndroidScanner txtScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner txtScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         txtScanner.setReportFormats(Reporter.ReportFormat.TXT);
         Assert.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
 
-        HeadlessAndroidScanner sarifScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner sarifScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         sarifScanner.setReportFormats(Reporter.ReportFormat.SARIF);
         Assert.assertEquals(sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
 
-        HeadlessAndroidScanner csvScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner csvScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         csvScanner.setReportFormats(Reporter.ReportFormat.CSV);
         Assert.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
 
-        HeadlessAndroidScanner csvSummaryScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner csvSummaryScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         csvSummaryScanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
-        Assert.assertEquals(csvSummaryScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV_SUMMARY));
+        Assert.assertEquals(
+                csvSummaryScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV_SUMMARY));
 
-        HeadlessAndroidScanner annotationScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        HeadlessAndroidScanner annotationScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         annotationScanner.setReportFormats(Reporter.ReportFormat.GITHUB_ANNOTATION);
-        Assert.assertEquals(annotationScanner.getReportFormats(), Set.of(Reporter.ReportFormat.GITHUB_ANNOTATION));
+        Assert.assertEquals(
+                annotationScanner.getReportFormats(),
+                Set.of(Reporter.ReportFormat.GITHUB_ANNOTATION));
 
-        HeadlessAndroidScanner multipleFormatsScanner = new HeadlessAndroidScanner(EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
-        multipleFormatsScanner.setReportFormats(Reporter.ReportFormat.CMD, Reporter.ReportFormat.TXT, Reporter.ReportFormat.CSV);
-        Assert.assertEquals(multipleFormatsScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD, Reporter.ReportFormat.TXT, Reporter.ReportFormat.CSV));
+        HeadlessAndroidScanner multipleFormatsScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        multipleFormatsScanner.setReportFormats(
+                Reporter.ReportFormat.CMD, Reporter.ReportFormat.TXT, Reporter.ReportFormat.CSV);
+        Assert.assertEquals(
+                multipleFormatsScanner.getReportFormats(),
+                Set.of(
+                        Reporter.ReportFormat.CMD,
+                        Reporter.ReportFormat.TXT,
+                        Reporter.ReportFormat.CSV));
     }
 }

@@ -4,9 +4,8 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.HiddenPredicate;
-import test.Assertion;
-
 import java.util.Collection;
+import test.Assertion;
 
 public class HasNotGeneratedPredicateAssertion implements Assertion {
 
@@ -41,6 +40,9 @@ public class HasNotGeneratedPredicateAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Did not expected " + val.getVariableName() + " to generate a predicate @ " + statement;
+        return "Did not expected "
+                + val.getVariableName()
+                + " to generate a predicate @ "
+                + statement;
     }
 }

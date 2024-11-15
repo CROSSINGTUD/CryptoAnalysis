@@ -3,12 +3,10 @@ package test.assertions;
 import boomerang.scene.Statement;
 import test.Assertion;
 
-/**
- * Created by johannesspath on 24.12.17.
- */
-public class MissingTypestateChange implements Assertion{
+/** Created by johannesspath on 24.12.17. */
+public class MissingTypestateChange implements Assertion {
     private final Statement stmt;
-	private int triggered;
+    private int triggered;
 
     public MissingTypestateChange(Statement stmt) {
         this.stmt = stmt;
@@ -29,11 +27,11 @@ public class MissingTypestateChange implements Assertion{
         return "Expected a missing typestate change @ " + stmt;
     }
 
-	public Statement getStmt() {
-		return stmt;
-	}
-	
-	public void trigger(){
-		triggered++;
-	}
+    public Statement getStmt() {
+        return stmt;
+    }
+
+    public void trigger() {
+        triggered++;
+    }
 }

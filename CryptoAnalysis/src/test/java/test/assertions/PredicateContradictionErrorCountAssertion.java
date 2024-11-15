@@ -11,7 +11,7 @@ public class PredicateContradictionErrorCountAssertion implements Assertion {
         this.expectedErrorCounts = numberOfCounts;
     }
 
-    public void increaseCount(){
+    public void increaseCount() {
         actualErrorCounts++;
     }
 
@@ -27,6 +27,9 @@ public class PredicateContradictionErrorCountAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + expectedErrorCounts + " predicate contradiction errors, but got " + actualErrorCounts;
+        return "Expected "
+                + expectedErrorCounts
+                + " predicate contradiction errors, but got "
+                + actualErrorCounts;
     }
 }

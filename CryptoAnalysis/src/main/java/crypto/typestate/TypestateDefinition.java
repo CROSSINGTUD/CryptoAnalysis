@@ -5,9 +5,8 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import crypto.rules.CrySLRule;
 import ideal.IDEALSeedSolver;
-import typestate.TransitionFunction;
-
 import java.util.Collection;
+import typestate.TransitionFunction;
 
 public interface TypestateDefinition {
 
