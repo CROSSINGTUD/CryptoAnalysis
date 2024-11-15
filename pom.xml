@@ -432,20 +432,14 @@
                         </sortPom>
                     </pom>
                     <java>
-                        <removeUnusedImports/>
-                        <importOrder/>
+                        <googleJavaFormat>
+                            <version>1.24.0</version>
+                            <style>AOSP</style>
+                        </googleJavaFormat>
                         <trimTrailingWhitespace/>
                         <endWithNewline/>
-                        <indent>
-                            <spaces>true</spaces>
-                            <spacesPerTab>4</spacesPerTab>
-                        </indent>
-                        <googleJavaFormat>
-                            <version>1.19.1</version>
-                            <style>AOSP</style>
-                            <reflowLongStrings>true</reflowLongStrings>
-                            <formatJavadoc>true</formatJavadoc>
-                        </googleJavaFormat>
+                        <removeUnusedImports/>
+                        <importOrder/>
                         <!--<licenseHeader>
                             <file>${main.basedir}/license_header_plain.txt</file>
                         </licenseHeader>-->

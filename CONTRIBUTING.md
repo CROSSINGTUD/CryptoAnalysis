@@ -26,13 +26,12 @@ We aim for the following workflow:
   - If you want to implement the issue yourself, please state this. 
 2. Create a personal fork of the repository on GitHub. 
 3. In your fork, create a new branch of develop (`git checkout -b mybranch`).
-    - Apply branch naming rules (see above)
+    - Apply branch naming rules (see below)
 3. Make and commit your changes to your branch.
     - Keep changes as small as possible.
-    - Try to follow the [Commit Messages](#commit-messages) guidance.
 4. Add new tests corresponding to your change, if applicable.
   - Minor changes, like fixing typos, adding documentation or non-critical bugfixes may are excluded.
-5. Build the repository with your changes.
+5. Build the repository with your changes (e.g. by `mvn clean package -DrunAllTests`).
     - Make sure that the builds are clean.
     - Make sure that the tests are all passing, including your new tests.
 6. Create a pull request against this repository's `develop` branch.
@@ -47,13 +46,14 @@ We aim for the following workflow:
 
 ## Branches
 
-This repository contains two central branches. The **master** and the **develop** branch. The develop branch is default.
-Both branches are *protected* against direct write access thus Pull Requests are necessary to push into them. 
-Other branches are unprotected and can be created and deleted by a contributer
+This repository contains two central branches. The **master** and the **develop** branch. The develop branch is default. Both branches are *protected* against direct write access, thus Pull Requests are necessary to push into them. Other branches are unprotected and can be created and deleted by a contributer
 
 The `master` branch holds the lastest stable release of the application.
 
-The `develop` branch holds the lastest development version of the application
+The `develop` branch holds the lastest development version of the application.
+
+New branches should *always* target the `develop`. Once, we decide to release a new version, we merge the changes from
+the `develop` branch into the `master` branch and deploy the changes to Maven Central.
 
 ### Branching
 Since `master` and `develop` branches are protected, working with branches is mandatory. 
@@ -62,39 +62,25 @@ In general each branch shall only be responsible for one idea.
 This way we try to minimize the amount of changes in all branches, which makes it easier to review.
 
 ### Naming Branches
-Branch names should be declarative, meaning the name of a branch shall always yield what it's ultimately going to change.
-Because a branch can target different aspects of development (e.g. feature, bug-fix, refactoring, etc.) 
-their names shall have that information also included by adding a PREFIX. 
-The scheme of a branch name look as follows: `PREFIX/tell-what-it-does`
+Branch names should be declarative, meaning the name of a branch shall always yield what it's ultimately going to change. Since a branch can target different aspects of development (e.g. feature, bug-fix, refactoring, etc.) their names shall have that information also included by adding a PREFIX. The scheme of a branch name look as follows: `PREFIX/tell-what-it-does`
 
 We suggest the following prefixes:
 ```
 feature/    // For new features
 fix/        // Fixes a bug
-hotfix/     // Fixes a critical bug in a release build
-migration/  // Moves code from the experiment to application code
-revert/     // Reverts a commit
 ```
 
-## Commit Messages
+### Tests
+Since we have multiple modules, we configured Maven to run subsets of the tests. You have the following options:
 
-Try to format commit messages as follows (based on [A Note About Git Commit Messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)):
+- Use `-DrunAnalysis` to run the tests for the analysis (CryptoAnalysis)
+- Use `-DrunSootTests` to run the tests for the HeadlessJavaScanner with Soot enabled
+- Use `-DrunSootUpTests` to run the tests for the HeadlessJavaScanner with SootUp enabled (not implemented yet)
+- Use `-DrunOpalTests` to run the tests for the HeadlessJavaScanner with Opal enabled (not implemented yet)
+- Use `-DrunAndroidTests` to run the tests for the HeadlessAndroidScanner
+- Use `-DrunAllTests` to run the tests for CryptoAnalysis, HeadlessAndroidScanner and HeadlessJavaScanner (with Soot)
 
-```
-Summarize change in 50 characters or less
-
-Provide more detail after the first line. Leave one blank line below the
-summary and wrap all lines at 72 characters or less.
-
-If the change fixes an issue, leave another blank line after the final
-paragraph and indicate which issue is fixed in the specific format
-below.
-
-Fix #42
-```
-
-Also do your best to factor commits appropriately, not too large with unrelated things in the same commit, and not too small with the same small change applied N times in N different commits.
-
+In all cases, the project is built and the corresponding tests are executed. For example, `mvn clean package -DrunAnalysisTests` builds the project and runs only the tests for the `CryptoAnalysis` module. You can also apply multiple arguments, e.g. `mvn clean package -DrunAnalysisTests -DrunSootTests` runs the tests for the CryptoAnalysis and HeadlessJavaScanner (with Soot) modules.
 
 ---
 *Based on the .NET Runtime contributing guidelines*
