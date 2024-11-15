@@ -1,4 +1,4 @@
-name: Check formatting
+name: Style checker
 description: Check the formatting. Use "mvn spotless:apply" to format the code.
 
 on:
@@ -7,7 +7,7 @@ on:
 jobs:
   check-formatting:
     runs-on: ubuntu-latest
-    name: Check the formatting
+    name: Check the style
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
