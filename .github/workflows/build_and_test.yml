@@ -38,6 +38,27 @@ jobs:
       - name: Run maven command
         run: mvn clean verify -DrunAnalysisTests
 
+  build-and-test-scanner-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      - name: List Android platforms
+        run: |
+          ls -lhR $ANDROID_SDK_ROOT/platforms/
+      - name: Copy Android platforms to test resources
+        run: |
+          cp -R $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/
+      - name: Run maven command
+        run: mvn clean verify -DrunAndroidTests
+
   # Build the HeadlessJavaScanner module and run its tests using Soot
   # as the static analysis framework
   build-and-test-scanner-soot:
