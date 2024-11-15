@@ -8,7 +8,7 @@ public abstract class AbstractAndroidTest {
 
     protected static final String APK_PATH = "." + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "apk" + File.separator;
     protected static final String PLATFORMS_PATH = "." + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "platforms" + File.separator;
-    protected static final String JCA_RULES_DIR = "." + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "JavaCryptoGraphicArchitecture" + File.separator;
+    protected static final String JCA_RULES_DIR = "." + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "JavaCryptographicArchitecture" + File.separator;
 
     protected HeadlessAndroidScanner createScanner(String apkFileName) {
         String apkFile = APK_PATH + apkFileName;
