@@ -37,6 +37,7 @@ jobs:
       - name: Run maven command
         run: mvn clean verify -DrunAnalysisTests
 
+  # Build the HeadlessAndroidScanner module and run its tests
   build-and-test-scanner-android:
     runs-on: ubuntu-latest
 
@@ -62,7 +63,7 @@ jobs:
       #     ls -lhR $ANDROID_SDK_ROOT/platforms/
       # Setup Android SDK
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3.2.2
+        uses: android-actions/setup-android@v2.0.10
       - name: Copy Android platforms to test resources
         run: |
           cp -R $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/
