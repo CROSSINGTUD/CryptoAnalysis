@@ -64,8 +64,6 @@ jobs:
       # Setup Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2.0.10
-        with:
-          log-accepted-android-sdk-licenses: 'false'
       - name: Copy Android platforms to test resources
         run: |
           mv $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/

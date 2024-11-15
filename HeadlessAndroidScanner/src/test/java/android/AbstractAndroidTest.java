@@ -42,6 +42,8 @@ public abstract class AbstractAndroidTest {
                     + File.separator
                     + "resources"
                     + File.separator
+                    + "rules"
+                    + File.separator
                     + "JavaCryptographicArchitecture"
                     + File.separator;
 
