@@ -3,7 +3,6 @@ package crypto.extractparameter;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -31,7 +30,6 @@ public class ExtractedValue {
         return types;
     }
 
-
     @Override
     public String toString() {
         return "Extracted Value: " + val + " with type " + types;
@@ -39,11 +37,7 @@ public class ExtractedValue {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{
-                val,
-                initialStatement,
-                types
-        });
+        return Arrays.hashCode(new Object[] {val, initialStatement, types});
     }
 
     @Override

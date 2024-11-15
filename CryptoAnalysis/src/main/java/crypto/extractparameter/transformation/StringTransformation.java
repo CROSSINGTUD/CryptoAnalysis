@@ -5,28 +5,27 @@ import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.extractparameter.ExtractParameterDefinition;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
 public class StringTransformation extends Transformation {
 
-    private final Collection<String> baseStringSignatures = Arrays.asList(
-            "<java.lang.String: char[] toCharArray()>",
-            "<java.lang.String: byte[] getBytes()>",
-            "<java.lang.String: byte[] getBytes(java.lang.String)>",
-            "<java.lang.String: String toUpperCase()>",
-            "<java.lang.String: String toUpperCase(java.util.Locale)>",
-            "<java.lang.String: String toLowerCase()>",
-            "<java.lang.String: String toLowerCase(java.util.Locale)>"
-    );
+    private final Collection<String> baseStringSignatures =
+            Arrays.asList(
+                    "<java.lang.String: char[] toCharArray()>",
+                    "<java.lang.String: byte[] getBytes()>",
+                    "<java.lang.String: byte[] getBytes(java.lang.String)>",
+                    "<java.lang.String: String toUpperCase()>",
+                    "<java.lang.String: String toUpperCase(java.util.Locale)>",
+                    "<java.lang.String: String toLowerCase()>",
+                    "<java.lang.String: String toLowerCase(java.util.Locale)>");
 
-    private final Collection<String> paramStringSignatures = Arrays.asList(
-            "<org.bouncycastle.util.encoders.Hex: byte[] decode(java.lang.String)>"
-    );
+    private final Collection<String> paramStringSignatures =
+            Arrays.asList("<org.bouncycastle.util.encoders.Hex: byte[] decode(java.lang.String)>");
 
-    private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE = "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
+    private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE =
+            "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
 
     public StringTransformation(ExtractParameterDefinition definition) {
         super(definition);
@@ -71,7 +70,8 @@ public class StringTransformation extends Transformation {
         return Optional.of(allocVal);
     }
 
-    private Optional<AllocVal> evaluateReplaceCharSequenceCharSequence(Statement statement, InvokeExpr invokeExpr) {
+    private Optional<AllocVal> evaluateReplaceCharSequenceCharSequence(
+            Statement statement, InvokeExpr invokeExpr) {
         Val base = invokeExpr.getBase();
         Val arg1 = invokeExpr.getArg(0);
         Val arg2 = invokeExpr.getArg(1);
@@ -93,5 +93,4 @@ public class StringTransformation extends Transformation {
         AllocVal allocVal = createTransformedAllocVal(result, statement);
         return Optional.of(allocVal);
     }
-
 }

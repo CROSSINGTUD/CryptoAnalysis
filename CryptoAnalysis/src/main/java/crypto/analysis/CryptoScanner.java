@@ -19,8 +19,6 @@ import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.rules.CrySLRule;
-import typestate.TransitionFunction;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import typestate.TransitionFunction;
 
 public abstract class CryptoScanner {
 
@@ -78,13 +77,16 @@ public abstract class CryptoScanner {
     protected final void scan() {
         // Check whether the fields have been initialized correctly
         if (ruleset == null) {
-            throw new CryptoAnalysisException("Cannot start the scan. The ruleset must not be null");
+            throw new CryptoAnalysisException(
+                    "Cannot start the scan. The ruleset must not be null");
         }
         if (callGraph == null) {
-            throw new CryptoAnalysisException("Cannot start the scan. The call graph must not be null");
+            throw new CryptoAnalysisException(
+                    "Cannot start the scan. The call graph must not be null");
         }
         if (dataFlowScope == null) {
-            throw new CryptoAnalysisException("Cannot start the scan. The dataflow scope must not be null");
+            throw new CryptoAnalysisException(
+                    "Cannot start the scan. The dataflow scope must not be null");
         }
 
         // Start analysis

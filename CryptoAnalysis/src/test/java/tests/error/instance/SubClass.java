@@ -1,4 +1,3 @@
 package tests.error.instance;
 
-public class SubClass extends SuperClass {
-}
+public class SubClass extends SuperClass {}

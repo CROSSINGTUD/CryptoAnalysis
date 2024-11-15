@@ -25,7 +25,7 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
 
     @Test
     public void testCouldNotExtractInteger() {
-        int randomValue = (int)(Math.random() * 20);
+        int randomValue = (int) (Math.random() * 20);
 
         // For both statements, the value cannot be extracted
         ImpreciseValueExtraction extraction = new ImpreciseValueExtraction(randomValue);
@@ -47,7 +47,7 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
 
     @Test
     public void testCouldNotExtractString() {
-        char[] charValue = new char[]{'v', 'a', 'l', 'u', 'e'};
+        char[] charValue = new char[] {'v', 'a', 'l', 'u', 'e'};
         String stringValue = String.valueOf(charValue);
 
         // For both statements, the value cannot be extracted
@@ -71,10 +71,11 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
     @Test
     @SuppressWarnings("unused")
     public void testCouldNotExtractConditionalValue() {
-        int randomValue = (int)(Math.random() * 20);
+        int randomValue = (int) (Math.random() * 20);
         ImpreciseValueExtraction extraction2 = new ImpreciseValueExtraction(randomValue);
 
-        // Value cannot be extract => Condition cannot be evaluated and call to 'missingCallTo' not known
+        // Value cannot be extract => Condition cannot be evaluated and call to 'missingCallTo' not
+        // known
         Assertions.impreciseValueExtractionErrors(1);
         Assertions.callToErrors(0);
     }

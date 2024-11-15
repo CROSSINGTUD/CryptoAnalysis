@@ -18,15 +18,14 @@ import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
 import de.fraunhofer.iem.framework.SootUpSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import typestate.TransitionFunction;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import typestate.TransitionFunction;
 
 public class HeadlessJavaScanner extends CryptoScanner {
 
@@ -47,7 +46,8 @@ public class HeadlessJavaScanner extends CryptoScanner {
         this.settings = settings;
     }
 
-    public static HeadlessJavaScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
+    public static HeadlessJavaScanner createFromCLISettings(String[] args)
+            throws CryptoAnalysisParserException {
         ScannerSettings scannerSettings = new ScannerSettings();
         scannerSettings.parseSettingsFromCLI(args);
 
@@ -56,7 +56,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
 
     @Override
     public String getRulesetPath() {
-		return settings.getRulesetPath();
+        return settings.getRulesetPath();
     }
 
     @Override
@@ -74,15 +74,25 @@ public class HeadlessJavaScanner extends CryptoScanner {
         if (settings.isVisualization()) {
 
             if (settings.getReportDirectory() == null) {
-                LOGGER.error("The visualization requires the --reportPath option. Disabling visualization...");
+                LOGGER.error(
+                        "The visualization requires the --reportPath option. Disabling visualization...");
                 return new Debugger<>();
             }
 
-            File vizFile = new File(settings.getReportDirectory() + File.separator + "viz" + File.separator + query.var().getVariableName() + ".json");
+            File vizFile =
+                    new File(
+                            settings.getReportDirectory()
+                                    + File.separator
+                                    + "viz"
+                                    + File.separator
+                                    + query.var().getVariableName()
+                                    + ".json");
             boolean created = vizFile.getParentFile().mkdirs();
 
             if (!created) {
-                LOGGER.error("Could not create directory {}. Disabling visualization...", vizFile.getAbsolutePath());
+                LOGGER.error(
+                        "Could not create directory {}. Disabling visualization...",
+                        vizFile.getAbsolutePath());
                 return new Debugger<>();
             }
 
@@ -102,7 +112,9 @@ public class HeadlessJavaScanner extends CryptoScanner {
             case ALIAS_AWARE:
                 return SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
             default:
-                LOGGER.error("Could not set sparsification strategy {}. Defaulting to NONE...", settings.getSparseStrategy());
+                LOGGER.error(
+                        "Could not set sparsification strategy {}. Defaulting to NONE...",
+                        settings.getSparseStrategy());
                 return SparseCFGCache.SparsificationStrategy.NONE;
         }
     }
@@ -120,27 +132,34 @@ public class HeadlessJavaScanner extends CryptoScanner {
 
         // Initialize fields and reporters
         super.initialize();
-        Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), super.getRuleset());
+        Collection<Reporter> reporters =
+                ReporterFactory.createReporters(
+                        getReportFormats(), getReportDirectory(), super.getRuleset());
 
         // Run the analysis
         super.scan();
 
         // Report the errors
         for (Reporter reporter : reporters) {
-            reporter.createAnalysisReport(super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
+            reporter.createAnalysisReport(
+                    super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
         }
     }
 
     private FrameworkSetup setupFramework() {
         switch (settings.getFramework()) {
             case SOOT:
-                return new SootSetup(settings.getApplicationPath(), settings.getCallGraph(), settings.getSootPath());
+                return new SootSetup(
+                        settings.getApplicationPath(),
+                        settings.getCallGraph(),
+                        settings.getSootPath());
             case SOOT_UP:
                 return new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
             case OPAL:
                 return new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
             default:
-                throw new CryptoAnalysisException("Framework " + settings.getFramework().name() + " is not supported");
+                throw new CryptoAnalysisException(
+                        "Framework " + settings.getFramework().name() + " is not supported");
         }
     }
 

@@ -5,7 +5,6 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.extractparameter.ExtractParameterDefinition;
-
 import java.util.Optional;
 
 public class OperatorTransformation extends Transformation {
@@ -46,7 +45,8 @@ public class OperatorTransformation extends Transformation {
         if (allocVal.isArrayAllocationVal()) {
             Val arraySize = allocVal.getArrayAllocationSize();
 
-            AllocVal arrayLengthVal = new TransformedAllocVal(statement.getLeftOp(), statement, arraySize);
+            AllocVal arrayLengthVal =
+                    new TransformedAllocVal(statement.getLeftOp(), statement, arraySize);
             return Optional.of(arrayLengthVal);
         } else if (allocVal.isStringConstant()) {
             int stringLength = allocVal.getStringValue().length();

@@ -2,9 +2,6 @@ package crypto.cryslhandler;
 
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.rules.CrySLRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,6 +15,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RulesetReader {
 
@@ -69,7 +68,8 @@ public class RulesetReader {
     public CrySLRule readRuleFromFile(File file) throws CryptoAnalysisException {
         String fileName = file.getName();
         if (!fileName.endsWith(CRYSL_FILE_ENDING)) {
-            throw new CryptoAnalysisException("The extension of " + fileName + " does not match " + CRYSL_FILE_ENDING);
+            throw new CryptoAnalysisException(
+                    "The extension of " + fileName + " does not match " + CRYSL_FILE_ENDING);
         }
 
         CrySLModelReader modelReader = new CrySLModelReader();
@@ -79,7 +79,8 @@ public class RulesetReader {
     private boolean isZipFile(String path) {
         File file = new File(path);
 
-        // Copied from https://stackoverflow.com/questions/33934178/how-to-identify-a-zip-file-in-java
+        // Copied from
+        // https://stackoverflow.com/questions/33934178/how-to-identify-a-zip-file-in-java
         int fileSignature;
 
         try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
@@ -87,7 +88,9 @@ public class RulesetReader {
         } catch (IOException e) {
             return false;
         }
-        return fileSignature == 0x504B0304 || fileSignature == 0x504B0506 || fileSignature == 0x504B0708;
+        return fileSignature == 0x504B0304
+                || fileSignature == 0x504B0506
+                || fileSignature == 0x504B0708;
     }
 
     public Collection<CrySLRule> readRulesFromZipArchive(String path) throws IOException {
@@ -115,8 +118,8 @@ public class RulesetReader {
         return result;
     }
 
-
-    private CrySLRule readRuleFromZipEntry(ZipEntry entry, ZipFile zipFile, File file) throws CryptoAnalysisException {
+    private CrySLRule readRuleFromZipEntry(ZipEntry entry, ZipFile zipFile, File file)
+            throws CryptoAnalysisException {
         String entryName = entry.getName();
         if (entry.isDirectory() || !entryName.endsWith(CRYSL_FILE_ENDING)) {
             throw new CryptoAnalysisException("ZIP entry " + entryName + " not a CrySL file");
@@ -132,18 +135,22 @@ public class RulesetReader {
 
             return rule;
         } catch (IOException ex) {
-            throw new CryptoAnalysisException("Could not read file " + entry.getName() + " from Zip archive " + ex.getMessage());
+            throw new CryptoAnalysisException(
+                    "Could not read file "
+                            + entry.getName()
+                            + " from Zip archive "
+                            + ex.getMessage());
         }
     }
 
     /**
-     * For zip file entries there is no real URI. Using the raw absolute path of the zip file will cause
-     * an exception when trying to resolve/create the resource in the {@link CrySLModelReader#readRule(File)}
-     * methods. Solution: Create a custom URI with the following scheme:
-     * uri := [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName]
-     * This scheme has the properties that it still is unique system-wide,
-     * The hash will be the same for the same file, so you could know if two rules come from the same ruleset
-     * file, and you still can get the information of the zipped file.
+     * For zip file entries there is no real URI. Using the raw absolute path of the zip file will
+     * cause an exception when trying to resolve/create the resource in the {@link
+     * CrySLModelReader#readRule(File)} methods. Solution: Create a custom URI with the following
+     * scheme: uri := [HexHashedAbsoluteZipFilePath][SystemFileSeparator][ZipEntryName] This scheme
+     * has the properties that it still is unique system-wide, The hash will be the same for the
+     * same file, so you could know if two rules come from the same ruleset file, and you still can
+     * get the information of the zipped file.
      *
      * @param zipFile the File that holds the zip archive
      * @param zipEntry the Zip entry to create the name for
@@ -151,7 +158,6 @@ public class RulesetReader {
      */
     private static String createUniqueZipEntryName(File zipFile, ZipEntry zipEntry) {
         StringBuilder sb = new StringBuilder();
-
 
         MessageDigest messageDigest;
         try {
@@ -171,9 +177,7 @@ public class RulesetReader {
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
-        for (byte b : bytes)
-            sb.append(String.format("%02x", b));
+        for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
-
 }

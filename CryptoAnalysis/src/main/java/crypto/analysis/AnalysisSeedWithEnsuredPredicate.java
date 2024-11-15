@@ -8,15 +8,18 @@ import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.rules.CrySLPredicate;
-import typestate.TransitionFunction;
-
 import java.util.Collection;
+import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
     private final Multimap<Statement, Integer> relevantStatements;
 
-    public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
+    public AnalysisSeedWithEnsuredPredicate(
+            CryptoScanner scanner,
+            Statement statement,
+            Val fact,
+            ForwardBoomerangResults<TransitionFunction> results) {
         super(scanner, statement, fact, results);
 
         relevantStatements = HashMultimap.create();
@@ -50,7 +53,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
     }
 
     @Override
-    public void expectPredicate(Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
+    public void expectPredicate(
+            Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
         CrySLPredicate predToBeEnsured;
         if (predicate.isNegated()) {
             predToBeEnsured = predicate.invertNegation();
@@ -58,7 +62,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
             predToBeEnsured = predicate;
         }
 
-        expectedPredicates.put(statement, new ExpectedPredicateOnSeed(predToBeEnsured, seed, paramIndex));
+        expectedPredicates.put(
+                statement, new ExpectedPredicateOnSeed(predToBeEnsured, seed, paramIndex));
 
         for (Statement relStatement : relevantStatements.keySet()) {
             if (!relStatement.containsInvokeExpr()) {
@@ -81,7 +86,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
                 }
 
                 // TODO from statement
-                Collection<Val> values = otherSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                Collection<Val> values =
+                        otherSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
                 if (values.contains(base)) {
                     for (Integer index : relevantStatements.get(relStatement)) {
 
@@ -100,7 +106,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
     public void addEnsuredPredicate(EnsuredCrySLPredicate predicate) {
         for (Statement statement : expectedPredicates.keySet()) {
-            Collection<ExpectedPredicateOnSeed> predicateOnSeeds = expectedPredicates.get(statement);
+            Collection<ExpectedPredicateOnSeed> predicateOnSeeds =
+                    expectedPredicates.get(statement);
 
             for (ExpectedPredicateOnSeed predOnSeed : predicateOnSeeds) {
                 if (!predOnSeed.getPredicate().equals(predicate.getPredicate())) {
@@ -111,7 +118,8 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
                     continue;
                 }
 
-                AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) predOnSeed.getSeed();
+                AnalysisSeedWithSpecification seedWithSpec =
+                        (AnalysisSeedWithSpecification) predOnSeed.getSeed();
                 seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.getParamIndex());
             }
         }
@@ -135,5 +143,4 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
     public String toString() {
         return "AnalysisSeedWithoutSpec [" + super.toString() + "]";
     }
-
 }

@@ -15,6 +15,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.listener.IErrorListener;
+import java.util.Collection;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
@@ -32,8 +33,6 @@ import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
-
-import java.util.Collection;
 
 public class UsagePatternErrorListener implements IErrorListener {
 
@@ -55,9 +54,10 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(ConstraintError constraintError) {
-        for (Assertion a: assertions) {
+        for (Assertion a : assertions) {
             if (a instanceof ConstraintErrorCountAssertion) {
-                ConstraintErrorCountAssertion errorCountAssertion = (ConstraintErrorCountAssertion) a;
+                ConstraintErrorCountAssertion errorCountAssertion =
+                        (ConstraintErrorCountAssertion) a;
                 errorCountAssertion.increaseCount();
             }
 
@@ -77,7 +77,8 @@ public class UsagePatternErrorListener implements IErrorListener {
             }
 
             if (e instanceof ForbiddenMethodErrorCountAssertion) {
-                ForbiddenMethodErrorCountAssertion assertion = (ForbiddenMethodErrorCountAssertion) e;
+                ForbiddenMethodErrorCountAssertion assertion =
+                        (ForbiddenMethodErrorCountAssertion) e;
                 assertion.increaseCount();
             }
         }
@@ -97,7 +98,8 @@ public class UsagePatternErrorListener implements IErrorListener {
     public void reportError(ImpreciseValueExtractionError impreciseValueExtractionError) {
         for (Assertion a : assertions) {
             if (a instanceof ImpreciseValueExtractionErrorCountAssertion) {
-                ImpreciseValueExtractionErrorCountAssertion assertion = (ImpreciseValueExtractionErrorCountAssertion) a;
+                ImpreciseValueExtractionErrorCountAssertion assertion =
+                        (ImpreciseValueExtractionErrorCountAssertion) a;
                 assertion.increaseCount();
             }
         }
@@ -107,10 +109,12 @@ public class UsagePatternErrorListener implements IErrorListener {
     public void reportError(IncompleteOperationError incompleteOperationError) {
         boolean hasTypestateChangeError = false;
         boolean expectsTypestateChangeError = false;
-        for (Assertion a: assertions) {
+        for (Assertion a : assertions) {
             if (a instanceof MissingTypestateChange) {
                 MissingTypestateChange missingTypestateChange = (MissingTypestateChange) a;
-                if (missingTypestateChange.getStmt().equals(incompleteOperationError.getErrorStatement())) {
+                if (missingTypestateChange
+                        .getStmt()
+                        .equals(incompleteOperationError.getErrorStatement())) {
                     missingTypestateChange.trigger();
                     hasTypestateChangeError = true;
                 }
@@ -122,7 +126,8 @@ public class UsagePatternErrorListener implements IErrorListener {
             }
 
             if (a instanceof IncompleteOperationErrorCountAssertion) {
-                IncompleteOperationErrorCountAssertion errorCountAssertion = (IncompleteOperationErrorCountAssertion) a;
+                IncompleteOperationErrorCountAssertion errorCountAssertion =
+                        (IncompleteOperationErrorCountAssertion) a;
                 errorCountAssertion.increaseCount();
             }
         }
@@ -170,7 +175,8 @@ public class UsagePatternErrorListener implements IErrorListener {
     public void reportError(PredicateContradictionError predicateContradictionError) {
         for (Assertion e : assertions) {
             if (e instanceof PredicateContradictionErrorCountAssertion) {
-                PredicateContradictionErrorCountAssertion a = (PredicateContradictionErrorCountAssertion) e;
+                PredicateContradictionErrorCountAssertion a =
+                        (PredicateContradictionErrorCountAssertion) e;
                 a.increaseCount();
             }
         }
@@ -178,7 +184,7 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(RequiredPredicateError requiredPredicateError) {
-        for (Assertion a: assertions) {
+        for (Assertion a : assertions) {
             if (a instanceof PredicateErrorCountAssertion) {
                 PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;
                 errorCountAssertion.increaseCount();
@@ -188,7 +194,7 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(TypestateError typestateError) {
-        for (Assertion a: assertions) {
+        for (Assertion a : assertions) {
             if (a instanceof TypestateErrorCountAssertion) {
                 TypestateErrorCountAssertion errorCountAssertion = (TypestateErrorCountAssertion) a;
                 errorCountAssertion.increaseCount();
@@ -197,9 +203,7 @@ public class UsagePatternErrorListener implements IErrorListener {
     }
 
     @Override
-    public void reportError(UncaughtExceptionError uncaughtExceptionError) {
-
-    }
+    public void reportError(UncaughtExceptionError uncaughtExceptionError) {}
 
     @Override
     public void reportError(AbstractError error) {

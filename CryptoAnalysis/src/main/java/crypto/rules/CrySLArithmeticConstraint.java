@@ -5,74 +5,83 @@ import java.util.List;
 
 public class CrySLArithmeticConstraint extends CrySLLiteral {
 
-	public enum ArithOp { p, n, m}
-	/* p = +
-	 * n = -
-	 * m = % 
-	 */
-	
-	private final ArithOp operator;
-	private final ICrySLPredicateParameter  left;
-	private final ICrySLPredicateParameter  right;
-	
-	public CrySLArithmeticConstraint(ICrySLPredicateParameter l, ICrySLPredicateParameter  r, ArithOp op) {
-		left = l;
-		right = r;
-		operator = op;
-	}
-	
-	/**
-	 * @return the operator
-	 */
-	public ArithOp getOperator() {
-		return operator;
-	}
+    public enum ArithOp {
+        p,
+        n,
+        m
+    }
 
-	/**
-	 * @return the left
-	 */
-	public ICrySLPredicateParameter getLeft() {
-		return left;
-	}
+    /* p = +
+     * n = -
+     * m = %
+     */
 
-	/**
-	 * @return the right
-	 */
-	public ICrySLPredicateParameter getRight() {
-		return right;
-	}
+    private final ArithOp operator;
+    private final ICrySLPredicateParameter left;
+    private final ICrySLPredicateParameter right;
 
-	public String toString() {
-		return left + " " + (operator.equals(ArithOp.p) ? "+" : (operator.equals(ArithOp.m) ? "%" : "-")) + " " + right;
-	}
+    public CrySLArithmeticConstraint(
+            ICrySLPredicateParameter l, ICrySLPredicateParameter r, ArithOp op) {
+        left = l;
+        right = r;
+        operator = op;
+    }
 
-	@Override
-	public List<String> getInvolvedVarNames() {
-		List<String> varNames = new ArrayList<>();
-		String name = left.getName();
-		if(!isIntOrBoolean(name)) {
-			varNames.add(name);
-		}
-		
-		name = right.getName();
-		if(!isIntOrBoolean(name)) {
-			varNames.add(name);
-		}
-		return varNames;
-	}
+    /**
+     * @return the operator
+     */
+    public ArithOp getOperator() {
+        return operator;
+    }
 
-	private boolean isIntOrBoolean(String name) {
-		try {
-			Integer.parseInt(name);
-			return true;
-		} catch(NumberFormatException ex) {
-			return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
-		}
-	}
+    /**
+     * @return the left
+     */
+    public ICrySLPredicateParameter getLeft() {
+        return left;
+    }
 
-	@Override
-	public String getName() {
-		return toString();
-	}
-	
+    /**
+     * @return the right
+     */
+    public ICrySLPredicateParameter getRight() {
+        return right;
+    }
+
+    public String toString() {
+        return left
+                + " "
+                + (operator.equals(ArithOp.p) ? "+" : (operator.equals(ArithOp.m) ? "%" : "-"))
+                + " "
+                + right;
+    }
+
+    @Override
+    public List<String> getInvolvedVarNames() {
+        List<String> varNames = new ArrayList<>();
+        String name = left.getName();
+        if (!isIntOrBoolean(name)) {
+            varNames.add(name);
+        }
+
+        name = right.getName();
+        if (!isIntOrBoolean(name)) {
+            varNames.add(name);
+        }
+        return varNames;
+    }
+
+    private boolean isIntOrBoolean(String name) {
+        try {
+            Integer.parseInt(name);
+            return true;
+        } catch (NumberFormatException ex) {
+            return name.equalsIgnoreCase("false") || name.equalsIgnoreCase("true");
+        }
+    }
+
+    @Override
+    public String getName() {
+        return toString();
+    }
 }

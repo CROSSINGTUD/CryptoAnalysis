@@ -22,6 +22,14 @@ import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.preanalysis.TransformerSetup;
 import crypto.rules.CrySLRule;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.Assert;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -54,15 +62,6 @@ import test.assertions.TypestateErrorCountAssertion;
 import test.core.selfrunning.AbstractTestingFramework;
 import test.core.selfrunning.ImprecisionException;
 import wpds.impl.Weight;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class UsagePatternTestingFramework extends AbstractTestingFramework {
 
@@ -107,7 +106,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 scanner.init();
 
                 // Setup test listener
-                Collection<Assertion> assertions = extractBenchmarkMethods(JimpleMethod.of(sootTestMethod), scanner.getCallGraph());
+                Collection<Assertion> assertions =
+                        extractBenchmarkMethods(
+                                JimpleMethod.of(sootTestMethod), scanner.getCallGraph());
                 IErrorListener errorListener = new UsagePatternErrorListener(assertions);
                 IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
 
@@ -138,7 +139,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                     errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound));
                 }
                 if (!imprecise.isEmpty()) {
-                    errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise));
+                    errors.append("\nImprecise results: \n")
+                            .append(Joiner.on("\n").join(imprecise));
                 }
                 if (!errors.toString().isEmpty()) {
                     Assert.fail(errors.toString());
@@ -159,14 +161,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
         return new ArrayList<>();
     }
 
-
     private Set<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
         Set<Assertion> results = new HashSet<>();
         extractBenchmarkMethods(testMethod, callGraph, results, new HashSet<>());
         return results;
     }
 
-    private void extractBenchmarkMethods(Method method, CallGraph callGraph, Set<Assertion> queries, Set<Method> visited) {
+    private void extractBenchmarkMethods(
+            Method method, CallGraph callGraph, Set<Assertion> queries, Set<Method> visited) {
         if (visited.contains(method)) {
             return;
         }
@@ -184,7 +186,11 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
             InvokeExpr invokeExpr = statement.getInvokeExpr();
 
-            if (!invokeExpr.getMethod().getDeclaringClass().toString().equals(Assertions.class.getName())) {
+            if (!invokeExpr
+                    .getMethod()
+                    .getDeclaringClass()
+                    .toString()
+                    .equals(Assertions.class.getName())) {
                 continue;
             }
 
@@ -428,7 +434,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             }
 
             // connect DependentErrorAssertions
-            Set<Assertion> depErrors = queries.stream().filter(q -> q instanceof DependentErrorAssertion).collect(Collectors.toSet());
+            Set<Assertion> depErrors =
+                    queries.stream()
+                            .filter(q -> q instanceof DependentErrorAssertion)
+                            .collect(Collectors.toSet());
             depErrors.forEach(ass -> ((DependentErrorAssertion) ass).registerListeners(depErrors));
         }
     }
@@ -447,7 +456,8 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             }
 
             if (curr.containsInvokeExpr()) {
-                String invokedClassName = curr.getInvokeExpr().getMethod().getDeclaringClass().getName();
+                String invokedClassName =
+                        curr.getInvokeExpr().getMethod().getDeclaringClass().getName();
                 String assertionClassName = Assertions.class.getName();
 
                 if (!invokedClassName.equals(assertionClassName)) {

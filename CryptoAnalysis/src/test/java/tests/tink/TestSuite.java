@@ -6,13 +6,11 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	TestAEADCipher.class,
-	TestDeterministicAEADCipher.class,
-	TestDigitalSignature.class, 
-	TestHybridEncryption.class, 
-	TestMAC.class,
-	TestStreamingAEADCipher.class
+    TestAEADCipher.class,
+    TestDeterministicAEADCipher.class,
+    TestDigitalSignature.class,
+    TestHybridEncryption.class,
+    TestMAC.class,
+    TestStreamingAEADCipher.class
 })
-public class TestSuite {
-
-}
+public class TestSuite {}

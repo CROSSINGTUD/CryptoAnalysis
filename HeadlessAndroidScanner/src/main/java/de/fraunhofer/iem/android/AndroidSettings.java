@@ -2,12 +2,11 @@ package de.fraunhofer.iem.android;
 
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
-import picocli.CommandLine;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
+import picocli.CommandLine;
 
 @CommandLine.Command(mixinStandardHelpOptions = true)
 public class AndroidSettings implements Callable<Integer> {
@@ -26,7 +25,9 @@ public class AndroidSettings implements Callable<Integer> {
 
     @CommandLine.Option(
             names = {"--rulesDir"},
-            description = {"The path to ruleset directory. Can be a simple directory or a ZIP archive"},
+            description = {
+                "The path to ruleset directory. Can be a simple directory or a ZIP archive"
+            },
             required = true)
     private String rulesetDirectory = null;
 
@@ -38,8 +39,9 @@ public class AndroidSettings implements Callable<Integer> {
     @CommandLine.Option(
             names = {"--reportFormat"},
             split = ",",
-            description = "The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY (default: CMD)."
-                    + " Multiple formats should be split with a comma (e.g. CMD,TXT,CSV)")
+            description =
+                    "The format of the report. Possible values are CMD, TXT, SARIF, CSV and CSV_SUMMARY (default: CMD)."
+                            + " Multiple formats should be split with a comma (e.g. CMD,TXT,CSV)")
     private String[] reportFormat = null;
 
     private Collection<Reporter.ReportFormat> reportFormats;
@@ -88,8 +90,11 @@ public class AndroidSettings implements Callable<Integer> {
                     reportFormats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
                     break;
                 default:
-                    throw new CryptoAnalysisParserException("Incorrect value " + reportFormatValue + " for --reportFormat option. "
-                            + "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
+                    throw new CryptoAnalysisParserException(
+                            "Incorrect value "
+                                    + reportFormatValue
+                                    + " for --reportFormat option. "
+                                    + "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
             }
         }
     }

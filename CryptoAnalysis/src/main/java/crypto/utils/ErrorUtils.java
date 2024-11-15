@@ -4,7 +4,6 @@ import boomerang.scene.Method;
 import boomerang.scene.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -15,13 +14,17 @@ import java.util.Set;
 
 public class ErrorUtils {
 
-    public static Map<String, Integer> getErrorCounts(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+    public static Map<String, Integer> getErrorCounts(
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
         Map<String, Integer> errorCounts = new HashMap<>();
 
-        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell :
+                errorCollection.cellSet()) {
             for (AbstractError error : cell.getValue()) {
                 String errorClass = error.getClass().getSimpleName();
-                errorCounts.put(errorClass, errorCounts.containsKey(errorClass) ? errorCounts.get(errorClass) + 1 : 1);
+                errorCounts.put(
+                        errorClass,
+                        errorCounts.containsKey(errorClass) ? errorCounts.get(errorClass) + 1 : 1);
             }
         }
 

@@ -26,12 +26,11 @@ import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.rules.CrySLRule;
 import crypto.rules.ISLConstraint;
-import typestate.TransitionFunction;
-import wpds.impl.Weight;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import typestate.TransitionFunction;
+import wpds.impl.Weight;
 
 public class AnalysisReporter {
 
@@ -121,7 +120,8 @@ public class AnalysisReporter {
         }
     }
 
-    public void extractedBoomerangResults(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+    public void extractedBoomerangResults(
+            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
         for (IResultsListener listener : resultsListeners) {
             listener.extractedBoomerangResults(query, results);
         }
@@ -181,7 +181,11 @@ public class AnalysisReporter {
         }
     }
 
-    public void onGeneratedPredicate(IAnalysisSeed fromSeed, EnsuredCrySLPredicate predicate, IAnalysisSeed toPred, Statement statement) {
+    public void onGeneratedPredicate(
+            IAnalysisSeed fromSeed,
+            EnsuredCrySLPredicate predicate,
+            IAnalysisSeed toPred,
+            Statement statement) {
         for (IResultsListener listener : resultsListeners) {
             listener.generatedPredicate(fromSeed, predicate, toPred, statement);
         }
@@ -193,25 +197,32 @@ public class AnalysisReporter {
         }
     }
 
-    public void typestateAnalysisResults(IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results) {
+    public void typestateAnalysisResults(
+            IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.typestateAnalysisResults(seed, results);
         }
     }
 
-    public void collectedValues(IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
+    public void collectedValues(
+            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.collectedValues(seed, collectedValues);
         }
     }
 
-    public void checkedConstraints(IAnalysisSeed seed, Collection<ISLConstraint> constraints, Collection<AbstractError> errors) {
+    public void checkedConstraints(
+            IAnalysisSeed seed,
+            Collection<ISLConstraint> constraints,
+            Collection<AbstractError> errors) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.checkedConstraints(seed, constraints, errors);
         }
     }
 
-    public void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+    public void ensuredPredicates(
+            IAnalysisSeed seed,
+            Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
         for (IResultsListener listener : resultsListeners) {
             listener.ensuredPredicates(seed, predicates);
         }
@@ -238,7 +249,8 @@ public class AnalysisReporter {
                 HardCodedError hardCodedError = (HardCodedError) error;
                 errorListener.reportError(hardCodedError);
             } else if (error instanceof ImpreciseValueExtractionError) {
-                ImpreciseValueExtractionError impreciseError = (ImpreciseValueExtractionError) error;
+                ImpreciseValueExtractionError impreciseError =
+                        (ImpreciseValueExtractionError) error;
                 errorListener.reportError(impreciseError);
             } else if (error instanceof IncompleteOperationError) {
                 IncompleteOperationError incompleteError = (IncompleteOperationError) error;
@@ -253,7 +265,8 @@ public class AnalysisReporter {
                 NoCallToError noCallToError = (NoCallToError) error;
                 errorListener.reportError(noCallToError);
             } else if (error instanceof PredicateContradictionError) {
-                PredicateContradictionError contradictionError = (PredicateContradictionError) error;
+                PredicateContradictionError contradictionError =
+                        (PredicateContradictionError) error;
                 errorListener.reportError(contradictionError);
             } else if (error instanceof RequiredPredicateError) {
                 RequiredPredicateError predicateError = (RequiredPredicateError) error;

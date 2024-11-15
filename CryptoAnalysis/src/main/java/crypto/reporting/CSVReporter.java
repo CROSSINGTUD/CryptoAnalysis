@@ -9,7 +9,6 @@ import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
 import crypto.rules.CrySLRule;
 import crypto.utils.ErrorUtils;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,7 +26,14 @@ public class CSVReporter extends Reporter {
 
     /** Headers for the errors */
     private enum Headers {
-        ErrorId, ErrorType, ViolatingClass, Class, Method, Statement, LineNumber, Message
+        ErrorId,
+        ErrorType,
+        ViolatingClass,
+        Class,
+        Method,
+        Statement,
+        LineNumber,
+        Message
     }
 
     public CSVReporter(String outputDir, Collection<CrySLRule> ruleset) throws IOException {
@@ -35,28 +41,34 @@ public class CSVReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
+    public void createAnalysisReport(
+            Collection<IAnalysisSeed> seeds,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
+            AnalysisStatistics statistics) {
         int idCount = 0;
         List<String> lineContents = new ArrayList<>();
 
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
             String className = wrappedClass.getName();
 
-            for (Map.Entry<Method, Set<AbstractError>> entry : errorCollection.row(wrappedClass).entrySet()) {
+            for (Map.Entry<Method, Set<AbstractError>> entry :
+                    errorCollection.row(wrappedClass).entrySet()) {
                 String methodName = entry.getKey().toString();
 
-                List<AbstractError> orderedErrors = ErrorUtils.orderErrorsByLineNumber(entry.getValue());
+                List<AbstractError> orderedErrors =
+                        ErrorUtils.orderErrorsByLineNumber(entry.getValue());
                 for (AbstractError error : orderedErrors) {
-                    List<String> lineFields = Arrays.asList(
-                            String.valueOf(idCount),                // id
-                            error.getClass().getSimpleName(),       // error type
-                            error.getRule().getClassName(),         // violating class
-                            className,                              // class
-                            methodName,                             // method
-                            error.getErrorStatement().toString(),   // statement
-                            String.valueOf(error.getLineNumber()),  // line number
-                            error.toErrorMarkerString()             // message
-                    );
+                    List<String> lineFields =
+                            Arrays.asList(
+                                    String.valueOf(idCount), // id
+                                    error.getClass().getSimpleName(), // error type
+                                    error.getRule().getClassName(), // violating class
+                                    className, // class
+                                    methodName, // method
+                                    error.getErrorStatement().toString(), // statement
+                                    String.valueOf(error.getLineNumber()), // line number
+                                    error.toErrorMarkerString() // message
+                                    );
 
                     String line = Joiner.on(CSV_SEPARATOR).join(lineFields);
                     lineContents.add(line);

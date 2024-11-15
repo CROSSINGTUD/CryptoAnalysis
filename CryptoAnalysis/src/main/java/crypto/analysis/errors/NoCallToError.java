@@ -29,5 +29,4 @@ public class NoCallToError extends AbstractError {
     public String toString() {
         return "NoCallToError: " + toErrorMarkerString();
     }
-
 }

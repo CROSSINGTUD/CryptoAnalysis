@@ -8,10 +8,9 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.rules.CrySLRule;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 
 public class AnalysisPrinter implements IAnalysisListener {
 
@@ -115,22 +114,33 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     @Override
     public void onTypestateAnalysisTimeout(IAnalysisSeed analysisSeed) {
-        LOGGER.warn("Seed {} timed out while typestate analysis. Consider increasing the timeout with '--timeout' or 'setTimeout'", analysisSeed);
+        LOGGER.warn(
+                "Seed {} timed out while typestate analysis. Consider increasing the timeout with '--timeout' or 'setTimeout'",
+                analysisSeed);
     }
 
     @Override
     public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
-        LOGGER.debug("Triggering Boomerang query for value {} @ {}", query.var(), query.cfgEdge().getTarget());
+        LOGGER.debug(
+                "Triggering Boomerang query for value {} @ {}",
+                query.var(),
+                query.cfgEdge().getTarget());
     }
 
     @Override
     public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
-        LOGGER.debug("Finished Boomerang query for value {} @ {}", query.var(), query.cfgEdge().getTarget());
+        LOGGER.debug(
+                "Finished Boomerang query for value {} @ {}",
+                query.var(),
+                query.cfgEdge().getTarget());
     }
 
     @Override
     public void onExtractParameterAnalysisTimeout(Val param, Statement statement) {
-        LOGGER.warn("Seed timed out while extracting parameter {} @ {}. Consider increasing the timeout with '--timeout' or 'setTimeout'", param, statement);
+        LOGGER.warn(
+                "Seed timed out while extracting parameter {} @ {}. Consider increasing the timeout with '--timeout' or 'setTimeout'",
+                param,
+                statement);
     }
 
     @Override

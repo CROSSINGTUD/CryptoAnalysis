@@ -4,7 +4,6 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Type;
 import crypto.rules.CrySLMethod;
 import crypto.rules.CrySLRule;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,7 +12,8 @@ import java.util.Map;
 
 public class MatcherUtils {
 
-    public static Collection<CrySLMethod> getMatchingCryslMethodsToDeclaredMethod(CrySLRule rule, DeclaredMethod declaredMethod) {
+    public static Collection<CrySLMethod> getMatchingCryslMethodsToDeclaredMethod(
+            CrySLRule rule, DeclaredMethod declaredMethod) {
         Collection<CrySLMethod> matchingMethods = new HashSet<>();
         for (CrySLMethod method : rule.getEvents()) {
             if (matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {
@@ -23,12 +23,14 @@ public class MatcherUtils {
         return matchingMethods;
     }
 
-    public static boolean matchCryslMethodAndDeclaredMethod(CrySLMethod cryslMethod, DeclaredMethod declaredMethod) {
+    public static boolean matchCryslMethodAndDeclaredMethod(
+            CrySLMethod cryslMethod, DeclaredMethod declaredMethod) {
         // Compare method names
         String cryslName = cryslMethod.getShortMethodName();
         String declaredName = declaredMethod.getName();
 
-        // Check for constructors: CryslMethod stores the actual class name, DeclaredMethod stores '<init>'
+        // Check for constructors: CryslMethod stores the actual class name, DeclaredMethod stores
+        // '<init>'
         if (declaredMethod.isConstructor()) {
             // Strip the plain class name: java.lang.Object -> Object
             String className = declaredMethod.getDeclaringClass().getName();
@@ -42,7 +44,8 @@ public class MatcherUtils {
         // Compare class names
         String cryslClassName = cryslMethod.getDeclaringClassName();
         Type declaringClassType = declaredMethod.getDeclaringClass().getType();
-        if (!cryslClassName.equals(declaringClassType.toString()) && !declaringClassType.isSupertypeOf(cryslClassName)) {
+        if (!cryslClassName.equals(declaringClassType.toString())
+                && !declaringClassType.isSupertypeOf(cryslClassName)) {
             return false;
         }
 
@@ -53,7 +56,8 @@ public class MatcherUtils {
         return matchParameters(cryslParameters, declaredParameters);
     }
 
-    public static boolean matchParameters(List<Map.Entry<String, String>> cryslParameters, List<Type> declaredParameters) {
+    public static boolean matchParameters(
+            List<Map.Entry<String, String>> cryslParameters, List<Type> declaredParameters) {
         if (cryslParameters.size() != declaredParameters.size()) {
             return false;
         }
@@ -63,7 +67,8 @@ public class MatcherUtils {
                 continue;
             }
 
-            // Soot does not track generic types, so we are required to remove <...> from the parameter
+            // Soot does not track generic types, so we are required to remove <...> from the
+            // parameter
             String cryslParameter = cryslParameters.get(i).getValue().replaceAll("<.*?>", "");
             Type parameterType = declaredParameters.get(i);
             String declaredParameter = parameterType.toString();

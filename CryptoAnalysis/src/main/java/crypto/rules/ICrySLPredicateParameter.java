@@ -1,7 +1,6 @@
 package crypto.rules;
 
 public interface ICrySLPredicateParameter {
-	
-	String getName();
 
+    String getName();
 }
