@@ -28,40 +28,6 @@ public class ErrorUtils {
         return errorCounts;
     }
 
-    public static int getErrorsOfTypeInMethod(String method, Class<?> errorClass, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
-        int result = 0;
-
-        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
-            String methodName = cell.getColumnKey().toString();
-
-            if (!methodName.equals(method)) {
-                continue;
-            }
-
-            for (AbstractError error : cell.getValue()) {
-                String errorName = error.getClass().getSimpleName();
-
-                if (errorName.equals(errorClass.getSimpleName())) {
-                    result++;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public static int getErrorsOfType(Class<?> errorType, Collection<AbstractError> errors) {
-        int result = 0;
-
-        for (AbstractError error : errors) {
-            if (error.getClass().getSimpleName().equals(errorType.getSimpleName())) {
-                result++;
-            }
-        }
-
-        return result;
-    }
-
     public static List<AbstractError> orderErrorsByLineNumber(Collection<AbstractError> errors) {
         List<AbstractError> errorList = new ArrayList<>(errors);
         errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));

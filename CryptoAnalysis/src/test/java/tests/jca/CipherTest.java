@@ -131,14 +131,12 @@ public class CipherTest extends UsagePatternTestingFramework {
 	@Test
 	public void cipherUsagePatternTestInter1() throws GeneralSecurityException {
 		SecretKey key = generateKey();
-		Assertions.hasEnsuredPredicate(key);
 		encrypt(key);
 	}
 
 	@Test
 	public void cipherUsagePatternTestInter2() throws GeneralSecurityException {
 		SecretKey key = generateKey();
-		Assertions.hasEnsuredPredicate(key);
 		forward(key);
 	}
 
@@ -150,7 +148,6 @@ public class CipherTest extends UsagePatternTestingFramework {
 	@Test
 	public void cipherUsagePatternTestInter3() throws GeneralSecurityException {
 		SecretKey key = generateKey();
-		Assertions.hasEnsuredPredicate(key);
 		rebuild(key);
 	}
 
@@ -162,7 +159,6 @@ public class CipherTest extends UsagePatternTestingFramework {
 	@Test
 	public void cipherUsagePatternTestInter4() throws GeneralSecurityException {
 		SecretKey key = generateKey();
-		Assertions.hasEnsuredPredicate(key);
 		wrongRebuild(key);
 	}
 
@@ -202,6 +198,7 @@ public class CipherTest extends UsagePatternTestingFramework {
 		keygen.init(128);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();
+		Assertions.hasEnsuredPredicate(key);
 
 		Assertions.mustBeInAcceptingState(keygen);
 		return key;
@@ -486,10 +483,10 @@ public class CipherTest extends UsagePatternTestingFramework {
 	@Test
 	public void cipherUsagePatternTest6() throws GeneralSecurityException {
 		SecureRandom keyRand = SecureRandom.getInstanceStrong();
+		Assertions.hasEnsuredPredicate(keyRand);
 
 		KeyGenerator keygen = KeyGenerator.getInstance("AES");
 		Assertions.extValue(0);
-		Assertions.hasEnsuredPredicate(keyRand);
 		keygen.init(128, keyRand);
 		Assertions.extValue(0);
 		SecretKey key = keygen.generateKey();

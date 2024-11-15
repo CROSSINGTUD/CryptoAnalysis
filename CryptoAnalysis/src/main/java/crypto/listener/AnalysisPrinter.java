@@ -7,6 +7,7 @@ import com.google.common.base.Stopwatch;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
+import crypto.rules.CrySLRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,16 @@ public class AnalysisPrinter implements IAnalysisListener {
         statistics.setAnalysisTime(analysisWatch.toString());
 
         LOGGER.info("Finished Analysis in {}", analysisWatch);
+    }
+
+    @Override
+    public void beforeReadingRuleset(String rulesetPath) {
+        LOGGER.info("Reading rules from {}", rulesetPath);
+    }
+
+    @Override
+    public void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> ruleset) {
+        LOGGER.info("Found {} rules in {}", ruleset.size(), rulesetPath);
     }
 
     @Override

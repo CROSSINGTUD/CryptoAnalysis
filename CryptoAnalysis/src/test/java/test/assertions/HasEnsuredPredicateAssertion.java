@@ -7,20 +7,19 @@ import crypto.analysis.HiddenPredicate;
 import test.Assertion;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class HasEnsuredPredicateAssertion implements Assertion {
 
 	private final Statement stmt;
-	private final Collection<Val> val;
+	private final Val val;
 	private final String predName;
 	private boolean satisfied;
 
-	public HasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Val val) {
 		this(stmt, val, null);
 	}
 
-	public HasEnsuredPredicateAssertion(Statement stmt, Collection<Val> val, String predName) {
+	public HasEnsuredPredicateAssertion(Statement stmt, Val val, String predName) {
 		this.stmt = stmt;
 		this.val = val;
 		this.predName = predName;
@@ -41,8 +40,8 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 		return stmt;
 	}
 
-	public void reported(Val seed, EnsuredCrySLPredicate pred) {
-		if (!val.contains(seed) || pred instanceof HiddenPredicate) {
+	public void reported(Collection<Val> seed, EnsuredCrySLPredicate pred) {
+		if (!seed.contains(val) || pred instanceof HiddenPredicate) {
 			return;
 		}
 
@@ -53,12 +52,10 @@ public class HasEnsuredPredicateAssertion implements Assertion {
 
 	@Override
 	public String toString() {
-		Collection<String> aliases = val.stream().map(Val::getVariableName).collect(Collectors.toList());
-
 		if (predName == null) {
-			return "Expected a predicate for " + aliases +" @ " + stmt;
+			return "Expected a predicate for " + val.getVariableName() +" @ " + stmt;
 		} else {
-			return "Expected '" + predName + "' ensured on " + aliases + " @ " + stmt;
+			return "Expected '" + predName + "' ensured on " + val.getVariableName() + " @ " + stmt;
 		}
 	}
 }
