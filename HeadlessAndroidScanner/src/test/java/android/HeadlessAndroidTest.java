@@ -6,7 +6,6 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;
@@ -16,7 +15,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     @Test
     public void testFalseCrypt() {
         // From https://github.com/secure-software-engineering/FalseCrypt
-        HeadlessAndroidScanner scanner = createScanner("falsecrypt.apk");
+        HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
         scanner.run();
 
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
@@ -200,5 +199,4 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
 
         Assert.assertFalse(errors.isEmpty());
     }
-
 }

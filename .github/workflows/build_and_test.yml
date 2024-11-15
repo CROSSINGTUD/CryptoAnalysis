@@ -44,15 +44,26 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-
+      # Set up Java version
       - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
-      - name: List Android platforms
-        run: |
-          ls -lhR $ANDROID_SDK_ROOT/platforms/
+      # Restores Maven dependecies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      # - name: List Android platforms
+      #   run: |
+      #     ls -lhR $ANDROID_SDK_ROOT/platforms/
+      # Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3.2.2
       - name: Copy Android platforms to test resources
         run: |
           cp -R $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/
