@@ -4,8 +4,7 @@ import boomerang.ForwardQuery;
 import boomerang.scene.AllocVal;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
-import crypto.utils.SootUtils;
+import crypto.extractparameter.ExtractParameterDefinition;
 
 import java.util.Optional;
 
@@ -45,7 +44,7 @@ public class OperatorTransformation extends Transformation {
         Val allocVal = ((AllocVal) val).getAllocVal();
 
         if (allocVal.isArrayAllocationVal()) {
-            Val arraySize = SootUtils.toArraySize(allocVal, statement.getMethod());
+            Val arraySize = allocVal.getArrayAllocationSize();
 
             AllocVal arrayLengthVal = new TransformedAllocVal(statement.getLeftOp(), statement, arraySize);
             return Optional.of(arrayLengthVal);

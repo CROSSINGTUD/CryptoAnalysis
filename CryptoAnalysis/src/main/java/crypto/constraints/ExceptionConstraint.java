@@ -9,7 +9,6 @@ import boomerang.scene.jimple.JimpleStatement;
 import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.rules.CrySLExceptionConstraint;
-import crypto.utils.MatcherUtils;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -152,7 +151,7 @@ public class ExceptionConstraint extends EvaluableConstraint {
 	 *         the given exception.
 	 */
 	public static boolean isCaughtAs(WrappedClass catchClause, WrappedClass exception) {
-		return MatcherUtils.isSubtype(exception, catchClause);
+		return catchClause.getType().isSupertypeOf(exception.getName());
 	}
 
 	/**

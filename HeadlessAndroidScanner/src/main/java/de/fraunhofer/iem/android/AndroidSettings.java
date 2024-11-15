@@ -6,6 +6,7 @@ import picocli.CommandLine;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(mixinStandardHelpOptions = true)
@@ -44,7 +45,7 @@ public class AndroidSettings implements Callable<Integer> {
     private Collection<Reporter.ReportFormat> reportFormats;
 
     public AndroidSettings() {
-        reportFormats = new HashSet<>();
+        reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
     }
 
     public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -62,6 +63,8 @@ public class AndroidSettings implements Callable<Integer> {
     }
 
     private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
+        reportFormats.clear();
+
         for (String format : settings) {
             String reportFormatValue = format.toLowerCase();
 
@@ -120,7 +123,7 @@ public class AndroidSettings implements Callable<Integer> {
     }
 
     public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
-        this.reportFormats = reportFormats;
+        this.reportFormats = new HashSet<>(reportFormats);
     }
 
     public String getReportPath() {

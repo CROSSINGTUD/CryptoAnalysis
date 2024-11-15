@@ -5,7 +5,7 @@ import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import com.google.common.collect.Table;
+import com.google.common.collect.Multimap;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -24,16 +24,14 @@ import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQuery;
-import crypto.listener.IAnalysisListener;
-import crypto.listener.IErrorListener;
-import crypto.listener.IResultsListener;
+import crypto.rules.CrySLRule;
 import crypto.rules.ISLConstraint;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 public class AnalysisReporter {
 
@@ -68,6 +66,18 @@ public class AnalysisReporter {
     public void afterAnalysis() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterAnalysis();
+        }
+    }
+
+    public void beforeReadingRuleset(String rulesetPath) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.beforeReadingRuleset(rulesetPath);
+        }
+    }
+
+    public void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> rules) {
+        for (IAnalysisListener listener : analysisListeners) {
+            listener.afterReadingRuleset(rulesetPath, rules);
         }
     }
 
@@ -171,6 +181,12 @@ public class AnalysisReporter {
         }
     }
 
+    public void onGeneratedPredicate(IAnalysisSeed fromSeed, EnsuredCrySLPredicate predicate, IAnalysisSeed toPred, Statement statement) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.generatedPredicate(fromSeed, predicate, toPred, statement);
+        }
+    }
+
     public void addProgress(int current, int total) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.addProgress(current, total);
@@ -195,9 +211,9 @@ public class AnalysisReporter {
         }
     }
 
-    public void ensuredPredicates(Table<Statement, Val, Set<EnsuredCrySLPredicate>> existingPredicates) {
-        for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.ensuredPredicates(existingPredicates);
+    public void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.ensuredPredicates(seed, predicates);
         }
     }
 

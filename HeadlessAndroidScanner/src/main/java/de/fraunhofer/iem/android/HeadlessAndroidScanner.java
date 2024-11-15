@@ -1,18 +1,10 @@
 package de.fraunhofer.iem.android;
 
 import boomerang.scene.CallGraph;
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Table;
 import crypto.analysis.CryptoScanner;
-import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
-import crypto.cryslhandler.RulesetReader;
-import crypto.definition.ScannerDefinition;
 import crypto.exceptions.CryptoAnalysisParserException;
-import crypto.listener.AnalysisStatistics;
 import crypto.preanalysis.TransformerSetup;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
@@ -25,165 +17,125 @@ import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
 import soot.options.Options;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
-public class HeadlessAndroidScanner {
+public class HeadlessAndroidScanner extends CryptoScanner {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessAndroidScanner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessAndroidScanner.class);
 
-	private final AndroidSettings settings;
-	private final CryptoScanner scanner;
+    private final AndroidSettings settings;
 
-	public HeadlessAndroidScanner(String apkFile, String platformsDirectory, String rulesetDirectory) {
-		settings = new AndroidSettings();
+    public HeadlessAndroidScanner(String apkFile, String platformsDirectory, String rulesetDirectory) {
+        settings = new AndroidSettings();
 
-		settings.setApkFile(apkFile);
-		settings.setPlatformDirectory(platformsDirectory);
-		settings.setRulesetDirectory(rulesetDirectory);
+        settings.setApkFile(apkFile);
+        settings.setPlatformDirectory(platformsDirectory);
+        settings.setRulesetDirectory(rulesetDirectory);
+    }
 
-		scanner = new CryptoScanner(createScannerDefinition());
-	}
+    private HeadlessAndroidScanner(AndroidSettings settings) {
+        this.settings = settings;
+    }
 
-	private HeadlessAndroidScanner(AndroidSettings settings) {
-		this.settings = settings;
+    public static HeadlessAndroidScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
+        AndroidSettings androidSettings = new AndroidSettings();
+        androidSettings.parseSettingsFromCLI(args);
 
-		scanner = new CryptoScanner(createScannerDefinition());
-	}
+        return new HeadlessAndroidScanner(androidSettings);
+    }
 
-	public static void main(String[] args) {
-		try {
-			HeadlessAndroidScanner scanner = createFromCLISettings(args);
-			scanner.run();
-		} catch (CryptoAnalysisParserException e) {
-			throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
-		}
-	}
+    @Override
+    public String getRulesetPath() {
+        return settings.getRulesetDirectory();
+    }
 
-	public static HeadlessAndroidScanner createFromCLISettings(String[] args) throws CryptoAnalysisParserException {
-		AndroidSettings androidSettings = new AndroidSettings();
-		androidSettings.parseSettingsFromCLI(args);
+    @Override
+    public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
+        TransformerSetup.v().setupPreTransformer(ruleset);
 
-		return new HeadlessAndroidScanner(androidSettings);
-	}
+        return new SootCallGraph();
+    }
 
-	public ScannerDefinition createScannerDefinition() {
-		return new ScannerDefinition() {
-			@Override
-			public CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
-				TransformerSetup.v().setupPreTransformer(ruleset);
+    public void run() {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        LOGGER.info("Setup Soot and FlowDroid...");
+        constructCallGraph();
+        LOGGER.info("Soot setup done in {} ", stopwatch);
 
-				return new SootCallGraph();
-			}
+        LOGGER.info("Starting analysis...");
+        runCryptoAnalysis();
+        LOGGER.info("Analysis finished in {}", stopwatch);
+        stopwatch.stop();
+    }
 
-			@Override
-			public Collection<CrySLRule> readRuleset() {
-				LOGGER.info("Reading rules from {}", getRulesetDirectory());
-				Collection<CrySLRule> ruleset;
-				try {
-					RulesetReader reader = new RulesetReader();
-					ruleset = reader.readRulesFromPath(getRulesetDirectory());
-				} catch (IOException e) {
-					throw new RuntimeException("Could not read rules: " + e.getMessage());
-				}
-				LOGGER.info("Found {} rules in {}", ruleset.size(), getRulesetDirectory());
+    private void constructCallGraph() {
+        InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
+        config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
+        config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
+        config.getAnalysisFileConfig().setAndroidPlatformDir(getPlatformDirectory());
+        config.getAnalysisFileConfig().setTargetAPKFile(getApkFile());
+        config.setMergeDexFiles(true);
+        config.setTaintAnalysisEnabled(false);
+        config.setIgnoreFlowsInSystemPackages(true);
+        config.setExcludeSootLibraryClasses(true);
 
-				return ruleset;
-			}
-		};
-	}
+        SetupApplication flowDroid = new SetupApplication(config);
+        SootConfigForAndroid sootConfigForAndroid = new SootConfigForAndroid() {
+            @Override
+            public void setSootOptions(Options options, InfoflowConfiguration config) {
+                options.set_keep_line_number(true);
+                options.setPhaseOption("jb.sils", "enabled:false");
+            }
+        };
+        flowDroid.setSootConfig(sootConfigForAndroid);
+        LOGGER.info("Constructing call graph");
+        flowDroid.constructCallgraph();
+        LOGGER.info("Done constructing call graph");
+    }
 
-	public void run() {
-		Stopwatch stopwatch = Stopwatch.createStarted();
-		LOGGER.info("Setup Soot and FlowDroid...");
-		constructCallGraph();
-		LOGGER.info("Soot setup done in {} ", stopwatch);
+    private void runCryptoAnalysis() {
+        LOGGER.info("Running static analysis on APK file " + getApkFile());
+        LOGGER.info("with Android Platforms dir " + getPlatformDirectory());
 
-		LOGGER.info("Starting analysis...");
-		runCryptoAnalysis();
-		LOGGER.info("Analysis finished in {}", stopwatch);
-		stopwatch.stop();
-	}
+        // Run scanner
+        super.initialize();
+        super.scan();
 
-	private void constructCallGraph() {
-		InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
-		config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
-		config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
-		config.getAnalysisFileConfig().setAndroidPlatformDir(getPlatformDirectory());
-		config.getAnalysisFileConfig().setTargetAPKFile(getApkFile());
-		config.setMergeDexFiles(true);
-		config.setTaintAnalysisEnabled(false);
-		config.setIgnoreFlowsInSystemPackages(true);
-		config.setExcludeSootLibraryClasses(true);
+        // Report the findings
+        Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), super.getRuleset());
 
-		SetupApplication flowDroid = new SetupApplication(config);
-		SootConfigForAndroid sootConfigForAndroid = new SootConfigForAndroid() {
-			@Override
-			public void setSootOptions(Options options, InfoflowConfiguration config) {
-				options.set_keep_line_number(true);
-				options.setPhaseOption("jb.sils", "enabled:false");
-			}
-		};
-		flowDroid.setSootConfig(sootConfigForAndroid);
-		LOGGER.info("Constructing call graph");
-		flowDroid.constructCallgraph();
-		LOGGER.info("Done constructing call graph");
-	}
+        for (Reporter reporter : reporters) {
+            reporter.createAnalysisReport(super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
+        }
+    }
 
-	private void runCryptoAnalysis() {
-		LOGGER.info("Running static analysis on APK file " + getApkFile());
-		LOGGER.info("with Android Platforms dir " + getPlatformDirectory());
+    public String getApkFile() {
+        return settings.getApkFile();
+    }
 
-		// Run scanner
-		scanner.scan();
+    public String getPlatformDirectory() {
+        return settings.getPlatformDirectory();
+    }
 
-		// Report the findings
-		Collection<CrySLRule> ruleset = scanner.getRuleset();
-		Collection<IAnalysisSeed> discoveredSeeds = scanner.getDiscoveredSeeds();
-		Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-		AnalysisStatistics statistics = scanner.getStatistics();
-		Collection<Reporter> reporters = ReporterFactory.createReporters(getReportFormats(), getReportDirectory(), ruleset);
+    public Collection<Reporter.ReportFormat> getReportFormats() {
+        return settings.getReportFormats();
+    }
 
-		for (Reporter reporter : reporters) {
-			reporter.createAnalysisReport(discoveredSeeds, errors, statistics);
-		}
-	}
+    public void setReportFormats(Reporter.ReportFormat... reportFormats) {
+        setReportFormats(Arrays.asList(reportFormats));
+    }
 
-	public CryptoScanner getScanner() {
-		return scanner;
-	}
+    public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
+        settings.setReportFormats(reportFormats);
+    }
 
-	public Table<WrappedClass, Method, Set<AbstractError>> getCollectedErrors() {
-		return scanner.getCollectedErrors();
-	}
+    public String getReportDirectory() {
+        return settings.getReportPath();
+    }
 
-	public String getApkFile() {
-		return settings.getApkFile();
-	}
-
-	public String getPlatformDirectory(){
-		return settings.getPlatformDirectory();
-	}
-
-	public String getRulesetDirectory(){
-		return settings.getRulesetDirectory();
-	}
-
-	public Collection<Reporter.ReportFormat> getReportFormats() {
-		return settings.getReportFormats();
-	}
-
-	public void setReportFormats(Collection<Reporter.ReportFormat> reportFormats) {
-		settings.setReportFormats(reportFormats);
-	}
-
-	public String getReportDirectory() {
-		return settings.getReportPath();
-	}
-
-	public void setReportDirectory(String reportDirectory) {
-		settings.setReportPath(reportDirectory);
-	}
+    public void setReportDirectory(String reportDirectory) {
+        settings.setReportPath(reportDirectory);
+    }
 
 }
