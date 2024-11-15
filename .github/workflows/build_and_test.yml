@@ -13,6 +13,10 @@ jobs:
   # Build the CryptoAnalysis module and run its tests
   build-and-test-analysis:
     runs-on: ubuntu-latest
+
+    # Do not run this build in the merge queue
+    if: github.event_name != 'merge_group'
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -38,6 +42,10 @@ jobs:
   # as the static analysis framework
   build-and-test-scanner-soot:
     runs-on: ubuntu-latest
+
+    # Do not run this build in the merge queue
+    if: github.event_name != 'merge_group'
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
