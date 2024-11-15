@@ -14,7 +14,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractParameterAnalysis;
-import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.ExtractParameterDefinition;
 import crypto.rules.CrySLConstraint;
 import crypto.rules.CrySLPredicate;
 import crypto.rules.CrySLRule;
@@ -51,7 +51,7 @@ public class ConstraintSolver {
 		ExtractParameterDefinition definition = new ExtractParameterDefinition() {
 			@Override
 			public CallGraph getCallGraph() {
-				return seed.getScanner().callGraph();
+				return seed.getScanner().getCallGraph();
 			}
 
 			@Override

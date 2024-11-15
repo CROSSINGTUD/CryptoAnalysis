@@ -24,7 +24,6 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
 		Assertions.mustBeInAcceptingState(md);
-		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 	}
 
@@ -82,10 +81,9 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
+		Assertions.hasEnsuredPredicate(output);
 		md.reset();
 		Assertions.mustBeInAcceptingState(md);
-		Assertions.hasEnsuredPredicate(input);
-		Assertions.hasEnsuredPredicate(output);
 		md.digest();
 	}
 
@@ -96,14 +94,12 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		Assertions.extValue(0);
 		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
-		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		output = null;
 		Assertions.notHasEnsuredPredicate(output);
 		md.reset();
 		output = md.digest(input);
 		Assertions.mustBeInAcceptingState(md);
-		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 	}
 
@@ -114,13 +110,11 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		final byte[] input2 = "input2".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
-		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		md.reset();
 		md.update(input2);
 		Assertions.mustNotBeInAcceptingState(md);
 		Assertions.notHasEnsuredPredicate(input2);
-		Assertions.hasEnsuredPredicate(output);
 		md.digest();
 	}
 
@@ -131,7 +125,6 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
 		final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
 		final byte[] input2 = "input2".getBytes(StandardCharsets.UTF_8);
 		byte[] output = md.digest(input);
-		Assertions.hasEnsuredPredicate(input);
 		Assertions.hasEnsuredPredicate(output);
 		Assertions.mustBeInAcceptingState(md);
 

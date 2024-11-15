@@ -6,6 +6,7 @@ import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
+import crypto.rules.CrySLRule;
 
 import java.util.Collection;
 
@@ -15,13 +16,17 @@ public interface IAnalysisListener {
 
     void afterAnalysis();
 
-    void beforeTypestateAnalysis();
+    void beforeReadingRuleset(String rulesetPath);
 
-    void afterTypestateAnalysis();
+    void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> ruleset);
 
     void beforeCallGraphConstruction();
 
     void afterCallGraphConstruction(CallGraph callGraph);
+
+    void beforeTypestateAnalysis();
+
+    void afterTypestateAnalysis();
 
     void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
 

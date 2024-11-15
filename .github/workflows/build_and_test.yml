@@ -1,0 +1,68 @@
+name: Build And Test (Basic)
+description: Basic build and tests for the submodules on each push and pull request
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
+
+env:
+  JAVA_VERSION: 11
+
+jobs:
+  # Build the CryptoAnalysis module and run its tests
+  build-and-test-analysis:
+    runs-on: ubuntu-latest
+
+    # Do not run this build in the merge queue
+    if: github.event_name != 'merge_group'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # Sets up Java version
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: ${{ env.JAVA_VERSION }}
+      # Restores Maven dependecies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run maven command
+        run: mvn clean verify -DrunAnalysisTests
+
+  # Build the HeadlessJavaScanner module and run its tests using Soot
+  # as the static analysis framework
+  build-and-test-scanner-soot:
+    runs-on: ubuntu-latest
+
+    # Do not run this build in the merge queue
+    if: github.event_name != 'merge_group'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # Sets up Java version
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: ${{ env.JAVA_VERSION }}
+      # Restores Maven dependecies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run maven command
+        run: mvn clean verify -DrunSootTests

@@ -18,11 +18,12 @@ public class RequiredPredicateWithThisTest extends UsagePatternTestingFramework 
         source.causeConstraintError(false);
 
         SimpleTarget target = source.generateTarget();
-        target.doNothing();
         Assertions.hasEnsuredPredicate(target, "generatedTarget");
+        target.doNothing();
 
         UsingTarget usingTarget = new UsingTarget();
         usingTarget.useTarget(target);
+        Assertions.hasGeneratedPredicate(usingTarget);
         Assertions.hasEnsuredPredicate(usingTarget);
 
         Assertions.predicateErrors(0);
@@ -52,24 +53,24 @@ public class RequiredPredicateWithThisTest extends UsagePatternTestingFramework 
         source.causeConstraintError(false);
 
         TargetWithAlternatives target1 = source.generateTargetWithAlternatives();
-        target1.doNothing();
         Assertions.hasEnsuredPredicate(target1, "generatedTargetWithAlternatives");
+        target1.doNothing();
 
         UsingTarget usingTarget1 = new UsingTarget();
         usingTarget1.useTarget(target1);
         Assertions.hasEnsuredPredicate(usingTarget1);
 
         TargetWithAlternatives target2 = source.generateTargetAlternative1();
-        target2.doNothing();
         Assertions.hasEnsuredPredicate(target2, "generatedAlternative1");
+        target2.doNothing();
 
         UsingTarget usingTarget2 = new UsingTarget();
         usingTarget2.useTarget(target2);
         Assertions.hasEnsuredPredicate(usingTarget2);
 
         TargetWithAlternatives target3 = source.generateTargetAlternative2();
-        target3.doNothing();
         Assertions.hasEnsuredPredicate(target3, "generatedAlternative2");
+        target3.doNothing();
 
         UsingTarget usingTarget3 = new UsingTarget();
         usingTarget3.useTarget(target3);

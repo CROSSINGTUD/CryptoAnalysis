@@ -21,8 +21,8 @@ public class Issue318Test extends UsagePatternTestingFramework {
         Assertions.notHasEnsuredPredicate(s);
 
         f.read();
-        s.goOn();
         Assertions.hasEnsuredPredicate(f);
+        s.goOn();
         Assertions.notHasEnsuredPredicate(s);
 
         Assertions.predicateErrors(1);
