@@ -293,8 +293,6 @@
                     <version>3.5.2</version>
                     <configuration>
                         <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
-                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
-                        <trimStackTrace>false</trimStackTrace>
                         <reuseForks>false</reuseForks>
                     </configuration>
                     <dependencies>
