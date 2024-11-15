@@ -60,7 +60,7 @@ public class CrySLMethod implements ICrySLPredicateParameter {
 	}
 
 	public String getSignature() {
-		return getMethodName() +
+        return getMethodName() +
 				"(" +
 				parameters.stream()
 						.map(param -> String.format("%s", param.getValue()))

@@ -15,23 +15,23 @@ import java.util.Set;
 
 public class ErrorUtils {
 
-	public static Map<String, Integer> getErrorCounts(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
-		Map<String, Integer> errorCounts = new HashMap<>();
+    public static Map<String, Integer> getErrorCounts(Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+        Map<String, Integer> errorCounts = new HashMap<>();
 
-		for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
-			for (AbstractError error : cell.getValue()) {
-				String errorClass = error.getClass().getSimpleName();
-				errorCounts.put(errorClass, errorCounts.containsKey(errorClass) ? errorCounts.get(errorClass) + 1 : 1);
-			}
-		}
+        for (Table.Cell<WrappedClass, Method, Set<AbstractError>> cell : errorCollection.cellSet()) {
+            for (AbstractError error : cell.getValue()) {
+                String errorClass = error.getClass().getSimpleName();
+                errorCounts.put(errorClass, errorCounts.containsKey(errorClass) ? errorCounts.get(errorClass) + 1 : 1);
+            }
+        }
 
-		return errorCounts;
-	}
+        return errorCounts;
+    }
 
-	public static List<AbstractError> orderErrorsByLineNumber(Collection<AbstractError> errors) {
-		List<AbstractError> errorList = new ArrayList<>(errors);
-		errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));
+    public static List<AbstractError> orderErrorsByLineNumber(Collection<AbstractError> errors) {
+        List<AbstractError> errorList = new ArrayList<>(errors);
+        errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));
 
-		return errorList;
-	}
+        return errorList;
+    }
 }

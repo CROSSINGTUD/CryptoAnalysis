@@ -14,126 +14,126 @@ import java.util.Collection;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
-	private final Multimap<Statement, Integer> relevantStatements;
+    private final Multimap<Statement, Integer> relevantStatements;
 
-	public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
-		super(scanner, statement, fact, results);
+    public AnalysisSeedWithEnsuredPredicate(CryptoScanner scanner, Statement statement, Val fact, ForwardBoomerangResults<TransitionFunction> results) {
+        super(scanner, statement, fact, results);
 
-		relevantStatements = HashMultimap.create();
-	}
+        relevantStatements = HashMultimap.create();
+    }
 
-	@Override
-	public void execute() {
-		scanner.getAnalysisReporter().onSeedStarted(this);
+    @Override
+    public void execute() {
+        scanner.getAnalysisReporter().onSeedStarted(this);
 
-		relevantStatements.put(getOrigin(), -1);
-		for (ControlFlowGraph.Edge edge : analysisResults.asStatementValWeightTable().rowKeySet()) {
-			Statement statement = edge.getTarget();
+        relevantStatements.put(getOrigin(), -1);
+        for (ControlFlowGraph.Edge edge : analysisResults.asStatementValWeightTable().rowKeySet()) {
+            Statement statement = edge.getTarget();
 
-			if (!statement.containsInvokeExpr()) {
-				continue;
-			}
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-			Collection<Val> values = analysisResults.asStatementValWeightTable().row(edge).keySet();
+            Collection<Val> values = analysisResults.asStatementValWeightTable().row(edge).keySet();
 
-			InvokeExpr invokeExpr = statement.getInvokeExpr();
-			for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
-				Val param = invokeExpr.getArg(i);
+            InvokeExpr invokeExpr = statement.getInvokeExpr();
+            for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
+                Val param = invokeExpr.getArg(i);
 
-				if (values.contains(param)) {
-					relevantStatements.put(statement, i);
-				}
-			}
-		}
+                if (values.contains(param)) {
+                    relevantStatements.put(statement, i);
+                }
+            }
+        }
 
-		scanner.getAnalysisReporter().onSeedFinished(this);
-	}
+        scanner.getAnalysisReporter().onSeedFinished(this);
+    }
 
-	@Override
-	public void expectPredicate(Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
-		CrySLPredicate predToBeEnsured;
-		if (predicate.isNegated()) {
-			predToBeEnsured = predicate.invertNegation();
-		} else {
-			predToBeEnsured = predicate;
-		}
+    @Override
+    public void expectPredicate(Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
+        CrySLPredicate predToBeEnsured;
+        if (predicate.isNegated()) {
+            predToBeEnsured = predicate.invertNegation();
+        } else {
+            predToBeEnsured = predicate;
+        }
 
-		expectedPredicates.put(statement, new ExpectedPredicateOnSeed(predToBeEnsured, seed, paramIndex));
+        expectedPredicates.put(statement, new ExpectedPredicateOnSeed(predToBeEnsured, seed, paramIndex));
 
-		for (Statement relStatement : relevantStatements.keySet()) {
-			if (!relStatement.containsInvokeExpr()) {
-				continue;
-			}
+        for (Statement relStatement : relevantStatements.keySet()) {
+            if (!relStatement.containsInvokeExpr()) {
+                continue;
+            }
 
-			if (relStatement.equals(statement)) {
-				continue;
-			}
+            if (relStatement.equals(statement)) {
+                continue;
+            }
 
-			InvokeExpr invokeExpr = relStatement.getInvokeExpr();
-			if (invokeExpr.isStaticInvokeExpr()) {
-				continue;
-			}
+            InvokeExpr invokeExpr = relStatement.getInvokeExpr();
+            if (invokeExpr.isStaticInvokeExpr()) {
+                continue;
+            }
 
-			Val base = invokeExpr.getBase();
-			for (AnalysisSeedWithSpecification otherSeed : scanner.getAnalysisSeedsWithSpec()) {
-				if (otherSeed.equals(seed)) {
-					continue;
-				}
+            Val base = invokeExpr.getBase();
+            for (AnalysisSeedWithSpecification otherSeed : scanner.getAnalysisSeedsWithSpec()) {
+                if (otherSeed.equals(seed)) {
+                    continue;
+                }
 
-				// TODO from statement
-				Collection<Val> values = otherSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-				if (values.contains(base)) {
-					for (Integer index : relevantStatements.get(relStatement)) {
+                // TODO from statement
+                Collection<Val> values = otherSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+                if (values.contains(base)) {
+                    for (Integer index : relevantStatements.get(relStatement)) {
 
-						if (otherSeed.canEnsurePredicate(predToBeEnsured, relStatement, index)) {
-							otherSeed.expectPredicate(relStatement, predToBeEnsured, this, index);
+                        if (otherSeed.canEnsurePredicate(predToBeEnsured, relStatement, index)) {
+                            otherSeed.expectPredicate(relStatement, predToBeEnsured, this, index);
 
-							if (seed instanceof AnalysisSeedWithSpecification) {
-								otherSeed.addRequiringSeed((AnalysisSeedWithSpecification) seed);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+                            if (seed instanceof AnalysisSeedWithSpecification) {
+                                otherSeed.addRequiringSeed((AnalysisSeedWithSpecification) seed);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	public void addEnsuredPredicate(EnsuredCrySLPredicate predicate) {
-		for (Statement statement : expectedPredicates.keySet()) {
-			Collection<ExpectedPredicateOnSeed> predicateOnSeeds = expectedPredicates.get(statement);
+    public void addEnsuredPredicate(EnsuredCrySLPredicate predicate) {
+        for (Statement statement : expectedPredicates.keySet()) {
+            Collection<ExpectedPredicateOnSeed> predicateOnSeeds = expectedPredicates.get(statement);
 
-			for (ExpectedPredicateOnSeed predOnSeed : predicateOnSeeds) {
-				if (!predOnSeed.getPredicate().equals(predicate.getPredicate())) {
-					continue;
-				}
+            for (ExpectedPredicateOnSeed predOnSeed : predicateOnSeeds) {
+                if (!predOnSeed.getPredicate().equals(predicate.getPredicate())) {
+                    continue;
+                }
 
-				if (!(predOnSeed.getSeed() instanceof AnalysisSeedWithSpecification)) {
-					continue;
-				}
+                if (!(predOnSeed.getSeed() instanceof AnalysisSeedWithSpecification)) {
+                    continue;
+                }
 
-				AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) predOnSeed.getSeed();
-				seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.getParamIndex());
-			}
-		}
+                AnalysisSeedWithSpecification seedWithSpec = (AnalysisSeedWithSpecification) predOnSeed.getSeed();
+                seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.getParamIndex());
+            }
+        }
 
-		for (Statement statement : relevantStatements.keySet()) {
-			scanner.getAnalysisReporter().onGeneratedPredicate(this, predicate, this, statement);
-		}
-	}
+        for (Statement statement : relevantStatements.keySet()) {
+            scanner.getAnalysisReporter().onGeneratedPredicate(this, predicate, this, statement);
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 
-	@Override
-	public String toString() {
-		return "AnalysisSeedWithoutSpec [" + super.toString() + "]";
-	}
+    @Override
+    public String toString() {
+        return "AnalysisSeedWithoutSpec [" + super.toString() + "]";
+    }
 
 }

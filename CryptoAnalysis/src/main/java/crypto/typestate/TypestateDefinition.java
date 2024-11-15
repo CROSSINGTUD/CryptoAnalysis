@@ -11,13 +11,13 @@ import java.util.Collection;
 
 public interface TypestateDefinition {
 
-	Collection<CrySLRule> getRuleset();
+    Collection<CrySLRule> getRuleset();
 
-	CallGraph getCallGraph();
+    CallGraph getCallGraph();
 
-	DataFlowScope getDataFlowScope();
+    DataFlowScope getDataFlowScope();
 
-	Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver);
+    Debugger<TransitionFunction> getDebugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver);
 
-	int getTimeout();
+    int getTimeout();
 }

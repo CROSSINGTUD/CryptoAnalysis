@@ -7,24 +7,24 @@ import test.assertions.Assertions;
 
 public class Issue318Test extends UsagePatternTestingFramework {
 
-	@Override
-	protected String getRulesetPath() {
-		return TestConstants.RULES_TEST_DIR + "issue318";
-	}
+    @Override
+    protected String getRulesetPath() {
+        return TestConstants.RULES_TEST_DIR + "issue318";
+    }
 
-	@Test
-	public void testIssue318() {
-		First f = new First();
-		Assertions.notHasEnsuredPredicate(f);
+    @Test
+    public void testIssue318() {
+        First f = new First();
+        Assertions.notHasEnsuredPredicate(f);
 
-		Second s = new Second(f);
-		Assertions.notHasEnsuredPredicate(s);
+        Second s = new Second(f);
+        Assertions.notHasEnsuredPredicate(s);
 
-		f.read();
-		Assertions.hasEnsuredPredicate(f);
-		s.goOn();
-		Assertions.notHasEnsuredPredicate(s);
+        f.read();
+        Assertions.hasEnsuredPredicate(f);
+        s.goOn();
+        Assertions.notHasEnsuredPredicate(s);
 
-		Assertions.predicateErrors(1);
-	}
+        Assertions.predicateErrors(1);
+    }
 }

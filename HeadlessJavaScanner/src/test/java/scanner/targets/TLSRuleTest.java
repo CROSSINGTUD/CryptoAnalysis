@@ -9,14 +9,14 @@ import scanner.setup.AbstractHeadlessTest;
 import java.io.File;
 
 public class TLSRuleTest extends AbstractHeadlessTest {
-	@Ignore
-	@Test
-	public void secureFileTransmitter() {
-		String mavenProjectPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter").getAbsolutePath();
-		MavenProject mavenProject = createAndCompile(mavenProjectPath);
-		HeadlessJavaScanner scanner = createScanner(mavenProject);
+    @Ignore
+    @Test
+    public void secureFileTransmitter() {
+        String mavenProjectPath = new File("../CryptoAnalysisTargets/SecureFileTransmitter").getAbsolutePath();
+        MavenProject mavenProject = createAndCompile(mavenProjectPath);
+        HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-		scanner.run();
-		assertErrors(scanner.getCollectedErrors());
-	}
+        scanner.run();
+        assertErrors(scanner.getCollectedErrors());
+    }
 }

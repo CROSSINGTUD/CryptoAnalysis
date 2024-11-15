@@ -11,17 +11,17 @@ import java.util.Collection;
 
 public interface ExtractParameterDefinition {
 
-	CallGraph getCallGraph();
+    CallGraph getCallGraph();
 
-	DataFlowScope getDataFlowScope();
+    DataFlowScope getDataFlowScope();
 
-	Collection<Statement> getCollectedCalls();
+    Collection<Statement> getCollectedCalls();
 
-	CrySLRule getRule();
+    CrySLRule getRule();
 
-	AnalysisReporter getAnalysisReporter();
+    AnalysisReporter getAnalysisReporter();
 
-	SparseCFGCache.SparsificationStrategy getSparsificationStrategy();
+    SparseCFGCache.SparsificationStrategy getSparsificationStrategy();
 
-	int getTimeout();
+    int getTimeout();
 }

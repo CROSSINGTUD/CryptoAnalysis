@@ -65,7 +65,7 @@ public class CrySLPredicate extends CrySLLiteral {
 		}
 
 		return negated == other.isNegated();
-	}
+    }
 
 	/**
 	 * @return the baseObject
