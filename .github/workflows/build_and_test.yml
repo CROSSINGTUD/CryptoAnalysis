@@ -48,8 +48,9 @@ jobs:
       - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
+          distribution: 'adopt'
+          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
       # Restores Maven dependecies
       - name: Restore local Maven repository
         uses: actions/cache@v4
@@ -58,15 +59,9 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      # - name: List Android platforms
-      #   run: |
-      #     ls -lhR $ANDROID_SDK_ROOT/platforms/
-      # Setup Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.10
       - name: Copy Android platforms to test resources
         run: |
-          mv $ANDROID_SDK_ROOT/platforms/* HeadlessAndroidScanner/src/test/resources/platforms/
+          mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
       - name: Run maven command
         run: mvn clean verify -DrunAndroidTests
 

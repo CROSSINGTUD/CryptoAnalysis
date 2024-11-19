@@ -5,7 +5,6 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
-import crypto.reporting.Reporter;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import org.junit.Test;
 
@@ -15,7 +14,6 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void testFalseCrypt() {
         // From https://github.com/secure-software-engineering/FalseCrypt
         HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
-        scanner.setReportFormats(Reporter.ReportFormat.CMD);
         scanner.run();
 
         addExpectedErrors(ConstraintError.class, 6);
