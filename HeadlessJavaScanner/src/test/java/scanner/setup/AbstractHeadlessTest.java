@@ -9,6 +9,7 @@ import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
@@ -98,7 +99,7 @@ public abstract class AbstractHeadlessTest {
 
     protected final void assertErrors(
             Table<WrappedClass, Method, Set<AbstractError>> collectedErrors) {
-        StringBuilder report = new StringBuilder();
+        Set<String> report = new HashSet<>();
 
         // Assert True Positives and False Positives
         for (Table.Cell<MethodWrapper, Class<?>, Integer> cell : errorMarkerCounts.cellSet()) {
@@ -110,19 +111,21 @@ public abstract class AbstractHeadlessTest {
 
             int difference = expected - actual;
             if (difference < 0) {
-                report.append("\n\tFound ")
-                        .append(Math.abs(difference))
-                        .append(" too many errors of type ")
-                        .append(errorType.getSimpleName())
-                        .append(" in ")
-                        .append(methodWrapper);
+                report.add(
+                        "\n\tFound "
+                                + Math.abs(difference)
+                                + " too many errors of type "
+                                + errorType.getSimpleName()
+                                + " in "
+                                + methodWrapper);
             } else if (difference > 0) {
-                report.append("\n\tFound ")
-                        .append(difference)
-                        .append(" too few errors of type ")
-                        .append(errorType.getSimpleName())
-                        .append(" in ")
-                        .append(methodWrapper);
+                report.add(
+                        "\n\tFound "
+                                + difference
+                                + " too few errors of type "
+                                + errorType.getSimpleName()
+                                + " in "
+                                + methodWrapper);
             }
         }
 
@@ -144,17 +147,18 @@ public abstract class AbstractHeadlessTest {
                 }
 
                 int unexpectedErrors = getErrorsOfType(errorType, errors);
-                report.append("\n\tFound ")
-                        .append(unexpectedErrors)
-                        .append(" too many errors of type ")
-                        .append(errorType.getSimpleName())
-                        .append(" in ")
-                        .append(methodWrapper);
+                report.add(
+                        "\n\tFound "
+                                + unexpectedErrors
+                                + " too many errors of type "
+                                + errorType.getSimpleName()
+                                + " in "
+                                + methodWrapper);
             }
         }
 
-        if (!report.toString().isEmpty()) {
-            Assert.fail("Tests not executed as planned:" + report);
+        if (!report.isEmpty()) {
+            Assert.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
         }
     }
 

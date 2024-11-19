@@ -12,7 +12,6 @@ import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
-import crypto.rules.CrySLRule;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
@@ -60,13 +59,13 @@ public class HeadlessJavaScanner extends CryptoScanner {
     }
 
     @Override
-    protected CallGraph constructCallGraph(Collection<CrySLRule> rules) {
-        return frameworkSetup.constructCallGraph(rules);
+    protected CallGraph constructCallGraph() {
+        return frameworkSetup.constructCallGraph(super.getRuleset());
     }
 
     @Override
-    public DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
-        return new CryptoAnalysisDataFlowScope(ruleset, getIgnoredSections());
+    public DataFlowScope createDataFlowScope() {
+        return new CryptoAnalysisDataFlowScope(super.getRuleset(), getIgnoredSections());
     }
 
     @Override

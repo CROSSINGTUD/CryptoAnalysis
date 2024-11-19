@@ -1,7 +1,16 @@
 package android;
 
+import boomerang.scene.Method;
+import boomerang.scene.WrappedClass;
+import com.google.common.collect.Table;
+import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.junit.Assert;
 
 /**
  * Running the tests requires an Android platform. Since they are licensed and quite large, they
@@ -47,9 +56,83 @@ public abstract class AbstractAndroidTest {
                     + "JavaCryptographicArchitecture"
                     + File.separator;
 
-    protected HeadlessAndroidScanner createScanner(String apkFileName) {
+    private final Map<Class<?>, Integer> expectedErrors = new HashMap<>();
+
+    protected final HeadlessAndroidScanner createScanner(String apkFileName) {
         String apkFile = APK_PATH + apkFileName;
 
         return new HeadlessAndroidScanner(apkFile, PLATFORMS_PATH, JCA_RULES_DIR);
+    }
+
+    protected final void addExpectedErrors(Class<?> errorType, int numberOfFindings) {
+        if (expectedErrors.containsKey(errorType)) {
+            throw new RuntimeException("Error type cannot be configured multiple times");
+        }
+        expectedErrors.put(errorType, numberOfFindings);
+    }
+
+    protected final void assertErrors(
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+        Set<String> report = new HashSet<>();
+
+        for (Map.Entry<Class<?>, Integer> entry : expectedErrors.entrySet()) {
+            Class<?> errorType = entry.getKey();
+
+            int expected = entry.getValue();
+            int actual = getErrorsOfType(errorType, errorCollection);
+
+            int difference = expected - actual;
+            if (difference < 0) {
+                report.add(
+                        "Found "
+                                + Math.abs(difference)
+                                + " too many errors of type "
+                                + errorType.getSimpleName());
+            } else if (difference > 0) {
+                report.add(
+                        "Found "
+                                + difference
+                                + " too few errors of type "
+                                + errorType.getSimpleName());
+            }
+        }
+
+        for (Set<AbstractError> errors : errorCollection.values()) {
+            for (AbstractError error : errors) {
+                Class<?> errorType = error.getClass();
+
+                if (expectedErrors.containsKey(errorType)) {
+                    continue;
+                }
+
+                int unexpectedErrors = getErrorsOfType(errorType, errorCollection);
+                report.add(
+                        "Found "
+                                + unexpectedErrors
+                                + " too many errors of type "
+                                + errorType.getSimpleName());
+            }
+        }
+
+        if (!report.isEmpty()) {
+            Assert.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
+        }
+    }
+
+    private int getErrorsOfType(
+            Class<?> errorClass, Table<WrappedClass, Method, Set<AbstractError>> errorCollection) {
+        int result = 0;
+
+        for (Set<AbstractError> errors : errorCollection.values()) {
+            for (AbstractError error : errors) {
+                String errorName = error.getClass().getSimpleName();
+
+                if (errorName.equals(errorClass.getSimpleName())) {
+                    result++;
+                }
+            }
+        }
+
+        return result;
     }
 }
