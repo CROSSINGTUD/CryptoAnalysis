@@ -8,19 +8,13 @@ import crypto.rules.CrySLRule;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import soot.EntryPoints;
-import soot.G;
-import soot.Scene;
-import soot.SootMethod;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration;
 import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
-import soot.jimple.infoflow.cfg.LibraryClassPatcher;
 import soot.options.Options;
 
 public class FlowDroidSetup {
@@ -40,7 +34,6 @@ public class FlowDroidSetup {
         LOGGER.info("Setting up FlowDroid...");
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        initializeSoot();
         flowDroid = initializeFlowDroid();
 
         stopwatch.stop();
@@ -54,48 +47,6 @@ public class FlowDroidSetup {
         return new SootCallGraph();
     }
 
-    /**
-     * Basic setup as done in <a
-     * href="https://github.com/secure-software-engineering/FlowDroid/blob/ab9faf1e67c6163972ae7d5a82da9b5a9dd1fcf8/soot-infoflow-android/src/soot/jimple/infoflow/android/SetupApplication.java#L1218">FlowDroid</a>
-     */
-    private void initializeSoot() {
-        G.reset();
-
-        Options.v().set_no_bodies_for_excluded(true);
-        Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_none);
-        Options.v().set_whole_program(true);
-        Options.v().set_process_dir(Collections.singletonList(apkFile.getAbsolutePath()));
-        Options.v().set_android_jars(platformDir.getAbsolutePath());
-        Options.v().set_src_prec(Options.src_prec_apk_class_jimple);
-        Options.v().set_keep_offset(false);
-        Options.v().set_keep_line_number(true);
-        Options.v().set_throw_analysis(Options.throw_analysis_dalvik);
-        Options.v().set_process_multiple_dex(true);
-        Options.v().set_ignore_resolution_errors(true);
-        Options.v().set_include(new ArrayList<>());
-        Options.v().set_exclude(List.of("android.*", "androidx.*"));
-
-        Options.v().setPhaseOption("jb.sils", "enabled:false");
-
-        Options.v().set_soot_classpath(getClassPath());
-
-        Scene.v().loadNecessaryClasses();
-        Scene.v().setEntryPoints(getEntryPoints());
-
-        LibraryClassPatcher patcher = new LibraryClassPatcher();
-        patcher.patchLibraries();
-    }
-
-    private String getClassPath() {
-        return Scene.v()
-                .getAndroidJarPath(platformDir.getAbsolutePath(), apkFile.getAbsolutePath());
-    }
-
-    private List<SootMethod> getEntryPoints() {
-        return new ArrayList<>(EntryPoints.v().methodsOfApplicationClasses());
-    }
-
     private SetupApplication initializeFlowDroid() {
         InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
         config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
@@ -105,10 +56,10 @@ public class FlowDroidSetup {
         config.setMergeDexFiles(true);
         config.setTaintAnalysisEnabled(false);
         config.setEnableLineNumbers(true);
-        config.setSootIntegrationMode(InfoflowConfiguration.SootIntegrationMode.UseExistingInstance);
+        // config.setSootIntegrationMode(InfoflowConfiguration.SootIntegrationMode.UseExistingInstance);
 
         SetupApplication app = new SetupApplication(config);
-        //app.setSootConfig(initSootConfig());
+        app.setSootConfig(initSootConfig());
 
         return app;
     }
