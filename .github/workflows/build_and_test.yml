@@ -24,7 +24,7 @@ jobs:
 
   # Build the HeadlessAndroidScanner module and run its tests
   build-and-test-scanner-android:
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout source code
