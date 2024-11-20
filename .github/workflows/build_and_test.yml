@@ -3,6 +3,9 @@ description: Basic build and tests for the submodules on each push and pull requ
 
 on:
   push:
+    branches-ignore:
+      - master
+      - develop
   pull_request:
     types: [opened, reopened]
 
@@ -24,7 +27,7 @@ jobs:
 
   # Build the HeadlessAndroidScanner module and run its tests
   build-and-test-scanner-android:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
