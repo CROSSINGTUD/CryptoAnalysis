@@ -24,7 +24,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Copy Android platforms to test resources
+      shell: bash
       run: |
         mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
     - name: Run maven command
+      shell: bash
       run: mvn clean verify -DrunAndroidTests
