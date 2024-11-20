@@ -10,47 +10,35 @@ jobs:
   # This name must be equal to the corresponding build_and_test action
   build-and-test-analysis:
     runs-on: macos-latest
+    
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      # Sets up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+      - name: Build and test Analysis
+        uses: ./.github/actions/analysis
         with:
-          distribution: 'adopt'
-          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Run maven command
-        run: mvn clean verify -DrunAnalysisTests
 
-  # This name must be equal to the corresponding build_and_test action
+  # This name must be equal to the corresponding build_and_test job
+  build-and-test-scanner-android:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+  # This name must be equal to the corresponding build_and_test job
   build-and-test-scanner-soot:
     runs-on: macos-latest
+    
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      # Sets up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+      - name: Build and test JavaScanner with Soot
+        uses: ./.github/actions/scanner-soot
         with:
-          distribution: 'adopt'
-          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Run maven command
-        run: mvn clean verify -DrunSootTests
