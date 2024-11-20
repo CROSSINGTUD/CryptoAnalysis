@@ -1,0 +1,30 @@
+name: Build and test Android Scanner
+
+inputs:
+  java-version:
+    description: "Version to build the project with"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # Set up Java version
+    - name: Set up Java ${{ inputs.java-version }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: adopt
+        java-package: jdk
+        java-version: ${{ inputs.java-version }}
+    # Restores Maven dependecies
+    - name: Restore local Maven repository
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+    - name: Copy Android platforms to test resources
+      run: |
+        mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
+    - name: Run maven command
+      run: mvn clean verify -DrunAndroidTests

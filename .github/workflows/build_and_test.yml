@@ -45,25 +45,10 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       # Set up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
         with:
-          distribution: 'adopt'
-          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Copy Android platforms to test resources
-        run: |
-          mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
-      - name: Run maven command
-        run: mvn clean verify -DrunAndroidTests
 
   # Build the HeadlessJavaScanner module and run its tests using Soot
   # as the static analysis framework
