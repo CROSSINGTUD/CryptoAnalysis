@@ -3,6 +3,9 @@ description: Basic build and tests for the submodules on each push and pull requ
 
 on:
   push:
+    branches-ignore:
+      - master
+      - develop
   pull_request:
     types: [opened, reopened]
 
@@ -17,25 +20,22 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      # Sets up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+      - name: Build and test Analysis
+        uses: ./.github/actions/analysis
         with:
-          distribution: 'adopt'
-          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
+
+  # Build the HeadlessAndroidScanner module and run its tests
+  build-and-test-scanner-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Event name
-        run: echo ${{ github.event_name }}
-      - name: Run maven command
-        run: mvn clean verify -DrunAnalysisTests
+          java-version: ${{ env.JAVA_VERSION }}
 
   # Build the HeadlessJavaScanner module and run its tests using Soot
   # as the static analysis framework
@@ -45,20 +45,7 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      # Sets up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+      - name: Build and test JavaScanner with Soot
+        uses: ./.github/actions/scanner-soot
         with:
-          distribution: 'adopt'
-          java-package: jdk
           java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependecies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Run maven command
-        run: mvn clean verify -DrunSootTests

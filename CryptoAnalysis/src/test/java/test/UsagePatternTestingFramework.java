@@ -21,7 +21,6 @@ import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.preanalysis.TransformerSetup;
-import crypto.rules.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,14 +80,14 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
         }
 
         @Override
-        protected CallGraph constructCallGraph(Collection<CrySLRule> ruleset) {
-            TransformerSetup.v().setupPreTransformer(ruleset);
+        protected CallGraph constructCallGraph() {
+            TransformerSetup.v().setupPreTransformer(super.getRuleset());
             return new SootCallGraph();
         }
 
         @Override
-        protected DataFlowScope createDataFlowScope(Collection<CrySLRule> rules) {
-            return new TestDataFlowScope(rules);
+        protected DataFlowScope createDataFlowScope() {
+            return new TestDataFlowScope(super.getRuleset());
         }
     }
 

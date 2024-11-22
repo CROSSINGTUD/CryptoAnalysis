@@ -1,19 +1,13 @@
 package android;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
-import com.google.common.collect.Table;
-import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.ConstraintError;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.RequiredPredicateError;
+import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
-import java.util.Set;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore(
-        "Running the tests requires an Android platform. Since they are licensed, they cannot be uploaded to "
-                + "the GitHub remote. If you plan to run the tests, copy a platform (e.g. 'android-35') into the "
-                + "src/test/resources/platforms/ directory. The files inside this directory are ignored for GitHub.")
 public class HeadlessAndroidTest extends AbstractAndroidTest {
 
     @Test
@@ -22,9 +16,13 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
         scanner.run();
 
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+        addExpectedErrors(ConstraintError.class, 6);
+        addExpectedErrors(RequiredPredicateError.class, 9);
+        addExpectedErrors(TypestateError.class, 1);
+        addExpectedErrors(IncompleteOperationError.class, 5);
+        addExpectedErrors(ImpreciseValueExtractionError.class, 1);
 
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -54,11 +52,12 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         */
         HeadlessAndroidScanner scanner =
                 createScanner("AndroidXAppCompatActivityCallbackDebug.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -87,11 +86,12 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
              }
         */
         HeadlessAndroidScanner scanner = createScanner("NormalAppCompatActivityCallbackDebug.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -120,11 +120,12 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
              }
         */
         HeadlessAndroidScanner scanner = createScanner("NormalActivityCallbackDebug.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -146,11 +147,12 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                }
         */
         HeadlessAndroidScanner scanner = createScanner("NoCallBackDebug.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -172,11 +174,12 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                }
         */
         HeadlessAndroidScanner scanner = createScanner("NoCallbackReleaseUnsigned.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 
     @Test
@@ -198,10 +201,11 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
                }
         */
         HeadlessAndroidScanner scanner = createScanner("NoCallbackReleaseSigned.apk");
+
+        addExpectedErrors(ConstraintError.class, 1);
+        addExpectedErrors(TypestateError.class, 1);
+
         scanner.run();
-
-        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
-
-        Assert.assertFalse(errors.isEmpty());
+        assertErrors(scanner.getCollectedErrors());
     }
 }

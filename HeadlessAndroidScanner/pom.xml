@@ -73,6 +73,15 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <!-- Do not copy the Android SDKs because it takes forever -->
+            <testResource>
+                <directory>${project.basedir}/src/test/resources</directory>
+                <excludes>
+                    <exclude>**/platforms/**</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

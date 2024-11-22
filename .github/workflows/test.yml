@@ -1,6 +1,10 @@
 name: Test Internal Action
 
-on: push
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
 
 jobs:
   internal_action:

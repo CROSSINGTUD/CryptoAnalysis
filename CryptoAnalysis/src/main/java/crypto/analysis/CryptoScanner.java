@@ -67,11 +67,11 @@ public abstract class CryptoScanner {
 
         // Construct the call graph
         analysisReporter.beforeCallGraphConstruction();
-        callGraph = constructCallGraph(ruleset);
+        callGraph = constructCallGraph();
         analysisReporter.afterCallGraphConstruction(callGraph);
 
         // Initialize the dataflow scope
-        dataFlowScope = createDataFlowScope(ruleset);
+        dataFlowScope = createDataFlowScope();
     }
 
     protected final void scan() {
@@ -169,9 +169,9 @@ public abstract class CryptoScanner {
 
     public abstract String getRulesetPath();
 
-    protected abstract CallGraph constructCallGraph(Collection<CrySLRule> ruleset);
+    protected abstract CallGraph constructCallGraph();
 
-    protected DataFlowScope createDataFlowScope(Collection<CrySLRule> ruleset) {
+    protected DataFlowScope createDataFlowScope() {
         return new CryptoAnalysisDataFlowScope(ruleset, Collections.emptySet());
     }
 
@@ -184,6 +184,6 @@ public abstract class CryptoScanner {
     }
 
     public int getTimeout() {
-        return 100000;
+        return 10000;
     }
 }
