@@ -66,6 +66,7 @@ public class PBETest extends UsagePatternTestingFramework {
         Assertions.hasGeneratedPredicate(pbekeyspec);
         Assertions.mustNotBeInAcceptingState(pbekeyspec);
         pbekeyspec.clearPassword();
+        Assertions.mustBeInAcceptingState(pbekeyspec);
         pbekeyspec = new PBEKeySpec(corPwd, salt, 9999, 128);
         Assertions.extValue(1);
         Assertions.extValue(2);
@@ -73,6 +74,7 @@ public class PBETest extends UsagePatternTestingFramework {
         Assertions.hasNotGeneratedPredicate(pbekeyspec);
         Assertions.mustNotBeInAcceptingState(pbekeyspec);
         pbekeyspec.clearPassword();
+        Assertions.mustBeInAcceptingState(pbekeyspec);
 
         PBEParameterSpec pbeParSpec1 = new PBEParameterSpec(salt, 10000);
         Assertions.extValue(0);

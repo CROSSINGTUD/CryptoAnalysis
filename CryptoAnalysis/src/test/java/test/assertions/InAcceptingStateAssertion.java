@@ -15,6 +15,7 @@ public class InAcceptingStateAssertion implements Assertion, StateResult {
     public InAcceptingStateAssertion(Statement unit, Collection<Val> val) {
         this.unit = unit;
         this.val = val;
+        this.satisfied = false;
     }
 
     public Collection<Val> getVal() {
@@ -41,6 +42,6 @@ public class InAcceptingStateAssertion implements Assertion, StateResult {
 
     @Override
     public String toString() {
-        return "[" + val + "@" + unit + " must not be in error state]";
+        return "[" + val + " @ " + unit + " must not be in error state]";
     }
 }

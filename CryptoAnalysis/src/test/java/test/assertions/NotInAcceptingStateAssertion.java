@@ -15,6 +15,7 @@ public class NotInAcceptingStateAssertion implements Assertion, StateResult {
     public NotInAcceptingStateAssertion(Statement unit, Collection<Val> accessGraph) {
         this.unit = unit;
         this.val = accessGraph;
+        this.satisfied = true;
     }
 
     public Collection<Val> getVal() {
@@ -26,7 +27,7 @@ public class NotInAcceptingStateAssertion implements Assertion, StateResult {
     }
 
     public void computedResults(State s) {
-        satisfied |= !s.isAccepting();
+        satisfied &= !s.isAccepting();
     }
 
     @Override
@@ -41,6 +42,6 @@ public class NotInAcceptingStateAssertion implements Assertion, StateResult {
 
     @Override
     public String toString() {
-        return "[" + val + "@" + unit + " must not be in error state]";
+        return "[" + val + " @ " + unit + " must not be in accepting state]";
     }
 }

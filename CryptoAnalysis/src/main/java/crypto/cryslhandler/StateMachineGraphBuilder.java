@@ -183,6 +183,13 @@ public class StateMachineGraphBuilder {
                 right = buildSubSMG(order.getRight(), left.getEndNodes());
                 start.addAll(left.getStartNodes());
                 end.addAll(right.getEndNodes());
+
+                for (StateNode node : startNodes) {
+                    if (left.getEndNodes().contains(node)) {
+                        start.addAll(right.getStartNodes());
+                    }
+                }
+
                 break;
             case ALTERNATIVE:
                 left = buildSubSMG(order.getLeft(), startNodes);
