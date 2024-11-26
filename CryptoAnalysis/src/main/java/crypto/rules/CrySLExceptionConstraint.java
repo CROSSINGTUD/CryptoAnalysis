@@ -1,6 +1,5 @@
 package crypto.rules;
 
-import boomerang.scene.Statement;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,8 +14,6 @@ public class CrySLExceptionConstraint implements ISLConstraint {
 
     /** The Exception thrown by the Method. */
     private final CrySLException exception;
-
-    private Statement location = null;
 
     /**
      * Construct the {@link CrySLExceptionConstraint} given the method and the exception thrown
@@ -50,11 +47,6 @@ public class CrySLExceptionConstraint implements ISLConstraint {
 
     public String toString() {
         return String.format("%s(%s, %s)", this.getClass().getName(), getMethod(), getException());
-    }
-
-    @Override
-    public Statement getLocation() {
-        return this.location;
     }
 
     @Override

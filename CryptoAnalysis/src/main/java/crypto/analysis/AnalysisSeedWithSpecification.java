@@ -859,9 +859,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         Collection<ISLConstraint> remainingPredicates = new HashSet<>(requiredPredicates);
 
         for (ISLConstraint pred : requiredPredicates) {
-            Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
-                    ensuredPredicates.get(pred.getLocation());
-
             if (pred instanceof RequiredCrySLPredicate) {
                 RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
 
@@ -873,6 +870,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 }
 
                 // Check for basic required predicates, e.g. randomized
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
+                        ensuredPredicates.get(reqPred.getLocation());
                 int reqParamIndex = reqPred.getParamIndex();
                 for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
                     if (doReqPredAndEnsPredMatch(
@@ -899,6 +898,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                                 .filter(CrySLPredicate::isNegated)
                                 .collect(Collectors.toList());
 
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
+                        ensuredPredicates.get(altPred.getLocation());
                 for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
                     // If any positive alternative is satisfied, the whole predicate is satisfied
                     if (positives.stream()
@@ -967,7 +968,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 // Check for basic negated required predicates, e.g. randomized
                 CrySLPredicate invertedPred = reqPred.getPred().invertNegation();
                 Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
-                        ensuredPredicates.get(pred.getLocation());
+                        ensuredPredicates.get(reqPred.getLocation());
 
                 for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
                     if (doReqPredAndEnsPredMatch(

@@ -420,7 +420,6 @@
                             <include>CryptoAnalysis/pom.xml</include>
                             <include>HeadlessAndroidScanner/pom.xml</include>
                             <include>HeadlessJavaScanner/pom.xml</include>
-                            <include>ScannerTests/pom.xml</include>
                         </includes>
                         <sortPom>
                             <encoding>UTF-8</encoding>
