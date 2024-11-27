@@ -6,11 +6,11 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractedValue;
-import crypto.rules.CrySLArithmeticConstraint;
-import crypto.rules.CrySLComparisonConstraint;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.ICrySLPredicateParameter;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLArithmeticConstraint;
+import crysl.rule.CrySLComparisonConstraint;
+import crysl.rule.CrySLPredicate;
+import crysl.rule.ICrySLPredicateParameter;
+import crysl.rule.ISLConstraint;
 import java.util.HashMap;
 import java.util.Map;
 

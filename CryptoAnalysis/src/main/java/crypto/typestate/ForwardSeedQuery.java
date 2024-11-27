@@ -3,7 +3,7 @@ package crypto.typestate;
 import boomerang.WeightedForwardQuery;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
 

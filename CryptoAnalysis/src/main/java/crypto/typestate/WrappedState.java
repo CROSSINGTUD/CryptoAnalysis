@@ -1,6 +1,6 @@
 package crypto.typestate;
 
-import crypto.rules.StateNode;
+import crysl.rule.StateNode;
 import typestate.finiteautomata.State;
 
 public class WrappedState implements State {

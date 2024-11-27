@@ -1,8 +1,8 @@
 package crypto.analysis;
 
 import boomerang.scene.Statement;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLPredicate;
+import crysl.rule.ISLConstraint;
 import java.util.List;
 
 public class RequiredCrySLPredicate implements ISLConstraint {

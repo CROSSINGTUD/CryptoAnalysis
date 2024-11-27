@@ -6,14 +6,13 @@ import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLArithmeticConstraint;
-import crypto.rules.CrySLComparisonConstraint;
-import crypto.rules.CrySLComparisonConstraint.CompOp;
-import crypto.rules.CrySLConstraint;
-import crypto.rules.CrySLRule;
-import crypto.rules.CrySLSplitter;
-import crypto.rules.CrySLValueConstraint;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLArithmeticConstraint;
+import crysl.rule.CrySLComparisonConstraint;
+import crysl.rule.CrySLConstraint;
+import crysl.rule.CrySLRule;
+import crysl.rule.CrySLSplitter;
+import crysl.rule.CrySLValueConstraint;
+import crysl.rule.ISLConstraint;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -91,7 +90,7 @@ public class ConstraintError extends AbstractError {
         return msg.toString();
     }
 
-    private String evaluateCompOp(CompOp operator) {
+    private String evaluateCompOp(CrySLComparisonConstraint.CompOp operator) {
         switch (operator) {
             case ge:
                 return "at least";

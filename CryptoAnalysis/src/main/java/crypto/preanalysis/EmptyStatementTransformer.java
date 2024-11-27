@@ -1,6 +1,6 @@
 package crypto.preanalysis;
 
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;

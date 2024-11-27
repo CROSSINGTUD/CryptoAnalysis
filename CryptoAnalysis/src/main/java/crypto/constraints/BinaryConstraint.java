@@ -1,7 +1,6 @@
 package crypto.constraints;
 
-import crypto.rules.CrySLConstraint;
-import crypto.rules.CrySLConstraint.LogOps;
+import crysl.rule.CrySLConstraint;
 
 class BinaryConstraint extends EvaluableConstraint {
 
@@ -17,9 +16,9 @@ class BinaryConstraint extends EvaluableConstraint {
         EvaluableConstraint right =
                 EvaluableConstraint.getInstance(binaryConstraint.getRight(), context);
         left.evaluate();
-        LogOps ops = binaryConstraint.getOperator();
+        CrySLConstraint.LogOps ops = binaryConstraint.getOperator();
 
-        if (ops.equals(LogOps.implies)) {
+        if (ops.equals(CrySLConstraint.LogOps.implies)) {
             // Left side of implication is not satisfied => Right side does not need to be satisfied
             if (left.hasErrors()) {
                 return;
@@ -27,12 +26,12 @@ class BinaryConstraint extends EvaluableConstraint {
 
             right.evaluate();
             errors.addAll(right.getErrors());
-        } else if (ops.equals(LogOps.or)) {
+        } else if (ops.equals(CrySLConstraint.LogOps.or)) {
             // Constraint is violated if left and right is not satisfied
             right.evaluate();
             errors.addAll(left.getErrors());
             errors.addAll(right.getErrors());
-        } else if (ops.equals(LogOps.and)) {
+        } else if (ops.equals(CrySLConstraint.LogOps.and)) {
             // Left is not satisfied => AND cannot be satisfied
             if (left.hasErrors()) {
                 errors.addAll(left.getErrors());
@@ -41,7 +40,7 @@ class BinaryConstraint extends EvaluableConstraint {
 
             right.evaluate();
             errors.addAll(right.getErrors());
-        } else if (ops.equals(LogOps.eq)) {
+        } else if (ops.equals(CrySLConstraint.LogOps.eq)) {
             right.evaluate();
 
             // Simple <=> evaluation

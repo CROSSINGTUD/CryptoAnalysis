@@ -6,7 +6,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;

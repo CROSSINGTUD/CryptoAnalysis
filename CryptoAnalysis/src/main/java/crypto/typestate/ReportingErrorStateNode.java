@@ -1,6 +1,6 @@
 package crypto.typestate;
 
-import crypto.rules.CrySLMethod;
+import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import typestate.finiteautomata.State;
 

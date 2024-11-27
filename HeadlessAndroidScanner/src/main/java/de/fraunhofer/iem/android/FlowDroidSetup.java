@@ -4,7 +4,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
 import crypto.preanalysis.TransformerSetup;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;

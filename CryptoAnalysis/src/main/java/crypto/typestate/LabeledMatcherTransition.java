@@ -1,8 +1,8 @@
 package crypto.typestate;
 
 import boomerang.scene.DeclaredMethod;
-import crypto.rules.CrySLMethod;
 import crypto.utils.MatcherUtils;
+import crysl.rule.CrySLMethod;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;

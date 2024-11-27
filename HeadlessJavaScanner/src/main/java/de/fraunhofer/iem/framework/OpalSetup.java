@@ -1,7 +1,7 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scene.CallGraph;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.util.Collection;
 

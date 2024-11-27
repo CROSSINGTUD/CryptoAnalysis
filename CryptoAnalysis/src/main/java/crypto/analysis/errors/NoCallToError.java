@@ -2,7 +2,7 @@ package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 
 public class NoCallToError extends AbstractError {
 

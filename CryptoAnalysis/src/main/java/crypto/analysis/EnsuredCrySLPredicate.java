@@ -1,7 +1,7 @@
 package crypto.analysis;
 
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLPredicate;
+import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 
 public class EnsuredCrySLPredicate {

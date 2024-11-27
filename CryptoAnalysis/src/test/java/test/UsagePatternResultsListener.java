@@ -15,7 +15,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.listener.IResultsListener;
-import crypto.rules.ISLConstraint;
+import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Map;
 import test.assertions.ExtractedValueAssertion;

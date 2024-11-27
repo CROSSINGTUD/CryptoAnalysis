@@ -9,7 +9,6 @@ import boomerang.scene.WrappedClass;
 import boomerang.scene.sparse.SparseCFGCache;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
-import crypto.cryslhandler.RulesetReader;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.listener.AnalysisPrinter;
 import crypto.listener.AnalysisReporter;
@@ -18,7 +17,8 @@ import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
-import crypto.rules.CrySLRule;
+import crysl.CrySLParser;
+import crysl.rule.CrySLRule;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,8 +58,8 @@ public abstract class CryptoScanner {
         // Read the ruleset
         analysisReporter.beforeReadingRuleset(getRulesetPath());
         try {
-            RulesetReader reader = new RulesetReader();
-            ruleset = reader.readRulesFromPath(getRulesetPath());
+            CrySLParser parser = new CrySLParser();
+            ruleset = parser.parseRulesFromDirectory(getRulesetPath());
         } catch (IOException e) {
             throw new CryptoAnalysisException("Could not read rules: " + e.getMessage());
         }

@@ -100,6 +100,11 @@
                 <version>${spdsVersion}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+                <artifactId>CrySLParser</artifactId>
+                <version>${cryslVersion}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -125,11 +130,6 @@
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-            <artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-            <version>${cryslVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>

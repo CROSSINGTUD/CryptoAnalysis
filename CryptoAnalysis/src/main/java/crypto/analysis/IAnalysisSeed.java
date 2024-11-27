@@ -8,7 +8,7 @@ import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.errors.AbstractError;
-import crypto.rules.CrySLPredicate;
+import crysl.rule.CrySLPredicate;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -108,20 +108,6 @@ public abstract class IAnalysisSeed {
         }
 
         return predicates;
-    }
-
-    public Collection<IAnalysisSeed> getDependantSeeds() {
-        Collection<IAnalysisSeed> seeds = new HashSet<>();
-
-        for (ExpectedPredicateOnSeed seed : expectedPredicates.values()) {
-            if (this.equals(seed.getSeed())) {
-                continue;
-            }
-
-            seeds.add(seed.getSeed());
-        }
-
-        return seeds;
     }
 
     public Method getMethod() {

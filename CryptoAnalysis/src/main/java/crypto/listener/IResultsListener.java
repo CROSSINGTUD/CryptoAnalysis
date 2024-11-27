@@ -10,7 +10,7 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQuery;
-import crypto.rules.ISLConstraint;
+import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Map;
 import typestate.TransitionFunction;

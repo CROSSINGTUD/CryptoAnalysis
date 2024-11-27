@@ -1,6 +1,6 @@
 package crypto.reporting;
 
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;

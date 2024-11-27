@@ -11,7 +11,7 @@ import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLPredicate;
+import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.stream.Collectors;
 

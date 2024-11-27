@@ -4,7 +4,7 @@ import boomerang.scene.Method;
 import boomerang.scene.jimple.JimpleMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

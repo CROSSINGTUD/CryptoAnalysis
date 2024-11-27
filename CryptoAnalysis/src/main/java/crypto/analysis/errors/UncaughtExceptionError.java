@@ -3,7 +3,7 @@ package crypto.analysis.errors;
 import boomerang.scene.Statement;
 import boomerang.scene.WrappedClass;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Arrays;
 
 public class UncaughtExceptionError extends AbstractError {

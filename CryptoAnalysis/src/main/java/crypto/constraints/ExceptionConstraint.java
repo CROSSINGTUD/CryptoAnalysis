@@ -8,7 +8,7 @@ import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.JimpleStatement;
 import boomerang.scene.jimple.JimpleWrappedClass;
 import crypto.analysis.errors.UncaughtExceptionError;
-import crypto.rules.CrySLExceptionConstraint;
+import crysl.rule.CrySLExceptionConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

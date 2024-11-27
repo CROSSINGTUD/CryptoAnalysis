@@ -2,7 +2,7 @@ package crypto.analysis;
 
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
-import crypto.rules.ISLConstraint;
+import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

@@ -4,7 +4,7 @@ import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.HiddenPredicate;
 import crypto.analysis.RequiredCrySLPredicate;
-import crypto.rules.CrySLPredicate;
+import crysl.rule.CrySLPredicate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
