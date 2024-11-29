@@ -90,6 +90,97 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
 
     @Test
     @SuppressWarnings("ConstantConditions")
+    public void keyStoreInvalidTest7()
+            throws NoSuchAlgorithmException,
+                    IOException,
+                    KeyStoreException,
+                    CertificateException,
+                    UnrecoverableEntryException {
+
+        // Related to issue 295: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/295
+        char[] passwordKey = null;
+        String aliasGet = null;
+        String alias = null;
+        Entry entry = null;
+        String keyStoreAlgorithm = null;
+        String aliasSet = null;
+        ProtectionParameter protParamSet = null;
+        LoadStoreParameter paramStore = null;
+        ProtectionParameter protParamGet = null;
+
+        KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
+        // loads skipped
+        keyStore0.getEntry(aliasGet, protParamGet);
+        Key key = keyStore0.getKey(alias, passwordKey);
+        keyStore0.setEntry(aliasSet, entry, protParamSet);
+        keyStore0.store(paramStore);
+        Assertions.notHasEnsuredPredicate(key);
+        Assertions.mustNotBeInAcceptingState(keyStore0);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void keyStoreInvalidTest8()
+            throws NoSuchAlgorithmException,
+                    IOException,
+                    KeyStoreException,
+                    CertificateException,
+                    UnrecoverableEntryException {
+
+        // Related to issue 295: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/295
+        char[] passwordKey = null;
+        String aliasGet = null;
+        String alias = null;
+        Entry entry = null;
+        String keyStoreAlgorithm = null;
+        String aliasSet = null;
+        ProtectionParameter protParamSet = null;
+        LoadStoreParameter paramStore = null;
+        ProtectionParameter protParamGet = null;
+
+        KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm, (Provider) null);
+        // loads skipped
+        keyStore0.getEntry(aliasGet, protParamGet);
+        Key key = keyStore0.getKey(alias, passwordKey);
+        keyStore0.setEntry(aliasSet, entry, protParamSet);
+        keyStore0.store(paramStore);
+        Assertions.notHasEnsuredPredicate(key);
+        Assertions.mustNotBeInAcceptingState(keyStore0);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
+    public void keyStoreInvalidTest9()
+            throws NoSuchAlgorithmException,
+                    IOException,
+                    KeyStoreException,
+                    CertificateException,
+                    UnrecoverableEntryException {
+
+        // Related to issue 295: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/295
+        char[] passwordKey = null;
+        String aliasGet = null;
+        String alias = null;
+        Entry entry = null;
+        String keyStoreAlgorithm = null;
+        String aliasSet = null;
+        ProtectionParameter protParamSet = null;
+        OutputStream fileoutput = null;
+        char[] passwordOut = null;
+        ProtectionParameter protParamGet = null;
+
+        KeyStore keyStore0 = KeyStore.getInstance(keyStoreAlgorithm);
+        // loads skipped
+        keyStore0.getEntry(aliasGet, protParamGet);
+        Key key = keyStore0.getKey(alias, passwordKey);
+        keyStore0.setEntry(aliasSet, entry, protParamSet);
+        keyStore0.store(fileoutput, passwordOut);
+        Assertions.notHasEnsuredPredicate(key);
+        Assertions.mustNotBeInAcceptingState(keyStore0);
+    }
+
+    @Test
+    @SuppressWarnings("ConstantConditions")
     public void keyStoreInvalidTest10()
             throws NoSuchAlgorithmException,
                     UnrecoverableKeyException,

@@ -1,6 +1,5 @@
 package crypto.rules;
 
-import boomerang.scene.Statement;
 import java.util.List;
 
 public class CrySLConstraint implements ISLConstraint {
@@ -15,7 +14,6 @@ public class CrySLConstraint implements ISLConstraint {
     private final LogOps operator;
     private final ISLConstraint left;
     private final ISLConstraint right;
-    private Statement location;
 
     public CrySLConstraint(ISLConstraint l, ISLConstraint r, LogOps op) {
         left = l;
@@ -62,10 +60,5 @@ public class CrySLConstraint implements ISLConstraint {
     @Override
     public String getName() {
         return toString();
-    }
-
-    @Override
-    public Statement getLocation() {
-        return location;
     }
 }
