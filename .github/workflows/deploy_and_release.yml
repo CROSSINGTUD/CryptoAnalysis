@@ -6,8 +6,6 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     environment: Deploy
-    name: CryptoAnalysis Deployment
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -19,17 +17,12 @@ jobs:
         with:
           distribution: 'adopt'
           java-package: 'jdk'
-          java-version: '11'
+          java-version: '17'
           server-id: 'ossrh' # must match the serverId configured for the nexus-staging-maven-plugin
           server-username: OSSRH_USERNAME # Env var that holds your OSSRH user name
           server-password: OSSRH_PASSWORD # Env var that holds your OSSRH user pw
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }} # Substituted with the value stored in the referenced secret
           gpg-passphrase: SIGN_KEY_PASS # Env var that holds the key's passphrase
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.6.3
 
       - name: Build & Deploy CryptoAnalysis
         run: mvn -B -U clean deploy -Pdeployment -DskipTests
@@ -38,6 +31,13 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
           OSSRH_PASSWORD: ${{ secrets.SONATYPE_PW }}
 
+  release:
+    runs-on: ubuntu-latest
+    needs: deployment
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      
       - name: Fetch all tags
         run: git fetch --tags
 

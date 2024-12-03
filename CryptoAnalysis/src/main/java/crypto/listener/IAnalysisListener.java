@@ -6,7 +6,7 @@ import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 
 public interface IAnalysisListener {

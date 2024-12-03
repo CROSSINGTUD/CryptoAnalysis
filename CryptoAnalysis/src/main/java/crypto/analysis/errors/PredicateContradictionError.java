@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLPredicate;
+import crysl.rule.CrySLRule;
 import java.util.Arrays;
 
 public class PredicateContradictionError extends AbstractError {

@@ -7,7 +7,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.rules.CrySLPredicate;
+import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import typestate.TransitionFunction;
 

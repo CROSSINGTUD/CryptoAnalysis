@@ -5,7 +5,7 @@ import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.preanalysis.TransformerSetup;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.util.ArrayList;

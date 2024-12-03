@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLRule;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLRule;
+import crysl.rule.ISLConstraint;
 import java.util.Arrays;
 
 public class ImpreciseValueExtractionError extends AbstractError {

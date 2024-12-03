@@ -2,8 +2,8 @@ package crypto.utils;
 
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Type;
-import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLMethod;
+import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

@@ -5,7 +5,7 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.sparse.SparseCFGCache;
 import crypto.listener.AnalysisReporter;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 
 public interface ExtractParameterDefinition {

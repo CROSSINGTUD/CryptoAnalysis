@@ -3,7 +3,7 @@ package de.fraunhofer.iem.android;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 
 public class AndroidDataFlowScope extends CryptoAnalysisDataFlowScope {

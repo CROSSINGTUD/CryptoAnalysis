@@ -1,7 +1,7 @@
 package crypto.typestate;
 
 import boomerang.scene.ControlFlowGraph;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
 

@@ -23,12 +23,7 @@ jobs:
         with:
           distribution: 'adopt'
           java-package: jdk
-          java-version: '11'
-      # Sets up Maven version
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.6.3
+          java-version: '17'
       # Semantic versioning
       - name: Semantic versioning
         id: versioning

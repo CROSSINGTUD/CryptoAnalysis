@@ -48,7 +48,7 @@ runs:
       with:
         distribution: 'adopt'
         java-package: jdk
-        java-version: '11'
+        java-version: '17'
 
     - name: Checkout rules
       uses: actions/checkout@v4

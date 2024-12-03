@@ -3,7 +3,7 @@ package crypto.typestate;
 import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import ideal.IDEALSeedSolver;
 import java.util.Collection;
 import typestate.TransitionFunction;

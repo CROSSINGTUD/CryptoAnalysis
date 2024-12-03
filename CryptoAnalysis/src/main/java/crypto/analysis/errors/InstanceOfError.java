@@ -2,10 +2,10 @@ package crypto.analysis.errors;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLObject;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLObject;
+import crysl.rule.CrySLPredicate;
+import crysl.rule.CrySLRule;
+import crysl.rule.ISLConstraint;
 import java.util.Arrays;
 
 public class InstanceOfError extends AbstractError {

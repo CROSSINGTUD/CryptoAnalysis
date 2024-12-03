@@ -2,10 +2,10 @@ package crypto.constraints;
 
 import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.rules.CrySLObject;
-import crypto.rules.CrySLSplitter;
-import crypto.rules.CrySLValueConstraint;
-import crypto.rules.ISLConstraint;
+import crysl.rule.CrySLObject;
+import crysl.rule.CrySLSplitter;
+import crysl.rule.CrySLValueConstraint;
+import crysl.rule.ISLConstraint;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;

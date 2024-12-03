@@ -3,7 +3,7 @@ package crypto.analysis;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Method;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
 import org.slf4j.Logger;

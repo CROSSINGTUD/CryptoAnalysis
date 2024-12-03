@@ -3,8 +3,8 @@ package crypto.analysis.errors;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLMethod;
+import crysl.rule.CrySLRule;
 import java.util.Arrays;
 import java.util.Collection;
 

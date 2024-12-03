@@ -1,7 +1,7 @@
 package crypto.preanalysis;
 
 import boomerang.scene.jimple.BoomerangPretransformer;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 
 public class TransformerSetup {
