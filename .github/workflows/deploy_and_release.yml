@@ -6,8 +6,6 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     environment: Deploy
-    name: CryptoAnalysis Deployment
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -33,6 +31,13 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
           OSSRH_PASSWORD: ${{ secrets.SONATYPE_PW }}
 
+  release:
+    runs-on: ubuntu-latest
+    needs: deployment
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      
       - name: Fetch all tags
         run: git fetch --tags
 
