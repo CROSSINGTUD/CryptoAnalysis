@@ -51,8 +51,8 @@ public class FlowDroidSetup {
         InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
         config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
         config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
-        config.getAnalysisFileConfig().setAndroidPlatformDir(platformDir.getAbsolutePath());
-        config.getAnalysisFileConfig().setTargetAPKFile(apkFile.getAbsolutePath());
+        config.getAnalysisFileConfig().setAndroidPlatformDir(platformDir);
+        config.getAnalysisFileConfig().setTargetAPKFile(apkFile);
         config.setMergeDexFiles(true);
         config.setTaintAnalysisEnabled(false);
         config.setEnableLineNumbers(true);
