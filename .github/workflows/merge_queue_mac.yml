@@ -4,7 +4,7 @@ on:
   merge_group:
 
 env:
-  JAVA_VERSION: 11
+  JAVA_VERSION: 17
 
 jobs:
   # This name must be equal to the corresponding build_and_test action

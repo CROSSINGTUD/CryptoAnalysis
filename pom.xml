@@ -54,12 +54,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <skipTests>true</skipTests>
 
         <spdsVersion>3.2.2</spdsVersion>
         <sootVersion>4.6.0</sootVersion>
-        <cryslVersion>3.0.2</cryslVersion>
+        <cryslVersion>4.0.0</cryslVersion>
     </properties>
 
     <dependencyManagement>
@@ -173,13 +173,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
-        </dependency>
-        <dependency>
-            <!-- Not sure why, but without this explicit dependency,
-            any newer version of maven-invoker-plugin than 3.2.1, causes tests to crash with runtime exceptions. -->
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>7.0.0</version>
         </dependency>
     </dependencies>
 
