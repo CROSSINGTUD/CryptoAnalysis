@@ -1,7 +1,10 @@
 name: Dependabot auto-approve
-on:
-  pull_request_target:
-   paths: ["**/pom.xml"]
+
+# Currently disabled because the action is not compatible with merge queues
+on: [workflow_dispatch]
+  # pull_request_target:
+  #   paths: ["**/pom.xml"]
+  
 
 permissions:
   contents: write

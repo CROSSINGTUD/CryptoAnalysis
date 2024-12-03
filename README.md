@@ -31,7 +31,7 @@ CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile and build th
 
 ```mvn clean package -DskipTests=true```.
 
-The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 11.
+The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 17.
 
 ## CogniCrypt<sub>SAST</sub> for Java Applications
 
