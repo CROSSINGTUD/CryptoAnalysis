@@ -11,7 +11,7 @@ public class NotHardCodedErrorCountAssertion implements Assertion {
         this.expectedErrorCount = numberOfCounts;
     }
 
-    public void increaseCount(){
+    public void increaseCount() {
         actualErrorCount++;
     }
 
@@ -27,6 +27,9 @@ public class NotHardCodedErrorCountAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + expectedErrorCount + " hardCodedErrors errors, but got " + actualErrorCount;
+        return "Expected "
+                + expectedErrorCount
+                + " hardCodedErrors errors, but got "
+                + actualErrorCount;
     }
 }

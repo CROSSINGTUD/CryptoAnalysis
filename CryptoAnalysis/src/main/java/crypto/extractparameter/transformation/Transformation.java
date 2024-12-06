@@ -8,14 +8,15 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
+import crypto.extractparameter.ExtractParameterDefinition;
 import crypto.extractparameter.ExtractParameterOptions;
-import crypto.utils.SootUtils;
-import wpds.impl.Weight;
-
+import crypto.extractparameter.scope.IntVal;
+import crypto.extractparameter.scope.LongVal;
+import crypto.extractparameter.scope.StringVal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
+import wpds.impl.Weight;
 
 public abstract class Transformation {
 
@@ -80,13 +81,16 @@ public abstract class Transformation {
     protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
         Collection<ForwardQuery> extractedValues = new HashSet<>();
 
-        Collection<Statement> preds = statement.getMethod().getControlFlowGraph().getPredsOf(statement);
+        Collection<Statement> preds =
+                statement.getMethod().getControlFlowGraph().getPredsOf(statement);
         for (Statement pred : preds) {
             ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
             ExtractParameterOptions options = new ExtractParameterOptions(definition);
             BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
-            Boomerang boomerang = new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
+            Boomerang boomerang =
+                    new Boomerang(
+                            definition.getCallGraph(), definition.getDataFlowScope(), options);
 
             BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
             extractedValues.addAll(results.getAllocationSites().keySet());
@@ -103,23 +107,22 @@ public abstract class Transformation {
 
     protected AllocVal createTransformedAllocVal(String string, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toStringConstant(string, statement.getMethod());
+        Val resultOp = new StringVal(string, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }
 
     protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toIntConstant(intValue, statement.getMethod());
+        Val resultOp = new IntVal(intValue, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }
 
     protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
         Val leftOp = statement.getLeftOp();
-        Val resultOp = SootUtils.toLongConstant(longValue, statement.getMethod());
+        Val resultOp = new LongVal(longValue, statement.getMethod());
 
         return new TransformedAllocVal(leftOp, statement, resultOp);
     }
-
 }

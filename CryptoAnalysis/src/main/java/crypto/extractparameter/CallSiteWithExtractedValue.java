@@ -1,7 +1,6 @@
 package crypto.extractparameter;
 
 import boomerang.scene.Val;
-
 import java.util.Arrays;
 
 public class CallSiteWithExtractedValue {
@@ -9,7 +8,8 @@ public class CallSiteWithExtractedValue {
     private final CallSiteWithParamIndex callSiteWithParam;
     private final ExtractedValue extractedValue;
 
-    public CallSiteWithExtractedValue(CallSiteWithParamIndex callSiteWithParam, ExtractedValue extractedValue) {
+    public CallSiteWithExtractedValue(
+            CallSiteWithParamIndex callSiteWithParam, ExtractedValue extractedValue) {
         this.callSiteWithParam = callSiteWithParam;
         this.extractedValue = extractedValue;
     }
@@ -25,7 +25,7 @@ public class CallSiteWithExtractedValue {
     @Override
     public String toString() {
         String res;
-        switch(callSiteWithParam.getIndex()) {
+        switch (callSiteWithParam.getIndex()) {
             case -1:
                 return "Return value";
             case 0:
@@ -55,7 +55,7 @@ public class CallSiteWithExtractedValue {
             Val allocVal = extractedValue.getVal();
 
             if (allocVal.isConstant()) {
-                res += " (with value " + allocVal.getVariableName() +")";
+                res += " (with value " + allocVal.getVariableName() + ")";
             }
         }
         return res;
@@ -63,10 +63,7 @@ public class CallSiteWithExtractedValue {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{
-                callSiteWithParam,
-                extractedValue
-        });
+        return Arrays.hashCode(new Object[] {callSiteWithParam, extractedValue});
     }
 
     @Override

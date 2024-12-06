@@ -14,7 +14,7 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
 
     @Test
     public void positiveLengthExprTest() {
-        byte[] correctBytes = new byte[]{'t', 'e', 's', 't'};
+        byte[] correctBytes = new byte[] {'t', 'e', 's', 't'};
 
         OperatorConstraint constraint = new OperatorConstraint();
         constraint.lengthExprConstraint(correctBytes.length);
@@ -25,7 +25,7 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
 
     @Test
     public void negativeLengthExprTest() {
-        byte[] incorrectBytes = new byte[]{'t', 'e', 's', 't', 'i', 'n', 'g'};
+        byte[] incorrectBytes = new byte[] {'t', 'e', 's', 't', 'i', 'n', 'g'};
 
         OperatorConstraint constraint = new OperatorConstraint();
         constraint.lengthExprConstraint(incorrectBytes.length);

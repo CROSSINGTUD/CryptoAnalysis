@@ -4,14 +4,15 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
-
+import crypto.extractparameter.ExtractParameterDefinition;
 import java.util.Optional;
 
 public class WrapperTransformation extends Transformation {
 
-    private static final String INTEGER_PARSE_INT = "<java.lang.Integer: int parseInt(java.lang.String)>";
-    private static final String BIG_INTEGER_VALUE_OF = "<java.math.BigInteger: java.math.BigInteger valueOf(long)>";
+    private static final String INTEGER_PARSE_INT =
+            "<java.lang.Integer: int parseInt(java.lang.String)>";
+    private static final String BIG_INTEGER_VALUE_OF =
+            "<java.math.BigInteger: java.math.BigInteger valueOf(long)>";
 
     public WrapperTransformation(ExtractParameterDefinition definition) {
         super(definition);
@@ -57,7 +58,8 @@ public class WrapperTransformation extends Transformation {
         }
     }
 
-    private Optional<AllocVal> evaluateBigIntegerValueOf(Statement statement, InvokeExpr invokeExpr) {
+    private Optional<AllocVal> evaluateBigIntegerValueOf(
+            Statement statement, InvokeExpr invokeExpr) {
         Val param = invokeExpr.getArg(0);
 
         Optional<Long> longParamOpt = extractLongFromVal(statement, param);
@@ -70,5 +72,4 @@ public class WrapperTransformation extends Transformation {
         AllocVal allocVal = createTransformedAllocVal(extractedParam, statement);
         return Optional.of(allocVal);
     }
-
 }

@@ -1,0 +1,51 @@
+name: Build And Test (Basic)
+description: Basic build and tests for the submodules on each push and pull request
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
+  pull_request:
+    types: [opened, reopened]
+
+env:
+  JAVA_VERSION: 17
+
+jobs:
+  # Build the CryptoAnalysis module and run its tests
+  build-and-test-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Analysis
+        uses: ./.github/actions/analysis
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+  # Build the HeadlessAndroidScanner module and run its tests
+  build-and-test-scanner-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+  # Build the HeadlessJavaScanner module and run its tests using Soot
+  # as the static analysis framework
+  build-and-test-scanner-soot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test JavaScanner with Soot
+        uses: ./.github/actions/scanner-soot
+        with:
+          java-version: ${{ env.JAVA_VERSION }}

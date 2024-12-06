@@ -9,19 +9,17 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Val;
-import crypto.definition.TypestateDefinition;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
 import ideal.IDEALResultHandler;
 import ideal.IDEALSeedSolver;
 import ideal.StoreIDEALResultHandler;
-import sync.pds.solver.WeightFunctions;
-import typestate.TransitionFunction;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import sync.pds.solver.WeightFunctions;
+import typestate.TransitionFunction;
 
 public class TypestateAnalysis {
 
@@ -37,7 +35,9 @@ public class TypestateAnalysis {
             transitions.put(rule.getClassName(), RuleTransitions.of(rule));
         }
 
-        analysisScope = new TypestateAnalysisScope(definition.getCallGraph(), transitions, definition.getDataFlowScope());
+        analysisScope =
+                new TypestateAnalysisScope(
+                        definition.getCallGraph(), transitions, definition.getDataFlowScope());
         resultHandler = new StoreIDEALResultHandler<>();
     }
 
@@ -61,19 +61,24 @@ public class TypestateAnalysis {
         TypestateFunction typestateFunction = new TypestateFunction(transitions);
 
         // Initialize and run IDE with Aliasing
-        IDEALAnalysis<TransitionFunction> idealAnalysis = new IDEALAnalysis<>(getIdealAnalysisDefinition(typestateFunction));
+        IDEALAnalysis<TransitionFunction> idealAnalysis =
+                new IDEALAnalysis<>(getIdealAnalysisDefinition(typestateFunction));
         idealAnalysis.run(query);
     }
 
-    private IDEALAnalysisDefinition<TransitionFunction> getIdealAnalysisDefinition(TypestateFunction typestateFunction) {
+    private IDEALAnalysisDefinition<TransitionFunction> getIdealAnalysisDefinition(
+            TypestateFunction typestateFunction) {
         return new IDEALAnalysisDefinition<>() {
             @Override
-            public Collection<WeightedForwardQuery<TransitionFunction>> generate(ControlFlowGraph.Edge stmt) {
+            public Collection<WeightedForwardQuery<TransitionFunction>> generate(
+                    ControlFlowGraph.Edge stmt) {
                 return typestateFunction.generateSeed(stmt);
             }
 
             @Override
-            public WeightFunctions<ControlFlowGraph.Edge, Val, ControlFlowGraph.Edge, TransitionFunction> weightFunctions() {
+            public WeightFunctions<
+                            ControlFlowGraph.Edge, Val, ControlFlowGraph.Edge, TransitionFunction>
+                    weightFunctions() {
                 return typestateFunction;
             }
 
@@ -83,7 +88,8 @@ public class TypestateAnalysis {
             }
 
             @Override
-            public Debugger<TransitionFunction> debugger(IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
+            public Debugger<TransitionFunction> debugger(
+                    IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
                 return definition.getDebugger(idealSeedSolver);
             }
 
@@ -105,9 +111,13 @@ public class TypestateAnalysis {
     }
 
     public Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> getResults() {
-        Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results = new HashMap<>();
+        Map<ForwardSeedQuery, ForwardBoomerangResults<TransitionFunction>> results =
+                new HashMap<>();
 
-        for (Map.Entry<WeightedForwardQuery<TransitionFunction>, ForwardBoomerangResults<TransitionFunction>> entry : resultHandler.getResults().entrySet()) {
+        for (Map.Entry<
+                        WeightedForwardQuery<TransitionFunction>,
+                        ForwardBoomerangResults<TransitionFunction>>
+                entry : resultHandler.getResults().entrySet()) {
             if (!(entry.getKey() instanceof ForwardSeedQuery)) {
                 continue;
             }
@@ -117,5 +127,4 @@ public class TypestateAnalysis {
         }
         return results;
     }
-
 }

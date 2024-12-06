@@ -6,7 +6,3 @@ updates:
     interval: weekly
     time: "04:00"
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: com.google.crypto.tink:tink
-    versions:
-    - 1.5.0

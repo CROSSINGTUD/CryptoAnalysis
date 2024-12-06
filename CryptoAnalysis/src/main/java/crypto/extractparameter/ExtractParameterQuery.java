@@ -5,12 +5,10 @@ import boomerang.Boomerang;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
-import crypto.definition.ExtractParameterDefinition;
-import wpds.impl.Weight;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import wpds.impl.Weight;
 
 public class ExtractParameterQuery extends BackwardQuery {
 
@@ -18,7 +16,11 @@ public class ExtractParameterQuery extends BackwardQuery {
     private final Collection<QueryListener> listeners;
     private final int index;
 
-    public ExtractParameterQuery(ExtractParameterDefinition definition, ControlFlowGraph.Edge statement, Val val, int index) {
+    public ExtractParameterQuery(
+            ExtractParameterDefinition definition,
+            ControlFlowGraph.Edge statement,
+            Val val,
+            int index) {
         super(statement, val);
 
         this.definition = definition;
@@ -28,12 +30,15 @@ public class ExtractParameterQuery extends BackwardQuery {
 
     public void solve() {
         ExtractParameterOptions options = new ExtractParameterOptions(definition);
-        Boomerang boomerang = new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
+        Boomerang boomerang =
+                new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), options);
 
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(this);
 
         if (results.isTimedout()) {
-            definition.getAnalysisReporter().onExtractParameterAnalysisTimeout(var(), cfgEdge().getTarget());
+            definition
+                    .getAnalysisReporter()
+                    .onExtractParameterAnalysisTimeout(var(), cfgEdge().getTarget());
         }
         definition.getAnalysisReporter().extractedBoomerangResults(this, results);
 
@@ -57,10 +62,7 @@ public class ExtractParameterQuery extends BackwardQuery {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[]{
-                super.hashCode(),
-                index
-        });
+        return Arrays.hashCode(new Object[] {super.hashCode(), index});
     }
 
     @Override

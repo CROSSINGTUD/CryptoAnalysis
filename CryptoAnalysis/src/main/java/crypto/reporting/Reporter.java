@@ -6,14 +6,13 @@ import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
-import crypto.rules.CrySLRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import crysl.rule.CrySLRule;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Reporter {
 
@@ -21,7 +20,12 @@ public abstract class Reporter {
     protected static final String REPORT_NAME = "CryptoAnalysis-Report";
 
     public enum ReportFormat {
-        CMD, TXT, SARIF, CSV, CSV_SUMMARY, GITHUB_ANNOTATION
+        CMD,
+        TXT,
+        SARIF,
+        CSV,
+        CSV_SUMMARY,
+        GITHUB_ANNOTATION
     }
 
     protected final File outputFile;
@@ -29,7 +33,8 @@ public abstract class Reporter {
 
     protected Reporter(String outputDir, Collection<CrySLRule> ruleset) throws IOException {
         if (outputDir == null) {
-            throw new RuntimeException("Cannot create report without directory (try using --reportDir or setOutputDirectory)");
+            throw new RuntimeException(
+                    "Cannot create report without directory (try using --reportDir or setOutputDirectory)");
         }
         this.outputFile = new File(outputDir);
         this.ruleset = ruleset;
@@ -48,5 +53,8 @@ public abstract class Reporter {
         this.ruleset = ruleset;
     }
 
-    public abstract void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics);
+    public abstract void createAnalysisReport(
+            Collection<IAnalysisSeed> seeds,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
+            AnalysisStatistics statistics);
 }

@@ -106,5 +106,4 @@ public class IncompleteOperationTest extends UsagePatternTestingFramework {
 
         Assertions.incompleteOperationErrors(2);
     }
-
 }

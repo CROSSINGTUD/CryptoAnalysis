@@ -1,18 +1,20 @@
 package crypto.reporting;
 
-import crypto.rules.CrySLRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import crysl.rule.CrySLRule;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ReporterFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReporterFactory.class);
 
-    public static Collection<Reporter> createReporters(Collection<Reporter.ReportFormat> reportFormats, String outputDir, Collection<CrySLRule> rules) {
+    public static Collection<Reporter> createReporters(
+            Collection<Reporter.ReportFormat> reportFormats,
+            String outputDir,
+            Collection<CrySLRule> rules) {
         Collection<Reporter> reporters = new HashSet<>();
 
         for (Reporter.ReportFormat format : reportFormats) {

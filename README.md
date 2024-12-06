@@ -31,7 +31,7 @@ CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile and build th
 
 ```mvn clean package -DskipTests=true```.
 
-The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 11.
+The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 17.
 
 ## CogniCrypt<sub>SAST</sub> for Java Applications
 
@@ -136,4 +136,12 @@ java -jar HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar
 ```
 Optional parameters are `--reportPath` and `--reportFormat`. They have the same functionality as the `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar` (see above).
 
+If specified, the analysis generates a report file `CogniCrypt-Report.txt` along with the `.jimple` output of the classes the analysis found misuses in. The format of the report file follows that described above.
+
 Again, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
+
+## How can I contribute?
+We hare happy for every contribution from the community!
+
+* [Contributing](CONTRIBUTING.md) for details on issues and merge requests.
+* [Coding Guidles](CODING.md) for this project.

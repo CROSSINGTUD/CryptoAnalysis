@@ -13,5 +13,4 @@ public class NotHardCoded {
     public void operation(char[] value) {}
 
     public void operation(int[] value) {}
-
 }

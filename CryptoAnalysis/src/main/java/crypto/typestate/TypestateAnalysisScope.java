@@ -1,6 +1,11 @@
 package crypto.typestate;
 
+import boomerang.BackwardQuery;
+import boomerang.Boomerang;
+import boomerang.DefaultBoomerangOptions;
+import boomerang.ForwardQuery;
 import boomerang.Query;
+import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.AnalysisScope;
 import boomerang.scene.CallGraph;
@@ -8,28 +13,35 @@ import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
+import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.rules.CrySLMethod;
-import crypto.rules.CrySLPredicate;
-import crypto.rules.CrySLRule;
-import crypto.rules.ICrySLPredicateParameter;
 import crypto.utils.MatcherUtils;
-
+import crysl.rule.CrySLMethod;
+import crysl.rule.CrySLPredicate;
+import crysl.rule.CrySLRule;
+import crysl.rule.ICrySLPredicateParameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
+import wpds.impl.Weight;
 
 public class TypestateAnalysisScope extends AnalysisScope {
 
     private final Map<String, RuleTransitions> ruleTransitions;
+    private final CallGraph callGraph;
     private final DataFlowScope dataFlowScope;
 
-    public TypestateAnalysisScope(CallGraph callGraph, Map<String, RuleTransitions> ruleTransitions, DataFlowScope dataFlowScope) {
+    public TypestateAnalysisScope(
+            CallGraph callGraph,
+            Map<String, RuleTransitions> ruleTransitions,
+            DataFlowScope dataFlowScope) {
         super(callGraph);
 
         this.ruleTransitions = ruleTransitions;
+        this.callGraph = callGraph;
         this.dataFlowScope = dataFlowScope;
     }
 
@@ -53,7 +65,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
 
         // Constructors
         if (declaredMethod.isConstructor()) {
-            Collection<ForwardSeedQuery> constructorSeeds = computeSeedsFromConstructor(stmt, statement);
+            Collection<ForwardSeedQuery> constructorSeeds =
+                    computeSeedsFromConstructor(stmt, statement);
             discoveredSeeds.addAll(constructorSeeds);
         }
 
@@ -61,7 +74,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
         if (invokeExpr.isInstanceInvokeExpr()) {
             String baseType = invokeExpr.getBase().getType().toString();
 
-            Collection<ForwardSeedQuery> instanceExprSeeds = computeSeedsFromStatement(stmt, statement, baseType);
+            Collection<ForwardSeedQuery> instanceExprSeeds =
+                    computeSeedsFromStatement(stmt, statement, baseType);
             discoveredSeeds.addAll(instanceExprSeeds);
         }
 
@@ -69,14 +83,16 @@ public class TypestateAnalysisScope extends AnalysisScope {
         if (invokeExpr.isStaticInvokeExpr()) {
             String declaringClassName = declaredMethod.getDeclaringClass().getName();
 
-            Collection<ForwardSeedQuery> staticExprSeeds = computeSeedsFromStatement(stmt, statement, declaringClassName);
+            Collection<ForwardSeedQuery> staticExprSeeds =
+                    computeSeedsFromStatement(stmt, statement, declaringClassName);
             discoveredSeeds.addAll(staticExprSeeds);
         }
 
         return discoveredSeeds;
     }
 
-    private Collection<ForwardSeedQuery> computeSeedsFromConstructor(ControlFlowGraph.Edge edge, Statement stmt) {
+    private Collection<ForwardSeedQuery> computeSeedsFromConstructor(
+            ControlFlowGraph.Edge edge, Statement stmt) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         Val base = stmt.getInvokeExpr().getBase();
@@ -89,16 +105,18 @@ public class TypestateAnalysisScope extends AnalysisScope {
         AllocVal allocVal = new AllocVal(base, stmt, base);
         RuleTransitions rule = ruleTransitions.get(baseType);
 
-        ForwardSeedQuery constructorSeed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, rule);
+        ForwardSeedQuery constructorSeed =
+                ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, rule);
         seeds.add(constructorSeed);
 
-        Collection<ForwardSeedQuery> paramSeeds = computeSeedsFromParameters(edge, stmt, baseType);
+        Collection<ForwardSeedQuery> paramSeeds = computeSeedsFromParameters(stmt, baseType);
         seeds.addAll(paramSeeds);
 
         return seeds;
     }
 
-    private Collection<ForwardSeedQuery> computeSeedsFromStatement(ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
+    private Collection<ForwardSeedQuery> computeSeedsFromStatement(
+            ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         if (!ruleTransitions.containsKey(baseType)) {
@@ -110,30 +128,35 @@ public class TypestateAnalysisScope extends AnalysisScope {
         seeds.addAll(basicSeeds);
 
         // Parameters
-        Collection<ForwardSeedQuery> parameterSeeds = computeSeedsFromParameters(edge, stmt, baseType);
+        Collection<ForwardSeedQuery> parameterSeeds = computeSeedsFromParameters(stmt, baseType);
         seeds.addAll(parameterSeeds);
 
         // Assign statements
-        Collection<ForwardSeedQuery> assignmentSeeds = computeSeedsFromAssignment(edge, stmt, baseType);
+        Collection<ForwardSeedQuery> assignmentSeeds =
+                computeSeedsFromAssignment(edge, stmt, baseType);
         seeds.addAll(assignmentSeeds);
 
         return seeds;
     }
 
-    private Collection<ForwardSeedQuery> computeSeedsFromExpression(ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
+    private Collection<ForwardSeedQuery> computeSeedsFromExpression(
+            ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         if (!stmt.isAssign()) {
             return seeds;
         }
 
-        // Only seeds from static expressions are relevant (e.g. getInstance()), others are from constructors
+        // Only seeds from static expressions are relevant (e.g. getInstance()), others are from
+        // constructors
         if (!stmt.getInvokeExpr().isStaticInvokeExpr()) {
             return seeds;
         }
 
         RuleTransitions rightSideRule = ruleTransitions.get(baseType);
-        Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rightSideRule.getRule(), stmt.getInvokeExpr().getMethod());
+        Collection<CrySLMethod> methods =
+                MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
+                        rightSideRule.getRule(), stmt.getInvokeExpr().getMethod());
 
         if (methods.isEmpty()) {
             return seeds;
@@ -146,22 +169,26 @@ public class TypestateAnalysisScope extends AnalysisScope {
         String leftSideType = leftOp.getType().toString();
         if (ruleTransitions.containsKey(leftSideType)) {
             RuleTransitions leftSideRule = ruleTransitions.get(leftSideType);
-            ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
+            ForwardSeedQuery seed =
+                    ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
             seeds.add(seed);
         } else {
-            ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, rightSideRule);
+            ForwardSeedQuery seed =
+                    ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, rightSideRule);
             seeds.add(seed);
         }
 
         return seeds;
     }
 
-    private Collection<ForwardSeedQuery> computeSeedsFromParameters(ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
+    private Collection<ForwardSeedQuery> computeSeedsFromParameters(
+            Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         CrySLRule baseTypeRule = ruleTransitions.get(baseType).getRule();
         DeclaredMethod declaredMethod = stmt.getInvokeExpr().getMethod();
-        Collection<CrySLMethod> methods = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(baseTypeRule, declaredMethod);
+        Collection<CrySLMethod> methods =
+                MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(baseTypeRule, declaredMethod);
 
         for (CrySLMethod method : methods) {
             for (int i = 0; i < method.getParameters().size(); i++) {
@@ -172,7 +199,6 @@ public class TypestateAnalysisScope extends AnalysisScope {
                 }
 
                 Val paramVal = stmt.getInvokeExpr().getArg(i);
-                AllocVal allocVal = new AllocVal(paramVal, stmt, paramVal);
 
                 // There is a rule for the parameter type => Seed is computed somewhere else
                 String paramValType = paramVal.getType().toString();
@@ -180,8 +206,24 @@ public class TypestateAnalysisScope extends AnalysisScope {
                     continue;
                 }
 
-                ForwardSeedQuery paramSeed = ForwardSeedQuery.makeQueryWithoutSpecification(edge, allocVal);
-                seeds.add(paramSeed);
+                for (Statement pred : stmt.getMethod().getControlFlowGraph().getPredsOf(stmt)) {
+                    ControlFlowGraph.Edge backwardsEdge = new ControlFlowGraph.Edge(pred, stmt);
+
+                    BackwardQuery backwardQuery = BackwardQuery.make(backwardsEdge, paramVal);
+                    Boomerang boomerang =
+                            new Boomerang(callGraph, dataFlowScope, new SeedsWithoutSpecOptions());
+
+                    BackwardBoomerangResults<Weight.NoWeight> results =
+                            boomerang.solve(backwardQuery);
+
+                    // TODO What happens when no value is found?
+                    for (ForwardQuery query : results.getAllocationSites().keySet()) {
+                        ForwardSeedQuery paramSeed =
+                                ForwardSeedQuery.makeQueryWithoutSpecification(
+                                        query.cfgEdge(), query.var());
+                        seeds.add(paramSeed);
+                    }
+                }
             }
         }
 
@@ -200,7 +242,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
         return false;
     }
 
-    private Collection<ForwardSeedQuery> computeSeedsFromAssignment(ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
+    private Collection<ForwardSeedQuery> computeSeedsFromAssignment(
+            ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         if (!stmt.isAssign()) {
@@ -219,11 +262,13 @@ public class TypestateAnalysisScope extends AnalysisScope {
                 // Case where rule exists, e.g. SecretKey key = kg.generateKey()
                 RuleTransitions leftSideRule = ruleTransitions.get(leftClassName);
 
-                ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
+                ForwardSeedQuery seed =
+                        ForwardSeedQuery.makeQueryWithSpecification(edge, allocVal, leftSideRule);
                 seeds.add(seed);
             } else {
                 // Case where no rule exists, e.g. byte[] bytes = key.getEncoded();
-                ForwardSeedQuery seed = ForwardSeedQuery.makeQueryWithoutSpecification(edge, allocVal);
+                ForwardSeedQuery seed =
+                        ForwardSeedQuery.makeQueryWithoutSpecification(edge, allocVal);
                 seeds.add(seed);
             }
         }
@@ -232,7 +277,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
     }
 
     private boolean isSeedGeneratingAssignment(CrySLRule rule, DeclaredMethod declaredMethod) {
-        Collection<CrySLMethod> converted = MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rule, declaredMethod);
+        Collection<CrySLMethod> converted =
+                MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rule, declaredMethod);
 
         for (CrySLMethod method : converted) {
             Map.Entry<String, String> targetObject = method.getRetObject();
@@ -244,4 +290,28 @@ public class TypestateAnalysisScope extends AnalysisScope {
         return false;
     }
 
+    private static class SeedsWithoutSpecOptions extends DefaultBoomerangOptions {
+
+        @Override
+        public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
+            if (!stmt.isAssign()) {
+                return Optional.empty();
+            }
+
+            if (!stmt.getLeftOp().equals(fact)) {
+                return Optional.empty();
+            }
+
+            Val leftOp = stmt.getLeftOp();
+            Val rightOp = stmt.getRightOp();
+
+            AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+            return Optional.of(allocVal);
+        }
+
+        @Override
+        public int analysisTimeoutMS() {
+            return 1000000000;
+        }
+    }
 }

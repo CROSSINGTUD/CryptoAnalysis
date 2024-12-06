@@ -1,0 +1,44 @@
+name: Build And Test (MacOS)
+
+on:
+  merge_group:
+
+env:
+  JAVA_VERSION: 17
+
+jobs:
+  # This name must be equal to the corresponding build_and_test action
+  build-and-test-analysis:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Analysis
+        uses: ./.github/actions/analysis
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+  # This name must be equal to the corresponding build_and_test job
+  build-and-test-scanner-android:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+  # This name must be equal to the corresponding build_and_test job
+  build-and-test-scanner-soot:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Build and test JavaScanner with Soot
+        uses: ./.github/actions/scanner-soot
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
