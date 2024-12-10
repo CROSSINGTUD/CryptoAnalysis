@@ -33,6 +33,9 @@ jobs:
         uses: ./.github/actions/scanner-android
         with:
           java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Create or update gh-pages-output directory
+        run: mkdir -p gh-pages-output
       
       - name: Extract performance
         uses: ./.github/actions/performance
