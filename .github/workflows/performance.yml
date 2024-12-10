@@ -1,33 +1,26 @@
-name: Test and Runtime Results
+name: Performance Analysis
 
 on: [workflow_dispatch]
 
+env:
+  JAVA_VERSION: 17
+
 jobs:
-  # Builds the project in windows, ubuntu, and macos
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    name: Project build in ${{ matrix.os }}
+  performance:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
-          ref: develop
+          ref: gh-pages
           fetch-depth: 0
       # Sets up Java version
-      - name: Set up Java
-        uses: actions/setup-java@v3
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
+          distribution: adopt
           java-package: jdk
-          java-version: '11'
-      # Sets up Maven version
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.6.3
+          java-version: ${{ env.JAVA_VERSION }}
       # Restores Maven dependencies
       - name: Restore local Maven repository
         uses: actions/cache@v2
@@ -37,18 +30,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run maven command
-        run: mvn clean verify
+        run: mvn clean verify -DrunAllTests
 
       # Ubuntu-specific steps only
       - name: Create or update gh-pages-output directory
-        if: matrix.os == 'ubuntu-latest'
         run: mkdir -p gh-pages-output
   
       - name: Aggregate test results from multiple directories
-        if: matrix.os == 'ubuntu-latest'
         run: |
           total_time=0
-          for dir in CryptoAnalysis/shippable/testresults HeadlessJavaScanner/shippable/testresults; do
+          for dir in CryptoAnalysis/shippable/testresults HeadlessAndroidScanner/shippable/testresults HeadlessJavaScanner/shippable/testresults; do
             if [ -d "$dir" ]; then
               echo "Processing directory: $dir"
               for file in "$dir"/*.txt; do
@@ -83,7 +74,6 @@ jobs:
           echo "Run ${run_number}, ${timestamp}, Total Time: ${minutes}m ${seconds}s ${milliseconds}ms" >> gh-pages-output/current_history.txt
   
       - name: Combine current and past history
-        if: matrix.os == 'ubuntu-latest'
         run: |
           git checkout gh-pages
           if [ -f current_history.txt ]; then
@@ -95,7 +85,6 @@ jobs:
           fi
   
       - name: Generate HTML report
-        if: matrix.os == 'ubuntu-latest'
         run: |
           echo "<html><body><h1>Aggregated Test Results</h1><ul>" > gh-pages-output/index.html
           cat gh-pages-output/current_history.txt | while read line; do
@@ -105,7 +94,6 @@ jobs:
           echo "</ul></body></html>" >> gh-pages-output/index.html
   
       - name: Deploy to GitHub Pages
-        if: matrix.os == 'ubuntu-latest'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
