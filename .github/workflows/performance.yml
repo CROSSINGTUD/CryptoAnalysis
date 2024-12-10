@@ -1,12 +1,27 @@
-name: Performance Analysis
+name: Performance Analysis (Pre)
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      analysis:
+        type: boolean
+        required: false
+        default: false
+      android:
+        type: boolean
+        required: false
+        default: false
+      soot:
+        type: boolean
+        required: false
+        default: false
 
 env:
   JAVA_VERSION: 17
 
 jobs:
-  performance:
+  performance-pre:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
@@ -77,7 +92,6 @@ jobs:
           git checkout gh-pages
           if [ -f current_history.txt ]; then
             echo "current history"
-            git checkout test_gh_pages
             git checkout gh-pages current_history.txt
             cat gh-pages-output/current_history.txt >> current_history.txt
             mv current_history.txt gh-pages-output/current_history.txt
