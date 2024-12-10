@@ -27,6 +27,9 @@ public class ImpreciseValueExtractionErrorCountAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + expectedErrorCount + " imprecise value extraction errors, but got " + actualErrorCount;
+        return "Expected "
+                + expectedErrorCount
+                + " imprecise value extraction errors, but got "
+                + actualErrorCount;
     }
 }

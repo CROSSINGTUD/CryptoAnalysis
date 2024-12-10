@@ -21,7 +21,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
         Contradiction contradiction = new Contradiction(false);
         contradiction.contradictPredicate(noPredicate);
-        Assertions.hasEnsuredPredicate(contradiction);
+        Assertions.hasGeneratedPredicate(contradiction);
 
         Assertions.predicateContradictionErrors(0);
     }
@@ -35,7 +35,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
         Contradiction contradiction = new Contradiction(false);
         contradiction.contradictPredicate(predicate);
-        // Assertions.notHasEnsuredPredicate(contradiction);
+        Assertions.hasNotGeneratedPredicate(contradiction);
 
         Assertions.predicateContradictionErrors(1);
     }
@@ -63,12 +63,12 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
         PredicateEnsurer ensurer3 = new PredicateEnsurer(false);
         char[] predicate3 = ensurer3.createCondPredicate();
-        Assertions.notHasEnsuredPredicate(false);
+        Assertions.notHasEnsuredPredicate(predicate3);
 
         // predicate3 has no ensured predicate and condition is not satisfied (False -> True)
         Contradiction contradiction3 = new Contradiction(false);
         contradiction3.contradictPredicate(predicate3);
-        Assertions.hasEnsuredPredicate(contradiction3);
+        Assertions.hasGeneratedPredicate(contradiction3);
 
         Assertions.predicateContradictionErrors(0);
     }
@@ -82,7 +82,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
         // predicate1 has predicate and condition is satisfied -> contradiction (True -> False)
         Contradiction contradiction = new Contradiction(true);
         contradiction.contradictPredicate(predicate);
-        // Assertions.notHasEnsuredPredicate(contradiction);
+        Assertions.hasNotGeneratedPredicate(contradiction);
 
         Assertions.predicateContradictionErrors(1);
     }

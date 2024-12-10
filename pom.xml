@@ -54,11 +54,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
+        <skipTests>true</skipTests>
 
-        <spdsVersion>3.2.1</spdsVersion>
-        <sootVersion>4.5.0</sootVersion>
-        <cryslVersion>3.0.2</cryslVersion>
+        <spdsVersion>3.2.2</spdsVersion>
+        <sootVersion>4.6.0</sootVersion>
+        <cryslVersion>4.0.0</cryslVersion>
     </properties>
 
     <dependencyManagement>
@@ -85,11 +86,6 @@
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>WPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>boomerangPDS</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
@@ -100,14 +96,14 @@
             </dependency>
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>synchronizedPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>testCore</artifactId>
                 <version>${spdsVersion}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+                <artifactId>CrySLParser</artifactId>
+                <version>${cryslVersion}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -116,13 +112,13 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.0-jre</version>
+            <version>33.3.1-jre</version>
         </dependency>
         <dependency>
             <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>9.7</version>
+            <version>9.7.1</version>
         </dependency>
         <dependency>
             <groupId>org.soot-oss</groupId>
@@ -136,20 +132,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-            <artifactId>de.darmstadt.tu.crossing.CrySL</artifactId>
-            <version>${cryslVersion}</version>
-        </dependency>
-        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.78.1</version>
+            <version>1.79</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bctls-jdk18on</artifactId>
-            <version>1.78.1</version>
+            <version>1.79</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -175,20 +166,13 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.16.1</version>
+            <version>2.18.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
-        </dependency>
-        <dependency>
-            <!-- Not sure why, but without this explicit dependency,
-            any newer version of maven-invoker-plugin than 3.2.1, causes tests to crash with runtime exceptions. -->
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>7.0.0</version>
         </dependency>
     </dependencies>
 
@@ -224,7 +208,7 @@
                          it has to be correct. -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>3.11.1</version>
                     <executions>
                         <execution>
                             <id>attach-javadoc</id>
@@ -235,36 +219,10 @@
                     </executions>
                 </plugin>
 
-                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
-                    test reports -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.0</version>
-                    <configuration>
-                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
-                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
-                        <trimStackTrace>false</trimStackTrace>
-                        <reuseForks>false</reuseForks>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.surefire</groupId>
-                            <artifactId>surefire-junit4</artifactId>
-                            <version>3.5.0</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>junit</groupId>
-                            <artifactId>junit</artifactId>
-                            <version>4.13.2</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.8.1</version>
                     <executions>
                         <execution>
                             <id>unpack</id>
@@ -281,7 +239,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -291,7 +249,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -301,7 +259,7 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                     <artifactItem>
@@ -311,11 +269,49 @@
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
-                                        <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                                        <outputDirectory>${project.basedir}/src/test/resources/rules</outputDirectory>
                                         <includes>**</includes>
                                     </artifactItem>
                                 </artifactItems>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
+                    test reports -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <configuration>
+                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
+                        <reuseForks>false</reuseForks>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit4</artifactId>
+                            <version>3.5.2</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>junit</groupId>
+                            <artifactId>junit</artifactId>
+                            <version>4.13.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.7.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -356,44 +352,44 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/JavaCryptographicArchitecture</directory>
+                            <directory>${basedir}/src/test/resources/rules/JavaCryptographicArchitecture</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle</directory>
+                            <directory>${basedir}/src/test/resources/test/BouncyCastle</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/Tink</directory>
+                            <directory>${basedir}/src/test/resources/rules/Tink</directory>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA/RulesInBin</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA/RulesInBin</directory>
                             <includes>
                                 <include>**</include>
                             </includes>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/BouncyCastle-JCA</directory>
+                            <directory>${basedir}/src/test/resources/rules/BouncyCastle-JCA</directory>
                         </fileset>
                         <fileset>
                             <directory>apps</directory>
@@ -424,32 +420,27 @@
                             <nrOfIndentSpace>4</nrOfIndentSpace>
                             <indentBlankLines>false</indentBlankLines>
                             <indentSchemaLocation>true</indentSchemaLocation>
+                            <expandEmptyElements>false</expandEmptyElements>
                         </sortPom>
                     </pom>
-                    <!-- This may be relevant for https://github.com/CROSSINGTUD/CryptoAnalysis/pull/272 -->
-                    <!--<java>
-                        <removeUnusedImports />
-                        <importOrder />
-                        <!- define the steps to apply to those files ->
-                        <trimTrailingWhitespace />
-                        <endWithNewline />
-                        <indent>
-                        	<tabs>true</tabs>
-                        	<spacesPerTab>4</spacesPerTab>
-                        </indent>
+                    <java>
                         <googleJavaFormat>
-                            <version>1.19.1</version>
+                            <version>1.24.0</version>
                             <style>AOSP</style>
                         </googleJavaFormat>
-                        <!-<licenseHeader>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                        <removeUnusedImports/>
+                        <importOrder/>
+                        <!--<licenseHeader>
                             <file>${main.basedir}/license_header_plain.txt</file>
-                        </licenseHeader>->
-                    </java>-->
+                        </licenseHeader>-->
+                    </java>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>check</goal>
+                            <goal>apply</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -479,7 +470,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.2.6</version>
+                        <version>3.2.7</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -503,6 +494,28 @@
                         <configuration>
                             <tagNameFormat>@{project.version}</tagNameFormat>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <!-- Use -DrunAllTests to enable running all tests -->
+            <id>allTests</id>
+            <activation>
+                <property>
+                    <name>runAllTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

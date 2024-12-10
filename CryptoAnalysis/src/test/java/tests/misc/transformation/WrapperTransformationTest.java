@@ -1,11 +1,10 @@
 package tests.misc.transformation;
 
+import java.math.BigInteger;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
-
-import java.math.BigInteger;
 
 public class WrapperTransformationTest extends UsagePatternTestingFramework {
 

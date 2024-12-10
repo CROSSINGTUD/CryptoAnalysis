@@ -1,6 +1,10 @@
 name: Test Internal Action
 
-on: push
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
 
 jobs:
   internal_action:
@@ -8,7 +12,7 @@ jobs:
     name: Test CryptoAnalysis Action
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run CogniCrypt
         uses: ./
         with:

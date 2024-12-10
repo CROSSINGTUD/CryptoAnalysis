@@ -8,12 +8,7 @@ import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
-import crypto.rules.CrySLRule;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import crysl.rule.CrySLRule;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -23,6 +18,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SARIFReporter extends Reporter {
 
@@ -43,22 +42,38 @@ public class SARIFReporter extends Reporter {
     }
 
     @Override
-    public void createAnalysisReport(Collection<IAnalysisSeed> seeds, Table<WrappedClass, Method, Set<AbstractError>> errorCollection, AnalysisStatistics statistics) {
+    public void createAnalysisReport(
+            Collection<IAnalysisSeed> seeds,
+            Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
+            AnalysisStatistics statistics) {
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
             addFile(wrappedClass);
 
-            for (Map.Entry<Method, Set<AbstractError>> entry : errorCollection.row(wrappedClass).entrySet()) {
+            for (Map.Entry<Method, Set<AbstractError>> entry :
+                    errorCollection.row(wrappedClass).entrySet()) {
                 String methodName = entry.getKey().toString();
 
                 for (AbstractError error : entry.getValue()) {
                     String violatedRule = error.getRule().getClassName();
                     String errorType = error.getClass().getSimpleName();
-                    String richText = errorType + " violating CrySL rule for " + error.getRule().getClassName();
+                    String richText =
+                            errorType
+                                    + " violating CrySL rule for "
+                                    + error.getRule().getClassName();
                     String errorMarker = error.toErrorMarkerString();
                     int lineNumber = error.getLineNumber();
                     String statement = error.getErrorStatement().toString();
 
-                    addResults(violatedRule, errorType, wrappedClass, methodName, lineNumber, methodName, statement, errorMarker, richText);
+                    addResults(
+                            violatedRule,
+                            errorType,
+                            wrappedClass,
+                            methodName,
+                            lineNumber,
+                            methodName,
+                            statement,
+                            errorMarker,
+                            richText);
                 }
             }
         }
@@ -108,14 +123,25 @@ public class SARIFReporter extends Reporter {
         return sarif;
     }
 
-    private void addResults(String violatedRule, String errorType, WrappedClass c, String methodName, int lineNumber, String method, String statement, String text, String richText) {
+    private void addResults(
+            String violatedRule,
+            String errorType,
+            WrappedClass c,
+            String methodName,
+            int lineNumber,
+            String method,
+            String statement,
+            String text,
+            String richText) {
         JSONObject result = new JSONObject();
 
         addError(errorType);
         result.put(SARIFConfig.VIOLATED_RULE_ID_KEY, violatedRule);
         result.put(SARIFConfig.ERROR_TYPE_KEY, errorType);
         result.put(SARIFConfig.MESSAGE_KEY, getMessage(text, richText));
-        result.put(SARIFConfig.LOCATIONS_KEY, getLocations(c, methodName, lineNumber, method, statement));
+        result.put(
+                SARIFConfig.LOCATIONS_KEY,
+                getLocations(c, methodName, lineNumber, method, statement));
         results.put(result);
     }
 
@@ -142,7 +168,9 @@ public class SARIFReporter extends Reporter {
         // TODO Put correct CryptoAnalysis version in report
         tool.put(SARIFConfig.ANALYSIS_TOOL_NAME_KEY, SARIFConfig.ANALYSIS_TOOL_NAME_VALUE);
         tool.put(SARIFConfig.VERSION, getClass().getPackage().getImplementationVersion());
-        tool.put(SARIFConfig.SEMANTIC_VERSION_KEY, getClass().getPackage().getImplementationVersion());
+        tool.put(
+                SARIFConfig.SEMANTIC_VERSION_KEY,
+                getClass().getPackage().getImplementationVersion());
         tool.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
 
         return tool;
@@ -161,7 +189,8 @@ public class SARIFReporter extends Reporter {
         return c.getName().replace(".", "/") + ".java";
     }
 
-    public JSONArray getLocations(WrappedClass c, String methodName, int lineNumber, String method, String statement) {
+    public JSONArray getLocations(
+            WrappedClass c, String methodName, int lineNumber, String method, String statement) {
         JSONArray locations = new JSONArray();
         JSONObject location = new JSONObject();
 

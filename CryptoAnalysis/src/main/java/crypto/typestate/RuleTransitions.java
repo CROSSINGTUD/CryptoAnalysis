@@ -1,10 +1,9 @@
 package crypto.typestate;
 
 import boomerang.scene.ControlFlowGraph;
-import crypto.rules.CrySLRule;
-import typestate.TransitionFunction;
-
+import crysl.rule.CrySLRule;
 import java.util.Collection;
+import typestate.TransitionFunction;
 
 public class RuleTransitions {
 
@@ -20,7 +19,8 @@ public class RuleTransitions {
         if (rule == null) {
             return new RuleTransitions(null, MatcherTransitionCollection.makeOne());
         }
-        return new RuleTransitions(rule, MatcherTransitionCollection.makeCollection(rule.getUsagePattern()));
+        return new RuleTransitions(
+                rule, MatcherTransitionCollection.makeCollection(rule.getUsagePattern()));
     }
 
     public CrySLRule getRule() {

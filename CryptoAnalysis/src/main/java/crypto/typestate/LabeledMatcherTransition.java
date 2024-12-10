@@ -1,14 +1,13 @@
 package crypto.typestate;
 
 import boomerang.scene.DeclaredMethod;
-import crypto.rules.CrySLMethod;
 import crypto.utils.MatcherUtils;
-import typestate.finiteautomata.MatcherTransition;
-import typestate.finiteautomata.State;
-
+import crysl.rule.CrySLMethod;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import typestate.finiteautomata.MatcherTransition;
+import typestate.finiteautomata.State;
 
 public class LabeledMatcherTransition extends MatcherTransition {
 
@@ -26,12 +25,11 @@ public class LabeledMatcherTransition extends MatcherTransition {
     }
 
     /**
-     * Return the {@link CrySLMethod}'s that match the given method.
-     * As the method is taken from a statement, we need to apply the matching logic
-     * defined here, to get the {@link CrySLMethod}s that were resolved to the
-     * matching {@link DeclaredMethod}s.
+     * Return the {@link CrySLMethod}'s that match the given method. As the method is taken from a
+     * statement, we need to apply the matching logic defined here, to get the {@link CrySLMethod}s
+     * that were resolved to the matching {@link DeclaredMethod}s.
      *
-     * @param declaredMethod	the given method
+     * @param declaredMethod the given method
      * @return The {@link CrySLMethod}'s matching the given declared method.
      */
     public Optional<CrySLMethod> getMatching(DeclaredMethod declaredMethod) {
@@ -65,11 +63,6 @@ public class LabeledMatcherTransition extends MatcherTransition {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {
-                super.hashCode(),
-                from(),
-                to(),
-                methods
-        });
+        return Arrays.hashCode(new Object[] {super.hashCode(), from(), to(), methods});
     }
 }

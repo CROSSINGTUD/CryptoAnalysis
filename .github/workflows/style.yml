@@ -1,0 +1,26 @@
+name: Spotless Style Check
+description: Check the formatting. Use "mvn spotless:apply" to format the code.
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - develop
+
+jobs:
+  check-formatting:
+    runs-on: ubuntu-latest
+    name: Check style
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # Restores Maven dependecies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run spotless checks
+        run: mvn spotless:check

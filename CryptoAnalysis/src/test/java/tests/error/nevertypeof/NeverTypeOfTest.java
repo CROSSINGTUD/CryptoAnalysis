@@ -16,7 +16,7 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
     public void positivePredicateWithoutConditionTest() {
         NeverTypeOf neverTypeOf = new NeverTypeOf();
 
-        char[] value = new char[]{'a', 'l', 'l', 'o', 'w', 'e', 'd'};
+        char[] value = new char[] {'a', 'l', 'l', 'o', 'w', 'e', 'd'};
         neverTypeOf.operation(value);
 
         Assertions.neverTypeOfErrors(0);

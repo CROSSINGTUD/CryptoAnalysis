@@ -4,7 +4,10 @@ import boomerang.scene.Method;
 import boomerang.scene.jimple.JimpleMethod;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.rules.CrySLRule;
+import crysl.rule.CrySLRule;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import soot.Body;
 import soot.Scene;
 import soot.SootClass;
@@ -16,84 +19,75 @@ import soot.jimple.Stmt;
 import soot.jimple.internal.JEqExpr;
 import soot.jimple.internal.JIfStmt;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 /**
- * This transformer adds a branch after each statement, that may throw an
- * Exception, to the handler of that Exception.
- * The exceptions that a statement may throw are declared in the CrySLRule.
+ * This transformer adds a branch after each statement, that may throw an Exception, to the handler
+ * of that Exception. The exceptions that a statement may throw are declared in the CrySLRule.
  */
 public class ExceptionAwareTransformer extends PreTransformer {
 
-	private final SootClass spec;
+    private final SootClass spec;
 
-	private final Multimap<Method, SootClass> exceptions;
+    private final Multimap<Method, SootClass> exceptions;
 
-	private final Map<Method, Method> lookupCache = new HashMap<>();
+    private final Map<Method, Method> lookupCache = new HashMap<>();
 
-	public ExceptionAwareTransformer(final CrySLRule rule) {
-		this.exceptions = HashMultimap.create();
-		this.spec = Scene.v().getSootClass(rule.getClassName());
-		// TODO Refactoring
-		/*rule.getConstraints().stream()
-				.filter(constraint -> constraint instanceof CrySLExceptionConstraint)
-				.map(constraint -> (CrySLExceptionConstraint) constraint)
-				.forEach(constraint -> CrySLMethodToSootMethod.v().convert(constraint.getMethod()).stream()
-						.forEach(
-								method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));*/
-	}
+    public ExceptionAwareTransformer(final CrySLRule rule) {
+        this.exceptions = HashMultimap.create();
+        this.spec = Scene.v().getSootClass(rule.getClassName());
+        // TODO Refactoring
+        /*rule.getConstraints().stream()
+        .filter(constraint -> constraint instanceof CrySLExceptionConstraint)
+        .map(constraint -> (CrySLExceptionConstraint) constraint)
+        .forEach(constraint -> CrySLMethodToSootMethod.v().convert(constraint.getMethod()).stream()
+        		.forEach(
+        				method -> exceptions.put(method, Scene.v().getSootClass(constraint.getException().getException()))));*/
+    }
 
-	protected void internalTransform(final Body body, final String phase, final Map<String, String> options) {
-		if (body.getMethod().getDeclaringClass().getName().startsWith("java."))
-			return;
-		if (!body.getMethod().getDeclaringClass().isApplicationClass())
-			return;
+    protected void internalTransform(
+            final Body body, final String phase, final Map<String, String> options) {
+        if (body.getMethod().getDeclaringClass().getName().startsWith("java.")) return;
+        if (!body.getMethod().getDeclaringClass().isApplicationClass()) return;
 
-		final UnitPatchingChain units = body.getUnits();
-		units.snapshotIterator().forEachRemaining(unit -> {
-			if (!(unit instanceof Stmt))
-				return;
-			if (!((Stmt) unit).containsInvokeExpr())
-				return;
+        final UnitPatchingChain units = body.getUnits();
+        units.snapshotIterator()
+                .forEachRemaining(
+                        unit -> {
+                            if (!(unit instanceof Stmt)) return;
+                            if (!((Stmt) unit).containsInvokeExpr()) return;
 
-			final SootMethod called = ((Stmt) unit).getInvokeExpr().getMethod();
+                            final SootMethod called = ((Stmt) unit).getInvokeExpr().getMethod();
 
-			if (!called.hasActiveBody()) {
-				return;
-			}
+                            if (!called.hasActiveBody()) {
+                                return;
+                            }
 
-			if (!called.getDeclaringClass().equals(this.spec))
-				return;
+                            if (!called.getDeclaringClass().equals(this.spec)) return;
 
-			// TODO Refactor
-			//Statement statement = JimpleStatement.create();
-			JimpleMethod calledMethod = JimpleMethod.of(called);
-			/*lookup(calledMethod).ifPresent(declared -> {
-				for (final SootClass exception : exceptions.get(declared))
-					ExceptionConstraint.getTrap(body, unit, new JimpleWrappedClass(exception))
-							.ifPresent(trap -> addBranch(units, unit, trap.getHandlerUnit()));
-			});*/
-		});
-	}
+                            // TODO Refactor
+                            // Statement statement = JimpleStatement.create();
+                            JimpleMethod calledMethod = JimpleMethod.of(called);
+                            /*lookup(calledMethod).ifPresent(declared -> {
+                            	for (final SootClass exception : exceptions.get(declared))
+                            		ExceptionConstraint.getTrap(body, unit, new JimpleWrappedClass(exception))
+                            				.ifPresent(trap -> addBranch(units, unit, trap.getHandlerUnit()));
+                            });*/
+                        });
+    }
 
-	private void addBranch(final UnitPatchingChain units, final Unit after, final Unit to) {
-		final JEqExpr condition = new JEqExpr(NullConstant.v(), NullConstant.v());
-		units.insertOnEdge(new JIfStmt(condition, to), after, null);
-	}
+    private void addBranch(final UnitPatchingChain units, final Unit after, final Unit to) {
+        final JEqExpr condition = new JEqExpr(NullConstant.v(), NullConstant.v());
+        units.insertOnEdge(new JIfStmt(condition, to), after, null);
+    }
 
-	private Optional<Method> lookup(final Method called) {
-		if (lookupCache.containsKey(called))
-			return Optional.of(lookupCache.get(called));
-		for (final Method declared : exceptions.keySet()) {
-			// TODO Refactoring
-			/*if (LabeledMatcherTransitionOld.matches(called, declared)) {
-				lookupCache.put(called, declared);
-				return Optional.of(declared);
-			}*/
-		}
-		return Optional.empty();
-	}
-
+    private Optional<Method> lookup(final Method called) {
+        if (lookupCache.containsKey(called)) return Optional.of(lookupCache.get(called));
+        for (final Method declared : exceptions.keySet()) {
+            // TODO Refactoring
+            /*if (LabeledMatcherTransitionOld.matches(called, declared)) {
+            	lookupCache.put(called, declared);
+            	return Optional.of(declared);
+            }*/
+        }
+        return Optional.empty();
+    }
 }

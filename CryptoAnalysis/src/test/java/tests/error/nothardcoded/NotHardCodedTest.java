@@ -1,13 +1,12 @@
 package tests.error.nothardcoded;
 
+import java.math.BigInteger;
+import java.util.Random;
+import java.util.UUID;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
-
-import java.math.BigInteger;
-import java.util.Random;
-import java.util.UUID;
 
 public class NotHardCodedTest extends UsagePatternTestingFramework {
 
@@ -86,7 +85,7 @@ public class NotHardCodedTest extends UsagePatternTestingFramework {
     public void negativePredicateWithArrayTest() {
         NotHardCoded notHardCoded = new NotHardCoded();
 
-        char[] array = new char[]{'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
+        char[] array = new char[] {'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
         notHardCoded.operation(array);
 
         Assertions.notHardCodedErrors(1);
