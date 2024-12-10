@@ -29,7 +29,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run maven command
-        run: mvn clean verify -DrunAllTests
+        run: mvn clean verify -DrunAnalysisTests
 
       # Ubuntu-specific steps only
       - name: Create or update gh-pages-output directory
@@ -38,7 +38,7 @@ jobs:
       - name: Aggregate test results from multiple directories
         run: |
           total_time=0
-          for dir in CryptoAnalysis/shippable/testresults HeadlessAndroidScanner/shippable/testresults HeadlessJavaScanner/shippable/testresults; do
+          for dir in CryptoAnalysis/shippable/testresults; do
             if [ -d "$dir" ]; then
               echo "Processing directory: $dir"
               for file in "$dir"/*.txt; do
