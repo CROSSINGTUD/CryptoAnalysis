@@ -1,6 +1,6 @@
 name: Performance Analysis
 
-on: [workflow_dispatch]
+on: [push]
 
 env:
   JAVA_VERSION: 17
