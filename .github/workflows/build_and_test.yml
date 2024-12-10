@@ -2,12 +2,7 @@ name: Build And Test (Basic)
 description: Basic build and tests for the submodules on each push and pull request
 
 on:
-  push:
-    branches-ignore:
-      - master
-      - develop
   pull_request:
-    types: [opened, reopened]
 
 env:
   JAVA_VERSION: 17
