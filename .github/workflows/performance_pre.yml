@@ -35,7 +35,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       
       - name: Extract performance
-        uses: ./.github/actions/performance_pre
+        uses: ./.github/actions/performance
         with:
           test-results-path: HeadlessAndroidScanner/shippable/testresults
           source-branch: gh-pages
