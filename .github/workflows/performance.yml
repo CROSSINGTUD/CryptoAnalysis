@@ -1,113 +1,183 @@
-name: Performance Analysis (Pre)
+name: Performance Analysis
 
 on:
   push:
   workflow_dispatch:
-    inputs:
-      analysis:
-        type: boolean
-        required: false
-        default: false
-      android:
-        type: boolean
-        required: false
-        default: false
-      soot:
-        type: boolean
-        required: false
-        default: false
+    #inputs:
+    #  analysis:
+    #    type: boolean
+    #    required: false
+    #    default: false
+    #  android:
+    #    type: boolean
+    #    required: false
+    #    default: false
+    #  soot:
+    #    type: boolean
+    #    required: false
+    #    default: false
 
 env:
   JAVA_VERSION: 17
 
 jobs:
-  performance-pre:
+  performance-analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # Sets up Java version
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          distribution: adopt
-          java-package: jdk
-          java-version: ${{ env.JAVA_VERSION }}
-      # Restores Maven dependencies
-      - name: Restore local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Run maven command
-        run: mvn clean verify -DrunAnalysisTests
 
-      # Ubuntu-specific steps only
+      - name: Build and test Analysis
+        uses: ./.github/actions/analysis
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
       - name: Create or update gh-pages-output directory
         run: mkdir -p gh-pages-output
-  
-      - name: Aggregate test results from multiple directories
-        run: |
-          total_time=0
-          for dir in CryptoAnalysis/shippable/testresults; do
-            if [ -d "$dir" ]; then
-              echo "Processing directory: $dir"
-              for file in "$dir"/*.txt; do
-                if [ -f "$file" ]; then
-                  echo "Processing file: $file"
-                  # Extract the time elapsed from each relevant line in the file and sum it up
-                  file_time=$(grep -oP "Time elapsed: \K[\d\.]+" "$file" | awk '{sum += $1} END {print sum}')
-                  if [ -n "$file_time" ]; then
-                    echo "Time found: $file_time seconds"
-                    total_time=$(echo "$total_time + $file_time" | bc)
-                  else
-                    echo "No time elapsed found in file: $file"
-                  fi
-                else
-                  echo "No files found in directory: $dir"
-                fi
-              done
-            else
-              echo "Directory does not exist: $dir"
-            fi
-          done
-  
-          # Convert total time to minutes, seconds, and milliseconds
-          total_time_int=$(printf "%.0f" "$total_time")
-          minutes=$((total_time_int / 60))
-          seconds=$((total_time_int % 60))
-          milliseconds=$(printf "%.0f" "$(echo "($total_time - $total_time_int) * 1000" | bc)")
-  
-          echo "Total Time Calculated: ${minutes}m ${seconds}s ${milliseconds}ms"
-          timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-          run_number=${{ github.run_number }}
-          echo "Run ${run_number}, ${timestamp}, Total Time: ${minutes}m ${seconds}s ${milliseconds}ms" >> gh-pages-output/current_history.txt
-  
-      - name: Combine current and past history
-        run: |
-          git checkout gh-pages
-          if [ -f current_history.txt ]; then
-            echo "current history"
-            git checkout gh-pages current_history.txt
-            cat gh-pages-output/current_history.txt >> current_history.txt
-            mv current_history.txt gh-pages-output/current_history.txt
-          fi
-  
+
+      - name: Extract performance
+        uses: ./.github/actions/performance
+        with:
+          test-results-path: CryptoAnalysis/shippable/testresults
+          source-branch: gh-pages
+          current-results: analysis_history.txt
+          output-file: gh-pages-output/analysis_history.txt
+
+      - name: Store Analysis performance
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-performance
+          path: gh-pages-output/analysis_history.txt
+
+  performance-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Build and test Android Scanner
+        uses: ./.github/actions/scanner-android
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Create or update gh-pages-output directory
+        run: mkdir -p gh-pages-output
+      
+      - name: Extract performance
+        uses: ./.github/actions/performance
+        with:
+          test-results-path: HeadlessAndroidScanner/shippable/testresults
+          source-branch: gh-pages
+          current-results: android_history.txt
+          output-file: gh-pages-output/android_history.txt
+          
+      - name: Store Android performance
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-performance
+          path: gh-pages-output/android_history.txt
+
+  performance-soot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build and test JavaScanner with Soot
+        uses: ./.github/actions/scanner-soot
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Create or update gh-pages-output directory
+        run: mkdir -p gh-pages-output
+      
+      - name: Extract performance
+        uses: ./.github/actions/performance
+        with:
+          test-results-path: HeadlessJavaScanner/shippable/testresults
+          source-branch: gh-pages
+          current-results: soot_history.txt
+          output-file: gh-pages-output/soot_history.txt
+          
+      - name: Store Soot performance
+        uses: actions/upload-artifact@v4
+        with:
+          name: soot-performance
+          path: gh-pages-output/soot_history.txt
+
+  performance-report:
+    runs-on: ubuntu-latest
+    needs: [performance-analysis, performance-android, performance-soot]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Load performance files
+        uses: actions/download-artifact@v4
+        with:
+          path: gh-pages-output
+          merge-multiple: true
+
       - name: Generate HTML report
         run: |
-          echo "<html><body><h1>Aggregated Test Results</h1><ul>" > gh-pages-output/index.html
-          cat gh-pages-output/current_history.txt | while read line; do
-            echo "${line}"
-            echo "<li>${line}</li>" >> gh-pages-output/index.html
-          done
-          echo "</ul></body></html>" >> gh-pages-output/index.html
+          echo "<html><body>" > gh-pages-output/index.html
+          echo "<div style=\"display: flex; flex-wrap: wrap; gap: 0 50px;\">" >> gh-pages-output/index.html
+
+          echo "<div style=\"flex: 1 1 200px; min-width: 200px;\"><h1>Analysis</h1><ul>" >> gh-pages-output/index.html
+
+          if [ -f gh-pages-output/analysis_history.txt ]; then
+            cat gh-pages-output/analysis_history.txt | while read line; do
+              echo "${line}"
+              echo "<li>${line}</li>" >> gh-pages-output/index.html
+            done
+          fi
+
+          echo "</ul></div>" >> gh-pages-output/index.html
+
+          echo "<div style=\"flex: 1 1 200px; min-width: 200px;\"><h1>AndroidScanner</h1><ul>" >> gh-pages-output/index.html
+
+          if [ -f gh-pages-output/android_history.txt ]; then
+            cat gh-pages-output/android_history.txt | while read line; do
+              echo "${line}"
+              echo "<li>${line}</li>" >> gh-pages-output/index.html
+            done
+          fi
+
+          echo "</ul></div>" >> gh-pages-output/index.html
+
+          echo "<div style=\"flex: 1 1 200px; min-width: 200px;\"><h1>JavaScanner (Soot)</h1><ul>" >> gh-pages-output/index.html
+
+          if [ -f gh-pages-output/soot_history.txt ]; then
+            cat gh-pages-output/soot_history.txt | while read line; do
+              echo "${line}"
+              echo "<li>${line}</li>" >> gh-pages-output/index.html
+            done
+          fi
+
+          echo "</ul></div>" >> gh-pages-output/index.html
+
+          echo "</div>" >> gh-pages-output/index.html
+          echo "</body></html>" >> gh-pages-output/index.html
   
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./gh-pages-output
+
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          failOnError: false
+          name: |
+            analysis-performance
+            android-performance
+            soot-performance
