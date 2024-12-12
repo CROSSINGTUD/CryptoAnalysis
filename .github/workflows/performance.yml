@@ -1,7 +1,6 @@
 name: Performance Analysis
 
 on:
-  push:
   workflow_dispatch:
     #inputs:
     #  analysis:
