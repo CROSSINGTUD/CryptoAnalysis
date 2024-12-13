@@ -3,6 +3,7 @@ description: Basic build and tests for the submodules on each push and pull requ
 
 on:
   pull_request:
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: 17
