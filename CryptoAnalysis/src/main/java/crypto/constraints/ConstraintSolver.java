@@ -153,8 +153,8 @@ public class ConstraintSolver {
             Collection<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
 
             for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-                CallSiteWithParamIndex callSiteWithParamIndex = callSite.getCallSiteWithParam();
-                involvedVarNames.remove(callSiteWithParamIndex.getVarName());
+                CallSiteWithParamIndex callSiteWithParamIndex = callSite.callSiteWithParam();
+                involvedVarNames.remove(callSiteWithParamIndex.varName());
             }
 
             if (!involvedVarNames.isEmpty()) {
@@ -201,15 +201,15 @@ public class ConstraintSolver {
 
         if (alts.isEmpty()) {
             for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-                CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+                CallSiteWithParamIndex cwpi = callSite.callSiteWithParam();
 
                 for (ICrySLPredicateParameter p : left.getParameters()) {
                     if (p.getName().equals("transformation")) {
                         continue;
                     }
 
-                    if (cwpi.getVarName().equals(p.getName())) {
-                        alts.add(new AlternativeReqPredicate(left, cwpi.stmt(), cwpi.getIndex()));
+                    if (cwpi.varName().equals(p.getName())) {
+                        alts.add(new AlternativeReqPredicate(left, cwpi.statement(), cwpi.index()));
                     }
                 }
             }
@@ -244,7 +244,7 @@ public class ConstraintSolver {
         Collection<RequiredCrySLPredicate> result = Lists.newArrayList();
 
         for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-            CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+            CallSiteWithParamIndex cwpi = callSite.callSiteWithParam();
 
             for (ICrySLPredicateParameter p : pred.getParameters()) {
                 // TODO: FIX Cipher rule
@@ -253,12 +253,12 @@ public class ConstraintSolver {
                 }
 
                 // Predicates with _ can have any type
-                if (cwpi.getVarName().equals("_")) {
+                if (cwpi.varName().equals("_")) {
                     continue;
                 }
 
-                if (cwpi.getVarName().equals(p.getName())) {
-                    result.add(new RequiredCrySLPredicate(pred, cwpi.stmt(), cwpi.getIndex()));
+                if (cwpi.varName().equals(p.getName())) {
+                    result.add(new RequiredCrySLPredicate(pred, cwpi.statement(), cwpi.index()));
                 }
             }
         }

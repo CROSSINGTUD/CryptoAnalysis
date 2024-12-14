@@ -5,6 +5,7 @@ import crysl.rule.CrySLPredicate;
 import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AlternativeReqPredicate implements ISLConstraint {
@@ -22,30 +23,15 @@ public class AlternativeReqPredicate implements ISLConstraint {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
-        result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
-        result = prime * result + paramIndex;
-        return result;
+        return Objects.hash(alternatives, stmt, paramIndex);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        AlternativeReqPredicate other = (AlternativeReqPredicate) obj;
-        if (alternatives == null) {
-            if (other.alternatives != null) return false;
-        } else if (!alternatives.equals(other.alternatives)) return false;
-        if (stmt == null) {
-            return other.stmt == null;
-        } else if (!stmt.equals(other.stmt)) {
-            return false;
-        }
-
-        return paramIndex == other.paramIndex;
+        return obj instanceof AlternativeReqPredicate other
+                && Objects.equals(alternatives, other.alternatives)
+                && Objects.equals(stmt, other.stmt)
+                && paramIndex == other.paramIndex;
     }
 
     public Statement getLocation() {

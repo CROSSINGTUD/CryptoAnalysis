@@ -3,8 +3,9 @@ package crypto.analysis.errors;
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
+import java.util.Objects;
 
-public class NoCallToError extends AbstractError {
+public class NoCallToError extends AbstractConstraintsError {
 
     public NoCallToError(IAnalysisSeed seed, Statement statement, CrySLRule rule) {
         super(seed, statement, rule);
@@ -17,12 +18,12 @@ public class NoCallToError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(super.hashCode());
     }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        return super.equals(obj) && obj instanceof NoCallToError;
     }
 
     @Override

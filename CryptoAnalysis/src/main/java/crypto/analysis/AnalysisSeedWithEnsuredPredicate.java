@@ -9,6 +9,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
+import java.util.Objects;
 import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
@@ -110,17 +111,15 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
                     expectedPredicates.get(statement);
 
             for (ExpectedPredicateOnSeed predOnSeed : predicateOnSeeds) {
-                if (!predOnSeed.getPredicate().equals(predicate.getPredicate())) {
+                if (!predOnSeed.predicate().equals(predicate.getPredicate())) {
                     continue;
                 }
 
-                if (!(predOnSeed.getSeed() instanceof AnalysisSeedWithSpecification)) {
+                if (!(predOnSeed.seed() instanceof AnalysisSeedWithSpecification seedWithSpec)) {
                     continue;
                 }
 
-                AnalysisSeedWithSpecification seedWithSpec =
-                        (AnalysisSeedWithSpecification) predOnSeed.getSeed();
-                seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.getParamIndex());
+                seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.paramIndex());
             }
         }
 
@@ -131,7 +130,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(super.hashCode());
     }
 
     @Override

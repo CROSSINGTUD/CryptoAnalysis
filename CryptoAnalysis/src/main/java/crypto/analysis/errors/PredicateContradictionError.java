@@ -4,9 +4,9 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
+import java.util.Objects;
 
-public class PredicateContradictionError extends AbstractError {
+public class PredicateContradictionError extends AbstractRequiresError {
 
     private final CrySLPredicate contradictedPredicate;
 
@@ -31,23 +31,14 @@ public class PredicateContradictionError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), contradictedPredicate});
+        return Objects.hash(super.hashCode(), contradictedPredicate);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        PredicateContradictionError other = (PredicateContradictionError) obj;
-        if (contradictedPredicate == null) {
-            if (other.getContradictedPredicate() != null) return false;
-        } else if (!contradictedPredicate.equals(other.getContradictedPredicate())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof PredicateContradictionError other
+                && Objects.equals(contradictedPredicate, other.getContradictedPredicate());
     }
 
     @Override

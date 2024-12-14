@@ -3,8 +3,8 @@ package crypto.typestate;
 import boomerang.scene.DeclaredMethod;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import typestate.finiteautomata.MatcherTransition;
 import typestate.finiteautomata.State;
@@ -52,17 +52,14 @@ public class LabeledMatcherTransition extends MatcherTransition {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (!super.equals(other)) {
-            return false;
-        }
-
-        LabeledMatcherTransition matcherTransition = (LabeledMatcherTransition) other;
-        return this.methods.equals(matcherTransition.getMethods());
+    public boolean equals(Object obj) {
+        return super.equals(obj)
+                && obj instanceof LabeledMatcherTransition other
+                && Objects.equals(methods, other.getMethods());
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), from(), to(), methods});
+        return Objects.hash(super.hashCode(), from(), to(), methods);
     }
 }

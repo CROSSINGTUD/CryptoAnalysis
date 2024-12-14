@@ -3,6 +3,7 @@ package crypto.analysis;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
+import java.util.Objects;
 
 public class EnsuredCrySLPredicate {
 
@@ -29,21 +30,11 @@ public class EnsuredCrySLPredicate {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
-        return result;
+        return Objects.hash(predicate);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        EnsuredCrySLPredicate other = (EnsuredCrySLPredicate) obj;
-        if (predicate == null) {
-            if (other.predicate != null) return false;
-        } else if (!predicate.equals(other.predicate)) return false;
-        return true;
+        return obj instanceof EnsuredCrySLPredicate other && predicate.equals(other.predicate);
     }
 }

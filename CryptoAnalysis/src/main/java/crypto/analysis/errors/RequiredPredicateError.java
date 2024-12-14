@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Creates {@link RequiredPredicateError} for all Required Predicate error generates
  * RequiredPredicateError
  */
-public class RequiredPredicateError extends AbstractError {
+public class RequiredPredicateError extends AbstractRequiresError {
 
     private final Collection<HiddenPredicate> hiddenPredicates;
     private final Collection<CrySLPredicate> contradictedPredicates;

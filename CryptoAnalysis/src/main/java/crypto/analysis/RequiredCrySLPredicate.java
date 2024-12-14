@@ -4,6 +4,7 @@ import boomerang.scene.Statement;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ISLConstraint;
 import java.util.List;
+import java.util.Objects;
 
 public class RequiredCrySLPredicate implements ISLConstraint {
 
@@ -19,31 +20,15 @@ public class RequiredCrySLPredicate implements ISLConstraint {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
-        result = prime * result + ((statement == null) ? 0 : statement.hashCode());
-        result = prime * result + paramIndex;
-        return result;
+        return Objects.hash(predicate, statement, paramIndex);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        RequiredCrySLPredicate other = (RequiredCrySLPredicate) obj;
-        if (predicate == null) {
-            if (other.predicate != null) return false;
-        } else if (!predicate.equals(other.predicate)) return false;
-        if (statement == null) {
-            if (other.statement != null) {
-                return false;
-            }
-        } else if (!statement.equals(other.statement)) {
-            return false;
-        }
-        return paramIndex == other.paramIndex;
+        return obj instanceof RequiredCrySLPredicate other
+                && Objects.equals(predicate, other.predicate)
+                && Objects.equals(statement, other.statement)
+                && paramIndex == other.paramIndex;
     }
 
     public CrySLPredicate getPred() {

@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import typestate.TransitionFunction;
@@ -172,12 +173,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     private void typeStateChangeAtStatement(Statement statement, State stateNode) {
         if (typeStateChange.put(statement, stateNode)) {
-            if (stateNode instanceof ReportingErrorStateNode) {
-                ReportingErrorStateNode errorStateNode = (ReportingErrorStateNode) stateNode;
-
+            if (stateNode instanceof ReportingErrorStateNode errorStateNode) {
                 TypestateError typestateError =
                         new TypestateError(
-                                this, statement, specification, errorStateNode.getExpectedCalls());
+                                this, statement, specification, errorStateNode.expectedCalls());
                 this.addError(typestateError);
                 scanner.getAnalysisReporter().reportError(this, typestateError);
             }
@@ -202,11 +201,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                     continue;
                 }
 
-                if (!(n.to() instanceof WrappedState)) {
+                if (!(n.to() instanceof WrappedState wrappedState)) {
                     continue;
                 }
 
-                WrappedState wrappedState = (WrappedState) n.to();
                 for (TransitionEdge t : specification.getUsagePattern().getAllTransitions()) {
                     if (t.getLeft().equals(wrappedState.delegate()) && !t.from().equals(t.to())) {
                         Collection<CrySLMethod> labels = t.getLabel();
@@ -322,15 +320,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private void initializeDependantSeedsFromRequiredPredicates(Collection<IAnalysisSeed> seeds) {
         Multimap<Statement, Map.Entry<CrySLPredicate, Integer>> reqPreds = HashMultimap.create();
         for (ISLConstraint constraint : constraintSolver.getRequiredPredicates()) {
-            if (constraint instanceof RequiredCrySLPredicate) {
-                RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) constraint;
-
+            if (constraint instanceof RequiredCrySLPredicate reqPred) {
                 Map.Entry<CrySLPredicate, Integer> entry =
                         new AbstractMap.SimpleEntry<>(reqPred.getPred(), reqPred.getParamIndex());
                 reqPreds.put(reqPred.getLocation(), entry);
-            } else if (constraint instanceof AlternativeReqPredicate) {
-                AlternativeReqPredicate altPred = (AlternativeReqPredicate) constraint;
-
+            } else if (constraint instanceof AlternativeReqPredicate altPred) {
                 for (CrySLPredicate predicate : altPred.getAlternatives()) {
                     Map.Entry<CrySLPredicate, Integer> entry =
                             new AbstractMap.SimpleEntry<>(predicate, altPred.getParamIndex());
@@ -644,22 +638,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         Collection<ExpectedPredicateOnSeed> expectedPredsAtStatement =
                 expectedPredicates.get(statement);
         for (ExpectedPredicateOnSeed expectedPredicateOnSeed : expectedPredsAtStatement) {
-            CrySLPredicate predicate = expectedPredicateOnSeed.getPredicate();
-            IAnalysisSeed seed = expectedPredicateOnSeed.getSeed();
-            int paramIndex = expectedPredicateOnSeed.getParamIndex();
+            CrySLPredicate predicate = expectedPredicateOnSeed.predicate();
+            IAnalysisSeed seed = expectedPredicateOnSeed.seed();
+            int paramIndex = expectedPredicateOnSeed.paramIndex();
 
             if (predicate.equals(ensPred.getPredicate())) {
-                if (seed instanceof AnalysisSeedWithSpecification) {
-                    AnalysisSeedWithSpecification seedWithSpec =
-                            (AnalysisSeedWithSpecification) seed;
-
+                if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
                     seedWithSpec.addEnsuredPredicateFromOtherRule(ensPred, statement, paramIndex);
                     scanner.getAnalysisReporter()
                             .onGeneratedPredicate(this, ensPred, seedWithSpec, statement);
-                } else if (seed instanceof AnalysisSeedWithEnsuredPredicate) {
-                    AnalysisSeedWithEnsuredPredicate seedWithoutSpec =
-                            (AnalysisSeedWithEnsuredPredicate) seed;
-
+                } else if (seed instanceof AnalysisSeedWithEnsuredPredicate seedWithoutSpec) {
                     seedWithoutSpec.addEnsuredPredicate(ensPred);
                     scanner.getAnalysisReporter()
                             .onGeneratedPredicate(this, ensPred, seedWithoutSpec, statement);
@@ -708,9 +696,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     public void addEnsuredPredicate(
             EnsuredCrySLPredicate ensPred, Statement statement, int paramIndex) {
-        if (ensPred instanceof HiddenPredicate) {
-            HiddenPredicate hiddenPredicate = (HiddenPredicate) ensPred;
-
+        if (ensPred instanceof HiddenPredicate hiddenPredicate) {
             Map.Entry<HiddenPredicate, Integer> predAtIndex =
                     new AbstractMap.SimpleEntry<>(hiddenPredicate, paramIndex);
             hiddenPredicates.put(statement, predAtIndex);
@@ -771,11 +757,9 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
             // Negated predicate does not have a condition, i.e. no "after" -> predicate is negated
             // in all states
-            if (!(negPred instanceof CrySLCondPredicate)) {
+            if (!(negPred instanceof CrySLCondPredicate condNegPred)) {
                 return true;
             }
-
-            CrySLCondPredicate condNegPred = (CrySLCondPredicate) negPred;
 
             for (StateNode s : condNegPred.getConditionalMethods()) {
                 if (WrappedState.of(s).equals(stateNode)) {
@@ -859,9 +843,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         Collection<ISLConstraint> remainingPredicates = new HashSet<>(requiredPredicates);
 
         for (ISLConstraint pred : requiredPredicates) {
-            if (pred instanceof RequiredCrySLPredicate) {
-                RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
-
+            if (pred instanceof RequiredCrySLPredicate reqPred) {
                 // If a negated predicate is ensured, a PredicateContradictionError has to be
                 // reported
                 if (reqPred.getPred().isNegated()) {
@@ -879,17 +861,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         remainingPredicates.remove(pred);
                     }
                 }
-            } else if (pred instanceof AlternativeReqPredicate) {
-                AlternativeReqPredicate altPred = (AlternativeReqPredicate) pred;
+            } else if (pred instanceof AlternativeReqPredicate altPred) {
                 Collection<CrySLPredicate> alternatives = altPred.getAlternatives();
                 Collection<CrySLPredicate> positives =
-                        alternatives.stream()
-                                .filter(e -> !e.isNegated())
-                                .collect(Collectors.toList());
+                        alternatives.stream().filter(e -> !e.isNegated()).toList();
                 Collection<CrySLPredicate> negatives =
-                        alternatives.stream()
-                                .filter(CrySLPredicate::isNegated)
-                                .collect(Collectors.toList());
+                        alternatives.stream().filter(CrySLPredicate::isNegated).toList();
                 int altParamIndex = altPred.getParamIndex();
 
                 boolean satisfied = false;
@@ -917,7 +894,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                                             e ->
                                                     doReqPredAndEnsPredMatch(
                                                             e, altParamIndex, ensPredAtIndex))
-                                    .collect(Collectors.toList());
+                                    .toList();
                     ensuredNegatives.removeAll(violatedNegAlternatives);
                 }
 
@@ -929,9 +906,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         // Check conditional required predicates
         for (ISLConstraint rem : new HashSet<>(remainingPredicates)) {
-            if (rem instanceof RequiredCrySLPredicate) {
-                RequiredCrySLPredicate singlePred = (RequiredCrySLPredicate) rem;
-
+            if (rem instanceof RequiredCrySLPredicate singlePred) {
                 if (isPredConditionViolated(singlePred.getPred())) {
                     remainingPredicates.remove(singlePred);
                 }
@@ -953,9 +928,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         Collection<RequiredCrySLPredicate> contradictedPredicates = new HashSet<>();
 
         for (ISLConstraint pred : requiredPredicates) {
-            if (pred instanceof RequiredCrySLPredicate) {
-                RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
-
+            if (pred instanceof RequiredCrySLPredicate reqPred) {
                 // Only negated predicates can be contradicted
                 if (!reqPred.getPred().isNegated()) {
                     continue;
@@ -1033,20 +1006,19 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 Collection<String> expVals = Collections.emptySet();
 
                 for (CallSiteWithExtractedValue cswpi : ensPred.getParametersToValues()) {
-                    if (cswpi.getCallSiteWithParam().getVarName().equals(parameterI)) {
+                    if (cswpi.callSiteWithParam().varName().equals(parameterI)) {
                         actVals = retrieveValueFromUnit(cswpi);
                     }
                 }
                 for (CallSiteWithExtractedValue cswpi : constraintSolver.getCollectedValues()) {
-                    if (cswpi.getCallSiteWithParam().getVarName().equals(var)) {
+                    if (cswpi.callSiteWithParam().varName().equals(var)) {
                         expVals = retrieveValueFromUnit(cswpi);
                     }
                 }
 
                 String splitter = "";
                 int index = -1;
-                if (pred.getParameters().get(i) instanceof CrySLObject) {
-                    CrySLObject obj = (CrySLObject) pred.getParameters().get(i);
+                if (pred.getParameters().get(i) instanceof CrySLObject obj) {
                     if (obj.getSplitter() != null) {
                         splitter = obj.getSplitter().getSplitter();
                         index = obj.getSplitter().getIndex();
@@ -1088,7 +1060,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     private Collection<String> retrieveValueFromUnit(CallSiteWithExtractedValue callSite) {
         Collection<String> values = new ArrayList<>();
-        Statement statement = callSite.getCallSiteWithParam().stmt();
+        Statement statement = callSite.callSiteWithParam().statement();
 
         if (statement.isAssign()) {
             Val rightSide = statement.getRightOp();
@@ -1136,20 +1108,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((specification == null) ? 0 : specification.hashCode());
-        return result;
+        return Objects.hash(super.hashCode(), specification);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-        AnalysisSeedWithSpecification other = (AnalysisSeedWithSpecification) obj;
-        if (specification == null) {
-            return other.specification == null;
-        } else return specification.equals(other.specification);
+        return super.equals(obj)
+                && obj instanceof AnalysisSeedWithSpecification other
+                && Objects.equals(specification, other.specification);
     }
 }

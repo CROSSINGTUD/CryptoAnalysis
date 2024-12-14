@@ -4,9 +4,9 @@ import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
-import java.util.Arrays;
+import java.util.Objects;
 
-public class HardCodedError extends AbstractError {
+public class HardCodedError extends AbstractConstraintsError {
 
     private final CallSiteWithExtractedValue extractedValue;
     private final ISLConstraint violatedConstraint;
@@ -16,7 +16,7 @@ public class HardCodedError extends AbstractError {
             CallSiteWithExtractedValue cs,
             CrySLRule rule,
             ISLConstraint constraint) {
-        super(seed, cs.getCallSiteWithParam().stmt(), rule);
+        super(seed, cs.callSiteWithParam().statement(), rule);
 
         this.extractedValue = cs;
         this.violatedConstraint = constraint;
@@ -37,29 +37,15 @@ public class HardCodedError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), extractedValue, violatedConstraint});
+        return Objects.hash(super.hashCode(), extractedValue, violatedConstraint);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        HardCodedError other = (HardCodedError) obj;
-        if (extractedValue == null) {
-            if (other.getExtractedValue() != null) return false;
-        } else if (!extractedValue.equals(other.getExtractedValue())) {
-            return false;
-        }
-
-        if (violatedConstraint == null) {
-            if (other.getViolatedConstraint() != null) return false;
-        } else if (!violatedConstraint.equals(other.getViolatedConstraint())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof HardCodedError other
+                && Objects.equals(extractedValue, other.getExtractedValue())
+                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
     }
 
     @Override
