@@ -9,15 +9,18 @@ import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
+import crypto.visualization.Visualizer;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
 import de.fraunhofer.iem.framework.SootUpSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.graphper.draw.ExecuteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +107,13 @@ public class HeadlessJavaScanner extends CryptoScanner {
         for (Reporter reporter : reporters) {
             reporter.createAnalysisReport(
                     super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
+        }
+
+        try {
+            Visualizer visualizer = new Visualizer(getReportDirectory());
+            visualizer.createVisualization(super.getDiscoveredSeeds());
+        } catch (IOException | ExecuteException e) {
+            LOGGER.error("Couldn't create visualization: " + e.getMessage());
         }
     }
 
