@@ -27,7 +27,6 @@ public abstract class IAnalysisSeed {
 
     private final Statement origin;
     private final Val fact;
-    private boolean secure = true;
 
     public IAnalysisSeed(
             CryptoScanner scanner,
@@ -80,11 +79,7 @@ public abstract class IAnalysisSeed {
     }
 
     public boolean isSecure() {
-        return secure;
-    }
-
-    public void setSecure(boolean secure) {
-        this.secure = secure;
+        return errorCollection.isEmpty();
     }
 
     public ForwardBoomerangResults<TransitionFunction> getAnalysisResults() {

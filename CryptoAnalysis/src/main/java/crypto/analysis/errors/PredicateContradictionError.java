@@ -6,7 +6,7 @@ import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
-public class PredicateContradictionError extends AbstractRequiresError {
+public class PredicateContradictionError extends AbstractConstraintsError {
 
     private final CrySLPredicate contradictedPredicate;
 

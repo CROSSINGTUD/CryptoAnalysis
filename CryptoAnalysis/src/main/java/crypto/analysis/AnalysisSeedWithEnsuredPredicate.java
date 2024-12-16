@@ -105,7 +105,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
         }
     }
 
-    public void addEnsuredPredicate(EnsuredCrySLPredicate predicate) {
+    public void addEnsuredPredicate(AbstractPredicate predicate) {
         for (Statement statement : expectedPredicates.keySet()) {
             Collection<ExpectedPredicateOnSeed> predicateOnSeeds =
                     expectedPredicates.get(statement);

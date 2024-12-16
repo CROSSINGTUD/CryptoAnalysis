@@ -16,16 +16,16 @@ public abstract class AbstractError {
     private final Statement errorStmt;
     private final CrySLRule rule;
 
-    private final Collection<AbstractError> causedByErrors; // preceding
-    private final Collection<AbstractError> willCauseErrors; // subsequent
+    private final Collection<AbstractError> precedingErrors; // preceding
+    private final Collection<AbstractError> subsequentErrors; // subsequent
 
     public AbstractError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule) {
         this.seed = seed;
         this.errorStmt = errorStmt;
         this.rule = rule;
 
-        this.causedByErrors = new HashSet<>();
-        this.willCauseErrors = new HashSet<>();
+        this.precedingErrors = new HashSet<>();
+        this.subsequentErrors = new HashSet<>();
     }
 
     public abstract String toErrorMarkerString();
@@ -50,24 +50,28 @@ public abstract class AbstractError {
         return errorStmt.getStartLineNumber();
     }
 
-    public void addCausingError(AbstractError parent) {
-        causedByErrors.add(parent);
+    public void addPrecedingError(AbstractError error) {
+        precedingErrors.add(error);
     }
 
     public void addCausingError(Collection<AbstractError> parents) {
-        causedByErrors.addAll(parents);
+        precedingErrors.addAll(parents);
     }
 
     public void addSubsequentError(AbstractError subsequentError) {
-        willCauseErrors.add(subsequentError);
+        subsequentErrors.add(subsequentError);
+    }
+
+    public Collection<AbstractError> getPrecedingErrors() {
+        return precedingErrors;
     }
 
     public Collection<AbstractError> getSubsequentErrors() {
-        return this.willCauseErrors;
+        return subsequentErrors;
     }
 
     public Collection<AbstractError> getRootErrors() {
-        return this.causedByErrors;
+        return this.precedingErrors;
     }
 
     public String toString() {

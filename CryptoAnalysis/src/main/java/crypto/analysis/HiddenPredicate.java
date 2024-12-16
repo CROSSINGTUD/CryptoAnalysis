@@ -1,122 +1,101 @@
 package crypto.analysis;
 
-import com.google.common.collect.Lists;
+import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.RequiredPredicateError;
-import crypto.analysis.errors.TypestateError;
+import crypto.analysis.errors.AbstractOrderError;
+import crypto.analysis.errors.ForbiddenMethodError;
+import crypto.analysis.errors.PredicateConstraintError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-public class HiddenPredicate extends EnsuredCrySLPredicate {
+public class HiddenPredicate extends AbstractPredicate {
 
     private final AnalysisSeedWithSpecification generatingSeed;
-    private final HiddenPredicateType type;
+    private final Collection<Violations> violations;
+
+    public enum Violations {
+        CallToForbiddenMethod,
+        ConstraintsAreNotSatisfied,
+        ConditionIsNotSatisfied,
+        GeneratingStateMayNotBeReached,
+        GeneratingStateIsNeverReached
+    }
 
     public HiddenPredicate(
             CrySLPredicate predicate,
             Collection<CallSiteWithExtractedValue> parametersToValues,
             AnalysisSeedWithSpecification generatingSeed,
-            HiddenPredicateType type) {
+            Collection<Violations> violations) {
         super(predicate, parametersToValues);
+
         this.generatingSeed = generatingSeed;
-        this.type = type;
+        this.violations = Set.copyOf(violations);
     }
 
     public AnalysisSeedWithSpecification getGeneratingSeed() {
         return generatingSeed;
     }
 
-    public enum HiddenPredicateType {
-        GeneratingStateIsNeverReached,
-        ConstraintsAreNotSatisfied,
-        ConditionIsNotSatisfied
+    public Collection<Violations> getViolations() {
+        return violations;
     }
 
-    public HiddenPredicateType getType() {
-        return type;
-    }
-
-    /**
-     * Node: Errors are only in complete count at the end of the analysis.
-     *
-     * @return errors list of all preceding errors
-     */
     public Collection<AbstractError> getPrecedingErrors() {
-        Collection<AbstractError> results = Lists.newArrayList();
-        Collection<AbstractError> allErrors = generatingSeed.getErrors();
-        switch (type) {
-            case GeneratingStateIsNeverReached:
-                Collection<AbstractError> typestateErrors =
-                        allErrors.stream()
-                                .filter(
-                                        e ->
-                                                (e instanceof IncompleteOperationError
-                                                        || e instanceof TypestateError))
-                                .collect(Collectors.toList());
-                if (typestateErrors.isEmpty()) {
-                    // Seed object has no typestate errors that might be responsible for this hidden
-                    // predicate
-                    // TODO: report new info error type to report,
-                    // 		that the seeds object could potentially ensure the missing predicate which
-                    // might cause further subsequent errors
-                    // 		but therefore requires a call to the predicate generating statement
-                }
+        Collection<AbstractError> result = new HashSet<>();
 
-                // TODO: check whether the generating state is not reached due to a typestate error
-                return allErrors;
-
-            case ConstraintsAreNotSatisfied:
-                // Generating state was reached but constraints are not satisfied.
-                // Thus, return all constraints & required predicate errors.
-                return allErrors.stream()
-                        .filter(
-                                e ->
-                                        (e instanceof RequiredPredicateError
-                                                || e instanceof ConstraintError
-                                                || e instanceof HardCodedError
-                                                || e instanceof ImpreciseValueExtractionError
-                                                || e instanceof InstanceOfError
-                                                || e instanceof NeverTypeOfError))
-                        .collect(Collectors.toList());
-            case ConditionIsNotSatisfied:
-                // Generating state was reached but the predicates condition is not satisfied.
-                // Thus, return all errors that causes the condition to be not satisfied
-                Collection<AbstractError> precedingErrors =
-                        Lists.newArrayList(
-                                generatingSeed.retrieveErrorsForPredCondition(this.getPredicate()));
-                // This method is called from a RequiredPredicateError that wants to retrieve its
-                // preceding errors.
-                // In this case, preceding errors are not reported yet because the predicate
-                // condition wasn't required to be satisfied.
-                // Since the hidden predicate is required to be an ensured predicate, we can assume
-                // the condition required to be satisfied.
-                // Thus, we report all errors that causes the condition to be not satisfied.
-                // precedingErrors.forEach(e ->
-                // this.generatingSeed.scanner.getAnalysisListener().reportError(generatingSeed,
-                // e));
-                precedingErrors.forEach(
-                        e ->
-                                this.generatingSeed
-                                        .scanner
-                                        .getAnalysisReporter()
-                                        .reportError(generatingSeed, e));
-                // Further, preceding errors can be of type RequiredPredicateError.
-                // Thus, we have to recursively map preceding errors for the newly reported errors.
-                for (AbstractError e : precedingErrors) {
-                    if (e instanceof RequiredPredicateError) {
-                        ((RequiredPredicateError) e).mapPrecedingErrors();
-                    }
-                }
-                return precedingErrors;
+        if (violations.contains(Violations.CallToForbiddenMethod)) {
+            Collection<AbstractError> forbiddenMethodErrors =
+                    generatingSeed.getErrors().stream()
+                            .filter(e -> e instanceof ForbiddenMethodError)
+                            .toList();
+            result.addAll(forbiddenMethodErrors);
         }
-        return results;
+
+        if (violations.contains(Violations.ConstraintsAreNotSatisfied)) {
+            Collection<AbstractError> constraintErrors =
+                    generatingSeed.getErrors().stream()
+                            .filter(e -> e instanceof AbstractConstraintsError)
+                            .toList();
+            result.addAll(constraintErrors);
+        }
+
+        if (violations.contains(Violations.ConditionIsNotSatisfied)) {
+            PredicateConstraintError error =
+                    new PredicateConstraintError(generatingSeed, getPredicate());
+            result.add(error);
+        }
+
+        if (violations.contains(Violations.GeneratingStateMayNotBeReached)
+                || violations.contains(Violations.GeneratingStateIsNeverReached)) {
+            Collection<AbstractError> orderError =
+                    generatingSeed.getErrors().stream()
+                            .filter(e -> e instanceof AbstractOrderError)
+                            .toList();
+            result.addAll(orderError);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), generatingSeed, violations);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj)
+                && obj instanceof HiddenPredicate other
+                && Objects.equals(generatingSeed, other.getGeneratingSeed())
+                && Objects.equals(violations, other.getViolations());
+    }
+
+    @Override
+    public String toString() {
+        return "Hidden: " + getPredicate().getPredName();
     }
 }

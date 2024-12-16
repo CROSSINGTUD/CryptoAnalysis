@@ -6,6 +6,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
+import crypto.analysis.AbstractPredicate;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -183,7 +184,7 @@ public class AnalysisReporter {
 
     public void onGeneratedPredicate(
             IAnalysisSeed fromSeed,
-            EnsuredCrySLPredicate predicate,
+            AbstractPredicate predicate,
             IAnalysisSeed toPred,
             Statement statement) {
         for (IResultsListener listener : resultsListeners) {
@@ -229,53 +230,36 @@ public class AnalysisReporter {
     }
 
     public void reportError(IAnalysisSeed seed, AbstractError error) {
-        seed.setSecure(false);
-
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onReportedError(seed, error);
         }
 
         for (IErrorListener errorListener : errorListeners) {
-            if (error instanceof CallToError) {
-                CallToError callToError = (CallToError) error;
+            if (error instanceof CallToError callToError) {
                 errorListener.reportError(callToError);
-            } else if (error instanceof ConstraintError) {
-                ConstraintError constraintError = (ConstraintError) error;
+            } else if (error instanceof ConstraintError constraintError) {
                 errorListener.reportError(constraintError);
-            } else if (error instanceof ForbiddenMethodError) {
-                ForbiddenMethodError forbiddenMethodError = (ForbiddenMethodError) error;
+            } else if (error instanceof ForbiddenMethodError forbiddenMethodError) {
                 errorListener.reportError(forbiddenMethodError);
-            } else if (error instanceof HardCodedError) {
-                HardCodedError hardCodedError = (HardCodedError) error;
+            } else if (error instanceof HardCodedError hardCodedError) {
                 errorListener.reportError(hardCodedError);
-            } else if (error instanceof ImpreciseValueExtractionError) {
-                ImpreciseValueExtractionError impreciseError =
-                        (ImpreciseValueExtractionError) error;
+            } else if (error instanceof ImpreciseValueExtractionError impreciseError) {
                 errorListener.reportError(impreciseError);
-            } else if (error instanceof IncompleteOperationError) {
-                IncompleteOperationError incompleteError = (IncompleteOperationError) error;
+            } else if (error instanceof IncompleteOperationError incompleteError) {
                 errorListener.reportError(incompleteError);
-            } else if (error instanceof InstanceOfError) {
-                InstanceOfError instanceOfError = (InstanceOfError) error;
+            } else if (error instanceof InstanceOfError instanceOfError) {
                 errorListener.reportError(instanceOfError);
-            } else if (error instanceof NeverTypeOfError) {
-                NeverTypeOfError neverTypeOfError = (NeverTypeOfError) error;
+            } else if (error instanceof NeverTypeOfError neverTypeOfError) {
                 errorListener.reportError(neverTypeOfError);
-            } else if (error instanceof NoCallToError) {
-                NoCallToError noCallToError = (NoCallToError) error;
+            } else if (error instanceof NoCallToError noCallToError) {
                 errorListener.reportError(noCallToError);
-            } else if (error instanceof PredicateContradictionError) {
-                PredicateContradictionError contradictionError =
-                        (PredicateContradictionError) error;
+            } else if (error instanceof PredicateContradictionError contradictionError) {
                 errorListener.reportError(contradictionError);
-            } else if (error instanceof RequiredPredicateError) {
-                RequiredPredicateError predicateError = (RequiredPredicateError) error;
+            } else if (error instanceof RequiredPredicateError predicateError) {
                 errorListener.reportError(predicateError);
-            } else if (error instanceof TypestateError) {
-                TypestateError typestateError = (TypestateError) error;
+            } else if (error instanceof TypestateError typestateError) {
                 errorListener.reportError(typestateError);
-            } else if (error instanceof UncaughtExceptionError) {
-                UncaughtExceptionError exceptionError = (UncaughtExceptionError) error;
+            } else if (error instanceof UncaughtExceptionError exceptionError) {
                 errorListener.reportError(exceptionError);
             } else {
                 errorListener.reportError(error);

@@ -9,6 +9,7 @@ import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import crypto.analysis.AbstractPredicate;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -102,7 +103,7 @@ public class UsagePatternResultsListener implements IResultsListener {
     @Override
     public void generatedPredicate(
             IAnalysisSeed fromSeed,
-            EnsuredCrySLPredicate predicate,
+            AbstractPredicate predicate,
             IAnalysisSeed toSeed,
             Statement statement) {
         for (Assertion a : assertions) {

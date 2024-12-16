@@ -2,7 +2,7 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.AbstractPredicate;
 import crypto.analysis.HiddenPredicate;
 import java.util.Collection;
 import test.Assertion;
@@ -32,7 +32,7 @@ public class HasNotGeneratedPredicateAssertion implements Assertion {
         return statement;
     }
 
-    public void reported(Collection<Val> seed, EnsuredCrySLPredicate predicate) {
+    public void reported(Collection<Val> seed, AbstractPredicate predicate) {
         if (seed.contains(val) && !(predicate instanceof HiddenPredicate)) {
             imprecise = true;
         }

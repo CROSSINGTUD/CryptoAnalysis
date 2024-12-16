@@ -1,5 +1,6 @@
 package crypto.analysis;
 
+import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crysl.rule.ISLConstraint;
@@ -23,13 +24,15 @@ public class PredicateHandler {
 
     public void checkPredicates() {
         runPredicateMechanism();
-        collectMissingRequiredPredicates();
         collectContradictingPredicates();
+        collectMissingRequiredPredicates();
         reportRequiredPredicateErrors();
+
+        // Connections are only available once all errors have been reported
+        connectSubsequentErrors();
     }
 
     private void runPredicateMechanism() {
-
         for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
             seed.computeExpectedPredicates(cryptoScanner.getDiscoveredSeeds());
         }
@@ -39,47 +42,6 @@ public class PredicateHandler {
 
         for (AnalysisSeedWithSpecification seed : sortedSeeds) {
             seed.ensurePredicates();
-        }
-    }
-
-    private void collectMissingRequiredPredicates() {
-        for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
-            requiredPredicateErrors.put(seed, new ArrayList<>());
-            Collection<ISLConstraint> missingPredicates = seed.computeMissingPredicates();
-
-            for (ISLConstraint pred : missingPredicates) {
-                if (pred instanceof RequiredCrySLPredicate) {
-                    RequiredCrySLPredicate reqPred = (RequiredCrySLPredicate) pred;
-
-                    RequiredPredicateError reqPredError = new RequiredPredicateError(seed, reqPred);
-                    addRequiredPredicateErrorOnSeed(reqPredError, seed);
-                } else if (pred instanceof AlternativeReqPredicate) {
-                    AlternativeReqPredicate altReqPred = (AlternativeReqPredicate) pred;
-
-                    RequiredPredicateError reqPredError =
-                            new RequiredPredicateError(seed, altReqPred);
-                    addRequiredPredicateErrorOnSeed(reqPredError, seed);
-                }
-            }
-        }
-    }
-
-    private void addRequiredPredicateErrorOnSeed(
-            RequiredPredicateError reqPredError, AnalysisSeedWithSpecification seed) {
-        seed.addHiddenPredicatesToError(reqPredError);
-        seed.addError(reqPredError);
-        requiredPredicateErrors.get(seed).add(reqPredError);
-    }
-
-    private void reportRequiredPredicateErrors() {
-        for (Map.Entry<AnalysisSeedWithSpecification, List<RequiredPredicateError>> entry :
-                requiredPredicateErrors.entrySet()) {
-            AnalysisSeedWithSpecification seed = entry.getKey();
-
-            for (RequiredPredicateError reqPredError : entry.getValue()) {
-                reqPredError.mapPrecedingErrors();
-                cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
-            }
         }
     }
 
@@ -94,6 +56,57 @@ public class PredicateHandler {
                                 seed, pred.getLocation(), seed.getSpecification(), pred.getPred());
                 seed.addError(error);
                 cryptoScanner.getAnalysisReporter().reportError(seed, error);
+            }
+        }
+    }
+
+    private void collectMissingRequiredPredicates() {
+        for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+            requiredPredicateErrors.put(seed, new ArrayList<>());
+            Collection<ISLConstraint> missingPredicates = seed.computeMissingPredicates();
+
+            for (ISLConstraint pred : missingPredicates) {
+                if (pred instanceof RequiredCrySLPredicate reqPred) {
+                    Collection<HiddenPredicate> hiddenPreds = seed.extractHiddenPredicates(reqPred);
+
+                    RequiredPredicateError reqPredError =
+                            new RequiredPredicateError(seed, reqPred, hiddenPreds);
+                    requiredPredicateErrors.get(seed).add(reqPredError);
+                } else if (pred instanceof AlternativeReqPredicate altReqPred) {
+                    Collection<HiddenPredicate> hiddenPreds =
+                            seed.extractHiddenPredicates(altReqPred);
+
+                    RequiredPredicateError reqPredError =
+                            new RequiredPredicateError(seed, altReqPred, hiddenPreds);
+                    requiredPredicateErrors.get(seed).add(reqPredError);
+                }
+            }
+        }
+    }
+
+    private void reportRequiredPredicateErrors() {
+        for (AnalysisSeedWithSpecification seed : requiredPredicateErrors.keySet()) {
+            Collection<RequiredPredicateError> errors = requiredPredicateErrors.get(seed);
+
+            for (RequiredPredicateError reqPredError : errors) {
+                seed.addError(reqPredError);
+                cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
+            }
+        }
+    }
+
+    private void connectSubsequentErrors() {
+        for (AnalysisSeedWithSpecification seed : requiredPredicateErrors.keySet()) {
+            Collection<RequiredPredicateError> errors = requiredPredicateErrors.get(seed);
+
+            for (RequiredPredicateError error : errors) {
+                for (HiddenPredicate hiddenPredicate : error.getHiddenPredicates()) {
+                    Collection<AbstractError> precedingErrors =
+                            hiddenPredicate.getPrecedingErrors();
+
+                    precedingErrors.forEach(error::addPrecedingError);
+                    precedingErrors.forEach(e -> e.addSubsequentError(error));
+                }
             }
         }
     }

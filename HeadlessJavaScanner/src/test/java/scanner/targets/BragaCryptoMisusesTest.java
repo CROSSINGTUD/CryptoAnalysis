@@ -275,7 +275,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.constPwd4PBE.ConstPassword4PBE1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -284,7 +284,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.constPwd4PBE.ConstPassword4PBE2", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -700,6 +700,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pdf.insecureDefault.InsecureDefault3DES", "main", 1)
@@ -1184,7 +1185,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.paramsPBE.PBEwConstSalt1", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -1193,7 +1194,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.paramsPBE.PBEwSmallCount1", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -1202,7 +1203,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.paramsPBE.PBEwSmallSalt", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -1349,6 +1350,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(

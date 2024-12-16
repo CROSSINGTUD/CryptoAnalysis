@@ -10,7 +10,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ValueConstraint extends EvaluableConstraint {
 
@@ -28,9 +27,7 @@ public class ValueConstraint extends EvaluableConstraint {
         }
 
         List<String> lowerCaseValues =
-                valCons.getValueRange().parallelStream()
-                        .map(String::toLowerCase)
-                        .collect(Collectors.toList());
+                valCons.getValueRange().parallelStream().map(String::toLowerCase).toList();
         for (Map.Entry<String, CallSiteWithExtractedValue> val : values) {
             if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
                 ConstraintError error =

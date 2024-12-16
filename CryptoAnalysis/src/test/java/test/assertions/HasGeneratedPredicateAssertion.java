@@ -2,7 +2,7 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.AbstractPredicate;
 import crypto.analysis.HiddenPredicate;
 import java.util.Collection;
 import test.Assertion;
@@ -28,7 +28,7 @@ public class HasGeneratedPredicateAssertion implements Assertion {
         return false;
     }
 
-    public void reported(Collection<Val> seed, EnsuredCrySLPredicate predicate) {
+    public void reported(Collection<Val> seed, AbstractPredicate predicate) {
         if (seed.contains(val) && !(predicate instanceof HiddenPredicate)) {
             satisfied = true;
         }

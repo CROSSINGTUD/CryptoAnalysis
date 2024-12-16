@@ -5,36 +5,25 @@ import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.Objects;
 
-public class EnsuredCrySLPredicate {
-
-    private final CrySLPredicate predicate;
-    private final Collection<CallSiteWithExtractedValue> parametersToValues;
+public class EnsuredCrySLPredicate extends AbstractPredicate {
 
     public EnsuredCrySLPredicate(
             CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues) {
-        this.predicate = predicate;
-        this.parametersToValues = parametersToValues;
-    }
-
-    public CrySLPredicate getPredicate() {
-        return predicate;
-    }
-
-    public Collection<CallSiteWithExtractedValue> getParametersToValues() {
-        return parametersToValues;
-    }
-
-    public String toString() {
-        return "Proved " + predicate.getPredName();
+        super(predicate, parametersToValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(predicate);
+        return Objects.hash(super.hashCode());
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof EnsuredCrySLPredicate other && predicate.equals(other.predicate);
+        return super.equals(obj) && obj instanceof EnsuredCrySLPredicate;
+    }
+
+    @Override
+    public String toString() {
+        return "Ensured: " + getPredicate().getPredName();
     }
 }

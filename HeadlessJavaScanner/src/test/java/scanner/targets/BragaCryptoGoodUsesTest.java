@@ -88,7 +88,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("example.PBEwLargeCountAndRandomSalt", "main", 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
@@ -123,7 +123,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("example.PBEwParameterPassword", "main", 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
@@ -391,7 +391,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseQualifiedNameForPBE1", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
