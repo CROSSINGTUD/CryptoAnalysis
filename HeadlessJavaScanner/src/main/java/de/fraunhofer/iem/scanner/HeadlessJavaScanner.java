@@ -1,8 +1,5 @@
 package de.fraunhofer.iem.scanner;
 
-import boomerang.Query;
-import boomerang.debugger.Debugger;
-import boomerang.debugger.IDEVizDebugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.sparse.SparseCFGCache;
@@ -17,14 +14,12 @@ import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
 import de.fraunhofer.iem.framework.SootUpSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import typestate.TransitionFunction;
 
 public class HeadlessJavaScanner extends CryptoScanner {
 
@@ -66,39 +61,6 @@ public class HeadlessJavaScanner extends CryptoScanner {
     @Override
     public DataFlowScope createDataFlowScope() {
         return new CryptoAnalysisDataFlowScope(super.getRuleset(), getIgnoredSections());
-    }
-
-    @Override
-    public Debugger<TransitionFunction> debugger(Query query) {
-        if (settings.isVisualization()) {
-
-            if (settings.getReportDirectory() == null) {
-                LOGGER.error(
-                        "The visualization requires the --reportPath option. Disabling visualization...");
-                return new Debugger<>();
-            }
-
-            File vizFile =
-                    new File(
-                            settings.getReportDirectory()
-                                    + File.separator
-                                    + "viz"
-                                    + File.separator
-                                    + query.var().getVariableName()
-                                    + ".json");
-            boolean created = vizFile.getParentFile().mkdirs();
-
-            if (!created) {
-                LOGGER.error(
-                        "Could not create directory {}. Disabling visualization...",
-                        vizFile.getAbsolutePath());
-                return new Debugger<>();
-            }
-
-            return new IDEVizDebugger<>(vizFile);
-        }
-
-        return new Debugger<>();
     }
 
     @Override

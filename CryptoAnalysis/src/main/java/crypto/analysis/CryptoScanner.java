@@ -1,7 +1,5 @@
 package crypto.analysis;
 
-import boomerang.Query;
-import boomerang.debugger.Debugger;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Method;
@@ -28,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import typestate.TransitionFunction;
 
 public abstract class CryptoScanner {
 
@@ -173,10 +170,6 @@ public abstract class CryptoScanner {
 
     protected DataFlowScope createDataFlowScope() {
         return new CryptoAnalysisDataFlowScope(ruleset, Collections.emptySet());
-    }
-
-    public Debugger<TransitionFunction> debugger(Query query) {
-        return new Debugger<>();
     }
 
     public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
