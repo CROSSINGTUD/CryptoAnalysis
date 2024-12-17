@@ -77,7 +77,7 @@ jobs:
       - name: Zip JavaCryptographicArchitecture folder
         run: |
           echo "Zipping the JavaCryptographicArchitecture folder..."
-          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture
+          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/test/resources/rules/JavaCryptographicArchitecture
 
       - name: Create GitHub Release
         run: |
