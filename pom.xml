@@ -287,6 +287,7 @@
                     <configuration>
                         <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
                         <reuseForks>false</reuseForks>
+                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -450,8 +451,8 @@
 
     <profiles>
         <!-- This profile is used to avoid running the deployment in non-deployment
-			contexts because they require specific keys from the GitHub remote. Include
-			this profile by setting the -Pdeployment flag. -->
+            contexts because they require specific keys from the GitHub remote. Include
+            this profile by setting the -Pdeployment flag. -->
         <profile>
             <id>deployment</id>
             <build>
