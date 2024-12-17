@@ -5,22 +5,16 @@ import boomerang.scene.DataFlowScope;
 import boomerang.scene.sparse.SparseCFGCache;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
-import crypto.exceptions.CryptoAnalysisException;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
-import crypto.reporting.ReporterFactory;
-import crypto.visualization.Visualizer;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
 import de.fraunhofer.iem.framework.SootUpSetup;
 import de.fraunhofer.iem.scanner.ScannerSettings.CallGraphAlgorithm;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
-import org.graphper.draw.ExecuteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,24 +57,16 @@ public class HeadlessJavaScanner extends CryptoScanner {
 
     @Override
     public DataFlowScope createDataFlowScope() {
-        return new CryptoAnalysisDataFlowScope(super.getRuleset(), getIgnoredSections());
+        return new CryptoAnalysisDataFlowScope(super.getRuleset(), settings.getIgnoredSections());
     }
 
     @Override
     public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
-        switch (settings.getSparseStrategy()) {
-            case NONE:
-                return SparseCFGCache.SparsificationStrategy.NONE;
-            case TYPE_BASED:
-                return SparseCFGCache.SparsificationStrategy.TYPE_BASED;
-            case ALIAS_AWARE:
-                return SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
-            default:
-                LOGGER.error(
-                        "Could not set sparsification strategy {}. Defaulting to NONE...",
-                        settings.getSparseStrategy());
-                return SparseCFGCache.SparsificationStrategy.NONE;
-        }
+        return switch (settings.getSparseStrategy()) {
+            case NONE -> SparseCFGCache.SparsificationStrategy.NONE;
+            case TYPE_BASED -> SparseCFGCache.SparsificationStrategy.TYPE_BASED;
+            case ALIAS_AWARE -> SparseCFGCache.SparsificationStrategy.ALIAS_AWARE;
+        };
     }
 
     @Override
@@ -94,44 +80,26 @@ public class HeadlessJavaScanner extends CryptoScanner {
         frameworkSetup.initializeFramework();
         additionalFrameworkSetup();
 
-        // Initialize fields and reporters
+        // Initialize fields
         super.initialize();
-        Collection<Reporter> reporters =
-                ReporterFactory.createReporters(
-                        getReportFormats(), getReportDirectory(), super.getRuleset());
 
         // Run the analysis
         super.scan();
 
         // Report the errors
-        for (Reporter reporter : reporters) {
-            reporter.createAnalysisReport(
-                    super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
-        }
-
-        try {
-            Visualizer visualizer = new Visualizer(getReportDirectory());
-            visualizer.createVisualization(super.getDiscoveredSeeds());
-        } catch (IOException | ExecuteException e) {
-            LOGGER.error("Couldn't create visualization: " + e.getMessage());
-        }
+        super.createReports(getReportFormats(), getReportDirectory(), isVisualization());
     }
 
     private FrameworkSetup setupFramework() {
-        switch (settings.getFramework()) {
-            case SOOT:
-                return new SootSetup(
-                        settings.getApplicationPath(),
-                        settings.getCallGraph(),
-                        settings.getSootPath());
-            case SOOT_UP:
-                return new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
-            case OPAL:
-                return new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
-            default:
-                throw new CryptoAnalysisException(
-                        "Framework " + settings.getFramework().name() + " is not supported");
-        }
+        return switch (settings.getFramework()) {
+            case SOOT ->
+                    new SootSetup(
+                            settings.getApplicationPath(),
+                            settings.getCallGraph(),
+                            settings.getSootPath());
+            case SOOT_UP -> new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
+            case OPAL -> new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
+        };
     }
 
     public String getApplicationPath() {
@@ -170,7 +138,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
         settings.setReportDirectory(reportDirectory);
     }
 
-    public Set<Reporter.ReportFormat> getReportFormats() {
+    public Collection<Reporter.ReportFormat> getReportFormats() {
         return settings.getReportFormats();
     }
 

@@ -2,11 +2,10 @@ package crypto.visualization;
 
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AbstractError;
-import java.util.Objects;
-
 import crypto.analysis.errors.AbstractOrderError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.PredicateConstraintError;
+import java.util.Objects;
 import org.graphper.api.Node;
 import org.graphper.api.attributes.Color;
 import org.graphper.api.attributes.NodeShapeEnum;
@@ -34,7 +33,11 @@ public class WrappedNode {
     }
 
     private String getLabel() {
-        return error.getClass().getSimpleName() + "\n" + error.getErrorStatement() + "\nLine: " + error.getLineNumber();
+        return error.getClass().getSimpleName()
+                + "\n"
+                + error.getErrorStatement()
+                + "\nLine: "
+                + error.getLineNumber();
     }
 
     private Color getColor() {

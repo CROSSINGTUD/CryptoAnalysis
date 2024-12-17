@@ -87,4 +87,13 @@ public class ProgramTest {
                         Reporter.ReportFormat.TXT,
                         Reporter.ReportFormat.CSV));
     }
+
+    @Test
+    public void testVisualization() {
+        HeadlessAndroidScanner scanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        scanner.setVisualization(true);
+        Assert.assertTrue(scanner.isVisualization());
+    }
 }

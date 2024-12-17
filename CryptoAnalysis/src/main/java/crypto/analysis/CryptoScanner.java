@@ -15,6 +15,9 @@ import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
+import crypto.reporting.Reporter;
+import crypto.reporting.ReporterFactory;
+import crypto.visualization.Visualizer;
 import crysl.CrySLParser;
 import crysl.rule.CrySLRule;
 import java.io.IOException;
@@ -26,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.graphper.draw.ExecuteException;
 
 public abstract class CryptoScanner {
 
@@ -107,6 +111,46 @@ public abstract class CryptoScanner {
         analysisReporter.afterPredicateCheck();
 
         analysisReporter.afterAnalysis();
+    }
+
+    protected final void createReports(
+            Collection<Reporter.ReportFormat> formats,
+            String reportDirectory,
+            boolean visualization) {
+        if (reportDirectory == null
+                && formats.stream()
+                        .anyMatch(
+                                e ->
+                                        Set.of(
+                                                        Reporter.ReportFormat.TXT,
+                                                        Reporter.ReportFormat.CSV,
+                                                        Reporter.ReportFormat.CSV_SUMMARY,
+                                                        Reporter.ReportFormat.SARIF)
+                                                .contains(e))) {
+            throw new RuntimeException("Cannot create report without existing report directory");
+        }
+
+        if (visualization && reportDirectory == null) {
+            throw new RuntimeException(
+                    "Cannot create visualization without existing report directory");
+        }
+
+        Collection<Reporter> reporters =
+                ReporterFactory.createReporters(formats, reportDirectory, ruleset);
+        for (Reporter reporter : reporters) {
+            reporter.createAnalysisReport(
+                    getDiscoveredSeeds(), getCollectedErrors(), getStatistics());
+        }
+
+        if (visualization) {
+            try {
+                Visualizer visualizer = new Visualizer(reportDirectory);
+                visualizer.createVisualization(getDiscoveredSeeds());
+            } catch (IOException | ExecuteException e) {
+                throw new CryptoAnalysisException(
+                        "Couldn't create visualization: " + e.getMessage());
+            }
+        }
     }
 
     public final Collection<CrySLRule> getRuleset() {

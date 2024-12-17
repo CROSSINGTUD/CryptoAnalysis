@@ -15,9 +15,12 @@ import org.graphper.api.Line;
 import org.graphper.api.Subgraph;
 import org.graphper.api.attributes.Rank;
 import org.graphper.draw.ExecuteException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Visualizer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Visualizer.class);
     private static final String VISUALIZATION_NAME = "visualization";
 
     private final File outputFile;
@@ -69,6 +72,9 @@ public class Visualizer {
 
         Graphviz graphviz = builder.build();
         graphviz.toFile(FileType.PNG).save(outputFile.getAbsolutePath(), VISUALIZATION_NAME);
+        LOGGER.info(
+                "Written visualization to {}",
+                outputFile.getAbsolutePath() + File.separator + VISUALIZATION_NAME + ".png");
     }
 
     private Cluster createClusterForSeed(
