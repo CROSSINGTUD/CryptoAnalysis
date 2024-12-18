@@ -53,7 +53,14 @@ public class HasEnsuredPredicateAssertion implements Assertion {
         if (predName == null) {
             return "Expected a predicate for " + val.getVariableName() + " @ " + stmt;
         } else {
-            return "Expected '" + predName + "' ensured on " + val.getVariableName() + " @ " + stmt;
+            return "Expected '"
+                    + predName
+                    + "' ensured on "
+                    + val.getVariableName()
+                    + " @ "
+                    + stmt
+                    + " @ line "
+                    + stmt.getStartLineNumber();
         }
     }
 }

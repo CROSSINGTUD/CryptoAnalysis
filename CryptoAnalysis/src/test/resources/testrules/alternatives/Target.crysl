@@ -1,0 +1,17 @@
+SPEC tests.error.predicate.alternatives.Target
+
+OBJECTS
+    tests.error.predicate.alternatives.Source source;
+    java.lang.String string;
+
+EVENTS
+    Con: Target();
+    ReqSource: requireSource(source);
+    ReqString: requireString(string);
+    ReqSourceAndString: requireSourceAndString(source, string);
+
+REQUIRES
+    predSource[source] || predString[string];
+
+ENSURES
+    generatedTarget[this];

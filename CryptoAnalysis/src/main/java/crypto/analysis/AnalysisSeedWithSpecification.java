@@ -302,7 +302,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     @Override
     public void expectPredicate(
             Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
-        expectedPredicates.put(statement, new ExpectedPredicateOnSeed(predicate, seed, paramIndex));
+        CrySLPredicate expectedPred;
+        if (predicate.isNegated()) {
+            expectedPred = predicate.invertNegation();
+        } else {
+            expectedPred = predicate;
+        }
+        expectedPredicates.put(statement, new ExpectedPredicateOnSeed(expectedPred, seed, paramIndex));
     }
 
     public void addRequiringSeed(AnalysisSeedWithSpecification seed) {
@@ -550,6 +556,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Collection<Statement> expectedPredStatements = expectedPredicates.keySet();
 
+        // TODO Check for relevant predicates?
         Collection<CrySLPredicate> predsToBeEnsured = new HashSet<>(specification.getPredicates());
         for (AbstractPredicate predicate : indirectlyEnsuredPredicates) {
             predsToBeEnsured.add(predicate.getPredicate().toNormalCrySLPredicate());
@@ -572,8 +579,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             }
 
             for (Statement statement : expectedPredStatements) {
-                if (!expectedPredicatesAtStatement(statement)
-                        .contains(predToBeEnsured.toNormalCrySLPredicate())) {
+                Collection<CrySLPredicate> expectedPreds = expectedPredicatesAtStatement(statement);
+                if (!expectedPreds.contains(predToBeEnsured.toNormalCrySLPredicate())) {
                     continue;
                 }
 

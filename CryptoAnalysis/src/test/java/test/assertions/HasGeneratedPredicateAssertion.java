@@ -40,6 +40,11 @@ public class HasGeneratedPredicateAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + val.getVariableName() + " to generate a predicate @ " + statement;
+        return "Expected "
+                + val.getVariableName()
+                + " to generate a predicate @ "
+                + statement
+                + " @ line "
+                + statement.getStartLineNumber();
     }
 }

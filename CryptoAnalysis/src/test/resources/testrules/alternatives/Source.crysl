@@ -1,0 +1,13 @@
+SPEC tests.error.predicate.alternatives.Source
+
+OBJECTS
+    java.lang.String string;
+
+EVENTS
+    Con: Source();
+    EnsOnThis: ensurePredOnThis();
+    EnsOnString: ensurePredOnString(string);
+
+ENSURES
+    predSource[this] after EnsOnThis;
+    predString[string];

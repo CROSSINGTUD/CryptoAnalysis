@@ -43,6 +43,8 @@ public class HasNotGeneratedPredicateAssertion implements Assertion {
         return "Did not expected "
                 + val.getVariableName()
                 + " to generate a predicate @ "
-                + statement;
+                + statement
+                + " @ line "
+                + statement.getStartLineNumber();
     }
 }
