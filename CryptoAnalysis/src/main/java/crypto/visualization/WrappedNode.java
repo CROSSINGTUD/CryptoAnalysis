@@ -3,6 +3,7 @@ package crypto.visualization;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AbstractOrderError;
+import crypto.analysis.errors.AbstractRequiredPredicateError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.PredicateConstraintError;
 import java.util.Objects;
@@ -42,11 +43,13 @@ public class WrappedNode {
 
     private Color getColor() {
         if (error instanceof ForbiddenMethodError) {
-            return Color.BLUE;
+            return Color.ofRGB("#9AF6FF"); // turquoise-ish
         } else if (error instanceof AbstractOrderError) {
-            return Color.ORANGE;
+            return Color.ofRGB("#FFF7AB"); // Yellow-ish
+        } else if (error instanceof AbstractRequiredPredicateError) {
+            return Color.ofRGB("#FFEBB2"); // Orange-ish
         } else if (error instanceof AbstractConstraintsError) {
-            return Color.YELLOW;
+            return Color.ofRGB("#C1D4FF"); // Blue-ish
         } else if (error instanceof PredicateConstraintError) {
             return Color.INDIGO;
         } else {

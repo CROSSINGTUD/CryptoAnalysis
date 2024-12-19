@@ -28,10 +28,10 @@ public class WrappedCluster {
             cluster =
                     Cluster.builder()
                             .subgraph(subgraph)
-                            .label(seed.getFact().getVariableName())
+                            .label(" " + seed.getFact().getVariableName())
                             .labeljust(Labeljust.LEFT)
                             .shape(ClusterShapeEnum.RECT)
-                            .bgColor(Color.GREY)
+                            .bgColor(Color.ofRGB("#E8E8E8")) // Gray-ish
                             .build();
         }
 
