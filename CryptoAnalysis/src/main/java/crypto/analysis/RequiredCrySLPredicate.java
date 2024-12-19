@@ -6,6 +6,17 @@ import crysl.rule.ISLConstraint;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Wrapper class for predicates from the REQUIRES section. This class only stores single predicates,
+ * that is, predicates of the form
+ *
+ * <pre>{@code
+ * REQUIRES
+ *    generatedKey[...];
+ * }</pre>
+ *
+ * If a predicate has alternatives, a {@link AlternativeReqPredicate} is used.
+ */
 public class RequiredCrySLPredicate implements ISLConstraint {
 
     private final CrySLPredicate predicate;

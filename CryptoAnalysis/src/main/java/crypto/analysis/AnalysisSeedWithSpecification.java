@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -308,7 +307,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         } else {
             expectedPred = predicate;
         }
-        expectedPredicates.put(statement, new ExpectedPredicateOnSeed(expectedPred, seed, paramIndex));
+        expectedPredicates.put(
+                statement, new ExpectedPredicateOnSeed(expectedPred, seed, paramIndex));
     }
 
     public void addRequiringSeed(AnalysisSeedWithSpecification seed) {
@@ -332,11 +332,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         new AbstractMap.SimpleEntry<>(reqPred.getPred(), reqPred.getParamIndex());
                 reqPreds.put(reqPred.getLocation(), entry);
             } else if (constraint instanceof AlternativeReqPredicate altPred) {
-                for (CrySLPredicate predicate : altPred.getAlternatives()) {
-                    Map.Entry<CrySLPredicate, Integer> entry =
-                            new AbstractMap.SimpleEntry<>(predicate, altPred.getParamIndex());
+                for (RequiredCrySLPredicate reqPred : altPred.getRelAlternatives()) {
+                    CrySLPredicate predicate = reqPred.getPred();
 
-                    reqPreds.put(altPred.getLocation(), entry);
+                    Map.Entry<CrySLPredicate, Integer> entry =
+                            new AbstractMap.SimpleEntry<>(predicate, reqPred.getParamIndex());
+                    reqPreds.put(reqPred.getLocation(), entry);
                 }
             }
         }
@@ -853,86 +854,125 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
      * @return remainingPredicates predicates that are not satisfied
      */
     public Collection<ISLConstraint> computeMissingPredicates() {
-        Collection<ISLConstraint> requiredPredicates = constraintSolver.getRequiredPredicates();
-        Collection<ISLConstraint> remainingPredicates = new HashSet<>(requiredPredicates);
+        Collection<RequiredCrySLPredicate> violatedReqPreds = computeViolatedRequiredPredicates();
+        Collection<AlternativeReqPredicate> violatedAltPreds =
+                computeViolatedAlternativePredicates();
 
-        for (ISLConstraint pred : requiredPredicates) {
-            if (pred instanceof RequiredCrySLPredicate reqPred) {
-                // If a negated predicate is ensured, a PredicateContradictionError has to be
-                // reported
-                if (reqPred.getPred().isNegated()) {
-                    remainingPredicates.remove(pred);
-                    continue;
-                }
+        Collection<ISLConstraint> result = new HashSet<>();
+        result.addAll(violatedReqPreds);
+        result.addAll(violatedAltPreds);
 
-                // Check for basic required predicates, e.g. randomized
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
-                        ensuredPredicates.get(reqPred.getLocation());
-                int reqParamIndex = reqPred.getParamIndex();
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
-                    if (doReqPredAndEnsPredMatch(
-                            reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
-                        remainingPredicates.remove(pred);
-                    }
-                }
-            } else if (pred instanceof AlternativeReqPredicate altPred) {
-                Collection<CrySLPredicate> alternatives = altPred.getAlternatives();
-                Collection<CrySLPredicate> positives =
-                        alternatives.stream().filter(e -> !e.isNegated()).toList();
-                Collection<CrySLPredicate> negatives =
-                        alternatives.stream().filter(CrySLPredicate::isNegated).toList();
-                int altParamIndex = altPred.getParamIndex();
+        return result;
+    }
 
-                boolean satisfied = false;
-                Collection<CrySLPredicate> ensuredNegatives =
-                        alternatives.stream()
-                                .filter(CrySLPredicate::isNegated)
-                                .collect(Collectors.toList());
+    public Collection<RequiredCrySLPredicate> computeViolatedRequiredPredicates() {
+        Collection<RequiredCrySLPredicate> requiredPredicates = new HashSet<>();
 
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
-                        ensuredPredicates.get(altPred.getLocation());
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
-                    // If any positive alternative is satisfied, the whole predicate is satisfied
-                    if (positives.stream()
-                            .anyMatch(
-                                    e ->
-                                            doReqPredAndEnsPredMatch(
-                                                    e, altParamIndex, ensPredAtIndex))) {
-                        satisfied = true;
-                    }
+        Collection<ISLConstraint> reqPreds = constraintSolver.getRequiredPredicates();
+        for (ISLConstraint constraint : reqPreds) {
+            if (constraint instanceof RequiredCrySLPredicate reqPred) {
+                requiredPredicates.add(reqPred);
+            }
+        }
 
-                    // Remove all negated alternatives that are ensured
-                    Collection<CrySLPredicate> violatedNegAlternatives =
-                            negatives.stream()
-                                    .filter(
-                                            e ->
-                                                    doReqPredAndEnsPredMatch(
-                                                            e, altParamIndex, ensPredAtIndex))
-                                    .toList();
-                    ensuredNegatives.removeAll(violatedNegAlternatives);
-                }
+        Collection<RequiredCrySLPredicate> remainingPredicates = new HashSet<>(requiredPredicates);
 
-                if (satisfied || !ensuredNegatives.isEmpty()) {
-                    remainingPredicates.remove(pred);
+        // Remove all ensured predicates from the required predicates set -> only not ensured
+        // predicates are left
+        for (RequiredCrySLPredicate reqPred : requiredPredicates) {
+            // If a negated predicate is ensured, a PredicateContradictionError has to be reported
+            if (reqPred.getPred().isNegated()) {
+                remainingPredicates.remove(reqPred);
+                continue;
+            }
+
+            // Check for basic required predicates, e.g. randomized
+            Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
+                    ensuredPredicates.get(reqPred.getLocation());
+            int reqParamIndex = reqPred.getParamIndex();
+            for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPredAtIndex : predsAtStatement) {
+                if (doReqPredAndEnsPredMatch(reqPred.getPred(), reqParamIndex, ensPredAtIndex)) {
+                    remainingPredicates.remove(reqPred);
                 }
             }
         }
 
         // Check conditional required predicates
-        for (ISLConstraint rem : new HashSet<>(remainingPredicates)) {
-            if (rem instanceof RequiredCrySLPredicate singlePred) {
-                if (isPredConditionViolated(singlePred.getPred())) {
-                    remainingPredicates.remove(singlePred);
-                }
-            } else if (rem instanceof AlternativeReqPredicate) {
-                Collection<CrySLPredicate> altPred =
-                        ((AlternativeReqPredicate) rem).getAlternatives();
-
-                if (altPred.parallelStream().anyMatch(this::isPredConditionViolated)) {
-                    remainingPredicates.remove(rem);
-                }
+        for (RequiredCrySLPredicate rem : new HashSet<>(remainingPredicates)) {
+            if (isPredConditionViolated(rem.getPred())) {
+                remainingPredicates.remove(rem);
             }
         }
+
+        return remainingPredicates;
+    }
+
+    public Collection<AlternativeReqPredicate> computeViolatedAlternativePredicates() {
+        Collection<AlternativeReqPredicate> alternativeReqPredicates = new HashSet<>();
+
+        Collection<ISLConstraint> reqPreds = constraintSolver.getRequiredPredicates();
+        for (ISLConstraint constraint : reqPreds) {
+            if (constraint instanceof AlternativeReqPredicate reqPred) {
+                alternativeReqPredicates.add(reqPred);
+            }
+        }
+
+        Collection<AlternativeReqPredicate> remainingPredicates =
+                new HashSet<>(alternativeReqPredicates);
+
+        for (AlternativeReqPredicate altPred : alternativeReqPredicates) {
+            Collection<RequiredCrySLPredicate> positives = new HashSet<>();
+            Collection<RequiredCrySLPredicate> negatives = new HashSet<>();
+
+            Collection<RequiredCrySLPredicate> relAlternatives = altPred.getRelAlternatives();
+            for (RequiredCrySLPredicate reqPred : relAlternatives) {
+                CrySLPredicate predicate = reqPred.getPred();
+
+                if (predicate.isNegated()) {
+                    negatives.add(reqPred);
+                } else {
+                    positives.add(reqPred);
+                }
+            }
+
+            boolean satisfied = false;
+
+            // If any positive alternative is satisfied, the whole predicate is satisfied
+            for (RequiredCrySLPredicate positive : positives) {
+                CrySLPredicate predicate = positive.getPred();
+                int paramIndex = positive.getParamIndex();
+
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
+                        ensuredPredicates.get(altPred.getLocation());
+                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : predsAtStatement) {
+                    if (doReqPredAndEnsPredMatch(predicate, paramIndex, ensPred)) {
+                        satisfied = true;
+                    }
+                }
+            }
+
+            Collection<RequiredCrySLPredicate> ensuredNegatives = new HashSet<>(negatives);
+
+            // Remove all negated predicates that are ensured
+            for (RequiredCrySLPredicate negative : negatives) {
+                CrySLPredicate predicate = negative.getPred();
+                int paramIndex = negative.getParamIndex();
+
+                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> predsAtStatement =
+                        ensuredPredicates.get(altPred.getLocation());
+                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : predsAtStatement) {
+                    if (doReqPredAndEnsPredMatch(predicate, paramIndex, ensPred)) {
+                        ensuredNegatives.remove(negative);
+                    }
+                }
+            }
+
+            if (satisfied || !ensuredNegatives.isEmpty()) {
+                remainingPredicates.remove(altPred);
+            }
+        }
+
+        // TODO Check condition
 
         return remainingPredicates;
     }
@@ -973,8 +1013,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             CrySLPredicate reqPred,
             int reqPredIndex,
             Map.Entry<EnsuredCrySLPredicate, Integer> ensPred) {
-        return reqPred.equals(ensPred.getKey().getPredicate())
-                && doPredsMatch(reqPred, ensPred.getKey())
+        CrySLPredicate predToCheck;
+        if (reqPred.isNegated()) {
+            predToCheck = reqPred.invertNegation();
+        } else {
+            predToCheck = reqPred;
+        }
+        return predToCheck.equals(ensPred.getKey().getPredicate())
+                && doPredsMatch(predToCheck, ensPred.getKey())
                 && reqPredIndex == ensPred.getValue();
     }
 
@@ -1045,18 +1091,25 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return requiredPredicatesExist;
     }
 
-    public Collection<HiddenPredicate> extractHiddenPredicates(RequiredCrySLPredicate predicate) {
-        return extractHiddenPredicates(
-                predicate.getLocation(), List.of(predicate.getPred()), predicate.getParamIndex());
+    public Collection<HiddenPredicate> extractHiddenPredicates(AlternativeReqPredicate predicate) {
+        Collection<HiddenPredicate> result = new HashSet<>();
+
+        for (RequiredCrySLPredicate reqPred : predicate.getRelAlternatives()) {
+            Collection<HiddenPredicate> extractedPreds = extractHiddenPredicates(reqPred);
+
+            result.addAll(extractedPreds);
+        }
+
+        return result;
     }
 
-    public Collection<HiddenPredicate> extractHiddenPredicates(AlternativeReqPredicate predicate) {
+    public Collection<HiddenPredicate> extractHiddenPredicates(RequiredCrySLPredicate predicate) {
         return extractHiddenPredicates(
-                predicate.getLocation(), predicate.getAlternatives(), predicate.getParamIndex());
+                predicate.getLocation(), predicate.getPred(), predicate.getParamIndex());
     }
 
     private Collection<HiddenPredicate> extractHiddenPredicates(
-            Statement statement, Collection<CrySLPredicate> predicates, int index) {
+            Statement statement, CrySLPredicate predicate, int index) {
         Collection<HiddenPredicate> result = new HashSet<>();
 
         if (!hiddenPredicates.containsKey(statement)) {
@@ -1070,13 +1123,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 continue;
             }
 
-            for (CrySLPredicate pred : predicates) {
-                HiddenPredicate hiddenPredicate = entry.getKey();
+            HiddenPredicate hiddenPredicate = entry.getKey();
 
-                if (hiddenPredicate.getPredicate().equals(pred)
-                        && doPredsMatch(pred, hiddenPredicate)) {
-                    result.add(hiddenPredicate);
-                }
+            if (hiddenPredicate.getPredicate().equals(predicate)
+                    && doPredsMatch(predicate, hiddenPredicate)) {
+                result.add(hiddenPredicate);
             }
         }
 

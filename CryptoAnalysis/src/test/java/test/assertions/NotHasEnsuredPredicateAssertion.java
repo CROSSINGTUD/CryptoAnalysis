@@ -51,7 +51,12 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
     @Override
     public String toString() {
         if (predName == null) {
-            return "Did not expect a predicate for " + val.getVariableName() + " @ " + stmt + " @ line " + stmt.getStartLineNumber();
+            return "Did not expect a predicate for "
+                    + val.getVariableName()
+                    + " @ "
+                    + stmt
+                    + " @ line "
+                    + stmt.getStartLineNumber();
         } else {
             return "Did not expect '"
                     + predName

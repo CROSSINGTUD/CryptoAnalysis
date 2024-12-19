@@ -10,6 +10,7 @@ import crypto.analysis.AbstractPredicate;
 import crypto.analysis.EnsuredCrySLPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -256,6 +257,8 @@ public class AnalysisReporter {
             } else if (error instanceof PredicateContradictionError contradictionError) {
                 errorListener.reportError(contradictionError);
             } else if (error instanceof RequiredPredicateError predicateError) {
+                errorListener.reportError(predicateError);
+            } else if (error instanceof AlternativeReqPredicateError predicateError) {
                 errorListener.reportError(predicateError);
             } else if (error instanceof TypestateError typestateError) {
                 errorListener.reportError(typestateError);
