@@ -1,6 +1,5 @@
 package crypto.analysis;
 
-import boomerang.debugger.Debugger;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.DataFlowScope;
@@ -10,7 +9,6 @@ import crypto.typestate.ForwardSeedQuery;
 import crypto.typestate.TypestateAnalysis;
 import crypto.typestate.TypestateDefinition;
 import crysl.rule.CrySLRule;
-import ideal.IDEALSeedSolver;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,12 +38,6 @@ public class SeedGenerator {
                     @Override
                     public DataFlowScope getDataFlowScope() {
                         return scanner.getDataFlowScope();
-                    }
-
-                    @Override
-                    public Debugger<TransitionFunction> getDebugger(
-                            IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                        return scanner.debugger(idealSeedSolver.getSeed());
                     }
 
                     @Override

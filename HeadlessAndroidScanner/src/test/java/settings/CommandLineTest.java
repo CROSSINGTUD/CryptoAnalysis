@@ -21,6 +21,8 @@ public class CommandLineTest {
     private static final String REPORT_PATH = "--reportPath";
     private static final String REPORT_FORMAT = "--reportFormat";
 
+    private static final String VISUALIZATION = "--visualization";
+
     @Test
     public void testMinimalApplication() {
         String[] args =
@@ -198,5 +200,40 @@ public class CommandLineTest {
                         Reporter.ReportFormat.CMD,
                         Reporter.ReportFormat.TXT,
                         Reporter.ReportFormat.CSV));
+    }
+
+    @Test
+    public void testVisualization() {
+        String reportPath = "path/to/report";
+        String[] args =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    VISUALIZATION,
+                    REPORT_PATH,
+                    reportPath
+                };
+        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assert.assertTrue(scanner.isVisualization());
+    }
+
+    @Test(expected = CryptoAnalysisParserException.class)
+    public void testInvalidVisualization() {
+        String[] args =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    VISUALIZATION,
+                };
+        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assert.assertTrue(scanner.isVisualization());
     }
 }

@@ -4,17 +4,7 @@ import crysl.rule.CrySLMethod;
 import java.util.Collection;
 import typestate.finiteautomata.State;
 
-public class ReportingErrorStateNode implements State {
-
-    private final Collection<CrySLMethod> expectedCalls;
-
-    public ReportingErrorStateNode(Collection<CrySLMethod> expectedCalls) {
-        this.expectedCalls = expectedCalls;
-    }
-
-    public Collection<CrySLMethod> getExpectedCalls() {
-        return expectedCalls;
-    }
+public record ReportingErrorStateNode(Collection<CrySLMethod> expectedCalls) implements State {
 
     @Override
     public boolean isErrorState() {
@@ -34,15 +24,5 @@ public class ReportingErrorStateNode implements State {
     @Override
     public String toString() {
         return "ERR";
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof ReportingErrorStateNode;
     }
 }

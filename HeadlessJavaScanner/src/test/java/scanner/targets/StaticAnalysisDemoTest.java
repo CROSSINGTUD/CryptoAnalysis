@@ -1,5 +1,6 @@
 package scanner.targets;
 
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
@@ -32,7 +33,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.PredicateMissingExample", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -123,7 +125,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "org.glassfish.grizzly.config.ssl.CustomClass", "init", 2)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -150,7 +152,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
 
         addErrorSpecification(

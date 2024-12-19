@@ -9,12 +9,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.errors.AbstractError;
 import crysl.rule.CrySLPredicate;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import typestate.TransitionFunction;
 
 public abstract class IAnalysisSeed {
@@ -25,56 +22,11 @@ public abstract class IAnalysisSeed {
     protected final Multimap<Statement, ExpectedPredicateOnSeed> expectedPredicates =
             HashMultimap.create();
 
-    protected static final class ExpectedPredicateOnSeed {
-
-        private final CrySLPredicate predicate;
-        private final IAnalysisSeed seed;
-        private final int paramIndex;
-
-        public ExpectedPredicateOnSeed(
-                CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
-            this.predicate = predicate;
-            this.seed = seed;
-            this.paramIndex = paramIndex;
-        }
-
-        public CrySLPredicate getPredicate() {
-            return predicate;
-        }
-
-        public IAnalysisSeed getSeed() {
-            return seed;
-        }
-
-        public int getParamIndex() {
-            return paramIndex;
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(new Object[] {predicate, seed, paramIndex});
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (getClass() != obj.getClass()) return false;
-            ExpectedPredicateOnSeed other = (ExpectedPredicateOnSeed) obj;
-
-            return predicate.equals(other.getPredicate())
-                    && seed.equals(other.getSeed())
-                    && paramIndex == other.getParamIndex();
-        }
-
-        @Override
-        public String toString() {
-            return predicate + " for " + seed + " @ " + paramIndex;
-        }
-    }
+    protected record ExpectedPredicateOnSeed(
+            CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {}
 
     private final Statement origin;
     private final Val fact;
-    private String objectId;
-    private boolean secure = true;
 
     public IAnalysisSeed(
             CryptoScanner scanner,
@@ -104,7 +56,7 @@ public abstract class IAnalysisSeed {
         Collection<ExpectedPredicateOnSeed> expectedPredicateOnSeeds =
                 expectedPredicates.get(statement);
         for (ExpectedPredicateOnSeed expectedPredicateOnSeed : expectedPredicateOnSeeds) {
-            predicates.add(expectedPredicateOnSeed.getPredicate());
+            predicates.add(expectedPredicateOnSeed.predicate());
         }
 
         return predicates;
@@ -127,11 +79,7 @@ public abstract class IAnalysisSeed {
     }
 
     public boolean isSecure() {
-        return secure;
-    }
-
-    public void setSecure(boolean secure) {
-        this.secure = secure;
+        return errorCollection.isEmpty();
     }
 
     public ForwardBoomerangResults<TransitionFunction> getAnalysisResults() {
@@ -150,38 +98,16 @@ public abstract class IAnalysisSeed {
         return scanner;
     }
 
-    public String getObjectId() {
-        if (objectId == null) {
-            MessageDigest md;
-            try {
-                md = MessageDigest.getInstance("SHA-256");
-            } catch (NoSuchAlgorithmException e) {
-                return null;
-            }
-            this.objectId = new BigInteger(1, md.digest(this.toString().getBytes())).toString(16);
-        }
-        return this.objectId;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-
-        if (!(obj instanceof IAnalysisSeed)) return false;
-        IAnalysisSeed other = (IAnalysisSeed) obj;
-
-        if (!origin.equals(other.getOrigin())) return false;
-        return fact.equals(other.getFact());
+        return obj instanceof IAnalysisSeed other
+                && Objects.equals(origin, other.origin)
+                && Objects.equals(fact, other.fact);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((origin == null) ? 0 : origin.hashCode());
-        result = prime * result + ((fact == null) ? 0 : fact.hashCode());
-        return result;
+        return Objects.hash(origin, fact);
     }
 
     @Override

@@ -4,10 +4,10 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
-public class TypestateError extends AbstractError {
+public class TypestateError extends AbstractOrderError {
 
     private final Collection<CrySLMethod> expectedMethodCalls;
 
@@ -44,23 +44,14 @@ public class TypestateError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), expectedMethodCalls});
+        return Objects.hash(super.hashCode(), expectedMethodCalls);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        TypestateError other = (TypestateError) obj;
-        if (expectedMethodCalls == null) {
-            if (other.getExpectedMethodCalls() != null) return false;
-        } else if (!expectedMethodCalls.equals(other.getExpectedMethodCalls())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof TypestateError other
+                && Objects.equals(expectedMethodCalls, other.getExpectedMethodCalls());
     }
 
     @Override

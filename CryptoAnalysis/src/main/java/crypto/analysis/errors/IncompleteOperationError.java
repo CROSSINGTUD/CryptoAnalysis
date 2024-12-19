@@ -5,8 +5,8 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * This class defines-IncompleteOperationError:
@@ -19,7 +19,7 @@ import java.util.Collection;
  * decryption, this may render the code dead. This error heavily depends on the computed call graph
  * (CHA by default).
  */
-public class IncompleteOperationError extends AbstractError {
+public class IncompleteOperationError extends AbstractOrderError {
 
     private final Collection<CrySLMethod> expectedMethodCalls;
     private final boolean multiplePaths;
@@ -112,23 +112,15 @@ public class IncompleteOperationError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), expectedMethodCalls, multiplePaths});
+        return Objects.hash(super.hashCode(), expectedMethodCalls, multiplePaths);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        IncompleteOperationError other = (IncompleteOperationError) obj;
-        if (expectedMethodCalls == null) {
-            if (other.getExpectedMethodCalls() != null) return false;
-        } else if (expectedMethodCalls != other.getExpectedMethodCalls()) {
-            return false;
-        }
-
-        return multiplePaths == other.isMultiplePaths();
+        return super.equals(obj)
+                && obj instanceof IncompleteOperationError other
+                && Objects.equals(expectedMethodCalls, other.getExpectedMethodCalls())
+                && multiplePaths == other.isMultiplePaths();
     }
 
     @Override

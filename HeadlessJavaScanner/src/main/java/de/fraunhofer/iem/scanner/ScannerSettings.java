@@ -64,7 +64,7 @@ public class ScannerSettings implements Callable<Integer> {
 
     @CommandLine.Option(
             names = {"--visualization"},
-            description = "Enable visualization")
+            description = "Visualize the errors (requires --reportPath to be set)")
     private boolean visualization = false;
 
     @CommandLine.Option(
@@ -112,13 +112,13 @@ public class ScannerSettings implements Callable<Integer> {
 
     private CallGraphAlgorithm callGraphAlgorithm;
     private Framework framework;
-    private Set<Reporter.ReportFormat> reportFormats;
+    private Collection<Reporter.ReportFormat> reportFormats;
     private Collection<String> ignoredSections;
     private SparseStrategy sparseStrategy;
 
     public ScannerSettings() {
         callGraphAlgorithm = CallGraphAlgorithm.CHA;
-        reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
+        reportFormats = Set.of(Reporter.ReportFormat.CMD);
         framework = Framework.SOOT;
         ignoredSections = new ArrayList<>();
         sparseStrategy = SparseStrategy.NONE;
@@ -130,23 +130,28 @@ public class ScannerSettings implements Callable<Integer> {
         int exitCode = parser.execute(settings);
 
         if (frameworkOption != null) {
-            parseFrameworkOption(frameworkOption);
+            framework = parseFrameworkOption(frameworkOption);
         }
 
         if (cg != null) {
-            parseControlGraphOption(cg);
+            callGraphAlgorithm = parseCallGraphOption(cg);
         }
 
         if (reportFormat != null) {
-            parseReportFormatValues(reportFormat);
+            reportFormats = parseReportFormatOption(reportFormat);
         }
 
         if (ignoreSectionsPath != null) {
-            parseIgnoredSections(ignoreSectionsPath);
+            ignoredSections = parseIgnoredSectionOption(ignoreSectionsPath);
+        }
+
+        if (visualization && reportPath == null) {
+            throw new CryptoAnalysisParserException(
+                    "If visualization is enabled, the reportPath has to be set");
         }
 
         if (sparseStrategyInput != null) {
-            parseSparseStrategy(sparseStrategyInput);
+            sparseStrategy = parseSparseStrategyOption(sparseStrategyInput);
         }
 
         if (timeout < 0) {
@@ -158,89 +163,77 @@ public class ScannerSettings implements Callable<Integer> {
         }
     }
 
-    private void parseFrameworkOption(String option) throws CryptoAnalysisParserException {
+    private Framework parseFrameworkOption(String option) throws CryptoAnalysisParserException {
         String frameworkValue = option.toLowerCase();
 
-        switch (frameworkValue) {
-            case "soot":
-                framework = Framework.SOOT;
-                break;
-            case "soot_up":
-                framework = Framework.SOOT_UP;
-                break;
-            case "opal":
-                framework = Framework.OPAL;
-                break;
-            default:
-                throw new CryptoAnalysisParserException(
-                        "Framework " + option + " is not supported");
-        }
+        return switch (frameworkValue) {
+            case "soot" -> Framework.SOOT;
+            case "soot_up" -> Framework.SOOT_UP;
+            case "opal" -> Framework.OPAL;
+            default ->
+                    throw new CryptoAnalysisParserException(
+                            "Incorrect framework option: " + option);
+        };
     }
 
-    private void parseControlGraphOption(String value) throws CryptoAnalysisParserException {
-        String CGValue = value.toLowerCase();
+    private CallGraphAlgorithm parseCallGraphOption(String option)
+            throws CryptoAnalysisParserException {
+        String callGraphValue = option.toLowerCase();
 
-        switch (CGValue) {
-            case "cha":
-                callGraphAlgorithm = CallGraphAlgorithm.CHA;
-                break;
-            case "spark":
-                callGraphAlgorithm = CallGraphAlgorithm.SPARK;
-                break;
-            case "sparklib":
-                callGraphAlgorithm = CallGraphAlgorithm.SPARK_LIB;
-                break;
-            default:
-                throw new CryptoAnalysisParserException(
-                        "Incorrect value "
-                                + CGValue
-                                + " for --cg option. "
-                                + "Available options are: CHA, SPARK and SPARKLIB.\n");
-        }
+        return switch (callGraphValue) {
+            case "cha" -> CallGraphAlgorithm.CHA;
+            case "spark" -> CallGraphAlgorithm.SPARK;
+            case "sparklib" -> CallGraphAlgorithm.SPARK_LIB;
+            default ->
+                    throw new CryptoAnalysisParserException(
+                            "Incorrect call graph value: " + option);
+        };
     }
 
-    private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
-        reportFormats.clear();
+    private Collection<Reporter.ReportFormat> parseReportFormatOption(String[] settings)
+            throws CryptoAnalysisParserException {
+        Collection<Reporter.ReportFormat> formats = new HashSet<>();
 
         for (String format : settings) {
             String reportFormatValue = format.toLowerCase();
 
             switch (reportFormatValue) {
                 case "cmd":
-                    reportFormats.add(Reporter.ReportFormat.CMD);
+                    formats.add(Reporter.ReportFormat.CMD);
                     break;
                 case "txt":
-                    reportFormats.add(Reporter.ReportFormat.TXT);
+                    formats.add(Reporter.ReportFormat.TXT);
                     break;
                 case "sarif":
-                    reportFormats.add(Reporter.ReportFormat.SARIF);
+                    formats.add(Reporter.ReportFormat.SARIF);
                     break;
                 case "csv":
-                    reportFormats.add(Reporter.ReportFormat.CSV);
+                    formats.add(Reporter.ReportFormat.CSV);
                     break;
                 case "csv_summary":
-                    reportFormats.add(Reporter.ReportFormat.CSV_SUMMARY);
+                    formats.add(Reporter.ReportFormat.CSV_SUMMARY);
                     break;
                 case "github_annotation":
-                    reportFormats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
+                    formats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
                     break;
                 default:
                     throw new CryptoAnalysisParserException(
-                            "Incorrect value "
-                                    + reportFormatValue
-                                    + " for --reportFormat option. "
-                                    + "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
+                            "Incorrect report format value: " + format);
             }
         }
+
+        return formats;
     }
 
-    private void parseIgnoredSections(String path) throws CryptoAnalysisParserException {
-        final File ignorePackageFile = new File(path);
+    private Collection<String> parseIgnoredSectionOption(String path)
+            throws CryptoAnalysisParserException {
+        Collection<String> result = new ArrayList<>();
+        File ignorePackageFile = new File(path);
 
         if (ignorePackageFile.isFile() && ignorePackageFile.canRead()) {
             try {
                 List<String> lines = Files.readLines(ignorePackageFile, Charset.defaultCharset());
-                ignoredSections.addAll(lines);
+                result.addAll(lines);
             } catch (IOException e) {
                 throw new CryptoAnalysisParserException(
                         "Error while reading file " + ignorePackageFile + ": " + e.getMessage());
@@ -249,25 +242,21 @@ public class ScannerSettings implements Callable<Integer> {
             throw new CryptoAnalysisParserException(
                     ignorePackageFile + " is not a file or cannot be read");
         }
+
+        return result;
     }
 
-    private void parseSparseStrategy(String strategy) {
-        String strategyLowerCase = strategy.toLowerCase();
+    private SparseStrategy parseSparseStrategyOption(String option) {
+        String strategyLowerCase = option.toLowerCase();
 
-        switch (strategyLowerCase) {
-            case "none":
-                sparseStrategy = SparseStrategy.NONE;
-                break;
-            case "type_based":
-                sparseStrategy = SparseStrategy.TYPE_BASED;
-                break;
-            case "alias_aware":
-                sparseStrategy = SparseStrategy.ALIAS_AWARE;
-                break;
-            default:
-                throw new CryptoAnalysisParserException(
-                        sparseStrategy + " is not a valid sparsification strategy");
-        }
+        return switch (strategyLowerCase) {
+            case "none" -> SparseStrategy.NONE;
+            case "type_based" -> SparseStrategy.TYPE_BASED;
+            case "alias_aware" -> SparseStrategy.ALIAS_AWARE;
+            default ->
+                    throw new CryptoAnalysisParserException(
+                            "Incorrect sparsification strategy: " + option);
+        };
     }
 
     public String getApplicationPath() {
@@ -318,7 +307,7 @@ public class ScannerSettings implements Callable<Integer> {
         this.reportPath = reportDirectory;
     }
 
-    public Set<Reporter.ReportFormat> getReportFormats() {
+    public Collection<Reporter.ReportFormat> getReportFormats() {
         return reportFormats;
     }
 

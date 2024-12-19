@@ -95,6 +95,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
     protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
 
         Options.v().setPhaseOption("jb", "use-original-names:false");
+        Options.v().set_keep_line_number(true);
 
         return new SceneTransformer() {
 

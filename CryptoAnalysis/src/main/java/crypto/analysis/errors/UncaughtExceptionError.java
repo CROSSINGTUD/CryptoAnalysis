@@ -4,7 +4,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.WrappedClass;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
+import java.util.Objects;
 
 public class UncaughtExceptionError extends AbstractError {
 
@@ -27,22 +27,13 @@ public class UncaughtExceptionError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), exception});
+        return Objects.hash(super.hashCode(), exception);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        UncaughtExceptionError other = (UncaughtExceptionError) obj;
-        if (exception == null) {
-            if (other.getException() != null) return false;
-        } else if (!exception.equals(other.getException())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof UncaughtExceptionError other
+                && Objects.equals(exception, other.getException());
     }
 }

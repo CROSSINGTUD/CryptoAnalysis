@@ -253,6 +253,23 @@ public class CommandLineTest {
 
     @Test
     public void testVisualization() {
+        String reportPath = "path/to/report";
+        String[] args =
+                new String[] {
+                    APP_PATH,
+                    EXAMPLE_APP_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    VISUALIZATION,
+                    REPORT_PATH,
+                    reportPath
+                };
+        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+        Assert.assertTrue(scanner.isVisualization());
+    }
+
+    @Test(expected = CryptoAnalysisParserException.class)
+    public void testInvalidVisualization() {
         String[] args =
                 new String[] {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, VISUALIZATION

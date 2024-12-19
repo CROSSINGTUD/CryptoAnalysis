@@ -5,6 +5,7 @@ import boomerang.scene.WrappedClass;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -96,6 +97,11 @@ public class ErrorCollector implements IErrorListener {
     @Override
     public void reportError(RequiredPredicateError requiredPredicateError) {
         addErrorToCollection(requiredPredicateError);
+    }
+
+    @Override
+    public void reportError(AlternativeReqPredicateError alternativeReqPredicateError) {
+        addErrorToCollection(alternativeReqPredicateError);
     }
 
     @Override

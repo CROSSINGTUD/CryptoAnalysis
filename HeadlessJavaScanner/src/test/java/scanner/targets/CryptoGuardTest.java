@@ -1,5 +1,6 @@
 package scanner.targets;
 
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
@@ -48,7 +49,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "example.brokencrypto.BrokenCryptoABICase2", "doCrypto", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         // ABICase3, ABICase4, ABICase9 not included as tests due to being similar to ABICase1 and
@@ -60,7 +62,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "example.brokencrypto.BrokenCryptoABICase5", "doCrypto", 0)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
@@ -71,7 +74,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.brokencrypto.BrokenCryptoBBCase3", "go", 0)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         // BBCase1, BBCase2, BBCase4, BBCase5 not included as tests due to being similar to BBCase3
@@ -192,7 +196,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "go",
                                 2)
                         .withTPs(IncompleteOperationError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 4)
+                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         // This test case corresponds to the following project in CryptoGuard:
@@ -211,9 +216,10 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "go",
                                 2)
                         .withTPs(IncompleteOperationError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 4)
+                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
-        // In the case above, misuse is caught correctly, but the keysize is reported to be 0
+        // In the case above, misuse is caught correctly, but the key size is reported to be 0
         // and not 1024, as it really is. This is caused because of the structure of the project
         // as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 
@@ -226,7 +232,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 0)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 5)
+                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         scanner.run();

@@ -5,9 +5,9 @@ import boomerang.Boomerang;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Val;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import wpds.impl.Weight;
 
 public class ExtractParameterQuery extends BackwardQuery {
@@ -62,15 +62,13 @@ public class ExtractParameterQuery extends BackwardQuery {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), index});
+        return Objects.hash(super.hashCode(), index);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        ExtractParameterQuery other = (ExtractParameterQuery) obj;
-        return index == other.index;
+        return super.equals(obj)
+                && obj instanceof ExtractParameterQuery other
+                && index == other.index;
     }
 }

@@ -4,9 +4,9 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
-import java.util.Arrays;
+import java.util.Objects;
 
-public class ImpreciseValueExtractionError extends AbstractError {
+public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
     private final ISLConstraint violatedConstraint;
 
@@ -29,23 +29,14 @@ public class ImpreciseValueExtractionError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), violatedConstraint});
+        return Objects.hash(super.hashCode(), violatedConstraint);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        ImpreciseValueExtractionError other = (ImpreciseValueExtractionError) obj;
-        if (violatedConstraint == null) {
-            if (other.violatedConstraint != null) return false;
-        } else if (!violatedConstraint.equals(other.violatedConstraint)) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof ImpreciseValueExtractionError other
+                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
     }
 
     @Override

@@ -4,90 +4,89 @@ import boomerang.scene.Statement;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Wrapper class for required predicates with alternatives. Predicates from the REQUIRES section may
+ * have the following form:
+ *
+ * <pre>{@code
+ * REQUIRES
+ *    generatedKey[...] || generatedPubKey[...] || generatedPrivKey[...];
+ * }</pre>
+ *
+ * According to the CrySL specification, "generatedKey" is the base predicate that determines the
+ * statement where the predicates should be ensured. If an alternative refers to some other
+ * statement, it is ignored for this predicate.
+ */
 public class AlternativeReqPredicate implements ISLConstraint {
 
-    private final List<CrySLPredicate> alternatives;
-    private final Statement stmt;
-    private final int paramIndex;
+    private final RequiredCrySLPredicate basePredicate;
+    private final Collection<CrySLPredicate> allAlternatives;
+    private final Collection<RequiredCrySLPredicate> relAlternatives;
 
-    public AlternativeReqPredicate(CrySLPredicate alternativeOne, Statement stmt, int paramIndex) {
-        this.alternatives = new ArrayList<>();
-        this.alternatives.add(alternativeOne);
-        this.stmt = stmt;
-        this.paramIndex = paramIndex;
+    public AlternativeReqPredicate(
+            RequiredCrySLPredicate basePredicate,
+            Collection<CrySLPredicate> allAlternatives,
+            Collection<RequiredCrySLPredicate> relAlternatives) {
+        this.basePredicate = basePredicate;
+        this.allAlternatives = List.copyOf(allAlternatives);
+        this.relAlternatives = Set.copyOf(relAlternatives);
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
-        result = prime * result + ((stmt == null) ? 0 : stmt.hashCode());
-        result = prime * result + paramIndex;
-        return result;
+    public Collection<CrySLPredicate> getAllAlternatives() {
+        return allAlternatives;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        AlternativeReqPredicate other = (AlternativeReqPredicate) obj;
-        if (alternatives == null) {
-            if (other.alternatives != null) return false;
-        } else if (!alternatives.equals(other.alternatives)) return false;
-        if (stmt == null) {
-            return other.stmt == null;
-        } else if (!stmt.equals(other.stmt)) {
-            return false;
-        }
-
-        return paramIndex == other.paramIndex;
+    public Collection<RequiredCrySLPredicate> getRelAlternatives() {
+        return relAlternatives;
     }
 
     public Statement getLocation() {
-        return stmt;
-    }
-
-    public int getParamIndex() {
-        return paramIndex;
-    }
-
-    @Override
-    public String toString() {
-        return alternatives.stream()
-                        .map(CrySLPredicate::toString)
-                        .collect(Collectors.joining(" OR "))
-                + " @ "
-                + stmt
-                + " @ index "
-                + paramIndex;
-    }
-
-    @Override
-    public String getName() {
-        return alternatives.stream()
-                .map(CrySLPredicate::getName)
-                .collect(Collectors.joining(" OR "));
+        return basePredicate.getLocation();
     }
 
     @Override
     public List<String> getInvolvedVarNames() {
         List<String> involvedVarNames = new ArrayList<>();
-        for (CrySLPredicate alt : alternatives) {
+        for (CrySLPredicate alt : allAlternatives) {
             involvedVarNames.addAll(alt.getInvolvedVarNames());
         }
         return involvedVarNames;
     }
 
-    public List<CrySLPredicate> getAlternatives() {
-        return alternatives;
+    @Override
+    public String getName() {
+        return allAlternatives.stream()
+                .map(CrySLPredicate::getName)
+                .collect(Collectors.joining(" OR "));
     }
 
-    public void addAlternative(CrySLPredicate newAlt) {
-        alternatives.add(newAlt);
+    @Override
+    public int hashCode() {
+        return Objects.hash(allAlternatives, relAlternatives);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof AlternativeReqPredicate other
+                && Objects.equals(allAlternatives, other.getAllAlternatives())
+                && Objects.equals(relAlternatives, other.getRelAlternatives());
+    }
+
+    @Override
+    public String toString() {
+        return allAlternatives.stream()
+                        .map(CrySLPredicate::toString)
+                        .collect(Collectors.joining(" OR "))
+                + " (Rel: "
+                + relAlternatives.stream()
+                        .map(e -> e.getPred().toString())
+                        .collect(Collectors.joining(", "))
+                + ")";
     }
 }

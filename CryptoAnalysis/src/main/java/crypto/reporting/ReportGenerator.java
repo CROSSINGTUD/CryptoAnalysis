@@ -45,7 +45,6 @@ public class ReportGenerator {
             report.append("\t\tStatement: ").append(seed.getOrigin()).append("\n");
             report.append("\t\tLine: ").append(seed.getOrigin().getStartLineNumber()).append("\n");
             report.append("\t\tMethod: ").append(seed.getMethod()).append("\n");
-            report.append("\t\tSHA-256: ").append(seed.getObjectId()).append("\n");
             report.append("\t\tSecure: ").append(seed.isSecure()).append("\n");
         }
 

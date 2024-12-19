@@ -23,6 +23,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
     private static final String csvSummaryReportPath =
             rootPath + "CryptoAnalysis-Report-Summary.csv";
     private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
+    private static final String visualizationPath = rootPath + "visualization.png";
 
     @Before
     public void setup() {
@@ -150,6 +151,24 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         Assert.assertTrue(csvReport.exists());
         Assert.assertTrue(csvSummaryReport.exists());
         Assert.assertTrue(sarifReport.exists());
+    }
+
+    @Test
+    public void testVisualization() {
+        File vizFile = new File(visualizationPath);
+        if (vizFile.exists()) {
+            vizFile.delete();
+        }
+        String mavenProjectPath =
+                new File("../CryptoAnalysisTargets/ReportFormatExample").getAbsolutePath();
+        MavenProject mavenProject = createAndCompile(mavenProjectPath);
+
+        HeadlessJavaScanner scanner = createScanner(mavenProject);
+        scanner.setReportDirectory(outputDir.getAbsolutePath());
+        scanner.setVisualization(true);
+        scanner.run();
+
+        Assert.assertTrue(vizFile.exists());
     }
 
     @After

@@ -13,10 +13,10 @@ import crysl.rule.CrySLRule;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
-public class ConstraintError extends AbstractError {
+public class ConstraintError extends AbstractConstraintsError {
 
     private final CallSiteWithExtractedValue callSite;
     private final ISLConstraint violatedConstraint;
@@ -26,7 +26,7 @@ public class ConstraintError extends AbstractError {
             CallSiteWithExtractedValue cs,
             CrySLRule rule,
             ISLConstraint constraint) {
-        super(seed, cs.getCallSiteWithParam().stmt(), rule);
+        super(seed, cs.callSiteWithParam().statement(), rule);
 
         this.callSite = cs;
         this.violatedConstraint = constraint;
@@ -49,24 +49,20 @@ public class ConstraintError extends AbstractError {
         StringBuilder msg = new StringBuilder();
         if (constraint instanceof CrySLValueConstraint) {
             return evaluateValueConstraint((CrySLValueConstraint) constraint);
-        } else if (constraint instanceof CrySLArithmeticConstraint) {
-            final CrySLArithmeticConstraint brokenArthConstraint =
-                    (CrySLArithmeticConstraint) constraint;
-            msg.append(brokenArthConstraint.getLeft());
+        } else if (constraint instanceof CrySLArithmeticConstraint brokenArithConstraint) {
+            msg.append(brokenArithConstraint.getLeft());
             msg.append(" ");
-            msg.append(brokenArthConstraint.getOperator());
+            msg.append(brokenArithConstraint.getOperator());
             msg.append(" ");
-            msg.append(brokenArthConstraint.getRight());
-        } else if (constraint instanceof CrySLComparisonConstraint) {
-            final CrySLComparisonConstraint brokenCompCons = (CrySLComparisonConstraint) constraint;
+            msg.append(brokenArithConstraint.getRight());
+        } else if (constraint instanceof CrySLComparisonConstraint brokenCompCons) {
             msg.append(" Variable ");
             msg.append(brokenCompCons.getLeft().getLeft().getName());
             msg.append(" must be ");
             msg.append(evaluateCompOp(brokenCompCons.getOperator()));
             msg.append(" ");
             msg.append(brokenCompCons.getRight().getLeft().getName());
-        } else if (constraint instanceof CrySLConstraint) {
-            final CrySLConstraint crySLConstraint = (CrySLConstraint) constraint;
+        } else if (constraint instanceof CrySLConstraint crySLConstraint) {
             final ISLConstraint leftSide = crySLConstraint.getLeft();
             final ISLConstraint rightSide = crySLConstraint.getRight();
             switch (crySLConstraint.getOperator()) {
@@ -91,21 +87,14 @@ public class ConstraintError extends AbstractError {
     }
 
     private String evaluateCompOp(CrySLComparisonConstraint.CompOp operator) {
-        switch (operator) {
-            case ge:
-                return "at least";
-            case g:
-                return "greater than";
-            case l:
-                return "lesser than";
-            case le:
-                return "at most";
-            case eq:
-                return "equal to";
-            case neq:
-                return "not equal to";
-        }
-        return "";
+        return switch (operator) {
+            case ge -> "at least";
+            case g -> "greater than";
+            case l -> "lesser than";
+            case le -> "at most";
+            case eq -> "equal to";
+            case neq -> "not equal to";
+        };
     }
 
     private String evaluateValueConstraint(final CrySLValueConstraint brokenConstraint) {
@@ -113,7 +102,7 @@ public class ConstraintError extends AbstractError {
         msg.append(" should be any of ");
         CrySLSplitter splitter = brokenConstraint.getVar().getSplitter();
         if (splitter != null) {
-            Statement stmt = callSite.getCallSiteWithParam().stmt();
+            Statement stmt = callSite.callSiteWithParam().statement();
             String[] splitValues = new String[] {""};
             if (stmt.isAssign()) {
                 Val rightSide = stmt.getRightOp();
@@ -135,10 +124,8 @@ public class ConstraintError extends AbstractError {
                         }
                     }
                 }
-            } else {
-                // splitValues =
-                // filterQuotes(stmt.getInvokeExpr().getUseBoxes().get(0).getValue().toString()).split(splitter.getSplitter());
             }
+
             if (splitValues.length >= splitter.getIndex()) {
                 for (int i = 0; i < splitter.getIndex(); i++) {
                     msg.append(splitValues[i]);
@@ -165,29 +152,15 @@ public class ConstraintError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), callSite, violatedConstraint});
+        return Objects.hash(super.hashCode(), callSite, violatedConstraint);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        ConstraintError other = (ConstraintError) obj;
-        if (callSite == null) {
-            if (other.getCallSiteWithExtractedValue() != null) return false;
-        } else if (!callSite.equals(other.getCallSiteWithExtractedValue())) {
-            return false;
-        }
-
-        if (violatedConstraint == null) {
-            if (other.getViolatedConstraint() != null) return false;
-        } else if (!violatedConstraint.equals(other.getViolatedConstraint())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof ConstraintError other
+                && Objects.equals(callSite, other.getCallSiteWithExtractedValue())
+                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
     }
 
     @Override

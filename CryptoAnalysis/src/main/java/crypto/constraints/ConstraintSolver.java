@@ -5,7 +5,6 @@ import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.sparse.SparseCFGCache;
-import com.google.common.collect.Lists;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.RequiredCrySLPredicate;
@@ -23,7 +22,9 @@ import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 public class ConstraintSolver {
 
@@ -153,16 +154,15 @@ public class ConstraintSolver {
             Collection<String> involvedVarNames = new HashSet<>(cons.getInvolvedVarNames());
 
             for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-                CallSiteWithParamIndex callSiteWithParamIndex = callSite.getCallSiteWithParam();
-                involvedVarNames.remove(callSiteWithParamIndex.getVarName());
+                CallSiteWithParamIndex callSiteWithParamIndex = callSite.callSiteWithParam();
+                involvedVarNames.remove(callSiteWithParamIndex.varName());
             }
 
             if (!involvedVarNames.isEmpty()) {
                 continue;
             }
 
-            if (cons instanceof CrySLPredicate) {
-                CrySLPredicate predicate = (CrySLPredicate) cons;
+            if (cons instanceof CrySLPredicate predicate) {
                 if (predefinedPreds.contains(predicate.getPredName())) {
                     relConstraints.add(predicate);
                     continue;
@@ -178,14 +178,31 @@ public class ConstraintSolver {
                         requiredPredicates.add(pred);
                     }
                 }
-            } else if (cons instanceof CrySLConstraint) {
-                ISLConstraint left = ((CrySLConstraint) cons).getLeft();
+            } else if (cons instanceof CrySLConstraint constraint) {
+                ISLConstraint left = constraint.getLeft();
 
                 if (left instanceof CrySLPredicate
                         && !predefinedPreds.contains(((CrySLPredicate) left).getPredName())) {
-                    requiredPredicates.addAll(
-                            collectAlternativePredicates(
-                                    (CrySLConstraint) cons, new ArrayList<>()));
+
+                    List<CrySLPredicate> allAlts = new ArrayList<>();
+                    extractAlternativePredicates(constraint, allAlts);
+                    Collections.reverse(allAlts);
+
+                    if (allAlts.isEmpty()) {
+                        continue;
+                    }
+
+                    // Use the left pred as the base predicate to determine the statement
+                    Collection<RequiredCrySLPredicate> basePreds =
+                            retrieveValuesForPred(allAlts.get(0));
+                    for (RequiredCrySLPredicate reqPred : basePreds) {
+                        Collection<RequiredCrySLPredicate> relAlts =
+                                getRelevantPredicates(reqPred, allAlts);
+
+                        AlternativeReqPredicate altPred =
+                                new AlternativeReqPredicate(reqPred, allAlts, relAlts);
+                        requiredPredicates.add(altPred);
+                    }
                 } else {
                     relConstraints.add(cons);
                 }
@@ -195,56 +212,40 @@ public class ConstraintSolver {
         }
     }
 
-    private Collection<AlternativeReqPredicate> collectAlternativePredicates(
-            CrySLConstraint cons, Collection<AlternativeReqPredicate> alts) {
+    private void extractAlternativePredicates(CrySLConstraint cons, List<CrySLPredicate> alts) {
         CrySLPredicate left = (CrySLPredicate) cons.getLeft();
+        alts.add(left);
 
-        if (alts.isEmpty()) {
-            for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-                CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+        ISLConstraint right = cons.getRight();
+        if (right instanceof CrySLPredicate predicate) {
+            alts.add(predicate);
+        } else if (right instanceof CrySLConstraint constraint) {
+            extractAlternativePredicates(constraint, alts);
+        }
+    }
 
-                for (ICrySLPredicateParameter p : left.getParameters()) {
-                    if (p.getName().equals("transformation")) {
-                        continue;
-                    }
+    private Collection<RequiredCrySLPredicate> getRelevantPredicates(
+            RequiredCrySLPredicate basePred, Collection<CrySLPredicate> predicates) {
+        Collection<RequiredCrySLPredicate> result = new HashSet<>();
 
-                    if (cwpi.getVarName().equals(p.getName())) {
-                        alts.add(new AlternativeReqPredicate(left, cwpi.stmt(), cwpi.getIndex()));
-                    }
+        for (CrySLPredicate pred : predicates) {
+            Collection<RequiredCrySLPredicate> reqPreds = retrieveValuesForPred(pred);
+
+            for (RequiredCrySLPredicate reqPred : reqPreds) {
+                if (reqPred.getLocation().equals(basePred.getLocation())) {
+                    result.add(reqPred);
                 }
-            }
-
-            // Extract predicates with 'this' as parameter
-            if (left.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
-                AlternativeReqPredicate altPred =
-                        new AlternativeReqPredicate(left, seed.getOrigin(), -1);
-
-                if (!alts.contains(altPred)) {
-                    alts.add(altPred);
-                }
-            }
-        } else {
-            for (AlternativeReqPredicate alt : alts) {
-                alt.addAlternative(left);
             }
         }
 
-        if (cons.getRight() instanceof CrySLPredicate) {
-            for (AlternativeReqPredicate alt : alts) {
-                alt.addAlternative((CrySLPredicate) cons.getRight());
-            }
-        } else {
-            return collectAlternativePredicates((CrySLConstraint) cons.getRight(), alts);
-        }
-
-        return alts;
+        return result;
     }
 
     private Collection<RequiredCrySLPredicate> retrieveValuesForPred(CrySLPredicate pred) {
-        Collection<RequiredCrySLPredicate> result = Lists.newArrayList();
+        Collection<RequiredCrySLPredicate> result = new ArrayList<>();
 
         for (CallSiteWithExtractedValue callSite : this.getCollectedValues()) {
-            CallSiteWithParamIndex cwpi = callSite.getCallSiteWithParam();
+            CallSiteWithParamIndex cwpi = callSite.callSiteWithParam();
 
             for (ICrySLPredicateParameter p : pred.getParameters()) {
                 // TODO: FIX Cipher rule
@@ -253,12 +254,12 @@ public class ConstraintSolver {
                 }
 
                 // Predicates with _ can have any type
-                if (cwpi.getVarName().equals("_")) {
+                if (cwpi.varName().equals("_")) {
                     continue;
                 }
 
-                if (cwpi.getVarName().equals(p.getName())) {
-                    result.add(new RequiredCrySLPredicate(pred, cwpi.stmt(), cwpi.getIndex()));
+                if (cwpi.varName().equals(p.getName())) {
+                    result.add(new RequiredCrySLPredicate(pred, cwpi.statement(), cwpi.index()));
                 }
             }
         }

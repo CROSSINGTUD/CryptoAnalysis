@@ -46,11 +46,10 @@ public class TypestateAnalysis {
         Collection<Query> seeds = analysisScope.computeSeeds();
 
         for (Query seed : seeds) {
-            if (!(seed instanceof ForwardSeedQuery)) {
+            if (!(seed instanceof ForwardSeedQuery query)) {
                 continue;
             }
 
-            ForwardSeedQuery query = (ForwardSeedQuery) seed;
             runTypestateAnalysisForSeed(query);
         }
     }
@@ -90,7 +89,7 @@ public class TypestateAnalysis {
             @Override
             public Debugger<TransitionFunction> debugger(
                     IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return definition.getDebugger(idealSeedSolver);
+                return new Debugger<>();
             }
 
             @Override
@@ -118,11 +117,10 @@ public class TypestateAnalysis {
                         WeightedForwardQuery<TransitionFunction>,
                         ForwardBoomerangResults<TransitionFunction>>
                 entry : resultHandler.getResults().entrySet()) {
-            if (!(entry.getKey() instanceof ForwardSeedQuery)) {
+            if (!(entry.getKey() instanceof ForwardSeedQuery forwardSeedQuery)) {
                 continue;
             }
 
-            ForwardSeedQuery forwardSeedQuery = (ForwardSeedQuery) entry.getKey();
             results.put(forwardSeedQuery, entry.getValue());
         }
         return results;

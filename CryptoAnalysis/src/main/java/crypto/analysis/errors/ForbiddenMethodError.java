@@ -5,22 +5,13 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Objects;
 
 public class ForbiddenMethodError extends AbstractError {
 
     private final DeclaredMethod calledMethod;
     private final Collection<CrySLMethod> alternatives;
-
-    public ForbiddenMethodError(
-            IAnalysisSeed seed,
-            Statement errorLocation,
-            CrySLRule rule,
-            DeclaredMethod calledMethod) {
-        this(seed, errorLocation, rule, calledMethod, new HashSet<>());
-    }
 
     public ForbiddenMethodError(
             IAnalysisSeed seed,
@@ -60,29 +51,15 @@ public class ForbiddenMethodError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), calledMethod, alternatives});
+        return Objects.hash(super.hashCode(), calledMethod, alternatives);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!super.equals(obj)) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        ForbiddenMethodError other = (ForbiddenMethodError) obj;
-        if (calledMethod == null) {
-            if (other.getCalledMethod() != null) return false;
-        } else if (!calledMethod.equals(other.getCalledMethod())) {
-            return false;
-        }
-
-        if (alternatives == null) {
-            if (other.getAlternatives() != null) return false;
-        } else if (!alternatives.equals(other.getAlternatives())) {
-            return false;
-        }
-
-        return true;
+        return super.equals(obj)
+                && obj instanceof ForbiddenMethodError other
+                && Objects.equals(calledMethod, other.getCalledMethod())
+                && Objects.equals(alternatives, other.getAlternatives());
     }
 
     @Override

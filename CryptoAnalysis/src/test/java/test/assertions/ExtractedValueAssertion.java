@@ -19,13 +19,13 @@ public class ExtractedValueAssertion implements Assertion {
 
     public void computedValues(Collection<CallSiteWithExtractedValue> collectedValues) {
         for (CallSiteWithExtractedValue callSite : collectedValues) {
-            Statement statement = callSite.getCallSiteWithParam().stmt();
+            Statement statement = callSite.callSiteWithParam().statement();
 
-            if (callSite.getExtractedValue().getVal().equals(Val.zero())) {
+            if (callSite.extractedValue().val().equals(Val.zero())) {
                 continue;
             }
 
-            if (statement.equals(stmt) && callSite.getCallSiteWithParam().getIndex() == index) {
+            if (statement.equals(stmt) && callSite.callSiteWithParam().index() == index) {
                 satisfied = true;
             }
         }

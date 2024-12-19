@@ -1,6 +1,7 @@
 package crypto.listener;
 
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -38,6 +39,8 @@ public interface IErrorListener {
     void reportError(PredicateContradictionError predicateContradictionError);
 
     void reportError(RequiredPredicateError requiredPredicateError);
+
+    void reportError(AlternativeReqPredicateError alternativeReqPredicateError);
 
     void reportError(TypestateError typestateError);
 

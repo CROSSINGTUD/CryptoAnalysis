@@ -5,10 +5,10 @@ import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractError {
 
@@ -16,16 +16,16 @@ public abstract class AbstractError {
     private final Statement errorStmt;
     private final CrySLRule rule;
 
-    private final Collection<AbstractError> causedByErrors; // preceding
-    private final Collection<AbstractError> willCauseErrors; // subsequent
+    private final Collection<AbstractError> precedingErrors; // preceding
+    private final Collection<AbstractError> subsequentErrors; // subsequent
 
     public AbstractError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule) {
         this.seed = seed;
         this.errorStmt = errorStmt;
         this.rule = rule;
 
-        this.causedByErrors = new HashSet<>();
-        this.willCauseErrors = new HashSet<>();
+        this.precedingErrors = new HashSet<>();
+        this.subsequentErrors = new HashSet<>();
     }
 
     public abstract String toErrorMarkerString();
@@ -50,24 +50,28 @@ public abstract class AbstractError {
         return errorStmt.getStartLineNumber();
     }
 
-    public void addCausingError(AbstractError parent) {
-        causedByErrors.add(parent);
+    public void addPrecedingError(AbstractError error) {
+        precedingErrors.add(error);
     }
 
     public void addCausingError(Collection<AbstractError> parents) {
-        causedByErrors.addAll(parents);
+        precedingErrors.addAll(parents);
     }
 
     public void addSubsequentError(AbstractError subsequentError) {
-        willCauseErrors.add(subsequentError);
+        subsequentErrors.add(subsequentError);
+    }
+
+    public Collection<AbstractError> getPrecedingErrors() {
+        return precedingErrors;
     }
 
     public Collection<AbstractError> getSubsequentErrors() {
-        return this.willCauseErrors;
+        return subsequentErrors;
     }
 
     public Collection<AbstractError> getRootErrors() {
-        return this.causedByErrors;
+        return this.precedingErrors;
     }
 
     public String toString() {
@@ -112,34 +116,14 @@ public abstract class AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {seed, errorStmt, rule});
+        return Objects.hash(seed, errorStmt, rule);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        AbstractError other = (AbstractError) obj;
-        if (seed == null) {
-            if (other.getSeed() != null) return false;
-        } else if (!seed.equals(other.getSeed())) {
-            return false;
-        }
-
-        if (errorStmt == null) {
-            if (other.getErrorStatement() != null) return false;
-        } else if (!errorStmt.equals(other.getErrorStatement())) {
-            return false;
-        }
-
-        if (rule == null) {
-            if (other.getRule() != null) return false;
-        } else if (!rule.equals(other.getRule())) {
-            return false;
-        }
-
-        return true;
+        return obj instanceof AbstractError other
+                && Objects.equals(seed, other.seed)
+                && Objects.equals(errorStmt, other.errorStmt)
+                && Objects.equals(rule, other.rule);
     }
 }
