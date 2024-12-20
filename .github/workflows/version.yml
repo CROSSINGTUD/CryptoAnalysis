@@ -67,7 +67,7 @@ jobs:
       - name: Open pull request for version update
         if: ${{ env.PR_EXISTS == '0' }}
         run: |
-          gh pr create -B master -H version_${{ steps.versioning.outputs.version }} -t "Update CryptoAnalysis version to ${{ steps.versioning.outputs.version }}" -b "This PR was created by the version-update workflow. Please make sure to delete the branch after merging, otherwise future workflows might fail."
+          gh pr create --draft -B master -H version_${{ steps.versioning.outputs.version }} -t "Update CryptoAnalysis version to ${{ steps.versioning.outputs.version }}" -b "This PR was created by the version-update workflow. Please make sure to delete the branch after merging, otherwise future workflows might fail."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
