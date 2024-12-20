@@ -35,6 +35,8 @@ public class WrappedNode {
 
     private String getLabel() {
         return error.getClass().getSimpleName()
+                + "\nClass: "
+                + error.getErrorStatement().getMethod().getDeclaringClass()
                 + "\n"
                 + error.getErrorStatement()
                 + "\nLine: "

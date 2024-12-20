@@ -61,7 +61,7 @@ Other additional arguments that can be used are as follows:
 --identifier <identifier_for_labeling_output_files>
 --reportPath <directory_location_for_cryptoanalysis_report>
 --reportFormat <format of cryptoanalysis_report> (possible values are CMD, TXT, SARIF, CSV, CSV_SUMMARY)
---visualization (enables the visualization, but also requires --reportPath option to be set)
+--visualization (Create a visualization of all errors (requires --reportPath option to be set))
 --dstats (disables the output of the analysis statistics in the reports)
 --ignoreSections (Text file with packages (e.g. `de.example.*`), classes (e.g. `de.example.exmapleClass`) or methods (e.g. `de.example.exampleClass.exampleMethod`), one per line. Those packages, classes and methods are ignored during the analysis)
 --timeout <timeout in milliseconds> (Timeout for seeds in milliseconds. If a seed exceeds this value, CryptoAnalysis aborts the typestate and extract parameter analysis and continues with the results computed so far. (default: 10000))
