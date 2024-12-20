@@ -5,6 +5,11 @@ import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * Wrapper class for a single {@link CrySLPredicate} to keep track of ensured predicate during the
+ * analysis. A predicate is only ensured if there are no violations for a corresponding rule.
+ * Otherwise, the analysis propagates an {@link UnEnsuredPredicate}.
+ */
 public class EnsuredPredicate extends AbstractPredicate {
 
     public EnsuredPredicate(

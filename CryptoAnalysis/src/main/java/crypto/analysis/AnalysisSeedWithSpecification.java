@@ -552,7 +552,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return result;
     }
 
+    /**
+     * Ensure the predicates from the ENSURES section and transfer them to this seed or other seeds.
+     * If there are no violations for the rule, propagate an {@link EnsuredPredicate}. Otherwise, if
+     * there is at least one violation, collect them and propagate a corresponding {@link
+     * UnEnsuredPredicate}.
+     */
     public void ensurePredicates() {
+        // Check whether all constraints from the CONSTRAINTS and REQUIRES section is satisfied
         boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
 
         Collection<Statement> expectedPredStatements = expectedPredicates.keySet();
@@ -566,6 +573,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         for (CrySLPredicate predToBeEnsured : predsToBeEnsured) {
             Collection<UnEnsuredPredicate.Violations> violations = new HashSet<>();
 
+            // Check whether there is a ForbiddenMethodError from previous checks
             if (errorCollection.stream().anyMatch(e -> e instanceof ForbiddenMethodError)) {
                 violations.add(UnEnsuredPredicate.Violations.CallToForbiddenMethod);
             }
@@ -574,6 +582,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
             }
 
+            // Check whether there is a predicate condition and whether it is satisfied
             if (predToBeEnsured.getConstraint().isPresent()
                     && isPredConditionViolated(predToBeEnsured)) {
                 violations.add(UnEnsuredPredicate.Violations.ConditionIsNotSatisfied);
@@ -609,7 +618,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                      *  single call to a method, e.g. Object o = new Object(); o.m();. After
                      *  the call to m1(), o is always in state 0 and 1, although it should only be 1
                      */
-                    // allViolations.add(HiddenPredicate.Violations.GeneratingStateMayNotBeReached);
+                    // allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
                 }
 
                 AbstractPredicate generatedPred;
@@ -1091,7 +1100,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return requiredPredicatesExist;
     }
 
-    public Collection<UnEnsuredPredicate> extractHiddenPredicates(AlternativeReqPredicate predicate) {
+    public Collection<UnEnsuredPredicate> extractHiddenPredicates(
+            AlternativeReqPredicate predicate) {
         Collection<UnEnsuredPredicate> result = new HashSet<>();
 
         for (RequiredCrySLPredicate reqPred : predicate.getRelAlternatives()) {
@@ -1103,7 +1113,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return result;
     }
 
-    public Collection<UnEnsuredPredicate> extractHiddenPredicates(RequiredCrySLPredicate predicate) {
+    public Collection<UnEnsuredPredicate> extractHiddenPredicates(
+            RequiredCrySLPredicate predicate) {
         return extractHiddenPredicates(
                 predicate.getLocation(), predicate.getPred(), predicate.getParamIndex());
     }

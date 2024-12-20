@@ -5,6 +5,12 @@ import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.Objects;
 
+/**
+ * Super class for predicates that are propagated during the analysis. Each predicate is either an
+ * {@link EnsuredPredicate} or an {@link UnEnsuredPredicate}. The former ones keep track of all
+ * predicates from the ENSURES section where no violations from a rule are found. The latter ones
+ * are propagated to keep track of predicates and seeds if there is a violation.
+ */
 public abstract class AbstractPredicate {
 
     private final CrySLPredicate predicate;

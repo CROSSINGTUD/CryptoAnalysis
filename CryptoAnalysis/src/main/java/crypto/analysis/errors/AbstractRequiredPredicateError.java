@@ -1,8 +1,8 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
-import crypto.analysis.UnEnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.UnEnsuredPredicate;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.Objects;

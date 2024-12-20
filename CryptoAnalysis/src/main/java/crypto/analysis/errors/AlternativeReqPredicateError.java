@@ -2,8 +2,8 @@ package crypto.analysis.errors;
 
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.UnEnsuredPredicate;
 import crypto.analysis.RequiredCrySLPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import crysl.rule.CrySLPredicate;
 import java.util.ArrayList;
 import java.util.Collection;
