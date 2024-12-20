@@ -5,7 +5,8 @@ import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import com.google.common.collect.Multimap;
-import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.AbstractPredicate;
+import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -36,11 +37,11 @@ public interface IResultsListener {
 
     void generatedPredicate(
             IAnalysisSeed fromSeed,
-            EnsuredCrySLPredicate predicate,
+            AbstractPredicate predicate,
             IAnalysisSeed toSeed,
             Statement statement);
 
     void ensuredPredicates(
             IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates);
+            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates);
 }

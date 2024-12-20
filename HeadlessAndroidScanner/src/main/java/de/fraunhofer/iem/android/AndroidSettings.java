@@ -4,7 +4,7 @@ import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
@@ -44,10 +44,15 @@ public class AndroidSettings implements Callable<Integer> {
                             + " Multiple formats should be split with a comma (e.g. CMD,TXT,CSV)")
     private String[] reportFormat = null;
 
+    @CommandLine.Option(
+            names = {"--visualization"},
+            description = "Visualize the errors (requires --reportPath to be set)")
+    private boolean visualization = false;
+
     private Collection<Reporter.ReportFormat> reportFormats;
 
     public AndroidSettings() {
-        reportFormats = new HashSet<>(List.of(Reporter.ReportFormat.CMD));
+        reportFormats = Set.of(Reporter.ReportFormat.CMD);
     }
 
     public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -56,7 +61,12 @@ public class AndroidSettings implements Callable<Integer> {
         int exitCode = parser.execute(settings);
 
         if (reportFormat != null) {
-            parseReportFormatValues(reportFormat);
+            reportFormats = parseReportFormatValues(reportFormat);
+        }
+
+        if (visualization && reportPath == null) {
+            throw new CryptoAnalysisParserException(
+                    "If visualization is enabled, the reportPath has to be set");
         }
 
         if (exitCode != CommandLine.ExitCode.OK) {
@@ -64,30 +74,31 @@ public class AndroidSettings implements Callable<Integer> {
         }
     }
 
-    private void parseReportFormatValues(String[] settings) throws CryptoAnalysisParserException {
-        reportFormats.clear();
+    private Collection<Reporter.ReportFormat> parseReportFormatValues(String[] settings)
+            throws CryptoAnalysisParserException {
+        Collection<Reporter.ReportFormat> formats = new HashSet<>();
 
         for (String format : settings) {
             String reportFormatValue = format.toLowerCase();
 
             switch (reportFormatValue) {
                 case "cmd":
-                    reportFormats.add(Reporter.ReportFormat.CMD);
+                    formats.add(Reporter.ReportFormat.CMD);
                     break;
                 case "txt":
-                    reportFormats.add(Reporter.ReportFormat.TXT);
+                    formats.add(Reporter.ReportFormat.TXT);
                     break;
                 case "sarif":
-                    reportFormats.add(Reporter.ReportFormat.SARIF);
+                    formats.add(Reporter.ReportFormat.SARIF);
                     break;
                 case "csv":
-                    reportFormats.add(Reporter.ReportFormat.CSV);
+                    formats.add(Reporter.ReportFormat.CSV);
                     break;
                 case "csv_summary":
-                    reportFormats.add(Reporter.ReportFormat.CSV_SUMMARY);
+                    formats.add(Reporter.ReportFormat.CSV_SUMMARY);
                     break;
                 case "github_annotation":
-                    reportFormats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
+                    formats.add(Reporter.ReportFormat.GITHUB_ANNOTATION);
                     break;
                 default:
                     throw new CryptoAnalysisParserException(
@@ -97,6 +108,8 @@ public class AndroidSettings implements Callable<Integer> {
                                     + "Available options are: CMD, TXT, SARIF, CSV and CSV_SUMMARY.\n");
             }
         }
+
+        return formats;
     }
 
     public String getApkFile() {
@@ -137,6 +150,14 @@ public class AndroidSettings implements Callable<Integer> {
 
     public void setReportPath(String reportPath) {
         this.reportPath = reportPath;
+    }
+
+    public boolean isVisualization() {
+        return visualization;
+    }
+
+    public void setVisualization(boolean visualization) {
+        this.visualization = visualization;
     }
 
     @Override

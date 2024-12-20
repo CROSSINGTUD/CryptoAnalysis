@@ -33,9 +33,9 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
     public void test() throws GeneralSecurityException {
         KeyGenerator generator = KeyGenerator.getInstance("AES");
         SecretKey key = generator.generateKey();
-        byte[] bytes = key.getEncoded();
 
-        SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
     }
 
     @Test

@@ -183,8 +183,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
             try {
                 for (Map.Entry<String, CallSiteWithExtractedValue> value :
                         valueCollection.entrySet()) {
-                    ExtractedValue extractedValue = value.getValue().getExtractedValue();
-                    if (extractedValue.getVal().equals(Val.zero())) {
+                    ExtractedValue extractedValue = value.getValue().extractedValue();
+                    if (extractedValue.val().equals(Val.zero())) {
                         continue;
                     }
 

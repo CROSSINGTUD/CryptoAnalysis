@@ -3,10 +3,10 @@ package crypto.analysis.errors;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
-public class CallToError extends AbstractError {
+public class CallToError extends AbstractConstraintsError {
 
     private final Collection<CrySLMethod> requiredMethods;
 
@@ -31,22 +31,14 @@ public class CallToError extends AbstractError {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(new Object[] {super.hashCode(), requiredMethods});
+        return Objects.hash(super.hashCode(), requiredMethods);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-
-        CallToError other = (CallToError) obj;
-        if (!super.equals(other)) return false;
-        if (requiredMethods == null) {
-            return other.getRequiredMethods() == null;
-        } else {
-            return requiredMethods.equals(other.getRequiredMethods());
-        }
+        return super.equals(obj)
+                && obj instanceof CallToError other
+                && Objects.equals(requiredMethods, other.getRequiredMethods());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package android;
 
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -17,9 +18,10 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         scanner.run();
 
         addExpectedErrors(ConstraintError.class, 6);
-        addExpectedErrors(RequiredPredicateError.class, 9);
+        addExpectedErrors(RequiredPredicateError.class, 7);
+        addExpectedErrors(AlternativeReqPredicateError.class, 2);
         addExpectedErrors(TypestateError.class, 1);
-        addExpectedErrors(IncompleteOperationError.class, 5);
+        addExpectedErrors(IncompleteOperationError.class, 4);
         addExpectedErrors(ImpreciseValueExtractionError.class, 1);
 
         assertErrors(scanner.getCollectedErrors());

@@ -2,8 +2,8 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.AbstractPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import java.util.Collection;
 import test.Assertion;
 
@@ -28,8 +28,8 @@ public class HasGeneratedPredicateAssertion implements Assertion {
         return false;
     }
 
-    public void reported(Collection<Val> seed, EnsuredCrySLPredicate predicate) {
-        if (seed.contains(val) && !(predicate instanceof HiddenPredicate)) {
+    public void reported(Collection<Val> seed, AbstractPredicate predicate) {
+        if (seed.contains(val) && !(predicate instanceof UnEnsuredPredicate)) {
             satisfied = true;
         }
     }
@@ -40,6 +40,11 @@ public class HasGeneratedPredicateAssertion implements Assertion {
 
     @Override
     public String toString() {
-        return "Expected " + val.getVariableName() + " to generate a predicate @ " + statement;
+        return "Expected "
+                + val.getVariableName()
+                + " to generate a predicate @ "
+                + statement
+                + " @ line "
+                + statement.getStartLineNumber();
     }
 }

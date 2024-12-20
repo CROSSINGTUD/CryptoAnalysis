@@ -123,13 +123,13 @@ public class PredicateConstraint extends EvaluableConstraint {
         CrySLObject parameterType = objects.get(1);
 
         for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
 
-            if (!variable.getName().equals(cs.getVarName())) {
+            if (!variable.getName().equals(cs.varName())) {
                 continue;
             }
 
-            Collection<Type> types = callSite.getExtractedValue().getTypes();
+            Collection<Type> types = callSite.extractedValue().types();
             for (Type type : types) {
                 if (!parameterType.getJavaType().equals(type.toString())) {
                     continue;
@@ -157,13 +157,13 @@ public class PredicateConstraint extends EvaluableConstraint {
         CrySLObject variable = objects.get(0);
 
         for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
 
-            if (!variable.getVarName().equals(cs.getVarName())) {
+            if (!variable.getVarName().equals(cs.varName())) {
                 continue;
             }
 
-            ExtractedValue extractedValue = callSite.getExtractedValue();
+            ExtractedValue extractedValue = callSite.extractedValue();
             if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
                 HardCodedError hardCodedError =
                         new HardCodedError(
@@ -188,14 +188,14 @@ public class PredicateConstraint extends EvaluableConstraint {
         CrySLObject parameterType = objects.get(1);
 
         for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.getCallSiteWithParam();
+            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
 
-            if (!variable.getName().equals(cs.getVarName())) {
+            if (!variable.getName().equals(cs.varName())) {
                 continue;
             }
 
             boolean isSubType = false;
-            Collection<Type> types = callSite.getExtractedValue().getTypes();
+            Collection<Type> types = callSite.extractedValue().types();
             for (Type type : types) {
                 if (type.isNullType()) {
                     continue;
@@ -250,26 +250,26 @@ public class PredicateConstraint extends EvaluableConstraint {
 
     public boolean isHardCodedVariable(ExtractedValue val) {
         // Check for basic constants
-        if (val.getVal().isConstant()) {
-            LOGGER.debug("Value {} is hard coded", val.getVal());
+        if (val.val().isConstant()) {
+            LOGGER.debug("Value {} is hard coded", val.val());
             return true;
         }
 
-        Statement statement = val.getInitialStatement();
+        Statement statement = val.initialStatement();
 
         // Objects initialized with 'new' are hard coded
         if (!statement.isAssign()) {
-            LOGGER.debug("Value {} is not hard coded", val.getVal());
+            LOGGER.debug("Value {} is not hard coded", val.val());
             return false;
         }
 
         Val rightOp = statement.getRightOp();
         if (rightOp.isNewExpr()) {
-            LOGGER.debug("Value {} is hard coded", val.getVal());
+            LOGGER.debug("Value {} is hard coded", val.val());
             return true;
         }
 
-        LOGGER.debug("Value {} is not hard coded", val.getVal());
+        LOGGER.debug("Value {} is not hard coded", val.val());
         return false;
     }
 

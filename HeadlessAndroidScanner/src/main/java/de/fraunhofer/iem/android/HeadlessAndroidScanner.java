@@ -5,7 +5,6 @@ import boomerang.scene.DataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
-import crypto.reporting.ReporterFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,20 +57,14 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         flowDroidSetup.setupFlowDroid();
         additionalFrameworkSetup();
 
-        // Initialize fields and reporters
+        // Initialize fields
         super.initialize();
-        Collection<Reporter> reporters =
-                ReporterFactory.createReporters(
-                        getReportFormats(), getReportDirectory(), super.getRuleset());
 
         // Run the analysis
         super.scan();
 
         // Report the errors
-        for (Reporter reporter : reporters) {
-            reporter.createAnalysisReport(
-                    super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
-        }
+        super.createReports(getReportFormats(), getReportDirectory(), isVisualization());
     }
 
     public String getApkFile() {
@@ -100,6 +93,14 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
     public void setReportDirectory(String reportDirectory) {
         settings.setReportPath(reportDirectory);
+    }
+
+    public boolean isVisualization() {
+        return settings.isVisualization();
+    }
+
+    public void setVisualization(boolean visualization) {
+        settings.setVisualization(visualization);
     }
 
     public void additionalFrameworkSetup() {}
