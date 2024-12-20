@@ -5,6 +5,54 @@ The static analysis CogniCrypt<sub>SAST</sub> takes rules written in the specifi
 and performs a static analysis based on the specification of the rules. CrySL is a domain-specific language (DSL) designed to encode usage specifications for cryptographic 
 libaries (e.g., the [JCA](https://docs.oracle.com/en/java/javase/14/security/java-cryptography-architecture-jca-reference-guide.html) in particular). More information on CrySL and the static analysis may be found in [this paper](http://drops.dagstuhl.de/opus/volltexte/2018/9215/).
 
+## Running CognitCrypt<sub>SAST</sub>
+
+Let's assume we have the following program with some violations:
+
+```java
+import java.security.GeneralSecurityException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.Cipher;
+
+public class Example {
+
+    public static void main(String[] args) throws GeneralSecurityException {
+        // Constraint Error: "DES" is not allowed
+        KeyGenerator generator = KeyGenerator.getInstance("DES"); // r0
+
+        // Constraint Error: Key size of 64 is not allowed
+        generator.init(64);
+
+        // KeyGenerator is not correctly initialized
+        // RequiredPredicateEror: Generated key is not secure
+        SecretKey key = generator.generateKey(); // r1
+
+        // Constraint Error: "DES" is not allowed
+        Cipher cipher = Cipher.getInstance("DES"); // r2
+
+        // RequiredPredicateError: "key" is not securely generated
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        // IncompleteOperationError: Cipher object is not used
+    }
+}
+```
+
+Using the [JCA rules](https://github.com/CROSSINGTUD/Crypto-API-Rules/tree/master/JavaCryptographicArchitecture/src), we execute the following command on a compiled version of this program:
+
+```bash
+java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar --appPath ./Examples.jar --rulesDir ./JCA-CrySL-rules.zip --reportFormat CMD --reportPath ./output/ --visualization
+```
+
+CogniCrypt<sub>SAST</sub> runs the analysis and prints a report to the command line. In total, it reports 3 `ConstraintErrors`, 2 `RequiredPredicateErrors` and 1 `IncompleteOperationError`, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
+
+![visualization.png](misc/visualization.png)
+
+You can see that two `ConstraintErrors` on the object `r0` (KeyGenerator) cause a `RequiredPredicateError` on the object `r1` (SecretKey) which in turn causes a `RequiredPredicateError` on the object `r2` (Cipher). Additionally, there is another `ConstraintError` and `IncompleteOperationError` on the Cipher object. Note that the variables and statements correspond to the intermediate representation Jimple. You can match the variables to the command line output that lists all analyzed objects.
+
+
 ## Structure
 We provide the implementation of the static analysis of CogniCrypt in:
 * `CryptoAnalysis` contains the components for the actual analysis
@@ -129,49 +177,3 @@ We hare happy for every contribution from the community!
 * [Contributing](CONTRIBUTING.md) for details on issues and merge requests.
 * [Coding Guidles](CODING.md) for this project.
 
-## Running CognitCrypt<sub>SAST</sub>
-
-Let's assume we have the following program with some violations:
-
-```java
-import java.security.GeneralSecurityException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.Cipher;
-
-public class Example {
-
-    public static void main(String[] args) throws GeneralSecurityException {
-        // Constraint Error: "DES" is not allowed
-        KeyGenerator generator = KeyGenerator.getInstance("DES"); // r0
-
-        // Constraint Error: Key size of 64 is not allowed
-        generator.init(64);
-
-        // KeyGenerator is not correctly initialized
-        // RequiredPredicateEror: Generated key is not secure
-        SecretKey key = generator.generateKey(); // r1
-
-        // Constraint Error: "DES" is not allowed
-        Cipher cipher = Cipher.getInstance("DES"); // r2
-
-        // RequiredPredicateError: "key" is not securely generated
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-
-        // IncompleteOperationError: Cipher object is not used
-    }
-}
-```
-
-Using the [JCA rules](https://github.com/CROSSINGTUD/Crypto-API-Rules/tree/master/JavaCryptographicArchitecture/src), we execute the following command on a compiled version of this program:
-
-```bash
-java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar --appPath ./Examples.jar --rulesDir ./JCA-CrySL-rules.zip --reportFormat CMD --reportPath ./output/ --visualization
-```
-
-CogniCrypt<sub>SAST</sub> runs the analysis and prints a report to the command line. In total, it reports 3 `ConstraintErrors`, 2 `RequiredPredicateErrors` and 1 `IncompleteOperationError`, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
-
-![visualization.png](misc/visualization.png)
-
-You can see that two `ConstraintErrors` on the object `r0` (KeyGenerator) cause a `RequiredPredicateError` on the object `r1` (SecretKey) which in turn causes a `RequiredPredicateError` on the object `r2` (Cipher). Additionally, there is another `ConstraintError` and `IncompleteOperationError` on the Cipher object. Note that the variables and statements correspond to the intermediate representation Jimple. You can match the variables to the command line output that lists all analyzed objects.
