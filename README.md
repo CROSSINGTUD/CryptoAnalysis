@@ -170,10 +170,8 @@ Using the [JCA rules](https://github.com/CROSSINGTUD/Crypto-API-Rules/tree/maste
 java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar --appPath ./Examples.jar --rulesDir ./JCA-CrySL-rules.zip --reportFormat CMD --reportPath ./output/ --visualization
 ```
 
-CogniCrypt<sub>SAST</subs> runs the analysis and prints a report to the command line. In total, it reports 3 `ConstraintErrors`, 2 `RequiredPredicateErrors` and 1 `IncompleteOperationError`, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
+CogniCrypt<sub>SAST</sub> runs the analysis and prints a report to the command line. In total, it reports 3 `ConstraintErrors`, 2 `RequiredPredicateErrors` and 1 `IncompleteOperationError`, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
 
-<p align="center">
-<img src="https://github.com/CROSSINGTUD/CryptoAnalysis/tree/develop/misc/visualization.png">
-</p>
+![visualization.png](misc/visualization.png)
 
 You can see that two `ConstraintErrors` on the object `r0` (KeyGenerator) cause a `RequiredPredicateError` on the object `r1` (SecretKey) which in turn causes a `RequiredPredicateError` on the object `r2` (Cipher). Additionally, there is another `ConstraintError` and `IncompleteOperationError` on the Cipher object. Note that the variables and statements correspond to the intermediate representation Jimple. You can match the variables to the command line output that lists all analyzed objects.
