@@ -1,6 +1,7 @@
 package test;
 
 import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -184,6 +185,16 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(RequiredPredicateError requiredPredicateError) {
+        for (Assertion a : assertions) {
+            if (a instanceof PredicateErrorCountAssertion) {
+                PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;
+                errorCountAssertion.increaseCount();
+            }
+        }
+    }
+
+    @Override
+    public void reportError(AlternativeReqPredicateError alternativeReqPredicateError) {
         for (Assertion a : assertions) {
             if (a instanceof PredicateErrorCountAssertion) {
                 PredicateErrorCountAssertion errorCountAssertion = (PredicateErrorCountAssertion) a;

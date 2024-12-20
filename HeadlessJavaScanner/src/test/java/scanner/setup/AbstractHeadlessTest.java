@@ -112,7 +112,7 @@ public abstract class AbstractHeadlessTest {
             int difference = expected - actual;
             if (difference < 0) {
                 report.add(
-                        "\n\tFound "
+                        "Found "
                                 + Math.abs(difference)
                                 + " too many errors of type "
                                 + errorType.getSimpleName()
@@ -120,7 +120,7 @@ public abstract class AbstractHeadlessTest {
                                 + methodWrapper);
             } else if (difference > 0) {
                 report.add(
-                        "\n\tFound "
+                        "Found "
                                 + difference
                                 + " too few errors of type "
                                 + errorType.getSimpleName()
@@ -148,7 +148,7 @@ public abstract class AbstractHeadlessTest {
 
                 int unexpectedErrors = getErrorsOfType(errorType, errors);
                 report.add(
-                        "\n\tFound "
+                        "Found "
                                 + unexpectedErrors
                                 + " too many errors of type "
                                 + errorType.getSimpleName()

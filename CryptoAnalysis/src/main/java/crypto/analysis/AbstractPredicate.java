@@ -3,13 +3,20 @@ package crypto.analysis;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
+import java.util.Objects;
 
-public class EnsuredCrySLPredicate {
+/**
+ * Super class for predicates that are propagated during the analysis. Each predicate is either an
+ * {@link EnsuredPredicate} or an {@link UnEnsuredPredicate}. The former ones keep track of all
+ * predicates from the ENSURES section where no violations from a rule are found. The latter ones
+ * are propagated to keep track of predicates and seeds if there is a violation.
+ */
+public abstract class AbstractPredicate {
 
     private final CrySLPredicate predicate;
     private final Collection<CallSiteWithExtractedValue> parametersToValues;
 
-    public EnsuredCrySLPredicate(
+    public AbstractPredicate(
             CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues) {
         this.predicate = predicate;
         this.parametersToValues = parametersToValues;
@@ -23,27 +30,14 @@ public class EnsuredCrySLPredicate {
         return parametersToValues;
     }
 
-    public String toString() {
-        return "Proved " + predicate.getPredName();
-    }
-
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((predicate == null) ? 0 : predicate.hashCode());
-        return result;
+        return Objects.hash(predicate);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        EnsuredCrySLPredicate other = (EnsuredCrySLPredicate) obj;
-        if (predicate == null) {
-            if (other.predicate != null) return false;
-        } else if (!predicate.equals(other.predicate)) return false;
-        return true;
+        return obj instanceof AbstractPredicate other
+                && Objects.equals(predicate, other.getPredicate());
     }
 }

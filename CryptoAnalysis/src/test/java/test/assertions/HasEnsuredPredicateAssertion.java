@@ -2,8 +2,8 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.AbstractPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import java.util.Collection;
 import test.Assertion;
 
@@ -38,8 +38,8 @@ public class HasEnsuredPredicateAssertion implements Assertion {
         return stmt;
     }
 
-    public void reported(Collection<Val> seed, EnsuredCrySLPredicate pred) {
-        if (!seed.contains(val) || pred instanceof HiddenPredicate) {
+    public void reported(Collection<Val> seed, AbstractPredicate pred) {
+        if (!seed.contains(val) || pred instanceof UnEnsuredPredicate) {
             return;
         }
 
@@ -53,7 +53,14 @@ public class HasEnsuredPredicateAssertion implements Assertion {
         if (predName == null) {
             return "Expected a predicate for " + val.getVariableName() + " @ " + stmt;
         } else {
-            return "Expected '" + predName + "' ensured on " + val.getVariableName() + " @ " + stmt;
+            return "Expected '"
+                    + predName
+                    + "' ensured on "
+                    + val.getVariableName()
+                    + " @ "
+                    + stmt
+                    + " @ line "
+                    + stmt.getStartLineNumber();
         }
     }
 }

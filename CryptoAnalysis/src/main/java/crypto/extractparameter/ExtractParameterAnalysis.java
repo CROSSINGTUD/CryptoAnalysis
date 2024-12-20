@@ -78,9 +78,7 @@ public class ExtractParameterAnalysis {
                         for (ForwardQuery paramQuery : filteredQueries) {
                             Val val = paramQuery.var();
 
-                            if (val instanceof AllocVal) {
-                                AllocVal allocVal = (AllocVal) val;
-
+                            if (val instanceof AllocVal allocVal) {
                                 Map.Entry<Val, Statement> entry =
                                         new AbstractMap.SimpleEntry<>(
                                                 allocVal.getAllocVal(),
@@ -95,8 +93,7 @@ public class ExtractParameterAnalysis {
                         }
 
                         CallSiteWithParamIndex callSiteWithParam =
-                                new CallSiteWithParamIndex(
-                                        statement, parameter, index, varNameInSpec);
+                                new CallSiteWithParamIndex(statement, index, varNameInSpec);
                         Collection<Type> types = results.getPropagationType();
 
                         // If no value could be extracted, add the zero value to indicate it

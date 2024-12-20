@@ -31,6 +31,21 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
           OSSRH_PASSWORD: ${{ secrets.SONATYPE_PW }}
 
+  synchronize:
+    runs-on: ubuntu-latest
+    needs: deployment
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synchronize master and develop
+        run: |
+          gh pr create -B develop -H master -t "Synchronize version in master and develop" -b "Update the version in `develop` from `master`"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   release:
     runs-on: ubuntu-latest
     needs: deployment
@@ -77,7 +92,7 @@ jobs:
       - name: Zip JavaCryptographicArchitecture folder
         run: |
           echo "Zipping the JavaCryptographicArchitecture folder..."
-          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/main/resources/JavaCryptographicArchitecture
+          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/test/resources/rules/JavaCryptographicArchitecture
 
       - name: Create GitHub Release
         run: |

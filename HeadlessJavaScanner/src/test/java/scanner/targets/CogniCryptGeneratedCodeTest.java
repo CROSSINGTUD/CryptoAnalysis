@@ -1,5 +1,6 @@
 package scanner.targets;
 
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.RequiredPredicateError;
@@ -31,11 +32,12 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.Enc", "encrypt", 2)
-                        .withFPs(RequiredPredicateError.class, 1, "Mystery")
+                        .withFPs(AlternativeReqPredicateError.class, 1, "Mystery")
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.Enc", "decrypt", 2)
-                        .withFPs(RequiredPredicateError.class, 2, "Mystery")
+                        .withFPs(RequiredPredicateError.class, 1, "Mystery")
+                        .withFPs(AlternativeReqPredicateError.class, 1, "Mystery")
                         .build());
 
         scanner.run();

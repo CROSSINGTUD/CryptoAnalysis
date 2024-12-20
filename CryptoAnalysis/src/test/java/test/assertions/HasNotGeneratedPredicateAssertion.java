@@ -2,8 +2,8 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.EnsuredCrySLPredicate;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.AbstractPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import java.util.Collection;
 import test.Assertion;
 
@@ -32,8 +32,8 @@ public class HasNotGeneratedPredicateAssertion implements Assertion {
         return statement;
     }
 
-    public void reported(Collection<Val> seed, EnsuredCrySLPredicate predicate) {
-        if (seed.contains(val) && !(predicate instanceof HiddenPredicate)) {
+    public void reported(Collection<Val> seed, AbstractPredicate predicate) {
+        if (seed.contains(val) && !(predicate instanceof UnEnsuredPredicate)) {
             imprecise = true;
         }
     }
@@ -43,6 +43,8 @@ public class HasNotGeneratedPredicateAssertion implements Assertion {
         return "Did not expected "
                 + val.getVariableName()
                 + " to generate a predicate @ "
-                + statement;
+                + statement
+                + " @ line "
+                + statement.getStartLineNumber();
     }
 }

@@ -14,6 +14,13 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+      # Set up Java version
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-package: jdk
+          java-version: 17
       # Restores Maven dependecies
       - name: Restore local Maven repository
         uses: actions/cache@v4

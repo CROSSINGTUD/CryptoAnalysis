@@ -1,0 +1,70 @@
+name: Test Performance
+
+inputs:
+  test-results-path:
+    description: "Path to the test results directory"
+    required: true
+  source-branch:
+    description: "Branch that holds the file with previous results"
+    required: true
+  current-results:
+    description: "File that stores previous results"
+    required: true
+  output-file:
+    description: "File where the results are storted in"
+    required: true
+
+runs:
+  using: "composite"
+  steps: 
+    - name: Aggregate test results from multiple directories
+      run: |
+        total_time=0
+          
+        if [ -d ${{ inputs.test-results-path }} ]; then
+          echo "Processing directory: ${{ inputs.test-results-path }}"
+            
+          for file in ${{ inputs.test-results-path }}/*.txt; do
+            if [ -f "$file" ]; then
+              echo "Processing file: $file"
+                
+              # Extract the time elapsed from each relevant line in the file and sum it up
+              file_time=$(grep -oP "Time elapsed: \K[\d\.]+" "$file" | awk '{sum += $1} END {print sum}')
+              if [ -n "$file_time" ]; then
+                echo "Time found: $file_time seconds"
+                total_time=$(echo "$total_time + $file_time" | bc)
+              else
+                echo "No time elapsed found in file: $file"
+              fi
+            else
+              echo "No files found in directory: ${{ inputs.test-results-path }}"
+            fi
+          done
+        else
+          echo "Directory does not exist: ${{ inputs.test-results-path }}"
+        fi
+  
+        # Convert total time to minutes, seconds, and milliseconds
+        total_time_int=$(printf "%.0f" "$total_time")
+        minutes=$((total_time_int / 60))
+        seconds=$((total_time_int % 60))
+        milliseconds=$(printf "%.0f" "$(echo "($total_time - $total_time_int) * 1000" | bc)")
+  
+        echo "Total Time Calculated: ${minutes}m ${seconds}s ${milliseconds}ms"
+        timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+        echo "${timestamp}, Total Time: ${minutes}m ${seconds}s ${milliseconds}ms" >> ${{ inputs.output-file }}
+      shell: bash
+
+    - name: Combine current and past results
+      run: |
+        git checkout ${{ inputs.source-branch }}
+        if [ -f ${{ inputs.current-results }} ]; then
+          git checkout ${{ inputs.source-branch }} ${{ inputs.current-results }}
+          cat ${{ inputs.output-file }} >> ${{ inputs.current-results }}
+          mv ${{ inputs.current-results }} ${{ inputs.output-file }}
+        fi
+      shell: bash
+
+    - name: Switch to default branch
+      run: git checkout ${{ github.ref_name }}
+      shell: bash

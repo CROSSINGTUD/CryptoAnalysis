@@ -1,5 +1,6 @@
 package scanner.targets;
 
+import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -46,7 +47,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue81.Encryption", "encrypt", 2)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue81.Encryption", "generateKey", 1)
@@ -71,13 +72,15 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue70.ClientProtocolDecoder", "decryptAES", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue69.Issue69", "encryptByPublicKey", 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 4)
+                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -93,7 +96,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue68.AESCryptor", "encryptImpl", 1)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue68.AESCryptor", "<init>", 1)
@@ -102,7 +105,8 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue68.AESCryptor", "decryptImpl", 1)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
@@ -166,7 +170,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
     }
 
     @Test
-    public void issue270() {
+    public void issue270Test() {
         // Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/270
         String mavenProjectPath =
                 new File("../CryptoAnalysisTargets/Bugfixes/issue270").getAbsolutePath();
