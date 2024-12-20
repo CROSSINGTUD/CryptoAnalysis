@@ -3,6 +3,11 @@ description: Basic build and tests for the submodules on each push and pull requ
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   workflow_dispatch:
 
 env:
