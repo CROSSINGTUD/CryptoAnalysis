@@ -5,9 +5,9 @@ import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.Objects;
 
-public class EnsuredCrySLPredicate extends AbstractPredicate {
+public class EnsuredPredicate extends AbstractPredicate {
 
-    public EnsuredCrySLPredicate(
+    public EnsuredPredicate(
             CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues) {
         super(predicate, parametersToValues);
     }
@@ -19,7 +19,7 @@ public class EnsuredCrySLPredicate extends AbstractPredicate {
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj) && obj instanceof EnsuredCrySLPredicate;
+        return super.equals(obj) && obj instanceof EnsuredPredicate;
     }
 
     @Override

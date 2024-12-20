@@ -68,7 +68,7 @@ public class PredicateHandler {
             Collection<RequiredCrySLPredicate> violatedReqPreds =
                     seed.computeViolatedRequiredPredicates();
             for (RequiredCrySLPredicate reqPred : violatedReqPreds) {
-                Collection<HiddenPredicate> hiddenPreds = seed.extractHiddenPredicates(reqPred);
+                Collection<UnEnsuredPredicate> hiddenPreds = seed.extractHiddenPredicates(reqPred);
 
                 RequiredPredicateError reqPredError =
                         new RequiredPredicateError(seed, reqPred, hiddenPreds);
@@ -78,7 +78,7 @@ public class PredicateHandler {
             Collection<AlternativeReqPredicate> violatedAltPreds =
                     seed.computeViolatedAlternativePredicates();
             for (AlternativeReqPredicate altPred : violatedAltPreds) {
-                Collection<HiddenPredicate> hiddenPreds = seed.extractHiddenPredicates(altPred);
+                Collection<UnEnsuredPredicate> hiddenPreds = seed.extractHiddenPredicates(altPred);
 
                 AlternativeReqPredicateError reqPredError =
                         new AlternativeReqPredicateError(seed, altPred, hiddenPreds);
@@ -103,9 +103,9 @@ public class PredicateHandler {
             Collection<AbstractRequiredPredicateError> errors = requiredPredicateErrors.get(seed);
 
             for (AbstractRequiredPredicateError error : errors) {
-                for (HiddenPredicate hiddenPredicate : error.getHiddenPredicates()) {
+                for (UnEnsuredPredicate unEnsuredPredicate : error.getHiddenPredicates()) {
                     Collection<AbstractError> precedingErrors =
-                            hiddenPredicate.getPrecedingErrors();
+                            unEnsuredPredicate.getPrecedingErrors();
 
                     precedingErrors.forEach(error::addPrecedingError);
                     precedingErrors.forEach(e -> e.addSubsequentError(error));

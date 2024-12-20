@@ -1,7 +1,7 @@
 package crypto.analysis.errors;
 
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import crypto.analysis.RequiredCrySLPredicate;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
@@ -26,8 +26,8 @@ public class RequiredPredicateError extends AbstractRequiredPredicateError {
     public RequiredPredicateError(
             AnalysisSeedWithSpecification seed,
             RequiredCrySLPredicate violatedPred,
-            Collection<HiddenPredicate> hiddenPredicates) {
-        super(seed, violatedPred.getLocation(), seed.getSpecification(), hiddenPredicates);
+            Collection<UnEnsuredPredicate> unEnsuredPredicates) {
+        super(seed, violatedPred.getLocation(), seed.getSpecification(), unEnsuredPredicates);
 
         this.contradictedPredicate = violatedPred.getPred();
         this.paramIndex = violatedPred.getParamIndex();

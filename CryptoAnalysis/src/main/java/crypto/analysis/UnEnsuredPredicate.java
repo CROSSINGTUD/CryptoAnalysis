@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class HiddenPredicate extends AbstractPredicate {
+public class UnEnsuredPredicate extends AbstractPredicate {
 
     private final AnalysisSeedWithSpecification generatingSeed;
     private final Collection<Violations> violations;
@@ -25,7 +25,7 @@ public class HiddenPredicate extends AbstractPredicate {
         GeneratingStateIsNeverReached
     }
 
-    public HiddenPredicate(
+    public UnEnsuredPredicate(
             CrySLPredicate predicate,
             Collection<CallSiteWithExtractedValue> parametersToValues,
             AnalysisSeedWithSpecification generatingSeed,
@@ -89,7 +89,7 @@ public class HiddenPredicate extends AbstractPredicate {
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
-                && obj instanceof HiddenPredicate other
+                && obj instanceof UnEnsuredPredicate other
                 && Objects.equals(generatingSeed, other.getGeneratingSeed())
                 && Objects.equals(violations, other.getViolations());
     }

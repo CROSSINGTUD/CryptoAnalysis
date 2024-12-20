@@ -10,7 +10,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
 import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
@@ -156,7 +156,7 @@ public class UsagePatternResultsListener implements IResultsListener {
     @Override
     public void ensuredPredicates(
             IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates) {
         for (Assertion a : assertions) {
             if (a instanceof HasEnsuredPredicateAssertion) {
                 HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
@@ -167,10 +167,10 @@ public class UsagePatternResultsListener implements IResultsListener {
 
                 Collection<Val> values =
                         seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds =
+                Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPreds =
                         predicates.get(assertion.getStmt());
 
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+                for (Map.Entry<EnsuredPredicate, Integer> ensPred : ensuredPreds) {
                     assertion.reported(values, ensPred.getKey());
                 }
             }
@@ -184,10 +184,10 @@ public class UsagePatternResultsListener implements IResultsListener {
 
                 Collection<Val> values =
                         seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredCrySLPredicate, Integer>> ensuredPreds =
+                Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPreds =
                         predicates.get(assertion.getStmt());
 
-                for (Map.Entry<EnsuredCrySLPredicate, Integer> ensPred : ensuredPreds) {
+                for (Map.Entry<EnsuredPredicate, Integer> ensPred : ensuredPreds) {
                     assertion.reported(values, ensPred.getKey());
                 }
             }

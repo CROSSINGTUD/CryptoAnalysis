@@ -3,7 +3,7 @@ package test.assertions;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.AbstractPredicate;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import java.util.Collection;
 import test.Assertion;
 
@@ -39,7 +39,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
     }
 
     public void reported(Collection<Val> seed, AbstractPredicate pred) {
-        if (!seed.contains(val) || pred instanceof HiddenPredicate) {
+        if (!seed.contains(val) || pred instanceof UnEnsuredPredicate) {
             return;
         }
 

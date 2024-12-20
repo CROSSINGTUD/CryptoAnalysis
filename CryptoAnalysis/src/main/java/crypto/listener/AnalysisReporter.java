@@ -7,7 +7,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredCrySLPredicate;
+import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
@@ -224,7 +224,7 @@ public class AnalysisReporter {
 
     public void ensuredPredicates(
             IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredCrySLPredicate, Integer>> predicates) {
+            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates) {
         for (IResultsListener listener : resultsListeners) {
             listener.ensuredPredicates(seed, predicates);
         }

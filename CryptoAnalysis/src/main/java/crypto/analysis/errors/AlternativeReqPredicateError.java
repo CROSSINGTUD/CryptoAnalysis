@@ -2,7 +2,7 @@ package crypto.analysis.errors;
 
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.HiddenPredicate;
+import crypto.analysis.UnEnsuredPredicate;
 import crypto.analysis.RequiredCrySLPredicate;
 import crysl.rule.CrySLPredicate;
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class AlternativeReqPredicateError extends AbstractRequiredPredicateError
     public AlternativeReqPredicateError(
             AnalysisSeedWithSpecification seed,
             AlternativeReqPredicate violatedPred,
-            Collection<HiddenPredicate> hiddenPredicates) {
-        super(seed, violatedPred.getLocation(), seed.getSpecification(), hiddenPredicates);
+            Collection<UnEnsuredPredicate> unEnsuredPredicates) {
+        super(seed, violatedPred.getLocation(), seed.getSpecification(), unEnsuredPredicates);
 
         this.contradictedPredicate = List.copyOf(violatedPred.getAllAlternatives());
         this.relevantPredicates = Set.copyOf(violatedPred.getRelAlternatives());
