@@ -4,12 +4,13 @@ import boomerang.ForwardQuery;
 import boomerang.scene.AllocVal;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.extractparameter.Definitions;
+
 import java.util.Optional;
 
 public class OperatorTransformation extends Transformation {
 
-    public OperatorTransformation(ExtractParameterDefinition definition) {
+    public OperatorTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 

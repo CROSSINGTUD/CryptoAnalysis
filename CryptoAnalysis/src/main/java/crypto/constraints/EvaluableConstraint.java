@@ -19,6 +19,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
+import crypto.extractparameter.ExtractParameterAnalysisOld;
 import crypto.extractparameter.ExtractedValue;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLConstraint;
@@ -253,7 +254,7 @@ public abstract class EvaluableConstraint {
     }
 
     /**
-     * If the {@link crypto.extractparameter.ExtractParameterAnalysis} cannot find the allocation
+     * If the {@link ExtractParameterAnalysisOld} cannot find the allocation
      * site of a parameter, it adds the ZERO value to the results to indicate that the value could
      * not be extracted. In such a case, a {@link ImpreciseValueExtractionError} is reported.
      *

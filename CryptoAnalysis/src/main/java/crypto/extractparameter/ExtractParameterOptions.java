@@ -16,9 +16,9 @@ import java.util.Optional;
 /** Created by johannesspath on 23.12.17. */
 public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
-    private final ExtractParameterDefinition definition;
+    private final Definitions.BoomerangOptionsDefinition definition;
 
-    public ExtractParameterOptions(ExtractParameterDefinition definition) {
+    public ExtractParameterOptions(Definitions.BoomerangOptionsDefinition definition) {
         this.definition = definition;
     }
 
@@ -63,8 +63,7 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
                 }
 
                 // Extract static fields
-                if (rightOp instanceof JimpleVal) {
-                    JimpleVal jimpleRightOp = (JimpleVal) rightOp;
+                if (rightOp instanceof JimpleVal jimpleRightOp) {
 
                     if (jimpleRightOp.isStaticFieldRef()) {
                         AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
@@ -125,7 +124,7 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
     @Override
     public int analysisTimeoutMS() {
-        return definition.getTimeout();
+        return definition.timeout();
     }
 
     @Override
@@ -135,6 +134,6 @@ public class ExtractParameterOptions extends IntAndStringBoomerangOptions {
 
     @Override
     public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
-        return definition.getSparsificationStrategy();
+        return definition.strategy();
     }
 }

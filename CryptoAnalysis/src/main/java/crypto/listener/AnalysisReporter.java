@@ -25,7 +25,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.ExtractParameterQuery;
+import crypto.extractparameter.ExtractParameterQueryOld;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
@@ -110,20 +110,20 @@ public class AnalysisReporter {
         }
     }
 
-    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void beforeTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.beforeTriggeringBoomerangQuery(query);
         }
     }
 
-    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void afterTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.afterTriggeringBoomerangQuery(query);
         }
     }
 
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+            ExtractParameterQueryOld query, BackwardBoomerangResults<Weight.NoWeight> results) {
         for (IResultsListener listener : resultsListeners) {
             listener.extractedBoomerangResults(query, results);
         }

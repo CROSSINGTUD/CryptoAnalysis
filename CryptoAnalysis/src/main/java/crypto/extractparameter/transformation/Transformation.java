@@ -8,7 +8,7 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.extractparameter.Definitions;
 import crypto.extractparameter.ExtractParameterOptions;
 import crypto.extractparameter.scope.IntVal;
 import crypto.extractparameter.scope.LongVal;
@@ -20,9 +20,9 @@ import wpds.impl.Weight;
 
 public abstract class Transformation {
 
-    private final ExtractParameterDefinition definition;
+    private final Definitions.BoomerangOptionsDefinition definition;
 
-    public Transformation(ExtractParameterDefinition definition) {
+    public Transformation(Definitions.BoomerangOptionsDefinition definition) {
         this.definition = definition;
     }
 
@@ -90,7 +90,7 @@ public abstract class Transformation {
             BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
             Boomerang boomerang =
                     new Boomerang(
-                            definition.getCallGraph(), definition.getDataFlowScope(), options);
+                            definition.callGraph(), definition.dataFlowScope(), options);
 
             BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
             extractedValues.addAll(results.getAllocationSites().keySet());

@@ -11,7 +11,7 @@ import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractParameterAnalysis;
+import crypto.extractparameter.ExtractParameterAnalysisOld;
 import crypto.extractparameter.ExtractParameterDefinition;
 import crypto.listener.AnalysisReporter;
 import crysl.rule.CrySLConstraint;
@@ -36,7 +36,7 @@ public class ConstraintSolver {
     private final Collection<Statement> collectedCalls;
     private final Collection<ISLConstraint> relConstraints;
     private final Collection<ISLConstraint> requiredPredicates;
-    private final ExtractParameterAnalysis parameterAnalysis;
+    private final ExtractParameterAnalysisOld parameterAnalysis;
 
     public ConstraintSolver(AnalysisSeedWithSpecification seed) {
         this.seed = seed;
@@ -86,7 +86,7 @@ public class ConstraintSolver {
                         return seed.getScanner().getTimeout();
                     }
                 };
-        parameterAnalysis = new ExtractParameterAnalysis(definition);
+        parameterAnalysis = new ExtractParameterAnalysisOld(definition);
     }
 
     /**

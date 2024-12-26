@@ -14,7 +14,7 @@ import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.ExtractParameterQuery;
+import crypto.extractparameter.ExtractParameterQueryOld;
 import crypto.listener.IResultsListener;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
@@ -81,7 +81,7 @@ public class UsagePatternResultsListener implements IResultsListener {
 
     @Override
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
+            ExtractParameterQueryOld query, BackwardBoomerangResults<Weight.NoWeight> results) {}
 
     @Override
     public void collectedValues(

@@ -4,7 +4,8 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.extractparameter.Definitions;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class StringTransformation extends Transformation {
     private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE =
             "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
 
-    public StringTransformation(ExtractParameterDefinition definition) {
+    public StringTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 

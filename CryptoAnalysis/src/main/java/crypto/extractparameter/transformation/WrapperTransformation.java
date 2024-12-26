@@ -4,7 +4,8 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
+import crypto.extractparameter.Definitions;
+
 import java.util.Optional;
 
 public class WrapperTransformation extends Transformation {
@@ -14,7 +15,7 @@ public class WrapperTransformation extends Transformation {
     private static final String BIG_INTEGER_VALUE_OF =
             "<java.math.BigInteger: java.math.BigInteger valueOf(long)>";
 
-    public WrapperTransformation(ExtractParameterDefinition definition) {
+    public WrapperTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 
