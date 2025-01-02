@@ -20,7 +20,7 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
         constraint.lengthExprConstraint(correctBytes.length);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
         constraint.lengthExprConstraint(correctBytes.length);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -55,6 +55,6 @@ public class OperatorTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 }

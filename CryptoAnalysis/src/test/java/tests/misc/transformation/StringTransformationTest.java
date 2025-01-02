@@ -18,11 +18,11 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         // Test replace(CharSequence, CharSequence) with replacing incorrect to correct String
         String string = "DES".replace("D", "A");
 
-        StringConstraint constraint1 = new StringConstraint();
-        constraint1.replaceConstraint(string);
+        StringConstraint constraint = new StringConstraint();
+        constraint.replaceConstraint(string);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 
     @Test

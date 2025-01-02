@@ -7,14 +7,14 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
+import crypto.definition.Definitions;
 import crypto.extractparameter.transformation.TransformedAllocVal;
-import wpds.impl.Weight;
-
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import wpds.impl.Weight;
 
 public class QuerySolver {
 
@@ -25,16 +25,23 @@ public class QuerySolver {
     }
 
     public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
-        Definitions.BoomerangOptionsDefinition optionsDefinition = new Definitions.BoomerangOptionsDefinition(definition.callGraph(), definition.dataFlowScope(), definition.timeout(), definition.strategy());
+        Definitions.BoomerangOptionsDefinition optionsDefinition =
+                new Definitions.BoomerangOptionsDefinition(
+                        definition.callGraph(),
+                        definition.dataFlowScope(),
+                        definition.timeout(),
+                        definition.strategy());
         ExtractParameterOptions options = new ExtractParameterOptions(optionsDefinition);
 
-        Boomerang boomerang = new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
+        Boomerang boomerang =
+                new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
 
         return extractValuesFromQueryResult(query, results);
     }
 
-    private ParameterWithExtractedValues extractValuesFromQueryResult(ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+    private ParameterWithExtractedValues extractValuesFromQueryResult(
+            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
         Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
 
         Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();
@@ -44,7 +51,8 @@ public class QuerySolver {
             Val val = paramQuery.var();
 
             if (val instanceof AllocVal allocVal) {
-                Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), initStatement);
+                Map.Entry<Val, Statement> entry =
+                        new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), initStatement);
                 extractedParameters.add(entry);
             } else {
                 Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, initStatement);
@@ -59,7 +67,12 @@ public class QuerySolver {
             ExtractedValue zeroVal =
                     new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
 
-            return new ParameterWithExtractedValues(query.cfgEdge().getTarget(), query.var(), query.getIndex(), query.getVarNameInSpec(), Collections.singleton(zeroVal));
+            return new ParameterWithExtractedValues(
+                    query.cfgEdge().getTarget(),
+                    query.var(),
+                    query.getIndex(),
+                    query.getVarNameInSpec(),
+                    Collections.singleton(zeroVal));
         }
 
         Collection<ExtractedValue> extractedValues = new HashSet<>();
@@ -74,7 +87,12 @@ public class QuerySolver {
             extractedValues.add(extractedValue);
         }
 
-        return new ParameterWithExtractedValues(query.cfgEdge().getTarget(), query.var(), query.getIndex(), query.getVarNameInSpec(), extractedValues);
+        return new ParameterWithExtractedValues(
+                query.cfgEdge().getTarget(),
+                query.var(),
+                query.getIndex(),
+                query.getVarNameInSpec(),
+                extractedValues);
     }
 
     private Collection<ForwardQuery> filterBoomerangResults(

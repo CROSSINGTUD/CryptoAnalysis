@@ -2,7 +2,6 @@ package crypto.extractparameter;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-
 import java.util.Collection;
 
 public record ParameterWithExtractedValues(

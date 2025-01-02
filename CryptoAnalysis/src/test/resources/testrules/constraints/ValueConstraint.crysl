@@ -1,0 +1,26 @@
+SPEC tests.error.constraints.ValueConstraint
+
+OBJECTS
+    java.lang.String conParam;
+    java.lang.String methodParam;
+    java.lang.String transform;
+    int value1;
+    int value2;
+
+EVENTS
+    Con: ValueConstraint(conParam);
+    Op1: operation1(value1);
+    Op2: operation2(methodParam, value2);
+    Op3: operation3(transform);
+
+ORDER
+    Con, (Op1 | Op2)*
+
+CONSTRAINTS
+    conParam in {"AES", "BES"};
+    methodParam in {"CES"};
+    value1 in {10, 20};
+    value2 in {10};
+    alg(transform) in {"AES", "BES"};
+    mode(transform) in {"CBC"};
+    pad(transform) in {"X", "Y", "Z"};

@@ -1,7 +1,10 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractedValue;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
@@ -10,8 +13,8 @@ import java.util.Objects;
 
 public class NeverTypeOfError extends AbstractConstraintsError {
 
-    private final CallSiteWithExtractedValue extractedValue;
-    private final CrySLPredicate violatedConstraint;
+    private CallSiteWithExtractedValue extractedValue;
+    private CrySLPredicate violatedConstraint;
 
     public NeverTypeOfError(
             IAnalysisSeed seed,
@@ -22,6 +25,18 @@ public class NeverTypeOfError extends AbstractConstraintsError {
 
         this.extractedValue = cs;
         this.violatedConstraint = constraint;
+    }
+
+    public NeverTypeOfError(
+            IAnalysisSeed seed,
+            Statement statement,
+            CrySLRule rule,
+            Val val,
+            int paramIndex,
+            ExtractedValue extractedValue) {
+        super(seed, statement, rule);
+
+        // TODO
     }
 
     public CallSiteWithExtractedValue getExtractedValue() {

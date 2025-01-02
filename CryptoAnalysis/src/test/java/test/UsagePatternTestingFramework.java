@@ -37,7 +37,10 @@ import test.assertions.Assertions;
 import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
-import test.assertions.ConstraintViolationAssertion;
+import test.assertions.ConstraintsEvaluatedAssertion;
+import test.assertions.ConstraintsNotRelevantAssertion;
+import test.assertions.ConstraintsSatisfiedAssertion;
+import test.assertions.ConstraintsViolatedAssertion;
 import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
@@ -227,8 +230,52 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
             if (invocationName.startsWith("violatedConstraint")) {
                 for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new ConstraintViolationAssertion(pred));
+                    // queries.add(new ConstraintViolationAssertion(pred));
                 }
+            }
+
+            if (invocationName.startsWith("evaluatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsEvaluatedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("satisfiedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsSatisfiedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("violatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsViolatedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("notRelevantConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsNotRelevantAssertion(local, count.getIntValue()));
             }
 
             if (invocationName.startsWith("hasEnsuredPredicate")) {
@@ -340,11 +387,17 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             }
 
             if (invocationName.startsWith("constraintErrors")) {
-                Val param = invokeExpr.getArg(0);
+                Val seed = invokeExpr.getArg(0);
+                Val param = invokeExpr.getArg(1);
+
+                if (!seed.isLocal()) {
+                    continue;
+                }
+
                 if (!param.isIntConstant()) {
                     continue;
                 }
-                queries.add(new ConstraintErrorCountAssertion(param.getIntValue()));
+                queries.add(new ConstraintErrorCountAssertion(seed, param.getIntValue()));
             }
 
             if (invocationName.startsWith("typestateErrors")) {

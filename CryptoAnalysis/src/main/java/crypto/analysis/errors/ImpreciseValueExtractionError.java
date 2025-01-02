@@ -1,22 +1,53 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
+import crypto.constraints.EvaluableConstraint;
+import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
 import java.util.Objects;
 
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
-    private final ISLConstraint violatedConstraint;
+    private final EvaluableConstraint violatedConstraint;
 
     public ImpreciseValueExtractionError(
-            IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, ISLConstraint constraint) {
+            IAnalysisSeed seed,
+            Statement errorStmt,
+            CrySLRule rule,
+            EvaluableConstraint constraint) {
         super(seed, errorStmt, rule);
         this.violatedConstraint = constraint;
     }
 
-    public ISLConstraint getViolatedConstraint() {
+    public ImpreciseValueExtractionError(
+            IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, ISLConstraint constraint) {
+        super(seed, errorStmt, rule);
+
+        violatedConstraint = null;
+    }
+
+    private enum ConstraintType {
+        ValueConstraint,
+        ComparisonConstraint,
+    }
+
+    public ImpreciseValueExtractionError(
+            AnalysisSeedWithSpecification seed,
+            Statement statement,
+            CrySLRule rule,
+            ParameterWithExtractedValues parameter,
+            ExtractedValue value,
+            EvaluableConstraint constraint) {
+        super(seed, statement, rule);
+
+        violatedConstraint = null;
+    }
+
+    public EvaluableConstraint getViolatedConstraint() {
         return violatedConstraint;
     }
 

@@ -14,6 +14,14 @@ public class Assertions {
 
     public static void violatedConstraint() {}
 
+    public static void evaluatedConstraints(Object o, int i) {}
+
+    public static void satisfiedConstraints(Object o, int i) {}
+
+    public static void violatedConstraints(Object o, int i) {}
+
+    public static void notRelevantConstraints(Object o, int i) {}
+
     public static void callToForbiddenMethod() {}
 
     public static void hasEnsuredPredicate(Object o) {}
@@ -36,7 +44,7 @@ public class Assertions {
 
     public static void predicateErrors(int i) {}
 
-    public static void constraintErrors(int i) {}
+    public static void constraintErrors(Object o, int i) {}
 
     public static void typestateErrors(int i) {}
 

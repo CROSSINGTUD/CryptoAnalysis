@@ -37,7 +37,7 @@ public class IssuesTest extends UsagePatternTestingFramework {
 
         Assertions.hasEnsuredPredicate(sr);
         Assertions.predicateErrors(0);
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(sr, 0);
         Assertions.typestateErrors(0);
     }
 

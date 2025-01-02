@@ -1,5 +1,7 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLObject;
@@ -10,8 +12,8 @@ import java.util.Objects;
 
 public class InstanceOfError extends AbstractConstraintsError {
 
-    private final CallSiteWithExtractedValue extractedValue;
-    private final CrySLPredicate violatedConstraint;
+    private CallSiteWithExtractedValue extractedValue;
+    private CrySLPredicate violatedConstraint;
 
     public InstanceOfError(
             IAnalysisSeed seed,
@@ -22,6 +24,11 @@ public class InstanceOfError extends AbstractConstraintsError {
 
         this.extractedValue = cs;
         this.violatedConstraint = constraint;
+    }
+
+    public InstanceOfError(
+            IAnalysisSeed seed, Statement statement, CrySLRule rule, Val val, int paramIndex) {
+        super(seed, statement, rule);
     }
 
     public CallSiteWithExtractedValue getExtractedValue() {

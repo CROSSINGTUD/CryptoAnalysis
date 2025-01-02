@@ -9,6 +9,7 @@ import crypto.analysis.AbstractPredicate;
 import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
 import crysl.rule.ISLConstraint;
@@ -29,6 +30,11 @@ public interface IResultsListener {
 
     void collectedValues(
             IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues);
+
+    void evaluatedConstraint(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result);
 
     void checkedConstraints(
             IAnalysisSeed seed,

@@ -30,9 +30,12 @@ public class ExtractParameterQueryOld extends BackwardQuery {
     }
 
     public void solve() {
-        //ExtractParameterOptions options = new ExtractParameterOptions(definition);
+        // ExtractParameterOptions options = new ExtractParameterOptions(definition);
         Boomerang boomerang =
-                new Boomerang(definition.getCallGraph(), definition.getDataFlowScope(), new DefaultBoomerangOptions());
+                new Boomerang(
+                        definition.getCallGraph(),
+                        definition.getDataFlowScope(),
+                        new DefaultBoomerangOptions());
 
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(this);
 

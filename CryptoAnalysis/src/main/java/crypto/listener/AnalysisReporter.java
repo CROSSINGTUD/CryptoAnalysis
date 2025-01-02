@@ -24,6 +24,7 @@ import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
 import crysl.rule.CrySLRule;
@@ -168,6 +169,15 @@ public class AnalysisReporter {
     public void afterConstraintsCheck(IAnalysisSeed analysisSeed, int violatedConstraints) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterConstraintsCheck(analysisSeed, violatedConstraints);
+        }
+    }
+
+    public void onEvaluatedConstraint(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.evaluatedConstraint(seed, constraint, result);
         }
     }
 

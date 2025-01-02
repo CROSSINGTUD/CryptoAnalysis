@@ -1,56 +1,159 @@
 package crypto.constraints;
 
+import boomerang.scene.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.errors.ConstraintError;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLConstraint;
+import crysl.rule.ISLConstraint;
+import java.util.Collection;
 
-class BinaryConstraint extends EvaluableConstraint {
+public class BinaryConstraint extends EvaluableConstraint {
 
-    public BinaryConstraint(CrySLConstraint origin, ConstraintSolver context) {
-        super(origin, context);
+    private final CrySLConstraint constraint;
+    private final EvaluableConstraint leftConstraint;
+    private final EvaluableConstraint rightConstraint;
+
+    protected BinaryConstraint(
+            AnalysisSeedWithSpecification seed,
+            CrySLConstraint constraint,
+            Collection<Statement> statements,
+            Collection<ParameterWithExtractedValues> extractedValues) {
+        super(seed, statements, extractedValues);
+
+        this.constraint = constraint;
+        this.leftConstraint =
+                EvaluableConstraint.getInstance(
+                        seed, constraint.getLeft(), statements, extractedValues);
+        this.rightConstraint =
+                EvaluableConstraint.getInstance(
+                        seed, constraint.getRight(), statements, extractedValues);
     }
 
     @Override
-    public void evaluate() {
-        CrySLConstraint binaryConstraint = (CrySLConstraint) origin;
-        EvaluableConstraint left =
-                EvaluableConstraint.getInstance(binaryConstraint.getLeft(), context);
-        EvaluableConstraint right =
-                EvaluableConstraint.getInstance(binaryConstraint.getRight(), context);
-        left.evaluate();
-        CrySLConstraint.LogOps ops = binaryConstraint.getOperator();
+    public ISLConstraint getConstraint() {
+        return constraint;
+    }
 
-        if (ops.equals(CrySLConstraint.LogOps.implies)) {
-            // Left side of implication is not satisfied => Right side does not need to be satisfied
-            if (left.hasErrors()) {
-                return;
+    @Override
+    public EvaluationResult evaluate() {
+        EvaluationResult leftResult = leftConstraint.evaluate();
+        EvaluationResult rightResult = rightConstraint.evaluate();
+
+        if (leftResult == EvaluationResult.ConstraintIsNotRelevant
+                && rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+            // return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
+        switch (constraint.getOperator()) {
+            case implies -> {
+                if (leftResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    if (rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                        return EvaluationResult.ConstraintIsNotRelevant;
+                    }
+
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
+
+                if (leftResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    if (rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                        return EvaluationResult.ConstraintIsNotRelevant;
+                    }
+
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
+
+                if (leftResult == EvaluationResult.ConstraintIsSatisfied) {
+                    if (rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                        return EvaluationResult.ConstraintIsNotRelevant;
+                    }
+
+                    if (rightResult == EvaluationResult.ConstraintIsSatisfied) {
+                        return EvaluationResult.ConstraintIsSatisfied;
+                    }
+                }
             }
+            case or -> {
+                if (leftResult == EvaluationResult.ConstraintIsNotRelevant
+                        && rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    return EvaluationResult.ConstraintIsNotRelevant;
+                }
 
-            right.evaluate();
-            errors.addAll(right.getErrors());
-        } else if (ops.equals(CrySLConstraint.LogOps.or)) {
-            // Constraint is violated if left and right is not satisfied
-            right.evaluate();
-            errors.addAll(left.getErrors());
-            errors.addAll(right.getErrors());
-        } else if (ops.equals(CrySLConstraint.LogOps.and)) {
-            // Left is not satisfied => AND cannot be satisfied
-            if (left.hasErrors()) {
-                errors.addAll(left.getErrors());
-                return;
+                if (leftResult == EvaluationResult.ConstraintIsSatisfied) {
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
+
+                if (rightResult == EvaluationResult.ConstraintIsSatisfied) {
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
             }
+            case and -> {
+                if (leftResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    return EvaluationResult.ConstraintIsNotRelevant;
+                }
 
-            right.evaluate();
-            errors.addAll(right.getErrors());
-        } else if (ops.equals(CrySLConstraint.LogOps.eq)) {
-            right.evaluate();
+                if (rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    return EvaluationResult.ConstraintIsNotRelevant;
+                }
 
-            // Simple <=> evaluation
-            if ((left.hasErrors() && right.hasErrors())
-                    || (!left.hasErrors() && !right.hasErrors())) {
-                return;
+                if (leftResult == EvaluationResult.ConstraintIsSatisfied
+                        && rightResult == EvaluationResult.ConstraintIsSatisfied) {
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
             }
-            errors.addAll(right.getErrors());
-        } else {
-            errors.addAll(left.getErrors());
+            case eq -> {
+                if (leftResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    return EvaluationResult.ConstraintIsNotRelevant;
+                }
+
+                if (rightResult == EvaluationResult.ConstraintIsNotRelevant) {
+                    return EvaluationResult.ConstraintIsNotRelevant;
+                }
+
+                if (leftResult == EvaluationResult.ConstraintIsSatisfied
+                        && rightResult == EvaluationResult.ConstraintIsSatisfied) {
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
+
+                if (leftResult == EvaluationResult.ConstraintIsNotSatisfied
+                        && rightResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    return EvaluationResult.ConstraintIsSatisfied;
+                }
+            }
+        }
+
+        ConstraintError error = new ConstraintError(this, seed, seed.getSpecification());
+        errors.add(error);
+
+        return EvaluationResult.ConstraintIsNotSatisfied;
+    }
+
+    public EvaluableConstraint getLeftConstraint() {
+        return leftConstraint;
+    }
+
+    public EvaluableConstraint getRightConstraint() {
+        return rightConstraint;
+    }
+
+    @Override
+    public String toString() {
+        switch (constraint.getOperator()) {
+            case implies -> {
+                return leftConstraint + " => " + rightConstraint;
+            }
+            case or -> {
+                return leftConstraint + " || " + rightConstraint;
+            }
+            case and -> {
+                return leftConstraint + " && " + rightConstraint;
+            }
+            case eq -> {
+                return leftConstraint + " <=> " + rightConstraint;
+            }
+            default -> {
+                return constraint.toString();
+            }
         }
     }
 }

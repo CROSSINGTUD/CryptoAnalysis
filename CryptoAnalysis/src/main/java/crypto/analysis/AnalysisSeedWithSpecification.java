@@ -11,12 +11,14 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import crypto.analysis.errors.AbstractError;
+import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
-import crypto.constraints.ConstraintSolver;
-import crypto.constraints.EvaluableConstraint;
+import crypto.constraints.ConstraintsAnalysis;
+import crypto.constraintsOld.ConstraintSolver;
+import crypto.constraintsOld.EvaluableConstraint;
+import crypto.definition.Definitions;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.WrappedState;
@@ -50,6 +52,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     private final CrySLRule specification;
 
+    private final ConstraintsAnalysis constraintsAnalysis;
     private final ConstraintSolver constraintSolver;
     private boolean internalConstraintsSatisfied;
 
@@ -73,6 +76,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         this.specification = specification;
         this.allCallsOnObject = results.getInvokedMethodOnInstance();
+
+        Definitions.ConstraintsDefinition definition =
+                new Definitions.ConstraintsDefinition(
+                        scanner.getCallGraph(),
+                        scanner.getDataFlowScope(),
+                        scanner.getTimeout(),
+                        scanner.getSparsificationStrategy(),
+                        scanner.getAnalysisReporter());
+        this.constraintsAnalysis = new ConstraintsAnalysis(this, definition);
         this.constraintSolver = new ConstraintSolver(this);
     }
 
@@ -827,18 +839,17 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private void checkInternalConstraints() {
         scanner.getAnalysisReporter().beforeConstraintsCheck(this);
 
-        Collection<AbstractError> violatedConstraints = constraintSolver.evaluateConstraints();
-        for (AbstractError violatedConstraint : violatedConstraints) {
-            this.addError(violatedConstraint);
-            scanner.getAnalysisReporter().reportError(this, violatedConstraint);
+        constraintsAnalysis.initialize();
+        Collection<AbstractConstraintsError> violatedConstraints =
+                constraintsAnalysis.evaluateConstraints();
+        this.internalConstraintsSatisfied = violatedConstraints.isEmpty();
+
+        for (AbstractConstraintsError error : violatedConstraints) {
+            this.addError(error);
+            scanner.getAnalysisReporter().reportError(this, error);
         }
 
-        scanner.getAnalysisReporter()
-                .checkedConstraints(
-                        this, constraintSolver.getRelConstraints(), violatedConstraints);
         scanner.getAnalysisReporter().afterConstraintsCheck(this, violatedConstraints.size());
-
-        this.internalConstraintsSatisfied = violatedConstraints.isEmpty();
     }
 
     /**

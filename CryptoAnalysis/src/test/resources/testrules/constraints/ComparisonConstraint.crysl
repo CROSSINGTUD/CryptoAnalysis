@@ -1,0 +1,62 @@
+SPEC tests.error.constraints.ComparisonConstraint
+
+OBJECTS
+    boolean equal1;
+    boolean equal2;
+    boolean equalConstant;
+    boolean unequal1;
+    boolean unequal2;
+    boolean unequalConstant;
+    int greater1;
+    int greater2;
+    int greaterConstant;
+    int greaterEqual1;
+    int greaterEqual2;
+    int greaterEqualConstant1;
+    int greaterEqualConstant2;
+    int less1;
+    int less2;
+    int less3;
+    int lessConstant;
+    int lessEqual1;
+    int lessEqual2;
+    int lessEqual3;
+    int lessEqualConstant;
+
+EVENTS
+    Con: ComparisonConstraint();
+    Com1: equal(equal1, equal2);
+    Com2: equalConstant(equalConstant);
+    Com3: unequal(unequal1, unequal2);
+    Com4: unequalConstant(unequalConstant);
+    Com5: greater(greater1, greater2);
+    Com6: greaterConstant(greaterConstant);
+    Com7: greaterEqual(greaterEqual1, greaterEqual2);
+    Com8: greaterEqualConstant(greaterEqualConstant1, greaterEqualConstant2);
+    Com9: less(less1, less2, less3);
+    Com10: lessConstant(lessConstant);
+    Com11: lessEqual(lessEqual1, lessEqual2, lessEqual3);
+    Com12: lessEqualConstant(lessConstant);
+    Com := Com1 | Com2 | Com3 | Com4 | Com5 | Com6 | Com7 | Com8 | Com9 | Com10 | Com11 | Com12;
+
+ORDER
+    Con, Com*
+
+CONSTRAINTS
+    equal1 == equal2;
+    equalConstant == true;
+
+    unequal1 != unequal2;
+    unequalConstant != false;
+
+    greater1 > greater2;
+    greaterConstant > 10;
+
+    greaterEqual1 >= greaterEqual2 + 10;
+    greaterEqualConstant1 % greaterEqualConstant2 >= 5;
+
+    less1 - 10 < less2 + less3;
+    10 < lessConstant;
+
+    lessEqual1 + 15 - lessEqual2 <= lessEqual3;
+    lessEqualConstant <= 15;

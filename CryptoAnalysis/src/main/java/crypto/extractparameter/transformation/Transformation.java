@@ -8,7 +8,7 @@ import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.extractparameter.Definitions;
+import crypto.definition.Definitions;
 import crypto.extractparameter.ExtractParameterOptions;
 import crypto.extractparameter.scope.IntVal;
 import crypto.extractparameter.scope.LongVal;
@@ -89,8 +89,7 @@ public abstract class Transformation {
             ExtractParameterOptions options = new ExtractParameterOptions(definition);
             BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
             Boomerang boomerang =
-                    new Boomerang(
-                            definition.callGraph(), definition.dataFlowScope(), options);
+                    new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
 
             BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
             extractedValues.addAll(results.getAllocationSites().keySet());

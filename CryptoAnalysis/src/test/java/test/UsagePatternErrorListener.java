@@ -1,5 +1,6 @@
 package test;
 
+import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.CallToError;
@@ -59,7 +60,14 @@ public class UsagePatternErrorListener implements IErrorListener {
             if (a instanceof ConstraintErrorCountAssertion) {
                 ConstraintErrorCountAssertion errorCountAssertion =
                         (ConstraintErrorCountAssertion) a;
-                errorCountAssertion.increaseCount();
+
+                Collection<Val> values =
+                        constraintError
+                                .getSeed()
+                                .getAnalysisResults()
+                                .asStatementValWeightTable()
+                                .columnKeySet();
+                errorCountAssertion.increaseCount(values);
             }
 
             if (a instanceof ConstraintViolationAssertion) {

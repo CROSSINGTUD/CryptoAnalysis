@@ -1,79 +1,116 @@
 package crypto.constraints;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crysl.rule.CrySLObject;
+import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.exceptions.CryptoAnalysisException;
+import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 
+/** Constraints: varName in {C1, ..., Cn} */
 public class ValueConstraint extends EvaluableConstraint {
 
-    protected ValueConstraint(ISLConstraint origin, ConstraintSolver context) {
-        super(origin, context);
+    private final CrySLValueConstraint constraint;
+
+    public ValueConstraint(
+            AnalysisSeedWithSpecification seed,
+            CrySLValueConstraint constraint,
+            Collection<Statement> statements,
+            Collection<ParameterWithExtractedValues> extractedValues) {
+        super(seed, statements, extractedValues);
+
+        this.constraint = constraint;
     }
 
     @Override
-    public void evaluate() {
-        CrySLValueConstraint valCons = (CrySLValueConstraint) origin;
-        List<Map.Entry<String, CallSiteWithExtractedValue>> values =
-                getValFromVar(valCons.getVar(), valCons);
-        if (values.isEmpty()) {
-            return;
+    public ISLConstraint getConstraint() {
+        return constraint;
+    }
+
+    @Override
+    public EvaluationResult evaluate() {
+        // TODO Make this case sensitive?
+        String varName = constraint.getVar().getVarName();
+        Collection<ParameterWithExtractedValues> relevantParameters =
+                filterRelevantParameterResults(varName, extractedValues);
+
+        if (relevantParameters.isEmpty()) {
+            return EvaluationResult.ConstraintIsNotRelevant;
         }
 
-        List<String> lowerCaseValues =
-                valCons.getValueRange().parallelStream().map(String::toLowerCase).toList();
-        for (Map.Entry<String, CallSiteWithExtractedValue> val : values) {
-            if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
-                ConstraintError error =
-                        new ConstraintError(
-                                context.getSeed(),
-                                val.getValue(),
-                                context.getSpecification(),
-                                valCons);
-                errors.add(error);
+        Collection<String> allowedValues = constraint.getValueRange();
+        allowedValues = allowedValues.stream().map(String::toLowerCase).toList();
+
+        for (ParameterWithExtractedValues parameter : relevantParameters) {
+            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                if (extractedValue.val().equals(Val.zero()) || !extractedValue.val().isConstant()) {
+                    ImpreciseValueExtractionError error =
+                            new ImpreciseValueExtractionError(
+                                    seed, parameter.statement(), seed.getSpecification(), this);
+                    errors.add(error);
+                } else {
+                    // TODO Make this case sensitive?
+                    String valAsString =
+                            convertConstantToString(extractedValue.val()).toLowerCase();
+                    valAsString =
+                            checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
+
+                    if (!allowedValues.contains(valAsString)) {
+                        ConstraintError error =
+                                new ConstraintError(
+                                        this, seed, parameter.statement(), seed.getSpecification());
+                        errors.add(error);
+                    }
+                }
             }
+        }
+
+        if (errors.isEmpty()) {
+            return EvaluationResult.ConstraintIsSatisfied;
+        } else {
+            return EvaluationResult.ConstraintIsNotSatisfied;
         }
     }
 
-    private List<Map.Entry<String, CallSiteWithExtractedValue>> getValFromVar(
-            CrySLObject var, ISLConstraint cons) {
-        final String varName = var.getVarName();
-        final Map<String, CallSiteWithExtractedValue> valueCollection =
-                extractValueAsString(varName);
-
-        List<Map.Entry<String, CallSiteWithExtractedValue>> values = new ArrayList<>();
-        if (couldNotExtractValues(valueCollection, cons)) {
-            return values;
+    private String checkForSplitterValue(String valAsString, CrySLSplitter splitter) {
+        if (splitter == null) {
+            return valAsString;
         }
 
-        for (Map.Entry<String, CallSiteWithExtractedValue> e : valueCollection.entrySet()) {
-            CrySLSplitter splitter = var.getSplitter();
-            final CallSiteWithExtractedValue location = e.getValue();
-            String val = e.getKey();
-            if (splitter != null) {
-                int ind = splitter.getIndex();
-                String splitElement = splitter.getSplitter();
-                if (ind > 0) {
-                    String[] splits = val.split(splitElement);
-                    if (splits.length > ind) {
-                        values.add(new AbstractMap.SimpleEntry<>(splits[ind], location));
-                    } else {
-                        values.add(new AbstractMap.SimpleEntry<>("", location));
-                    }
-                } else {
-                    values.add(
-                            new AbstractMap.SimpleEntry<>(val.split(splitElement)[ind], location));
-                }
-            } else {
-                values.add(new AbstractMap.SimpleEntry<>(val, location));
+        String splitValue = splitter.getSplitter();
+        String[] splits = valAsString.split(splitValue);
+
+        return splits[splitter.getIndex()];
+    }
+
+    private String convertConstantToString(Val val) {
+        // Constants can be returned directly
+        if (val.isConstant()) {
+            if (val.isStringConstant()) {
+                return val.getStringValue();
+            } else if (val.isIntConstant()) {
+                return String.valueOf(val.getIntValue());
+            } else if (val.isLongConstant()) {
+                return String.valueOf(val.getLongValue());
+            } else if (val.isClassConstant()) {
+                return val.getClassConstantType().toString();
             }
         }
-        return values;
+
+        throw new CryptoAnalysisException("Val " + val.getVariableName() + " is not a constant");
+    }
+
+    @Override
+    public String toString() {
+        return constraint.getVar().getVarName()
+                + " in {"
+                + String.join(", ", constraint.getValueRange())
+                + "}";
     }
 }

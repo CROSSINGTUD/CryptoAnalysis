@@ -4,15 +4,14 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import crypto.analysis.IAnalysisSeed;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.InstanceOfError;
 import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.NoCallToError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
 import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLObject;
@@ -22,200 +21,256 @@ import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class PredicateConstraint extends EvaluableConstraint {
 
-    protected PredicateConstraint(ISLConstraint origin, ConstraintSolver context) {
-        super(origin, context);
+    private final CrySLPredicate constraint;
+
+    public PredicateConstraint(
+            AnalysisSeedWithSpecification seed,
+            CrySLPredicate constraint,
+            Collection<Statement> statements,
+            Collection<ParameterWithExtractedValues> extractedValues) {
+        super(seed, statements, extractedValues);
+
+        this.constraint = constraint;
     }
 
     @Override
-    public void evaluate() {
-        CrySLPredicate predicateConstraint = (CrySLPredicate) origin;
-        String predName = predicateConstraint.getPredName();
-        if (ConstraintSolver.predefinedPreds.contains(predName)) {
-            handlePredefinedNames(predicateConstraint);
-        }
+    public ISLConstraint getConstraint() {
+        return constraint;
     }
 
-    private void handlePredefinedNames(CrySLPredicate predicate) {
+    @Override
+    public EvaluationResult evaluate() {
+        String predName = constraint.getPredName();
+
+        if (ConstraintsAnalysis.predefinedPredicates.contains(predName)) {
+            return handlePredefinedPredicate(constraint);
+        }
+
+        return EvaluationResult.ConstraintIsNotRelevant;
+    }
+
+    private EvaluationResult handlePredefinedPredicate(CrySLPredicate predicate) {
         switch (predicate.getPredName()) {
-            case "callTo":
-                evaluateCallToPredicate(predicate.getParameters());
-                break;
-            case "noCallTo":
-                evaluateNoCallToPredicate(predicate.getParameters());
-                break;
-            case "neverTypeOf":
-                evaluateNeverTypeOfPredicate(predicate);
-                break;
-            case "length":
-                // TODO Not implemented!
-                break;
-            case "notHardCoded":
-                evaluateHardCodedPredicate(predicate);
-                break;
-            case "instanceOf":
-                evaluateInstanceOfPredicate(predicate);
-                break;
-            default:
-                LOGGER.error("Cannot evaluate predicate {}", predicate.getPredName());
+            case "callTo" -> {
+                return evaluateCallToPredicate(predicate);
+            }
+            case "noCallTo" -> {
+                return evaluateNoCallToPredicate(predicate);
+            }
+            case "neverTypeOf" -> {
+                return evaluateNeverTypeOfPredicate(predicate);
+            }
+            case "length" -> {
+                return evaluateLengthPredicate(predicate);
+            }
+            case "instanceOf" -> {
+                return evaluateInstanceOfPredicate(predicate);
+            }
+            case "notHardCoded" -> {
+                return evaluateNotHardCodedPredicate(predicate);
+            }
+            default ->
+                    throw new UnsupportedOperationException(
+                            "Predicate " + predicate.getPredName() + " is not supported");
         }
     }
 
-    private void evaluateCallToPredicate(List<ICrySLPredicateParameter> callToMethods) {
+    private EvaluationResult evaluateCallToPredicate(CrySLPredicate predicate) {
+        // callTo[$methods]
         boolean isCalled = false;
-        Collection<CrySLMethod> methods = parametersToCryslMethods(callToMethods);
+        Collection<CrySLMethod> requiredCalls = parametersToCryslMethods(predicate.getParameters());
 
-        for (CrySLMethod predMethod : methods) {
-            for (Statement statement : context.getCollectedCalls()) {
-                if (!statement.containsInvokeExpr()) {
-                    continue;
-                }
+        for (Statement statement : statements) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-                DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-                Collection<CrySLMethod> matchingCryslMethods =
-                        MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                                context.getSpecification(), foundCall);
-                if (matchingCryslMethods.contains(predMethod)) {
+            DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+            Collection<CrySLMethod> matchingCryslMethods =
+                    MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
+                            seed.getSpecification(), foundCall);
+
+            for (CrySLMethod method : requiredCalls) {
+                if (matchingCryslMethods.contains(method)) {
                     isCalled = true;
                 }
             }
         }
 
         if (!isCalled) {
-            IAnalysisSeed seed = context.getSeed();
-            CallToError callToError = new CallToError(seed, context.getSpecification(), methods);
-            errors.add(callToError);
+            CallToError error = new CallToError(seed, seed.getSpecification(), requiredCalls);
+            errors.add(error);
+
+            return EvaluationResult.ConstraintIsNotSatisfied;
         }
+
+        return EvaluationResult.ConstraintIsSatisfied;
     }
 
-    private void evaluateNoCallToPredicate(List<ICrySLPredicateParameter> noCallToMethods) {
-        Collection<CrySLMethod> methods = parametersToCryslMethods(noCallToMethods);
+    private EvaluationResult evaluateNoCallToPredicate(CrySLPredicate predicate) {
+        // noCallTo[$methods]
+        EvaluationResult result = EvaluationResult.ConstraintIsSatisfied;
+        Collection<CrySLMethod> notAllowedCalls =
+                parametersToCryslMethods(predicate.getParameters());
 
-        for (CrySLMethod predMethod : methods) {
-            for (Statement statement : context.getCollectedCalls()) {
-                if (!statement.containsInvokeExpr()) {
-                    continue;
-                }
+        for (Statement statement : statements) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-                DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
-                if (MatcherUtils.matchCryslMethodAndDeclaredMethod(predMethod, foundCall)) {
-                    NoCallToError noCallToError =
-                            new NoCallToError(
-                                    context.getSeed(), statement, context.getSpecification());
-                    errors.add(noCallToError);
+            DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+            for (CrySLMethod method : notAllowedCalls) {
+                if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, foundCall)) {
+                    NoCallToError error =
+                            new NoCallToError(seed, statement, seed.getSpecification());
+                    errors.add(error);
+
+                    result = EvaluationResult.ConstraintIsNotSatisfied;
                 }
             }
         }
+
+        return result;
     }
 
-    private void evaluateNeverTypeOfPredicate(CrySLPredicate neverTypeOfPredicate) {
-        List<CrySLObject> objects = parametersToCryslObjects(neverTypeOfPredicate.getParameters());
-
-        if (objects.size() != 2) {
-            return;
-        }
+    private EvaluationResult evaluateNeverTypeOfPredicate(CrySLPredicate predicate) {
+        EvaluationResult result = EvaluationResult.ConstraintIsSatisfied;
+        List<CrySLObject> objects = parametersToCryslObjects(predicate.getParameters());
 
         // neverTypeOf[$variable, $type]
+        if (objects.size() != 2) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
         CrySLObject variable = objects.get(0);
         CrySLObject parameterType = objects.get(1);
 
-        for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
+        Collection<ParameterWithExtractedValues> relevantExtractedValues =
+                filterRelevantParameterResults(variable.getName(), extractedValues);
+        for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
+            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                for (Type type : extractedValue.types()) {
+                    if (type.toString().equals(parameterType.getJavaType())) {
+                        NeverTypeOfError error =
+                                new NeverTypeOfError(
+                                        seed,
+                                        parameter.statement(),
+                                        seed.getSpecification(),
+                                        parameter.param(),
+                                        parameter.index(),
+                                        extractedValue);
+                        errors.add(error);
 
-            if (!variable.getName().equals(cs.varName())) {
-                continue;
-            }
-
-            Collection<Type> types = callSite.extractedValue().types();
-            for (Type type : types) {
-                if (!parameterType.getJavaType().equals(type.toString())) {
-                    continue;
+                        result = EvaluationResult.ConstraintIsNotSatisfied;
+                    }
                 }
-
-                NeverTypeOfError neverTypeOfError =
-                        new NeverTypeOfError(
-                                context.getSeed(),
-                                callSite,
-                                context.getSpecification(),
-                                neverTypeOfPredicate);
-                errors.add(neverTypeOfError);
             }
         }
+
+        return result;
     }
 
-    private void evaluateHardCodedPredicate(CrySLPredicate hardCodedPredicate) {
-        List<CrySLObject> objects = parametersToCryslObjects(hardCodedPredicate.getParameters());
-
-        if (objects.size() != 1) {
-            return;
-        }
-
-        // notHardCoded[$variable]
-        CrySLObject variable = objects.get(0);
-
-        for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
-
-            if (!variable.getVarName().equals(cs.varName())) {
-                continue;
-            }
-
-            ExtractedValue extractedValue = callSite.extractedValue();
-            if (isHardCodedVariable(extractedValue) || isHardCodedArray(extractedValue)) {
-                HardCodedError hardCodedError =
-                        new HardCodedError(
-                                context.getSeed(),
-                                callSite,
-                                context.getSpecification(),
-                                hardCodedPredicate);
-                errors.add(hardCodedError);
-            }
-        }
+    private EvaluationResult evaluateLengthPredicate(CrySLPredicate predicate) {
+        // TODO Not implemented yet
+        return EvaluationResult.ConstraintIsNotRelevant;
     }
 
-    private void evaluateInstanceOfPredicate(CrySLPredicate instanceOfPredicate) {
-        List<CrySLObject> objects = parametersToCryslObjects(instanceOfPredicate.getParameters());
-
-        if (objects.size() != 2) {
-            return;
-        }
+    private EvaluationResult evaluateInstanceOfPredicate(CrySLPredicate predicate) {
+        EvaluationResult result = EvaluationResult.ConstraintIsSatisfied;
+        List<CrySLObject> objects = parametersToCryslObjects(predicate.getParameters());
 
         // instanceOf[$variable, $type]
+        if (objects.size() != 2) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
         CrySLObject variable = objects.get(0);
         CrySLObject parameterType = objects.get(1);
 
-        for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex cs = callSite.callSiteWithParam();
-
-            if (!variable.getName().equals(cs.varName())) {
-                continue;
-            }
-
+        Collection<ParameterWithExtractedValues> relevantExtractedValues =
+                filterRelevantParameterResults(variable.getName(), extractedValues);
+        for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             boolean isSubType = false;
-            Collection<Type> types = callSite.extractedValue().types();
-            for (Type type : types) {
-                if (type.isNullType()) {
-                    continue;
-                }
 
-                if (type.isSubtypeOf(parameterType.getJavaType())) {
-                    isSubType = true;
+            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                for (Type type : extractedValue.types()) {
+                    if (type.isNullType()) {
+                        continue;
+                    }
+
+                    if (type.isSubtypeOf(parameterType.getJavaType())) {
+                        isSubType = true;
+                    }
                 }
             }
 
             if (!isSubType) {
-                InstanceOfError instanceOfError =
+                InstanceOfError error =
                         new InstanceOfError(
-                                context.getSeed(),
-                                callSite,
-                                context.getSpecification(),
-                                instanceOfPredicate);
-                errors.add(instanceOfError);
+                                seed,
+                                parameter.statement(),
+                                seed.getSpecification(),
+                                parameter.param(),
+                                parameter.index());
+                errors.add(error);
+
+                result = EvaluationResult.ConstraintIsNotSatisfied;
             }
         }
+
+        return result;
+    }
+
+    private EvaluationResult evaluateNotHardCodedPredicate(CrySLPredicate predicate) {
+        EvaluationResult result = EvaluationResult.ConstraintIsSatisfied;
+        List<CrySLObject> objects = parametersToCryslObjects(predicate.getParameters());
+
+        // notHardCoded[$variable]
+        if (objects.size() != 1) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
+        CrySLObject variable = objects.get(0);
+
+        Collection<ParameterWithExtractedValues> relevantExtractedValues =
+                filterRelevantParameterResults(variable.getName(), extractedValues);
+        for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
+            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                if (isHardCoded(extractedValue)) {
+                    HardCodedError error =
+                            new HardCodedError(
+                                    seed,
+                                    parameter.statement(),
+                                    seed.getSpecification(),
+                                    parameter.param(),
+                                    parameter.index(),
+                                    extractedValue);
+                    errors.add(error);
+
+                    result = EvaluationResult.ConstraintIsNotSatisfied;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private boolean isHardCoded(ExtractedValue extractedValue) {
+        if (extractedValue.val().isConstant()) {
+            return true;
+        }
+
+        Statement statement = extractedValue.initialStatement();
+        if (statement.isAssign()) {
+            Val rightOp = statement.getRightOp();
+
+            return rightOp.isNewExpr();
+        }
+
+        return false;
     }
 
     private Collection<CrySLMethod> parametersToCryslMethods(
@@ -223,12 +278,9 @@ public class PredicateConstraint extends EvaluableConstraint {
         List<CrySLMethod> methods = new ArrayList<>();
 
         for (ICrySLPredicateParameter parameter : parameters) {
-            if (!(parameter instanceof CrySLMethod)) {
-                continue;
+            if (parameter instanceof CrySLMethod crySLMethod) {
+                methods.add(crySLMethod);
             }
-
-            CrySLMethod crySLMethod = (CrySLMethod) parameter;
-            methods.add(crySLMethod);
         }
         return methods;
     }
@@ -238,44 +290,10 @@ public class PredicateConstraint extends EvaluableConstraint {
         List<CrySLObject> objects = new ArrayList<>();
 
         for (ICrySLPredicateParameter parameter : parameters) {
-            if (!(parameter instanceof CrySLObject)) {
-                continue;
+            if (parameter instanceof CrySLObject crySLObject) {
+                objects.add(crySLObject);
             }
-
-            CrySLObject crySLObject = (CrySLObject) parameter;
-            objects.add(crySLObject);
         }
         return objects;
-    }
-
-    public boolean isHardCodedVariable(ExtractedValue val) {
-        // Check for basic constants
-        if (val.val().isConstant()) {
-            LOGGER.debug("Value {} is hard coded", val.val());
-            return true;
-        }
-
-        Statement statement = val.initialStatement();
-
-        // Objects initialized with 'new' are hard coded
-        if (!statement.isAssign()) {
-            LOGGER.debug("Value {} is not hard coded", val.val());
-            return false;
-        }
-
-        Val rightOp = statement.getRightOp();
-        if (rightOp.isNewExpr()) {
-            LOGGER.debug("Value {} is hard coded", val.val());
-            return true;
-        }
-
-        LOGGER.debug("Value {} is not hard coded", val.val());
-        return false;
-    }
-
-    private boolean isHardCodedArray(ExtractedValue extractedValue) {
-        Map<Integer, Val> extractedArray = extractArray(extractedValue);
-
-        return !extractedArray.keySet().isEmpty();
     }
 }

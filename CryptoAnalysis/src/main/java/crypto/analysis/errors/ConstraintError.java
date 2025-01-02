@@ -5,6 +5,9 @@ import boomerang.scene.Type;
 import boomerang.scene.Val;
 import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
+import crypto.constraints.BinaryConstraint;
+import crypto.constraints.ComparisonConstraint;
+import crypto.constraints.ValueConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLArithmeticConstraint;
 import crysl.rule.CrySLComparisonConstraint;
@@ -18,8 +21,8 @@ import java.util.Objects;
 
 public class ConstraintError extends AbstractConstraintsError {
 
-    private final CallSiteWithExtractedValue callSite;
-    private final ISLConstraint violatedConstraint;
+    private CallSiteWithExtractedValue callSite;
+    private ISLConstraint constraint;
 
     public ConstraintError(
             IAnalysisSeed seed,
@@ -29,11 +32,47 @@ public class ConstraintError extends AbstractConstraintsError {
         super(seed, cs.callSiteWithParam().statement(), rule);
 
         this.callSite = cs;
-        this.violatedConstraint = constraint;
+        this.constraint = constraint;
+    }
+
+    private IViolatedConstraint violatedConstraint;
+
+    public ConstraintError(BinaryConstraint constraint, IAnalysisSeed seed, CrySLRule rule) {
+        super(seed, seed.getOrigin(), rule);
+
+        this.violatedConstraint = new IViolatedConstraint.ViolatedBinaryConstraint(constraint);
+    }
+
+    public ConstraintError(
+            ComparisonConstraint constraint,
+            IAnalysisSeed seed,
+            Statement statement,
+            CrySLRule rule) {
+        super(seed, statement, rule);
+
+        this.violatedConstraint = new IViolatedConstraint.ViolatedComparisonConstraint(constraint);
+    }
+
+    public ConstraintError(
+            ValueConstraint constraint, IAnalysisSeed seed, Statement statement, CrySLRule rule) {
+        super(seed, statement, rule);
+
+        this.violatedConstraint = new IViolatedConstraint.ViolatedValueConstraint(constraint);
+    }
+
+    private sealed interface IViolatedConstraint {
+
+        record ViolatedBinaryConstraint(BinaryConstraint constraint)
+                implements IViolatedConstraint {}
+
+        record ViolatedComparisonConstraint(ComparisonConstraint constraint)
+                implements IViolatedConstraint {}
+
+        record ViolatedValueConstraint(ValueConstraint constraint) implements IViolatedConstraint {}
     }
 
     public ISLConstraint getViolatedConstraint() {
-        return violatedConstraint;
+        return constraint;
     }
 
     public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
@@ -42,7 +81,7 @@ public class ConstraintError extends AbstractConstraintsError {
 
     @Override
     public String toErrorMarkerString() {
-        return callSite.toString() + evaluateBrokenConstraint(violatedConstraint);
+        return callSite.toString() + evaluateBrokenConstraint(constraint);
     }
 
     private String evaluateBrokenConstraint(final ISLConstraint constraint) {
@@ -152,7 +191,7 @@ public class ConstraintError extends AbstractConstraintsError {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), callSite, violatedConstraint);
+        return Objects.hash(super.hashCode(), callSite, constraint, violatedConstraint);
     }
 
     @Override
@@ -160,7 +199,8 @@ public class ConstraintError extends AbstractConstraintsError {
         return super.equals(obj)
                 && obj instanceof ConstraintError other
                 && Objects.equals(callSite, other.getCallSiteWithExtractedValue())
-                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
+                && Objects.equals(constraint, other.getViolatedConstraint())
+                && Objects.equals(violatedConstraint, other.violatedConstraint);
     }
 
     @Override

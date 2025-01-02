@@ -8,6 +8,7 @@ import boomerang.scene.Val;
 import boomerang.scene.jimple.IntAndStringBoomerangOptions;
 import boomerang.scene.jimple.JimpleVal;
 import boomerang.scene.sparse.SparseCFGCache;
+import crypto.definition.Definitions;
 import crypto.extractparameter.transformation.OperatorTransformation;
 import crypto.extractparameter.transformation.StringTransformation;
 import crypto.extractparameter.transformation.WrapperTransformation;

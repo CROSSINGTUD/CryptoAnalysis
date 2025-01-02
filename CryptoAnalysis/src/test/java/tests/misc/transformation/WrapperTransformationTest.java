@@ -21,7 +21,7 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         constraint.integerParseIntConstraint(correctValue);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         constraint.bigIntegerValueOfConstraint(correctValue);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -56,6 +56,6 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 }

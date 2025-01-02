@@ -13,12 +13,17 @@ import crypto.analysis.AbstractPredicate;
 import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
 import crypto.listener.IResultsListener;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Map;
+import test.assertions.ConstraintsEvaluatedAssertion;
+import test.assertions.ConstraintsNotRelevantAssertion;
+import test.assertions.ConstraintsSatisfiedAssertion;
+import test.assertions.ConstraintsViolatedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.HasGeneratedPredicateAssertion;
@@ -99,6 +104,33 @@ public class UsagePatternResultsListener implements IResultsListener {
             IAnalysisSeed analysisSeed,
             Collection<ISLConstraint> constraints,
             Collection<AbstractError> errors) {}
+
+    @Override
+    public void evaluatedConstraint(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {
+        for (Assertion assertion : assertions) {
+            Collection<Val> values =
+                    seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
+
+            if (assertion instanceof ConstraintsEvaluatedAssertion a) {
+                a.reported(values);
+            }
+
+            if (assertion instanceof ConstraintsSatisfiedAssertion a) {
+                a.reported(values, result);
+            }
+
+            if (assertion instanceof ConstraintsViolatedAssertion a) {
+                a.reported(values, result);
+            }
+
+            if (assertion instanceof ConstraintsNotRelevantAssertion a) {
+                a.reported(values, result);
+            }
+        }
+    }
 
     @Override
     public void generatedPredicate(

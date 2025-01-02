@@ -1,15 +1,18 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.extractparameter.ExtractedValue;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
 import java.util.Objects;
 
 public class HardCodedError extends AbstractConstraintsError {
 
-    private final CallSiteWithExtractedValue extractedValue;
-    private final ISLConstraint violatedConstraint;
+    private CallSiteWithExtractedValue extractedValue;
+    private ISLConstraint violatedConstraint;
 
     public HardCodedError(
             IAnalysisSeed seed,
@@ -20,6 +23,16 @@ public class HardCodedError extends AbstractConstraintsError {
 
         this.extractedValue = cs;
         this.violatedConstraint = constraint;
+    }
+
+    public HardCodedError(
+            IAnalysisSeed seed,
+            Statement statement,
+            CrySLRule rule,
+            Val val,
+            int paramIndex,
+            ExtractedValue extractedValue) {
+        super(seed, statement, rule);
     }
 
     public CallSiteWithExtractedValue getExtractedValue() {

@@ -1,4 +1,4 @@
-package crypto.constraints;
+package crypto.constraintsOld;
 
 import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
@@ -138,7 +138,7 @@ public class ConstraintSolver {
 
         for (ISLConstraint con : getRelConstraints()) {
             EvaluableConstraint currentConstraint = EvaluableConstraint.getInstance(con, this);
-            currentConstraint.evaluate();
+            // currentConstraint.evaluate();
 
             violatedConstraints.addAll(currentConstraint.getErrors());
         }
