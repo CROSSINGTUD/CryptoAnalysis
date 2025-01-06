@@ -11,8 +11,12 @@ import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 public abstract class EvaluableConstraint {
+
+    public static final Collection<String> predefinedPredicates =
+            Set.of("callTo", "noCallTo", "neverTypeOf", "length", "instanceOf", "notHardCoded");
 
     protected final AnalysisSeedWithSpecification seed;
     protected final Collection<Statement> statements;
@@ -49,8 +53,13 @@ public abstract class EvaluableConstraint {
             return new ComparisonConstraint(
                     seed, comparisonConstraint, statements, filteredStatements);
         } else if (constraint instanceof CrySLPredicate predicateConstraint) {
-            return new PredicateConstraint(
-                    seed, predicateConstraint, statements, filteredStatements);
+            if (predefinedPredicates.contains(predicateConstraint.getPredName())) {
+                return new PredefinedPredicateConstraint(
+                        seed, statements, filteredStatements, predicateConstraint);
+            } else {
+                return new RequiredPredicateConstraint(
+                        seed, statements, filteredStatements, predicateConstraint);
+            }
         } else if (constraint instanceof CrySLConstraint cryslConstraint) {
             return new BinaryConstraint(seed, cryslConstraint, statements, filteredStatements);
         }

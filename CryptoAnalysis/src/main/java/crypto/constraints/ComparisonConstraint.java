@@ -11,6 +11,7 @@ import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLArithmeticConstraint;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLObject;
+import crysl.rule.CrySLPredicate;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Collections;
@@ -199,6 +200,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 left = new ArithmeticSingleton(leftObject, statementToValues);
             } else if (constraint.getLeft() instanceof CrySLArithmeticConstraint leftConstraint) {
                 left = new ArithmeticConstraint(leftConstraint, statementToValues);
+            } else if (constraint.getLeft() instanceof CrySLPredicate leftPredicate) {
+                left = new ArithmeticLength(leftPredicate, statementToValues);
             } else {
                 throw new IllegalArgumentException("Could not evaluate constraint");
             }
@@ -207,6 +210,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 right = new ArithmeticSingleton(rightObject, statementToValues);
             } else if (constraint.getRight() instanceof CrySLArithmeticConstraint rightConstraint) {
                 right = new ArithmeticConstraint(rightConstraint, statementToValues);
+            } else if (constraint.getRight() instanceof CrySLPredicate rightPredicate) {
+                right = new ArithmeticLength(rightPredicate, statementToValues);
             } else {
                 throw new IllegalArgumentException("Could not evaluate constraint");
             }
@@ -338,6 +343,24 @@ public class ComparisonConstraint extends EvaluableConstraint {
         @Override
         public String toString() {
             return object.getVarName();
+        }
+    }
+
+    private static class ArithmeticLength extends IArithmeticConstraint {
+
+        private final CrySLPredicate predicate;
+
+        public ArithmeticLength(
+                CrySLPredicate predicate,
+                Multimap<Statement, ParameterWithExtractedValues> statementToValues) {
+            super(statementToValues);
+
+            this.predicate = predicate;
+        }
+
+        @Override
+        public IntermediateResult evaluate(Statement statement) {
+            return new IntermediateResult(Collections.emptySet(), Collections.emptySet());
         }
     }
 

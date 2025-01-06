@@ -22,15 +22,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class PredicateConstraint extends EvaluableConstraint {
+public class PredefinedPredicateConstraint extends EvaluableConstraint {
 
     private final CrySLPredicate constraint;
 
-    public PredicateConstraint(
+    public PredefinedPredicateConstraint(
             AnalysisSeedWithSpecification seed,
-            CrySLPredicate constraint,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            Collection<ParameterWithExtractedValues> extractedValues,
+            CrySLPredicate constraint) {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;
@@ -45,7 +45,7 @@ public class PredicateConstraint extends EvaluableConstraint {
     public EvaluationResult evaluate() {
         String predName = constraint.getPredName();
 
-        if (ConstraintsAnalysis.predefinedPredicates.contains(predName)) {
+        if (predefinedPredicates.contains(predName)) {
             return handlePredefinedPredicate(constraint);
         }
 
@@ -150,6 +150,10 @@ public class PredicateConstraint extends EvaluableConstraint {
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
                 filterRelevantParameterResults(variable.getName(), extractedValues);
+        if (relevantExtractedValues.isEmpty()) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 for (Type type : extractedValue.types()) {
@@ -192,6 +196,10 @@ public class PredicateConstraint extends EvaluableConstraint {
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
                 filterRelevantParameterResults(variable.getName(), extractedValues);
+        if (relevantExtractedValues.isEmpty()) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             boolean isSubType = false;
 
@@ -237,6 +245,10 @@ public class PredicateConstraint extends EvaluableConstraint {
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
                 filterRelevantParameterResults(variable.getName(), extractedValues);
+        if (relevantExtractedValues.isEmpty()) {
+            return EvaluationResult.ConstraintIsNotRelevant;
+        }
+
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 if (isHardCoded(extractedValue)) {
@@ -295,5 +307,10 @@ public class PredicateConstraint extends EvaluableConstraint {
             }
         }
         return objects;
+    }
+
+    @Override
+    public String toString() {
+        return constraint.toString();
     }
 }

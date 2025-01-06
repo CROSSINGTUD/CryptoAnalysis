@@ -40,11 +40,6 @@ public class BinaryConstraint extends EvaluableConstraint {
         EvaluationResult leftResult = leftConstraint.evaluate();
         EvaluationResult rightResult = rightConstraint.evaluate();
 
-        if (leftResult == EvaluationResult.ConstraintIsNotRelevant
-                && rightResult == EvaluationResult.ConstraintIsNotRelevant) {
-            // return EvaluationResult.ConstraintIsNotRelevant;
-        }
-
         switch (constraint.getOperator()) {
             case implies -> {
                 if (leftResult == EvaluationResult.ConstraintIsNotSatisfied) {

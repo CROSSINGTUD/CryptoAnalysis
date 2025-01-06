@@ -182,11 +182,9 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(PredicateContradictionError predicateContradictionError) {
-        for (Assertion e : assertions) {
-            if (e instanceof PredicateContradictionErrorCountAssertion) {
-                PredicateContradictionErrorCountAssertion a =
-                        (PredicateContradictionErrorCountAssertion) e;
-                a.increaseCount();
+        for (Assertion a : assertions) {
+            if (a instanceof PredicateContradictionErrorCountAssertion assertion) {
+                assertion.increaseCount();
             }
         }
     }

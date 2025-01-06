@@ -1,9 +1,12 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.UnEnsuredPredicate;
 import crysl.rule.CrySLPredicate;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -31,6 +34,19 @@ public class RequiredPredicateError extends AbstractRequiredPredicateError {
 
         this.contradictedPredicate = violatedPred.getPred();
         this.paramIndex = violatedPred.getParamIndex();
+    }
+
+    public RequiredPredicateError(
+            IAnalysisSeed seed,
+            Statement statement,
+            CrySLRule rule,
+            CrySLPredicate predicate,
+            int paramIndex,
+            Collection<UnEnsuredPredicate> unEnsuredPredicates) {
+        super(seed, statement, rule, unEnsuredPredicates);
+
+        this.contradictedPredicate = predicate;
+        this.paramIndex = paramIndex;
     }
 
     public CrySLPredicate getContradictedPredicates() {

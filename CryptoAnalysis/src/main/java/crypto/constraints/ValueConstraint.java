@@ -12,6 +12,7 @@ import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
+import java.util.HashSet;
 
 /** Constraints: varName in {C1, ..., Cn} */
 public class ValueConstraint extends EvaluableConstraint {
@@ -45,7 +46,7 @@ public class ValueConstraint extends EvaluableConstraint {
         }
 
         Collection<String> allowedValues = constraint.getValueRange();
-        allowedValues = allowedValues.stream().map(String::toLowerCase).toList();
+        allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
@@ -78,6 +79,22 @@ public class ValueConstraint extends EvaluableConstraint {
         }
     }
 
+    private Collection<String> formatAllowedValues(Collection<String> originalValues) {
+        Collection<String> formattedValues = new HashSet<>();
+
+        for (String originalValue : originalValues) {
+            if (originalValue.equalsIgnoreCase("true")) {
+                formattedValues.add("1");
+            } else if (originalValue.equalsIgnoreCase("false")) {
+                formattedValues.add("0");
+            } else {
+                formattedValues.add(originalValue.toLowerCase());
+            }
+        }
+
+        return formattedValues;
+    }
+
     private String checkForSplitterValue(String valAsString, CrySLSplitter splitter) {
         if (splitter == null) {
             return valAsString;
@@ -85,6 +102,10 @@ public class ValueConstraint extends EvaluableConstraint {
 
         String splitValue = splitter.getSplitter();
         String[] splits = valAsString.split(splitValue);
+
+        if (splits.length <= splitter.getIndex()) {
+            return "";
+        }
 
         return splits[splitter.getIndex()];
     }

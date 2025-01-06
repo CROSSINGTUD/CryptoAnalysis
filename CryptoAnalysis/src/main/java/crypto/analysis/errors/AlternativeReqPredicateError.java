@@ -1,10 +1,13 @@
 package crypto.analysis.errors;
 
+import boomerang.scene.Statement;
 import crypto.analysis.AlternativeReqPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.RequiredCrySLPredicate;
 import crypto.analysis.UnEnsuredPredicate;
 import crysl.rule.CrySLPredicate;
+import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,7 +30,7 @@ import java.util.Set;
 public class AlternativeReqPredicateError extends AbstractRequiredPredicateError {
 
     private final Collection<CrySLPredicate> contradictedPredicate;
-    private final Collection<RequiredCrySLPredicate> relevantPredicates;
+    private Collection<RequiredCrySLPredicate> relevantPredicates;
 
     public AlternativeReqPredicateError(
             AnalysisSeedWithSpecification seed,
@@ -37,6 +40,17 @@ public class AlternativeReqPredicateError extends AbstractRequiredPredicateError
 
         this.contradictedPredicate = List.copyOf(violatedPred.getAllAlternatives());
         this.relevantPredicates = Set.copyOf(violatedPred.getRelAlternatives());
+    }
+
+    public AlternativeReqPredicateError(
+            IAnalysisSeed seed,
+            Statement statement,
+            CrySLRule rule,
+            Collection<CrySLPredicate> predicates,
+            Collection<AbstractConstraintsError> violatedPredicateErrors) {
+        super(seed, statement, rule, new HashSet<>());
+
+        this.contradictedPredicate = predicates;
     }
 
     public Collection<CrySLPredicate> getContradictedPredicate() {

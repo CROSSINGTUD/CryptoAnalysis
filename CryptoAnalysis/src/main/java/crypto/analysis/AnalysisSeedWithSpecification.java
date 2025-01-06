@@ -16,6 +16,7 @@ import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintsAnalysis;
+import crypto.constraints.RequiredPredicate;
 import crypto.constraintsOld.ConstraintSolver;
 import crypto.constraintsOld.EvaluableConstraint;
 import crypto.definition.Definitions;
@@ -338,7 +339,12 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     private void initializeDependantSeedsFromRequiredPredicates(Collection<IAnalysisSeed> seeds) {
         Multimap<Statement, Map.Entry<CrySLPredicate, Integer>> reqPreds = HashMultimap.create();
-        for (ISLConstraint constraint : constraintSolver.getRequiredPredicates()) {
+        for (RequiredPredicate reqPred : constraintsAnalysis.getRequiredPredicates()) {
+            Map.Entry<CrySLPredicate, Integer> entry =
+                    new AbstractMap.SimpleEntry<>(reqPred.predicate(), reqPred.index());
+            reqPreds.put(reqPred.statement(), entry);
+        }
+        /*for (ISLConstraint constraint : constraintSolver.getRequiredPredicates()) {
             if (constraint instanceof RequiredCrySLPredicate reqPred) {
                 Map.Entry<CrySLPredicate, Integer> entry =
                         new AbstractMap.SimpleEntry<>(reqPred.getPred(), reqPred.getParamIndex());
@@ -352,7 +358,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                     reqPreds.put(reqPred.getLocation(), entry);
                 }
             }
-        }
+        }*/
 
         for (Statement statement : reqPreds.keySet()) {
             if (!statement.containsInvokeExpr()) {
@@ -859,11 +865,19 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
      * @return true if all internal and required predicate constraints are satisfied
      */
     private boolean isConstraintSystemSatisfied() {
-        if (internalConstraintsSatisfied) {
+        Collection<AbstractConstraintsError> violatedPredicates =
+                constraintsAnalysis.evaluateRequiredPredicates();
+        for (AbstractConstraintsError error : violatedPredicates) {
+            addError(error);
+            scanner.getAnalysisReporter().reportError(this, error);
+        }
+        return internalConstraintsSatisfied && violatedPredicates.isEmpty();
+        /*if (internalConstraintsSatisfied) {
+            constraintsAnalysis.evaluateRequiredPredicates();
             return computeMissingPredicates().isEmpty()
                     && computeContradictedPredicates().isEmpty();
         }
-        return false;
+        return false;*/
     }
 
     /**
@@ -1196,6 +1210,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     public Map<ControlFlowGraph.Edge, DeclaredMethod> getAllCallsOnObject() {
         return allCallsOnObject;
+    }
+
+    public Collection<Map.Entry<EnsuredPredicate, Integer>> getEnsuredPredicatesAtStatement(
+            Statement statement) {
+        return ensuredPredicates.get(statement);
+    }
+
+    public Collection<Map.Entry<UnEnsuredPredicate, Integer>> getUnEnsuredPredicatesAtStatement(
+            Statement statement) {
+        return hiddenPredicates.get(statement);
     }
 
     @Override

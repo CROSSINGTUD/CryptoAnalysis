@@ -12,6 +12,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Map;
@@ -30,6 +31,9 @@ public interface IResultsListener {
 
     void collectedValues(
             IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues);
+
+    void extractedParameterValues(
+            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues);
 
     void evaluatedConstraint(
             IAnalysisSeed seed,

@@ -27,6 +27,7 @@ import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
@@ -181,6 +182,11 @@ public class AnalysisReporter {
         }
     }
 
+    public void onEvaluatedPredicate(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {}
+
     public void beforePredicateCheck() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.beforePredicateCheck();
@@ -220,6 +226,13 @@ public class AnalysisReporter {
             IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.collectedValues(seed, collectedValues);
+        }
+    }
+
+    public void extractedParameterValues(
+            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues) {
+        for (IResultsListener resultsListener : resultsListeners) {
+            resultsListener.extractedParameterValues(seed, extractedValues);
         }
     }
 

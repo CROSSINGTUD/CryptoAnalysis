@@ -51,7 +51,12 @@ public class HasEnsuredPredicateAssertion implements Assertion {
     @Override
     public String toString() {
         if (predName == null) {
-            return "Expected a predicate for " + val.getVariableName() + " @ " + stmt;
+            return "Expected a predicate for "
+                    + val.getVariableName()
+                    + " @ "
+                    + stmt
+                    + " @ line "
+                    + stmt.getStartLineNumber();
         } else {
             return "Expected '"
                     + predName

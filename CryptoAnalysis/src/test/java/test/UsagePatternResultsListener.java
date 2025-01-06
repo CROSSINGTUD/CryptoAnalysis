@@ -16,6 +16,7 @@ import crypto.analysis.errors.AbstractError;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.listener.IResultsListener;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
@@ -94,7 +95,17 @@ public class UsagePatternResultsListener implements IResultsListener {
         for (Assertion a : assertions) {
             if (a instanceof ExtractedValueAssertion) {
                 ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;
-                assertion.computedValues(collectedValues);
+                // assertion.computedValues(collectedValues);
+            }
+        }
+    }
+
+    @Override
+    public void extractedParameterValues(
+            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues) {
+        for (Assertion a : assertions) {
+            if (a instanceof ExtractedValueAssertion assertion) {
+                assertion.computedValues(extractedValues);
             }
         }
     }

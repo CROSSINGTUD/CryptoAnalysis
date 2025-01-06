@@ -47,9 +47,9 @@ public class CallToTest extends UsagePatternTestingFramework {
     @Test
     public void negativePredicateWithCondition() {
         // Condition is satisfied, but no call to operation3
-        CallTo callTo1 = new CallTo(true);
-        callTo1.operation2();
+        CallTo callTo = new CallTo(true);
+        callTo.operation2();
 
-        Assertions.callToErrors(1);
+        Assertions.constraintErrors(callTo, 1);
     }
 }

@@ -55,8 +55,8 @@ public class PredicateHandler {
                 PredicateContradictionError error =
                         new PredicateContradictionError(
                                 seed, pred.getLocation(), seed.getSpecification(), pred.getPred());
-                seed.addError(error);
-                cryptoScanner.getAnalysisReporter().reportError(seed, error);
+                // seed.addError(error);
+                // cryptoScanner.getAnalysisReporter().reportError(seed, error);
             }
         }
     }
@@ -92,8 +92,8 @@ public class PredicateHandler {
             Collection<AbstractRequiredPredicateError> errors = requiredPredicateErrors.get(seed);
 
             for (AbstractRequiredPredicateError reqPredError : errors) {
-                seed.addError(reqPredError);
-                cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
+                // seed.addError(reqPredError);
+                // cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
             }
         }
     }
