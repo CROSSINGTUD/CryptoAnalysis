@@ -117,9 +117,15 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 boolean satisfied = isOperatorSatisfied(leftValue, rightValue);
 
                 if (!satisfied) {
-                    // TODO Make it more expressive
+                    IViolatedConstraint violatedConstraint =
+                            new IViolatedConstraint.ViolatedComparisonConstraint(this);
                     ConstraintError error =
-                            new ConstraintError(this, seed, statement, seed.getSpecification());
+                            new ConstraintError(
+                                    seed,
+                                    statement,
+                                    seed.getSpecification(),
+                                    this,
+                                    violatedConstraint);
                     errors.add(error);
                 }
             }

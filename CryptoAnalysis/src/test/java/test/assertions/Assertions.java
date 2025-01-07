@@ -55,36 +55,4 @@ public class Assertions {
     public static void impreciseValueExtractionErrors(int i) {}
 
     public static void callToErrors(int i) {}
-
-    public static void noCallToErrors(int i) {}
-
-    public static void neverTypeOfErrors(int i) {}
-
-    public static void notHardCodedErrors(int i) {}
-
-    public static void instanceOfErrors(int i) {}
-
-    public static void dependentError(int thisErrorNr) {}
-
-    public static void dependentError(int thisErrorNr, int precedingError1) {}
-
-    public static void dependentError(int thisErrorNr, int precedingError1, int precedingError2) {}
-
-    public static void dependentError(
-            int thisErrorNr, int precedingError1, int precedingError2, int precedingError3) {}
-
-    public static void dependentError(
-            int thisErrorNr,
-            int precedingError1,
-            int precedingError2,
-            int precedingError3,
-            int precedingError4) {}
-
-    public static void dependentError(
-            int thisErrorNr,
-            int precedingError1,
-            int precedingError2,
-            int precedingError3,
-            int precedingError4,
-            int precedingError5) {}
 }

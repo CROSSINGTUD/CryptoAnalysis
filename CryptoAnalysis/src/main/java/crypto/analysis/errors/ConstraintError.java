@@ -1,90 +1,52 @@
 package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
-import com.google.common.base.CharMatcher;
 import crypto.analysis.IAnalysisSeed;
-import crypto.constraints.BinaryConstraint;
-import crypto.constraints.ComparisonConstraint;
-import crypto.constraints.ValueConstraint;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crysl.rule.CrySLArithmeticConstraint;
-import crysl.rule.CrySLComparisonConstraint;
-import crysl.rule.CrySLConstraint;
+import crypto.constraints.EvaluableConstraint;
+import crypto.constraints.IViolatedConstraint;
 import crysl.rule.CrySLRule;
-import crysl.rule.CrySLSplitter;
-import crysl.rule.CrySLValueConstraint;
-import crysl.rule.ISLConstraint;
-import java.util.Collection;
 import java.util.Objects;
 
 public class ConstraintError extends AbstractConstraintsError {
 
-    private CallSiteWithExtractedValue callSite;
-    private ISLConstraint constraint;
+    private final EvaluableConstraint evaluableConstraint;
+    private final IViolatedConstraint violatedConstraint;
 
+    /**
+     * Constructs a ConstraintError for a violated constraint
+     *
+     * @param seed the seed with the violated predicate
+     * @param statement the statement of the violation
+     * @param rule the rule containing the violated predicate
+     * @param evaluableConstraint the evaluated constraint
+     * @param violatedConstraint the violated constraint
+     */
     public ConstraintError(
-            IAnalysisSeed seed,
-            CallSiteWithExtractedValue cs,
-            CrySLRule rule,
-            ISLConstraint constraint) {
-        super(seed, cs.callSiteWithParam().statement(), rule);
-
-        this.callSite = cs;
-        this.constraint = constraint;
-    }
-
-    private IViolatedConstraint violatedConstraint;
-
-    public ConstraintError(BinaryConstraint constraint, IAnalysisSeed seed, CrySLRule rule) {
-        super(seed, seed.getOrigin(), rule);
-
-        this.violatedConstraint = new IViolatedConstraint.ViolatedBinaryConstraint(constraint);
-    }
-
-    public ConstraintError(
-            ComparisonConstraint constraint,
             IAnalysisSeed seed,
             Statement statement,
-            CrySLRule rule) {
+            CrySLRule rule,
+            EvaluableConstraint evaluableConstraint,
+            IViolatedConstraint violatedConstraint) {
         super(seed, statement, rule);
 
-        this.violatedConstraint = new IViolatedConstraint.ViolatedComparisonConstraint(constraint);
+        this.evaluableConstraint = evaluableConstraint;
+        this.violatedConstraint = violatedConstraint;
     }
 
-    public ConstraintError(
-            ValueConstraint constraint, IAnalysisSeed seed, Statement statement, CrySLRule rule) {
-        super(seed, statement, rule);
-
-        this.violatedConstraint = new IViolatedConstraint.ViolatedValueConstraint(constraint);
-    }
-
-    private sealed interface IViolatedConstraint {
-
-        record ViolatedBinaryConstraint(BinaryConstraint constraint)
-                implements IViolatedConstraint {}
-
-        record ViolatedComparisonConstraint(ComparisonConstraint constraint)
-                implements IViolatedConstraint {}
-
-        record ViolatedValueConstraint(ValueConstraint constraint) implements IViolatedConstraint {}
-    }
-
-    public ISLConstraint getViolatedConstraint() {
-        return constraint;
-    }
-
-    public CallSiteWithExtractedValue getCallSiteWithExtractedValue() {
-        return callSite;
+    public IViolatedConstraint getViolatedConstraint() {
+        return violatedConstraint;
     }
 
     @Override
     public String toErrorMarkerString() {
-        return callSite.toString() + evaluateBrokenConstraint(constraint);
+        return "Constraint "
+                + evaluableConstraint
+                + " on object "
+                + getSeed().getFact()
+                + " is violated due to the following reasons:";
     }
 
-    private String evaluateBrokenConstraint(final ISLConstraint constraint) {
+    /*private String evaluateBrokenConstraint(final ISLConstraint constraint) {
         StringBuilder msg = new StringBuilder();
         if (constraint instanceof CrySLValueConstraint) {
             return evaluateValueConstraint((CrySLValueConstraint) constraint);
@@ -187,19 +149,17 @@ public class ConstraintError extends AbstractConstraintsError {
 
     public static String filterQuotes(final String dirty) {
         return CharMatcher.anyOf("\"").removeFrom(dirty);
-    }
+    }*/
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), callSite, constraint, violatedConstraint);
+        return Objects.hash(super.hashCode(), violatedConstraint);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof ConstraintError other
-                && Objects.equals(callSite, other.getCallSiteWithExtractedValue())
-                && Objects.equals(constraint, other.getViolatedConstraint())
                 && Objects.equals(violatedConstraint, other.violatedConstraint);
     }
 

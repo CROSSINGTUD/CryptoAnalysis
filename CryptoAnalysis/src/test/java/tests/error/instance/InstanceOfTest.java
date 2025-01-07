@@ -20,7 +20,7 @@ public class InstanceOfTest extends UsagePatternTestingFramework {
         instanceOf.operation1(new SuperClass());
         instanceOf.operation1(new SubClass());
 
-        Assertions.instanceOfErrors(0);
+        Assertions.constraintErrors(instanceOf, 0);
     }
 
     @Test
@@ -31,6 +31,6 @@ public class InstanceOfTest extends UsagePatternTestingFramework {
         SuperClass superClass = new SuperClass();
         instanceOf.operation2(superClass);
 
-        Assertions.instanceOfErrors(1);
+        Assertions.constraintErrors(instanceOf, 1);
     }
 }

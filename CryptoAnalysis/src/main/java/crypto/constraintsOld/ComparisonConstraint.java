@@ -2,7 +2,6 @@ package crypto.constraintsOld;
 
 import boomerang.scene.Val;
 import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crypto.extractparameter.ExtractedValue;
@@ -29,13 +28,13 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
         for (Map.Entry<Integer, CallSiteWithExtractedValue> entry : right.entrySet()) {
             if (entry.getKey() == Integer.MIN_VALUE) {
-                ConstraintError error =
+                /*ConstraintError error =
                         new ConstraintError(
                                 context.getSeed(),
                                 entry.getValue(),
                                 context.getSpecification(),
                                 compConstraint);
-                errors.add(error);
+                errors.add(error);*/
 
                 return;
             }
@@ -43,13 +42,13 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
         for (Map.Entry<Integer, CallSiteWithExtractedValue> leftie : left.entrySet()) {
             if (leftie.getKey() == Integer.MIN_VALUE) {
-                ConstraintError error =
+                /*ConstraintError error =
                         new ConstraintError(
                                 context.getSeed(),
                                 leftie.getValue(),
                                 context.getSpecification(),
                                 compConstraint);
-                errors.add(error);
+                errors.add(error);*/
 
                 return;
             }
@@ -79,13 +78,13 @@ public class ComparisonConstraint extends EvaluableConstraint {
                         cons = false;
                 }
                 if (!cons) {
-                    ConstraintError error =
+                    /*ConstraintError error =
                             new ConstraintError(
                                     context.getSeed(),
                                     leftie.getValue(),
                                     context.getSpecification(),
                                     origin);
-                    errors.add(error);
+                    errors.add(error);*/
 
                     return;
                 }

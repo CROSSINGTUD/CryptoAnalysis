@@ -9,19 +9,26 @@ import java.util.Objects;
 public class PredicateContradictionError extends AbstractConstraintsError {
 
     private final CrySLPredicate contradictedPredicate;
+    private final int paramIndex;
 
     public PredicateContradictionError(
             IAnalysisSeed seed,
             Statement errorStmt,
             CrySLRule rule,
-            CrySLPredicate contradictedPredicate) {
+            CrySLPredicate contradictedPredicate,
+            int paramIndex) {
         super(seed, errorStmt, rule);
 
         this.contradictedPredicate = contradictedPredicate;
+        this.paramIndex = paramIndex;
     }
 
     public CrySLPredicate getContradictedPredicate() {
         return contradictedPredicate;
+    }
+
+    public int getParamIndex() {
+        return paramIndex;
     }
 
     @Override
@@ -31,14 +38,15 @@ public class PredicateContradictionError extends AbstractConstraintsError {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), contradictedPredicate);
+        return Objects.hash(super.hashCode(), contradictedPredicate, paramIndex);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof PredicateContradictionError other
-                && Objects.equals(contradictedPredicate, other.getContradictedPredicate());
+                && Objects.equals(contradictedPredicate, other.getContradictedPredicate())
+                && paramIndex == other.getParamIndex();
     }
 
     @Override

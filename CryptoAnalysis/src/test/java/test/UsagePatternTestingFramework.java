@@ -34,7 +34,6 @@ import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
 import test.assertions.Assertions;
-import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.ConstraintsEvaluatedAssertion;
@@ -50,12 +49,8 @@ import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
-import test.assertions.InstanceOfErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
-import test.assertions.NeverTypeOfErrorCountAssertion;
-import test.assertions.NoCallToErrorCountAssertion;
 import test.assertions.NoMissingTypestateChange;
-import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradictionErrorCountAssertion;
@@ -430,46 +425,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                     continue;
                 }
                 queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("callToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new CallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("noCallToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NoCallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("neverTypeOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NeverTypeOfErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("notHardCodedErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NotHardCodedErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("instanceOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new InstanceOfErrorCountAssertion(param.getIntValue()));
             }
 
             if (invocationName.startsWith("dependentError")) {

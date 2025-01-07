@@ -50,7 +50,8 @@ public class ValueConstraint extends EvaluableConstraint {
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                if (extractedValue.val().equals(Val.zero()) || !extractedValue.val().isConstant()) {
+                if (extractedValue.val().equals(Val.zero())
+                        || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
                     ImpreciseValueExtractionError error =
                             new ImpreciseValueExtractionError(
                                     seed, parameter.statement(), seed.getSpecification(), this);
@@ -63,9 +64,15 @@ public class ValueConstraint extends EvaluableConstraint {
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
                     if (!allowedValues.contains(valAsString)) {
+                        IViolatedConstraint violatedConstraint =
+                                new IViolatedConstraint.ViolatedValueConstraint(this);
                         ConstraintError error =
                                 new ConstraintError(
-                                        this, seed, parameter.statement(), seed.getSpecification());
+                                        seed,
+                                        parameter.statement(),
+                                        seed.getSpecification(),
+                                        this,
+                                        violatedConstraint);
                         errors.add(error);
                     }
                 }
@@ -122,6 +129,8 @@ public class ValueConstraint extends EvaluableConstraint {
             } else if (val.isClassConstant()) {
                 return val.getClassConstantType().toString();
             }
+        } else if (val.isNull()) {
+            return "null";
         }
 
         throw new CryptoAnalysisException("Val " + val.getVariableName() + " is not a constant");

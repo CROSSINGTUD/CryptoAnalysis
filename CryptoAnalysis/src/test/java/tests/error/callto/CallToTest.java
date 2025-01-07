@@ -18,7 +18,7 @@ public class CallToTest extends UsagePatternTestingFramework {
         CallTo callTo = new CallTo();
         callTo.operation2();
 
-        Assertions.callToErrors(0);
+        Assertions.constraintErrors(callTo, 0);
     }
 
     @Test
@@ -27,7 +27,7 @@ public class CallToTest extends UsagePatternTestingFramework {
         CallTo callTo = new CallTo();
         callTo.operation1();
 
-        Assertions.callToErrors(1);
+        Assertions.constraintErrors(callTo, 1);
     }
 
     @Test
@@ -41,7 +41,8 @@ public class CallToTest extends UsagePatternTestingFramework {
         CallTo callTo2 = new CallTo(false);
         callTo2.operation2();
 
-        Assertions.callToErrors(0);
+        Assertions.constraintErrors(callTo1, 0);
+        Assertions.constraintErrors(callTo2, 0);
     }
 
     @Test

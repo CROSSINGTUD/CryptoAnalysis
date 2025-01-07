@@ -2,9 +2,6 @@ package crypto.analysis;
 
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AbstractRequiredPredicateError;
-import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.PredicateContradictionError;
-import crypto.analysis.errors.RequiredPredicateError;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,19 +12,13 @@ import java.util.Map;
 public class PredicateHandler {
 
     private final CryptoScanner cryptoScanner;
-    private final Map<AnalysisSeedWithSpecification, List<AbstractRequiredPredicateError>>
-            requiredPredicateErrors;
 
     public PredicateHandler(CryptoScanner cryptoScanner) {
         this.cryptoScanner = cryptoScanner;
-        this.requiredPredicateErrors = new HashMap<>();
     }
 
     public void checkPredicates() {
         runPredicateMechanism();
-        collectContradictingPredicates();
-        collectMissingRequiredPredicates();
-        reportRequiredPredicateErrors();
 
         // Connections are only available once all errors have been reported
         connectSubsequentErrors();
@@ -46,64 +37,14 @@ public class PredicateHandler {
         }
     }
 
-    private void collectContradictingPredicates() {
-        for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
-            Collection<RequiredCrySLPredicate> contradictedPredicates =
-                    seed.computeContradictedPredicates();
-
-            for (RequiredCrySLPredicate pred : contradictedPredicates) {
-                PredicateContradictionError error =
-                        new PredicateContradictionError(
-                                seed, pred.getLocation(), seed.getSpecification(), pred.getPred());
-                // seed.addError(error);
-                // cryptoScanner.getAnalysisReporter().reportError(seed, error);
-            }
-        }
-    }
-
-    private void collectMissingRequiredPredicates() {
-        for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
-            requiredPredicateErrors.put(seed, new ArrayList<>());
-
-            Collection<RequiredCrySLPredicate> violatedReqPreds =
-                    seed.computeViolatedRequiredPredicates();
-            for (RequiredCrySLPredicate reqPred : violatedReqPreds) {
-                Collection<UnEnsuredPredicate> hiddenPreds = seed.extractHiddenPredicates(reqPred);
-
-                RequiredPredicateError reqPredError =
-                        new RequiredPredicateError(seed, reqPred, hiddenPreds);
-                requiredPredicateErrors.get(seed).add(reqPredError);
-            }
-
-            Collection<AlternativeReqPredicate> violatedAltPreds =
-                    seed.computeViolatedAlternativePredicates();
-            for (AlternativeReqPredicate altPred : violatedAltPreds) {
-                Collection<UnEnsuredPredicate> hiddenPreds = seed.extractHiddenPredicates(altPred);
-
-                AlternativeReqPredicateError reqPredError =
-                        new AlternativeReqPredicateError(seed, altPred, hiddenPreds);
-                requiredPredicateErrors.get(seed).add(reqPredError);
-            }
-        }
-    }
-
-    private void reportRequiredPredicateErrors() {
-        for (AnalysisSeedWithSpecification seed : requiredPredicateErrors.keySet()) {
-            Collection<AbstractRequiredPredicateError> errors = requiredPredicateErrors.get(seed);
-
-            for (AbstractRequiredPredicateError reqPredError : errors) {
-                // seed.addError(reqPredError);
-                // cryptoScanner.getAnalysisReporter().reportError(seed, reqPredError);
-            }
-        }
-    }
-
     private void connectSubsequentErrors() {
-        for (AnalysisSeedWithSpecification seed : requiredPredicateErrors.keySet()) {
-            Collection<AbstractRequiredPredicateError> errors = requiredPredicateErrors.get(seed);
+        for (AnalysisSeedWithSpecification seed : cryptoScanner.getAnalysisSeedsWithSpec()) {
+            for (AbstractError error : seed.getErrors()) {
+                if (!(error instanceof AbstractRequiredPredicateError reqPredError)) {
+                    continue;
+                }
 
-            for (AbstractRequiredPredicateError error : errors) {
-                for (UnEnsuredPredicate unEnsuredPredicate : error.getHiddenPredicates()) {
+                for (UnEnsuredPredicate unEnsuredPredicate : reqPredError.getHiddenPredicates()) {
                     Collection<AbstractError> precedingErrors =
                             unEnsuredPredicate.getPrecedingErrors();
 

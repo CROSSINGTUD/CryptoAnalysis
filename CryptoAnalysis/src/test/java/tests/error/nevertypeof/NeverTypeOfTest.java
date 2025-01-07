@@ -19,7 +19,7 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         char[] value = new char[] {'a', 'l', 'l', 'o', 'w', 'e', 'd'};
         neverTypeOf.operation(value);
 
-        Assertions.neverTypeOfErrors(0);
+        Assertions.constraintErrors(neverTypeOf, 0);
     }
 
     @Test
@@ -27,7 +27,7 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         NeverTypeOf neverTypeOf = new NeverTypeOf();
         neverTypeOf.operation("notAllowed");
 
-        Assertions.neverTypeOfErrors(1);
+        Assertions.constraintErrors(neverTypeOf, 1);
     }
 
     @Test
@@ -40,6 +40,6 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         neverTypeOf.operation(transformedString);
         Assertions.extValue(0);
 
-        Assertions.neverTypeOfErrors(1);
+        Assertions.constraintErrors(neverTypeOf, 1);
     }
 }

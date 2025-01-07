@@ -5,11 +5,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.errors.CallToError;
-import crypto.analysis.errors.HardCodedError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.NoCallToError;
+import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.utils.MatcherUtils;
@@ -93,15 +89,21 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                     MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
                             seed.getSpecification(), foundCall);
 
-            for (CrySLMethod method : requiredCalls) {
-                if (matchingCryslMethods.contains(method)) {
-                    isCalled = true;
-                }
+            if (requiredCalls.stream().anyMatch(matchingCryslMethods::contains)) {
+                isCalled = true;
             }
         }
 
         if (!isCalled) {
-            CallToError error = new CallToError(seed, seed.getSpecification(), requiredCalls);
+            IViolatedConstraint violatedConstraint =
+                    new IViolatedConstraint.ViolatedCallToConstraint(requiredCalls);
+            ConstraintError error =
+                    new ConstraintError(
+                            seed,
+                            seed.getOrigin(),
+                            seed.getSpecification(),
+                            this,
+                            violatedConstraint);
             errors.add(error);
 
             return EvaluationResult.ConstraintIsNotSatisfied;
@@ -124,8 +126,15 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
             for (CrySLMethod method : notAllowedCalls) {
                 if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, foundCall)) {
-                    NoCallToError error =
-                            new NoCallToError(seed, statement, seed.getSpecification());
+                    IViolatedConstraint violatedConstraint =
+                            new IViolatedConstraint.ViolatedNoCallToConstraint(method);
+                    ConstraintError error =
+                            new ConstraintError(
+                                    seed,
+                                    statement,
+                                    seed.getSpecification(),
+                                    this,
+                                    violatedConstraint);
                     errors.add(error);
 
                     result = EvaluationResult.ConstraintIsNotSatisfied;
@@ -158,14 +167,18 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 for (Type type : extractedValue.types()) {
                     if (type.toString().equals(parameterType.getJavaType())) {
-                        NeverTypeOfError error =
-                                new NeverTypeOfError(
+                        IViolatedConstraint violatedConstraint =
+                                new IViolatedConstraint.ViolatedNeverTypeOfConstraint(
+                                        parameter.param(),
+                                        parameter.index(),
+                                        parameterType.getJavaType());
+                        ConstraintError error =
+                                new ConstraintError(
                                         seed,
                                         parameter.statement(),
                                         seed.getSpecification(),
-                                        parameter.param(),
-                                        parameter.index(),
-                                        extractedValue);
+                                        this,
+                                        violatedConstraint);
                         errors.add(error);
 
                         result = EvaluationResult.ConstraintIsNotSatisfied;
@@ -216,13 +229,16 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             }
 
             if (!isSubType) {
-                InstanceOfError error =
-                        new InstanceOfError(
+                IViolatedConstraint violatedConstraint =
+                        new IViolatedConstraint.ViolatedInstanceOfConstraint(
+                                parameter.param(), parameter.index(), parameterType.getJavaType());
+                ConstraintError error =
+                        new ConstraintError(
                                 seed,
                                 parameter.statement(),
                                 seed.getSpecification(),
-                                parameter.param(),
-                                parameter.index());
+                                this,
+                                violatedConstraint);
                 errors.add(error);
 
                 result = EvaluationResult.ConstraintIsNotSatisfied;
@@ -252,14 +268,16 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 if (isHardCoded(extractedValue)) {
-                    HardCodedError error =
-                            new HardCodedError(
+                    IViolatedConstraint violatedConstraint =
+                            new IViolatedConstraint.ViolatedNotHardCodedConstraint(
+                                    parameter.param(), parameter.index(), extractedValue);
+                    ConstraintError error =
+                            new ConstraintError(
                                     seed,
                                     parameter.statement(),
                                     seed.getSpecification(),
-                                    parameter.param(),
-                                    parameter.index(),
-                                    extractedValue);
+                                    this,
+                                    violatedConstraint);
                     errors.add(error);
 
                     result = EvaluationResult.ConstraintIsNotSatisfied;
@@ -279,7 +297,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         if (statement.isAssign()) {
             Val rightOp = statement.getRightOp();
 
-            return rightOp.isNewExpr();
+            return rightOp.isNewExpr() || rightOp.isArrayAllocationVal();
         }
 
         return false;

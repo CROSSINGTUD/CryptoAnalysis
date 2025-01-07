@@ -43,6 +43,20 @@ public class RequiredPredicateConstraint extends EvaluableConstraint {
 
     @Override
     public EvaluationResult evaluate() {
+        // TODO Move this outside
+        if (predicate.getConstraint().isPresent()) {
+            EvaluableConstraint constraint =
+                    EvaluableConstraint.getInstance(
+                            seed, predicate.getConstraint().get(), statements, extractedValues);
+            EvaluationResult result = constraint.evaluate();
+
+            if (result == EvaluationResult.ConstraintIsNotRelevant) {
+                return EvaluationResult.ConstraintIsNotRelevant;
+            } else if (result == EvaluationResult.ConstraintIsNotSatisfied) {
+                return EvaluationResult.ConstraintIsNotRelevant;
+            }
+        }
+
         boolean isRelevant = false;
 
         for (Statement statement : statements) {
@@ -149,7 +163,7 @@ public class RequiredPredicateConstraint extends EvaluableConstraint {
         if (ensured) {
             PredicateContradictionError error =
                     new PredicateContradictionError(
-                            seed, statement, seed.getSpecification(), predicate);
+                            seed, statement, seed.getSpecification(), predicate, index);
             errors.add(error);
         }
     }

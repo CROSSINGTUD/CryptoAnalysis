@@ -1,6 +1,5 @@
 package crypto.constraintsOld;
 
-import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLSplitter;
@@ -30,13 +29,13 @@ public class ValueConstraint extends EvaluableConstraint {
                 valCons.getValueRange().parallelStream().map(String::toLowerCase).toList();
         for (Map.Entry<String, CallSiteWithExtractedValue> val : values) {
             if (!lowerCaseValues.contains(val.getKey().toLowerCase())) {
-                ConstraintError error =
+                /*ConstraintError error =
                         new ConstraintError(
                                 context.getSeed(),
                                 val.getValue(),
                                 context.getSpecification(),
                                 valCons);
-                errors.add(error);
+                errors.add(error);*/
             }
         }
     }

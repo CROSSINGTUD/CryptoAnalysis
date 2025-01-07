@@ -256,4 +256,27 @@ public class ConstraintsAnalysis {
 
         return errors;
     }
+
+    /**
+     * Check for a predicate A =&gt; B, whether the condition A of B is satisfied
+     *
+     * @param pred the predicate to be checked
+     * @return true if the condition is satisfied
+     */
+    public boolean isPredConditionViolated(CrySLPredicate pred) {
+        return isPredConditionViolated(pred, collectedCalls);
+    }
+
+    public boolean isPredConditionViolated(CrySLPredicate pred, Collection<Statement> statements) {
+        if (pred.getConstraint().isEmpty()) {
+            return false;
+        }
+
+        EvaluableConstraint constraint =
+                EvaluableConstraint.getInstance(
+                        seed, pred.getConstraint().get(), statements, extractedValues);
+        EvaluableConstraint.EvaluationResult result = constraint.evaluate();
+
+        return result == EvaluableConstraint.EvaluationResult.ConstraintIsNotSatisfied;
+    }
 }
