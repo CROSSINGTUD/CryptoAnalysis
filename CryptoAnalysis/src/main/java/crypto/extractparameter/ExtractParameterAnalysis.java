@@ -21,7 +21,8 @@ public class ExtractParameterAnalysis {
                         definition.callGraph(),
                         definition.dataFlowScope(),
                         definition.timeout(),
-                        definition.strategy());
+                        definition.strategy(),
+                        definition.reporter());
         this.querySolver = new QuerySolver(querySolverDefinition);
     }
 

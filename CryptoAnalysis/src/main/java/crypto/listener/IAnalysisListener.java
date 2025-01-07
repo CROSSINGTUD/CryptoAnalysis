@@ -5,7 +5,7 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ExtractParameterQuery;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 
@@ -27,9 +27,9 @@ public interface IAnalysisListener {
 
     void afterTypestateAnalysis();
 
-    void beforeTriggeringBoomerangQuery(ExtractParameterQueryOld query);
+    void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
 
-    void afterTriggeringBoomerangQuery(ExtractParameterQueryOld query);
+    void afterTriggeringBoomerangQuery(ExtractParameterQuery query);
 
     void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds);
 

@@ -62,7 +62,8 @@ public class ConstraintsAnalysis {
                         definition.callGraph(),
                         definition.dataFlowScope(),
                         definition.timeout(),
-                        definition.strategy());
+                        definition.strategy(),
+                        definition.reporter());
         ExtractParameterAnalysis analysis = new ExtractParameterAnalysis(parameterDefinition);
 
         Collection<ParameterWithExtractedValues> params =

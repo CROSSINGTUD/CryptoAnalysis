@@ -35,13 +35,24 @@ public class QuerySolver {
 
         Boomerang boomerang =
                 new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
+
+        definition.reporter().beforeTriggeringBoomerangQuery(query);
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
+        definition.reporter().afterTriggeringBoomerangQuery(query);
+
+        definition.reporter().extractedBoomerangResults(query, results);
+        if (results.isTimedout()) {
+            definition
+                    .reporter()
+                    .onExtractParameterAnalysisTimeout(query.var(), query.cfgEdge().getTarget());
+        }
 
         return extractValuesFromQueryResult(query, results);
     }
 
     private ParameterWithExtractedValues extractValuesFromQueryResult(
             ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+
         Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
 
         Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();

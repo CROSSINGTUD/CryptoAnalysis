@@ -10,8 +10,7 @@ import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
@@ -27,10 +26,7 @@ public interface IResultsListener {
             IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results);
 
     void extractedBoomerangResults(
-            ExtractParameterQueryOld query, BackwardBoomerangResults<Weight.NoWeight> results);
-
-    void collectedValues(
-            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues);
+            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results);
 
     void extractedParameterValues(
             IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues);

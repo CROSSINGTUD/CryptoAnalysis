@@ -11,22 +11,16 @@ import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
 import crysl.rule.ISLConstraint;
@@ -112,20 +106,20 @@ public class AnalysisReporter {
         }
     }
 
-    public void beforeTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
+    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.beforeTriggeringBoomerangQuery(query);
         }
     }
 
-    public void afterTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
+    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.afterTriggeringBoomerangQuery(query);
         }
     }
 
     public void extractedBoomerangResults(
-            ExtractParameterQueryOld query, BackwardBoomerangResults<Weight.NoWeight> results) {
+            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
         for (IResultsListener listener : resultsListeners) {
             listener.extractedBoomerangResults(query, results);
         }
@@ -222,13 +216,6 @@ public class AnalysisReporter {
         }
     }
 
-    public void collectedValues(
-            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
-        for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.collectedValues(seed, collectedValues);
-        }
-    }
-
     public void extractedParameterValues(
             IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
@@ -259,24 +246,14 @@ public class AnalysisReporter {
         }
 
         for (IErrorListener errorListener : errorListeners) {
-            if (error instanceof CallToError callToError) {
-                errorListener.reportError(callToError);
-            } else if (error instanceof ConstraintError constraintError) {
+            if (error instanceof ConstraintError constraintError) {
                 errorListener.reportError(constraintError);
             } else if (error instanceof ForbiddenMethodError forbiddenMethodError) {
                 errorListener.reportError(forbiddenMethodError);
-            } else if (error instanceof HardCodedError hardCodedError) {
-                errorListener.reportError(hardCodedError);
             } else if (error instanceof ImpreciseValueExtractionError impreciseError) {
                 errorListener.reportError(impreciseError);
             } else if (error instanceof IncompleteOperationError incompleteError) {
                 errorListener.reportError(incompleteError);
-            } else if (error instanceof InstanceOfError instanceOfError) {
-                errorListener.reportError(instanceOfError);
-            } else if (error instanceof NeverTypeOfError neverTypeOfError) {
-                errorListener.reportError(neverTypeOfError);
-            } else if (error instanceof NoCallToError noCallToError) {
-                errorListener.reportError(noCallToError);
             } else if (error instanceof PredicateContradictionError contradictionError) {
                 errorListener.reportError(contradictionError);
             } else if (error instanceof RequiredPredicateError predicateError) {

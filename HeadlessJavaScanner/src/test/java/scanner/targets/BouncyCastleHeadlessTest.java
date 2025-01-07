@@ -1,11 +1,10 @@
 package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
+import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -40,8 +39,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("gwt_crypto.GMacTest", "performTestOne", 0)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -205,7 +204,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("fabric_api_archieve.Crypto", "sign", 2)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
@@ -245,7 +244,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.ISO9796SignerTest", "doFullMessageTest", 0)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -354,11 +353,11 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ECPrivateKeyParametersTest", "testOne", 1)
                         .withTPs(RequiredPredicateError.class, 2)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ECPrivateKeyParametersTest", "testTwo", 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ParametersWithRandomTest", "testOne", 1)
@@ -493,7 +492,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("constants.Constants", "<clinit>", 0)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         scanner.run();

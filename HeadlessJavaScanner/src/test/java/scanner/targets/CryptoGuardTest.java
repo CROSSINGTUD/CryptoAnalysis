@@ -2,10 +2,8 @@ package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -364,8 +362,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1",
                                 "go",
                                 1)
-                        .withTPs(HardCodedError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
         // ABH1, ABI2, BB1 are other similar test cases that were not included
 
@@ -395,7 +392,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordBBCase2",
                                 "key",
                                 0)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         // This test case corresponds to the following project in CryptoGuard:
@@ -412,8 +409,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordABHCase2",
                                 "key",
                                 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
 
         // This test case corresponds to the following project in CryptoGuard:
@@ -430,8 +426,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordABICase1",
                                 "key",
                                 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
         // ABHCase1, BBCase1 are similar to the case above
 

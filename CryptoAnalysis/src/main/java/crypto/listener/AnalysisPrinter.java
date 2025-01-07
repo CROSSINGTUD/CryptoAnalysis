@@ -6,7 +6,7 @@ import boomerang.scene.Val;
 import com.google.common.base.Stopwatch;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.ExtractParameterQueryOld;
+import crypto.extractparameter.ExtractParameterQuery;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import org.slf4j.Logger;
@@ -120,7 +120,7 @@ public class AnalysisPrinter implements IAnalysisListener {
     }
 
     @Override
-    public void beforeTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
+    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
         LOGGER.debug(
                 "Triggering Boomerang query for value {} @ {}",
                 query.var(),
@@ -128,7 +128,7 @@ public class AnalysisPrinter implements IAnalysisListener {
     }
 
     @Override
-    public void afterTriggeringBoomerangQuery(ExtractParameterQueryOld query) {
+    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
         LOGGER.debug(
                 "Finished Boomerang query for value {} @ {}",
                 query.var(),

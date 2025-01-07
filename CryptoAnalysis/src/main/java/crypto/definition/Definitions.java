@@ -18,13 +18,15 @@ public interface Definitions {
             CallGraph callGraph,
             DataFlowScope dataFlowScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy) {}
+            SparseCFGCache.SparsificationStrategy strategy,
+            AnalysisReporter reporter) {}
 
     record QuerySolverDefinition(
             CallGraph callGraph,
             DataFlowScope dataFlowScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy) {}
+            SparseCFGCache.SparsificationStrategy strategy,
+            AnalysisReporter reporter) {}
 
     record BoomerangOptionsDefinition(
             CallGraph callGraph,

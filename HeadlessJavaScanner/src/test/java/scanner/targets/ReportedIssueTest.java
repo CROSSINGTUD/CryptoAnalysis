@@ -2,9 +2,7 @@ package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -57,15 +55,14 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue81.Main", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "issuecognicrypt210.CogniCryptSecretKeySpec", "main", 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .build());
 
@@ -85,8 +82,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue68.AESCryptor", "getKey", 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .build());

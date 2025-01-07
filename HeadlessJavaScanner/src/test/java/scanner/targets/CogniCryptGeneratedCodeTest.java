@@ -1,8 +1,7 @@
 package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
-import crypto.analysis.errors.HardCodedError;
+import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.RequiredPredicateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
@@ -22,12 +21,12 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.Enc", "encrypt", 2)
-                        .withTPs(CallToError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.KeyDeriv", "getKey", 1)
-                        .withFPs(HardCodedError.class, 1, "Mystery")
+                        .withFPs(ConstraintError.class, 1, "Mystery")
                         .withFPs(RequiredPredicateError.class, 3, "Mystery")
                         .build());
         addErrorSpecification(
