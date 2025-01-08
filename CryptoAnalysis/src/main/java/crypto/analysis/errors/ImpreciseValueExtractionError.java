@@ -7,7 +7,6 @@ import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
-import crysl.rule.ISLConstraint;
 import java.util.Objects;
 
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
@@ -24,18 +23,6 @@ public class ImpreciseValueExtractionError extends AbstractConstraintsError {
     }
 
     public ImpreciseValueExtractionError(
-            IAnalysisSeed seed, Statement errorStmt, CrySLRule rule, ISLConstraint constraint) {
-        super(seed, errorStmt, rule);
-
-        violatedConstraint = null;
-    }
-
-    private enum ConstraintType {
-        ValueConstraint,
-        ComparisonConstraint,
-    }
-
-    public ImpreciseValueExtractionError(
             AnalysisSeedWithSpecification seed,
             Statement statement,
             CrySLRule rule,
@@ -44,7 +31,7 @@ public class ImpreciseValueExtractionError extends AbstractConstraintsError {
             EvaluableConstraint constraint) {
         super(seed, statement, rule);
 
-        violatedConstraint = null;
+        violatedConstraint = constraint;
     }
 
     public EvaluableConstraint getViolatedConstraint() {

@@ -46,11 +46,12 @@ public class AlternativeReqPredicateError extends AbstractRequiredPredicateError
             IAnalysisSeed seed,
             Statement statement,
             CrySLRule rule,
-            Collection<CrySLPredicate> predicates,
-            Collection<AbstractConstraintsError> violatedPredicateErrors) {
+            Collection<CrySLPredicate> allPredicates,
+            Collection<AbstractConstraintsError> missingPredicates) {
         super(seed, statement, rule, new HashSet<>());
 
-        this.contradictedPredicate = predicates;
+        this.contradictedPredicate = allPredicates;
+        this.relevantPredicates = new HashSet<>();
     }
 
     public Collection<CrySLPredicate> getContradictedPredicate() {

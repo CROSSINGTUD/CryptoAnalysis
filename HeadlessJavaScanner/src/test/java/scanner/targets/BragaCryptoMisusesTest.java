@@ -163,17 +163,17 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.buggyIVgen.BuggyIVGen1", "main", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.buggyIVgen.BuggyIVGen2", "main", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
@@ -193,17 +193,17 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.FixedIV1", "main", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.FixedIV2", "main", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.SimpleIVConstant", "main", 1)
@@ -357,7 +357,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkc.enc.deterministicCrypto.DeterministicEncryptionRSA", "main", 1)
-                        .withTPs(ConstraintError.class, 7)
+                        .withTPs(ConstraintError.class, 3)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
@@ -418,7 +418,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "wc.deterministicSymEnc.DeterministicEncryptionAESwECB2", "main", 1)
-                        .withTPs(ConstraintError.class, 6)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
@@ -438,6 +438,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("br.fixedSeed.FixedSeed1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 6)
                         .withTPs(TypestateError.class, 4)
                         .withTPs(IncompleteOperationError.class, 4)

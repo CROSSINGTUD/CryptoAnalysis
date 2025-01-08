@@ -7,6 +7,8 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
+import crypto.analysis.errors.PredicateContradictionError;
+import crypto.analysis.errors.RequiredPredicateError;
 import crypto.definition.Definitions;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ParameterWithExtractedValues;
@@ -226,8 +228,6 @@ public class ConstraintsAnalysis {
             return errors;
         }
 
-        boolean satisfied = false;
-
         Multimap<Statement, AbstractConstraintsError> statementToErrors = HashMultimap.create();
         for (CrySLPredicate predicate : predicates) {
             EvaluableConstraint constraint =
@@ -238,12 +238,20 @@ public class ConstraintsAnalysis {
             for (AbstractConstraintsError error : constraint.getErrors()) {
                 statementToErrors.put(error.getErrorStatement(), error);
             }
-
-            satisfied |= constraint.isSatisfied();
         }
 
-        if (!satisfied) {
-            for (Statement statement : statementToErrors.keySet()) {
+        for (Statement statement : statementToErrors.keySet()) {
+            Collection<CrySLPredicate> ensuredPreds = new HashSet<>(predicates);
+
+            for (AbstractConstraintsError error : statementToErrors.get(statement)) {
+                if (error instanceof RequiredPredicateError reqPredError) {
+                    ensuredPreds.remove(reqPredError.getContradictedPredicates());
+                } else if (error instanceof PredicateContradictionError predContradictionError) {
+                    ensuredPreds.remove(predContradictionError.getContradictedPredicate());
+                }
+            }
+
+            if (ensuredPreds.isEmpty()) {
                 AlternativeReqPredicateError error =
                         new AlternativeReqPredicateError(
                                 seed,

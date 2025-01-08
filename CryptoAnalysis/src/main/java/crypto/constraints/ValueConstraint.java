@@ -49,7 +49,9 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
+            // TODO Collect not allowed values and report a single error with them
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                // TODO Extract call sites that are not part of the dataflow scope
                 if (extractedValue.val().equals(Val.zero())
                         || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
                     ImpreciseValueExtractionError error =

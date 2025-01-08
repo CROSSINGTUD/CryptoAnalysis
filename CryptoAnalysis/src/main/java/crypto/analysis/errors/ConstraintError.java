@@ -42,7 +42,7 @@ public class ConstraintError extends AbstractConstraintsError {
         return "Constraint "
                 + evaluableConstraint
                 + " on object "
-                + getSeed().getFact()
+                + getSeed().getFact().getVariableName()
                 + " is violated due to the following reasons:";
     }
 

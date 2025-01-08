@@ -52,6 +52,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("bunkr.PBKDF2Descriptor", "calculateRounds", 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
@@ -79,13 +80,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gcm_aes_example.GCMAESBouncyCastle", "processing", 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gcm_aes_example.GCMAESBouncyCastle", "processingCorrect", 2)
-                        .withTPs(RequiredPredicateError.class, 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -115,7 +117,12 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("rsa_misuse.RSATest", "Decrypt", 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("rsa_nomisuse.RSATest", "Decrypt", 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         // These two errors occur because AsymmetricCipherKeyPair ensures the predicate only after
@@ -130,25 +137,41 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .build());
 
         addErrorSpecification(
+                new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptOne", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
+                        .build());
+        addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptTwo", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testDecryptOne", 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testDecryptTwo", 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "params.RSAPrivateCrtKeyParametersTest", "testOne", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
+                        .build());
+
+        addErrorSpecification(
+                new ErrorSpecification.Builder("params.RSAKeyParametersTest", "testOne", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("params.RSAKeyParametersTest", "testTwo", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -156,8 +179,15 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
+                new ErrorSpecification.Builder("params.ParametersWithRandomTest", "testOne", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
+                        .build());
+        addErrorSpecification(
                 new ErrorSpecification.Builder("params.ParametersWithRandomTest", "testTwo", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("generators.RSAKeyPairGeneratorTest", "testThree", 0)
@@ -186,7 +216,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("pattern.DigestTest", "digestWithMultipleUpdates", 0)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -200,6 +230,11 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "wrapAES", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder(
+                                "inflatable_donkey.KeyBlobCurve25519Unwrap", "curve25519Unwrap", 4)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .build());
 
         addErrorSpecification(
@@ -217,12 +252,12 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "testSHA256DigestTwo", 0)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("ipack.JPAKEExample", "deriveSessionKey", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         scanner.run();
@@ -239,12 +274,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.ISO9796SignerTest", "doShortPartialTest", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.ISO9796SignerTest", "doFullMessageTest", 0)
                         .withTPs(ConstraintError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -252,7 +289,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("gwt_crypto.PSSTest", "testSig", 6)
@@ -263,11 +300,13 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.X931SignerTest", "shouldPassSignatureTestOne", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.X931SignerTest", "shouldPassSignatureTestTwo", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
@@ -286,7 +325,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "diqube.TicketSignatureService", "isValidTicketSignature", 1)
                         .withTPs(AlternativeReqPredicateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -300,13 +339,15 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("pattern.SignerTest", "testSignerGenerate", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pattern.SignerTest", "testSignerVerify", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
                         .withTPs(RequiredPredicateError.class, 2)
-                        .withTPs(AlternativeReqPredicateError.class, 1)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         scanner.run();

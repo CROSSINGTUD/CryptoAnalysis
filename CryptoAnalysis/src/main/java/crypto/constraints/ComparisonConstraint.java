@@ -368,6 +368,11 @@ public class ComparisonConstraint extends EvaluableConstraint {
         public IntermediateResult evaluate(Statement statement) {
             return new IntermediateResult(Collections.emptySet(), Collections.emptySet());
         }
+
+        @Override
+        public String toString() {
+            return predicate.toString();
+        }
     }
 
     private record IntermediateResult(

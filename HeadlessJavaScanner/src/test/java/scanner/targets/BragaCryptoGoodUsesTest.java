@@ -101,7 +101,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.GenerateRandomIV", "main", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .build());
@@ -409,17 +409,17 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseExplicitMode1", "main", 1)
-                        .withTPs(ConstraintError.class, 6)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 3)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(TypestateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseExplicitPadding1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 3)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         // positive test case
@@ -476,7 +476,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA2_1", "main", 1)
-                        .withNoErrors(ConstraintError.class)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA2_2", "main", 1)
@@ -488,7 +488,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA3_2", "main", 1)
-                        .withNoErrors(ConstraintError.class)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
 
         scanner.run();
@@ -505,6 +505,12 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .getAbsolutePath();
         MavenProject mavenProject = createAndCompile(mavenProjectPath);
         HeadlessJavaScanner scanner = createScanner(mavenProject);
+
+        addErrorSpecification(
+                new ErrorSpecification.Builder("example.UseHMACSHA2_1", "main", 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
+                        .withTPs(RequiredPredicateError.class, 4)
+                        .build());
 
         scanner.run();
         assertErrors(scanner.getCollectedErrors());

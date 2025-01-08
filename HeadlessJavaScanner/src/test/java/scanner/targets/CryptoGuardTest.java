@@ -59,11 +59,10 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.brokencrypto.BrokenCryptoABICase5", "doCrypto", 0)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         // ABICase6, -7, -8, -10 not included as tests due to being similar to ABICase5 above
 
@@ -144,8 +143,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         // https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.ecbcrypto.EcbInSymmCryptoABICase2", "go", 0)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         // ABICase3 not included as tests due to being similar to ABICase2 above
 
@@ -205,8 +204,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2",
                                 "main",
                                 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(

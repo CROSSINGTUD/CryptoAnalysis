@@ -103,7 +103,13 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .build());
 
         addErrorSpecification(
+                new ErrorSpecification.Builder("main.Encrypt", "correct", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
+                        .build());
+        addErrorSpecification(
                 new ErrorSpecification.Builder("main.Encrypt", "incorrect", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
@@ -225,7 +231,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.CipherExample", "cipherExampleTwo", 0)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
 
         scanner.run();
@@ -241,7 +247,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("TruePositive", "getKey", 4)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
@@ -261,6 +267,35 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                 new File("../CryptoAnalysisTargets/SSLMisuseExample").getAbsolutePath();
         MavenProject mavenProject = createAndCompile(mavenProjectPath);
         HeadlessJavaScanner scanner = createScanner(mavenProject);
+
+        addErrorSpecification(
+                new ErrorSpecification.Builder("crypto.SSLExample", "NoMisuse", 0)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                1,
+                                "Requires proper implementation of keyword 'elements'")
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("crypto.SSLExample", "MisuseOne", 0)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                1,
+                                "Requires proper implementation of keyword 'elements'")
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("crypto.SSLExample", "MisuseTwo", 0)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                1,
+                                "Requires proper implementation of keyword 'elements'")
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("crypto.SSLExample", "MisuseThree", 0)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                1,
+                                "Requires proper implementation of keyword 'elements'")
+                        .build());
 
         scanner.run();
         assertErrors(scanner.getCollectedErrors());

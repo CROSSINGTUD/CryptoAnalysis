@@ -75,6 +75,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue69.Issue69", "encryptByPublicKey", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 1)
@@ -127,7 +128,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue137.Program", "main", 1)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
