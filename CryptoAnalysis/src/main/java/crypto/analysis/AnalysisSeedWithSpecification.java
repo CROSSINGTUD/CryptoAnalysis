@@ -1,7 +1,6 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.InvokeExpr;
@@ -18,7 +17,10 @@ import crypto.analysis.errors.TypestateError;
 import crypto.constraints.ConstraintsAnalysis;
 import crypto.constraints.RequiredPredicate;
 import crypto.definition.Definitions;
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.predicates.AbstractPredicate;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.ExpectedPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import crypto.typestate.ReportingErrorStateNode;
 import crypto.typestate.WrappedState;
 import crypto.utils.MatcherUtils;
@@ -28,14 +30,9 @@ import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
-import crysl.rule.ICrySLPredicateParameter;
 import crysl.rule.StateNode;
 import crysl.rule.TransitionEdge;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -56,11 +53,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
     private final Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
 
-    private final Collection<AnalysisSeedWithSpecification> requiringSeeds = new HashSet<>();
-    private final Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> ensuredPredicates =
-            HashMultimap.create();
-    private final Multimap<Statement, Map.Entry<UnEnsuredPredicate, Integer>> hiddenPredicates =
-            HashMultimap.create();
+    private final Multimap<Statement, Integer> relevantStatements = HashMultimap.create();
     private final Collection<AbstractPredicate> indirectlyEnsuredPredicates = new HashSet<>();
 
     public AnalysisSeedWithSpecification(
@@ -307,213 +300,321 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
     @Override
-    public void expectPredicate(
-            Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
-        CrySLPredicate expectedPred;
-        if (predicate.isNegated()) {
-            expectedPred = predicate.invertNegation();
-        } else {
-            expectedPred = predicate;
+    public void beforePredicateChecks(Collection<IAnalysisSeed> seeds) {
+        for (Statement statement : getInvokedMethods()) {
+            relevantStatements.put(statement, -1);
         }
-        expectedPredicates.put(
-                statement, new ExpectedPredicateOnSeed(expectedPred, seed, paramIndex));
-    }
 
-    public void addRequiringSeed(AnalysisSeedWithSpecification seed) {
-        requiringSeeds.add(seed);
-    }
-
-    public Collection<AnalysisSeedWithSpecification> getRequiringSeeds() {
-        return requiringSeeds;
-    }
-
-    public void computeExpectedPredicates(Collection<IAnalysisSeed> seeds) {
-        initializeDependantSeedsFromRequiredPredicates(seeds);
-        initializeDependantSeedsFromEnsuringPredicates(seeds);
-    }
-
-    private void initializeDependantSeedsFromRequiredPredicates(Collection<IAnalysisSeed> seeds) {
-        Multimap<Statement, Map.Entry<CrySLPredicate, Integer>> reqPreds = HashMultimap.create();
-        for (RequiredPredicate reqPred : constraintsAnalysis.getRequiredPredicates()) {
-            Map.Entry<CrySLPredicate, Integer> entry =
-                    new AbstractMap.SimpleEntry<>(reqPred.predicate(), reqPred.index());
-            reqPreds.put(reqPred.statement(), entry);
-        }
-        /*for (ISLConstraint constraint : constraintSolver.getRequiredPredicates()) {
-            if (constraint instanceof RequiredCrySLPredicate reqPred) {
-                Map.Entry<CrySLPredicate, Integer> entry =
-                        new AbstractMap.SimpleEntry<>(reqPred.getPred(), reqPred.getParamIndex());
-                reqPreds.put(reqPred.getLocation(), entry);
-            } else if (constraint instanceof AlternativeReqPredicate altPred) {
-                for (RequiredCrySLPredicate reqPred : altPred.getRelAlternatives()) {
-                    CrySLPredicate predicate = reqPred.getPred();
-
-                    Map.Entry<CrySLPredicate, Integer> entry =
-                            new AbstractMap.SimpleEntry<>(predicate, reqPred.getParamIndex());
-                    reqPreds.put(reqPred.getLocation(), entry);
-                }
-            }
-        }*/
-
-        for (Statement statement : reqPreds.keySet()) {
+        for (Statement statement : statementValWeightTable.rowKeySet()) {
             if (!statement.containsInvokeExpr()) {
                 continue;
             }
 
             InvokeExpr invokeExpr = statement.getInvokeExpr();
+            Collection<Val> values = getAliasesAtStatement(statement);
 
-            Collection<Map.Entry<CrySLPredicate, Integer>> preds = reqPreds.get(statement);
-            for (Map.Entry<CrySLPredicate, Integer> entry : preds) {
-                CrySLPredicate predicate = entry.getKey();
-                int paramIndex = entry.getValue();
+            for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
+                Val param = invokeExpr.getArg(i);
 
-                if (paramIndex == -1) {
-                    if (!statement.isAssign() || invokeExpr.isStaticInvokeExpr()) {
-                        continue;
-                    }
+                if (values.contains(param)) {
+                    relevantStatements.put(statement, i);
+                }
+            }
+        }
 
-                    Val base = invokeExpr.getBase();
+        Collection<RequiredPredicate> reqPreds = constraintsAnalysis.getRequiredPredicates();
 
-                    Collection<IAnalysisSeed> requiredSeeds =
-                            computeRequiredSeeds(statement, base, seeds);
-                    for (IAnalysisSeed seed : requiredSeeds) {
-                        seed.expectPredicate(
-                                statement, predicate.toNormalCrySLPredicate(), this, paramIndex);
+        for (RequiredPredicate reqPred : reqPreds) {
+            Statement statement = reqPred.statement();
 
-                        if (seed instanceof AnalysisSeedWithSpecification) {
-                            ((AnalysisSeedWithSpecification) seed).addRequiringSeed(this);
-                        }
-                    }
-                } else {
-                    Val param = invokeExpr.getArg(paramIndex);
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
 
-                    Collection<IAnalysisSeed> requiredSeeds =
-                            computeRequiredSeeds(statement, param, seeds);
-                    for (IAnalysisSeed seed : requiredSeeds) {
-                        seed.expectPredicate(
-                                statement, predicate.toNormalCrySLPredicate(), this, paramIndex);
+            InvokeExpr invokeExpr = statement.getInvokeExpr();
+            int paramIndex = reqPred.index();
 
-                        if (seed instanceof AnalysisSeedWithSpecification) {
-                            ((AnalysisSeedWithSpecification) seed).addRequiringSeed(this);
-                        }
-                    }
+            if (paramIndex == -1) {
+                if (!statement.isAssign() || invokeExpr.isStaticInvokeExpr()) {
+                    continue;
+                }
+
+                Val base = invokeExpr.getBase();
+
+                Collection<IAnalysisSeed> requiredSeeds = getSeedsForVal(statement, base, seeds);
+                for (IAnalysisSeed seed : requiredSeeds) {
+                    CrySLPredicate predicate = formatCrySLPredicate(reqPred.predicate());
+                    ExpectedPredicate expectedPredicate =
+                            new ExpectedPredicate(this, predicate, statement, paramIndex);
+
+                    seed.registerExpectedPredicate(expectedPredicate);
+                }
+            } else {
+                Val param = statement.getInvokeExpr().getArg(paramIndex);
+
+                Collection<IAnalysisSeed> requiredSeeds = getSeedsForVal(statement, param, seeds);
+                for (IAnalysisSeed seed : requiredSeeds) {
+                    CrySLPredicate predicate = formatCrySLPredicate(reqPred.predicate());
+                    ExpectedPredicate expectedPredicate =
+                            new ExpectedPredicate(this, predicate, statement, paramIndex);
+
+                    seed.registerExpectedPredicate(expectedPredicate);
                 }
             }
         }
     }
 
-    private Collection<IAnalysisSeed> computeRequiredSeeds(
+    private Collection<IAnalysisSeed> getSeedsForVal(
             Statement statement, Val val, Collection<IAnalysisSeed> seeds) {
         Collection<IAnalysisSeed> result = new HashSet<>();
 
         for (IAnalysisSeed seed : seeds) {
-            for (Statement successor :
-                    statement.getMethod().getControlFlowGraph().getSuccsOf(statement)) {
-                ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(statement, successor);
+            Collection<Val> values = seed.getAliasesAtStatement(statement);
 
-                Collection<Val> values =
-                        seed.getAnalysisResults().asStatementValWeightTable().row(edge).keySet();
-                if (values.contains(val)) {
-                    result.add(seed);
-                }
+            if (values.contains(val)) {
+                result.add(seed);
             }
         }
 
         return result;
     }
 
-    public boolean canEnsurePredicate(
-            CrySLPredicate predicate, Statement statement, int paramIndex) {
-        DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+    private CrySLPredicate formatCrySLPredicate(CrySLPredicate predicate) {
+        if (predicate.isNegated()) {
+            return predicate.invertNegation().toNormalCrySLPredicate();
+        } else {
+            return predicate.toNormalCrySLPredicate();
+        }
+    }
 
-        Collection<CrySLMethod> methods =
-                MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(specification, declaredMethod);
-        for (CrySLMethod method : methods) {
-            String param;
-            if (paramIndex == -1) {
-                param = method.getRetObject().getKey();
-            } else {
-                param = method.getParameters().get(paramIndex).getKey();
+    @Override
+    public void propagatePredicates() {
+        // Check whether all constraints from the CONSTRAINTS and REQUIRES section is satisfied
+        boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
+
+        Collection<CrySLPredicate> predsToBeEnsured = specification.getPredicates();
+        for (CrySLPredicate predToBeEnsured : predsToBeEnsured) {
+            propagatePredicate(predToBeEnsured, satisfiesConstraintSystem);
+        }
+
+        for (AbstractPredicate indirectPred : indirectlyEnsuredPredicates) {
+            propagatePredicate(indirectPred.getPredicate(), satisfiesConstraintSystem, true);
+        }
+    }
+
+    private void propagatePredicate(CrySLPredicate predicate, boolean satisfiesConstraintSystem) {
+        propagatePredicate(predicate, satisfiesConstraintSystem, false);
+    }
+
+    private void propagatePredicate(
+            CrySLPredicate predicate,
+            boolean satisfiesConstraintSystem,
+            boolean isIndirectlyEnsured) {
+        Collection<UnEnsuredPredicate.Violations> violations = new HashSet<>();
+
+        // Check whether there is a ForbiddenMethodError from previous checks
+        if (errorCollection.stream().anyMatch(e -> e instanceof ForbiddenMethodError)) {
+            violations.add(UnEnsuredPredicate.Violations.CallToForbiddenMethod);
+        }
+
+        if (!satisfiesConstraintSystem) {
+            violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
+        }
+
+        // Check whether there is a predicate condition and whether it is satisfied
+        if (constraintsAnalysis.isPredConditionViolated(predicate)) {
+            violations.add(UnEnsuredPredicate.Violations.ConditionIsNotSatisfied);
+        }
+
+        for (Statement statement : relevantStatements.keySet()) {
+            /* Check for all states whether an accepting state is reached:
+             * 1) All states are accepting -> Predicate is generated
+             * 2) No state is accepting -> Predicate is definitely not generated
+             * 3) There are generating and non-generating states -> At least one
+             *    dataflow path leads to a non-generating state s.t. the predicate
+             *    is not generated (over approximation)
+             */
+            Collection<State> states = getStatesAtStatement(statement);
+            boolean allStatesNonGenerating =
+                    states.stream().noneMatch(s -> doesStateGeneratePredicate(s, predicate));
+            boolean someStatesNonGenerating =
+                    states.stream().anyMatch(s -> !doesStateGeneratePredicate(s, predicate));
+
+            Collection<UnEnsuredPredicate.Violations> allViolations = new HashSet<>(violations);
+            if (allStatesNonGenerating) {
+                allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateIsNeverReached);
+            } else if (someStatesNonGenerating) {
+                /* TODO
+                 *  Due to a bug, IDEal returns the states [0,1] whenever there is a
+                 *  single call to a method, e.g. Object o = new Object(); o.m();. After
+                 *  the call to m1(), o is always in state 0 and 1, although it should only be 1
+                 */
+                // allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
             }
 
-            for (CrySLPredicate ensPred : specification.getPredicates()) {
-                if (!predicate.equals(ensPred)) {
-                    continue;
-                }
+            if (isIndirectlyEnsured) {
+                propagateIndirectlyEnsuredPredicate(
+                        predicate.toNormalCrySLPredicate(), statement, allViolations);
+            } else {
+                propagateEnsuredPredicate(
+                        predicate.toNormalCrySLPredicate(), statement, allViolations);
+            }
+        }
+    }
 
-                if (isPredicateRelevantValue(param, ensPred)) {
-                    return true;
-                }
+    private void propagateIndirectlyEnsuredPredicate(
+            CrySLPredicate predicate,
+            Statement statement,
+            Collection<UnEnsuredPredicate.Violations> violations) {
+        Collection<AbstractPredicate> indirectPreds =
+                indirectlyEnsuredPredicates.stream()
+                        .filter(p -> p.getPredicate().equals(predicate))
+                        .collect(Collectors.toSet());
+        for (AbstractPredicate indirectPred : indirectPreds) {
+            AbstractPredicate generatedPred =
+                    createPredicate(
+                            indirectPred.getGeneratingSeed(), predicate, statement, -1, violations);
+            this.onGeneratedPredicate(generatedPred);
+
+            Collection<Integer> indices = relevantStatements.get(statement);
+            for (Integer index : indices) {
+                AbstractPredicate predForOtherSeed =
+                        createPredicate(
+                                indirectPred.getGeneratingSeed(),
+                                predicate,
+                                statement,
+                                index,
+                                violations);
+
+                notifyExpectingSeeds(predForOtherSeed, false);
+            }
+        }
+    }
+
+    private void propagateEnsuredPredicate(
+            CrySLPredicate predicate,
+            Statement statement,
+            Collection<UnEnsuredPredicate.Violations> violations) {
+        if (hasThisParameter(predicate)) {
+            AbstractPredicate generatedPred =
+                    createPredicate(this, predicate, statement, -1, violations);
+            this.onGeneratedPredicate(generatedPred);
+
+            Collection<Integer> indices = relevantStatements.get(statement);
+            for (Integer index : indices) {
+                AbstractPredicate predForOtherSeed =
+                        createPredicate(this, predicate, statement, index, violations);
+
+                notifyExpectingSeeds(predForOtherSeed);
             }
         }
 
-        return false;
-    }
+        Collection<CrySLMethod> methods =
+                MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
+                        specification, statement.getInvokeExpr().getMethod());
+        for (CrySLMethod method : methods) {
+            if (isPredicateGeneratingAssignStatement(statement, predicate, method)) {
+                AbstractPredicate generatedPred =
+                        createPredicate(this, predicate, statement, -1, violations);
+                Val otherSeedVal = statement.getLeftOp();
 
-    private void initializeDependantSeedsFromEnsuringPredicates(Collection<IAnalysisSeed> seeds) {
-        for (CrySLPredicate predicate : specification.getPredicates()) {
-            for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> entry :
-                    allCallsOnObject.entrySet()) {
-                Statement statement = entry.getKey().getStart();
-                DeclaredMethod declaredMethod = entry.getValue();
+                propagatePredicateToOtherSeeds(generatedPred, otherSeedVal);
+            }
 
-                if (!statement.containsInvokeExpr()) {
-                    continue;
-                }
+            for (int i = 0; i < method.getParameters().size(); i++) {
+                Map.Entry<String, String> param = method.getParameters().get(i);
 
-                if (hasThisParameter(predicate)) {
-                    this.expectPredicate(statement, predicate.toNormalCrySLPredicate(), this, -1);
-                }
+                if (isPredicateRelevantValue(predicate, param.getKey())) {
+                    AbstractPredicate generatedPred =
+                            createPredicate(this, predicate, statement, i, violations);
+                    Val otherSeedVal = statement.getInvokeExpr().getArg(i);
 
-                Collection<CrySLMethod> methods =
-                        MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                                specification, declaredMethod);
-
-                for (CrySLMethod method : methods) {
-                    if (isPredicateGeneratingAssignStatement(predicate, statement, method)) {
-                        Val leftOp = statement.getLeftOp();
-                        Val rightOp = statement.getRightOp();
-
-                        AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
-
-                        Collection<IAnalysisSeed> dependentAssignSeeds =
-                                computeGeneratedAssignSeeds(statement, allocVal, seeds);
-                        for (IAnalysisSeed seed : dependentAssignSeeds) {
-                            this.expectPredicate(
-                                    statement, predicate.toNormalCrySLPredicate(), seed, -1);
-                        }
-                    }
-
-                    for (int i = 0; i < method.getParameters().size(); i++) {
-                        Map.Entry<String, String> param = method.getParameters().get(i);
-
-                        if (isPredicateRelevantValue(param.getKey(), predicate)) {
-                            Val paramVal = statement.getInvokeExpr().getArg(i);
-
-                            Collection<IAnalysisSeed> dependantParamSeeds =
-                                    computeGeneratedParameterSeeds(entry.getKey(), paramVal, seeds);
-                            for (IAnalysisSeed seed : dependantParamSeeds) {
-                                this.expectPredicate(
-                                        statement, predicate.toNormalCrySLPredicate(), seed, i);
-                            }
-                        }
-                    }
+                    propagatePredicateToOtherSeeds(generatedPred, otherSeedVal);
                 }
             }
+        }
+    }
+
+    private void propagatePredicateToOtherSeeds(AbstractPredicate predicate, Val otherSeedVal) {
+        for (IAnalysisSeed seed : scanner.getDiscoveredSeeds()) {
+            Collection<Val> values = seed.getAliasesAtStatement(predicate.getStatement());
+
+            if (values.contains(otherSeedVal)) {
+                if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
+                    seedWithSpec.onGeneratedPredicateFromOtherSeed(predicate);
+                } else if (seed instanceof AnalysisSeedWithEnsuredPredicate seedWithoutSpec) {
+                    seedWithoutSpec.onPredicateGeneratedFromOtherSeed(predicate);
+                }
+            }
+        }
+    }
+
+    private AbstractPredicate createPredicate(
+            AnalysisSeedWithSpecification seed,
+            CrySLPredicate predicate,
+            Statement statement,
+            int index,
+            Collection<UnEnsuredPredicate.Violations> violations) {
+        if (!violations.isEmpty()) {
+            return new UnEnsuredPredicate(seed, predicate, statement, index, violations);
+        } else {
+            return new EnsuredPredicate(seed, predicate, statement, index);
+        }
+    }
+
+    private void notifyExpectingSeeds(AbstractPredicate predicate) {
+        notifyExpectingSeeds(predicate, true);
+    }
+
+    private void notifyExpectingSeeds(AbstractPredicate predicate, boolean isOriginalPredicate) {
+        Collection<ExpectedPredicate> predsAtStatement =
+                expectedPredicates.get(predicate.getStatement());
+
+        for (ExpectedPredicate expectedPredicate : predsAtStatement) {
+            if (expectedPredicate.predicate().equals(predicate.getPredicate())
+                    && expectedPredicate.paramIndex() == predicate.getIndex()) {
+                IAnalysisSeed seed = expectedPredicate.seed();
+
+                if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
+                    seedWithSpec.onGeneratedPredicateFromOtherSeed(predicate, isOriginalPredicate);
+                } else if (seed instanceof AnalysisSeedWithEnsuredPredicate seedWithoutSpec) {
+                    seedWithoutSpec.onPredicateGeneratedFromOtherSeed(predicate);
+                }
+            }
+        }
+    }
+
+    public void onGeneratedPredicateFromOtherSeed(AbstractPredicate predicate) {
+        onGeneratedPredicateFromOtherSeed(predicate, true);
+    }
+
+    private void onGeneratedPredicateFromOtherSeed(
+            AbstractPredicate predicate, boolean isOriginalPredicate) {
+        if (isOriginalPredicate) {
+            indirectlyEnsuredPredicates.add(predicate);
+        }
+        onGeneratedPredicate(predicate);
+    }
+
+    @Override
+    public void afterPredicateChecks() {
+        scanner.getAnalysisReporter().ensuredPredicates(this, ensuredPredicates);
+        scanner.getAnalysisReporter().unEnsuredPredicates(this, unEnsuredPredicates);
+
+        Collection<AbstractConstraintsError> violatedPredicates =
+                constraintsAnalysis.evaluateRequiredPredicates();
+        for (AbstractConstraintsError error : violatedPredicates) {
+            addError(error);
+            scanner.getAnalysisReporter().reportError(this, error);
         }
     }
 
     private boolean hasThisParameter(CrySLPredicate predicate) {
-        for (ICrySLPredicateParameter parameter : predicate.getParameters()) {
-            if (parameter.getName().equals("this")) {
-                return true;
-            }
-        }
-        return false;
+        return predicate.getParameters().get(0).getName().equals("this");
     }
 
     private boolean isPredicateGeneratingAssignStatement(
-            CrySLPredicate predicate, Statement statement, CrySLMethod method) {
+            Statement statement, CrySLPredicate predicate, CrySLMethod method) {
         if (!statement.isAssign()) {
             return false;
         }
@@ -524,138 +625,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             return false;
         }
 
-        return isPredicateRelevantValue(retObject.getKey(), predicate);
+        return isPredicateRelevantValue(predicate, retObject.getKey());
     }
 
-    private boolean isPredicateRelevantValue(String key, CrySLPredicate predicate) {
-        for (ICrySLPredicateParameter param : predicate.getParameters()) {
-            if (key.equals(param.getName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Collection<IAnalysisSeed> computeGeneratedAssignSeeds(
-            Statement statement, Val fact, Collection<IAnalysisSeed> seeds) {
-        Collection<IAnalysisSeed> result = new HashSet<>();
-
-        for (IAnalysisSeed seed : seeds) {
-            if (seed.getOrigin().equals(statement) && seed.getFact().equals(fact)) {
-                result.add(seed);
-            }
-        }
-
-        return result;
-    }
-
-    private Collection<IAnalysisSeed> computeGeneratedParameterSeeds(
-            ControlFlowGraph.Edge edge, Val fact, Collection<IAnalysisSeed> seeds) {
-        Collection<IAnalysisSeed> result = new HashSet<>();
-
-        for (IAnalysisSeed seed : seeds) {
-            Collection<Val> values =
-                    seed.getAnalysisResults().asStatementValWeightTable().row(edge).keySet();
-
-            if (values.contains(fact)) {
-                result.add(seed);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Ensure the predicates from the ENSURES section and transfer them to this seed or other seeds.
-     * If there are no violations for the rule, propagate an {@link EnsuredPredicate}. Otherwise, if
-     * there is at least one violation, collect them and propagate a corresponding {@link
-     * UnEnsuredPredicate}.
-     */
-    public void ensurePredicates() {
-        // Check whether all constraints from the CONSTRAINTS and REQUIRES section is satisfied
-        boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
-
-        Collection<Statement> expectedPredStatements = expectedPredicates.keySet();
-
-        // TODO Check for relevant predicates?
-        Collection<CrySLPredicate> predsToBeEnsured = new HashSet<>(specification.getPredicates());
-        for (AbstractPredicate predicate : indirectlyEnsuredPredicates) {
-            predsToBeEnsured.add(predicate.getPredicate().toNormalCrySLPredicate());
-        }
-
-        for (CrySLPredicate predToBeEnsured : predsToBeEnsured) {
-            Collection<UnEnsuredPredicate.Violations> violations = new HashSet<>();
-
-            // Check whether there is a ForbiddenMethodError from previous checks
-            if (errorCollection.stream().anyMatch(e -> e instanceof ForbiddenMethodError)) {
-                violations.add(UnEnsuredPredicate.Violations.CallToForbiddenMethod);
-            }
-
-            if (!satisfiesConstraintSystem) {
-                violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
-            }
-
-            // Check whether there is a predicate condition and whether it is satisfied
-            if (predToBeEnsured.getConstraint().isPresent()
-                    && constraintsAnalysis.isPredConditionViolated(predToBeEnsured)) {
-                violations.add(UnEnsuredPredicate.Violations.ConditionIsNotSatisfied);
-            }
-
-            for (Statement statement : expectedPredStatements) {
-                Collection<CrySLPredicate> expectedPreds = expectedPredicatesAtStatement(statement);
-                if (!expectedPreds.contains(predToBeEnsured.toNormalCrySLPredicate())) {
-                    continue;
-                }
-
-                /* Check for all states whether an accepting state is reached:
-                 * 1) All states are accepting -> Predicate is generated
-                 * 2) No state is accepting -> Predicate is definitely not generated
-                 * 3) There are generating and non-generating states -> At least one
-                 *    dataflow path leads to a non-generating state s.t. the predicate
-                 *    is not generated (over approximation)
-                 */
-                Collection<State> states = getStatesAtStatement(statement);
-                boolean allStatesNonGenerating =
-                        states.stream()
-                                .noneMatch(s -> doesStateGeneratePredicate(s, predToBeEnsured));
-                boolean someStatesNonGenerating =
-                        states.stream()
-                                .anyMatch(s -> !doesStateGeneratePredicate(s, predToBeEnsured));
-
-                Collection<UnEnsuredPredicate.Violations> allViolations = new HashSet<>(violations);
-                if (allStatesNonGenerating) {
-                    allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateIsNeverReached);
-                } else if (someStatesNonGenerating) {
-                    /* TODO
-                     *  Due to a bug, IDEal returns the states [0,1] whenever there is a
-                     *  single call to a method, e.g. Object o = new Object(); o.m();. After
-                     *  the call to m1(), o is always in state 0 and 1, although it should only be 1
-                     */
-                    // allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
-                }
-
-                AbstractPredicate generatedPred;
-                if (!allViolations.isEmpty()) {
-                    generatedPred =
-                            new UnEnsuredPredicate(
-                                    predToBeEnsured.toNormalCrySLPredicate(),
-                                    // constraintSolver.getCollectedValues(),
-                                    new HashSet<>(),
-                                    this,
-                                    allViolations);
-                } else {
-                    generatedPred =
-                            new EnsuredPredicate(
-                                    predToBeEnsured.toNormalCrySLPredicate(),
-                                    // constraintSolver.getCollectedValues()
-                                    new HashSet<>());
-                }
-
-                ensurePredicateAtStatement(generatedPred, statement);
-            }
-        }
-
-        scanner.getAnalysisReporter().ensuredPredicates(this, ensuredPredicates);
+    private boolean isPredicateRelevantValue(CrySLPredicate predicate, String key) {
+        return predicate.getParameters().get(0).getName().equals(key);
     }
 
     private boolean doesStateGeneratePredicate(State state, CrySLPredicate predicate) {
@@ -663,86 +637,21 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 && !isPredicateNegatingState(predicate, state);
     }
 
-    private void ensurePredicateAtStatement(AbstractPredicate ensPred, Statement statement) {
-        if (hasThisParameter(ensPred.getPredicate())) {
-            this.addEnsuredPredicate(ensPred, statement, -1);
-            scanner.getAnalysisReporter().onGeneratedPredicate(this, ensPred, this, statement);
-        }
-
-        if (!expectedPredicates.containsKey(statement)) {
-            return;
-        }
-
-        Collection<ExpectedPredicateOnSeed> expectedPredsAtStatement =
-                expectedPredicates.get(statement);
-        for (ExpectedPredicateOnSeed expectedPredicateOnSeed : expectedPredsAtStatement) {
-            CrySLPredicate predicate = expectedPredicateOnSeed.predicate();
-            IAnalysisSeed seed = expectedPredicateOnSeed.seed();
-            int paramIndex = expectedPredicateOnSeed.paramIndex();
-
-            if (predicate.equals(ensPred.getPredicate())) {
-                if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
-                    seedWithSpec.addEnsuredPredicateFromOtherRule(ensPred, statement, paramIndex);
-                    scanner.getAnalysisReporter()
-                            .onGeneratedPredicate(this, ensPred, seedWithSpec, statement);
-                } else if (seed instanceof AnalysisSeedWithEnsuredPredicate seedWithoutSpec) {
-                    seedWithoutSpec.addEnsuredPredicate(ensPred);
-                    scanner.getAnalysisReporter()
-                            .onGeneratedPredicate(this, ensPred, seedWithoutSpec, statement);
-                }
-            }
-        }
-    }
-
-    private void addEnsuredPredicateFromOtherRule(
-            AbstractPredicate pred, Statement statement, int paramIndex) {
-        addEnsuredPredicate(pred, statement, paramIndex);
-        indirectlyEnsuredPredicates.add(pred);
-    }
-
     private Collection<State> getStatesAtStatement(Statement statement) {
         Collection<State> states = new HashSet<>();
 
-        if (typeStateChange.containsKey(statement)) {
-            states.addAll(typeStateChange.get(statement));
-        }
-
         if (statement.containsInvokeExpr()) {
-            InvokeExpr invokeExpr = statement.getInvokeExpr();
+            Collection<TransitionFunction> functions =
+                    statementValWeightTable.row(statement).values();
 
-            for (Statement pred :
-                    statement.getMethod().getControlFlowGraph().getPredsOf(statement)) {
-                ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
+            for (TransitionFunction function : functions) {
+                Collection<State> targets = getTargetStates(function);
 
-                Map<Val, TransitionFunction> rows =
-                        analysisResults.asStatementValWeightTable().row(edge);
-                Collection<Val> values = rows.keySet();
-
-                for (Val arg : invokeExpr.getArgs()) {
-                    if (values.contains(arg)) {
-                        TransitionFunction transition = rows.get(arg);
-                        Collection<State> targetStates = getTargetStates(transition);
-
-                        states.addAll(targetStates);
-                    }
-                }
+                states.addAll(targets);
             }
         }
 
         return states;
-    }
-
-    public void addEnsuredPredicate(
-            AbstractPredicate ensPred, Statement statement, int paramIndex) {
-        if (ensPred instanceof UnEnsuredPredicate unEnsuredPredicate) {
-            Map.Entry<UnEnsuredPredicate, Integer> predAtIndex =
-                    new AbstractMap.SimpleEntry<>(unEnsuredPredicate, paramIndex);
-            hiddenPredicates.put(statement, predAtIndex);
-        } else if (ensPred instanceof EnsuredPredicate ensuredPredicate) {
-            Map.Entry<EnsuredPredicate, Integer> predAtIndex =
-                    new AbstractMap.SimpleEntry<>(ensuredPredicate, paramIndex);
-            ensuredPredicates.put(statement, predAtIndex);
-        }
     }
 
     private Collection<State> getTargetStates(TransitionFunction value) {
@@ -756,15 +665,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private boolean isPredicateGeneratingState(CrySLPredicate ensPred, State stateNode) {
         // Predicate has a condition, i.e. "after" is specified -> Active predicate for
         // corresponding states
-        if (ensPred instanceof CrySLCondPredicate
-                && isConditionalState(
-                        ((CrySLCondPredicate) ensPred).getConditionalMethods(), stateNode)) {
-            return true;
+        if (ensPred instanceof CrySLCondPredicate condPred) {
+            if (isConditionalState(condPred.getConditionalMethods(), stateNode)) {
+                return true;
+            }
         }
 
         // If there is no condition, the predicate is activated for all accepting states
-        if (!(ensPred instanceof CrySLCondPredicate) && stateNode.isAccepting()) {
-            return true;
+        if (!(ensPred instanceof CrySLCondPredicate)) {
+            return stateNode.isAccepting();
         }
 
         return false;
@@ -864,90 +773,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private boolean isConstraintSystemSatisfied() {
         Collection<AbstractConstraintsError> violatedPredicates =
                 constraintsAnalysis.evaluateRequiredPredicates();
-        for (AbstractConstraintsError error : violatedPredicates) {
-            addError(error);
-            scanner.getAnalysisReporter().reportError(this, error);
-        }
+
         return internalConstraintsSatisfied && violatedPredicates.isEmpty();
-    }
-
-    private boolean doPredsMatch(CrySLPredicate pred, AbstractPredicate ensPred) {
-        boolean requiredPredicatesExist = true;
-        for (int i = 0; i < pred.getParameters().size(); i++) {
-            String var = pred.getParameters().get(i).getName();
-            if (isOfNonTrackableType(var)) {
-                continue;
-            }
-
-            if (pred.getInvolvedVarNames().contains(var)) {
-                final String parameterI = ensPred.getPredicate().getParameters().get(i).getName();
-                Collection<String> actVals = Collections.emptySet();
-                Collection<String> expVals = Collections.emptySet();
-
-                for (CallSiteWithExtractedValue callSite : ensPred.getParametersToValues()) {
-                    if (callSite.callSiteWithParam().varName().equals(parameterI)) {
-                        actVals = retrieveValueFromUnit(callSite);
-                    }
-                }
-                /*for (CallSiteWithExtractedValue callSite : constraintSolver.getCollectedValues()) {
-                    if (callSite.callSiteWithParam().varName().equals(var)) {
-                        expVals = retrieveValueFromUnit(callSite);
-                    }
-                }*/
-
-                String splitter = "";
-                int index = -1;
-                if (pred.getParameters().get(i) instanceof CrySLObject obj) {
-                    if (obj.getSplitter() != null) {
-                        splitter = obj.getSplitter().getSplitter();
-                        index = obj.getSplitter().getIndex();
-                    }
-                }
-                for (String foundVal : expVals) {
-                    if (index > -1) {
-                        foundVal = foundVal.split(splitter)[index];
-                    }
-                    actVals =
-                            actVals.parallelStream()
-                                    .map(String::toLowerCase)
-                                    .collect(Collectors.toList());
-                    requiredPredicatesExist &= actVals.contains(foundVal.toLowerCase());
-                }
-            } else {
-                requiredPredicatesExist = false;
-            }
-        }
-        return requiredPredicatesExist;
-    }
-
-    private Collection<String> retrieveValueFromUnit(CallSiteWithExtractedValue callSite) {
-        Collection<String> values = new ArrayList<>();
-        Statement statement = callSite.callSiteWithParam().statement();
-
-        if (statement.isAssign()) {
-            Val rightSide = statement.getRightOp();
-
-            if (rightSide.isIntConstant()) {
-                values.add(String.valueOf(rightSide.getIntValue()));
-            } else if (rightSide.isLongConstant()) {
-                values.add(String.valueOf(rightSide.getLongValue()));
-            } else if (rightSide.isStringConstant()) {
-                values.add(rightSide.getStringValue());
-            }
-        }
-        return values;
-    }
-
-    private static final Collection<String> trackedTypes =
-            Arrays.asList("java.lang.String", "int", "java.lang.Integer");
-
-    private boolean isOfNonTrackableType(String varName) {
-        for (Map.Entry<String, String> object : specification.getObjects()) {
-            if (object.getKey().equals(varName) && trackedTypes.contains(object.getValue())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -962,14 +789,22 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return allCallsOnObject;
     }
 
-    public Collection<Map.Entry<EnsuredPredicate, Integer>> getEnsuredPredicatesAtStatement(
-            Statement statement) {
+    public Collection<Statement> getInvokedMethods() {
+        Collection<Statement> statements = new HashSet<>();
+
+        for (ControlFlowGraph.Edge edge : allCallsOnObject.keySet()) {
+            statements.add(edge.getStart());
+        }
+
+        return statements;
+    }
+
+    public Collection<EnsuredPredicate> getEnsuredPredicatesAtStatement(Statement statement) {
         return ensuredPredicates.get(statement);
     }
 
-    public Collection<Map.Entry<UnEnsuredPredicate, Integer>> getUnEnsuredPredicatesAtStatement(
-            Statement statement) {
-        return hiddenPredicates.get(statement);
+    public Collection<UnEnsuredPredicate> getUnEnsuredPredicatesAtStatement(Statement statement) {
+        return unEnsuredPredicates.get(statement);
     }
 
     @Override

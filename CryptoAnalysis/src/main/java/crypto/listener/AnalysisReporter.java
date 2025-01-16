@@ -6,8 +6,6 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
@@ -22,11 +20,11 @@ import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import crysl.rule.CrySLRule;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
@@ -193,16 +191,6 @@ public class AnalysisReporter {
         }
     }
 
-    public void onGeneratedPredicate(
-            IAnalysisSeed fromSeed,
-            AbstractPredicate predicate,
-            IAnalysisSeed toPred,
-            Statement statement) {
-        for (IResultsListener listener : resultsListeners) {
-            listener.generatedPredicate(fromSeed, predicate, toPred, statement);
-        }
-    }
-
     public void addProgress(int current, int total) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.addProgress(current, total);
@@ -223,20 +211,17 @@ public class AnalysisReporter {
         }
     }
 
-    public void checkedConstraints(
-            IAnalysisSeed seed,
-            Collection<ISLConstraint> constraints,
-            Collection<AbstractError> errors) {
-        for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.checkedConstraints(seed, constraints, errors);
+    public void ensuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.ensuredPredicates(seed, predicates);
         }
     }
 
-    public void ensuredPredicates(
-            IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates) {
+    public void unEnsuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, UnEnsuredPredicate> predicates) {
         for (IResultsListener listener : resultsListeners) {
-            listener.ensuredPredicates(seed, predicates);
+            listener.unEnsuredPredicates(seed, predicates);
         }
     }
 

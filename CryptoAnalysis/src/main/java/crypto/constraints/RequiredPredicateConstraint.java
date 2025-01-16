@@ -4,17 +4,16 @@ import boomerang.scene.Statement;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.EnsuredPredicate;
-import crypto.analysis.UnEnsuredPredicate;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ICrySLPredicateParameter;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 
 public class RequiredPredicateConstraint extends EvaluableConstraint {
 
@@ -129,9 +128,9 @@ public class RequiredPredicateConstraint extends EvaluableConstraint {
             CrySLPredicate predicate, Statement statement, int index) {
         boolean ensured = false;
 
-        Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPredsAtStatement =
+        Collection<EnsuredPredicate> ensuredPredsAtStatement =
                 seed.getEnsuredPredicatesAtStatement(statement);
-        for (Map.Entry<EnsuredPredicate, Integer> ensuredPred : ensuredPredsAtStatement) {
+        for (EnsuredPredicate ensuredPred : ensuredPredsAtStatement) {
             if (doReqPredAndEnsPredMatch(predicate, index, ensuredPred)) {
                 ensured = true;
             }
@@ -152,9 +151,9 @@ public class RequiredPredicateConstraint extends EvaluableConstraint {
             CrySLPredicate negatedPred, Statement statement, int index) {
         boolean ensured = false;
 
-        Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPredsAtStatement =
+        Collection<EnsuredPredicate> ensuredPredsAtStatement =
                 seed.getEnsuredPredicatesAtStatement(statement);
-        for (Map.Entry<EnsuredPredicate, Integer> ensuredPred : ensuredPredsAtStatement) {
+        for (EnsuredPredicate ensuredPred : ensuredPredsAtStatement) {
             if (doReqPredAndEnsPredMatch(negatedPred, index, ensuredPred)) {
                 ensured = true;
             }
@@ -169,32 +168,29 @@ public class RequiredPredicateConstraint extends EvaluableConstraint {
     }
 
     private boolean doReqPredAndEnsPredMatch(
-            CrySLPredicate reqPred,
-            int reqPredIndex,
-            Map.Entry<EnsuredPredicate, Integer> ensPred) {
+            CrySLPredicate reqPred, int reqPredIndex, EnsuredPredicate ensPred) {
         CrySLPredicate predToCheck;
         if (reqPred.isNegated()) {
             predToCheck = reqPred.invertNegation();
         } else {
             predToCheck = reqPred;
         }
-        return predToCheck.equals(ensPred.getKey().getPredicate())
+        return predToCheck.equals(ensPred.getPredicate())
                 // && doPredsMatch(predToCheck, ensPred.getKey())
-                && reqPredIndex == ensPred.getValue();
+                && reqPredIndex == ensPred.getIndex();
     }
 
     private Collection<UnEnsuredPredicate> extractUnEnsuredPredicatesAtStatement(
             Statement statement, CrySLPredicate predicate, int index) {
         Collection<UnEnsuredPredicate> result = new HashSet<>();
 
-        Collection<Map.Entry<UnEnsuredPredicate, Integer>> unEnsuredPreds =
+        Collection<UnEnsuredPredicate> unEnsuredPreds =
                 seed.getUnEnsuredPredicatesAtStatement(statement);
-        for (Map.Entry<UnEnsuredPredicate, Integer> entry : unEnsuredPreds) {
-            if (entry.getValue() != index) {
+        for (UnEnsuredPredicate unEnsuredPredicate : unEnsuredPreds) {
+            if (unEnsuredPredicate.getIndex() != index) {
                 continue;
             }
 
-            UnEnsuredPredicate unEnsuredPredicate = entry.getKey();
             if (unEnsuredPredicate.getPredicate().equals(predicate)) { // && doPredsMatch())
                 result.add(unEnsuredPredicate);
             }

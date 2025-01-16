@@ -7,11 +7,18 @@ import crypto.listener.AnalysisReporter;
 
 public interface Definitions {
 
+    record SeedDefinition(
+            CallGraph callGraph,
+            DataFlowScope dataFlowScope,
+            int timeout,
+            SparseCFGCache.SparsificationStrategy strategy,
+            AnalysisReporter reporter) {}
+
     record ConstraintsDefinition(
             CallGraph callGraph,
             DataFlowScope dataFlowScope,
             int timeout,
-            boomerang.scene.sparse.SparseCFGCache.SparsificationStrategy strategy,
+            SparseCFGCache.SparsificationStrategy strategy,
             AnalysisReporter reporter) {}
 
     record ExtractParameterDefinition(

@@ -15,8 +15,6 @@ import crypto.listener.IErrorListener;
 import java.util.Collection;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
-import test.assertions.ConstraintViolationAssertion;
-import test.assertions.DependentErrorAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
@@ -45,10 +43,6 @@ public class UsagePatternErrorListener implements IErrorListener {
                                 .asStatementValWeightTable()
                                 .columnKeySet();
                 assertion.increaseCount(values);
-            }
-
-            if (a instanceof ConstraintViolationAssertion assertion) {
-                assertion.reported(constraintError.getErrorStatement());
             }
         }
     }
@@ -141,11 +135,5 @@ public class UsagePatternErrorListener implements IErrorListener {
     public void reportError(UncaughtExceptionError uncaughtExceptionError) {}
 
     @Override
-    public void reportError(AbstractError error) {
-        for (Assertion a : assertions) {
-            if (a instanceof DependentErrorAssertion assertion) {
-                assertion.addError(error);
-            }
-        }
-    }
+    public void reportError(AbstractError error) {}
 }

@@ -1,11 +1,12 @@
-package crypto.analysis;
+package crypto.predicates;
 
+import boomerang.scene.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AbstractOrderError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.PredicateConstraintError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,7 +23,6 @@ import java.util.Set;
  */
 public class UnEnsuredPredicate extends AbstractPredicate {
 
-    private final AnalysisSeedWithSpecification generatingSeed;
     private final Collection<Violations> violations;
 
     /** Collection of violations that may cause a predicate to be not ensured */
@@ -57,18 +57,14 @@ public class UnEnsuredPredicate extends AbstractPredicate {
     }
 
     public UnEnsuredPredicate(
-            CrySLPredicate predicate,
-            Collection<CallSiteWithExtractedValue> parametersToValues,
             AnalysisSeedWithSpecification generatingSeed,
+            CrySLPredicate predicate,
+            Statement statement,
+            int index,
             Collection<Violations> violations) {
-        super(predicate, parametersToValues);
+        super(generatingSeed, predicate, statement, index);
 
-        this.generatingSeed = generatingSeed;
         this.violations = Set.copyOf(violations);
-    }
-
-    public AnalysisSeedWithSpecification getGeneratingSeed() {
-        return generatingSeed;
     }
 
     public Collection<Violations> getViolations() {
@@ -86,7 +82,7 @@ public class UnEnsuredPredicate extends AbstractPredicate {
         // Collect all ForbiddenMethodErrors
         if (violations.contains(Violations.CallToForbiddenMethod)) {
             Collection<AbstractError> forbiddenMethodErrors =
-                    generatingSeed.getErrors().stream()
+                    getGeneratingSeed().getErrors().stream()
                             .filter(e -> e instanceof ForbiddenMethodError)
                             .toList();
             result.addAll(forbiddenMethodErrors);
@@ -97,7 +93,7 @@ public class UnEnsuredPredicate extends AbstractPredicate {
          */
         if (violations.contains(Violations.ConstraintsAreNotSatisfied)) {
             Collection<AbstractError> constraintErrors =
-                    generatingSeed.getErrors().stream()
+                    getGeneratingSeed().getErrors().stream()
                             .filter(e -> e instanceof AbstractConstraintsError)
                             .toList();
             result.addAll(constraintErrors);
@@ -110,7 +106,7 @@ public class UnEnsuredPredicate extends AbstractPredicate {
          */
         if (violations.contains(Violations.ConditionIsNotSatisfied)) {
             PredicateConstraintError error =
-                    new PredicateConstraintError(generatingSeed, getPredicate());
+                    new PredicateConstraintError(getGeneratingSeed(), getPredicate());
             result.add(error);
         }
 
@@ -118,7 +114,7 @@ public class UnEnsuredPredicate extends AbstractPredicate {
         if (violations.contains(Violations.GeneratingStateMayNotBeReached)
                 || violations.contains(Violations.GeneratingStateIsNeverReached)) {
             Collection<AbstractError> orderError =
-                    generatingSeed.getErrors().stream()
+                    getGeneratingSeed().getErrors().stream()
                             .filter(e -> e instanceof AbstractOrderError)
                             .toList();
             result.addAll(orderError);
@@ -129,14 +125,13 @@ public class UnEnsuredPredicate extends AbstractPredicate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), generatingSeed, violations);
+        return Objects.hash(super.hashCode(), violations);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof UnEnsuredPredicate other
-                && Objects.equals(generatingSeed, other.getGeneratingSeed())
                 && Objects.equals(violations, other.getViolations());
     }
 

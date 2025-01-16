@@ -241,7 +241,7 @@ public class ConstraintsAnalysis {
         }
 
         for (Statement statement : statementToErrors.keySet()) {
-            Collection<CrySLPredicate> ensuredPreds = new HashSet<>(predicates);
+            Collection<CrySLPredicate> ensuredPreds = new ArrayList<>(predicates);
 
             for (AbstractConstraintsError error : statementToErrors.get(statement)) {
                 if (error instanceof RequiredPredicateError reqPredError) {

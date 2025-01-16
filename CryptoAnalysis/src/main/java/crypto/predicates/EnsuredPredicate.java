@@ -1,8 +1,8 @@
-package crypto.analysis;
+package crypto.predicates;
 
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import boomerang.scene.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crysl.rule.CrySLPredicate;
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -13,8 +13,11 @@ import java.util.Objects;
 public class EnsuredPredicate extends AbstractPredicate {
 
     public EnsuredPredicate(
-            CrySLPredicate predicate, Collection<CallSiteWithExtractedValue> parametersToValues) {
-        super(predicate, parametersToValues);
+            AnalysisSeedWithSpecification generatingSeed,
+            CrySLPredicate predicate,
+            Statement statement,
+            int index) {
+        super(generatingSeed, predicate, statement, index);
     }
 
     @Override

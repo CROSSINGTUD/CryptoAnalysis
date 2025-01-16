@@ -32,10 +32,6 @@ public class Assertions {
 
     public static void notHasEnsuredPredicate(Object o, String predName) {}
 
-    public static void hasGeneratedPredicate(Object o) {}
-
-    public static void hasNotGeneratedPredicate(Object o) {}
-
     public static void missingTypestateChange() {}
 
     public static void noMissingTypestateChange() {}

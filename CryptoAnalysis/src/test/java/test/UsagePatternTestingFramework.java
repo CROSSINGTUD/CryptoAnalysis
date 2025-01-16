@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.Assert;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -40,12 +39,9 @@ import test.assertions.ConstraintsEvaluatedAssertion;
 import test.assertions.ConstraintsNotRelevantAssertion;
 import test.assertions.ConstraintsSatisfiedAssertion;
 import test.assertions.ConstraintsViolatedAssertion;
-import test.assertions.DependentErrorAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.HasGeneratedPredicateAssertion;
-import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
@@ -223,12 +219,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
             }
 
-            if (invocationName.startsWith("violatedConstraint")) {
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    // queries.add(new ConstraintViolationAssertion(pred));
-                }
-            }
-
             if (invocationName.startsWith("evaluatedConstraints")) {
                 Val local = invokeExpr.getArg(0);
                 Val count = invokeExpr.getArg(1);
@@ -286,13 +276,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
+
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
@@ -309,35 +296,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param, predName));
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param));
-                    }
-                }
-            }
-
-            if (invocationName.startsWith("hasGeneratedPredicate")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isLocal()) {
-                    continue;
-                }
-
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasGeneratedPredicateAssertion(pred, param));
-                }
-            }
-
-            if (invocationName.startsWith("hasNotGeneratedPredicate")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isLocal()) {
-                    continue;
-                }
-
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasNotGeneratedPredicateAssertion(pred, param));
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
@@ -426,26 +387,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
                 queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
             }
-
-            if (invocationName.startsWith("dependentError")) {
-                // extract parameters
-                List<Val> params = invokeExpr.getArgs();
-                if (!params.stream().allMatch(Val::isIntConstant)) {
-                    continue;
-                }
-                int thisErrorID = params.remove(0).getIntValue();
-                int[] precedingErrorIDs = params.stream().mapToInt(Val::getIntValue).toArray();
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new DependentErrorAssertion(pred, thisErrorID, precedingErrorIDs));
-                }
-            }
-
-            // connect DependentErrorAssertions
-            Set<Assertion> depErrors =
-                    queries.stream()
-                            .filter(q -> q instanceof DependentErrorAssertion)
-                            .collect(Collectors.toSet());
-            depErrors.forEach(ass -> ((DependentErrorAssertion) ass).registerListeners(depErrors));
         }
     }
 

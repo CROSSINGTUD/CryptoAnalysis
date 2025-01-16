@@ -5,16 +5,13 @@ import boomerang.results.ForwardBoomerangResults;
 import boomerang.scene.CallGraph;
 import boomerang.scene.Statement;
 import com.google.common.collect.Multimap;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
-import crysl.rule.ISLConstraint;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
-import java.util.Map;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
@@ -36,18 +33,8 @@ public interface IResultsListener {
             EvaluableConstraint constraint,
             EvaluableConstraint.EvaluationResult result);
 
-    void checkedConstraints(
-            IAnalysisSeed seed,
-            Collection<ISLConstraint> constraints,
-            Collection<AbstractError> errors);
+    void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates);
 
-    void generatedPredicate(
-            IAnalysisSeed fromSeed,
-            AbstractPredicate predicate,
-            IAnalysisSeed toSeed,
-            Statement statement);
-
-    void ensuredPredicates(
-            IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates);
+    void unEnsuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, UnEnsuredPredicate> predicates);
 }
