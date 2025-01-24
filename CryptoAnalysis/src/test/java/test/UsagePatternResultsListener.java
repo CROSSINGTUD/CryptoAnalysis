@@ -86,7 +86,7 @@ public class UsagePatternResultsListener implements IResultsListener {
 
     @Override
     public void extractedParameterValues(
-            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues) {
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         for (Assertion a : assertions) {
             if (a instanceof ExtractedValueAssertion assertion) {
                 assertion.computedValues(extractedValues);
@@ -125,13 +125,7 @@ public class UsagePatternResultsListener implements IResultsListener {
     public void ensuredPredicates(
             IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates) {
         for (Assertion a : assertions) {
-            if (a instanceof HasEnsuredPredicateAssertion) {
-                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
-
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
-
+            if (a instanceof HasEnsuredPredicateAssertion assertion) {
                 Collection<Val> values = seed.getAliasesAtStatement(assertion.getStmt());
                 Collection<EnsuredPredicate> ensuredPreds = predicates.get(assertion.getStmt());
 
@@ -140,13 +134,7 @@ public class UsagePatternResultsListener implements IResultsListener {
                 }
             }
 
-            if (a instanceof NotHasEnsuredPredicateAssertion) {
-                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
-
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
-
+            if (a instanceof NotHasEnsuredPredicateAssertion assertion) {
                 Collection<Val> values = seed.getAliasesAtStatement(assertion.getStmt());
                 Collection<EnsuredPredicate> ensuredPreds = predicates.get(assertion.getStmt());
 

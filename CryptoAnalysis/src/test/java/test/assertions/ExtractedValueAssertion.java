@@ -2,6 +2,7 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import com.google.common.collect.Multimap;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import java.util.Collection;
 import test.Assertion;
@@ -17,8 +18,10 @@ public class ExtractedValueAssertion implements Assertion {
         this.index = index;
     }
 
-    public void computedValues(Collection<ParameterWithExtractedValues> extractedValues) {
-        for (ParameterWithExtractedValues parameter : extractedValues) {
+    public void computedValues(Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        Collection<ParameterWithExtractedValues> paramsAtStatement = extractedValues.get(stmt);
+
+        for (ParameterWithExtractedValues parameter : paramsAtStatement) {
             Statement statement = parameter.statement();
 
             // TODO Maybe distinguish between "MayExtracted" and "MustExtracted"

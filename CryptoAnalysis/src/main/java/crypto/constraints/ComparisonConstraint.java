@@ -1,7 +1,6 @@
 package crypto.constraints;
 
 import boomerang.scene.Statement;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -28,18 +27,13 @@ public class ComparisonConstraint extends EvaluableConstraint {
             AnalysisSeedWithSpecification seed,
             CrySLComparisonConstraint constraint,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;
 
-        Multimap<Statement, ParameterWithExtractedValues> values = HashMultimap.create();
-        for (ParameterWithExtractedValues param : extractedValues) {
-            values.put(param.statement(), param);
-        }
-
-        this.left = new ArithmeticConstraint(constraint.getLeft(), values);
-        this.right = new ArithmeticConstraint(constraint.getRight(), values);
+        this.left = new ArithmeticConstraint(constraint.getLeft(), extractedValues);
+        this.right = new ArithmeticConstraint(constraint.getRight(), extractedValues);
     }
 
     @Override

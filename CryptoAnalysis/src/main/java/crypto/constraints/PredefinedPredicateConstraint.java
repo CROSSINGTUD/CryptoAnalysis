@@ -4,6 +4,7 @@ import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
+import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.ExtractedValue;
@@ -25,7 +26,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
     public PredefinedPredicateConstraint(
             AnalysisSeedWithSpecification seed,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues,
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues,
             CrySLPredicate constraint) {
         super(seed, statements, extractedValues);
 
@@ -158,7 +159,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         CrySLObject parameterType = objects.get(1);
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
-                filterRelevantParameterResults(variable.getName(), extractedValues);
+                filterRelevantParameterResults(variable.getName(), extractedValues.values());
         if (relevantExtractedValues.isEmpty()) {
             return EvaluationResult.ConstraintIsNotRelevant;
         }
@@ -190,8 +191,9 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         return result;
     }
 
-    private EvaluationResult evaluateLengthPredicate(CrySLPredicate predicate) {
-        // TODO Not implemented yet
+    private EvaluationResult evaluateLengthPredicate(
+            @SuppressWarnings("unused") CrySLPredicate predicate) {
+        // length(...) is only used in combination with arithmetic constraints
         return EvaluationResult.ConstraintIsNotRelevant;
     }
 
@@ -208,7 +210,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         CrySLObject parameterType = objects.get(1);
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
-                filterRelevantParameterResults(variable.getName(), extractedValues);
+                filterRelevantParameterResults(variable.getName(), extractedValues.values());
         if (relevantExtractedValues.isEmpty()) {
             return EvaluationResult.ConstraintIsNotRelevant;
         }
@@ -260,7 +262,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         CrySLObject variable = objects.get(0);
 
         Collection<ParameterWithExtractedValues> relevantExtractedValues =
-                filterRelevantParameterResults(variable.getName(), extractedValues);
+                filterRelevantParameterResults(variable.getName(), extractedValues.values());
         if (relevantExtractedValues.isEmpty()) {
             return EvaluationResult.ConstraintIsNotRelevant;
         }

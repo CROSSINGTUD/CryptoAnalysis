@@ -11,7 +11,6 @@ import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
-import java.util.Collection;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
@@ -26,7 +25,7 @@ public interface IResultsListener {
             ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results);
 
     void extractedParameterValues(
-            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues);
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues);
 
     void evaluatedConstraint(
             IAnalysisSeed seed,

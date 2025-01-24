@@ -1,6 +1,7 @@
 package crypto.constraints;
 
 import boomerang.scene.Statement;
+import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.extractparameter.ParameterWithExtractedValues;
@@ -18,7 +19,7 @@ public class BinaryConstraint extends EvaluableConstraint {
             AnalysisSeedWithSpecification seed,
             CrySLConstraint constraint,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;

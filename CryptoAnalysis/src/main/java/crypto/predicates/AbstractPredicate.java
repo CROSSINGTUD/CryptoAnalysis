@@ -45,6 +45,11 @@ public abstract class AbstractPredicate {
         return index;
     }
 
+    public boolean equalsSimple(AbstractPredicate other) {
+        return Objects.equals(predicate, other.getPredicate())
+                && index == other.getIndex();
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(predicate, generatingSeed, statement, index);

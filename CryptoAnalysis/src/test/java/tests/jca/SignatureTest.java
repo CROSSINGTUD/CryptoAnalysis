@@ -77,6 +77,18 @@ public class SignatureTest extends UsagePatternTestingFramework {
     }
 
     @Test
+    public void test() throws GeneralSecurityException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        Assertions.extValue(0);
+        keyGen.initialize(3072);
+        KeyPair kp = keyGen.generateKeyPair();
+        Assertions.hasEnsuredPredicate(kp);
+
+        final PrivateKey privateKey = kp.getPrivate();
+        Assertions.hasEnsuredPredicate(privateKey);
+    }
+
+    @Test
     public void negativeSignUsagePatternTest1() throws GeneralSecurityException {
         String input = "TestTestTest";
 

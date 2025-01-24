@@ -205,7 +205,7 @@ public class AnalysisReporter {
     }
 
     public void extractedParameterValues(
-            IAnalysisSeed seed, Collection<ParameterWithExtractedValues> extractedValues) {
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
             resultsListener.extractedParameterValues(seed, extractedValues);
         }

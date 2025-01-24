@@ -2,6 +2,7 @@ package crypto.constraints;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
@@ -23,7 +24,7 @@ public class ValueConstraint extends EvaluableConstraint {
             AnalysisSeedWithSpecification seed,
             CrySLValueConstraint constraint,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;
@@ -39,7 +40,7 @@ public class ValueConstraint extends EvaluableConstraint {
         // TODO Make this case sensitive?
         String varName = constraint.getVar().getVarName();
         Collection<ParameterWithExtractedValues> relevantParameters =
-                filterRelevantParameterResults(varName, extractedValues);
+                filterRelevantParameterResults(varName, extractedValues.values());
 
         if (relevantParameters.isEmpty()) {
             return EvaluationResult.ConstraintIsNotRelevant;

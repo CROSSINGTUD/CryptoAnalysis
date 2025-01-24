@@ -472,8 +472,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         .collect(Collectors.toSet());
         for (AbstractPredicate indirectPred : indirectPreds) {
             AbstractPredicate generatedPred =
-                    createPredicate(
-                            indirectPred.getGeneratingSeed(), predicate, statement, -1, violations);
+                    createIndirectPredicate(indirectPred, statement, violations);
             this.onGeneratedPredicate(generatedPred);
 
             Collection<Integer> indices = relevantStatements.get(statement);
@@ -488,6 +487,36 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
                 notifyExpectingSeeds(predForOtherSeed, false);
             }
+        }
+    }
+
+    private AbstractPredicate createIndirectPredicate(
+            AbstractPredicate predicate,
+            Statement statement,
+            Collection<UnEnsuredPredicate.Violations> violations) {
+        // If the generating seed ensured a hidden predicate, we have to propagate it as a hidden
+        // one
+        if (predicate instanceof UnEnsuredPredicate unEnsPred) {
+            return new UnEnsuredPredicate(
+                    unEnsPred.getGeneratingSeed(),
+                    unEnsPred.getPredicate(),
+                    statement,
+                    -1,
+                    new HashSet<>());
+        }
+
+        // If the generating seed ensured a valid predicate, we have to check if the current seed is
+        // secure
+        if (!violations.isEmpty()) {
+            return new UnEnsuredPredicate(
+                    predicate.getGeneratingSeed(),
+                    predicate.getPredicate(),
+                    statement,
+                    -1,
+                    violations);
+        } else {
+            return new EnsuredPredicate(
+                    predicate.getGeneratingSeed(), predicate.getPredicate(), statement, -1);
         }
     }
 
@@ -591,6 +620,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private void onGeneratedPredicateFromOtherSeed(
             AbstractPredicate predicate, boolean isOriginalPredicate) {
         if (isOriginalPredicate) {
+            Collection<AbstractPredicate> currentPreds = new HashSet<>(indirectlyEnsuredPredicates);
+
+            for (AbstractPredicate existingPred : currentPreds) {
+                if (existingPred.equalsSimple(predicate)) {
+                    indirectlyEnsuredPredicates.remove(existingPred);
+                }
+            }
+
             indirectlyEnsuredPredicates.add(predicate);
         }
         onGeneratedPredicate(predicate);

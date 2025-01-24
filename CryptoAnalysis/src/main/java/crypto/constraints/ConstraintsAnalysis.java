@@ -7,18 +7,17 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.definition.Definitions;
 import crypto.extractparameter.ExtractParameterAnalysis;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.predicates.UnEnsuredPredicate;
 import crysl.rule.CrySLConstraint;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ICrySLPredicateParameter;
 import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -28,8 +27,8 @@ public class ConstraintsAnalysis {
     private final Definitions.ConstraintsDefinition definition;
 
     private final Collection<Statement> collectedCalls;
-    private final Collection<RequiredPredicate> requiredPredicates;
-    private final Collection<ParameterWithExtractedValues> extractedValues;
+    private final Collection<IRequiredPredicate> requiredPredicates;
+    private final Multimap<Statement, ParameterWithExtractedValues> extractedValues;
 
     public ConstraintsAnalysis(
             AnalysisSeedWithSpecification seed, Definitions.ConstraintsDefinition definition) {
@@ -38,7 +37,7 @@ public class ConstraintsAnalysis {
 
         this.collectedCalls = new HashSet<>();
         this.requiredPredicates = new HashSet<>();
-        this.extractedValues = new HashSet<>();
+        this.extractedValues = HashMultimap.create();
     }
 
     public void initialize() {
@@ -70,7 +69,10 @@ public class ConstraintsAnalysis {
 
         Collection<ParameterWithExtractedValues> params =
                 analysis.extractParameters(collectedCalls, seed.getSpecification());
-        extractedValues.addAll(params);
+
+        for (ParameterWithExtractedValues param : params) {
+            extractedValues.put(param.statement(), param);
+        }
 
         definition.reporter().extractedParameterValues(seed, extractedValues);
     }
@@ -78,30 +80,50 @@ public class ConstraintsAnalysis {
     private void initializeRequiredPredicates() {
         requiredPredicates.clear();
 
-        for (ISLConstraint constraint : seed.getSpecification().getRequiredPredicates()) {
-            if (constraint instanceof CrySLPredicate predicate) {
-                Collection<RequiredPredicate> reqPreds =
-                        extractRequiredPredicates(predicate, extractedValues);
+        for (Statement statement : collectedCalls) {
+            Collection<IRequiredPredicate> reqPreds = extractPredicatesAtStatement(statement);
 
-                requiredPredicates.addAll(reqPreds);
-            } else if (constraint instanceof CrySLConstraint cryslConstraint) {
-                Collection<CrySLPredicate> allAlts = extractAlternativePredicates(cryslConstraint);
-
-                for (CrySLPredicate predicate : allAlts) {
-                    Collection<RequiredPredicate> reqPreds =
-                            extractRequiredPredicates(predicate, extractedValues);
-
-                    requiredPredicates.addAll(reqPreds);
-                }
-            }
+            requiredPredicates.addAll(reqPreds);
         }
     }
 
-    private Collection<RequiredPredicate> extractRequiredPredicates(
-            CrySLPredicate pred, Collection<ParameterWithExtractedValues> values) {
-        Collection<RequiredPredicate> result = new HashSet<>();
+    private Collection<IRequiredPredicate> extractPredicatesAtStatement(Statement statement) {
+        Collection<IRequiredPredicate> result = new HashSet<>();
 
-        for (ICrySLPredicateParameter parameter : pred.getParameters()) {
+        for (ISLConstraint constraint : seed.getSpecification().getRequiredPredicates()) {
+            if (constraint instanceof CrySLPredicate predicate) {
+                Collection<RequiredPredicate> reqPreds =
+                        extractPredicateAtStatement(predicate, statement);
+
+                result.addAll(reqPreds);
+            } else if (constraint instanceof CrySLConstraint cryslConstraint) {
+                Collection<CrySLPredicate> altPreds = extractAlternativePredicates(cryslConstraint);
+
+                Collection<RequiredPredicate> reqPreds = new HashSet<>();
+                for (CrySLPredicate pred : altPreds) {
+                    Collection<RequiredPredicate> reqPredsForAlt =
+                            extractPredicateAtStatement(pred, statement);
+
+                    reqPreds.addAll(reqPredsForAlt);
+                }
+
+                if (!reqPreds.isEmpty()) {
+                    AlternativeReqPredicate altPredicate =
+                            new AlternativeReqPredicate(statement, altPreds, reqPreds);
+                    result.add(altPredicate);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private Collection<RequiredPredicate> extractPredicateAtStatement(
+            CrySLPredicate predicate, Statement statement) {
+        Collection<RequiredPredicate> result = new HashSet<>();
+        Collection<ParameterWithExtractedValues> params = extractedValues.get(statement);
+
+        for (ICrySLPredicateParameter parameter : predicate.getParameters()) {
             String paramName = parameter.getName();
 
             // TODO Fix Cipher rule
@@ -114,15 +136,17 @@ public class ConstraintsAnalysis {
                 continue;
             }
 
-            for (ParameterWithExtractedValues value : values) {
-                if (value.varName().equals(paramName)) {
-                    result.add(new RequiredPredicate(pred, value.statement(), value.index()));
+            for (ParameterWithExtractedValues param : params) {
+                if (param.varName().equals(paramName)) {
+                    result.add(new RequiredPredicate(predicate, statement, param.index()));
                 }
             }
         }
 
-        if (pred.getParameters().stream().anyMatch(param -> param.getName().equals("this"))) {
-            result.add(new RequiredPredicate(pred, seed.getOrigin(), -1));
+        if (statement.equals(seed.getOrigin())) {
+            if (predicate.getParameters().get(0).getName().equals("this")) {
+                result.add(new RequiredPredicate(predicate, statement, -1));
+            }
         }
 
         return result;
@@ -147,7 +171,17 @@ public class ConstraintsAnalysis {
     }
 
     public Collection<RequiredPredicate> getRequiredPredicates() {
-        return requiredPredicates;
+        Collection<RequiredPredicate> reqPreds = new HashSet<>();
+
+        for (IRequiredPredicate reqPred : requiredPredicates) {
+            if (reqPred instanceof RequiredPredicate singlePred) {
+                reqPreds.add(singlePred);
+            } else if (reqPred instanceof AlternativeReqPredicate altPred) {
+                reqPreds.addAll(altPred.predicates());
+            }
+        }
+
+        return reqPreds;
     }
 
     public Collection<AbstractConstraintsError> evaluateConstraints() {
@@ -181,17 +215,17 @@ public class ConstraintsAnalysis {
             Collection<Statement> statements) {
         Collection<AbstractConstraintsError> errors = new HashSet<>();
 
-        for (ISLConstraint cons : seed.getSpecification().getRequiredPredicates()) {
-            if (cons instanceof CrySLPredicate predicate) {
-                Collection<AbstractConstraintsError> singleErrors =
-                        evaluateSingleRequiredPredicate(predicate, statements, extractedValues);
+        for (IRequiredPredicate reqPred : requiredPredicates) {
+            if (reqPred instanceof RequiredPredicate singlePred) {
+                Collection<AbstractConstraintsError> predErrors =
+                        evaluateSingleRequiredPredicate(singlePred, statements);
 
-                errors.addAll(singleErrors);
-            } else if (cons instanceof CrySLConstraint constraint) {
-                Collection<AbstractConstraintsError> altErrors =
-                        evaluateAlternativeReqPredicate(constraint, statements, extractedValues);
+                errors.addAll(predErrors);
+            } else if (reqPred instanceof AlternativeReqPredicate altPred) {
+                Collection<AbstractConstraintsError> predErrors =
+                        evaluateAlternativeReqPredicate(altPred, statements);
 
-                errors.addAll(altErrors);
+                errors.addAll(predErrors);
             }
         }
 
@@ -199,13 +233,10 @@ public class ConstraintsAnalysis {
     }
 
     private Collection<AbstractConstraintsError> evaluateSingleRequiredPredicate(
-            CrySLPredicate predicate,
-            Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
-        EvaluableConstraint constraint =
-                EvaluableConstraint.getInstance(seed, predicate, statements, extractedValues);
+            RequiredPredicate predicate, Collection<Statement> statements) {
+        RequiredPredicateConstraint constraint =
+                new RequiredPredicateConstraint(seed, statements, extractedValues, predicate);
         EvaluableConstraint.EvaluationResult result = constraint.evaluate();
-
         definition.reporter().onEvaluatedPredicate(seed, constraint, result);
 
         Collection<AbstractConstraintsError> errors = new HashSet<>();
@@ -217,50 +248,40 @@ public class ConstraintsAnalysis {
     }
 
     private Collection<AbstractConstraintsError> evaluateAlternativeReqPredicate(
-            CrySLConstraint cons,
-            Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            AlternativeReqPredicate altPred, Collection<Statement> statements) {
         Collection<AbstractConstraintsError> errors = new HashSet<>();
 
-        List<CrySLPredicate> predicates = extractAlternativePredicates(cons);
-        Collections.reverse(predicates);
-        if (predicates.isEmpty()) {
-            return errors;
-        }
-
-        Multimap<Statement, AbstractConstraintsError> statementToErrors = HashMultimap.create();
-        for (CrySLPredicate predicate : predicates) {
-            EvaluableConstraint constraint =
-                    EvaluableConstraint.getInstance(seed, predicate, statements, extractedValues);
+        Multimap<RequiredPredicate, AbstractConstraintsError> violatedPredsToErrors =
+                HashMultimap.create();
+        for (RequiredPredicate predicate : altPred.predicates()) {
+            RequiredPredicateConstraint constraint =
+                    new RequiredPredicateConstraint(seed, statements, extractedValues, predicate);
             EvaluableConstraint.EvaluationResult result = constraint.evaluate();
             definition.reporter().onEvaluatedPredicate(seed, constraint, result);
 
-            for (AbstractConstraintsError error : constraint.getErrors()) {
-                statementToErrors.put(error.getErrorStatement(), error);
+            if (constraint.isViolated()) {
+                violatedPredsToErrors.putAll(predicate, constraint.getErrors());
             }
         }
 
-        for (Statement statement : statementToErrors.keySet()) {
-            Collection<CrySLPredicate> ensuredPreds = new ArrayList<>(predicates);
+        Collection<RequiredPredicate> ensuredPreds = new ArrayList<>(altPred.predicates());
+        for (RequiredPredicate violatedPred : violatedPredsToErrors.keySet()) {
+            ensuredPreds.remove(violatedPred);
+        }
 
-            for (AbstractConstraintsError error : statementToErrors.get(statement)) {
+        // If no alternative is ensured, report a single error for all alternatives
+        if (ensuredPreds.isEmpty()) {
+            Collection<UnEnsuredPredicate> unEnsuredPredicates = new HashSet<>();
+            for (AbstractConstraintsError error : violatedPredsToErrors.values()) {
                 if (error instanceof RequiredPredicateError reqPredError) {
-                    ensuredPreds.remove(reqPredError.getContradictedPredicates());
-                } else if (error instanceof PredicateContradictionError predContradictionError) {
-                    ensuredPreds.remove(predContradictionError.getContradictedPredicate());
+                    unEnsuredPredicates.addAll(reqPredError.getHiddenPredicates());
                 }
             }
 
-            if (ensuredPreds.isEmpty()) {
-                AlternativeReqPredicateError error =
-                        new AlternativeReqPredicateError(
-                                seed,
-                                statement,
-                                seed.getSpecification(),
-                                predicates,
-                                statementToErrors.get(statement));
-                errors.add(error);
-            }
+            AlternativeReqPredicateError error =
+                    new AlternativeReqPredicateError(
+                            seed, seed.getSpecification(), altPred, unEnsuredPredicates);
+            errors.add(error);
         }
 
         return errors;

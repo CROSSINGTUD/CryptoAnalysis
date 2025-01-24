@@ -1,6 +1,8 @@
 package crypto.constraints;
 
 import boomerang.scene.Statement;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.extractparameter.ParameterWithExtractedValues;
@@ -20,7 +22,7 @@ public abstract class EvaluableConstraint {
 
     protected final AnalysisSeedWithSpecification seed;
     protected final Collection<Statement> statements;
-    protected final Collection<ParameterWithExtractedValues> extractedValues;
+    protected final Multimap<Statement, ParameterWithExtractedValues> extractedValues;
     protected final Collection<AbstractConstraintsError> errors;
 
     public enum EvaluationResult {
@@ -32,7 +34,7 @@ public abstract class EvaluableConstraint {
     protected EvaluableConstraint(
             AnalysisSeedWithSpecification seed,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         this.seed = seed;
         this.statements = statements;
         this.extractedValues = extractedValues;
@@ -43,25 +45,20 @@ public abstract class EvaluableConstraint {
             AnalysisSeedWithSpecification seed,
             ISLConstraint constraint,
             Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
-        Collection<ParameterWithExtractedValues> filteredStatements =
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        Multimap<Statement, ParameterWithExtractedValues> filteredParameters =
                 filterExtractedValuesOnStatements(statements, extractedValues);
 
         if (constraint instanceof CrySLValueConstraint valueConstraint) {
-            return new ValueConstraint(seed, valueConstraint, statements, filteredStatements);
+            return new ValueConstraint(seed, valueConstraint, statements, filteredParameters);
         } else if (constraint instanceof CrySLComparisonConstraint comparisonConstraint) {
             return new ComparisonConstraint(
-                    seed, comparisonConstraint, statements, filteredStatements);
+                    seed, comparisonConstraint, statements, filteredParameters);
         } else if (constraint instanceof CrySLPredicate predicateConstraint) {
-            if (predefinedPredicates.contains(predicateConstraint.getPredName())) {
-                return new PredefinedPredicateConstraint(
-                        seed, statements, filteredStatements, predicateConstraint);
-            } else {
-                return new RequiredPredicateConstraint(
-                        seed, statements, filteredStatements, predicateConstraint);
-            }
+            return new PredefinedPredicateConstraint(
+                    seed, statements, filteredParameters, predicateConstraint);
         } else if (constraint instanceof CrySLConstraint cryslConstraint) {
-            return new BinaryConstraint(seed, cryslConstraint, statements, filteredStatements);
+            return new BinaryConstraint(seed, cryslConstraint, statements, filteredParameters);
         }
 
         throw new UnsupportedOperationException("Constraint type is not supported");
@@ -83,15 +80,16 @@ public abstract class EvaluableConstraint {
         return errors;
     }
 
-    private static Collection<ParameterWithExtractedValues> filterExtractedValuesOnStatements(
-            Collection<Statement> statements,
-            Collection<ParameterWithExtractedValues> extractedValues) {
-        Collection<ParameterWithExtractedValues> result = new HashSet<>();
+    private static Multimap<Statement, ParameterWithExtractedValues>
+            filterExtractedValuesOnStatements(
+                    Collection<Statement> statements,
+                    Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        Multimap<Statement, ParameterWithExtractedValues> result = HashMultimap.create();
 
-        for (ParameterWithExtractedValues parameter : extractedValues) {
-            if (statements.contains(parameter.statement())) {
-                result.add(parameter);
-            }
+        for (Statement statement : statements) {
+            Collection<ParameterWithExtractedValues> params = extractedValues.get(statement);
+
+            result.putAll(statement, params);
         }
 
         return result;

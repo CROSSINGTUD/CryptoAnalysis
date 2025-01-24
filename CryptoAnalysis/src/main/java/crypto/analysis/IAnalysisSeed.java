@@ -160,7 +160,7 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         Statement statement = predicate.getStatement();
 
         for (UnEnsuredPredicate unEnsPred : unEnsuredPredicates.get(statement)) {
-            if (predicatesSimpleEquality(unEnsPred, predicate)) {
+            if (unEnsPred.equalsSimple(predicate)) {
                 return Optional.of(unEnsPred);
             }
         }
@@ -173,7 +173,7 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         Statement statement = predicate.getStatement();
 
         for (EnsuredPredicate unEnsPred : ensuredPredicates.get(statement)) {
-            if (predicatesSimpleEquality(unEnsPred, predicate)) {
+            if (unEnsPred.equalsSimple(predicate)) {
                 return Optional.of(unEnsPred);
             }
         }
@@ -185,17 +185,12 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         Statement statement = predicate.getStatement();
 
         for (UnEnsuredPredicate unEnsPred : unEnsuredPredicates.get(statement)) {
-            if (predicatesSimpleEquality(unEnsPred, predicate)) {
+            if (unEnsPred.equalsSimple(predicate)) {
                 return Optional.of(unEnsPred);
             }
         }
 
         return Optional.empty();
-    }
-
-    private boolean predicatesSimpleEquality(AbstractPredicate pred1, AbstractPredicate pred2) {
-        return pred1.getPredicate().equals(pred2.getPredicate())
-                && pred1.getIndex() == pred2.getIndex();
     }
 
     @Override
