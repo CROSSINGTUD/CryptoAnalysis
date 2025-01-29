@@ -1,6 +1,7 @@
 package crypto.constraints;
 
 import boomerang.scene.Statement;
+import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -13,6 +14,7 @@ import crysl.rule.CrySLArithmeticConstraint;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
+import crysl.rule.ICrySLPredicateParameter;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,10 +66,18 @@ public class ComparisonConstraint extends EvaluableConstraint {
             impreciseResults.addAll(leftResult.impreciseResults());
             impreciseResults.addAll(rightResult.impreciseResults());
 
-            if (!(leftResult.evaluatedValues().isEmpty() || rightResult.evaluatedValues().isEmpty())
-                    || !impreciseResults.isEmpty()) {
-                isRelevant = true;
+            // Check if left side is relevant
+            if (leftResult.evaluatedValues().isEmpty() && leftResult.impreciseResults().isEmpty()) {
+                continue;
             }
+
+            // Check if right side is relevant
+            if (rightResult.evaluatedValues().isEmpty()
+                    && rightResult.impreciseResults().isEmpty()) {
+                continue;
+            }
+
+            isRelevant = true;
 
             if (impreciseResults.isEmpty()) {
                 evaluateConstraint(statement, leftResult, rightResult);
@@ -373,12 +383,82 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
         @Override
         public IntermediateResult evaluate(Statement statement) {
-            return new IntermediateResult(Collections.emptySet(), Collections.emptySet());
+            if (!predicate.getPredName().equals("length")) {
+                return new IntermediateResult(Collections.emptySet(), Collections.emptySet());
+            }
+
+            if (predicate.getParameters().size() != 1) {
+                return new IntermediateResult(Collections.emptySet(), Collections.emptySet());
+            }
+
+            String paramName = predicate.getParameters().get(0).getName();
+            Collection<ParameterWithExtractedValues> params = statementToValues.get(statement);
+            Collection<ParameterWithExtractedValues> values = filterParameters(params, paramName);
+
+            Collection<Integer> preciseValues = new HashSet<>();
+            Collection<ImpreciseResult> impreciseResults = new HashSet<>();
+
+            for (ParameterWithExtractedValues parameter : values) {
+                for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                    Val val = extractedValue.val();
+
+                    if (val.isArrayAllocationVal()) {
+                        Val arrLength = val.getArrayAllocationSize();
+
+                        // TODO Add transformation for complex array sizes, e.g.
+                        // int size = 10;
+                        // byte[] arr = new byte[size];
+                        if (arrLength.isIntConstant()) {
+                            preciseValues.add(arrLength.getIntValue());
+                        } else {
+                            ImpreciseResult impreciseResult =
+                                    new ImpreciseResult.ImpreciseExtractedValue(
+                                            parameter, extractedValue);
+                            impreciseResults.add(impreciseResult);
+                        }
+                    } else if (val.isStringConstant()) {
+                        String value = val.getStringValue();
+                        preciseValues.add(value.length());
+                    } else if (val.isIntConstant()) {
+                        int value = val.getIntValue();
+                        preciseValues.add(String.valueOf(value).length());
+                    } else {
+                        ImpreciseResult impreciseResult =
+                                new ImpreciseResult.ImpreciseExtractedValue(
+                                        parameter, extractedValue);
+                        impreciseResults.add(impreciseResult);
+                    }
+                }
+            }
+
+            return new IntermediateResult(preciseValues, impreciseResults);
+        }
+
+        private Collection<ParameterWithExtractedValues> filterParameters(
+                Collection<ParameterWithExtractedValues> parameters, String varName) {
+            Collection<ParameterWithExtractedValues> result = new HashSet<>();
+
+            for (ParameterWithExtractedValues parameter : parameters) {
+                if (parameter.varName().equals(varName)) {
+                    result.add(parameter);
+                }
+            }
+
+            return result;
         }
 
         @Override
         public String toString() {
-            return predicate.toString();
+            if (predicate.getPredName().equals("length")) {
+                Collection<String> params =
+                        predicate.getParameters().stream()
+                                .map(ICrySLPredicateParameter::getName)
+                                .toList();
+
+                return "length[" + String.join(", ", params) + "]";
+            } else {
+                return predicate.toString();
+            }
         }
     }
 

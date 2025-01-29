@@ -1,0 +1,22 @@
+SPEC tests.error.lengthpred.Length
+
+OBJECTS
+    byte[] arr;
+    java.lang.String s;
+    int i;
+
+EVENTS
+    Con: Length();
+    Arr: lengthArray(arr);
+    Str: lengthString(s);
+    Int: lengthInteger(i);
+
+    Len := Arr | Str | Int;
+
+ORDER
+    Con, Len*
+
+CONSTRAINTS
+    length[arr] == 7;    // corresponds to arr.length
+    length[s] == 5;      // corresponds to s.length()
+    length[i] == 2;      // corresponds to String.valueOf(i).length()

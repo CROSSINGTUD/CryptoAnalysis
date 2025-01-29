@@ -52,7 +52,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("bunkr.PBKDF2Descriptor", "calculateRounds", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
                         .withTPs(TypestateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
@@ -80,14 +80,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gcm_aes_example.GCMAESBouncyCastle", "processing", 2)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gcm_aes_example.GCMAESBouncyCastle", "processingCorrect", 2)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .build());
 
         addErrorSpecification(
@@ -210,13 +210,26 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject, BOUNCY_CASTLE_RULESET_PATH);
 
         addErrorSpecification(
+                new ErrorSpecification.Builder("pattern.DigestTest", "digestWithReset", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .build());
+        addErrorSpecification(
                 new ErrorSpecification.Builder("pattern.DigestTest", "digestWithoutUpdate", 0)
                         .withTPs(TypestateError.class, 1)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pattern.DigestTest", "digestWithMultipleUpdates", 0)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("pattern.DigestTest", "multipleDigests", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .build());
+        addErrorSpecification(
+                new ErrorSpecification.Builder("pattern.DigestTest", "digestDefaultUsage", 0)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -234,7 +247,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "curve25519Unwrap", 4)
-                        .withTPs(ImpreciseValueExtractionError.class, 4)
+                        .withTPs(ImpreciseValueExtractionError.class, 5)
                         .build());
 
         addErrorSpecification(
@@ -247,17 +260,18 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "TestSHA256DigestOne", 0)
                         .withTPs(TypestateError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "testSHA256DigestTwo", 0)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("ipack.JPAKEExample", "deriveSessionKey", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
                         .build());
 
         scanner.run();
