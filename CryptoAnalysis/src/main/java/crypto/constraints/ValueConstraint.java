@@ -6,6 +6,8 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
@@ -15,7 +17,7 @@ import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
 
-/** Constraints: varName in {C1, ..., Cn} */
+/** Value constraints correspond to constraints of the form 'varName in {C1, ..., Cn}' */
 public class ValueConstraint extends EvaluableConstraint {
 
     private final CrySLValueConstraint constraint;
@@ -50,7 +52,8 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
-            // TODO Collect not allowed values and report a single error with them
+            Collection<ExtractedValue> violatingValues = new HashSet<>();
+
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 // TODO Extract call sites that are not part of the dataflow scope
                 if (extractedValue.val().equals(Val.zero())
@@ -67,18 +70,22 @@ public class ValueConstraint extends EvaluableConstraint {
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
                     if (!allowedValues.contains(valAsString)) {
-                        IViolatedConstraint violatedConstraint =
-                                new IViolatedConstraint.ViolatedValueConstraint(this);
-                        ConstraintError error =
-                                new ConstraintError(
-                                        seed,
-                                        parameter.statement(),
-                                        seed.getSpecification(),
-                                        this,
-                                        violatedConstraint);
-                        errors.add(error);
+                        violatingValues.add(extractedValue);
                     }
                 }
+            }
+
+            if (!violatingValues.isEmpty()) {
+                IViolatedConstraint violatedConstraint =
+                        new ViolatedValueConstraint(constraint, violatingValues, parameter.index());
+                ConstraintError error =
+                        new ConstraintError(
+                                seed,
+                                parameter.statement(),
+                                seed.getSpecification(),
+                                this,
+                                violatedConstraint);
+                errors.add(error);
             }
         }
 

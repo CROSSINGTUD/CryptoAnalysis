@@ -15,6 +15,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Supper class that construct and evaluate a CrySL constraint from the CONSTRAINTS or REQUIRES
+ * section. A call to {@link EvaluableConstraint#getInstance(AnalysisSeedWithSpecification,
+ * ISLConstraint, Collection, Multimap)}} creates an instance for a corresponding CrySL constraint
+ * and a call to {@link EvaluableConstraint#evaluate()} evaluates it and returns the result. With
+ * {@link EvaluableConstraint#getErrors()}, one can retrieve the collected violations/errors.
+ */
 public abstract class EvaluableConstraint {
 
     public static final Collection<String> predefinedPredicates =
@@ -26,8 +33,16 @@ public abstract class EvaluableConstraint {
     protected final Collection<AbstractConstraintsError> errors;
 
     public enum EvaluationResult {
+        /** Returned if the constraint is satisfied with the given information */
         ConstraintIsSatisfied,
+
+        /** Returned if the constraint is violated with the given information */
         ConstraintIsNotSatisfied,
+
+        /**
+         * Returned if the constraint contains variables that are not part of the given statements.
+         * In this case, the constraint cannot be evaluated and is declared as 'not relevant'.
+         */
         ConstraintIsNotRelevant
     }
 

@@ -5,6 +5,8 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
+import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ViolatedComparisonConstraint;
 import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLArithmeticConstraint;
@@ -17,6 +19,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A comparison constraint represents two constraints 'left' and 'right' that are connected by a
+ * comparison operator. CrySL defines 'left' and 'right' as arithmetic constraints, i.e.
+ * mathematical expressions that can be evaluated individually. These constraints are transformed
+ * into a tree that is evaluated recursively from bottom to top. For example, an expression x + y +
+ * z is evaluated as x, then y, then z, then w := x + y, then w + z, i.e. as ((x + y) + z). Note
+ * that CrySL adds a '+ 0' to all arithmetic expressions. Additionally, the predefined predicate
+ * length[...] may be part of an expression that has to be evaluated separately.
+ */
 public class ComparisonConstraint extends EvaluableConstraint {
 
     private final CrySLComparisonConstraint constraint;
@@ -111,8 +122,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 boolean satisfied = isOperatorSatisfied(leftValue, rightValue);
 
                 if (!satisfied) {
-                    IViolatedConstraint violatedConstraint =
-                            new IViolatedConstraint.ViolatedComparisonConstraint(this);
+                    IViolatedConstraint violatedConstraint = new ViolatedComparisonConstraint(this);
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -146,27 +156,30 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
     @Override
     public String toString() {
+        String leftExpr = left.toString().replace(" + 0", "");
+        String rightExpr = right.toString().replace(" + 0", "");
+
         switch (constraint.getOperator()) {
             case eq -> {
-                return left + " == " + right;
+                return leftExpr + " == " + rightExpr;
             }
             case neq -> {
-                return left + " != " + right;
+                return leftExpr + " != " + rightExpr;
             }
             case g -> {
-                return left + " > " + right;
+                return leftExpr + " > " + rightExpr;
             }
             case ge -> {
-                return left + " >= " + right;
+                return leftExpr + " >= " + rightExpr;
             }
             case l -> {
-                return left + " < " + right;
+                return leftExpr + " < " + rightExpr;
             }
             case le -> {
-                return left + " <= " + right;
+                return leftExpr + " <= " + rightExpr;
             }
             default -> {
-                return left + " <unknown operator> " + right;
+                return leftExpr + " <unknown operator> " + rightExpr;
             }
         }
     }

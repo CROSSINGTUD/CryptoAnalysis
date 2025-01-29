@@ -46,8 +46,7 @@ public abstract class AbstractPredicate {
     }
 
     public boolean equalsSimple(AbstractPredicate other) {
-        return Objects.equals(predicate, other.getPredicate())
-                && index == other.getIndex();
+        return Objects.equals(predicate, other.getPredicate()) && index == other.getIndex();
     }
 
     @Override

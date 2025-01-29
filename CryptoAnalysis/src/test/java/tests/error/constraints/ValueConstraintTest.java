@@ -151,4 +151,43 @@ public class ValueConstraintTest extends UsagePatternTestingFramework {
 
         Assertions.impreciseValueExtractionErrors(0);
     }
+
+    @Test
+    public void testBranching() {
+        // Both correct
+        String value1 = "AES";
+        if (Math.random() > 0.5) {
+            value1 = "BES";
+        }
+
+        ValueConstraint constraint1 = new ValueConstraint(value1);
+        Assertions.constraintErrors(constraint1, 0);
+
+        // Original correct, branch wrong
+        String value2 = "AES";
+        if (Math.random() > 0.5) {
+            value2 = "CES";
+        }
+
+        ValueConstraint constraint2 = new ValueConstraint(value2);
+        Assertions.constraintErrors(constraint2, 1);
+
+        // Original wrong, branch correct
+        String value3 = "CES";
+        if (Math.random() > 0.5) {
+            value3 = "AES";
+        }
+
+        ValueConstraint constraint3 = new ValueConstraint(value3);
+        Assertions.constraintErrors(constraint3, 1);
+
+        // Both wrong
+        String value4 = "CES";
+        if (Math.random() > 0.5) {
+            value4 = "DES";
+        }
+
+        ValueConstraint constraint4 = new ValueConstraint(value4);
+        Assertions.constraintErrors(constraint4, 1);
+    }
 }

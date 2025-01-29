@@ -21,6 +21,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Main class to evaluate the constraints and predicates from the CONSTRAINTS and REQUIRES section,
+ * respectively. To run the analysis, a call to {@link ConstraintsAnalysis#initialize()} is required
+ * to run Boomerang queries to extract required values for the parameters.
+ */
 public class ConstraintsAnalysis {
 
     private final AnalysisSeedWithSpecification seed;

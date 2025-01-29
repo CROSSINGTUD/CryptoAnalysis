@@ -478,12 +478,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             Collection<Integer> indices = relevantStatements.get(statement);
             for (Integer index : indices) {
                 AbstractPredicate predForOtherSeed =
-                        createPredicate(
-                                indirectPred.getGeneratingSeed(),
-                                predicate,
-                                statement,
-                                index,
-                                violations);
+                        createPredicate(this, predicate, statement, index, violations);
 
                 notifyExpectingSeeds(predForOtherSeed, false);
             }
@@ -502,7 +497,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                     unEnsPred.getPredicate(),
                     statement,
                     -1,
-                    new HashSet<>());
+                    unEnsPred.getViolations());
         }
 
         // If the generating seed ensured a valid predicate, we have to check if the current seed is

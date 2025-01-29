@@ -2,8 +2,11 @@ package crypto.analysis.errors;
 
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.AlternativeReqPredicate;
+import crypto.constraints.RequiredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLRule;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -39,7 +42,25 @@ public class AlternativeReqPredicateError extends AbstractRequiredPredicateError
 
     @Override
     public String toErrorMarkerString() {
-        return "";
+        StringBuilder builder = new StringBuilder();
+
+        if (violatedPredicate.predicates().isEmpty()) {
+            return "";
+        }
+
+        int index = violatedPredicate.predicates().stream().findFirst().get().index();
+        builder.append(CrySLUtils.getIndexAsString(index));
+        builder.append(" parameter was not properly generated as ");
+
+        Collection<String> predNames = new ArrayList<>();
+        for (RequiredPredicate predicate : violatedPredicate.predicates()) {
+            predNames.add(predicate.predicate().getPredName());
+        }
+
+        String preds = String.join(" OR ", predNames);
+        builder.append(preds);
+
+        return builder.toString();
     }
 
     @Override

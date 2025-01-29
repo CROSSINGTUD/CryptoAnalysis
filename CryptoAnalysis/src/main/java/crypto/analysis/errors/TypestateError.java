@@ -2,6 +2,7 @@ package crypto.analysis.errors;
 
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -33,7 +34,7 @@ public class TypestateError extends AbstractOrderError {
         msg.append(getErrorStatement().getInvokeExpr().getMethod());
         msg.append(getObjectType());
 
-        String altMethods = formatMethodNames(expectedMethodCalls);
+        String altMethods = CrySLUtils.formatMethodNames(expectedMethodCalls);
 
         if (!altMethods.isEmpty()) {
             msg.append(". Expected a call to one of the following methods ");

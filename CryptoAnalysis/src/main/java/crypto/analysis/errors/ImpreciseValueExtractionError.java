@@ -40,9 +40,9 @@ public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
     @Override
     public String toErrorMarkerString() {
-        return "Constraint "
+        return "Constraint \""
                 + violatedConstraint
-                + " could not be evaluated due to insufficient information.";
+                + "\" could not be evaluated due to insufficient information.";
     }
 
     @Override

@@ -13,6 +13,7 @@ import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
 
+/** Constraint that evaluates a single required predicate from the REQUIRES section */
 public class RequiredPredicateConstraint extends EvaluableConstraint {
 
     private final RequiredPredicate predicate;

@@ -4,11 +4,20 @@ import boomerang.scene.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
+import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLConstraint;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
 
+/**
+ * A binary constraint represents two constraints 'left' and 'right' that are connected by a logical
+ * operator. During the evaluation, both sites are evaluated individually and, depending on the
+ * operator, evaluated by the basic logic rules. For example, an implication 'A implies B' evaluates
+ * to false if A is true and B is false, otherwise it evaluates to true. Currently, we have
+ * implications, conjunctions and disjunctions.
+ */
 public class BinaryConstraint extends EvaluableConstraint {
 
     private final CrySLConstraint constraint;
@@ -118,8 +127,7 @@ public class BinaryConstraint extends EvaluableConstraint {
             }
         }
 
-        IViolatedConstraint violatedConstraint =
-                new IViolatedConstraint.ViolatedBinaryConstraint(this);
+        IViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
         ConstraintError error =
                 new ConstraintError(
                         seed, seed.getOrigin(), seed.getSpecification(), this, violatedConstraint);

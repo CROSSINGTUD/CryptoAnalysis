@@ -3,6 +3,7 @@ package crypto.analysis.errors;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -86,7 +87,7 @@ public class IncompleteOperationError extends AbstractOrderError {
         msg.append(getObjectType());
         msg.append(" not completed. Expected call to one of the methods ");
 
-        String altMethods = formatMethodNames(expectedMethodCalls);
+        String altMethods = CrySLUtils.formatMethodNames(expectedMethodCalls);
         msg.append(altMethods);
         return msg.toString();
     }
@@ -105,7 +106,7 @@ public class IncompleteOperationError extends AbstractOrderError {
         msg.append(
                 " is on a dataflow path with an incomplete operation. Potential missing call to one of the methods ");
 
-        String altMethods = formatMethodNames(expectedMethodCalls);
+        String altMethods = CrySLUtils.formatMethodNames(expectedMethodCalls);
         msg.append(altMethods);
         return msg.toString();
     }

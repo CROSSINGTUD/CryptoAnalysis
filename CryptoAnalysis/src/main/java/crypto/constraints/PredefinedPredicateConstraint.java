@@ -7,8 +7,15 @@ import boomerang.scene.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
+import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ViolatedCallToConstraint;
+import crypto.constraints.violations.ViolatedInstanceOfConstraint;
+import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
+import crypto.constraints.violations.ViolatedNoCallToConstraint;
+import crypto.constraints.violations.ViolatedNotHardCodedConstraint;
 import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.utils.CrySLUtils;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLObject;
@@ -19,6 +26,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Constraint that evaluates the predefined predicates 'callTo', 'noCallTo', 'neverTypeOf',
+ * 'instanceOf' and 'notHardCoded'. The predicate 'length' is evaluated as part of an arithmetic
+ * constraint in an {@link ComparisonConstraint}, the predicate 'elements' is currently not
+ * supported.
+ */
 public class PredefinedPredicateConstraint extends EvaluableConstraint {
 
     private final CrySLPredicate constraint;
@@ -96,8 +109,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         }
 
         if (!isCalled) {
-            IViolatedConstraint violatedConstraint =
-                    new IViolatedConstraint.ViolatedCallToConstraint(requiredCalls);
+            IViolatedConstraint violatedConstraint = new ViolatedCallToConstraint(requiredCalls);
             ConstraintError error =
                     new ConstraintError(
                             seed,
@@ -127,8 +139,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
             for (CrySLMethod method : notAllowedCalls) {
                 if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, foundCall)) {
-                    IViolatedConstraint violatedConstraint =
-                            new IViolatedConstraint.ViolatedNoCallToConstraint(method);
+                    IViolatedConstraint violatedConstraint = new ViolatedNoCallToConstraint(method);
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -169,10 +180,8 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                 for (Type type : extractedValue.types()) {
                     if (type.toString().equals(parameterType.getJavaType())) {
                         IViolatedConstraint violatedConstraint =
-                                new IViolatedConstraint.ViolatedNeverTypeOfConstraint(
-                                        parameter.param(),
-                                        parameter.index(),
-                                        parameterType.getJavaType());
+                                new ViolatedNeverTypeOfConstraint(
+                                        parameter, parameterType.getJavaType());
                         ConstraintError error =
                                 new ConstraintError(
                                         seed,
@@ -232,8 +241,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
 
             if (!isSubType) {
                 IViolatedConstraint violatedConstraint =
-                        new IViolatedConstraint.ViolatedInstanceOfConstraint(
-                                parameter.param(), parameter.index(), parameterType.getJavaType());
+                        new ViolatedInstanceOfConstraint(parameter, parameterType.getJavaType());
                 ConstraintError error =
                         new ConstraintError(
                                 seed,
@@ -271,8 +279,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
                 if (isHardCoded(extractedValue)) {
                     IViolatedConstraint violatedConstraint =
-                            new IViolatedConstraint.ViolatedNotHardCodedConstraint(
-                                    parameter.param(), parameter.index(), extractedValue);
+                            new ViolatedNotHardCodedConstraint(parameter, extractedValue);
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -331,6 +338,58 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
 
     @Override
     public String toString() {
-        return constraint.toString();
+        switch (constraint.getPredName()) {
+            case "callTo" -> {
+                Collection<CrySLMethod> methods =
+                        parametersToCryslMethods(constraint.getParameters());
+                String formattedMethods = CrySLUtils.formatMethodNames(methods);
+
+                return "callTo["
+                        + formattedMethods.substring(1, formattedMethods.length() - 1)
+                        + "]";
+            }
+            case "noCallTo" -> {
+                Collection<CrySLMethod> methods =
+                        parametersToCryslMethods(constraint.getParameters());
+                String formattedMethods = CrySLUtils.formatMethodNames(methods);
+
+                return "noCallTo["
+                        + formattedMethods.substring(1, formattedMethods.length() - 1)
+                        + "]";
+            }
+            case "neverTypeOf" -> {
+                List<CrySLObject> objects = parametersToCryslObjects(constraint.getParameters());
+
+                CrySLObject variable = objects.get(0);
+                CrySLObject parameterType = objects.get(1);
+
+                return "neverTypeOf["
+                        + variable.getVarName()
+                        + ", "
+                        + parameterType.getJavaType()
+                        + "]";
+            }
+            case "instanceOf" -> {
+                List<CrySLObject> objects = parametersToCryslObjects(constraint.getParameters());
+
+                CrySLObject variable = objects.get(0);
+                CrySLObject parameterType = objects.get(1);
+
+                return "instanceOf["
+                        + variable.getVarName()
+                        + ", "
+                        + parameterType.getJavaType()
+                        + "]";
+            }
+            case "notHardCoded" -> {
+                List<CrySLObject> objects = parametersToCryslObjects(constraint.getParameters());
+
+                CrySLObject variable = objects.get(0);
+                return "notHardCoded[" + variable.getVarName() + "]";
+            }
+            default -> {
+                return constraint.toString();
+            }
+        }
     }
 }
