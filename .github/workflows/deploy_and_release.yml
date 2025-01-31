@@ -31,6 +31,21 @@ jobs:
           OSSRH_USERNAME: ${{ secrets.SONATYPE_USER }}
           OSSRH_PASSWORD: ${{ secrets.SONATYPE_PW }}
 
+      # Prepare for GitHub release
+      - name: Zip JavaCryptographicArchitecture folder
+        run: |
+          echo "Zipping the JavaCryptographicArchitecture folder..."
+          zip -r apps/JavaCryptographicArchitecture.zip CryptoAnalysis/src/test/resources/rules/JavaCryptographicArchitecture
+
+      - name: Copy Examples.jar
+        run: cp -r CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar apps/
+        
+      - name: Create artefact for released files
+        uses: actions/upload-artifact@v4
+        with:
+          name: released-files
+          path: apps/
+
   synchronize:
     runs-on: ubuntu-latest
     needs: deployment
@@ -89,14 +104,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Zip JavaCryptographicArchitecture folder
-        run: |
-          echo "Zipping the JavaCryptographicArchitecture folder..."
-          zip -r JavaCryptographicArchitecture.zip CryptoAnalysis/src/test/resources/rules/JavaCryptographicArchitecture
+      - name: Load released files
+        uses: actions/download-artifact@v4
+        with:
+          name: released-files
+          path: apps/
 
       - name: Create GitHub Release
         run: |
-          gh release create "$VERSION" ./apps/* "CryptoAnalysisTargets/CogniCryptDemoExample/Examples.jar" "JavaCryptographicArchitecture.zip" \
-            --title "$VERSION" --notes-file release_notes.txt
+          gh release create "$VERSION" ./apps/* --title "$VERSION" --notes-file release_notes.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: released-files
