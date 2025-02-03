@@ -5,6 +5,7 @@ import boomerang.scene.Method;
 import boomerang.scene.Pair;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
+import java.util.Objects;
 
 public class IntVal extends Val {
 
@@ -162,6 +163,21 @@ public class IntVal extends Val {
 
     @Override
     public String getVariableName() {
+        return String.valueOf(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) && obj instanceof IntVal other && value == other.value;
+    }
+
+    @Override
+    public String toString() {
         return "Int constant: " + value;
     }
 }

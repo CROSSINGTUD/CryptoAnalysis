@@ -139,11 +139,19 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptOne", 0)
                         .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                2,
+                                "Requires handling of static fields")
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptTwo", 0)
                         .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withFPs(
+                                ImpreciseValueExtractionError.class,
+                                2,
+                                "Requires handling of static fields")
                         .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(

@@ -37,6 +37,22 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
     }
 
     @Test
+    public void branchingIntegerParseIntTest() {
+        String value = "10";
+        if (Math.random() > 0.5) {
+            value = "9999";
+        }
+
+        int intValue = Integer.parseInt(value);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.integerParseIntConstraint(intValue);
+        Assertions.extValue(0);
+
+        Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
     public void positiveBigIntegerValueOfTest() {
         BigInteger correctValue = BigInteger.valueOf(100000);
 

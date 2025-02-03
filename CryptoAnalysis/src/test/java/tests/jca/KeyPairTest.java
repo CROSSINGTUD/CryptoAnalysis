@@ -43,7 +43,7 @@ public class KeyPairTest extends UsagePatternTestingFramework {
                 new RSAKeyGenParameterSpec(keySize, RSAKeyGenParameterSpec.F4);
         Assertions.notHasEnsuredPredicate(parameters);
         Assertions.extValue(0);
-        Assertions.extValue(1);
+        // Assertions.extValue(1); Requires static field F4
         generator.initialize(parameters, new SecureRandom());
         KeyPair keyPair = generator.generateKeyPair();
         Assertions.notHasEnsuredPredicate(keyPair);

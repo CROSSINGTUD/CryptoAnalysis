@@ -3,73 +3,99 @@ package crypto.extractparameter.transformation;
 import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
-import java.util.Optional;
+import crypto.extractparameter.scope.IntVal;
+import crypto.extractparameter.scope.LongVal;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
+/** Class for transformations for Java's wrapper classes, e.g. Integer, BigInteger, Long, etc. */
 public class WrapperTransformation extends Transformation {
 
-    private static final String INTEGER_PARSE_INT =
-            "<java.lang.Integer: int parseInt(java.lang.String)>";
-    private static final String BIG_INTEGER_VALUE_OF =
-            "<java.math.BigInteger: java.math.BigInteger valueOf(long)>";
+    private static final Signature INTEGER_PARSE_INT =
+            new Signature("java.lang.Integer", "int", "parseInt", List.of("java.lang.String"));
+    private static final Signature BIG_INTEGER_VALUE_OF =
+            new Signature(
+                    "java.math.BigInteger", "java.math.BigInteger", "valueOf", List.of("long"));
 
-    public WrapperTransformation(Definitions.BoomerangOptionsDefinition definition) {
+    private static final Collection<Signature> WRAPPER_SIGNATURES =
+            Set.of(INTEGER_PARSE_INT, BIG_INTEGER_VALUE_OF);
+
+    protected static boolean isWrapperTransformation(Signature signature) {
+        return WRAPPER_SIGNATURES.contains(signature);
+    }
+
+    protected WrapperTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 
     @Override
-    public Optional<AllocVal> evaluateExpression(Statement statement) {
-        if (!statement.containsInvokeExpr() || !statement.isAssign()) {
-            return Optional.empty();
-        }
-
-        InvokeExpr invokeExpr = statement.getInvokeExpr();
-        String signature = invokeExpr.getMethod().getSignature();
-
+    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
         if (signature.equals(INTEGER_PARSE_INT)) {
-            return evaluateIntegerParseInt(statement, invokeExpr);
+            return evaluateIntegerParseInt(statement);
         }
 
         if (signature.equals(BIG_INTEGER_VALUE_OF)) {
-            return evaluateBigIntegerValueOf(statement, invokeExpr);
+            return evaluateBigIntegerValueOf(statement);
         }
 
-        return Optional.empty();
+        return HashMultimap.create();
     }
 
-    private Optional<AllocVal> evaluateIntegerParseInt(Statement statement, InvokeExpr invokeExpr) {
+    private Multimap<Val, Type> evaluateIntegerParseInt(Statement statement) {
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
         Val param = invokeExpr.getArg(0);
 
-        Optional<String> stringParamOpt = extractStringFromVal(statement, param);
-        if (stringParamOpt.isEmpty()) {
-            return Optional.empty();
+        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, param);
+        Multimap<Val, Type> extractedParams = extractAllocValues(allocSites);
+
+        Multimap<Val, Type> result = HashMultimap.create();
+        for (Val extractedParam : extractedParams.keySet()) {
+            if (!extractedParam.isStringConstant()) {
+                continue;
+            }
+
+            try {
+                int parsedInt = Integer.parseInt(extractedParam.getStringValue());
+                IntVal intVal = new IntVal(parsedInt, statement.getMethod());
+
+                Collection<Type> types = extractedParams.get(extractedParam);
+                types.add(intVal.getType());
+
+                result.putAll(intVal, types);
+            } catch (NumberFormatException ignored) {
+            }
         }
 
-        String paramString = stringParamOpt.get();
-
-        try {
-            int result = Integer.parseInt(paramString);
-
-            AllocVal allocVal = createTransformedAllocVal(result, statement);
-            return Optional.of(allocVal);
-        } catch (NumberFormatException e) {
-            return Optional.empty();
-        }
+        return result;
     }
 
-    private Optional<AllocVal> evaluateBigIntegerValueOf(
-            Statement statement, InvokeExpr invokeExpr) {
+    private Multimap<Val, Type> evaluateBigIntegerValueOf(Statement statement) {
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
         Val param = invokeExpr.getArg(0);
 
-        Optional<Long> longParamOpt = extractLongFromVal(statement, param);
-        if (longParamOpt.isEmpty()) {
-            return Optional.empty();
+        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, param);
+        Multimap<Val, Type> extractedParams = extractAllocValues(allocSites);
+
+        Multimap<Val, Type> result = HashMultimap.create();
+        for (Val extractedParam : extractedParams.keySet()) {
+            if (!extractedParam.isLongConstant()) {
+                continue;
+            }
+
+            // Instead of a BigInteger, we continue propagating the long value
+            LongVal longVal = new LongVal(extractedParam.getLongValue(), statement.getMethod());
+            Collection<Type> types = extractedParams.get(extractedParam);
+            types.add(longVal.getType());
+
+            result.putAll(longVal, types);
         }
 
-        long extractedParam = longParamOpt.get();
-
-        AllocVal allocVal = createTransformedAllocVal(extractedParam, statement);
-        return Optional.of(allocVal);
+        return result;
     }
 }

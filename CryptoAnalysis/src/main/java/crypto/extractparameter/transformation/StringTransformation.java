@@ -3,94 +3,177 @@ package crypto.extractparameter.transformation;
 import boomerang.scene.AllocVal;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
-import java.util.Arrays;
+import crypto.extractparameter.scope.StringVal;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
 
+/** Class for all transformations from the class {@link java.lang.String}. */
 public class StringTransformation extends Transformation {
 
-    private final Collection<String> baseStringSignatures =
-            Arrays.asList(
-                    "<java.lang.String: char[] toCharArray()>",
-                    "<java.lang.String: byte[] getBytes()>",
-                    "<java.lang.String: byte[] getBytes(java.lang.String)>",
-                    "<java.lang.String: String toUpperCase()>",
-                    "<java.lang.String: String toUpperCase(java.util.Locale)>",
-                    "<java.lang.String: String toLowerCase()>",
-                    "<java.lang.String: String toLowerCase(java.util.Locale)>");
+    private static final Signature TO_CHAR_ARRAY =
+            new Signature("java.lang.String", "char[]", "toCharArray");
+    private static final Signature GET_BYTES =
+            new Signature("java.lang.String", "byte[]", "getBytes");
+    private static final Signature GET_BYTES_WITH_PARAM =
+            new Signature("java.lang.String", "byte[]", "getBytes", List.of("java.lang.String"));
+    private static final Signature TO_UPPER_CASE =
+            new Signature("java.lang.String", "java.lang.String", "toUpperCase");
+    private static final Signature TO_UPPER_CASE_WITH_PARAM =
+            new Signature(
+                    "java.lang.String",
+                    "java.lang.String",
+                    "toUpperCase",
+                    List.of("java.util.Locale"));
+    private static final Signature TO_LOWER_CASE =
+            new Signature("java.lang.String", "java.lang.String", "toLowerCase");
+    private static final Signature TO_LOWER_CASE_WITH_PARAM =
+            new Signature(
+                    "java.lang.String",
+                    "java.lang.String",
+                    "toLowerCase",
+                    List.of("java.util.Locale"));
+    private static final Signature REPLACE =
+            new Signature(
+                    "java.lang.String",
+                    "java.lang.String",
+                    "replace",
+                    List.of("java.lang.CharSequence", "java.lang.CharSequence"));
 
-    private final Collection<String> paramStringSignatures =
-            Arrays.asList("<org.bouncycastle.util.encoders.Hex: byte[] decode(java.lang.String)>");
+    /** Signatures for methods where the base is the corresponding transformed value */
+    private static final Collection<Signature> STRING_BASE =
+            Set.of(
+                    TO_CHAR_ARRAY,
+                    GET_BYTES,
+                    GET_BYTES_WITH_PARAM,
+                    TO_UPPER_CASE,
+                    TO_UPPER_CASE_WITH_PARAM,
+                    TO_LOWER_CASE,
+                    TO_LOWER_CASE_WITH_PARAM);
 
-    private static final String REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE =
-            "<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>";
+    private static final Collection<Signature> STRING_SIGNATURES =
+            Set.of(
+                    TO_CHAR_ARRAY,
+                    GET_BYTES,
+                    GET_BYTES_WITH_PARAM,
+                    TO_UPPER_CASE,
+                    TO_UPPER_CASE_WITH_PARAM,
+                    TO_LOWER_CASE,
+                    TO_LOWER_CASE_WITH_PARAM,
+                    REPLACE);
 
-    public StringTransformation(Definitions.BoomerangOptionsDefinition definition) {
+    protected static boolean isStringTransformation(Signature signature) {
+        return STRING_SIGNATURES.contains(signature);
+    }
+
+    protected StringTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 
     @Override
-    public Optional<AllocVal> evaluateExpression(Statement statement) {
-        if (!statement.containsInvokeExpr() || !statement.isAssign()) {
-            return Optional.empty();
+    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
+        if (STRING_BASE.contains(signature)) {
+            return evaluateStringAsBase(statement);
         }
 
+        if (signature.equals(REPLACE)) {
+            return evaluateReplaceCharSequence(statement);
+        }
+
+        return HashMultimap.create();
+    }
+
+    /**
+     * Evaluate and transform all String expressions where only the base is relevant, e.g. in
+     *
+     * <pre>{@code
+     * String s = "test";
+     * char[] c = s.toCharArray();
+     * }</pre>
+     *
+     * the call to 's.toCharArray()' requires only the value of the base 's'.
+     *
+     * @param statement the statement with a corresponding invoked expression
+     * @return all possible values for the base and their propagated types
+     */
+    private Multimap<Val, Type> evaluateStringAsBase(Statement statement) {
         InvokeExpr invokeExpr = statement.getInvokeExpr();
-        String signature = invokeExpr.getMethod().getSignature();
-
-        if (baseStringSignatures.contains(signature)) {
-            Val base = invokeExpr.getBase();
-            return evaluateVal(statement, base);
-        }
-
-        if (paramStringSignatures.contains(signature)) {
-            Val param = invokeExpr.getArg(0);
-            return evaluateVal(statement, param);
-        }
-
-        if (signature.equals(REPLACE_CHAR_SEQUENCE_CHAR_SEQUENCE)) {
-            return evaluateReplaceCharSequenceCharSequence(statement, invokeExpr);
-        }
-
-        return Optional.empty();
-    }
-
-    private Optional<AllocVal> evaluateVal(Statement statement, Val val) {
-        Optional<String> baseStringOpt = extractStringFromVal(statement, val);
-
-        if (baseStringOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String baseString = baseStringOpt.get();
-
-        AllocVal allocVal = createTransformedAllocVal(baseString, statement);
-        return Optional.of(allocVal);
-    }
-
-    private Optional<AllocVal> evaluateReplaceCharSequenceCharSequence(
-            Statement statement, InvokeExpr invokeExpr) {
         Val base = invokeExpr.getBase();
-        Val arg1 = invokeExpr.getArg(0);
-        Val arg2 = invokeExpr.getArg(1);
 
-        Optional<String> baseStringOpt = extractStringFromVal(statement, base);
-        Optional<String> arg1StringOpt = extractStringFromVal(statement, arg1);
-        Optional<String> arg2StringOpt = extractStringFromVal(statement, arg2);
+        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, base);
 
-        if (baseStringOpt.isEmpty() || arg1StringOpt.isEmpty() || arg2StringOpt.isEmpty()) {
-            return Optional.empty();
+        Multimap<Val, Type> result = HashMultimap.create();
+        for (AllocVal allocSite : allocSites.keySet()) {
+            Multimap<Val, Type> transformedAllocSites =
+                    Transformation.transformAllocationSite(allocSite, definition);
+
+            for (Val transformedVal : transformedAllocSites.keySet()) {
+                if (!transformedVal.isStringConstant()) {
+                    continue;
+                }
+
+                Collection<Type> types = transformedAllocSites.get(transformedVal);
+                types.add(transformedVal.getType());
+
+                result.putAll(transformedVal, types);
+            }
         }
 
-        String baseString = baseStringOpt.get();
-        String arg1String = arg1StringOpt.get();
-        String arg2String = arg2StringOpt.get();
+        return result;
+    }
 
-        String result = baseString.replace(arg1String, arg2String);
+    /**
+     * Evaluates and transforms the expression s.replace(a, b). This includes all possible
+     * combinations that can be extracted for s, a and b.
+     *
+     * @param statement the statement with the replace expression
+     * @return all possible results and their types
+     */
+    private Multimap<Val, Type> evaluateReplaceCharSequence(Statement statement) {
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
 
-        AllocVal allocVal = createTransformedAllocVal(result, statement);
-        return Optional.of(allocVal);
+        Val base = invokeExpr.getBase();
+        Val param1 = invokeExpr.getArg(0);
+        Val param2 = invokeExpr.getArg(1);
+
+        Multimap<AllocVal, Type> allocBases = computeAllocSites(statement, base);
+        Multimap<AllocVal, Type> allocParams1 = computeAllocSites(statement, param1);
+        Multimap<AllocVal, Type> allocParams2 = computeAllocSites(statement, param2);
+
+        Multimap<Val, Type> extractedBases = extractAllocValues(allocBases);
+        Multimap<Val, Type> extractedParams1 = extractAllocValues(allocParams1);
+        Multimap<Val, Type> extractedParams2 = extractAllocValues(allocParams2);
+
+        Multimap<Val, Type> result = HashMultimap.create();
+        for (Val extractedBase : extractedBases.keySet()) {
+            for (Val extractedParam1 : extractedParams1.keySet()) {
+                for (Val extractedParam2 : extractedParams2.keySet()) {
+                    if (!extractedBase.isStringConstant()
+                            || !extractedParam1.isStringConstant()
+                            || !extractedParam2.isStringConstant()) {
+                        continue;
+                    }
+
+                    String stringBase = extractedBase.getStringValue();
+                    String stringParam1 = extractedParam1.getStringValue();
+                    String stringParam2 = extractedParam2.getStringValue();
+
+                    String transformedString = stringBase.replace(stringParam1, stringParam2);
+                    StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+
+                    Collection<Type> types = extractedBases.get(extractedBase);
+                    types.add(stringVal.getType());
+
+                    result.putAll(stringVal, types);
+                }
+            }
+        }
+
+        return result;
     }
 }

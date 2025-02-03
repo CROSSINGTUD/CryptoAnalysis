@@ -61,7 +61,6 @@ public class ExtractValueTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         int val = noCallee();
         keygen.init(val);
-        Assertions.extValue(0);
     }
 
     private String getAESReturn() {

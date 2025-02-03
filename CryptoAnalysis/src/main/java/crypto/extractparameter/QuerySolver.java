@@ -4,34 +4,35 @@ import boomerang.Boomerang;
 import boomerang.ForwardQuery;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
-import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
+import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
-import crypto.extractparameter.transformation.TransformedAllocVal;
-import java.util.AbstractMap;
+import crypto.extractparameter.transformation.Transformation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import wpds.impl.Weight;
 
 public class QuerySolver {
 
     private final Definitions.QuerySolverDefinition definition;
+    private final Definitions.BoomerangOptionsDefinition optionsDefinition;
 
     public QuerySolver(Definitions.QuerySolverDefinition definition) {
         this.definition = definition;
-    }
-
-    public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
-        Definitions.BoomerangOptionsDefinition optionsDefinition =
+        this.optionsDefinition =
                 new Definitions.BoomerangOptionsDefinition(
                         definition.callGraph(),
                         definition.dataFlowScope(),
                         definition.timeout(),
                         definition.strategy());
-        ExtractParameterOptions options = new ExtractParameterOptions(optionsDefinition);
+    }
+
+    public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
+        ExtendedBoomerangOptions options =
+                new ExtendedBoomerangOptions(
+                        optionsDefinition.timeout(), optionsDefinition.strategy());
 
         Boomerang boomerang =
                 new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
@@ -53,49 +54,34 @@ public class QuerySolver {
     private ParameterWithExtractedValues extractValuesFromQueryResult(
             ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
 
-        Collection<Map.Entry<Val, Statement>> extractedParameters = new HashSet<>();
-
         Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();
-        Collection<ForwardQuery> filteredAllocSites = filterBoomerangResults(allocSites);
-        for (ForwardQuery paramQuery : filteredAllocSites) {
-            Statement initStatement = paramQuery.cfgEdge().getStart();
-            Val val = paramQuery.var();
+        Collection<Type> propagatedTypes = results.getPropagationType();
 
-            if (val instanceof AllocVal allocVal) {
-                Map.Entry<Val, Statement> entry =
-                        new AbstractMap.SimpleEntry<>(allocVal.getAllocVal(), initStatement);
-                extractedParameters.add(entry);
-            } else {
-                Map.Entry<Val, Statement> entry = new AbstractMap.SimpleEntry<>(val, initStatement);
-                extractedParameters.add(entry);
-            }
-        }
-
-        Collection<Type> types = results.getPropagationType();
-
-        // If no value could be extracted, add the zero value to indicate it
-        if (extractedParameters.isEmpty()) {
-            ExtractedValue zeroVal =
-                    new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
-
-            return new ParameterWithExtractedValues(
-                    query.cfgEdge().getTarget(),
-                    query.var(),
-                    query.getIndex(),
-                    query.getVarNameInSpec(),
-                    Collections.singleton(zeroVal));
+        // If no allocation site has been found, add the zero value to indicate it
+        if (allocSites.isEmpty()) {
+            return extractedZeroValue(query, propagatedTypes);
         }
 
         Collection<ExtractedValue> extractedValues = new HashSet<>();
-        for (Map.Entry<Val, Statement> entry : extractedParameters) {
-            // The extracted value may be transformed, i.e. not the propagated type
-            Collection<Type> valueTypes = new HashSet<>(types);
-            valueTypes.add(entry.getKey().getType());
+        for (ForwardQuery allocSite : allocSites) {
+            Val val = allocSite.var();
+            if (val instanceof AllocVal allocVal) {
+                Multimap<Val, Type> sites =
+                        Transformation.transformAllocationSite(allocVal, optionsDefinition);
 
-            ExtractedValue extractedValue =
-                    new ExtractedValue(entry.getKey(), entry.getValue(), valueTypes);
+                for (Val site : sites.keySet()) {
+                    Collection<Type> types = sites.get(site);
+                    types.addAll(propagatedTypes);
 
-            extractedValues.add(extractedValue);
+                    ExtractedValue extractedValue =
+                            new ExtractedValue(site, allocVal.getAllocStatement(), types);
+                    extractedValues.add(extractedValue);
+                }
+            }
+        }
+
+        if (extractedValues.isEmpty()) {
+            return extractedZeroValue(query, propagatedTypes);
         }
 
         return new ParameterWithExtractedValues(
@@ -106,22 +92,15 @@ public class QuerySolver {
                 extractedValues);
     }
 
-    private Collection<ForwardQuery> filterBoomerangResults(
-            Collection<ForwardQuery> resultQueries) {
-        Collection<ForwardQuery> transformedQueries = new HashSet<>();
+    private ParameterWithExtractedValues extractedZeroValue(
+            ExtractParameterQuery query, Collection<Type> types) {
+        ExtractedValue zeroVal = new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
 
-        for (ForwardQuery query : resultQueries) {
-            Val val = query.var();
-
-            if (val instanceof TransformedAllocVal) {
-                transformedQueries.add(query);
-            }
-        }
-
-        if (transformedQueries.isEmpty()) {
-            return resultQueries;
-        }
-
-        return transformedQueries;
+        return new ParameterWithExtractedValues(
+                query.cfgEdge().getTarget(),
+                query.var(),
+                query.getIndex(),
+                query.getVarNameInSpec(),
+                Collections.singleton(zeroVal));
     }
 }

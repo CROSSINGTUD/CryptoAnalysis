@@ -39,6 +39,27 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
     }
 
     @Test
+    public void cascadingReplaceCharSequenceTest() {
+        // Correct -> incorrect -> correct (AES -> DES -> AES)
+        String incorrect1 = "AES".replace("A", "D");
+        String correct1 = incorrect1.replace("D", "A");
+
+        StringConstraint constraint1 = new StringConstraint();
+        constraint1.replaceConstraint(correct1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 0);
+
+        // Incorrect -> correct -> incorrect (DES -> AES -> DES)
+        String correct2 = "DES".replace("D", "A");
+        String incorrect2 = correct2.replace("A", "D");
+
+        StringConstraint constraint2 = new StringConstraint();
+        constraint2.replaceConstraint(incorrect2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 1);
+    }
+
+    @Test
     public void positiveToCharArrayTest() {
         // Test toCharArray() with a random String -> not hard coded
         char[] password = UUID.randomUUID().toString().toCharArray();

@@ -27,6 +27,10 @@ public class TestDataFlowScope implements DataFlowScope {
     @Override
     public boolean isExcluded(DeclaredMethod method) {
         WrappedClass declaringClass = method.getDeclaringClass();
+        if (!declaringClass.isApplicationClass()) {
+            return true;
+        }
+
         if (declaringClass.getName().contains(ASSERTION)) {
             return true;
         }
@@ -44,6 +48,10 @@ public class TestDataFlowScope implements DataFlowScope {
     @Override
     public boolean isExcluded(Method method) {
         WrappedClass declaringClass = method.getDeclaringClass();
+        if (!declaringClass.isApplicationClass()) {
+            return true;
+        }
+
         if (declaringClass.getName().contains(ASSERTION)) {
             return true;
         }
