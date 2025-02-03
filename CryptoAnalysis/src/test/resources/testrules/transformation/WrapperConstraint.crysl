@@ -2,13 +2,16 @@ SPEC tests.misc.transformation.WrapperConstraint
 
 OBJECTS
     int intValue;
-    java.math.BigInteger bigInteger;
+    java.math.BigInteger bigIntegerConstructor;
+    java.math.BigInteger bigIntegerValueOf;
 
 EVENTS
     Con: WrapperConstraint();
     IntParseInt: integerParseIntConstraint(intValue);
-    BigIntValueOf: bigIntegerValueOfConstraint(bigInteger);
+    BigIntCon: bigIntegerConstructor(bigIntegerConstructor);
+    BigIntValueOf: bigIntegerValueOfConstraint(bigIntegerValueOf);
 
 CONSTRAINTS
     intValue in {10};
-    bigInteger in {100000};
+    bigIntegerConstructor > 555555;
+    bigIntegerValueOf in {100000};

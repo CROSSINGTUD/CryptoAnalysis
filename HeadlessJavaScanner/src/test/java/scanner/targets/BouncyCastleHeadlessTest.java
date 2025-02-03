@@ -296,7 +296,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.ISO9796SignerTest", "doShortPartialTest", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -322,7 +321,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "gwt_crypto.X931SignerTest", "shouldPassSignatureTestOne", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -416,11 +414,9 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ECPrivateKeyParametersTest", "testOne", 1)
                         .withTPs(RequiredPredicateError.class, 2)
-                        .withTPs(ConstraintError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ECPrivateKeyParametersTest", "testTwo", 1)
-                        .withTPs(ConstraintError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("params.ParametersWithRandomTest", "testOne", 1)

@@ -21,7 +21,6 @@ import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.math.ec.ECConstants;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.util.encoders.Hex;
-import org.junit.Ignore;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
@@ -34,14 +33,13 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         return TestConstants.BOUNCY_CASTLE_RULESET_PATH;
     }
 
-    @Ignore("Currently cannot handle BigIntegers")
     @Test
     public void testEncryptTwo() throws InvalidCipherTextException {
         String edgeInput = "ff6f77206973207468652074696d6520666f7220616c6c20676f6f64206d656e";
         byte[] data = Hex.decode(edgeInput);
 
         RSAKeyParameters pubParameters = new RSAKeyParameters(false, null, null);
-        Assertions.hasEnsuredPredicate(pubParameters);
+        Assertions.notHasEnsuredPredicate(pubParameters);
 
         AsymmetricBlockCipher eng = new RSAEngine();
         // missing init()
@@ -51,12 +49,11 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         Assertions.notHasEnsuredPredicate(cipherText);
     }
 
-    @Ignore("Currently cannot handle BigIntegers")
     @Test
     public void rsaKeyParameters() {
         BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
-        BigInteger pub = new BigInteger("9f0783a49...da", 16);
-        BigInteger pri = new BigInteger("21231...cda7", 16);
+        BigInteger pub = new BigInteger("499602D2", 16); // 1234567890
+        BigInteger pri = new BigInteger("24CB016EA", 16); // 9876543210
 
         RSAKeyParameters privateParameters = new RSAKeyParameters(true, mod, pri);
         Assertions.mustBeInAcceptingState(privateParameters);
@@ -67,12 +64,11 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         Assertions.hasEnsuredPredicate(publicParameters);
     }
 
-    @Ignore("Currently cannot handle BigIntegers")
     @Test
     public void testORingTwoPredicates1() throws GeneralSecurityException {
         BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
-        BigInteger pub = new BigInteger("9f0783a49...da", 16);
-        BigInteger prv = new BigInteger("92e08f83...19", 16);
+        BigInteger pub = new BigInteger("499602D2", 16); // 1234567890
+        BigInteger prv = new BigInteger("24CB016EA", 16); // 9876543210
 
         RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
         Assertions.mustBeInAcceptingState(params);
@@ -88,9 +84,18 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
 
         BigInteger p = new BigInteger(1024, randomGenerator);
         BigInteger q = new BigInteger(1024, randomGenerator);
-        BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
-        BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
-        BigInteger crtCoefficient = new BigInteger("dae7651ee...39", 16);
+        BigInteger pExp =
+                new BigInteger(
+                        "1d1a2d3ca8e52068b3094d501c9a842fec37f54db16e9a67070a8b3f53cc03d4257ad252a1a640eadd603724d7bf3737914b544ae332eedf4f34436cac25ceb5",
+                        16);
+        BigInteger qExp =
+                new BigInteger(
+                        "6c929e4e81672fef49d9c825163fec97c4b7ba7acb26c0824638ac22605d7201c94625770984f78a56e6e25904fe7db407099cad9b14588841b94f5ab498dded",
+                        16);
+        BigInteger crtCoefficient =
+                new BigInteger(
+                        "dae7651ee69ad1d081ec5e7188ae126f6004ff39556bde90e0b870962fa7b926d070686d8244fe5a9aa709a95686a104614834b0ada4b10f53197a5cb4c97339",
+                        16);
 
         RSAPrivateCrtKeyParameters privateParam =
                 new RSAPrivateCrtKeyParameters(mod, pub, prv, p, q, pExp, qExp, crtCoefficient);
@@ -144,26 +149,37 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         Assertions.mustNotBeInAcceptingState(cipher2);
     }
 
-    @Ignore("Currently cannot handle BigIntegers")
     @Test
     public void testORingThreePredicates1() throws GeneralSecurityException {
         BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
-        BigInteger pub = new BigInteger("9f0783a49...da", 16);
+        BigInteger pub = new BigInteger("499602D2", 16);
         RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
 
         ParametersWithRandom randomParam1 = new ParametersWithRandom(params);
         Assertions.mustBeInAcceptingState(randomParam1);
         Assertions.hasEnsuredPredicate(randomParam1);
 
-        BigInteger prv = new BigInteger("92e08f83...19", 16);
+        BigInteger prv =
+                new BigInteger(
+                        "92e08f83cc9920746989ca5034dcb384a094fb9c5a6288fcc4304424ab8f56388f72652d8fafc65a4b9020896f2cde297080f2a540e7b7ce5af0b3446e1258d1dd7f245cf54124b4c6e17da21b90a0ebd22605e6f45c9f136d7a13eaac1c0f7487de8bd6d924972408ebb58af71e76fd7b012a8d0e165f3ae2e5077a8648e619",
+                        16);
         Random randomGenerator = SecureRandom.getInstance("SHA1PRNG");
         Assertions.mustBeInAcceptingState(randomGenerator);
         Assertions.hasEnsuredPredicate(randomGenerator);
         BigInteger p = new BigInteger(1024, randomGenerator);
         BigInteger q = new BigInteger(1024, randomGenerator);
-        BigInteger pExp = new BigInteger("1d1a2d3ca8...b5", 16);
-        BigInteger qExp = new BigInteger("6c929e4e816...ed", 16);
-        BigInteger crtCoefficient = new BigInteger("dae7651ee...39", 16);
+        BigInteger pExp =
+                new BigInteger(
+                        "1d1a2d3ca8e52068b3094d501c9a842fec37f54db16e9a67070a8b3f53cc03d4257ad252a1a640eadd603724d7bf3737914b544ae332eedf4f34436cac25ceb5",
+                        16);
+        BigInteger qExp =
+                new BigInteger(
+                        "6c929e4e81672fef49d9c825163fec97c4b7ba7acb26c0824638ac22605d7201c94625770984f78a56e6e25904fe7db407099cad9b14588841b94f5ab498dded",
+                        16);
+        BigInteger crtCoefficient =
+                new BigInteger(
+                        "dae7651ee69ad1d081ec5e7188ae126f6004ff39556bde90e0b870962fa7b926d070686d8244fe5a9aa709a95686a104614834b0ada4b10f53197a5cb4c97339",
+                        16);
         RSAPrivateCrtKeyParameters privateParam =
                 new RSAPrivateCrtKeyParameters(mod, pub, prv, p, q, pExp, qExp, crtCoefficient);
         Assertions.mustBeInAcceptingState(privateParam);
@@ -201,11 +217,10 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         Assertions.hasEnsuredPredicate(randomParam3);
     }
 
-    @Ignore("Currently cannot handle BigIntegers")
     @Test
     public void testORingThreePredicates2() {
         BigInteger mod = new BigInteger("a0b8e8321b041acd40b7", 16);
-        BigInteger pub = new BigInteger("9f0783a49...da", 16);
+        BigInteger pub = new BigInteger("499602D2", 16);
         RSAKeyParameters params = new RSAKeyParameters(false, mod, pub);
         Assertions.mustBeInAcceptingState(params);
         Assertions.hasEnsuredPredicate(params);

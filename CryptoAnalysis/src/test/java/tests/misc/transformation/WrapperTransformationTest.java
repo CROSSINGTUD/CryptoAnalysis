@@ -53,6 +53,40 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
     }
 
     @Test
+    public void positiveBigIntegerConstructorTest() {
+        BigInteger correctValue1 = new BigInteger("999999");
+
+        WrapperConstraint constraint1 = new WrapperConstraint();
+        constraint1.bigIntegerConstructor(correctValue1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 0);
+
+        BigInteger correctValue2 = new BigInteger("F423F", 16); // 999.999
+
+        WrapperConstraint constraint2 = new WrapperConstraint();
+        constraint2.bigIntegerConstructor(correctValue2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 0);
+    }
+
+    @Test
+    public void negativeBigIntegerConstructorTest() {
+        BigInteger incorrectValue1 = new BigInteger("111111");
+
+        WrapperConstraint constraint1 = new WrapperConstraint();
+        constraint1.bigIntegerConstructor(incorrectValue1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 1);
+
+        BigInteger correctValue2 = new BigInteger("3640E", 16); // 222.222
+
+        WrapperConstraint constraint2 = new WrapperConstraint();
+        constraint2.bigIntegerConstructor(correctValue2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 1);
+    }
+
+    @Test
     public void positiveBigIntegerValueOfTest() {
         BigInteger correctValue = BigInteger.valueOf(100000);
 

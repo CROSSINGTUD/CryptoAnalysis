@@ -2,6 +2,8 @@ package crypto.extractparameter;
 
 import boomerang.DefaultBoomerangOptions;
 import boomerang.scene.AllocVal;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
@@ -23,6 +25,23 @@ public class ExtendedBoomerangOptions extends DefaultBoomerangOptions {
 
     @Override
     public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
+        /* Constructors are not assignments; they are simple invoke statements. Therefore, we
+         * have to check if we have a corresponding transformation separately.
+         */
+        if (Transformation.isTransformationExpression(stmt)) {
+            InvokeExpr invokeExpr = stmt.getInvokeExpr();
+            DeclaredMethod declaredMethod = invokeExpr.getMethod();
+
+            if (declaredMethod.isConstructor()) {
+                Val base = invokeExpr.getBase();
+
+                if (base.equals(fact)) {
+                    AllocVal allocVal = new AllocVal(base, stmt, base);
+                    return Optional.of(allocVal);
+                }
+            }
+        }
+
         if (!stmt.isAssign()) {
             return Optional.empty();
         }
