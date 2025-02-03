@@ -57,7 +57,7 @@
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
-        <spdsVersion>3.2.2</spdsVersion>
+        <spdsVersion>3.2.3</spdsVersion>
         <sootVersion>4.6.0</sootVersion>
         <cryslVersion>4.0.0</cryslVersion>
     </properties>
