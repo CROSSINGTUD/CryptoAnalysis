@@ -23,7 +23,6 @@ public class RequiredPredicateWithThisTest extends UsagePatternTestingFramework 
 
         UsingTarget usingTarget = new UsingTarget();
         usingTarget.useTarget(target);
-        Assertions.hasGeneratedPredicate(usingTarget);
         Assertions.hasEnsuredPredicate(usingTarget);
 
         Assertions.predicateErrors(0);

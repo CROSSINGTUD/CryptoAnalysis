@@ -1,32 +1,30 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crysl.rule.CrySLPredicate;
+import crypto.constraints.RequiredPredicate;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
 public class PredicateContradictionError extends AbstractConstraintsError {
 
-    private final CrySLPredicate contradictedPredicate;
+    private final RequiredPredicate contradictedPredicate;
 
     public PredicateContradictionError(
-            IAnalysisSeed seed,
-            Statement errorStmt,
-            CrySLRule rule,
-            CrySLPredicate contradictedPredicate) {
-        super(seed, errorStmt, rule);
+            IAnalysisSeed seed, CrySLRule rule, RequiredPredicate predicate) {
+        super(seed, predicate.statement(), rule);
 
-        this.contradictedPredicate = contradictedPredicate;
+        this.contradictedPredicate = predicate;
     }
 
-    public CrySLPredicate getContradictedPredicate() {
+    public RequiredPredicate getContradictedPredicate() {
         return contradictedPredicate;
     }
 
     @Override
     public String toErrorMarkerString() {
-        return "Predicate " + contradictedPredicate + " is ensured although it should not";
+        return "Predicate "
+                + contradictedPredicate.predicate()
+                + " is ensured although it should not";
     }
 
     @Override

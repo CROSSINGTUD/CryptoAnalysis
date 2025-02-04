@@ -9,20 +9,21 @@ import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.listener.IResultsListener;
-import crysl.rule.ISLConstraint;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
 import java.util.Map;
+import test.assertions.ConstraintsEvaluatedAssertion;
+import test.assertions.ConstraintsNotRelevantAssertion;
+import test.assertions.ConstraintsSatisfiedAssertion;
+import test.assertions.ConstraintsViolatedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.HasGeneratedPredicateAssertion;
-import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.StateResult;
 import typestate.TransitionFunction;
@@ -54,7 +55,7 @@ public class UsagePatternResultsListener implements IResultsListener {
 
         for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
             for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                    results.asStatementValWeightTable().cellSet()) {
+                    results.asEdgeValWeightTable().cellSet()) {
                 Statement expectedStatement = entry.getKey();
                 Collection<Val> expectedVal = entry.getValue().getVal();
 
@@ -84,113 +85,67 @@ public class UsagePatternResultsListener implements IResultsListener {
             ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
 
     @Override
-    public void collectedValues(
-            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
+    public void extractedParameterValues(
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         for (Assertion a : assertions) {
-            if (a instanceof ExtractedValueAssertion) {
-                ExtractedValueAssertion assertion = (ExtractedValueAssertion) a;
-                assertion.computedValues(collectedValues);
+            if (a instanceof ExtractedValueAssertion assertion) {
+                assertion.computedValues(extractedValues);
             }
         }
     }
 
     @Override
-    public void checkedConstraints(
-            IAnalysisSeed analysisSeed,
-            Collection<ISLConstraint> constraints,
-            Collection<AbstractError> errors) {}
+    public void evaluatedConstraint(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {
+        for (Assertion assertion : assertions) {
+            Collection<Val> values =
+                    seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
 
-    @Override
-    public void generatedPredicate(
-            IAnalysisSeed fromSeed,
-            AbstractPredicate predicate,
-            IAnalysisSeed toSeed,
-            Statement statement) {
-        for (Assertion a : assertions) {
-            if (a instanceof HasGeneratedPredicateAssertion) {
-                HasGeneratedPredicateAssertion assertion = (HasGeneratedPredicateAssertion) a;
-
-                // TODO from statement
-                Collection<Val> values =
-                        fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (assertion.getStatement().equals(statement)) {
-                    assertion.reported(values, predicate);
-                }
+            if (assertion instanceof ConstraintsEvaluatedAssertion a) {
+                a.reported(values);
             }
 
-            if (a instanceof HasNotGeneratedPredicateAssertion) {
-                HasNotGeneratedPredicateAssertion assertion = (HasNotGeneratedPredicateAssertion) a;
-
-                // TODO from statement
-                Collection<Val> values =
-                        fromSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (assertion.getStatement().equals(statement)) {
-                    assertion.reported(values, predicate);
-                }
+            if (assertion instanceof ConstraintsSatisfiedAssertion a) {
+                a.reported(values, result);
             }
 
-            if (a instanceof HasEnsuredPredicateAssertion) {
-                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
-
-                // TODO from statement
-                Collection<Val> values =
-                        toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (statement.equals(assertion.getStmt())) {
-                    assertion.reported(values, predicate);
-                }
+            if (assertion instanceof ConstraintsViolatedAssertion a) {
+                a.reported(values, result);
             }
 
-            if (a instanceof NotHasEnsuredPredicateAssertion) {
-                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
-
-                // TODO from statement
-                Collection<Val> values =
-                        toSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (statement.equals(assertion.getStmt())) {
-                    assertion.reported(values, predicate);
-                }
+            if (assertion instanceof ConstraintsNotRelevantAssertion a) {
+                a.reported(values, result);
             }
         }
     }
 
     @Override
     public void ensuredPredicates(
-            IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates) {
+            IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates) {
         for (Assertion a : assertions) {
-            if (a instanceof HasEnsuredPredicateAssertion) {
-                HasEnsuredPredicateAssertion assertion = (HasEnsuredPredicateAssertion) a;
+            if (a instanceof HasEnsuredPredicateAssertion assertion) {
+                Collection<Val> values = seed.getAliasesAtStatement(assertion.getStmt());
+                Collection<EnsuredPredicate> ensuredPreds = predicates.get(assertion.getStmt());
 
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
-
-                Collection<Val> values =
-                        seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPreds =
-                        predicates.get(assertion.getStmt());
-
-                for (Map.Entry<EnsuredPredicate, Integer> ensPred : ensuredPreds) {
-                    assertion.reported(values, ensPred.getKey());
+                for (EnsuredPredicate ensPred : ensuredPreds) {
+                    assertion.reported(values, ensPred);
                 }
             }
 
-            if (a instanceof NotHasEnsuredPredicateAssertion) {
-                NotHasEnsuredPredicateAssertion assertion = (NotHasEnsuredPredicateAssertion) a;
+            if (a instanceof NotHasEnsuredPredicateAssertion assertion) {
+                Collection<Val> values = seed.getAliasesAtStatement(assertion.getStmt());
+                Collection<EnsuredPredicate> ensuredPreds = predicates.get(assertion.getStmt());
 
-                if (!predicates.containsKey(assertion.getStmt())) {
-                    continue;
-                }
-
-                Collection<Val> values =
-                        seed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                Collection<Map.Entry<EnsuredPredicate, Integer>> ensuredPreds =
-                        predicates.get(assertion.getStmt());
-
-                for (Map.Entry<EnsuredPredicate, Integer> ensPred : ensuredPreds) {
-                    assertion.reported(values, ensPred.getKey());
+                for (EnsuredPredicate ensPred : ensuredPreds) {
+                    assertion.reported(values, ensPred);
                 }
             }
         }
     }
+
+    @Override
+    public void unEnsuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, UnEnsuredPredicate> predicates) {}
 }

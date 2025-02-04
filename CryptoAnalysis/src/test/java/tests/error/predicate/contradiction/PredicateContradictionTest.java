@@ -7,6 +7,8 @@ import test.assertions.Assertions;
 
 public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
+    private static final String ENSURED_PRED = "generatedContradiction";
+
     @Override
     protected String getRulesetPath() {
         return TestConstants.RULES_TEST_DIR + "predicateContradiction";
@@ -21,7 +23,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
         Contradiction contradiction = new Contradiction(false);
         contradiction.contradictPredicate(noPredicate);
-        Assertions.hasGeneratedPredicate(contradiction);
+        Assertions.hasEnsuredPredicate(contradiction, ENSURED_PRED);
 
         Assertions.predicateContradictionErrors(0);
     }
@@ -35,7 +37,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
 
         Contradiction contradiction = new Contradiction(false);
         contradiction.contradictPredicate(predicate);
-        Assertions.hasNotGeneratedPredicate(contradiction);
+        Assertions.notHasEnsuredPredicate(contradiction);
 
         Assertions.predicateContradictionErrors(1);
     }
@@ -49,7 +51,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
         // Condition is true -> Predicate not expected (True -> True)
         Contradiction contradiction1 = new Contradiction(true);
         contradiction1.contradictPredicate(predicate1);
-        Assertions.hasEnsuredPredicate(contradiction1);
+        Assertions.hasEnsuredPredicate(contradiction1, ENSURED_PRED);
 
         PredicateEnsurer ensurer2 = new PredicateEnsurer(true);
         char[] predicate2 = ensurer2.createCondPredicate();
@@ -59,7 +61,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
         // condition is not satisfied (False -> False)
         Contradiction contradiction2 = new Contradiction(false);
         contradiction2.contradictPredicate(predicate2);
-        Assertions.hasEnsuredPredicate(contradiction2);
+        Assertions.hasEnsuredPredicate(contradiction2, ENSURED_PRED);
 
         PredicateEnsurer ensurer3 = new PredicateEnsurer(false);
         char[] predicate3 = ensurer3.createCondPredicate();
@@ -68,7 +70,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
         // predicate3 has no ensured predicate and condition is not satisfied (False -> True)
         Contradiction contradiction3 = new Contradiction(false);
         contradiction3.contradictPredicate(predicate3);
-        Assertions.hasGeneratedPredicate(contradiction3);
+        Assertions.hasEnsuredPredicate(contradiction3, ENSURED_PRED);
 
         Assertions.predicateContradictionErrors(0);
     }
@@ -82,7 +84,7 @@ public class PredicateContradictionTest extends UsagePatternTestingFramework {
         // predicate1 has predicate and condition is satisfied -> contradiction (True -> False)
         Contradiction contradiction = new Contradiction(true);
         contradiction.contradictPredicate(predicate);
-        Assertions.hasNotGeneratedPredicate(contradiction);
+        Assertions.notHasEnsuredPredicate(contradiction);
 
         Assertions.predicateContradictionErrors(1);
     }

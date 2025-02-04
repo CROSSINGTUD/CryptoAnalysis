@@ -18,11 +18,11 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         // Test replace(CharSequence, CharSequence) with replacing incorrect to correct String
         String string = "DES".replace("D", "A");
 
-        StringConstraint constraint1 = new StringConstraint();
-        constraint1.replaceConstraint(string);
+        StringConstraint constraint = new StringConstraint();
+        constraint.replaceConstraint(string);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -35,7 +35,28 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
+    public void cascadingReplaceCharSequenceTest() {
+        // Correct -> incorrect -> correct (AES -> DES -> AES)
+        String incorrect1 = "AES".replace("A", "D");
+        String correct1 = incorrect1.replace("D", "A");
+
+        StringConstraint constraint1 = new StringConstraint();
+        constraint1.replaceConstraint(correct1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 0);
+
+        // Incorrect -> correct -> incorrect (DES -> AES -> DES)
+        String correct2 = "DES".replace("D", "A");
+        String incorrect2 = correct2.replace("A", "D");
+
+        StringConstraint constraint2 = new StringConstraint();
+        constraint2.replaceConstraint(incorrect2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 1);
     }
 
     @Test
@@ -46,7 +67,7 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         StringConstraint constraint = new StringConstraint();
         constraint.toCharArrayConstraint(password);
 
-        Assertions.notHardCodedErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -58,7 +79,7 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         constraint.toCharArrayConstraint(password);
         Assertions.extValue(0);
 
-        Assertions.notHardCodedErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 
     @Test
@@ -69,7 +90,7 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         StringConstraint constraint = new StringConstraint();
         constraint.getBytesConstraint(password);
 
-        Assertions.notHardCodedErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -81,6 +102,6 @@ public class StringTransformationTest extends UsagePatternTestingFramework {
         constraint.getBytesConstraint(password);
         Assertions.extValue(0);
 
-        Assertions.notHardCodedErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 }

@@ -2,6 +2,8 @@ package tests.jca;
 
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import org.junit.Ignore;
@@ -24,7 +26,7 @@ public class PBETest extends UsagePatternTestingFramework {
         SecureRandom sr = new SecureRandom();
         sr.nextBytes(salt);
         PBEKeySpec pbeKeySpec = new PBEKeySpec(defaultKey, salt, 11010, 16);
-        Assertions.hasNotGeneratedPredicate(pbeKeySpec);
+        Assertions.notHasEnsuredPredicate(pbeKeySpec);
         pbeKeySpec.clearPassword();
         Assertions.mustBeInAcceptingState(pbeKeySpec);
     }
@@ -63,7 +65,7 @@ public class PBETest extends UsagePatternTestingFramework {
         Assertions.extValue(1);
         Assertions.extValue(2);
         Assertions.extValue(3);
-        Assertions.hasGeneratedPredicate(pbekeyspec);
+        Assertions.hasEnsuredPredicate(pbekeyspec);
         Assertions.mustNotBeInAcceptingState(pbekeyspec);
         pbekeyspec.clearPassword();
         Assertions.mustBeInAcceptingState(pbekeyspec);
@@ -71,7 +73,7 @@ public class PBETest extends UsagePatternTestingFramework {
         Assertions.extValue(1);
         Assertions.extValue(2);
         Assertions.extValue(3);
-        Assertions.hasNotGeneratedPredicate(pbekeyspec);
+        Assertions.notHasEnsuredPredicate(pbekeyspec);
         Assertions.mustNotBeInAcceptingState(pbekeyspec);
         pbekeyspec.clearPassword();
         Assertions.mustBeInAcceptingState(pbekeyspec);
@@ -85,7 +87,7 @@ public class PBETest extends UsagePatternTestingFramework {
         PBEParameterSpec pbeParSpec2 = new PBEParameterSpec(salt, 9999);
         Assertions.extValue(0);
         Assertions.extValue(1);
-        Assertions.hasNotGeneratedPredicate(pbeParSpec2);
+        Assertions.notHasEnsuredPredicate(pbeParSpec2);
         Assertions.mustBeInAcceptingState(pbeParSpec2);
     }
 
@@ -125,11 +127,12 @@ public class PBETest extends UsagePatternTestingFramework {
 
     public char[] generateRandomPassword() {
         SecureRandom rnd = new SecureRandom();
-        char[] defaultKey = new char[20];
-        for (int i = 0; i < 20; i++) {
-            defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
-        }
-        return defaultKey;
+
+        return IntStream.generate(() -> rnd.nextInt('a', 'z'))
+                .mapToObj(Character::toString)
+                .limit(10)
+                .collect(Collectors.joining())
+                .toCharArray();
     }
 
     @Test

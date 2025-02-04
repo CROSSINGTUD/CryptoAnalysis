@@ -1,0 +1,22 @@
+SPEC tests.error.predicate.implication.Generator
+
+OBJECTS
+    boolean constraint;
+    tests.error.predicate.implication.Receiver receiver;
+    java.lang.String param;
+
+EVENTS
+    Con: Generator(constraint);
+    Gen1: receiver = generateReceiver();
+    Gen2: ensureParameter(param);
+    Gen := Gen1 | Gen2;
+
+ORDER
+    Con, Gen*
+
+CONSTRAINTS
+    constraint == true;
+
+ENSURES
+    generatedReceiver[receiver];
+    ensuredParameter[param];

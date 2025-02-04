@@ -1,0 +1,50 @@
+SPEC tests.error.constraints.BinaryConstraint
+
+OBJECTS
+    java.lang.String implication1;
+    int implication2;
+    java.lang.String implicationSameStatement1;
+    int implicationSameStatement2;
+
+    java.lang.String or1;
+    int or2;
+    java.lang.String orSameStatement1;
+    int orSameStatement2;
+
+    java.lang.String and1;
+    int and2;
+    java.lang.String andSameStatement1;
+    int andSameStatement2;
+
+EVENTS
+    Con: BinaryConstraint();
+
+    Impl1: implication1(implication1);
+    Impl2: implication2(implication2);
+    ImplSame: implication(implicationSameStatement1, implicationSameStatement2);
+    Implication := Impl1 | Impl2 | ImplSame;
+
+    Or1: or1(or1);
+    Or2: or2(or2);
+    OrSame: or(orSameStatement1, orSameStatement2);
+    Or := Or1 | Or2 | OrSame;
+
+    And1: and1(and1);
+    And2: and2(and2);
+    AndSame: and(andSameStatement1, andSameStatement2);
+    And := And1 | And2 | AndSame;
+
+    Cons := Implication | Or | And;
+
+ORDER
+    Con, Cons*
+
+CONSTRAINTS
+    implication1 in {"A", "B"} => implication2 in {10, 20};
+    implicationSameStatement1 in {"A"} => implicationSameStatement2 == 10;
+
+    or1 in {"C", "D"} || or2 == 10;
+    orSameStatement1 in {"C"} || orSameStatement2 in {10, 20};
+
+    and1 in {"E", "F"} && and2 == 20;
+    andSameStatement1 in {"E"} && andSameStatement2 != 20;

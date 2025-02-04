@@ -1,60 +1,81 @@
 package crypto.extractparameter.transformation;
 
-import boomerang.ForwardQuery;
 import boomerang.scene.AllocVal;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
-import java.util.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import crypto.definition.Definitions;
+import crypto.extractparameter.scope.IntType;
+import crypto.extractparameter.scope.IntVal;
 
+/**
+ * Class for transformations that do not belong to invoke expressions. This class expects an assign
+ * statement where the right operation is a value that can be transformed.
+ */
 public class OperatorTransformation extends Transformation {
 
-    public OperatorTransformation(ExtractParameterDefinition definition) {
+    protected OperatorTransformation(Definitions.BoomerangOptionsDefinition definition) {
         super(definition);
     }
 
-    @Override
-    public Optional<AllocVal> evaluateExpression(Statement statement) {
-        if (!statement.isAssign()) {
-            return Optional.empty();
+    public static boolean isOperatorTransformation(Val val) {
+        if (val.isLengthExpr()) {
+            return true;
         }
 
-        Val rightOp = statement.getRightOp();
-        if (rightOp.isLengthExpr()) {
-            return evaluateLengthExpr(statement, rightOp);
-        }
-
-        return Optional.empty();
+        return false;
     }
 
-    private Optional<AllocVal> evaluateLengthExpr(Statement statement, Val lengthExpr) {
+    @Override
+    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
+        return HashMultimap.create();
+    }
+
+    protected Multimap<Val, Type> evaluateOperator(Statement statement, Val val) {
+        if (val.isLengthExpr()) {
+            return evaluateLengthOperator(statement, val);
+        }
+
+        return HashMultimap.create();
+    }
+
+    /**
+     * Evaluates and transforms assign statements where the right side is a length expression for
+     * arrays, e.g. for
+     *
+     * <pre>{@code
+     * String[] arr = new String[] {"H", "i"};
+     * int length = arr.length;
+     * }</pre>
+     *
+     * the transformation extracts the value 2.
+     *
+     * @param statement the assign statement
+     * @param lengthExpr the length expression
+     * @return all possible length values with the type 'int'
+     */
+    private Multimap<Val, Type> evaluateLengthOperator(Statement statement, Val lengthExpr) {
         Val lengthOp = lengthExpr.getLengthOp();
 
-        Optional<ForwardQuery> allocSite = triggerBackwardQuery(statement, lengthOp);
-        if (allocSite.isEmpty()) {
-            return Optional.empty();
+        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, lengthOp);
+        Multimap<Val, Type> extractedSites = extractAllocValues(allocSites);
+
+        Multimap<Val, Type> result = HashMultimap.create();
+        for (Val extractedSite : extractedSites.keySet()) {
+            if (extractedSite.isArrayAllocationVal()) {
+                Val arrLength = extractedSite.getArrayAllocationSize();
+
+                result.put(arrLength, new IntType());
+            } else if (extractedSite.isStringConstant()) {
+                int stringLength = extractedSite.getStringValue().length();
+                IntVal intVal = new IntVal(stringLength, statement.getMethod());
+
+                result.put(intVal, intVal.getType());
+            }
         }
 
-        Val val = allocSite.get().var();
-        if (!(val instanceof AllocVal)) {
-            return Optional.empty();
-        }
-
-        Val allocVal = ((AllocVal) val).getAllocVal();
-
-        if (allocVal.isArrayAllocationVal()) {
-            Val arraySize = allocVal.getArrayAllocationSize();
-
-            AllocVal arrayLengthVal =
-                    new TransformedAllocVal(statement.getLeftOp(), statement, arraySize);
-            return Optional.of(arrayLengthVal);
-        } else if (allocVal.isStringConstant()) {
-            int stringLength = allocVal.getStringValue().length();
-
-            AllocVal stringLengthVal = createTransformedAllocVal(stringLength, statement);
-            return Optional.of(stringLengthVal);
-        }
-
-        return Optional.empty();
+        return result;
     }
 }

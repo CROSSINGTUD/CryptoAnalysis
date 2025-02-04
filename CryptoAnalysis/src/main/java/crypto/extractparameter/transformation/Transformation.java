@@ -6,123 +6,151 @@ import boomerang.ForwardQuery;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scene.AllocVal;
 import boomerang.scene.ControlFlowGraph;
+import boomerang.scene.DeclaredMethod;
+import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
+import boomerang.scene.Type;
 import boomerang.scene.Val;
-import crypto.extractparameter.ExtractParameterDefinition;
-import crypto.extractparameter.ExtractParameterOptions;
-import crypto.extractparameter.scope.IntVal;
-import crypto.extractparameter.scope.LongVal;
-import crypto.extractparameter.scope.StringVal;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import crypto.definition.Definitions;
+import crypto.extractparameter.ExtendedBoomerangOptions;
+import java.util.ArrayList;
+import java.util.List;
 import wpds.impl.Weight;
 
+/**
+ * Main class for transforming the allocation sites when using Boomerang to extract relevant
+ * parameters. When running Boomerang, one can use the function {@link
+ * Transformation#isTransformationExpression(Statement)} to check if there is an implemented
+ * transformation for the given statement. Note that transformations require an invoke expression to
+ * run. After checking corresponding statements, one can use {@link
+ * Transformation#transformAllocationSite(AllocVal, Definitions.BoomerangOptionsDefinition)} to
+ * transform Boomerang's detected allocations sites, if an implementation is available.
+ */
 public abstract class Transformation {
 
-    private final ExtractParameterDefinition definition;
+    protected record Signature(
+            String declaringClass, String returnValue, String name, List<String> params) {
+        public Signature(String declaringClass, String returnValue, String name) {
+            this(declaringClass, returnValue, name, new ArrayList<>());
+        }
+    }
 
-    public Transformation(ExtractParameterDefinition definition) {
+    public static boolean isTransformationExpression(Statement statement) {
+        if (!statement.containsInvokeExpr()) {
+            return false;
+        }
+
+        Signature signature = invokeExprToSignature(statement.getInvokeExpr());
+
+        if (StringTransformation.isStringTransformation(signature)) {
+            return true;
+        }
+
+        if (WrapperTransformation.isWrapperTransformation(signature)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static Signature invokeExprToSignature(InvokeExpr invokeExpr) {
+        DeclaredMethod method = invokeExpr.getMethod();
+
+        List<String> params = method.getParameterTypes().stream().map(Object::toString).toList();
+        return new Signature(
+                method.getDeclaringClass().getName(),
+                method.getReturnType().toString(),
+                method.getName(),
+                params);
+    }
+
+    public static Multimap<Val, Type> transformAllocationSite(
+            AllocVal allocVal, Definitions.BoomerangOptionsDefinition definition) {
+        Statement allocStatement = allocVal.getAllocStatement();
+
+        if (!allocStatement.containsInvokeExpr()) {
+            Val allocSite = allocVal.getAllocVal();
+
+            // Check for basic transformation operators (e.g. length)
+            if (OperatorTransformation.isOperatorTransformation(allocSite)) {
+                OperatorTransformation transformation = new OperatorTransformation(definition);
+
+                return transformation.evaluateOperator(allocStatement, allocSite);
+            }
+
+            // For direct values (e.g. constants), we take their type
+            Multimap<Val, Type> allocMap = HashMultimap.create();
+            allocMap.put(allocSite, allocSite.getType());
+
+            return allocMap;
+        }
+
+        Signature signature = invokeExprToSignature(allocStatement.getInvokeExpr());
+        if (StringTransformation.isStringTransformation(signature)) {
+            Transformation transformation = new StringTransformation(definition);
+
+            return transformation.evaluateExpression(allocStatement, signature);
+        } else if (WrapperTransformation.isWrapperTransformation(signature)) {
+            Transformation transformation = new WrapperTransformation(definition);
+
+            return transformation.evaluateExpression(allocStatement, signature);
+        } else if (MiscellaneousTransformation.isMiscellaneousTransformation(signature)) {
+            Transformation transformation = new MiscellaneousTransformation(definition);
+
+            return transformation.evaluateExpression(allocStatement, signature);
+        }
+
+        return HashMultimap.create();
+    }
+
+    protected final Definitions.BoomerangOptionsDefinition definition;
+
+    protected Transformation(Definitions.BoomerangOptionsDefinition definition) {
         this.definition = definition;
     }
 
-    public abstract Optional<AllocVal> evaluateExpression(Statement statement);
+    protected Multimap<AllocVal, Type> computeAllocSites(Statement statement, Val val) {
+        Multimap<AllocVal, Type> boomerangResults = HashMultimap.create();
 
-    protected Optional<String> extractStringFromVal(Statement statement, Val val) {
-        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
-
-        if (forwardQuery.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return extractStringFromBoomerangResult(forwardQuery.get());
-    }
-
-    protected Optional<String> extractStringFromBoomerangResult(ForwardQuery query) {
-        Statement statement = query.cfgEdge().getStart();
-
-        if (!statement.isAssign()) {
-            return Optional.empty();
-        }
-
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isStringConstant()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(rightOp.getStringValue());
-    }
-
-    protected Optional<Long> extractLongFromVal(Statement statement, Val val) {
-        Optional<ForwardQuery> forwardQuery = triggerBackwardQuery(statement, val);
-
-        if (forwardQuery.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return extractLongFromBoomerangResult(forwardQuery.get());
-    }
-
-    protected Optional<Long> extractLongFromBoomerangResult(ForwardQuery query) {
-        Statement statement = query.cfgEdge().getStart();
-
-        if (!statement.isAssign()) {
-            return Optional.empty();
-        }
-
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isLongConstant()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(rightOp.getLongValue());
-    }
-
-    protected Optional<ForwardQuery> triggerBackwardQuery(Statement statement, Val val) {
-        Collection<ForwardQuery> extractedValues = new HashSet<>();
-
-        Collection<Statement> preds =
-                statement.getMethod().getControlFlowGraph().getPredsOf(statement);
-        for (Statement pred : preds) {
+        for (Statement pred : statement.getMethod().getControlFlowGraph().getPredsOf(statement)) {
             ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
-            ExtractParameterOptions options = new ExtractParameterOptions(definition);
-            BackwardQuery backwardQuery = BackwardQuery.make(edge, val);
+            BackwardQuery query = BackwardQuery.make(edge, val);
             Boomerang boomerang =
                     new Boomerang(
-                            definition.getCallGraph(), definition.getDataFlowScope(), options);
+                            definition.callGraph(),
+                            definition.dataFlowScope(),
+                            new ExtendedBoomerangOptions(
+                                    definition.timeout(), definition.strategy()));
+            BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
 
-            BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(backwardQuery);
-            extractedValues.addAll(results.getAllocationSites().keySet());
+            for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
+                if (!(forwardQuery.var() instanceof AllocVal allocVal)) {
+                    continue;
+                }
+
+                boomerangResults.putAll(allocVal, results.getPropagationType());
+            }
         }
 
-        // If we have multiple allocation sites, then we cannot correctly evaluate an expression
-        if (extractedValues.size() != 1) {
-            return Optional.empty();
+        return boomerangResults;
+    }
+
+    protected Multimap<Val, Type> extractAllocValues(Multimap<AllocVal, Type> allocSites) {
+        Multimap<Val, Type> result = HashMultimap.create();
+
+        for (AllocVal allocVal : allocSites.keySet()) {
+            Multimap<Val, Type> transformedAllocSites =
+                    Transformation.transformAllocationSite(allocVal, definition);
+
+            result.putAll(transformedAllocSites);
         }
 
-        ForwardQuery forwardQuery = extractedValues.stream().iterator().next();
-        return Optional.of(forwardQuery);
+        return result;
     }
 
-    protected AllocVal createTransformedAllocVal(String string, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new StringVal(string, statement.getMethod());
-
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
-
-    protected AllocVal createTransformedAllocVal(int intValue, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new IntVal(intValue, statement.getMethod());
-
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
-
-    protected AllocVal createTransformedAllocVal(long longValue, Statement statement) {
-        Val leftOp = statement.getLeftOp();
-        Val resultOp = new LongVal(longValue, statement.getMethod());
-
-        return new TransformedAllocVal(leftOp, statement, resultOp);
-    }
+    protected abstract Multimap<Val, Type> evaluateExpression(
+            Statement statement, Signature signature);
 }

@@ -10,6 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -47,6 +49,15 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
         SecureRandom random1 = new SecureRandom();
         random1.setSeed(bytes);
+    }
+
+    @Test
+    public void test3() throws GeneralSecurityException {
+        KeyGenerator generator = KeyGenerator.getInstance("AES");
+        SecretKey key = generator.generateKey();
+        byte[] bytes = key.getEncoded();
+        Assertions.hasEnsuredPredicate(bytes);
+        SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
     }
 
     @Test
@@ -137,11 +148,12 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
     public char[] generateRandomPassword() {
         SecureRandom rnd = new SecureRandom();
-        char[] defaultKey = new char[20];
-        for (int i = 0; i < 20; i++) {
-            defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
-        }
-        return defaultKey;
+
+        return IntStream.generate(() -> rnd.nextInt('a', 'z'))
+                .mapToObj(Character::toString)
+                .limit(10)
+                .collect(Collectors.joining())
+                .toCharArray();
     }
 
     @Test
