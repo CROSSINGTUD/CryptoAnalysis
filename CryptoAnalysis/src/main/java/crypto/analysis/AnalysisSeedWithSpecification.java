@@ -143,14 +143,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private void evaluateTypestateOrder() {
         Collection<ControlFlowGraph.Edge> allTypestateChangeStatements = new HashSet<>();
         for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                analysisResults.asStatementValWeightTable().cellSet()) {
+                analysisResults.asEdgeValWeightTable().cellSet()) {
             Collection<ControlFlowGraph.Edge> edges =
                     cell.getValue().getLastStateChangeStatements();
             allTypestateChangeStatements.addAll(edges);
         }
 
         for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c :
-                analysisResults.asStatementValWeightTable().cellSet()) {
+                analysisResults.asEdgeValWeightTable().cellSet()) {
             ControlFlowGraph.Edge curr = c.getRowKey();
 
             // The initial statement is always the start of the CFG edge, all other statements are

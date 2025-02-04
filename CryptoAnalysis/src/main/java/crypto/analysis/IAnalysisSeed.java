@@ -53,7 +53,7 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
         this.statementValWeightTable = HashBasedTable.create();
         for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                results.asStatementValWeightTable().cellSet()) {
+                results.asEdgeValWeightTable().cellSet()) {
             statementValWeightTable.put(
                     cell.getRowKey().getStart(), cell.getColumnKey(), cell.getValue());
         }
