@@ -54,7 +54,7 @@ public class UsagePatternResultsListener implements IResultsListener {
 
         for (Map.Entry<Statement, StateResult> entry : expectedTypestateResults.entries()) {
             for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                    results.asStatementValWeightTable().cellSet()) {
+                    results.asEdgeValWeightTable().cellSet()) {
                 Statement expectedStatement = entry.getKey();
                 Collection<Val> expectedVal = entry.getValue().getVal();
 

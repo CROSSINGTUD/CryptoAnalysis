@@ -31,14 +31,14 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
         scanner.getAnalysisReporter().onSeedStarted(this);
 
         relevantStatements.put(getOrigin(), -1);
-        for (ControlFlowGraph.Edge edge : analysisResults.asStatementValWeightTable().rowKeySet()) {
+        for (ControlFlowGraph.Edge edge : analysisResults.asEdgeValWeightTable().rowKeySet()) {
             Statement statement = edge.getTarget();
 
             if (!statement.containsInvokeExpr()) {
                 continue;
             }
 
-            Collection<Val> values = analysisResults.asStatementValWeightTable().row(edge).keySet();
+            Collection<Val> values = analysisResults.asEdgeValWeightTable().row(edge).keySet();
 
             InvokeExpr invokeExpr = statement.getInvokeExpr();
             for (int i = 0; i < invokeExpr.getArgs().size(); i++) {

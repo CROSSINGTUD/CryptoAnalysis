@@ -210,7 +210,7 @@ public abstract class EvaluableConstraint {
             ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
 
             for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry :
-                    results.asStatementValWeightTable().cellSet()) {
+                    results.asEdgeValWeightTable().cellSet()) {
                 Statement stmt = entry.getRowKey().getStart();
                 if (!stmt.isArrayStore()) {
                     continue;

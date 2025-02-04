@@ -142,14 +142,14 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private void evaluateTypestateOrder() {
         Collection<ControlFlowGraph.Edge> allTypestateChangeStatements = new HashSet<>();
         for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                analysisResults.asStatementValWeightTable().cellSet()) {
+                analysisResults.asEdgeValWeightTable().cellSet()) {
             Collection<ControlFlowGraph.Edge> edges =
                     cell.getValue().getLastStateChangeStatements();
             allTypestateChangeStatements.addAll(edges);
         }
 
         for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c :
-                analysisResults.asStatementValWeightTable().cellSet()) {
+                analysisResults.asEdgeValWeightTable().cellSet()) {
             ControlFlowGraph.Edge curr = c.getRowKey();
 
             // The initial statement is always the start of the CFG edge, all other statements are
@@ -399,7 +399,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(statement, successor);
 
                 Collection<Val> values =
-                        seed.getAnalysisResults().asStatementValWeightTable().row(edge).keySet();
+                        seed.getAnalysisResults().asEdgeValWeightTable().row(edge).keySet();
                 if (values.contains(val)) {
                     result.add(seed);
                 }
@@ -542,7 +542,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         for (IAnalysisSeed seed : seeds) {
             Collection<Val> values =
-                    seed.getAnalysisResults().asStatementValWeightTable().row(edge).keySet();
+                    seed.getAnalysisResults().asEdgeValWeightTable().row(edge).keySet();
 
             if (values.contains(fact)) {
                 result.add(seed);
@@ -700,7 +700,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
                 Map<Val, TransitionFunction> rows =
-                        analysisResults.asStatementValWeightTable().row(edge);
+                        analysisResults.asEdgeValWeightTable().row(edge);
                 Collection<Val> values = rows.keySet();
 
                 for (Val arg : invokeExpr.getArgs()) {
