@@ -3,6 +3,7 @@ package crypto.analysis.errors;
 import boomerang.scene.DeclaredMethod;
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -43,7 +44,7 @@ public class ForbiddenMethodError extends AbstractError {
 
         if (!getAlternatives().isEmpty()) {
             msg.append(". Instead, call one of the methods ");
-            String altMethods = formatMethodNames(alternatives);
+            String altMethods = CrySLUtils.formatMethodNames(alternatives);
             msg.append(altMethods);
         }
         return msg.toString();

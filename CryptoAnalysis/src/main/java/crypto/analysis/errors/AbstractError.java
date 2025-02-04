@@ -3,11 +3,9 @@ package crypto.analysis.errors;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbstractError {
@@ -16,8 +14,8 @@ public abstract class AbstractError {
     private final Statement errorStmt;
     private final CrySLRule rule;
 
-    private final Collection<AbstractError> precedingErrors; // preceding
-    private final Collection<AbstractError> subsequentErrors; // subsequent
+    private final Collection<AbstractError> precedingErrors;
+    private final Collection<AbstractError> subsequentErrors;
 
     public AbstractError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule) {
         this.seed = seed;
@@ -80,38 +78,6 @@ public abstract class AbstractError {
 
     protected String getObjectType() {
         return " on object of type " + seed.getFact().getType();
-    }
-
-    protected String formatMethodNames(Collection<CrySLMethod> methods) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-
-        for (CrySLMethod method : methods) {
-            String formattedName = formatMethodName(method);
-            builder.append(formattedName);
-            builder.append(", ");
-        }
-        builder.delete(builder.length() - 2, builder.length());
-        builder.append("}");
-
-        return builder.toString();
-    }
-
-    protected String formatMethodName(CrySLMethod method) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(method.getShortMethodName());
-        builder.append("(");
-
-        if (!method.getParameters().isEmpty()) {
-            for (Map.Entry<String, String> param : method.getParameters()) {
-                builder.append(param.getValue());
-                builder.append(", ");
-            }
-            builder.delete(builder.length() - 2, builder.length());
-        }
-
-        builder.append(")");
-        return builder.toString();
     }
 
     @Override

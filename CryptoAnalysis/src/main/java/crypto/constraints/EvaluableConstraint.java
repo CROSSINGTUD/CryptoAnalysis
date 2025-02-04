@@ -1,288 +1,125 @@
 package crypto.constraints;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
-import boomerang.ForwardQuery;
-import boomerang.results.BackwardBoomerangResults;
-import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.AllocVal;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
 import boomerang.scene.Statement;
-import boomerang.scene.Val;
-import boomerang.scene.jimple.IntAndStringBoomerangOptions;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import crypto.analysis.errors.AbstractError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
-import crypto.extractparameter.CallSiteWithParamIndex;
-import crypto.extractparameter.ExtractedValue;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.errors.AbstractConstraintsError;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLConstraint;
-import crysl.rule.CrySLExceptionConstraint;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Supper class that construct and evaluate a CrySL constraint from the CONSTRAINTS or REQUIRES
+ * section. A call to {@link EvaluableConstraint#getInstance(AnalysisSeedWithSpecification,
+ * ISLConstraint, Collection, Multimap)}} creates an instance for a corresponding CrySL constraint
+ * and a call to {@link EvaluableConstraint#evaluate()} evaluates it and returns the result. With
+ * {@link EvaluableConstraint#getErrors()}, one can retrieve the collected violations/errors.
+ */
 public abstract class EvaluableConstraint {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(EvaluableConstraint.class);
+    public static final Collection<String> predefinedPredicates =
+            Set.of("callTo", "noCallTo", "neverTypeOf", "length", "instanceOf", "notHardCoded");
 
-    public static EvaluableConstraint getInstance(ISLConstraint con, ConstraintSolver context) {
-        if (con instanceof CrySLComparisonConstraint) {
-            return new ComparisonConstraint(con, context);
-        } else if (con instanceof CrySLValueConstraint) {
-            return new ValueConstraint(con, context);
-        } else if (con instanceof CrySLPredicate) {
-            return new PredicateConstraint(con, context);
-        } else if (con instanceof CrySLConstraint) {
-            return new BinaryConstraint((CrySLConstraint) con, context);
-        } else if (con instanceof CrySLExceptionConstraint) {
-            return new ExceptionConstraint((CrySLExceptionConstraint) con, context);
+    protected final AnalysisSeedWithSpecification seed;
+    protected final Collection<Statement> statements;
+    protected final Multimap<Statement, ParameterWithExtractedValues> extractedValues;
+    protected final Collection<AbstractConstraintsError> errors;
+
+    public enum EvaluationResult {
+        /** Returned if the constraint is satisfied with the given information */
+        ConstraintIsSatisfied,
+
+        /** Returned if the constraint is violated with the given information */
+        ConstraintIsNotSatisfied,
+
+        /**
+         * Returned if the constraint contains variables that are not part of the given statements.
+         * In this case, the constraint cannot be evaluated and is declared as 'not relevant'.
+         */
+        ConstraintIsNotRelevant
+    }
+
+    protected EvaluableConstraint(
+            AnalysisSeedWithSpecification seed,
+            Collection<Statement> statements,
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        this.seed = seed;
+        this.statements = statements;
+        this.extractedValues = extractedValues;
+        this.errors = new HashSet<>();
+    }
+
+    public static EvaluableConstraint getInstance(
+            AnalysisSeedWithSpecification seed,
+            ISLConstraint constraint,
+            Collection<Statement> statements,
+            Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        Multimap<Statement, ParameterWithExtractedValues> filteredParameters =
+                filterExtractedValuesOnStatements(statements, extractedValues);
+
+        if (constraint instanceof CrySLValueConstraint valueConstraint) {
+            return new ValueConstraint(seed, valueConstraint, statements, filteredParameters);
+        } else if (constraint instanceof CrySLComparisonConstraint comparisonConstraint) {
+            return new ComparisonConstraint(
+                    seed, comparisonConstraint, statements, filteredParameters);
+        } else if (constraint instanceof CrySLPredicate predicateConstraint) {
+            return new PredefinedPredicateConstraint(
+                    seed, statements, filteredParameters, predicateConstraint);
+        } else if (constraint instanceof CrySLConstraint cryslConstraint) {
+            return new BinaryConstraint(seed, cryslConstraint, statements, filteredParameters);
         }
-        throw new RuntimeException("Type of constraint is not supported");
+
+        throw new UnsupportedOperationException("Constraint type is not supported");
     }
 
-    final Collection<AbstractError> errors = Sets.newHashSet();
+    public abstract EvaluationResult evaluate();
 
-    final ConstraintSolver context;
+    public abstract ISLConstraint getConstraint();
 
-    final ISLConstraint origin;
-
-    protected EvaluableConstraint(ISLConstraint origin, ConstraintSolver context) {
-        this.origin = origin;
-        this.context = context;
+    public boolean isSatisfied() {
+        return errors.isEmpty();
     }
 
-    public abstract void evaluate();
-
-    public boolean hasErrors() {
+    public boolean isViolated() {
         return !errors.isEmpty();
     }
 
-    protected Collection<AbstractError> getErrors() {
+    public Collection<AbstractConstraintsError> getErrors() {
         return errors;
     }
 
-    protected Map<String, CallSiteWithExtractedValue> extractValueAsString(String varName) {
-        Map<String, CallSiteWithExtractedValue> varVal = Maps.newHashMap();
-        for (CallSiteWithExtractedValue callSite : context.getCollectedValues()) {
-            CallSiteWithParamIndex wrappedCallSite = callSite.callSiteWithParam();
-            Statement statement = wrappedCallSite.statement();
+    private static Multimap<Statement, ParameterWithExtractedValues>
+            filterExtractedValuesOnStatements(
+                    Collection<Statement> statements,
+                    Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
+        Multimap<Statement, ParameterWithExtractedValues> result = HashMultimap.create();
 
-            if (!wrappedCallSite.varName().equals(varName)) {
-                continue;
-            }
+        for (Statement statement : statements) {
+            Collection<ParameterWithExtractedValues> params = extractedValues.get(statement);
 
-            ExtractedValue extractedValue = callSite.extractedValue();
-            Statement allocSite = extractedValue.initialStatement();
-
-            InvokeExpr invoker = statement.getInvokeExpr();
-            if (statement.equals(allocSite)) {
-                String constant =
-                        retrieveConstantFromValue(invoker.getArg(wrappedCallSite.index()));
-                varVal.put(constant, callSite);
-            } else if (allocSite.isAssign()) {
-                if (extractedValue.val().isConstant()) {
-                    String retrieveConstantFromValue =
-                            retrieveConstantFromValue(extractedValue.val());
-                    int pos = -1;
-
-                    for (int i = 0; i < invoker.getArgs().size(); i++) {
-                        Val allocVal = allocSite.getLeftOp();
-                        Val parameterVal = invoker.getArg(i);
-
-                        if (allocVal.equals(parameterVal)) {
-                            pos = i;
-                        }
-                    }
-
-                    if (pos > -1 && invoker.getMethod().getParameterType(pos).isBooleanType()) {
-                        varVal.put(
-                                "0".equals(retrieveConstantFromValue) ? "false" : "true",
-                                new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
-                    } else {
-                        varVal.put(
-                                retrieveConstantFromValue,
-                                new CallSiteWithExtractedValue(wrappedCallSite, extractedValue));
-                    }
-                } else if (extractedValue.val().isNewExpr()) {
-                    varVal.putAll(extractSootArray(wrappedCallSite, extractedValue));
-                }
-            }
-        }
-        return varVal;
-    }
-
-    /***
-     * Function that finds the values assigned to a soot array.
-     *
-     * @param callSite   call site at which sootValue is involved
-     * @param allocSite  allocation site at which sootValue is involved
-     * @return extracted array values
-     */
-    protected Map<String, CallSiteWithExtractedValue> extractSootArray(
-            CallSiteWithParamIndex callSite, ExtractedValue allocSite) {
-        Val arrayLocal = allocSite.val();
-        Method method = callSite.statement().getMethod();
-
-        Map<String, CallSiteWithExtractedValue> arrVal = Maps.newHashMap();
-
-        for (Statement statement : method.getStatements()) {
-            if (!statement.isAssign()) {
-                continue;
-            }
-
-            Val leftVal = statement.getLeftOp();
-            Val rightVal = statement.getRightOp();
-
-            if (leftVal.equals(arrayLocal) && !rightVal.toString().contains("newarray")) {
-                arrVal.put(
-                        retrieveConstantFromValue(rightVal),
-                        new CallSiteWithExtractedValue(callSite, allocSite));
-            }
+            result.putAll(statement, params);
         }
 
-        /*Body methodBody = allocSite.stmt().getMethod().getActiveBody();
-
-        if (methodBody == null)
-        	return arrVal;
-
-        Iterator<Unit> unitIterator = methodBody.getUnits().snapshotIterator();
-        while (unitIterator.hasNext()) {
-        	final Unit unit = unitIterator.next();
-        	if (!(unit instanceof AssignStmt))
-        		continue;
-        	AssignStmt uStmt = (AssignStmt) (unit);
-        	Value leftValue = uStmt.getLeftOp();
-        	Value rightValue = uStmt.getRightOp();
-        	if (leftValue.toString().contains(arrayLocal.toString()) && !rightValue.toString().contains("newarray")) {
-        		arrVal.put(retrieveConstantFromValue(rightValue), new CallSiteWithExtractedValue(callSite, allocSite));
-        	}
-        }*/
-        return arrVal;
-    }
-
-    private String retrieveConstantFromValue(Val val) {
-        if (val.isStringConstant()) {
-            return val.getStringValue();
-        } else if (val.isIntConstant()) {
-            return String.valueOf(val.getIntValue());
-        } else if (val.isLongConstant()) {
-            return String.valueOf(val.getLongValue()).replaceAll("L", "");
-        } else {
-            return "";
-        }
-    }
-
-    protected Map<Integer, Val> extractArray(ExtractedValue extractedValue) {
-        Map<Integer, Val> result = new HashMap<>();
-
-        Statement statement = extractedValue.initialStatement();
-        if (!statement.isAssign()) {
-            return result;
-        }
-
-        Val leftOp = statement.getLeftOp();
-        Val rightOp = statement.getRightOp();
-        if (!rightOp.isArrayAllocationVal()) {
-            return result;
-        }
-
-        AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
-        for (Statement successor :
-                statement.getMethod().getControlFlowGraph().getSuccsOf(statement)) {
-            ForwardQuery forwardQuery =
-                    new ForwardQuery(new ControlFlowGraph.Edge(statement, successor), allocVal);
-
-            Boomerang solver =
-                    new Boomerang(
-                            context.getSeed().getScanner().getCallGraph(),
-                            context.getSeed().getScanner().getDataFlowScope());
-            ForwardBoomerangResults<?> results = solver.solve(forwardQuery);
-
-            for (Table.Cell<ControlFlowGraph.Edge, Val, ?> entry :
-                    results.asEdgeValWeightTable().cellSet()) {
-                Statement stmt = entry.getRowKey().getStart();
-                if (!stmt.isArrayStore()) {
-                    continue;
-                }
-
-                Val arrayBase = stmt.getLeftOp().getArrayBase().getX();
-                Integer index = stmt.getLeftOp().getArrayBase().getY();
-                if (!arrayBase.equals(allocVal.getDelegate())) {
-                    continue;
-                }
-
-                // TODO
-                ControlFlowGraph.Edge edge =
-                        new ControlFlowGraph.Edge(
-                                stmt.getMethod().getControlFlowGraph().getPredsOf(stmt).stream()
-                                        .findFirst()
-                                        .get(),
-                                stmt);
-                BackwardQuery backwardQuery = BackwardQuery.make(edge, stmt.getRightOp());
-
-                Boomerang indexSolver =
-                        new Boomerang(
-                                context.getSeed().getScanner().getCallGraph(),
-                                context.getSeed().getScanner().getDataFlowScope(),
-                                new IntAndStringBoomerangOptions());
-                BackwardBoomerangResults<?> indexValue = indexSolver.solve(backwardQuery);
-
-                for (ForwardQuery allocSite : indexValue.getAllocationSites().keySet()) {
-                    Statement allocStmt = allocSite.cfgEdge().getStart();
-
-                    if (!allocStmt.isAssign()) {
-                        continue;
-                    }
-
-                    result.put(index, allocStmt.getRightOp());
-                }
-            }
-        }
         return result;
     }
 
-    /**
-     * If the {@link crypto.extractparameter.ExtractParameterAnalysis} cannot find the allocation
-     * site of a parameter, it adds the ZERO value to the results to indicate that the value could
-     * not be extracted. In such a case, a {@link ImpreciseValueExtractionError} is reported.
-     *
-     * @param extractedValueMap the map from the {@link #extractValueAsString(String)} method
-     * @param constraint the constraint that cannot be evaluated
-     * @return true if the value could not be extracted and an {@link ImpreciseValueExtractionError}
-     *     got reported
-     */
-    protected boolean couldNotExtractValues(
-            Map<String, CallSiteWithExtractedValue> extractedValueMap, ISLConstraint constraint) {
-        if (extractedValueMap.size() != 1) {
-            return false;
-        }
+    protected Collection<ParameterWithExtractedValues> filterRelevantParameterResults(
+            String varName, Collection<ParameterWithExtractedValues> extractedValues) {
+        Collection<ParameterWithExtractedValues> result = new HashSet<>();
 
-        for (CallSiteWithExtractedValue callSite : extractedValueMap.values()) {
-            Statement statement = callSite.callSiteWithParam().statement();
-            Val extractedVal = callSite.extractedValue().val();
-
-            if (extractedVal.equals(Val.zero())) {
-                ImpreciseValueExtractionError extractionError =
-                        new ImpreciseValueExtractionError(
-                                context.getSeed(),
-                                statement,
-                                context.getSpecification(),
-                                constraint);
-                errors.add(extractionError);
-                return true;
+        for (ParameterWithExtractedValues parameter : extractedValues) {
+            if (parameter.varName().equals(varName)) {
+                result.add(parameter);
             }
         }
-        return false;
+
+        return result;
     }
 }

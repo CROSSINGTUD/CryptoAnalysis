@@ -3,7 +3,6 @@ package scanner.targets;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -81,7 +80,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest {
         // https://github.com/akwick/MUBench/blob/master/data/chensun/misuses/2/misuse.yml
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.CipherUsesNonRandomKeyExample", "main", 1)
-                        .withTPs(NeverTypeOfError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());

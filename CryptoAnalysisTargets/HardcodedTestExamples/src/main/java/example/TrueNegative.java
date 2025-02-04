@@ -1,6 +1,8 @@
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.SecureRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TrueNegative {
 
@@ -13,10 +15,12 @@ public class TrueNegative {
         secureRandom.nextBytes(pass);
 
         // convert byte array to char array
-        char[] passwd = new char[pass.length];
-        for(int i=0; i < pass.length; i++){
-            passwd[i] = (char) (pass[i]&0xff);
-        }
+        char[] passwd = IntStream
+                            .range(0, salt.length)
+                            .map(i -> (char) (pass[i]&0xff))
+                            .mapToObj(Character::toString)
+                            .collect(Collectors.joining())
+                            .toCharArray();
 
         byte[] key = getKey(passwd, salt, 10000, 256);
     }

@@ -6,7 +6,9 @@ public class WrapperConstraint {
 
     public WrapperConstraint() {}
 
-    public void integerParseIntConstraint(int value) {}
+    public void integerParseIntConstraint(@SuppressWarnings("unused") int value) {}
 
-    public void bigIntegerValueOfConstraint(BigInteger value) {}
+    public void bigIntegerConstructor(@SuppressWarnings("unused") BigInteger value) {}
+
+    public void bigIntegerValueOfConstraint(@SuppressWarnings("unused") BigInteger value) {}
 }

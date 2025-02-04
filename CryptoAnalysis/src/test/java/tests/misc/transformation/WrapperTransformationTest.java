@@ -21,7 +21,7 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         constraint.integerParseIntConstraint(correctValue);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -33,7 +33,57 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
+    public void branchingIntegerParseIntTest() {
+        String value = "10";
+        if (Math.random() > 0.5) {
+            value = "9999";
+        }
+
+        int intValue = Integer.parseInt(value);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.integerParseIntConstraint(intValue);
+        Assertions.extValue(0);
+
+        Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
+    public void positiveBigIntegerConstructorTest() {
+        BigInteger correctValue1 = new BigInteger("999999");
+
+        WrapperConstraint constraint1 = new WrapperConstraint();
+        constraint1.bigIntegerConstructor(correctValue1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 0);
+
+        BigInteger correctValue2 = new BigInteger("F423F", 16); // 999.999
+
+        WrapperConstraint constraint2 = new WrapperConstraint();
+        constraint2.bigIntegerConstructor(correctValue2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 0);
+    }
+
+    @Test
+    public void negativeBigIntegerConstructorTest() {
+        BigInteger incorrectValue1 = new BigInteger("111111");
+
+        WrapperConstraint constraint1 = new WrapperConstraint();
+        constraint1.bigIntegerConstructor(incorrectValue1);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint1, 1);
+
+        BigInteger correctValue2 = new BigInteger("3640E", 16); // 222.222
+
+        WrapperConstraint constraint2 = new WrapperConstraint();
+        constraint2.bigIntegerConstructor(correctValue2);
+        Assertions.extValue(0);
+        Assertions.constraintErrors(constraint2, 1);
     }
 
     @Test
@@ -44,7 +94,7 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         constraint.bigIntegerValueOfConstraint(correctValue);
         Assertions.extValue(0);
 
-        Assertions.constraintErrors(0);
+        Assertions.constraintErrors(constraint, 0);
     }
 
     @Test
@@ -56,6 +106,6 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.violatedConstraint();
 
-        Assertions.constraintErrors(1);
+        Assertions.constraintErrors(constraint, 1);
     }
 }

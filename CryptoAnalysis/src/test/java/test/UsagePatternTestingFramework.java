@@ -28,31 +28,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.Assert;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
 import test.assertions.Assertions;
-import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
-import test.assertions.ConstraintViolationAssertion;
-import test.assertions.DependentErrorAssertion;
+import test.assertions.ConstraintsEvaluatedAssertion;
+import test.assertions.ConstraintsNotRelevantAssertion;
+import test.assertions.ConstraintsSatisfiedAssertion;
+import test.assertions.ConstraintsViolatedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.HasGeneratedPredicateAssertion;
-import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
-import test.assertions.InstanceOfErrorCountAssertion;
 import test.assertions.MissingTypestateChange;
-import test.assertions.NeverTypeOfErrorCountAssertion;
-import test.assertions.NoCallToErrorCountAssertion;
 import test.assertions.NoMissingTypestateChange;
-import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradictionErrorCountAssertion;
@@ -225,10 +219,48 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
             }
 
-            if (invocationName.startsWith("violatedConstraint")) {
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new ConstraintViolationAssertion(pred));
+            if (invocationName.startsWith("evaluatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
                 }
+
+                queries.add(new ConstraintsEvaluatedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("satisfiedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsSatisfiedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("violatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsViolatedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("notRelevantConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsNotRelevantAssertion(local, count.getIntValue()));
             }
 
             if (invocationName.startsWith("hasEnsuredPredicate")) {
@@ -244,13 +276,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
+
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
@@ -267,35 +296,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param, predName));
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param));
-                    }
-                }
-            }
-
-            if (invocationName.startsWith("hasGeneratedPredicate")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isLocal()) {
-                    continue;
-                }
-
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasGeneratedPredicateAssertion(pred, param));
-                }
-            }
-
-            if (invocationName.startsWith("hasNotGeneratedPredicate")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isLocal()) {
-                    continue;
-                }
-
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasNotGeneratedPredicateAssertion(pred, param));
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
@@ -340,11 +343,17 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             }
 
             if (invocationName.startsWith("constraintErrors")) {
-                Val param = invokeExpr.getArg(0);
+                Val seed = invokeExpr.getArg(0);
+                Val param = invokeExpr.getArg(1);
+
+                if (!seed.isLocal()) {
+                    continue;
+                }
+
                 if (!param.isIntConstant()) {
                     continue;
                 }
-                queries.add(new ConstraintErrorCountAssertion(param.getIntValue()));
+                queries.add(new ConstraintErrorCountAssertion(seed, param.getIntValue()));
             }
 
             if (invocationName.startsWith("typestateErrors")) {
@@ -378,66 +387,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
                 queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
             }
-
-            if (invocationName.startsWith("callToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new CallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("noCallToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NoCallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("neverTypeOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NeverTypeOfErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("notHardCodedErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NotHardCodedErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("instanceOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new InstanceOfErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("dependentError")) {
-                // extract parameters
-                List<Val> params = invokeExpr.getArgs();
-                if (!params.stream().allMatch(Val::isIntConstant)) {
-                    continue;
-                }
-                int thisErrorID = params.remove(0).getIntValue();
-                int[] precedingErrorIDs = params.stream().mapToInt(Val::getIntValue).toArray();
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new DependentErrorAssertion(pred, thisErrorID, precedingErrorIDs));
-                }
-            }
-
-            // connect DependentErrorAssertions
-            Set<Assertion> depErrors =
-                    queries.stream()
-                            .filter(q -> q instanceof DependentErrorAssertion)
-                            .collect(Collectors.toSet());
-            depErrors.forEach(ass -> ((DependentErrorAssertion) ass).registerListeners(depErrors));
         }
     }
 

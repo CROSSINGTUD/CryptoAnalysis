@@ -9,6 +9,6 @@ public record ExtractedValue(Val val, Statement initialStatement, Collection<Typ
 
     @Override
     public String toString() {
-        return "Extracted Value: " + val + " with types " + types;
+        return "Extracted Value: " + val.getVariableName() + " with types " + types;
     }
 }

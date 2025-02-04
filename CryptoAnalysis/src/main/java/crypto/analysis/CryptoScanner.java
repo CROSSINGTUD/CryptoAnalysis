@@ -15,6 +15,7 @@ import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
+import crypto.predicates.PredicateAnalysis;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.visualization.Visualizer;
@@ -37,7 +38,6 @@ public abstract class CryptoScanner {
     private final AnalysisPrinter analysisPrinter;
     private final ErrorCollector errorCollector;
     private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds;
-    private final PredicateHandler predicateHandler;
 
     private CallGraph callGraph;
     private Collection<CrySLRule> ruleset;
@@ -46,7 +46,6 @@ public abstract class CryptoScanner {
     protected CryptoScanner() {
         this.analysisReporter = new AnalysisReporter();
         this.discoveredSeeds = new HashMap<>();
-        this.predicateHandler = new PredicateHandler(this);
 
         analysisPrinter = new AnalysisPrinter();
         addAnalysisListener(analysisPrinter);
@@ -107,7 +106,8 @@ public abstract class CryptoScanner {
         }
 
         analysisReporter.beforePredicateCheck();
-        predicateHandler.checkPredicates();
+        PredicateAnalysis analysis = new PredicateAnalysis();
+        analysis.checkPredicates(seeds);
         analysisReporter.afterPredicateCheck();
 
         analysisReporter.afterAnalysis();

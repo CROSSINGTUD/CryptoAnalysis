@@ -22,7 +22,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(AlternativeReqPredicateError.class, 2);
         addExpectedErrors(TypestateError.class, 1);
         addExpectedErrors(IncompleteOperationError.class, 4);
-        addExpectedErrors(ImpreciseValueExtractionError.class, 1);
+        addExpectedErrors(ImpreciseValueExtractionError.class, 2);
 
         assertErrors(scanner.getCollectedErrors());
     }

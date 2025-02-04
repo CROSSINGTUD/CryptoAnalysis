@@ -1,20 +1,24 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.InvokeExpr;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crysl.rule.CrySLPredicate;
+import crypto.predicates.AbstractPredicate;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.ExpectedPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import typestate.TransitionFunction;
 
 public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
     private final Multimap<Statement, Integer> relevantStatements;
+    private final Collection<AbstractPredicate> predicatesToPropagate;
 
     public AnalysisSeedWithEnsuredPredicate(
             CryptoScanner scanner,
@@ -24,23 +28,57 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
         super(scanner, statement, fact, results);
 
         relevantStatements = HashMultimap.create();
+        predicatesToPropagate = new HashSet<>();
     }
 
     @Override
     public void execute() {
         scanner.getAnalysisReporter().onSeedStarted(this);
 
-        relevantStatements.put(getOrigin(), -1);
-        for (ControlFlowGraph.Edge edge : analysisResults.asEdgeValWeightTable().rowKeySet()) {
-            Statement statement = edge.getTarget();
+        scanner.getAnalysisReporter().onSeedFinished(this);
+    }
 
+    @Override
+    public void registerExpectedPredicate(ExpectedPredicate expectedPredicate) {
+        super.registerExpectedPredicate(expectedPredicate);
+
+        /* Since seeds without a rule cannot ensure predicates, they have to get the
+         * expected predicate from another (unknown) seed
+         */
+        for (Statement statement : relevantStatements.keySet()) {
+            Collection<Integer> indices = relevantStatements.get(statement);
+
+            for (Integer index : indices) {
+                ExpectedPredicate predicate =
+                        new ExpectedPredicate(
+                                this, expectedPredicate.predicate(), statement, index);
+
+                if (expectedPredicate.statement().equals(statement)) {
+                    continue;
+                }
+
+                for (AnalysisSeedWithSpecification seed : scanner.getAnalysisSeedsWithSpec()) {
+                    Collection<Statement> invokedMethods = seed.getInvokedMethods();
+
+                    if (invokedMethods.contains(statement)) {
+                        seed.registerExpectedPredicate(predicate);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void beforePredicateChecks(Collection<IAnalysisSeed> seeds) {
+        relevantStatements.put(getOrigin(), -1);
+        for (Statement statement : statementValWeightTable.rowKeySet()) {
             if (!statement.containsInvokeExpr()) {
                 continue;
             }
 
-            Collection<Val> values = analysisResults.asEdgeValWeightTable().row(edge).keySet();
-
             InvokeExpr invokeExpr = statement.getInvokeExpr();
+            Collection<Val> values = getAliasesAtStatement(statement);
+
             for (int i = 0; i < invokeExpr.getArgs().size(); i++) {
                 Val param = invokeExpr.getArg(i);
 
@@ -49,83 +87,96 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
                 }
             }
         }
-
-        scanner.getAnalysisReporter().onSeedFinished(this);
     }
 
     @Override
-    public void expectPredicate(
-            Statement statement, CrySLPredicate predicate, IAnalysisSeed seed, int paramIndex) {
-        CrySLPredicate predToBeEnsured;
-        if (predicate.isNegated()) {
-            predToBeEnsured = predicate.invertNegation();
-        } else {
-            predToBeEnsured = predicate;
+    public void propagatePredicates() {
+        Collection<Statement> allStatements = new HashSet<>();
+        allStatements.addAll(relevantStatements.keySet());
+        allStatements.addAll(expectedPredicates.keySet());
+
+        for (Statement statement : allStatements) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
+
+            for (AbstractPredicate ensPred : predicatesToPropagate) {
+                propagatePredicateAtStatement(ensPred, statement);
+            }
+        }
+    }
+
+    private void propagatePredicateAtStatement(AbstractPredicate predicate, Statement statement) {
+        // Ensure the predicate on this seed
+        AbstractPredicate generatedPredicate = createPredicateWithIndex(predicate, statement, -1);
+        this.onGeneratedPredicate(generatedPredicate);
+
+        if (statement.getInvokeExpr().isStaticInvokeExpr()) {
+            return;
         }
 
-        expectedPredicates.put(
-                statement, new ExpectedPredicateOnSeed(predToBeEnsured, seed, paramIndex));
+        if (statement.equals(getOrigin())) {
+            return;
+        }
 
-        for (Statement relStatement : relevantStatements.keySet()) {
-            if (!relStatement.containsInvokeExpr()) {
-                continue;
-            }
+        Collection<Integer> indices = relevantStatements.get(statement);
+        for (Integer index : indices) {
+            AbstractPredicate predForSeed = createPredicateWithIndex(predicate, statement, index);
 
-            if (relStatement.equals(statement)) {
-                continue;
-            }
+            notifyExpectingSeeds(predForSeed);
+        }
+    }
 
-            InvokeExpr invokeExpr = relStatement.getInvokeExpr();
-            if (invokeExpr.isStaticInvokeExpr()) {
-                continue;
-            }
+    private void notifyExpectingSeeds(AbstractPredicate predicate) {
+        Statement statement = predicate.getStatement();
 
-            Val base = invokeExpr.getBase();
-            for (AnalysisSeedWithSpecification otherSeed : scanner.getAnalysisSeedsWithSpec()) {
-                if (otherSeed.equals(seed)) {
-                    continue;
-                }
+        Collection<ExpectedPredicate> expectedPredsAtStatement = expectedPredicates.get(statement);
+        for (ExpectedPredicate expectedPred : expectedPredsAtStatement) {
+            if (expectedPred.predicate().equals(predicate.getPredicate())
+                    && expectedPred.paramIndex() == predicate.getIndex()) {
+                IAnalysisSeed seed = expectedPred.seed();
 
-                // TODO from statement
-                Collection<Val> values =
-                        otherSeed.getAnalysisResults().asStatementValWeightTable().columnKeySet();
-                if (values.contains(base)) {
-                    for (Integer index : relevantStatements.get(relStatement)) {
-
-                        if (otherSeed.canEnsurePredicate(predToBeEnsured, relStatement, index)) {
-                            otherSeed.expectPredicate(relStatement, predToBeEnsured, this, index);
-
-                            if (seed instanceof AnalysisSeedWithSpecification) {
-                                otherSeed.addRequiringSeed((AnalysisSeedWithSpecification) seed);
-                            }
-                        }
-                    }
+                if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
+                    seedWithSpec.onGeneratedPredicateFromOtherSeed(predicate);
                 }
             }
         }
     }
 
-    public void addEnsuredPredicate(AbstractPredicate predicate) {
-        for (Statement statement : expectedPredicates.keySet()) {
-            Collection<ExpectedPredicateOnSeed> predicateOnSeeds =
-                    expectedPredicates.get(statement);
+    private AbstractPredicate createPredicateWithIndex(
+            AbstractPredicate predicate, Statement statement, int index) {
+        if (predicate instanceof EnsuredPredicate ensPred) {
+            return new EnsuredPredicate(
+                    ensPred.getGeneratingSeed(), ensPred.getPredicate(), statement, index);
+        } else if (predicate instanceof UnEnsuredPredicate unEnsPred) {
+            return new UnEnsuredPredicate(
+                    unEnsPred.getGeneratingSeed(),
+                    unEnsPred.getPredicate(),
+                    statement,
+                    index,
+                    unEnsPred.getViolations());
+        } else {
+            return predicate;
+        }
+    }
 
-            for (ExpectedPredicateOnSeed predOnSeed : predicateOnSeeds) {
-                if (!predOnSeed.predicate().equals(predicate.getPredicate())) {
-                    continue;
-                }
+    public void onPredicateGeneratedFromOtherSeed(AbstractPredicate predicate) {
+        Collection<AbstractPredicate> currentPreds = new HashSet<>(predicatesToPropagate);
 
-                if (!(predOnSeed.seed() instanceof AnalysisSeedWithSpecification seedWithSpec)) {
-                    continue;
-                }
-
-                seedWithSpec.addEnsuredPredicate(predicate, statement, predOnSeed.paramIndex());
+        for (AbstractPredicate pred : currentPreds) {
+            if (pred.getPredicate().equals(predicate.getPredicate())) {
+                predicatesToPropagate.remove(pred);
             }
         }
 
-        for (Statement statement : relevantStatements.keySet()) {
-            scanner.getAnalysisReporter().onGeneratedPredicate(this, predicate, this, statement);
-        }
+        predicatesToPropagate.add(predicate);
+        onGeneratedPredicate(predicate);
+    }
+
+    @Override
+    public void afterPredicateChecks() {
+        scanner.getAnalysisReporter().ensuredPredicates(this, ensuredPredicates);
+        scanner.getAnalysisReporter().unEnsuredPredicates(this, unEnsuredPredicates);
     }
 
     @Override

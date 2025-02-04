@@ -59,7 +59,7 @@
 
         <spdsVersion>3.2.3</spdsVersion>
         <sootVersion>4.6.0</sootVersion>
-        <cryslVersion>4.0.0</cryslVersion>
+        <cryslVersion>4.0.1</cryslVersion>
     </properties>
 
     <dependencyManagement>

@@ -2,8 +2,8 @@ package test.assertions;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.UnEnsuredPredicate;
+import crypto.predicates.AbstractPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
 import test.Assertion;
 

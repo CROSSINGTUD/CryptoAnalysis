@@ -8,6 +8,8 @@ import test.assertions.Assertions;
 
 public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
+    private static final String ENSURED_PREDICATE = "requiredPredicateWasEnsured";
+
     @Override
     protected String getRulesetPath() {
         return TestConstants.RULES_TEST_DIR + "requiredPredicates";
@@ -31,12 +33,12 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.pred1onPos1(pred1OnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 required error
         Requires r2 = new Requires();
         r2.pred1onPos1(noPred1OnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         Assertions.predicateErrors(1);
     }
@@ -53,12 +55,12 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.notPred1onPos1(noPred1OnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 contradiction error
         Requires r2 = new Requires();
         r2.notPred1onPos1(pred1OnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         Assertions.predicateContradictionErrors(1);
     }
@@ -78,22 +80,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.pred1onPos1_AND_pred1onPos2(pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 required error
         Requires r2 = new Requires();
         r2.pred1onPos1_AND_pred1onPos2(pred1onA, noPred1onA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 required error
         Requires r3 = new Requires();
         r3.pred1onPos1_AND_pred1onPos2(noPred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required + 1 required error
         Requires r4 = new Requires();
         r4.pred1onPos1_AND_pred1onPos2(noPred1onA, noPred1onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(4);
     }
@@ -110,22 +112,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.pred1onPos1_AND_notPred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 required + 1 contradiction error
         Requires r2 = new Requires();
         r2.pred1onPos1_AND_notPred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction error
         Requires r3 = new Requires();
         r3.pred1onPos1_AND_notPred1onPos2(pred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required error
         Requires r4 = new Requires();
         r4.pred1onPos1_AND_notPred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(2);
         Assertions.predicateContradictionErrors(2);
@@ -143,22 +145,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.notPred1onPos1_AND_pred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 contradiction + 1 required error
         Requires r2 = new Requires();
         r2.notPred1onPos1_AND_pred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction error
         Requires r3 = new Requires();
         r3.notPred1onPos1_AND_pred1onPos2(pred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required error
         Requires r4 = new Requires();
         r4.notPred1onPos1_AND_pred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(2);
         Assertions.predicateContradictionErrors(2);
@@ -176,22 +178,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.notPred1onPos1_AND_notPred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 contradiction error
         Requires r2 = new Requires();
         r2.notPred1onPos1_AND_notPred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction error
         Requires r3 = new Requires();
         r3.notPred1onPos1_AND_notPred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 2 contradiction error
         Requires r4 = new Requires();
         r4.notPred1onPos1_AND_notPred1onPos2(pred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(0);
         Assertions.predicateContradictionErrors(4);
@@ -214,22 +216,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.pred1onPos1_AND_pred2onPos2(pred1onA, pred2onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 required error
         Requires r2 = new Requires();
         r2.pred1onPos1_AND_pred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 required error
         Requires r3 = new Requires();
         r3.pred1onPos1_AND_pred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required + 1 required error
         Requires r4 = new Requires();
         r4.pred1onPos1_AND_pred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(4);
     }
@@ -250,22 +252,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.pred1onPos1_AND_notPred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 required + 1 contradiction error
         Requires r2 = new Requires();
         r2.pred1onPos1_AND_notPred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction error
         Requires r3 = new Requires();
         r3.pred1onPos1_AND_notPred2onPos2(pred1onA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required error
         Requires r4 = new Requires();
         r4.pred1onPos1_AND_notPred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(2);
         Assertions.predicateContradictionErrors(2);
@@ -287,17 +289,17 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.notPred1onPos1_AND_pred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 contradiction + 1 required error
         Requires r2 = new Requires();
         r2.notPred1onPos1_AND_pred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction
         Requires r3 = new Requires();
         r3.notPred1onPos1_AND_pred2onPos2(pred1onA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 required error
         Requires r4 = new Requires();
@@ -324,22 +326,22 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // correct
         Requires r1 = new Requires();
         r1.notPred1onPos1_AND_notPred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         // 1 contradiction error
         Requires r2 = new Requires();
         r2.notPred1onPos1_AND_notPred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r2);
+        Assertions.notHasEnsuredPredicate(r2);
 
         // 1 contradiction error
         Requires r3 = new Requires();
         r3.notPred1onPos1_AND_notPred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r3);
+        Assertions.notHasEnsuredPredicate(r3);
 
         // 1 contradiction + 1 contradiction error
         Requires r4 = new Requires();
         r4.notPred1onPos1_AND_notPred2onPos2(pred1onA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         Assertions.predicateErrors(0);
         Assertions.predicateContradictionErrors(4);
@@ -360,20 +362,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_pred1onPos2(pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_pred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_pred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_pred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -391,20 +393,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_notPred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_notPred1onPos2(pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_notPred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_notPred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -422,20 +424,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_pred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_pred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_pred1onPos2(pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_pred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -457,20 +459,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_notPred1onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_notPred1onPos2(noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_notPred1onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_notPred1onPos2(pred1onA, pred1onA2);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -497,20 +499,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_pred2onPos2(pred1onA, pred2onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_pred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_pred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_pred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -532,20 +534,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_notPred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_notPred2onPos2(pred1onA, pred2onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_notPred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_notPred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -567,20 +569,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_pred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_pred2onPos2(pred1onA, pred2onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_pred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_pred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -602,20 +604,20 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_notPred2onPos2(noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_notPred2onPos2(pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_notPred2onPos2(noPredOnA, pred2onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         // assert false
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_notPred2onPos2(pred1onA, pred2onA);
-        Assertions.hasNotGeneratedPredicate(r4);
+        Assertions.notHasEnsuredPredicate(r4);
 
         // one, because both parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -634,36 +636,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.pred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -681,36 +683,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.pred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -728,36 +730,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.notPred1onPos1_OR_pred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -775,36 +777,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.notPred1onPos1_OR_notPred1onPos2_OR_pred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -822,36 +824,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.pred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -869,36 +871,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.pred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -916,36 +918,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.notPred1onPos1_OR_pred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
@@ -963,36 +965,36 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         // assert true
         Requires r1 = new Requires();
         r1.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r1);
+        Assertions.hasEnsuredPredicate(r1, ENSURED_PREDICATE);
 
         Requires r2 = new Requires();
         r2.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, pred1onA);
-        Assertions.hasGeneratedPredicate(r2);
+        Assertions.hasEnsuredPredicate(r2, ENSURED_PREDICATE);
 
         Requires r3 = new Requires();
         r3.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, pred1onA);
-        Assertions.hasGeneratedPredicate(r3);
+        Assertions.hasEnsuredPredicate(r3, ENSURED_PREDICATE);
 
         Requires r4 = new Requires();
         r4.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r4);
+        Assertions.hasEnsuredPredicate(r4, ENSURED_PREDICATE);
 
         Requires r5 = new Requires();
         r5.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r5);
+        Assertions.hasEnsuredPredicate(r5, ENSURED_PREDICATE);
 
         Requires r6 = new Requires();
         r6.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, pred1onA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r6);
+        Assertions.hasEnsuredPredicate(r6, ENSURED_PREDICATE);
 
         Requires r7 = new Requires();
         r7.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(noPredOnA, noPredOnA, noPredOnA);
-        Assertions.hasGeneratedPredicate(r7);
+        Assertions.hasEnsuredPredicate(r7, ENSURED_PREDICATE);
 
         // assert false
         Requires r8 = new Requires();
         r8.notPred1onPos1_OR_notPred1onPos2_OR_notPred1onPos3(pred1onA, pred1onA, pred1onA);
-        Assertions.hasNotGeneratedPredicate(r8);
+        Assertions.notHasEnsuredPredicate(r8);
 
         // one, because all three parameters belong to the same alternative predicate
         Assertions.predicateErrors(1);
