@@ -51,7 +51,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private boolean internalConstraintsSatisfied;
 
     private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
-    private final Map<ControlFlowGraph.Edge, DeclaredMethod> allCallsOnObject;
+    private final Collection<Statement> allCallsOnObject;
 
     private final Multimap<Statement, Integer> relevantStatements = HashMultimap.create();
     private final Collection<AbstractPredicate> indirectlyEnsuredPredicates = new HashSet<>();
@@ -65,7 +65,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         super(scanner, statement, fact, results);
 
         this.specification = specification;
-        this.allCallsOnObject = results.getInvokedMethodOnInstance();
+        this.allCallsOnObject = results.getInvokeStatementsOnInstance();
 
         Definitions.ConstraintsDefinition definition =
                 new Definitions.ConstraintsDefinition(
@@ -109,15 +109,16 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     /** Check the FORBIDDEN section and report corresponding errors */
     private void evaluateForbiddenMethods() {
-        for (Map.Entry<ControlFlowGraph.Edge, DeclaredMethod> calledMethod :
-                allCallsOnObject.entrySet()) {
-            Optional<CrySLForbiddenMethod> forbiddenMethod =
-                    isForbiddenMethod(calledMethod.getValue());
+        for (Statement statement : allCallsOnObject) {
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
+
+            DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+            Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(declaredMethod);
 
             if (forbiddenMethod.isPresent()) {
                 Collection<CrySLMethod> alternatives = forbiddenMethod.get().getAlternatives();
-                Statement statement = calledMethod.getKey().getStart();
-                DeclaredMethod declaredMethod = calledMethod.getValue();
 
                 ForbiddenMethodError error =
                         new ForbiddenMethodError(
@@ -301,7 +302,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     @Override
     public void beforePredicateChecks(Collection<IAnalysisSeed> seeds) {
-        for (Statement statement : getInvokedMethods()) {
+        for (Statement statement : getInvokedMethodStatements()) {
             relevantStatements.put(statement, -1);
         }
 
@@ -817,18 +818,8 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return specification;
     }
 
-    public Map<ControlFlowGraph.Edge, DeclaredMethod> getAllCallsOnObject() {
+    public Collection<Statement> getInvokedMethodStatements() {
         return allCallsOnObject;
-    }
-
-    public Collection<Statement> getInvokedMethods() {
-        Collection<Statement> statements = new HashSet<>();
-
-        for (ControlFlowGraph.Edge edge : allCallsOnObject.keySet()) {
-            statements.add(edge.getStart());
-        }
-
-        return statements;
     }
 
     public Collection<EnsuredPredicate> getEnsuredPredicatesAtStatement(Statement statement) {

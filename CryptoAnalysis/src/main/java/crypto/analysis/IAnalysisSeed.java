@@ -1,12 +1,10 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
@@ -49,18 +47,11 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         this.fact = fact;
         this.analysisResults = results;
 
+        this.statementValWeightTable = results.asStatementValWeightTable();
+
         this.errorCollection = new HashSet<>();
-
-        this.statementValWeightTable = HashBasedTable.create();
-        for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                results.asEdgeValWeightTable().cellSet()) {
-            statementValWeightTable.put(
-                    cell.getRowKey().getStart(), cell.getColumnKey(), cell.getValue());
-        }
-
         this.expectedPredicates = HashMultimap.create();
         this.predicateStateChangeListeners = new HashSet<>();
-
         this.ensuredPredicates = HashMultimap.create();
         this.unEnsuredPredicates = HashMultimap.create();
     }

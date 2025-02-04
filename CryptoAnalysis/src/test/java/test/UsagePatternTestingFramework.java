@@ -11,6 +11,7 @@ import boomerang.scene.Method;
 import boomerang.scene.SootDataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import boomerang.scene.jimple.BoomerangPretransformer;
 import boomerang.scene.jimple.JimpleMethod;
 import boomerang.scene.jimple.SootCallGraph;
 import boomerang.util.AccessPath;
@@ -20,7 +21,6 @@ import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
-import crypto.preanalysis.TransformerSetup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -75,7 +75,9 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
         @Override
         protected CallGraph constructCallGraph() {
-            TransformerSetup.v().setupPreTransformer(super.getRuleset());
+            BoomerangPretransformer.v().reset();
+            BoomerangPretransformer.v().apply();
+
             return new SootCallGraph();
         }
 

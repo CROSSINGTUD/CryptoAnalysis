@@ -1,9 +1,9 @@
 package de.fraunhofer.iem.android;
 
 import boomerang.scene.CallGraph;
+import boomerang.scene.jimple.BoomerangPretransformer;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.base.Stopwatch;
-import crypto.preanalysis.TransformerSetup;
 import crysl.rule.CrySLRule;
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +42,9 @@ public class FlowDroidSetup {
 
     public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
         flowDroid.constructCallgraph();
-        TransformerSetup.v().setupPreTransformer(rules);
+
+        BoomerangPretransformer.v().reset();
+        BoomerangPretransformer.v().apply();
 
         return new SootCallGraph();
     }

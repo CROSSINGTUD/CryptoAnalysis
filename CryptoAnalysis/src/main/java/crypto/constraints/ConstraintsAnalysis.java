@@ -1,6 +1,5 @@
 package crypto.constraints;
 
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Statement;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -53,11 +52,7 @@ public class ConstraintsAnalysis {
 
     private void initializeCollectedCalls() {
         collectedCalls.clear();
-
-        Collection<ControlFlowGraph.Edge> edges = seed.getAllCallsOnObject().keySet();
-        for (ControlFlowGraph.Edge edge : edges) {
-            collectedCalls.add(edge.getStart());
-        }
+        collectedCalls.addAll(seed.getInvokedMethodStatements());
     }
 
     private void initializeExtractedValues() {

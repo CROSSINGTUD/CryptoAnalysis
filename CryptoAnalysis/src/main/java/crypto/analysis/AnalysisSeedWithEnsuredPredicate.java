@@ -58,7 +58,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
                 }
 
                 for (AnalysisSeedWithSpecification seed : scanner.getAnalysisSeedsWithSpec()) {
-                    Collection<Statement> invokedMethods = seed.getInvokedMethods();
+                    Collection<Statement> invokedMethods = seed.getInvokedMethodStatements();
 
                     if (invokedMethods.contains(statement)) {
                         seed.registerExpectedPredicate(predicate);
