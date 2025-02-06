@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import typestate.TransitionFunction;
+import typestate.finiteautomata.ITransition;
+import typestate.finiteautomata.State;
 
 public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
@@ -60,6 +62,30 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
     public Collection<Val> getAliasesAtStatement(Statement statement) {
         return statementValWeightTable.row(statement).keySet();
+    }
+
+    public Collection<State> getStatesAtStatement(Statement statement) {
+        Collection<State> states = new HashSet<>();
+
+        Collection<TransitionFunction> transitions =
+                statementValWeightTable.row(statement).values();
+        for (TransitionFunction transition : transitions) {
+            Collection<State> targetStates = getTargetStates(transition);
+
+            states.addAll(targetStates);
+        }
+
+        return states;
+    }
+
+    private Collection<State> getTargetStates(TransitionFunction transitionFunction) {
+        Collection<State> states = new HashSet<>();
+
+        for (ITransition transition : transitionFunction.values()) {
+            states.add(transition.to());
+        }
+
+        return states;
     }
 
     public void addPredicateStateChangeListener(IPredicateStateChangeListener listener) {

@@ -40,6 +40,6 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
     }
 
     public Collection<LabeledMatcherTransition> getAllTransitions() {
-        return transitions.getAllTransitions();
+        return transitions.getStateMachineTransitions();
     }
 }

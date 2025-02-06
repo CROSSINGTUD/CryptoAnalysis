@@ -8,7 +8,6 @@ import boomerang.scene.Statement;
 import boomerang.scene.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.ForbiddenMethodError;
@@ -50,9 +49,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private final ConstraintsAnalysis constraintsAnalysis;
     private boolean internalConstraintsSatisfied;
 
-    private final Multimap<Statement, State> typeStateChange = HashMultimap.create();
     private final Collection<Statement> allCallsOnObject;
-
     private final Multimap<Statement, Integer> relevantStatements = HashMultimap.create();
     private final Collection<AbstractPredicate> indirectlyEnsuredPredicates = new HashSet<>();
 
@@ -141,50 +138,29 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         return Optional.empty();
     }
 
+    /**
+     * Check the ORDER section and report a corresponding {@link TypestateError} for each sequence
+     * of statements that visits a {@link ReportingErrorStateNode}
+     */
     private void evaluateTypestateOrder() {
-        Collection<ControlFlowGraph.Edge> allTypestateChangeStatements = new HashSet<>();
-        for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                analysisResults.asEdgeValWeightTable().cellSet()) {
-            Collection<ControlFlowGraph.Edge> edges =
-                    cell.getValue().getLastStateChangeStatements();
-            allTypestateChangeStatements.addAll(edges);
-        }
-
-        for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c :
-                analysisResults.asEdgeValWeightTable().cellSet()) {
-            ControlFlowGraph.Edge curr = c.getRowKey();
-
-            // The initial statement is always the start of the CFG edge, all other statements are
-            // targets
-            Statement typestateChangeStatement;
-            if (curr.getStart().equals(getOrigin())) {
-                typestateChangeStatement = curr.getStart();
-            } else {
-                typestateChangeStatement = curr.getTarget();
-            }
-
-            if (allTypestateChangeStatements.contains(curr)) {
-                Collection<? extends State> targetStates = getTargetStates(c.getValue());
-
-                for (State newStateAtCurr : targetStates) {
-                    typeStateChangeAtStatement(typestateChangeStatement, newStateAtCurr);
+        for (Statement statement : allCallsOnObject) {
+            Collection<State> statesAtStatement = getStatesAtStatement(statement);
+            for (State state : statesAtStatement) {
+                if (state instanceof ReportingErrorStateNode errorStateNode) {
+                    TypestateError typestateError =
+                            new TypestateError(
+                                    this, statement, specification, errorStateNode.expectedCalls());
+                    this.addError(typestateError);
+                    scanner.getAnalysisReporter().reportError(this, typestateError);
                 }
             }
         }
     }
 
-    private void typeStateChangeAtStatement(Statement statement, State stateNode) {
-        if (typeStateChange.put(statement, stateNode)) {
-            if (stateNode instanceof ReportingErrorStateNode errorStateNode) {
-                TypestateError typestateError =
-                        new TypestateError(
-                                this, statement, specification, errorStateNode.expectedCalls());
-                this.addError(typestateError);
-                scanner.getAnalysisReporter().reportError(this, typestateError);
-            }
-        }
-    }
-
+    /**
+     * Check the ORDER section and report a corresponding {@link IncompleteOperationError} for each
+     * sequence of statements that do not end in an accepting state
+     */
     private void evaluateIncompleteOperations() {
         Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation =
                 analysisResults.getObjectDestructingStatements();
@@ -445,12 +421,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             if (allStatesNonGenerating) {
                 allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateIsNeverReached);
             } else if (someStatesNonGenerating) {
-                /* TODO
-                 *  Due to a bug, IDEal returns the states [0,1] whenever there is a
-                 *  single call to a method, e.g. Object o = new Object(); o.m();. After
-                 *  the call to m1(), o is always in state 0 and 1, although it should only be 1
-                 */
-                // allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
+                allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
             }
 
             if (isIndirectlyEnsured) {
@@ -668,31 +639,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private boolean doesStateGeneratePredicate(State state, CrySLPredicate predicate) {
         return isPredicateGeneratingState(predicate, state)
                 && !isPredicateNegatingState(predicate, state);
-    }
-
-    private Collection<State> getStatesAtStatement(Statement statement) {
-        Collection<State> states = new HashSet<>();
-
-        if (statement.containsInvokeExpr()) {
-            Collection<TransitionFunction> functions =
-                    statementValWeightTable.row(statement).values();
-
-            for (TransitionFunction function : functions) {
-                Collection<State> targets = getTargetStates(function);
-
-                states.addAll(targets);
-            }
-        }
-
-        return states;
-    }
-
-    private Collection<State> getTargetStates(TransitionFunction value) {
-        Collection<State> res = Sets.newHashSet();
-        for (ITransition t : value.values()) {
-            if (t.to() != null) res.add(t.to());
-        }
-        return res;
     }
 
     private boolean isPredicateGeneratingState(CrySLPredicate ensPred, State stateNode) {

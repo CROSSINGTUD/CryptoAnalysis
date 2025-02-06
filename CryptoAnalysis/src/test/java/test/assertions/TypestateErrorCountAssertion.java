@@ -1,18 +1,24 @@
 package test.assertions;
 
+import boomerang.scene.Val;
+import java.util.Collection;
 import test.Assertion;
 
 public class TypestateErrorCountAssertion implements Assertion {
 
+    private final Val seed;
     private final int expectedErrorCounts;
     private int actualErrorCounts;
 
-    public TypestateErrorCountAssertion(int numberOfCounts) {
+    public TypestateErrorCountAssertion(Val seed, int numberOfCounts) {
+        this.seed = seed;
         this.expectedErrorCounts = numberOfCounts;
     }
 
-    public void increaseCount() {
-        actualErrorCounts++;
+    public void increaseCount(Collection<Val> vals) {
+        if (vals.contains(seed)) {
+            actualErrorCounts++;
+        }
     }
 
     @Override
@@ -29,7 +35,9 @@ public class TypestateErrorCountAssertion implements Assertion {
     public String toString() {
         return "Expected "
                 + expectedErrorCounts
-                + " typestate errors, but got "
+                + " typestate errors on "
+                + seed.getVariableName()
+                + ", but got "
                 + actualErrorCounts;
     }
 }

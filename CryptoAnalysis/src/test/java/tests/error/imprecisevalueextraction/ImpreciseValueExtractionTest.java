@@ -58,18 +58,16 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
     }
 
     @Test
-    @SuppressWarnings("unused")
     public void testCouldExtractConditionalValue() {
         ImpreciseValueExtraction extraction1 = new ImpreciseValueExtraction(100);
         Assertions.extValue(0);
 
         // Value can be extracted and condition satisfied => required call to 'missingCallTo'
         Assertions.impreciseValueExtractionErrors(0);
-        Assertions.callToErrors(1);
+        Assertions.constraintErrors(extraction1, 1);
     }
 
     @Test
-    @SuppressWarnings("unused")
     public void testCouldNotExtractConditionalValue() {
         int randomValue = (int) (Math.random() * 20);
         ImpreciseValueExtraction extraction2 = new ImpreciseValueExtraction(randomValue);
@@ -77,6 +75,6 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
         // Value cannot be extract => Condition cannot be evaluated and call to 'missingCallTo' not
         // known
         Assertions.impreciseValueExtractionErrors(1);
-        Assertions.callToErrors(0);
+        Assertions.constraintErrors(extraction2, 0);
     }
 }

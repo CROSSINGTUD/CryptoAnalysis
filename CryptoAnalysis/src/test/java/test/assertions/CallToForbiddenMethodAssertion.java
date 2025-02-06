@@ -5,7 +5,7 @@ import test.Assertion;
 
 public class CallToForbiddenMethodAssertion implements Assertion {
 
-    private Statement stmt;
+    private final Statement stmt;
     private boolean satisfied;
 
     public CallToForbiddenMethodAssertion(Statement stmt) {

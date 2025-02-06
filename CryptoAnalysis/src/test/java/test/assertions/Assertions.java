@@ -2,15 +2,15 @@ package test.assertions;
 
 public class Assertions {
 
-    public static void assertState(Object o, int state) {}
-
     public static void extValue(int pos) {}
 
-    public static void assertValue(Object o, Object v) {}
+    public static void mustBeInAcceptingState(Object o) {}
+
+    public static void mayBeInAcceptingState(Object o) {}
 
     public static void mustNotBeInAcceptingState(Object o) {}
 
-    public static void mustBeInAcceptingState(Object o) {}
+    public static void assertState(Object o, String label) {}
 
     public static void violatedConstraint() {}
 
@@ -42,13 +42,11 @@ public class Assertions {
 
     public static void constraintErrors(Object o, int i) {}
 
-    public static void typestateErrors(int i) {}
+    public static void typestateErrors(Object o, int i) {}
 
     public static void incompleteOperationErrors(int i) {}
 
     public static void forbiddenMethodErrors(int i) {}
 
     public static void impreciseValueExtractionErrors(int i) {}
-
-    public static void callToErrors(int i) {}
 }

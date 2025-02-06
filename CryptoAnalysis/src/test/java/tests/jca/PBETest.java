@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-import org.junit.Ignore;
 import org.junit.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
@@ -107,8 +106,6 @@ public class PBETest extends UsagePatternTestingFramework {
         pbekeyspec.clearPassword();
     }
 
-    @Ignore(
-            "Typestate analysis returns state 0 and 1 after call to clearPassword() (should only be 1)")
     @Test
     public void pbeUsagePattern2() throws GeneralSecurityException {
         final byte[] salt = new byte[32];
@@ -118,11 +115,11 @@ public class PBETest extends UsagePatternTestingFramework {
         Assertions.extValue(2);
         Assertions.extValue(3);
         Assertions.mustNotBeInAcceptingState(pbekeyspec);
-        Assertions.hasEnsuredPredicate(pbekeyspec);
+        Assertions.hasEnsuredPredicate(pbekeyspec, "speccedKey");
 
         pbekeyspec.clearPassword();
         Assertions.mustBeInAcceptingState(pbekeyspec);
-        Assertions.notHasEnsuredPredicate(pbekeyspec);
+        Assertions.notHasEnsuredPredicate(pbekeyspec, "speccedKey");
     }
 
     public char[] generateRandomPassword() {

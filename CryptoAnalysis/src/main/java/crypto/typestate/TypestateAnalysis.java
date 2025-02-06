@@ -9,6 +9,7 @@ import boomerang.scene.CallGraph;
 import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.DataFlowScope;
 import boomerang.scene.Val;
+import crypto.definition.Definitions;
 import crysl.rule.CrySLRule;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
@@ -23,21 +24,21 @@ import typestate.TransitionFunction;
 
 public class TypestateAnalysis {
 
-    private final TypestateDefinition definition;
+    private final Definitions.TypestateDefinition definition;
     private final TypestateAnalysisScope analysisScope;
     private final StoreIDEALResultHandler<TransitionFunction> resultHandler;
 
-    public TypestateAnalysis(TypestateDefinition definition) {
+    public TypestateAnalysis(Definitions.TypestateDefinition definition) {
         this.definition = definition;
 
         Map<String, RuleTransitions> transitions = new HashMap<>();
-        for (CrySLRule rule : definition.getRuleset()) {
+        for (CrySLRule rule : definition.rules()) {
             transitions.put(rule.getClassName(), RuleTransitions.of(rule));
         }
 
         analysisScope =
                 new TypestateAnalysisScope(
-                        definition.getCallGraph(), transitions, definition.getDataFlowScope());
+                        definition.callGraph(), transitions, definition.dataFlowScope());
         resultHandler = new StoreIDEALResultHandler<>();
     }
 
@@ -60,13 +61,14 @@ public class TypestateAnalysis {
         TypestateFunction typestateFunction = new TypestateFunction(transitions);
 
         // Initialize and run IDE with Aliasing
-        IDEALAnalysis<TransitionFunction> idealAnalysis =
-                new IDEALAnalysis<>(getIdealAnalysisDefinition(typestateFunction));
+        IDEALAnalysisDefinition<TransitionFunction> idealDefinition =
+                getIdealAnalysisDefinition(query, typestateFunction);
+        IDEALAnalysis<TransitionFunction> idealAnalysis = new IDEALAnalysis<>(idealDefinition);
         idealAnalysis.run(query);
     }
 
     private IDEALAnalysisDefinition<TransitionFunction> getIdealAnalysisDefinition(
-            TypestateFunction typestateFunction) {
+            ForwardSeedQuery seedQuery, TypestateFunction typestateFunction) {
         return new IDEALAnalysisDefinition<>() {
             @Override
             public Collection<WeightedForwardQuery<TransitionFunction>> generate(
@@ -83,7 +85,7 @@ public class TypestateAnalysis {
 
             @Override
             public CallGraph callGraph() {
-                return definition.getCallGraph();
+                return definition.callGraph();
             }
 
             @Override
@@ -94,7 +96,7 @@ public class TypestateAnalysis {
 
             @Override
             protected DataFlowScope getDataFlowScope() {
-                return definition.getDataFlowScope();
+                return definition.dataFlowScope();
             }
 
             @Override
@@ -104,7 +106,7 @@ public class TypestateAnalysis {
 
             @Override
             public BoomerangOptions boomerangOptions() {
-                return new TypestateAnalysisOptions(definition.getTimeout());
+                return new TypestateAnalysisOptions(seedQuery, definition.timeout());
             }
         };
     }

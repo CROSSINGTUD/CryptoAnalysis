@@ -1,4 +1,4 @@
-package test.assertions;
+package test.assertions.states;
 
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
@@ -7,9 +7,9 @@ import typestate.finiteautomata.State;
 
 public interface StateResult {
 
-    Collection<Val> getVal();
+    Val getVal();
 
     Statement getStmt();
 
-    void computedResults(State state);
+    void computedStatesAtStatement(Collection<State> states);
 }

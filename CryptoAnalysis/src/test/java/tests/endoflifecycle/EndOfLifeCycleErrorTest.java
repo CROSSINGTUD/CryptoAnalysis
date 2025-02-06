@@ -68,7 +68,6 @@ public class EndOfLifeCycleErrorTest extends UsagePatternTestingFramework {
         key.destroy();
     }
 
-    // TODO Boomerang Error
     @Test
     public void missingDoFinalCall5() throws GeneralSecurityException, DestroyFailedException {
         KeyGenerator keygen = KeyGenerator.getInstance("AES");
