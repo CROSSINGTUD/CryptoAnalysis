@@ -26,10 +26,12 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("animamea.AmAESCrypto", "getMACOne", 1)
                         .withTPs(ForbiddenMethodError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("animamea.AmAESCrypto", "getMACTwo", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -41,6 +43,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("gwt_crypto.GMacTest", "performTestOne", 0)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -53,7 +56,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("bunkr.PBKDF2Descriptor", "calculateRounds", 1)
                         .withTPs(ImpreciseValueExtractionError.class, 3)
-                        .withTPs(TypestateError.class, 2)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
@@ -244,12 +247,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "unwrapAES", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "wrapAES", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(

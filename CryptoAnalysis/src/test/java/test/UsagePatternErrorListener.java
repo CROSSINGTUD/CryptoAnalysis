@@ -18,8 +18,6 @@ import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
-import test.assertions.MissingTypestateChange;
-import test.assertions.NoMissingTypestateChange;
 import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
@@ -71,27 +69,10 @@ public class UsagePatternErrorListener implements IErrorListener {
 
     @Override
     public void reportError(IncompleteOperationError incompleteOperationError) {
-        boolean hasTypestateChangeError = false;
-        boolean expectsTypestateChangeError = false;
         for (Assertion a : assertions) {
-            if (a instanceof MissingTypestateChange assertion) {
-                if (assertion.getStmt().equals(incompleteOperationError.getErrorStatement())) {
-                    assertion.trigger();
-                    hasTypestateChangeError = true;
-                }
-                expectsTypestateChangeError = true;
-            }
-
-            if (a instanceof NoMissingTypestateChange) {
-                throw new RuntimeException("Reports a typestate error that should not be reported");
-            }
-
             if (a instanceof IncompleteOperationErrorCountAssertion assertion) {
                 assertion.increaseCount();
             }
-        }
-        if (hasTypestateChangeError != expectsTypestateChangeError) {
-            throw new RuntimeException("Reports a typestate error that should not be reported");
         }
     }
 
@@ -126,7 +107,13 @@ public class UsagePatternErrorListener implements IErrorListener {
     public void reportError(TypestateError typestateError) {
         for (Assertion a : assertions) {
             if (a instanceof TypestateErrorCountAssertion assertion) {
-                assertion.increaseCount();
+                Collection<Val> values =
+                        typestateError
+                                .getSeed()
+                                .getAnalysisResults()
+                                .asStatementValWeightTable()
+                                .columnKeySet();
+                assertion.increaseCount(values);
             }
         }
     }

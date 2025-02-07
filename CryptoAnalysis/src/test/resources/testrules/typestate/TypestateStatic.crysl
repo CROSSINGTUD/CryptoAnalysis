@@ -1,0 +1,12 @@
+SPEC tests.error.typestate.TypestateStatic
+
+EVENTS
+    Con1: createTypestate();
+    Con2: createTypestate(_);
+    Con3: createTypestate(_, _); // This call is not allowed, i.e. leads directly to an error state
+
+    Op1: operation1();
+    Op2: operation2();
+
+ORDER
+    (Con1, Op1) | (Con2, Op2)

@@ -2,9 +2,25 @@ package crypto.typestate;
 
 import typestate.finiteautomata.State;
 
+/**
+ * Final error state that cannot be left. All ingoing transitions should originate from a {@link
+ * ReportingErrorStateNode}.
+ */
 public class ErrorStateNode implements State {
 
-    public ErrorStateNode() {}
+    public static final String LABEL = "ERR (final)";
+
+    private static ErrorStateNode errorState;
+
+    private ErrorStateNode() {}
+
+    public static ErrorStateNode getInstance() {
+        if (errorState == null) {
+            errorState = new ErrorStateNode();
+        }
+
+        return errorState;
+    }
 
     @Override
     public boolean isErrorState() {
@@ -23,7 +39,7 @@ public class ErrorStateNode implements State {
 
     @Override
     public String toString() {
-        return "ERR";
+        return LABEL;
     }
 
     @Override

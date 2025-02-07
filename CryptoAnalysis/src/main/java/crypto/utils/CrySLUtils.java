@@ -23,12 +23,11 @@ public class CrySLUtils {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
 
-        for (CrySLMethod method : methods) {
-            String formattedName = formatMethodName(method);
-            builder.append(formattedName);
-            builder.append(", ");
-        }
-        builder.delete(builder.length() - 2, builder.length());
+        Collection<String> methodNames =
+                methods.stream().map(CrySLUtils::formatMethodName).toList();
+        String formattedNames = String.join(", ", methodNames);
+        builder.append(formattedNames);
+
         builder.append("}");
 
         return builder.toString();

@@ -14,7 +14,7 @@ public class LabeledMatcherTransition extends MatcherTransition {
     private final Collection<CrySLMethod> methods;
 
     public LabeledMatcherTransition(State from, Collection<CrySLMethod> methods, State to) {
-        super(from, "", Parameter.This, to, Type.OnCallOrOnCallToReturn);
+        super(from, "", Parameter.This, to, Type.OnCallToReturn);
 
         this.methods = methods;
     }

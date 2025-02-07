@@ -280,9 +280,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -290,9 +289,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
         scanner.run();
@@ -710,7 +708,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("pdf.insecureDefault.InsecureDefaultPBE", "main", 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -1213,8 +1211,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -1223,8 +1220,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -1233,8 +1229,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
         scanner.run();
@@ -1378,7 +1373,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                                 "wc.riskyInsecureCrypto.InsecureCryptoPBE", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 

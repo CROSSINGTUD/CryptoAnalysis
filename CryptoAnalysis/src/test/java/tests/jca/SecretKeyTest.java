@@ -55,6 +55,8 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
     public void test3() throws GeneralSecurityException {
         KeyGenerator generator = KeyGenerator.getInstance("AES");
         SecretKey key = generator.generateKey();
+        Assertions.hasEnsuredPredicate(key);
+
         byte[] bytes = key.getEncoded();
         Assertions.hasEnsuredPredicate(bytes);
         SecretKeySpec spec = new SecretKeySpec(bytes, "AES");

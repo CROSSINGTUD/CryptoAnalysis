@@ -88,11 +88,10 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.PBEwLargeCountAndRandomSalt", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.DoNotSaveToString", "main", 1)
@@ -124,11 +123,10 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.PBEwParameterPassword", "main", 1)
                         .withTPs(ConstraintError.class, 1)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
         scanner.run();
@@ -404,8 +402,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseExplicitMode1", "main", 1)

@@ -4,7 +4,7 @@ import test.Assertion;
 
 public class PredicateErrorCountAssertion implements Assertion {
 
-    private int expectedErrorCounts;
+    private final int expectedErrorCounts;
     private int actualErrorCounts;
 
     public PredicateErrorCountAssertion(int numberOfCounts) {

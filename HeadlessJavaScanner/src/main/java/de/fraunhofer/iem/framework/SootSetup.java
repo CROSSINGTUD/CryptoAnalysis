@@ -1,10 +1,10 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scene.CallGraph;
+import boomerang.scene.jimple.BoomerangPretransformer;
 import boomerang.scene.jimple.SootCallGraph;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.preanalysis.TransformerSetup;
 import crysl.rule.CrySLRule;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
@@ -100,7 +100,9 @@ public class SootSetup extends FrameworkSetup {
     @Override
     public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
         PackManager.v().getPack("cg").apply();
-        TransformerSetup.v().setupPreTransformer(rules);
+
+        BoomerangPretransformer.v().reset();
+        BoomerangPretransformer.v().apply();
 
         return new SootCallGraph();
     }

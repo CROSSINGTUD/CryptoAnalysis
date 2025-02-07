@@ -1,12 +1,10 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.ControlFlowGraph;
 import boomerang.scene.Method;
 import boomerang.scene.Statement;
 import boomerang.scene.Type;
 import boomerang.scene.Val;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
@@ -22,6 +20,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import typestate.TransitionFunction;
+import typestate.finiteautomata.ITransition;
+import typestate.finiteautomata.State;
 
 public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
@@ -49,18 +49,11 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         this.fact = fact;
         this.analysisResults = results;
 
+        this.statementValWeightTable = results.asStatementValWeightTable();
+
         this.errorCollection = new HashSet<>();
-
-        this.statementValWeightTable = HashBasedTable.create();
-        for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> cell :
-                results.asEdgeValWeightTable().cellSet()) {
-            statementValWeightTable.put(
-                    cell.getRowKey().getStart(), cell.getColumnKey(), cell.getValue());
-        }
-
         this.expectedPredicates = HashMultimap.create();
         this.predicateStateChangeListeners = new HashSet<>();
-
         this.ensuredPredicates = HashMultimap.create();
         this.unEnsuredPredicates = HashMultimap.create();
     }
@@ -69,6 +62,30 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
     public Collection<Val> getAliasesAtStatement(Statement statement) {
         return statementValWeightTable.row(statement).keySet();
+    }
+
+    public Collection<State> getStatesAtStatement(Statement statement) {
+        Collection<State> states = new HashSet<>();
+
+        Collection<TransitionFunction> transitions =
+                statementValWeightTable.row(statement).values();
+        for (TransitionFunction transition : transitions) {
+            Collection<State> targetStates = getTargetStates(transition);
+
+            states.addAll(targetStates);
+        }
+
+        return states;
+    }
+
+    private Collection<State> getTargetStates(TransitionFunction transitionFunction) {
+        Collection<State> states = new HashSet<>();
+
+        for (ITransition transition : transitionFunction.values()) {
+            states.add(transition.to());
+        }
+
+        return states;
     }
 
     public void addPredicateStateChangeListener(IPredicateStateChangeListener listener) {

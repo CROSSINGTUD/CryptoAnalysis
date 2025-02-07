@@ -70,8 +70,8 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
             i++;
         }
         byte[] digest = md.digest();
-        Assertions.mustBeInAcceptingState(md);
-        Assertions.hasEnsuredPredicate(digest);
+        Assertions.mayBeInAcceptingState(md);
+        Assertions.notHasEnsuredPredicate(digest);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
         MessageDigest d = createDigest();
         byte[] digest = d.digest(new byte[] {});
         Assertions.hasEnsuredPredicate(digest);
-        Assertions.typestateErrors(0);
+        Assertions.typestateErrors(d, 0);
     }
 
     private MessageDigest createDigest() throws NoSuchAlgorithmException {

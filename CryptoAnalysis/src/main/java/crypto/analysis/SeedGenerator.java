@@ -1,13 +1,11 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
 import boomerang.scene.Statement;
 import boomerang.scene.Val;
+import crypto.definition.Definitions;
 import crypto.typestate.ForwardSeedQuery;
 import crypto.typestate.TypestateAnalysis;
-import crypto.typestate.TypestateDefinition;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,29 +21,12 @@ public class SeedGenerator {
     public SeedGenerator(CryptoScanner scanner, Collection<CrySLRule> rules) {
         this.scanner = scanner;
 
-        TypestateDefinition definition =
-                new TypestateDefinition() {
-                    @Override
-                    public Collection<CrySLRule> getRuleset() {
-                        return rules;
-                    }
-
-                    @Override
-                    public CallGraph getCallGraph() {
-                        return scanner.getCallGraph();
-                    }
-
-                    @Override
-                    public DataFlowScope getDataFlowScope() {
-                        return scanner.getDataFlowScope();
-                    }
-
-                    @Override
-                    public int getTimeout() {
-                        return scanner.getTimeout();
-                    }
-                };
-
+        Definitions.TypestateDefinition definition =
+                new Definitions.TypestateDefinition(
+                        rules,
+                        scanner.getCallGraph(),
+                        scanner.getDataFlowScope(),
+                        scanner.getTimeout());
         typestateAnalysis = new TypestateAnalysis(definition);
     }
 

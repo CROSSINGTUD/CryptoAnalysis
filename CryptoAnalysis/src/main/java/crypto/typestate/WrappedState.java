@@ -4,7 +4,9 @@ import crysl.rule.StateNode;
 import java.util.Objects;
 import typestate.finiteautomata.State;
 
+/** State that wraps a {@link StateNode} from the state machine to make it consistent with IDEal. */
 public class WrappedState implements State {
+
     private final StateNode delegate;
     private final boolean initialState;
 
