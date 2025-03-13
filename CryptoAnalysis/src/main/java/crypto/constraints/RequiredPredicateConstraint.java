@@ -1,6 +1,6 @@
 package crypto.constraints;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.PredicateContradictionError;

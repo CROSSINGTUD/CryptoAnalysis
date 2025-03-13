@@ -1,6 +1,6 @@
 package crypto.predicates;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.AbstractError;

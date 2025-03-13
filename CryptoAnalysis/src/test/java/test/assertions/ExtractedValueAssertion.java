@@ -1,11 +1,10 @@
 package test.assertions;
 
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import java.util.Collection;
-import test.Assertion;
 
 public class ExtractedValueAssertion implements Assertion {
 
@@ -36,8 +35,8 @@ public class ExtractedValueAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return satisfied;
+    public boolean isUnsound() {
+        return !satisfied;
     }
 
     @Override
@@ -46,7 +45,7 @@ public class ExtractedValueAssertion implements Assertion {
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Did not extract parameter with index: " + index + " @ " + stmt;
     }
 }

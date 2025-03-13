@@ -1,11 +1,9 @@
 package test;
 
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
-import boomerang.scene.jimple.JimpleDeclaredMethod;
-import boomerang.scene.jimple.JimpleMethod;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
@@ -31,17 +29,15 @@ public class TestDataFlowScope implements DataFlowScope {
             return true;
         }
 
-        if (declaringClass.getName().contains(ASSERTION)) {
+        if (declaringClass.getFullyQualifiedName().contains(ASSERTION)) {
             return true;
         }
 
-        if (declaringClass.getName().contains(STRING_CLASS)) {
+        if (declaringClass.getFullyQualifiedName().contains(STRING_CLASS)) {
             return true;
         }
 
-        JimpleDeclaredMethod jimpleMethod = (JimpleDeclaredMethod) method;
-        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
-
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return ruleNames.contains(declaringClassName);
     }
 
@@ -52,17 +48,15 @@ public class TestDataFlowScope implements DataFlowScope {
             return true;
         }
 
-        if (declaringClass.getName().contains(ASSERTION)) {
+        if (declaringClass.getFullyQualifiedName().contains(ASSERTION)) {
             return true;
         }
 
-        if (declaringClass.getName().contains(STRING_CLASS)) {
+        if (declaringClass.getFullyQualifiedName().contains(STRING_CLASS)) {
             return true;
         }
 
-        JimpleMethod jimpleMethod = (JimpleMethod) method;
-        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
-
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return ruleNames.contains(declaringClassName);
     }
 }

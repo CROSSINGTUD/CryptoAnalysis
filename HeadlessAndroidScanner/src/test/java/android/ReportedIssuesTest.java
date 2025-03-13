@@ -1,7 +1,7 @@
 package android;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
@@ -15,7 +15,7 @@ public class ReportedIssuesTest extends AbstractAndroidTest {
     public void testIssue268() {
         // Related to https://github.com/CROSSINGTUD/CryptoAnalysis/issues/268
         HeadlessAndroidScanner scanner = createScanner("Issue268.apk");
-        scanner.run();
+        scanner.scan();
 
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
 

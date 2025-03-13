@@ -43,7 +43,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.TXT);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -61,7 +61,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.CSV);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -81,7 +81,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -99,7 +99,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.SARIF);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -145,7 +145,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(formats);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(txtReport.exists());
         Assert.assertTrue(csvReport.exists());
@@ -166,7 +166,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setVisualization(true);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(vizFile.exists());
     }

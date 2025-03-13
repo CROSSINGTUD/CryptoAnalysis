@@ -1,7 +1,7 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.Method;
-import boomerang.scene.Statement;
+import boomerang.scope.Method;
+import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
 import java.util.Collection;

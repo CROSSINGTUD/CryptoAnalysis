@@ -1,7 +1,7 @@
 package android;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;

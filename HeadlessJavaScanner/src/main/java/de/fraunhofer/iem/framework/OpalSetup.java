@@ -1,9 +1,7 @@
 package de.fraunhofer.iem.framework;
 
-import boomerang.scene.CallGraph;
-import crysl.rule.CrySLRule;
+import boomerang.scope.FrameworkScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
-import java.util.Collection;
 
 public class OpalSetup extends FrameworkSetup {
 
@@ -17,7 +15,7 @@ public class OpalSetup extends FrameworkSetup {
     }
 
     @Override
-    public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
+    public FrameworkScope createFrameworkScope() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

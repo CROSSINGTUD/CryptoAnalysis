@@ -1,14 +1,14 @@
 package crypto.typestate;
 
-import boomerang.BoomerangOptions;
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
 import boomerang.debugger.Debugger;
+import boomerang.options.BoomerangOptions;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.Val;
+import boomerang.solver.Strategies;
 import crypto.definition.Definitions;
 import crysl.rule.CrySLRule;
 import ideal.IDEALAnalysis;
@@ -36,9 +36,7 @@ public class TypestateAnalysis {
             transitions.put(rule.getClassName(), RuleTransitions.of(rule));
         }
 
-        analysisScope =
-                new TypestateAnalysisScope(
-                        definition.callGraph(), transitions, definition.dataFlowScope());
+        analysisScope = new TypestateAnalysisScope(definition.frameworkScope(), transitions);
         resultHandler = new StoreIDEALResultHandler<>();
     }
 
@@ -84,19 +82,14 @@ public class TypestateAnalysis {
             }
 
             @Override
-            public CallGraph callGraph() {
-                return definition.callGraph();
-            }
-
-            @Override
             public Debugger<TransitionFunction> debugger(
                     IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
                 return new Debugger<>();
             }
 
             @Override
-            protected DataFlowScope getDataFlowScope() {
-                return definition.dataFlowScope();
+            public FrameworkScope getFrameworkFactory() {
+                return definition.frameworkScope();
             }
 
             @Override
@@ -106,7 +99,12 @@ public class TypestateAnalysis {
 
             @Override
             public BoomerangOptions boomerangOptions() {
-                return new TypestateAnalysisOptions(seedQuery, definition.timeout());
+                return BoomerangOptions.builder()
+                        .withAllocationSite(new TypestateAllocationSite(seedQuery))
+                        .withStaticFieldStrategy(Strategies.StaticFieldStrategy.FLOW_SENSITIVE)
+                        .withAnalysisTimeout(definition.timeout())
+                        .enableAllowMultipleQueries(true)
+                        .build();
             }
         };
     }
@@ -119,11 +117,9 @@ public class TypestateAnalysis {
                         WeightedForwardQuery<TransitionFunction>,
                         ForwardBoomerangResults<TransitionFunction>>
                 entry : resultHandler.getResults().entrySet()) {
-            if (!(entry.getKey() instanceof ForwardSeedQuery forwardSeedQuery)) {
-                continue;
+            if (entry.getKey() instanceof ForwardSeedQuery forwardSeedQuery) {
+                results.put(forwardSeedQuery, entry.getValue());
             }
-
-            results.put(forwardSeedQuery, entry.getValue());
         }
         return results;
     }

@@ -120,7 +120,7 @@ public class MUBenchExamplesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

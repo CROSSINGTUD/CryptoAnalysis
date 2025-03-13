@@ -1,7 +1,7 @@
 package scanner.setup;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
@@ -135,7 +135,7 @@ public abstract class AbstractHeadlessTest {
             Method method = cell.getColumnKey();
             MethodWrapper methodWrapper =
                     new MethodWrapper(
-                            method.getDeclaringClass().getName(),
+                            method.getDeclaringClass().getFullyQualifiedName(),
                             method.getName(),
                             method.getParameterTypes().size());
             Set<AbstractError> errors = cell.getValue();
@@ -173,7 +173,7 @@ public abstract class AbstractHeadlessTest {
             Method method = cell.getColumnKey();
             MethodWrapper collectedMethodWrapper =
                     new MethodWrapper(
-                            method.getDeclaringClass().getName(),
+                            method.getDeclaringClass().getFullyQualifiedName(),
                             method.getName(),
                             method.getParameterTypes().size());
 

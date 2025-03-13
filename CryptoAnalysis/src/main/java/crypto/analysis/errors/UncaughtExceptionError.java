@@ -1,7 +1,7 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.Statement;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Statement;
+import boomerang.scope.WrappedClass;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class UncaughtExceptionError extends AbstractError {
 
     @Override
     public String toErrorMarkerString() {
-        return String.format("Uncaught exception `%s`", exception.getName());
+        return String.format("Uncaught exception `%s`", exception.getFullyQualifiedName());
     }
 
     @Override

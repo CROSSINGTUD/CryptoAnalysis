@@ -39,7 +39,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
                         .withFPs(AlternativeReqPredicateError.class, 1, "Mystery")
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -59,7 +59,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
                         .withNoErrors(RequiredPredicateError.class)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

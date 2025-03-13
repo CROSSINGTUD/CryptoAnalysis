@@ -2,10 +2,11 @@ package crypto.extractparameter;
 
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
+import boomerang.options.BoomerangOptions;
 import boomerang.results.BackwardBoomerangResults;
-import boomerang.scene.AllocVal;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.scope.AllocVal;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
 import crypto.extractparameter.transformation.Transformation;
@@ -17,25 +18,21 @@ import wpds.impl.Weight;
 public class QuerySolver {
 
     private final Definitions.QuerySolverDefinition definition;
-    private final Definitions.BoomerangOptionsDefinition optionsDefinition;
+    private final BoomerangOptions options;
 
     public QuerySolver(Definitions.QuerySolverDefinition definition) {
         this.definition = definition;
-        this.optionsDefinition =
-                new Definitions.BoomerangOptionsDefinition(
-                        definition.callGraph(),
-                        definition.dataFlowScope(),
-                        definition.timeout(),
-                        definition.strategy());
+        this.options =
+                BoomerangOptions.builder()
+                        .withAllocationSite(new ExtractParameterAllocationSite())
+                        .withAnalysisTimeout(definition.timeout())
+                        .withSparsificationStrategy(definition.strategy())
+                        .enableTrackStaticFieldAtEntryPointToClinit(true)
+                        .build();
     }
 
     public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
-        ExtendedBoomerangOptions options =
-                new ExtendedBoomerangOptions(
-                        optionsDefinition.timeout(), optionsDefinition.strategy());
-
-        Boomerang boomerang =
-                new Boomerang(definition.callGraph(), definition.dataFlowScope(), options);
+        Boomerang boomerang = new Boomerang(definition.frameworkScope(), options);
 
         definition.reporter().beforeTriggeringBoomerangQuery(query);
         BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
@@ -64,19 +61,18 @@ public class QuerySolver {
 
         Collection<ExtractedValue> extractedValues = new HashSet<>();
         for (ForwardQuery allocSite : allocSites) {
-            Val val = allocSite.var();
-            if (val instanceof AllocVal allocVal) {
-                Multimap<Val, Type> sites =
-                        Transformation.transformAllocationSite(allocVal, optionsDefinition);
+            AllocVal allocVal = allocSite.getAllocVal();
+            Multimap<Val, Type> sites =
+                    Transformation.transformAllocationSite(
+                            allocVal, definition.frameworkScope(), options);
 
-                for (Val site : sites.keySet()) {
-                    Collection<Type> types = sites.get(site);
-                    types.addAll(propagatedTypes);
+            for (Val site : sites.keySet()) {
+                Collection<Type> types = sites.get(site);
+                types.addAll(propagatedTypes);
 
-                    ExtractedValue extractedValue =
-                            new ExtractedValue(site, allocVal.getAllocStatement(), types);
-                    extractedValues.add(extractedValue);
-                }
+                ExtractedValue extractedValue =
+                        new ExtractedValue(site, allocVal.getAllocStatement(), types);
+                extractedValues.add(extractedValue);
             }
         }
 

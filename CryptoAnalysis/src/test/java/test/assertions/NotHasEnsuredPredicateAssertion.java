@@ -1,11 +1,10 @@
 package test.assertions;
 
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import crypto.predicates.AbstractPredicate;
 import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
-import test.Assertion;
 
 public class NotHasEnsuredPredicateAssertion implements Assertion {
 
@@ -25,8 +24,8 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return true;
+    public boolean isUnsound() {
+        return false;
     }
 
     @Override
@@ -49,7 +48,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         if (predName == null) {
             return "Did not expect a predicate for "
                     + val.getVariableName()

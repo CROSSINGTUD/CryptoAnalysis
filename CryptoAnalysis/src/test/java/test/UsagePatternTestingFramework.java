@@ -1,30 +1,32 @@
 package test;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
-import boomerang.scene.jimple.BoomerangPretransformer;
-import boomerang.scene.jimple.JimpleMethod;
-import boomerang.scene.jimple.SootCallGraph;
+import boomerang.scope.CallGraph;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Method;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
+import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
-import soot.SceneTransformer;
-import soot.options.Options;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import test.assertions.Assertion;
 import test.assertions.Assertions;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
@@ -45,117 +47,97 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
-import test.core.selfrunning.AbstractTestingFramework;
-import test.core.selfrunning.ImprecisionException;
+import test.framework.SootTestSetup;
+import test.framework.TestSetup;
 
-public abstract class UsagePatternTestingFramework extends AbstractTestingFramework {
+public abstract class UsagePatternTestingFramework {
 
-    private class TestScanner extends CryptoScanner {
+    private static final Logger LOGGER = LoggerFactory.getLogger("AnalysisTests");
 
-        public void init() {
-            super.initialize();
+    private static Collection<CrySLRule> rules = new HashSet<>();
+    private static String rulesetPath = "";
+
+    @Rule public TestName testName = new TestName();
+
+    @Before
+    public void beforeTestCaseExecution() {
+        String testClassName = this.getClass().getName().replace("class ", "");
+        String testMethodName = testName.getMethodName();
+
+        LOGGER.info("Running test {} in class {}", testMethodName, testClassName);
+
+        CryptoScanner scanner = new CryptoScanner();
+
+        if (!rulesetPath.equals(getRulesetPath())) {
+            LOGGER.info("Updating rules to {}", getRulesetPath());
+
+            rulesetPath = getRulesetPath();
+            rules = scanner.readRules(rulesetPath);
+        } else {
+            LOGGER.info("Reusing rules from previous run");
         }
 
-        public void run() {
-            super.scan();
-        }
+        TestSetup testSetup = new SootTestSetup();
+        testSetup.initialize(testClassName, testMethodName);
 
-        @Override
-        public String getRulesetPath() {
-            return UsagePatternTestingFramework.this.getRulesetPath();
-        }
+        DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
+        FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
+        Method testMethod = testSetup.getTestMethod();
 
-        @Override
-        protected CallGraph constructCallGraph() {
-            BoomerangPretransformer.v().reset();
-            BoomerangPretransformer.v().apply();
+        // Setup test listener
+        Collection<Assertion> assertions =
+                extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
+        IErrorListener errorListener = new UsagePatternErrorListener(assertions);
+        IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
 
-            return new SootCallGraph();
-        }
+        scanner.addErrorListener(errorListener);
+        scanner.addResultsListener(resultsListener);
 
-        @Override
-        protected DataFlowScope createDataFlowScope() {
-            return new TestDataFlowScope(super.getRuleset());
-        }
-    }
+        scanner.scan(frameworkScope, rules);
 
-    @Override
-    protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
+        // Evaluate results
+        Collection<Assertion> unsound = new ArrayList<>();
+        Collection<Assertion> imprecise = new ArrayList<>();
 
-        Options.v().setPhaseOption("jb", "use-original-names:false");
-        Options.v().set_keep_line_number(true);
-
-        return new SceneTransformer() {
-
-            protected void internalTransform(String phaseName, Map<String, String> options) {
-
-                TestScanner scanner = new TestScanner();
-                scanner.init();
-
-                // Setup test listener
-                Collection<Assertion> assertions =
-                        extractBenchmarkMethods(
-                                JimpleMethod.of(sootTestMethod), scanner.getCallGraph());
-                IErrorListener errorListener = new UsagePatternErrorListener(assertions);
-                IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
-
-                // Setup scanner
-                scanner.addErrorListener(errorListener);
-                scanner.addResultsListener(resultsListener);
-
-                scanner.run();
-
-                // Evaluate results
-                List<Assertion> unsound = Lists.newLinkedList();
-                List<Assertion> imprecise = Lists.newLinkedList();
-
-                for (Assertion r : assertions) {
-                    if (!r.isSatisfied()) {
-                        unsound.add(r);
-                    }
-                }
-
-                for (Assertion r : assertions) {
-                    if (r.isImprecise()) {
-                        imprecise.add(r);
-                    }
-                }
-
-                StringBuilder errors = new StringBuilder();
-                if (!unsound.isEmpty()) {
-                    errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound));
-                }
-                if (!imprecise.isEmpty()) {
-                    errors.append("\nImprecise results: \n")
-                            .append(Joiner.on("\n").join(imprecise));
-                }
-                if (!errors.toString().isEmpty()) {
-                    Assert.fail(errors.toString());
-                }
+        for (Assertion r : assertions) {
+            if (r.isUnsound()) {
+                unsound.add(r);
             }
-        };
+        }
+
+        for (Assertion r : assertions) {
+            if (r.isImprecise()) {
+                imprecise.add(r);
+            }
+        }
+
+        StringBuilder errors = new StringBuilder();
+        if (!unsound.isEmpty()) {
+            errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound.stream().map(Assertion::getErrorMessage).toList()));
+        }
+        if (!imprecise.isEmpty()) {
+            errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise.stream().map(Assertion::getErrorMessage).toList()));
+        }
+        if (!errors.toString().isEmpty()) {
+            Assert.fail(errors.toString());
+        }
+
+        Assume.assumeTrue(false);
     }
 
     protected abstract String getRulesetPath();
 
-    @Override
-    public List<String> getIncludeList() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<String> excludedPackages() {
-        return new ArrayList<>();
-    }
-
-    private Set<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
-        Set<Assertion> results = new HashSet<>();
+    private Collection<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
+        Collection<Assertion> results = new HashSet<>();
         extractBenchmarkMethods(testMethod, callGraph, results, new HashSet<>());
         return results;
     }
 
     private void extractBenchmarkMethods(
-            Method method, CallGraph callGraph, Set<Assertion> queries, Set<Method> visited) {
+            Method method,
+            CallGraph callGraph,
+            Collection<Assertion> queries,
+            Collection<Method> visited) {
         if (visited.contains(method)) {
             return;
         }
@@ -410,7 +392,7 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
             if (curr.containsInvokeExpr()) {
                 String invokedClassName =
-                        curr.getInvokeExpr().getMethod().getDeclaringClass().getName();
+                        curr.getInvokeExpr().getMethod().getDeclaringClass().getFullyQualifiedName();
                 String assertionClassName = Assertions.class.getName();
 
                 if (!invokedClassName.equals(assertionClassName)) {

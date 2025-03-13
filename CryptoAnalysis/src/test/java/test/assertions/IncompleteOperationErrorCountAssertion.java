@@ -1,7 +1,5 @@
 package test.assertions;
 
-import test.Assertion;
-
 public class IncompleteOperationErrorCountAssertion implements Assertion {
 
     private final int expectedErrorCounts;
@@ -16,17 +14,17 @@ public class IncompleteOperationErrorCountAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedErrorCounts <= actualErrorCounts;
+    public boolean isUnsound() {
+        return expectedErrorCounts > actualErrorCounts;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedErrorCounts != actualErrorCounts;
+        return expectedErrorCounts < actualErrorCounts;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedErrorCounts
                 + " incomplete operation errors, but got "

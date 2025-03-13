@@ -1,7 +1,7 @@
 package de.fraunhofer.iem.android;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -21,7 +21,7 @@ public class AndroidDataFlowScope extends CryptoAnalysisDataFlowScope {
             return true;
         }
 
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return declaringClassName.startsWith(ANDROID) || declaringClassName.startsWith(ANDROIDX);
     }
 
@@ -31,7 +31,7 @@ public class AndroidDataFlowScope extends CryptoAnalysisDataFlowScope {
             return true;
         }
 
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return declaringClassName.startsWith(ANDROID) || declaringClassName.startsWith(ANDROIDX);
     }
 }

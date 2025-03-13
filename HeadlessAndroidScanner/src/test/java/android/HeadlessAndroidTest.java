@@ -15,7 +15,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void testFalseCrypt() {
         // From https://github.com/secure-software-engineering/FalseCrypt
         HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
-        scanner.run();
+        scanner.scan();
 
         addExpectedErrors(ConstraintError.class, 6);
         addExpectedErrors(RequiredPredicateError.class, 7);
@@ -58,7 +58,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -92,7 +92,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -126,7 +126,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -153,7 +153,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -180,7 +180,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -207,7 +207,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

@@ -1,8 +1,8 @@
 package crypto.extractparameter;
 
-import boomerang.scene.Statement;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.scope.Statement;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 import java.util.Collection;
 
 public record ExtractedValue(Val val, Statement initialStatement, Collection<Type> types) {

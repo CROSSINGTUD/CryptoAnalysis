@@ -1,8 +1,8 @@
 package crypto.extractparameter;
 
 import boomerang.BackwardQuery;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.Val;
 import java.util.Objects;
 
 public class ExtractParameterQuery extends BackwardQuery {

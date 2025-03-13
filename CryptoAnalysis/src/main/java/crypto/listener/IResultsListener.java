@@ -2,8 +2,8 @@ package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;

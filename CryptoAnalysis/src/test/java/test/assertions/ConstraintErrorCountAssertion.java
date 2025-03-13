@@ -1,8 +1,7 @@
 package test.assertions;
 
-import boomerang.scene.Val;
+import boomerang.scope.Val;
 import java.util.Collection;
-import test.Assertion;
 
 public class ConstraintErrorCountAssertion implements Assertion {
 
@@ -22,17 +21,17 @@ public class ConstraintErrorCountAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedErrorCounts == actualErrorCounts;
+    public boolean isUnsound() {
+        return expectedErrorCounts > actualErrorCounts;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedErrorCounts != actualErrorCounts;
+        return expectedErrorCounts < actualErrorCounts;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedErrorCounts
                 + " constraint errors on object "

@@ -1,6 +1,6 @@
 package test;
 
-import boomerang.scene.Val;
+import boomerang.scope.Val;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
@@ -13,6 +13,7 @@ import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.listener.IErrorListener;
 import java.util.Collection;
+import test.assertions.Assertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;

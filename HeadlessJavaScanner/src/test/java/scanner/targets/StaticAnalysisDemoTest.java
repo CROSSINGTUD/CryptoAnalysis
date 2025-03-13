@@ -56,7 +56,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -114,7 +114,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -139,7 +139,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -214,7 +214,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -234,7 +234,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -257,7 +257,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 0)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -297,7 +297,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                                 "Requires proper implementation of keyword 'elements'")
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

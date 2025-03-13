@@ -1,7 +1,5 @@
 package test.assertions;
 
-import test.Assertion;
-
 public class ImpreciseValueExtractionErrorCountAssertion implements Assertion {
 
     private final int expectedErrorCount;
@@ -16,17 +14,17 @@ public class ImpreciseValueExtractionErrorCountAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedErrorCount <= actualErrorCount;
+    public boolean isUnsound() {
+        return expectedErrorCount > actualErrorCount;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedErrorCount != actualErrorCount;
+        return expectedErrorCount < actualErrorCount;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedErrorCount
                 + " imprecise value extraction errors, but got "

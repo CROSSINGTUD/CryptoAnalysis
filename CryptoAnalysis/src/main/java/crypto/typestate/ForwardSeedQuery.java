@@ -1,8 +1,8 @@
 package crypto.typestate;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Val;
+import boomerang.scope.AllocVal;
+import boomerang.scope.ControlFlowGraph;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
@@ -13,7 +13,7 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
 
     private ForwardSeedQuery(
             ControlFlowGraph.Edge stmt,
-            Val fact,
+            AllocVal fact,
             TransitionFunction weight,
             RuleTransitions transitions) {
         super(stmt, fact, weight);
@@ -22,12 +22,12 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
     }
 
     public static ForwardSeedQuery makeQueryWithSpecification(
-            ControlFlowGraph.Edge stmt, Val fact, RuleTransitions transitions) {
+            ControlFlowGraph.Edge stmt, AllocVal fact, RuleTransitions transitions) {
         return new ForwardSeedQuery(stmt, fact, transitions.getInitialWeight(stmt), transitions);
     }
 
     public static ForwardSeedQuery makeQueryWithoutSpecification(
-            ControlFlowGraph.Edge stmt, Val fact) {
+            ControlFlowGraph.Edge stmt, AllocVal fact) {
         return new ForwardSeedQuery(stmt, fact, TransitionFunction.one(), RuleTransitions.of(null));
     }
 

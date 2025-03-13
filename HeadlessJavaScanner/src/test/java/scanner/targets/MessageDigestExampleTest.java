@@ -23,7 +23,7 @@ public class MessageDigestExampleTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

@@ -1,6 +1,6 @@
 package crypto.constraints;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
@@ -60,8 +60,7 @@ public class ConstraintsAnalysis {
 
         Definitions.ExtractParameterDefinition parameterDefinition =
                 new Definitions.ExtractParameterDefinition(
-                        definition.callGraph(),
-                        definition.dataFlowScope(),
+                        definition.frameworkScope(),
                         definition.timeout(),
                         definition.strategy(),
                         definition.reporter());

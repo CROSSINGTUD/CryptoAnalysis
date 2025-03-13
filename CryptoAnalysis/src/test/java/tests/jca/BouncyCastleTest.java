@@ -1,6 +1,5 @@
 package tests.jca;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -260,12 +259,5 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         byte[] cipherText2 = engine2.processBlock(message, 0, message.length);
         Assertions.mustBeInAcceptingState(engine2);
         Assertions.hasEnsuredPredicate(cipherText2);
-    }
-
-    @Override
-    protected String getSootClassPath() {
-        String bouncyCastleJarPath =
-                new File("src/test/resources/bcprov-jdk18on-1.76.jar").getAbsolutePath();
-        return super.getSootClassPath() + File.pathSeparator + bouncyCastleJarPath;
     }
 }

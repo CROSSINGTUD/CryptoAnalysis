@@ -69,7 +69,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 3)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -103,7 +103,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -209,7 +209,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -287,7 +287,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(ImpreciseValueExtractionError.class, 3)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -375,7 +375,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -559,7 +559,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

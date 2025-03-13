@@ -1,8 +1,7 @@
 package test.assertions;
 
-import boomerang.scene.Val;
+import boomerang.scope.Val;
 import java.util.Collection;
-import test.Assertion;
 
 public class ConstraintsEvaluatedAssertion implements Assertion {
 
@@ -24,17 +23,17 @@ public class ConstraintsEvaluatedAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedConstraints == actualConstraints;
+    public boolean isUnsound() {
+        return expectedConstraints > actualConstraints;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedConstraints != actualConstraints;
+        return expectedConstraints < actualConstraints;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedConstraints
                 + " evaluated constraints on object "

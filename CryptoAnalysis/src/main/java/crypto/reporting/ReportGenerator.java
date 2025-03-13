@@ -1,7 +1,7 @@
 package crypto.reporting;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -50,7 +50,7 @@ public class ReportGenerator {
 
         report.append("\n");
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
-            report.append("Findings in class ").append(wrappedClass.getName()).append("\n");
+            report.append("Findings in class ").append(wrappedClass.getFullyQualifiedName()).append("\n");
 
             for (Map.Entry<Method, Set<AbstractError>> entry :
                     errorCollection.row(wrappedClass).entrySet()) {

@@ -1,7 +1,7 @@
 package crypto.typestate;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scope.ControlFlowGraph;
 import java.util.Collection;
 import java.util.Collections;
 import typestate.TransitionFunction;

@@ -2,20 +2,20 @@ package crypto.typestate;
 
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
-import boomerang.DefaultBoomerangOptions;
 import boomerang.ForwardQuery;
 import boomerang.Query;
+import boomerang.options.BoomerangOptions;
+import boomerang.options.IAllocationSite;
 import boomerang.results.BackwardBoomerangResults;
-import boomerang.scene.AllocVal;
-import boomerang.scene.AnalysisScope;
-import boomerang.scene.CallGraph;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.AllocVal;
+import boomerang.scope.AnalysisScope;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Method;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLPredicate;
@@ -30,19 +30,15 @@ import wpds.impl.Weight;
 
 public class TypestateAnalysisScope extends AnalysisScope {
 
+    private final FrameworkScope frameworkScope;
     private final Map<String, RuleTransitions> ruleTransitions;
-    private final CallGraph callGraph;
-    private final DataFlowScope dataFlowScope;
 
     public TypestateAnalysisScope(
-            CallGraph callGraph,
-            Map<String, RuleTransitions> ruleTransitions,
-            DataFlowScope dataFlowScope) {
-        super(callGraph);
+            FrameworkScope frameworkScope, Map<String, RuleTransitions> ruleTransitions) {
+        super(frameworkScope.getCallGraph());
 
         this.ruleTransitions = ruleTransitions;
-        this.callGraph = callGraph;
-        this.dataFlowScope = dataFlowScope;
+        this.frameworkScope = frameworkScope;
     }
 
     @Override
@@ -53,8 +49,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
             return Collections.emptySet();
         }
 
-        // Check if method should not be analyzed
-        if (dataFlowScope.isExcluded(statement.getMethod())) {
+        // Check if method should not be analyzed TODO Move this to AnalysisScope
+        if (frameworkScope.getDataFlowScope().isExcluded(statement.getMethod())) {
             return Collections.emptySet();
         }
 
@@ -81,7 +77,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
 
         // Static invoke statements
         if (invokeExpr.isStaticInvokeExpr()) {
-            String declaringClassName = declaredMethod.getDeclaringClass().getName();
+            String declaringClassName = declaredMethod.getDeclaringClass().getFullyQualifiedName();
 
             Collection<ForwardSeedQuery> staticExprSeeds =
                     computeSeedsFromStatement(stmt, statement, declaringClassName);
@@ -143,7 +139,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
             ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
-        if (!stmt.isAssign()) {
+        if (!stmt.isAssignStmt()) {
             return seeds;
         }
 
@@ -209,9 +205,12 @@ public class TypestateAnalysisScope extends AnalysisScope {
                 for (Statement pred : stmt.getMethod().getControlFlowGraph().getPredsOf(stmt)) {
                     ControlFlowGraph.Edge backwardsEdge = new ControlFlowGraph.Edge(pred, stmt);
 
+                    BoomerangOptions options =
+                            BoomerangOptions.WITH_ALLOCATION_SITE(
+                                    new SeedsWithoutSpecAllocationSite());
+
                     BackwardQuery backwardQuery = BackwardQuery.make(backwardsEdge, paramVal);
-                    Boomerang boomerang =
-                            new Boomerang(callGraph, dataFlowScope, new SeedsWithoutSpecOptions());
+                    Boomerang boomerang = new Boomerang(frameworkScope, options);
 
                     BackwardBoomerangResults<Weight.NoWeight> results =
                             boomerang.solve(backwardQuery);
@@ -220,7 +219,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
                     for (ForwardQuery query : results.getAllocationSites().keySet()) {
                         ForwardSeedQuery paramSeed =
                                 ForwardSeedQuery.makeQueryWithoutSpecification(
-                                        query.cfgEdge(), query.var());
+                                        query.cfgEdge(), query.getAllocVal());
                         seeds.add(paramSeed);
                     }
                 }
@@ -246,7 +245,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
             ControlFlowGraph.Edge edge, Statement stmt, String baseType) {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
-        if (!stmt.isAssign()) {
+        if (!stmt.isAssignStmt()) {
             return seeds;
         }
 
@@ -290,11 +289,11 @@ public class TypestateAnalysisScope extends AnalysisScope {
         return false;
     }
 
-    private static class SeedsWithoutSpecOptions extends DefaultBoomerangOptions {
+    private static class SeedsWithoutSpecAllocationSite implements IAllocationSite {
 
         @Override
-        public Optional<AllocVal> getAllocationVal(Method m, Statement stmt, Val fact) {
-            if (!stmt.isAssign()) {
+        public Optional<AllocVal> getAllocationSite(Method method, Statement stmt, Val fact) {
+            if (!stmt.isAssignStmt()) {
                 return Optional.empty();
             }
 
@@ -307,11 +306,6 @@ public class TypestateAnalysisScope extends AnalysisScope {
 
             AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
             return Optional.of(allocVal);
-        }
-
-        @Override
-        public int analysisTimeoutMS() {
-            return 1000000000;
         }
     }
 }

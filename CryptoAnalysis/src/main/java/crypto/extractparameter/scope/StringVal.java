@@ -1,10 +1,10 @@
 package crypto.extractparameter.scope;
 
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Method;
-import boomerang.scene.Pair;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.Method;
+import boomerang.scope.Pair;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 
 public class StringVal extends Val {
 

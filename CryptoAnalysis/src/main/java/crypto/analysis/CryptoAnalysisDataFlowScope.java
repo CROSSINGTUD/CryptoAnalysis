@@ -1,8 +1,8 @@
 package crypto.analysis;
 
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     @Override
     public boolean isExcluded(DeclaredMethod method) {
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
 
         if (!method.getDeclaringClass().isApplicationClass()) {
             return true;
@@ -48,7 +48,7 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     @Override
     public boolean isExcluded(Method method) {
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
 
         if (!method.getDeclaringClass().isApplicationClass()) {
             return true;
@@ -66,14 +66,14 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
     }
 
     private boolean isOnIgnoredSectionList(Method method) {
-        String declaringClass = method.getDeclaringClass().getName();
+        String declaringClass = method.getDeclaringClass().getFullyQualifiedName();
         String methodName = declaringClass + "." + method.getName();
 
         return isOnIgnoredSectionList(declaringClass, methodName);
     }
 
     private boolean isOnIgnoredSectionList(DeclaredMethod declaredMethod) {
-        String declaringClass = declaredMethod.getDeclaringClass().getName();
+        String declaringClass = declaredMethod.getDeclaringClass().getFullyQualifiedName();
         String methodName = declaringClass + "." + declaredMethod.getName();
 
         return isOnIgnoredSectionList(declaringClass, methodName);

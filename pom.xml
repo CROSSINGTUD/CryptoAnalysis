@@ -6,7 +6,7 @@
 
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>CryptoAnalysis-Parent</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>CryptoAnalysis-Parent</name>
@@ -57,7 +57,7 @@
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
-        <spdsVersion>3.2.3</spdsVersion>
+        <spdsVersion>4.0.0</spdsVersion>
         <sootVersion>4.6.0</sootVersion>
         <cryslVersion>4.0.1</cryslVersion>
     </properties>
@@ -82,6 +82,11 @@
             <dependency>
                 <groupId>de.fraunhofer.iem</groupId>
                 <artifactId>boomerangScope</artifactId>
+                <version>${spdsVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.fraunhofer.iem</groupId>
+                <artifactId>boomerangScope-Soot</artifactId>
                 <version>${spdsVersion}</version>
             </dependency>
             <dependency>
@@ -209,6 +214,12 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.11.2</version>
+                    <configuration>
+                        <!-- Disable warnings regarding missing comments etc. during the build -->
+                        <additionalOptions>
+                            <additionalOption>-Xdoclint:none</additionalOption>
+                        </additionalOptions>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>attach-javadoc</id>

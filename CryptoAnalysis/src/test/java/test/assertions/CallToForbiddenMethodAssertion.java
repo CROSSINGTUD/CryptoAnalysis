@@ -1,7 +1,6 @@
 package test.assertions;
 
-import boomerang.scene.Statement;
-import test.Assertion;
+import boomerang.scope.Statement;
 
 public class CallToForbiddenMethodAssertion implements Assertion {
 
@@ -13,8 +12,8 @@ public class CallToForbiddenMethodAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return satisfied;
+    public boolean isUnsound() {
+        return !satisfied;
     }
 
     @Override
@@ -23,7 +22,7 @@ public class CallToForbiddenMethodAssertion implements Assertion {
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected to report a call to a forbidden method at this statement: " + stmt;
     }
 

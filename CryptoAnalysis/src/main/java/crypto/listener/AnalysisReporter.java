@@ -2,9 +2,9 @@ package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
@@ -22,7 +22,6 @@ import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
-import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
 import typestate.TransitionFunction;
@@ -61,18 +60,6 @@ public class AnalysisReporter {
     public void afterAnalysis() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterAnalysis();
-        }
-    }
-
-    public void beforeReadingRuleset(String rulesetPath) {
-        for (IAnalysisListener listener : analysisListeners) {
-            listener.beforeReadingRuleset(rulesetPath);
-        }
-    }
-
-    public void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> rules) {
-        for (IAnalysisListener listener : analysisListeners) {
-            listener.afterReadingRuleset(rulesetPath, rules);
         }
     }
 

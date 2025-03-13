@@ -1,7 +1,7 @@
 package crypto.analysis.errors;
 
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;

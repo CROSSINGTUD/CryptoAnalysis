@@ -1,6 +1,6 @@
 package crypto.predicates;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crysl.rule.CrySLPredicate;
 import java.util.Objects;

@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
-            scanner.run();
+            scanner.scan();
         } catch (CryptoAnalysisParserException e) {
             throw new RuntimeException("Error while parsing the CLI arguments: " + e.getMessage());
         }

@@ -1,6 +1,6 @@
 package crypto.constraints;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import crysl.rule.CrySLPredicate;
 import java.util.Collection;
 

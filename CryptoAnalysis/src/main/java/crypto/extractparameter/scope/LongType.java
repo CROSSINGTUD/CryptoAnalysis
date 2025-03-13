@@ -1,8 +1,8 @@
 package crypto.extractparameter.scope;
 
-import boomerang.scene.Type;
-import boomerang.scene.Val;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
+import boomerang.scope.WrappedClass;
 import java.util.Arrays;
 
 public class LongType implements Type {

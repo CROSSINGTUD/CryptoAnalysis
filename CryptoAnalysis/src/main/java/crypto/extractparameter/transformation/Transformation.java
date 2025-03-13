@@ -3,18 +3,18 @@ package crypto.extractparameter.transformation;
 import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
+import boomerang.options.BoomerangOptions;
 import boomerang.results.BackwardBoomerangResults;
-import boomerang.scene.AllocVal;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.scope.AllocVal;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.definition.Definitions;
-import crypto.extractparameter.ExtendedBoomerangOptions;
 import java.util.ArrayList;
 import java.util.List;
 import wpds.impl.Weight;
@@ -25,8 +25,8 @@ import wpds.impl.Weight;
  * Transformation#isTransformationExpression(Statement)} to check if there is an implemented
  * transformation for the given statement. Note that transformations require an invoke expression to
  * run. After checking corresponding statements, one can use {@link
- * Transformation#transformAllocationSite(AllocVal, Definitions.BoomerangOptionsDefinition)} to
- * transform Boomerang's detected allocations sites, if an implementation is available.
+ * Transformation#transformAllocationSite(AllocVal, FrameworkScope, BoomerangOptions)} to transform
+ * Boomerang's detected allocations sites, if an implementation is available.
  */
 public abstract class Transformation {
 
@@ -60,14 +60,14 @@ public abstract class Transformation {
 
         List<String> params = method.getParameterTypes().stream().map(Object::toString).toList();
         return new Signature(
-                method.getDeclaringClass().getName(),
+                method.getDeclaringClass().getFullyQualifiedName(),
                 method.getReturnType().toString(),
                 method.getName(),
                 params);
     }
 
     public static Multimap<Val, Type> transformAllocationSite(
-            AllocVal allocVal, Definitions.BoomerangOptionsDefinition definition) {
+            AllocVal allocVal, FrameworkScope frameworkScope, BoomerangOptions options) {
         Statement allocStatement = allocVal.getAllocStatement();
 
         if (!allocStatement.containsInvokeExpr()) {
@@ -75,7 +75,8 @@ public abstract class Transformation {
 
             // Check for basic transformation operators (e.g. length)
             if (OperatorTransformation.isOperatorTransformation(allocSite)) {
-                OperatorTransformation transformation = new OperatorTransformation(definition);
+                OperatorTransformation transformation =
+                        new OperatorTransformation(frameworkScope, options);
 
                 return transformation.evaluateOperator(allocStatement, allocSite);
             }
@@ -89,15 +90,16 @@ public abstract class Transformation {
 
         Signature signature = invokeExprToSignature(allocStatement.getInvokeExpr());
         if (StringTransformation.isStringTransformation(signature)) {
-            Transformation transformation = new StringTransformation(definition);
+            Transformation transformation = new StringTransformation(frameworkScope, options);
 
             return transformation.evaluateExpression(allocStatement, signature);
         } else if (WrapperTransformation.isWrapperTransformation(signature)) {
-            Transformation transformation = new WrapperTransformation(definition);
+            Transformation transformation = new WrapperTransformation(frameworkScope, options);
 
             return transformation.evaluateExpression(allocStatement, signature);
         } else if (MiscellaneousTransformation.isMiscellaneousTransformation(signature)) {
-            Transformation transformation = new MiscellaneousTransformation(definition);
+            Transformation transformation =
+                    new MiscellaneousTransformation(frameworkScope, options);
 
             return transformation.evaluateExpression(allocStatement, signature);
         }
@@ -105,10 +107,12 @@ public abstract class Transformation {
         return HashMultimap.create();
     }
 
-    protected final Definitions.BoomerangOptionsDefinition definition;
+    protected final FrameworkScope frameworkScope;
+    protected final BoomerangOptions options;
 
-    protected Transformation(Definitions.BoomerangOptionsDefinition definition) {
-        this.definition = definition;
+    protected Transformation(FrameworkScope frameworkScope, BoomerangOptions options) {
+        this.frameworkScope = frameworkScope;
+        this.options = options;
     }
 
     protected Multimap<AllocVal, Type> computeAllocSites(Statement statement, Val val) {
@@ -118,20 +122,11 @@ public abstract class Transformation {
             ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
 
             BackwardQuery query = BackwardQuery.make(edge, val);
-            Boomerang boomerang =
-                    new Boomerang(
-                            definition.callGraph(),
-                            definition.dataFlowScope(),
-                            new ExtendedBoomerangOptions(
-                                    definition.timeout(), definition.strategy()));
+            Boomerang boomerang = new Boomerang(frameworkScope, options);
             BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
 
             for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
-                if (!(forwardQuery.var() instanceof AllocVal allocVal)) {
-                    continue;
-                }
-
-                boomerangResults.putAll(allocVal, results.getPropagationType());
+                boomerangResults.putAll(forwardQuery.getAllocVal(), results.getPropagationType());
             }
         }
 
@@ -143,7 +138,7 @@ public abstract class Transformation {
 
         for (AllocVal allocVal : allocSites.keySet()) {
             Multimap<Val, Type> transformedAllocSites =
-                    Transformation.transformAllocationSite(allocVal, definition);
+                    Transformation.transformAllocationSite(allocVal, frameworkScope, options);
 
             result.putAll(transformedAllocSites);
         }

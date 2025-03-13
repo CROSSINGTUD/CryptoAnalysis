@@ -132,7 +132,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -162,7 +162,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .withNoErrors(IncompleteOperationError.class)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -180,7 +180,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                         .build());
 
         // Must not throw NullPointerException in ConstraintSolver:init()!
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

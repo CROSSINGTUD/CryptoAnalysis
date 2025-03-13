@@ -1,20 +1,23 @@
 package de.fraunhofer.iem.android;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.jimple.BoomerangPretransformer;
-import boomerang.scene.jimple.SootCallGraph;
+import boomerang.scope.soot.BoomerangPretransformer;
+import boomerang.scope.soot.SootFrameworkScope;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.FrameworkScope;
 import com.google.common.base.Stopwatch;
-import crysl.rule.CrySLRule;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import soot.Scene;
+import soot.SootMethod;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.android.InfoflowAndroidConfiguration;
 import soot.jimple.infoflow.android.SetupApplication;
 import soot.jimple.infoflow.android.config.SootConfigForAndroid;
+import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 
 public class FlowDroidSetup {
@@ -40,13 +43,15 @@ public class FlowDroidSetup {
         LOGGER.info("FlowDroid setup done in {} ", stopwatch);
     }
 
-    public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
+    public FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope) {
         flowDroid.constructCallgraph();
 
         BoomerangPretransformer.v().reset();
         BoomerangPretransformer.v().apply();
 
-        return new SootCallGraph();
+        CallGraph callGraph = Scene.v().getCallGraph();
+        Collection<SootMethod> entryPoints = Scene.v().getEntryPoints();
+        return new SootFrameworkScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
     }
 
     private SetupApplication initializeFlowDroid() {

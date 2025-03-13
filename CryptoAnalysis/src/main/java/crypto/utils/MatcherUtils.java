@@ -1,7 +1,7 @@
 package crypto.utils;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Type;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Type;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class MatcherUtils {
         // '<init>'
         if (declaredMethod.isConstructor()) {
             // Strip the plain class name: java.lang.Object -> Object
-            String className = declaredMethod.getDeclaringClass().getName();
+            String className = declaredMethod.getDeclaringClass().getFullyQualifiedName();
             declaredName = className.substring(className.lastIndexOf(".") + 1);
         }
 

@@ -1,9 +1,9 @@
 package crypto.extractparameter;
 
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import crypto.definition.Definitions;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
@@ -18,8 +18,7 @@ public class ExtractParameterAnalysis {
     public ExtractParameterAnalysis(Definitions.ExtractParameterDefinition definition) {
         Definitions.QuerySolverDefinition querySolverDefinition =
                 new Definitions.QuerySolverDefinition(
-                        definition.callGraph(),
-                        definition.dataFlowScope(),
+                        definition.frameworkScope(),
                         definition.timeout(),
                         definition.strategy(),
                         definition.reporter());

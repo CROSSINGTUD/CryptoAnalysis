@@ -1,7 +1,7 @@
 package crypto.reporting;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
@@ -49,7 +49,7 @@ public class CSVReporter extends Reporter {
         List<String> lineContents = new ArrayList<>();
 
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
-            String className = wrappedClass.getName();
+            String className = wrappedClass.getFullyQualifiedName();
 
             for (Map.Entry<Method, Set<AbstractError>> entry :
                     errorCollection.row(wrappedClass).entrySet()) {

@@ -1,6 +1,6 @@
 package crypto.listener;
 
-import boomerang.scene.CallGraph;
+import boomerang.scope.CallGraph;
 
 public class AnalysisStatistics {
 

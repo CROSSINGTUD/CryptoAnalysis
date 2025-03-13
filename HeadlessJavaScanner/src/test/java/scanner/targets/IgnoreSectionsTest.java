@@ -48,7 +48,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -86,7 +86,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withNoErrors(TypestateError.class)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -126,7 +126,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -160,7 +160,7 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withNoErrors(TypestateError.class)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

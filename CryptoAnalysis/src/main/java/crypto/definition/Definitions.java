@@ -1,51 +1,37 @@
 package crypto.definition;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.sparse.SparseCFGCache;
+import boomerang.scope.FrameworkScope;
 import crypto.listener.AnalysisReporter;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
+import sparse.SparsificationStrategy;
 
 public interface Definitions {
 
     record SeedDefinition(
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
+            FrameworkScope frameworkScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy,
+            SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
 
     record TypestateDefinition(
-            Collection<CrySLRule> rules,
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
-            int timeout) {}
+            FrameworkScope frameworkScope, Collection<CrySLRule> rules, int timeout) {}
 
     record ConstraintsDefinition(
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
+            FrameworkScope frameworkScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy,
+            SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
 
     record ExtractParameterDefinition(
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
+            FrameworkScope frameworkScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy,
+            SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
 
     record QuerySolverDefinition(
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
+            FrameworkScope frameworkScope,
             int timeout,
-            SparseCFGCache.SparsificationStrategy strategy,
+            SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
-
-    record BoomerangOptionsDefinition(
-            CallGraph callGraph,
-            DataFlowScope dataFlowScope,
-            int timeout,
-            SparseCFGCache.SparsificationStrategy strategy) {}
 }

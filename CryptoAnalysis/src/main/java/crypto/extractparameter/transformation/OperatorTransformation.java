@@ -1,12 +1,13 @@
 package crypto.extractparameter.transformation;
 
-import boomerang.scene.AllocVal;
-import boomerang.scene.Statement;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.options.BoomerangOptions;
+import boomerang.scope.AllocVal;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.Statement;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.definition.Definitions;
 import crypto.extractparameter.scope.IntType;
 import crypto.extractparameter.scope.IntVal;
 
@@ -16,8 +17,8 @@ import crypto.extractparameter.scope.IntVal;
  */
 public class OperatorTransformation extends Transformation {
 
-    protected OperatorTransformation(Definitions.BoomerangOptionsDefinition definition) {
-        super(definition);
+    protected OperatorTransformation(FrameworkScope frameworkScope, BoomerangOptions options) {
+        super(frameworkScope, options);
     }
 
     public static boolean isOperatorTransformation(Val val) {
