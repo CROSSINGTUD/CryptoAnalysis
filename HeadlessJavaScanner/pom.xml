@@ -52,12 +52,6 @@
             <version>4.7.6</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-invoker</artifactId>
             <version>3.3.0</version>
