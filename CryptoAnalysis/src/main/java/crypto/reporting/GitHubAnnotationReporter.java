@@ -165,7 +165,8 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
     }
 
     private Path classToSourcePath(WrappedClass clazz) {
-        return Paths.get(basePath, clazz.getFullyQualifiedName().replace('.', File.separatorChar) + ".java");
+        return Paths.get(
+                basePath, clazz.getFullyQualifiedName().replace('.', File.separatorChar) + ".java");
     }
 
     /**

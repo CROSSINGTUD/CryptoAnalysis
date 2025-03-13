@@ -3,7 +3,6 @@ package test.assertions.states;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import java.util.Collection;
-
 import typestate.finiteautomata.State;
 
 public class MustBeInAcceptingStateAssertion extends StateResult {
@@ -41,7 +40,10 @@ public class MustBeInAcceptingStateAssertion extends StateResult {
                     + " @ line "
                     + statement.getStartLineNumber();
         } else {
-            return statement + " @ line " + statement.getStartLineNumber() + " has not been checked";
+            return statement
+                    + " @ line "
+                    + statement.getStartLineNumber()
+                    + " has not been checked";
         }
     }
 }

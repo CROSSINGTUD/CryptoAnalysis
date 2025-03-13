@@ -1,9 +1,9 @@
 package de.fraunhofer.iem.framework;
 
-import boomerang.scope.soot.BoomerangPretransformer;
-import boomerang.scope.soot.SootFrameworkScope;
 import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
+import boomerang.scope.soot.BoomerangPretransformer;
+import boomerang.scope.soot.SootFrameworkScope;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;

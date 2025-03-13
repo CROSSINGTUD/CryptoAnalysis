@@ -50,7 +50,9 @@ public class ReportGenerator {
 
         report.append("\n");
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
-            report.append("Findings in class ").append(wrappedClass.getFullyQualifiedName()).append("\n");
+            report.append("Findings in class ")
+                    .append(wrappedClass.getFullyQualifiedName())
+                    .append("\n");
 
             for (Map.Entry<Method, Set<AbstractError>> entry :
                     errorCollection.row(wrappedClass).entrySet()) {

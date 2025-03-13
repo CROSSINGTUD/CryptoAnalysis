@@ -208,7 +208,8 @@ public class SARIFReporter extends Reporter {
 
         location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
 
-        String fullyQualifiedLogicalName = c.getFullyQualifiedName().replace(".", "::") + "::" + methodName;
+        String fullyQualifiedLogicalName =
+                c.getFullyQualifiedName().replace(".", "::") + "::" + methodName;
         location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
 
         locations.put(location);

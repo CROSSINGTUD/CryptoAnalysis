@@ -47,6 +47,11 @@
             <artifactId>CryptoAnalysis</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+            <artifactId>CrySLParser</artifactId>
+            <version>${crysl.version}</version>
+        </dependency>
+        <dependency>
             <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
             <artifactId>soot-infoflow</artifactId>
             <version>${flowDroidVersion}</version>
@@ -64,10 +69,12 @@
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope-Soot</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -89,23 +96,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

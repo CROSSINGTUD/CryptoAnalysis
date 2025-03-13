@@ -53,13 +53,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
-        <spdsVersion>4.0.0</spdsVersion>
-        <sootVersion>4.6.0</sootVersion>
-        <cryslVersion>4.0.1</cryslVersion>
+        <spds.version>4.0.0</spds.version>
+        <soot.version>4.6.0</soot.version>
+        <crysl.version>4.0.1</crysl.version>
     </properties>
 
     <dependencyManagement>
@@ -79,37 +78,6 @@
                 <artifactId>HeadlessJavaScanner</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>boomerangScope</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>boomerangScope-Soot</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>boomerangPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>idealPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>testCore</artifactId>
-                <version>${spdsVersion}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-                <artifactId>CrySLParser</artifactId>
-                <version>${cryslVersion}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -128,7 +96,7 @@
         <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
-            <version>${sootVersion}</version>
+            <version>${soot.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -184,52 +152,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
-                         it has to be correct. -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
-                    <configuration>
-                        <!-- Disable warnings regarding missing comments etc. during the build -->
-                        <additionalOptions>
-                            <additionalOption>-Xdoclint:none</additionalOption>
-                        </additionalOptions>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>attach-javadoc</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
+                <!-- This plugin has to be specified in child to unpack the zip files to the correct relative directories -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -289,14 +212,13 @@
                     </executions>
                 </plugin>
 
-                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
-                    test reports -->
+                <!-- Surefire plugin is included in profiles if the tests are actually executed -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.2</version>
                     <configuration>
-                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
+                        <argLine>-Xmx8G -Xms256M -Xss8M</argLine>
                         <reuseForks>false</reuseForks>
                         <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
                     </configuration>
@@ -314,6 +236,7 @@
                     </dependencies>
                 </plugin>
 
+                <!-- Children need to include this plugin to build the correct jar artefacts -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -327,10 +250,91 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <!-- Code formatter: Run 'mvn spotless:apply' to format the code -->
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.44.2</version>
+                    <configuration>
+                        <pom>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>CryptoAnalysis/pom.xml</include>
+                                <include>HeadlessAndroidScanner/pom.xml</include>
+                                <include>HeadlessJavaScanner/pom.xml</include>
+                            </includes>
+                            <sortPom>
+                                <encoding>UTF-8</encoding>
+                                <keepBlankLines>true</keepBlankLines>
+                                <nrOfIndentSpace>4</nrOfIndentSpace>
+                                <indentBlankLines>false</indentBlankLines>
+                                <indentAttribute>schemaLocation</indentAttribute>
+                                <expandEmptyElements>false</expandEmptyElements>
+                            </sortPom>
+                        </pom>
+                        <java>
+                            <googleJavaFormat>
+                                <version>1.24.0</version>
+                                <style>AOSP</style>
+                            </googleJavaFormat>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <removeUnusedImports/>
+                            <importOrder/>
+                            <!--<licenseHeader>
+                                <file>${main.basedir}/license_header_plain.txt</file>
+                            </licenseHeader>-->
+                        </java>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
+                     it has to be correct. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <!-- Disable warnings regarding missing comments etc. during the build -->
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
@@ -412,50 +416,6 @@
                         </fileset>
                     </filesets>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.44.2</version>
-                <configuration>
-                    <pom>
-                        <includes>
-                            <include>pom.xml</include>
-                            <include>CryptoAnalysis/pom.xml</include>
-                            <include>HeadlessAndroidScanner/pom.xml</include>
-                            <include>HeadlessJavaScanner/pom.xml</include>
-                        </includes>
-                        <sortPom>
-                            <encoding>UTF-8</encoding>
-                            <keepBlankLines>true</keepBlankLines>
-                            <nrOfIndentSpace>4</nrOfIndentSpace>
-                            <indentBlankLines>false</indentBlankLines>
-                            <indentAttribute>schemaLocation</indentAttribute>
-                            <expandEmptyElements>false</expandEmptyElements>
-                        </sortPom>
-                    </pom>
-                    <java>
-                        <googleJavaFormat>
-                            <version>1.24.0</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
-                        <removeUnusedImports/>
-                        <importOrder/>
-                        <!--<licenseHeader>
-                            <file>${main.basedir}/license_header_plain.txt</file>
-                        </licenseHeader>-->
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -4,7 +4,6 @@ import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import java.util.Collection;
 import java.util.Objects;
-
 import test.assertions.Assertion;
 import typestate.finiteautomata.State;
 

@@ -113,10 +113,22 @@ public abstract class UsagePatternTestingFramework {
 
         StringBuilder errors = new StringBuilder();
         if (!unsound.isEmpty()) {
-            errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound.stream().map(Assertion::getErrorMessage).toList()));
+            errors.append("\nUnsound results: \n")
+                    .append(
+                            Joiner.on("\n")
+                                    .join(
+                                            unsound.stream()
+                                                    .map(Assertion::getErrorMessage)
+                                                    .toList()));
         }
         if (!imprecise.isEmpty()) {
-            errors.append("\nImprecise results: \n").append(Joiner.on("\n").join(imprecise.stream().map(Assertion::getErrorMessage).toList()));
+            errors.append("\nImprecise results: \n")
+                    .append(
+                            Joiner.on("\n")
+                                    .join(
+                                            imprecise.stream()
+                                                    .map(Assertion::getErrorMessage)
+                                                    .toList()));
         }
         if (!errors.toString().isEmpty()) {
             Assert.fail(errors.toString());
@@ -392,7 +404,10 @@ public abstract class UsagePatternTestingFramework {
 
             if (curr.containsInvokeExpr()) {
                 String invokedClassName =
-                        curr.getInvokeExpr().getMethod().getDeclaringClass().getFullyQualifiedName();
+                        curr.getInvokeExpr()
+                                .getMethod()
+                                .getDeclaringClass()
+                                .getFullyQualifiedName();
                 String assertionClassName = Assertions.class.getName();
 
                 if (!invokedClassName.equals(assertionClassName)) {
