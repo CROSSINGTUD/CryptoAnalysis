@@ -37,6 +37,10 @@
         <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
     </scm>
 
+    <properties>
+        <license.dir>${project.parent.basedir}</license.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

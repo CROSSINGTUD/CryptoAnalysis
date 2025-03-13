@@ -53,6 +53,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- See https://www.eclipse.org/projects/handbook/#ip-copyright-headers -->
+        <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
@@ -282,9 +284,9 @@
                             <endWithNewline/>
                             <removeUnusedImports/>
                             <importOrder/>
-                            <!--<licenseHeader>
-                                <file>${main.basedir}/license_header_plain.txt</file>
-                            </licenseHeader>-->
+                            <licenseHeader>
+                                <file>${license.dir}/license_header.txt</file>
+                            </licenseHeader>
                         </java>
                     </configuration>
                 </plugin>

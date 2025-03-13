@@ -38,6 +38,7 @@
     </scm>
 
     <properties>
+        <license.dir>${project.parent.basedir}</license.dir>
         <flowDroidVersion>2.14.1</flowDroidVersion>
     </properties>
 
