@@ -90,6 +90,12 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>soot</artifactId>
+            <version>${sootVersion}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
