@@ -53,11 +53,6 @@
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-summaries</artifactId>
-            <version>${flowDroidVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
             <artifactId>soot-infoflow-android</artifactId>
             <version>${flowDroidVersion}</version>
         </dependency>
