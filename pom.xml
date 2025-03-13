@@ -220,7 +220,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.2</version>
                     <configuration>
-                        <argLine>-Xmx8G -Xms256M -Xss8M</argLine>
+                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
                         <reuseForks>false</reuseForks>
                         <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
                     </configuration>
