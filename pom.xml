@@ -115,12 +115,6 @@
             <version>33.4.0-jre</version>
         </dependency>
         <dependency>
-            <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>9.7.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
             <version>${sootVersion}</version>
@@ -136,20 +130,9 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.80</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bctls-jdk18on</artifactId>
-            <version>1.80</version>
-        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
             <version>2.0.16</version>
         </dependency>
         <dependency>
@@ -162,11 +145,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
