@@ -130,6 +130,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.17</version>
         </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -179,6 +185,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.8.1</version>
+                    <configuration>
+                        <ignoredUnusedDeclaredDependencies>
+                            <ignoredUnusedDeclaredDependencies>org.bouncycastle:bcprov-jdk18on</ignoredUnusedDeclaredDependencies>
+                        </ignoredUnusedDeclaredDependencies>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>unpack</id>
