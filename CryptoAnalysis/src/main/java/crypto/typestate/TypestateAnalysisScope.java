@@ -20,7 +20,6 @@ import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
-import crysl.rule.ICrySLPredicateParameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -231,11 +230,13 @@ public class TypestateAnalysisScope extends AnalysisScope {
 
     private boolean isEnsuringPredicateParam(CrySLRule rule, String param) {
         for (CrySLPredicate ensuredPred : rule.getPredicates()) {
-            for (ICrySLPredicateParameter predParam : ensuredPred.getParameters()) {
-                // TODO Maybe also compare types?
-                if (predParam.getName().equals(param)) {
-                    return true;
-                }
+            if (ensuredPred.getParameters().isEmpty()) {
+                continue;
+            }
+
+            // TODO Maybe also compare types?
+            if (ensuredPred.getParameters().get(0).getName().equals(param)) {
+                return true;
             }
         }
         return false;
@@ -303,6 +304,11 @@ public class TypestateAnalysisScope extends AnalysisScope {
 
             Val leftOp = stmt.getLeftOp();
             Val rightOp = stmt.getRightOp();
+
+            // Do not return alias assignments
+            if (rightOp.isLocal()) {
+                return Optional.empty();
+            }
 
             AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
             return Optional.of(allocVal);

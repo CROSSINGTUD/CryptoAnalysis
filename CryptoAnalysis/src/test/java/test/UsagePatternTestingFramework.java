@@ -64,7 +64,7 @@ public abstract class UsagePatternTestingFramework {
         String testClassName = this.getClass().getName().replace("class ", "");
         String testMethodName = testName.getMethodName();
 
-        LOGGER.info("Running test {} in class {}", testMethodName, testClassName);
+        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
 
         CryptoScanner scanner = new CryptoScanner();
 

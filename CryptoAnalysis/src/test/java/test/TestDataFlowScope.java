@@ -7,11 +7,11 @@ import boomerang.scope.WrappedClass;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
+import test.assertions.Assertion;
 
 public class TestDataFlowScope implements DataFlowScope {
 
-    private static final String ASSERTION = "Assertion";
-    private static final String STRING_CLASS = "java.lang.String";
+    private static final String ASSERTION = Assertion.class.getName();
     private final Collection<String> ruleNames;
 
     public TestDataFlowScope(Collection<CrySLRule> rules) {
@@ -33,10 +33,6 @@ public class TestDataFlowScope implements DataFlowScope {
             return true;
         }
 
-        if (declaringClass.getFullyQualifiedName().contains(STRING_CLASS)) {
-            return true;
-        }
-
         String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return ruleNames.contains(declaringClassName);
     }
@@ -49,10 +45,6 @@ public class TestDataFlowScope implements DataFlowScope {
         }
 
         if (declaringClass.getFullyQualifiedName().contains(ASSERTION)) {
-            return true;
-        }
-
-        if (declaringClass.getFullyQualifiedName().contains(STRING_CLASS)) {
             return true;
         }
 
