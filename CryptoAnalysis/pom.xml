@@ -102,25 +102,9 @@
             <version>1.4.0</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>WPDS</artifactId>
-            <version>${spdsVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>synchronizedPDS</artifactId>
-            <version>${spdsVersion}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.soot-oss</groupId>
-            <artifactId>soot</artifactId>
-            <version>${sootVersion}</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
         <dependency>

@@ -50,8 +50,7 @@ public class Visualizer {
         }
     }
 
-    public void createVisualization(Collection<IAnalysisSeed> seeds)
-            throws ExecuteException, IOException {
+    public void createVisualization(Collection<IAnalysisSeed> seeds) throws IOException {
 
         Graphviz.GraphvizBuilder builder = Graphviz.digraph();
 
@@ -80,10 +79,14 @@ public class Visualizer {
         }
 
         Graphviz graphviz = builder.build();
-        graphviz.toFile(FileType.PNG).save(outputFile.getAbsolutePath(), VISUALIZATION_NAME);
-        LOGGER.info(
-                "Written visualization to {}",
-                outputFile.getAbsolutePath() + File.separator + VISUALIZATION_NAME + ".png");
+        try {
+            graphviz.toFile(FileType.PNG).save(outputFile.getAbsolutePath(), VISUALIZATION_NAME);
+            LOGGER.info(
+                    "Written visualization to {}",
+                    outputFile.getAbsolutePath() + File.separator + VISUALIZATION_NAME + ".png");
+        } catch (ExecuteException e) {
+            LOGGER.error("Could not create visualization: {}", e.getMessage());
+        }
     }
 
     private Cluster createClusterForSeed(

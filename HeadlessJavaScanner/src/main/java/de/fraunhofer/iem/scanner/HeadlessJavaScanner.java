@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import org.graphper.draw.ExecuteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sparse.SparsificationStrategy;
@@ -111,7 +110,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
             try {
                 Visualizer visualizer = new Visualizer(settings.getReportDirectory());
                 visualizer.createVisualization(getDiscoveredSeeds());
-            } catch (IOException | ExecuteException e) {
+            } catch (IOException e) {
                 throw new CryptoAnalysisException(
                         "Couldn't create visualization: " + e.getMessage());
             }

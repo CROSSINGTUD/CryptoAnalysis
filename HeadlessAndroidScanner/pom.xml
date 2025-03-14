@@ -77,10 +77,6 @@
             <artifactId>picocli</artifactId>
             <version>4.7.6</version>
         </dependency>
-        <dependency>
-            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-            <artifactId>CrySLParser</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
