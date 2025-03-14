@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>CryptoAnalysis-Parent</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>CryptoAnalysis-Parent</name>
@@ -53,13 +53,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <versions.maven-jar-plugin>3.4.2</versions.maven-jar-plugin>
+        <!-- See https://www.eclipse.org/projects/handbook/#ip-copyright-headers -->
+        <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
-        <spdsVersion>3.2.2</spdsVersion>
-        <sootVersion>4.6.0</sootVersion>
-        <cryslVersion>4.0.0</cryslVersion>
+        <spds.version>4.0.0</spds.version>
+        <soot.version>4.6.0</soot.version>
+        <crysl.version>4.0.1</crysl.version>
     </properties>
 
     <dependencyManagement>
@@ -79,32 +80,6 @@
                 <artifactId>HeadlessJavaScanner</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>boomerangScope</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>boomerangPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>idealPDS</artifactId>
-                <version>${spdsVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.fraunhofer.iem</groupId>
-                <artifactId>testCore</artifactId>
-                <version>${spdsVersion}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-                <artifactId>CrySLParser</artifactId>
-                <version>${cryslVersion}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -112,18 +87,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.3.1-jre</version>
-        </dependency>
-        <dependency>
-            <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>9.7.1</version>
+            <version>33.4.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
-            <version>${sootVersion}</version>
+            <version>${soot.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -132,97 +101,38 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.79</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bctls-jdk18on -->
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bctls-jdk18on</artifactId>
-            <version>1.79</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.16</version>
+            <version>2.0.17</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version>
+            <version>2.0.17</version>
         </dependency>
         <dependency>
-            <groupId>com.google.crypto.tink</groupId>
-            <artifactId>tink</artifactId>
-            <version>1.15.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.17.0</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
-                         it has to be correct. -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
-                    <executions>
-                        <execution>
-                            <id>attach-javadoc</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
+                <!-- This plugin has to be specified in child to unpack the zip files to the correct relative directories -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.8.1</version>
+                    <configuration>
+                        <ignoredUnusedDeclaredDependencies>
+                            <!-- The logger api requires a concrete provider that is not used by this project: https://www.slf4j.org/manual.html -->
+                            <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-simple</ignoredUnusedDeclaredDependency>
+                            <ignoredUnusedDeclaredDependencies>org.bouncycastle:bcprov-jdk18on</ignoredUnusedDeclaredDependencies>
+                        </ignoredUnusedDeclaredDependencies>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>unpack</id>
@@ -278,8 +188,7 @@
                     </executions>
                 </plugin>
 
-                <!-- Adding The Surefire Maven Plugin to the POM file, so it can generate
-                    test reports -->
+                <!-- Surefire plugin is included in profiles if the tests are actually executed -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -303,6 +212,7 @@
                     </dependencies>
                 </plugin>
 
+                <!-- Children need to include this plugin to build the correct jar artefacts -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -316,14 +226,95 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <!-- Code formatter: Run 'mvn spotless:apply' to format the code -->
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.44.2</version>
+                    <configuration>
+                        <pom>
+                            <includes>
+                                <include>pom.xml</include>
+                                <include>CryptoAnalysis/pom.xml</include>
+                                <include>HeadlessAndroidScanner/pom.xml</include>
+                                <include>HeadlessJavaScanner/pom.xml</include>
+                            </includes>
+                            <sortPom>
+                                <encoding>UTF-8</encoding>
+                                <keepBlankLines>true</keepBlankLines>
+                                <nrOfIndentSpace>4</nrOfIndentSpace>
+                                <indentBlankLines>false</indentBlankLines>
+                                <indentAttribute>schemaLocation</indentAttribute>
+                                <expandEmptyElements>false</expandEmptyElements>
+                            </sortPom>
+                        </pom>
+                        <java>
+                            <googleJavaFormat>
+                                <version>1.24.0</version>
+                                <style>AOSP</style>
+                            </googleJavaFormat>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <removeUnusedImports/>
+                            <importOrder/>
+                            <licenseHeader>
+                                <file>${license.dir}/license_header.txt</file>
+                            </licenseHeader>
+                        </java>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
+                     it has to be correct. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <!-- Disable warnings regarding missing comments etc. during the build -->
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>1.7.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>ossrh</flattenMode>
@@ -349,7 +340,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -401,50 +392,6 @@
                         </fileset>
                     </filesets>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.43.0</version>
-                <configuration>
-                    <pom>
-                        <includes>
-                            <include>pom.xml</include>
-                            <include>CryptoAnalysis/pom.xml</include>
-                            <include>HeadlessAndroidScanner/pom.xml</include>
-                            <include>HeadlessJavaScanner/pom.xml</include>
-                        </includes>
-                        <sortPom>
-                            <encoding>UTF-8</encoding>
-                            <keepBlankLines>true</keepBlankLines>
-                            <nrOfIndentSpace>4</nrOfIndentSpace>
-                            <indentBlankLines>false</indentBlankLines>
-                            <indentSchemaLocation>true</indentSchemaLocation>
-                            <expandEmptyElements>false</expandEmptyElements>
-                        </sortPom>
-                    </pom>
-                    <java>
-                        <googleJavaFormat>
-                            <version>1.24.0</version>
-                            <style>AOSP</style>
-                        </googleJavaFormat>
-                        <trimTrailingWhitespace/>
-                        <endWithNewline/>
-                        <removeUnusedImports/>
-                        <importOrder/>
-                        <!--<licenseHeader>
-                            <file>${main.basedir}/license_header_plain.txt</file>
-                        </licenseHeader>-->
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

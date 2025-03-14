@@ -1,6 +1,15 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.typestate;
 
-import boomerang.scene.DeclaredMethod;
+import boomerang.scope.DeclaredMethod;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import java.util.Collection;
@@ -14,7 +23,7 @@ public class LabeledMatcherTransition extends MatcherTransition {
     private final Collection<CrySLMethod> methods;
 
     public LabeledMatcherTransition(State from, Collection<CrySLMethod> methods, State to) {
-        super(from, "", Parameter.This, to, Type.OnCallOrOnCallToReturn);
+        super(from, "", Parameter.This, to, Type.OnCallToReturn);
 
         this.methods = methods;
     }

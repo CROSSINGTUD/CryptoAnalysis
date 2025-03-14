@@ -1,36 +1,38 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
-import crysl.rule.CrySLRule;
-import crysl.rule.ISLConstraint;
+import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
@@ -67,18 +69,6 @@ public class AnalysisReporter {
     public void afterAnalysis() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterAnalysis();
-        }
-    }
-
-    public void beforeReadingRuleset(String rulesetPath) {
-        for (IAnalysisListener listener : analysisListeners) {
-            listener.beforeReadingRuleset(rulesetPath);
-        }
-    }
-
-    public void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> rules) {
-        for (IAnalysisListener listener : analysisListeners) {
-            listener.afterReadingRuleset(rulesetPath, rules);
         }
     }
 
@@ -171,6 +161,20 @@ public class AnalysisReporter {
         }
     }
 
+    public void onEvaluatedConstraint(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.evaluatedConstraint(seed, constraint, result);
+        }
+    }
+
+    public void onEvaluatedPredicate(
+            IAnalysisSeed seed,
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result) {}
+
     public void beforePredicateCheck() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.beforePredicateCheck();
@@ -180,16 +184,6 @@ public class AnalysisReporter {
     public void afterPredicateCheck() {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.afterPredicateCheck();
-        }
-    }
-
-    public void onGeneratedPredicate(
-            IAnalysisSeed fromSeed,
-            AbstractPredicate predicate,
-            IAnalysisSeed toPred,
-            Statement statement) {
-        for (IResultsListener listener : resultsListeners) {
-            listener.generatedPredicate(fromSeed, predicate, toPred, statement);
         }
     }
 
@@ -206,27 +200,24 @@ public class AnalysisReporter {
         }
     }
 
-    public void collectedValues(
-            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues) {
+    public void extractedParameterValues(
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues) {
         for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.collectedValues(seed, collectedValues);
-        }
-    }
-
-    public void checkedConstraints(
-            IAnalysisSeed seed,
-            Collection<ISLConstraint> constraints,
-            Collection<AbstractError> errors) {
-        for (IResultsListener resultsListener : resultsListeners) {
-            resultsListener.checkedConstraints(seed, constraints, errors);
+            resultsListener.extractedParameterValues(seed, extractedValues);
         }
     }
 
     public void ensuredPredicates(
-            IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates) {
+            IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates) {
         for (IResultsListener listener : resultsListeners) {
             listener.ensuredPredicates(seed, predicates);
+        }
+    }
+
+    public void unEnsuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, UnEnsuredPredicate> predicates) {
+        for (IResultsListener listener : resultsListeners) {
+            listener.unEnsuredPredicates(seed, predicates);
         }
     }
 
@@ -236,24 +227,14 @@ public class AnalysisReporter {
         }
 
         for (IErrorListener errorListener : errorListeners) {
-            if (error instanceof CallToError callToError) {
-                errorListener.reportError(callToError);
-            } else if (error instanceof ConstraintError constraintError) {
+            if (error instanceof ConstraintError constraintError) {
                 errorListener.reportError(constraintError);
             } else if (error instanceof ForbiddenMethodError forbiddenMethodError) {
                 errorListener.reportError(forbiddenMethodError);
-            } else if (error instanceof HardCodedError hardCodedError) {
-                errorListener.reportError(hardCodedError);
             } else if (error instanceof ImpreciseValueExtractionError impreciseError) {
                 errorListener.reportError(impreciseError);
             } else if (error instanceof IncompleteOperationError incompleteError) {
                 errorListener.reportError(incompleteError);
-            } else if (error instanceof InstanceOfError instanceOfError) {
-                errorListener.reportError(instanceOfError);
-            } else if (error instanceof NeverTypeOfError neverTypeOfError) {
-                errorListener.reportError(neverTypeOfError);
-            } else if (error instanceof NoCallToError noCallToError) {
-                errorListener.reportError(noCallToError);
             } else if (error instanceof PredicateContradictionError contradictionError) {
                 errorListener.reportError(contradictionError);
             } else if (error instanceof RequiredPredicateError predicateError) {

@@ -1,8 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
-import crypto.analysis.errors.HardCodedError;
+import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.RequiredPredicateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
@@ -22,12 +30,12 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.Enc", "encrypt", 2)
-                        .withTPs(CallToError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.KeyDeriv", "getKey", 1)
-                        .withFPs(HardCodedError.class, 1, "Mystery")
+                        .withFPs(ConstraintError.class, 1, "Mystery")
                         .withFPs(RequiredPredicateError.class, 3, "Mystery")
                         .build());
         addErrorSpecification(
@@ -40,7 +48,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
                         .withFPs(AlternativeReqPredicateError.class, 1, "Mystery")
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -60,7 +68,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
                         .withNoErrors(RequiredPredicateError.class)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

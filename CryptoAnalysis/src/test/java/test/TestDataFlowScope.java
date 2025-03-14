@@ -1,19 +1,26 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test;
 
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
-import boomerang.scene.jimple.JimpleDeclaredMethod;
-import boomerang.scene.jimple.JimpleMethod;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
+import test.assertions.Assertion;
 
 public class TestDataFlowScope implements DataFlowScope {
 
-    private static final String ASSERTION = "Assertion";
-    private static final String STRING_CLASS = "java.lang.String";
+    private static final String ASSERTION = Assertion.class.getName();
     private final Collection<String> ruleNames;
 
     public TestDataFlowScope(Collection<CrySLRule> rules) {
@@ -27,34 +34,30 @@ public class TestDataFlowScope implements DataFlowScope {
     @Override
     public boolean isExcluded(DeclaredMethod method) {
         WrappedClass declaringClass = method.getDeclaringClass();
-        if (declaringClass.getName().contains(ASSERTION)) {
+        if (!declaringClass.isApplicationClass()) {
             return true;
         }
 
-        if (declaringClass.getName().contains(STRING_CLASS)) {
+        if (declaringClass.getFullyQualifiedName().contains(ASSERTION)) {
             return true;
         }
 
-        JimpleDeclaredMethod jimpleMethod = (JimpleDeclaredMethod) method;
-        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
-
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return ruleNames.contains(declaringClassName);
     }
 
     @Override
     public boolean isExcluded(Method method) {
         WrappedClass declaringClass = method.getDeclaringClass();
-        if (declaringClass.getName().contains(ASSERTION)) {
+        if (!declaringClass.isApplicationClass()) {
             return true;
         }
 
-        if (declaringClass.getName().contains(STRING_CLASS)) {
+        if (declaringClass.getFullyQualifiedName().contains(ASSERTION)) {
             return true;
         }
 
-        JimpleMethod jimpleMethod = (JimpleMethod) method;
-        String declaringClassName = jimpleMethod.getDeclaringClass().getName();
-
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return ruleNames.contains(declaringClassName);
     }
 }

@@ -1,8 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.typestate;
 
 import boomerang.WeightedForwardQuery;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Val;
+import boomerang.scope.AllocVal;
+import boomerang.scope.ControlFlowGraph;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
@@ -13,7 +22,7 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
 
     private ForwardSeedQuery(
             ControlFlowGraph.Edge stmt,
-            Val fact,
+            AllocVal fact,
             TransitionFunction weight,
             RuleTransitions transitions) {
         super(stmt, fact, weight);
@@ -22,12 +31,12 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
     }
 
     public static ForwardSeedQuery makeQueryWithSpecification(
-            ControlFlowGraph.Edge stmt, Val fact, RuleTransitions transitions) {
+            ControlFlowGraph.Edge stmt, AllocVal fact, RuleTransitions transitions) {
         return new ForwardSeedQuery(stmt, fact, transitions.getInitialWeight(stmt), transitions);
     }
 
     public static ForwardSeedQuery makeQueryWithoutSpecification(
-            ControlFlowGraph.Edge stmt, Val fact) {
+            ControlFlowGraph.Edge stmt, AllocVal fact) {
         return new ForwardSeedQuery(stmt, fact, TransitionFunction.one(), RuleTransitions.of(null));
     }
 
@@ -40,6 +49,6 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
     }
 
     public Collection<LabeledMatcherTransition> getAllTransitions() {
-        return transitions.getAllTransitions();
+        return transitions.getStateMachineTransitions();
     }
 }

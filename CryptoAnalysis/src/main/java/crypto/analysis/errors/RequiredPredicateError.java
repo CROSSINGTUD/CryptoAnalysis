@@ -1,9 +1,18 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis.errors;
 
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.RequiredCrySLPredicate;
-import crypto.analysis.UnEnsuredPredicate;
-import crysl.rule.CrySLPredicate;
+import crypto.analysis.IAnalysisSeed;
+import crypto.constraints.RequiredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
+import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -20,32 +29,27 @@ import java.util.Objects;
  */
 public class RequiredPredicateError extends AbstractRequiredPredicateError {
 
-    private final CrySLPredicate contradictedPredicate;
-    private final int paramIndex;
+    private final RequiredPredicate contradictedPredicate;
 
     public RequiredPredicateError(
-            AnalysisSeedWithSpecification seed,
-            RequiredCrySLPredicate violatedPred,
+            IAnalysisSeed seed,
+            CrySLRule rule,
+            RequiredPredicate predicate,
             Collection<UnEnsuredPredicate> unEnsuredPredicates) {
-        super(seed, violatedPred.getLocation(), seed.getSpecification(), unEnsuredPredicates);
+        super(seed, predicate.statement(), rule, unEnsuredPredicates);
 
-        this.contradictedPredicate = violatedPred.getPred();
-        this.paramIndex = violatedPred.getParamIndex();
+        this.contradictedPredicate = predicate;
     }
 
-    public CrySLPredicate getContradictedPredicates() {
+    public RequiredPredicate getContradictedPredicates() {
         return contradictedPredicate;
-    }
-
-    public int getParamIndex() {
-        return paramIndex;
     }
 
     @Override
     public String toErrorMarkerString() {
-        StringBuilder msg = new StringBuilder(getParamIndexAsText(paramIndex));
+        StringBuilder msg = new StringBuilder(getParamIndexAsText(contradictedPredicate.index()));
         msg.append(" was not properly generated as ");
-        String[] parts = contradictedPredicate.getPredName().split("(?=[A-Z])");
+        String[] parts = contradictedPredicate.predicate().getPredName().split("(?=[A-Z])");
         msg.append(parts[0]);
         for (int i = 1; i < parts.length; i++) {
             msg.append(parts[i]);
@@ -55,15 +59,14 @@ public class RequiredPredicateError extends AbstractRequiredPredicateError {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), contradictedPredicate, paramIndex);
+        return Objects.hash(super.hashCode(), contradictedPredicate);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof RequiredPredicateError other
-                && Objects.equals(contradictedPredicate, other.getContradictedPredicates())
-                && paramIndex == other.getParamIndex();
+                && Objects.equals(contradictedPredicate, other.getContradictedPredicates());
     }
 
     @Override

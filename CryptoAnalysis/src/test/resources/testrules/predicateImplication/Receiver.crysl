@@ -1,0 +1,21 @@
+SPEC tests.error.predicate.implication.Receiver
+
+OBJECTS
+    int i;
+    java.lang.String s;
+
+EVENTS
+    Con: Receiver();
+    Cond1: condition(i);
+    Cond2: requiredPredicate(s);
+    Cond := Cond1 | Cond2;
+
+ORDER
+    Con, Cond*
+
+REQUIRES
+    i == 10 => generatedReceiver[this];
+    i == 20 => ensuredParameter[s];
+
+ENSURES
+    generatedThis[this];

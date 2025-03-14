@@ -1,6 +1,15 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.typestate;
 
-import boomerang.scene.ControlFlowGraph;
+import boomerang.scope.ControlFlowGraph;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
@@ -8,30 +17,30 @@ import typestate.TransitionFunction;
 public class RuleTransitions {
 
     private final CrySLRule rule;
-    private final MatcherTransitionCollection transitions;
+    private final IdealStateMachine stateMachine;
 
-    private RuleTransitions(CrySLRule rule, MatcherTransitionCollection transitions) {
+    private RuleTransitions(CrySLRule rule, IdealStateMachine transitions) {
         this.rule = rule;
-        this.transitions = transitions;
+        this.stateMachine = transitions;
     }
 
     public static RuleTransitions of(CrySLRule rule) {
         if (rule == null) {
-            return new RuleTransitions(null, MatcherTransitionCollection.makeOne());
+            return new RuleTransitions(null, IdealStateMachine.makeOne());
         }
         return new RuleTransitions(
-                rule, MatcherTransitionCollection.makeCollection(rule.getUsagePattern()));
+                rule, IdealStateMachine.makeStateMachine(rule.getUsagePattern()));
     }
 
     public CrySLRule getRule() {
         return rule;
     }
 
-    public Collection<LabeledMatcherTransition> getAllTransitions() {
-        return transitions.getAllTransitions();
+    public Collection<LabeledMatcherTransition> getStateMachineTransitions() {
+        return stateMachine.getAllTransitions();
     }
 
     public TransitionFunction getInitialWeight(ControlFlowGraph.Edge edge) {
-        return transitions.getInitialWeight(edge);
+        return stateMachine.getInitialWeight(edge);
     }
 }

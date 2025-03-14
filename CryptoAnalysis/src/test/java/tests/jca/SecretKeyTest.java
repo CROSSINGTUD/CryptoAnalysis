@@ -1,3 +1,12 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package tests.jca;
 
 import java.io.IOException;
@@ -10,6 +19,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -47,6 +58,17 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
         SecureRandom random1 = new SecureRandom();
         random1.setSeed(bytes);
+    }
+
+    @Test
+    public void test3() throws GeneralSecurityException {
+        KeyGenerator generator = KeyGenerator.getInstance("AES");
+        SecretKey key = generator.generateKey();
+        Assertions.hasEnsuredPredicate(key);
+
+        byte[] bytes = key.getEncoded();
+        Assertions.hasEnsuredPredicate(bytes);
+        SecretKeySpec spec = new SecretKeySpec(bytes, "AES");
     }
 
     @Test
@@ -137,11 +159,12 @@ public class SecretKeyTest extends UsagePatternTestingFramework {
 
     public char[] generateRandomPassword() {
         SecureRandom rnd = new SecureRandom();
-        char[] defaultKey = new char[20];
-        for (int i = 0; i < 20; i++) {
-            defaultKey[i] = (char) (rnd.nextInt(26) + 'a');
-        }
-        return defaultKey;
+
+        return IntStream.generate(() -> rnd.nextInt('a', 'z'))
+                .mapToObj(Character::toString)
+                .limit(10)
+                .collect(Collectors.joining())
+                .toCharArray();
     }
 
     @Test

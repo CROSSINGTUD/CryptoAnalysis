@@ -1,12 +1,19 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -62,7 +69,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -98,7 +105,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 4)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -149,7 +156,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -165,21 +172,21 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.buggyIVgen.BuggyIVGen1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
-                        .withTPs(CallToError.class, 1)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.buggyIVgen.BuggyIVGen2", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
-                        .withTPs(CallToError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -195,24 +202,24 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.FixedIV1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
-                        .withTPs(CallToError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.FixedIV2", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 3)
-                        .withTPs(CallToError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.constantIV.SimpleIVConstant", "main", 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -241,17 +248,17 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.constantKey.ConstantKeyAES2", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.constantKey.ConstantKeyAES3", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.constantKey.HardCodedKey", "main", 1)
@@ -263,7 +270,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -282,9 +289,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
         addErrorSpecification(
@@ -292,12 +298,11 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(TypestateError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -341,7 +346,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -359,7 +364,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkc.enc.deterministicCrypto.DeterministicEncryptionRSA", "main", 1)
-                        .withTPs(ConstraintError.class, 7)
+                        .withTPs(ConstraintError.class, 3)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
@@ -395,7 +400,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -420,11 +425,11 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "wc.deterministicSymEnc.DeterministicEncryptionAESwECB2", "main", 1)
-                        .withTPs(ConstraintError.class, 6)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -440,6 +445,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("br.fixedSeed.FixedSeed1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 6)
                         .withTPs(TypestateError.class, 4)
                         .withTPs(IncompleteOperationError.class, 4)
@@ -457,7 +463,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -499,7 +505,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -521,7 +527,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -561,7 +567,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -601,7 +607,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -693,7 +699,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -711,7 +717,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("pdf.insecureDefault.InsecureDefaultPBE", "main", 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -764,7 +770,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -843,7 +849,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -984,7 +990,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1002,22 +1008,22 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pdf.insecureStreamCipher.ConfusingBlockAndStream", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 5)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pdf.insecureStreamCipher.MalealableStreamCipher", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1102,7 +1108,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1120,46 +1126,45 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkm.keyReuseInStreamCipher.KeyReuseStreamCipher1", "main", 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 5)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkm.keyReuseInStreamCipher.KeyReuseStreamCipher2", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 5)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkm.keyReuseInStreamCipher.KeyReuseStreamCipher3", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 5)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkm.keyReuseInStreamCipher.KeyReuseStreamCipher4", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 6)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pkm.keyReuseInStreamCipher.KeyReuseStreamCipher5", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1175,13 +1180,13 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("ivm.nonceReuse.NonceReuse1", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 2)
-                        .withTPs(CallToError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1195,7 +1200,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         MavenProject mavenProject = createAndCompile(mavenProjectPath);
         HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1215,8 +1220,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -1225,8 +1229,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -1235,11 +1238,10 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1274,7 +1276,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1324,8 +1326,8 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("cib.printPrivSecKey.PrintSecKey1", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(CallToError.class, 1)
                         .build());
 
         // positive test case
@@ -1360,7 +1362,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 16)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1380,7 +1382,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                                 "wc.riskyInsecureCrypto.InsecureCryptoPBE", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
@@ -1429,7 +1431,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1477,7 +1479,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1497,7 +1499,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1511,7 +1513,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         MavenProject mavenProject = createAndCompile(mavenProjectPath);
         HeadlessJavaScanner scanner = createScanner(mavenProject);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1565,7 +1567,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1815,7 +1817,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1877,7 +1879,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 5)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -1934,7 +1936,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(TypestateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

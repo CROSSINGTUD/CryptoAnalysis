@@ -1,11 +1,19 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test.assertions;
 
-import boomerang.scene.Statement;
-import test.Assertion;
+import boomerang.scope.Statement;
 
 public class CallToForbiddenMethodAssertion implements Assertion {
 
-    private Statement stmt;
+    private final Statement stmt;
     private boolean satisfied;
 
     public CallToForbiddenMethodAssertion(Statement stmt) {
@@ -13,8 +21,8 @@ public class CallToForbiddenMethodAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return satisfied;
+    public boolean isUnsound() {
+        return !satisfied;
     }
 
     @Override
@@ -23,7 +31,7 @@ public class CallToForbiddenMethodAssertion implements Assertion {
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected to report a call to a forbidden method at this statement: " + stmt;
     }
 

@@ -1,11 +1,18 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package scanner.targets;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.NeverTypeOfError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
@@ -61,11 +68,10 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.brokencrypto.BrokenCryptoABICase5", "doCrypto", 0)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         // ABICase6, -7, -8, -10 not included as tests due to being similar to ABICase5 above
 
@@ -85,7 +91,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         // all the test cases above:
         // https://github.com/CryptoGuardOSS/cryptoapi-bench/tree/master/src/main/java/org/cryptoapi/bench/ecbcrypto
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -121,7 +127,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .build());
         // BBCase1, -3, -4 not included due to being similar to BBCase2 above
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -146,8 +152,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         // https://github.com/CryptoGuardOSS/cryptoapi-bench/blob/master/src/main/java/org/cryptoapi/bench/ecbcrypto/EcbInSymmCryptoABICase2.java
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.ecbcrypto.EcbInSymmCryptoABICase2", "go", 0)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         // ABICase3 not included as tests due to being similar to ABICase2 above
 
@@ -168,7 +174,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -207,8 +213,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.insecureasymmetriccrypto.InsecureAsymmetricCipherABICase2",
                                 "main",
                                 1)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
@@ -236,7 +242,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -283,7 +289,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         // and not 20, as it really is. This is caused because of the structure of the project
         // as explained in the issue: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/163
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -345,7 +351,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -364,12 +370,11 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablekeystorepassword.PredictableKeyStorePasswordABICase1",
                                 "go",
                                 1)
-                        .withTPs(HardCodedError.class, 1)
-                        .withTPs(NeverTypeOfError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
         // ABH1, ABI2, BB1 are other similar test cases that were not included
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -395,7 +400,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordBBCase2",
                                 "key",
                                 0)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         // This test case corresponds to the following project in CryptoGuard:
@@ -412,8 +417,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordABHCase2",
                                 "key",
                                 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
 
         // This test case corresponds to the following project in CryptoGuard:
@@ -430,12 +434,11 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                                 "example.predictablepbepassword.PredictablePBEPasswordABICase1",
                                 "key",
                                 1)
-                        .withTPs(NeverTypeOfError.class, 1)
-                        .withTPs(HardCodedError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .build());
         // ABHCase1, BBCase1 are similar to the case above
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -527,7 +530,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -564,7 +567,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
                         .build());
         // ABICase1 is similar to the examples above
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }

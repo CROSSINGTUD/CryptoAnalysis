@@ -1,16 +1,23 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis.errors;
 
-import crypto.analysis.AlternativeReqPredicate;
-import crypto.analysis.AnalysisSeedWithSpecification;
-import crypto.analysis.RequiredCrySLPredicate;
-import crypto.analysis.UnEnsuredPredicate;
-import crysl.rule.CrySLPredicate;
+import crypto.analysis.IAnalysisSeed;
+import crypto.constraints.AlternativeReqPredicate;
+import crypto.constraints.RequiredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
+import crypto.utils.CrySLUtils;
+import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Error that models a violation of required predicates with alternatives. Predicates from the
@@ -26,68 +33,55 @@ import java.util.Set;
  */
 public class AlternativeReqPredicateError extends AbstractRequiredPredicateError {
 
-    private final Collection<CrySLPredicate> contradictedPredicate;
-    private final Collection<RequiredCrySLPredicate> relevantPredicates;
+    private final AlternativeReqPredicate violatedPredicate;
 
     public AlternativeReqPredicateError(
-            AnalysisSeedWithSpecification seed,
+            IAnalysisSeed seed,
+            CrySLRule rule,
             AlternativeReqPredicate violatedPred,
             Collection<UnEnsuredPredicate> unEnsuredPredicates) {
-        super(seed, violatedPred.getLocation(), seed.getSpecification(), unEnsuredPredicates);
+        super(seed, violatedPred.statement(), rule, unEnsuredPredicates);
 
-        this.contradictedPredicate = List.copyOf(violatedPred.getAllAlternatives());
-        this.relevantPredicates = Set.copyOf(violatedPred.getRelAlternatives());
+        this.violatedPredicate = violatedPred;
     }
 
-    public Collection<CrySLPredicate> getContradictedPredicate() {
-        return contradictedPredicate;
-    }
-
-    public Collection<RequiredCrySLPredicate> getRelevantPredicates() {
-        return relevantPredicates;
+    public AlternativeReqPredicate getViolatedPredicate() {
+        return violatedPredicate;
     }
 
     @Override
     public String toErrorMarkerString() {
-        Collection<CrySLPredicate> added = new HashSet<>();
+        StringBuilder builder = new StringBuilder();
 
-        List<String> msg = new ArrayList<>();
-        for (RequiredCrySLPredicate pred : relevantPredicates) {
-            StringBuilder temp = new StringBuilder();
-            temp.append(getParamIndexAsText(pred.getParamIndex()));
-
-            if (pred.getPred().isNegated()) {
-                temp.append(" is generated as ");
-            } else {
-                temp.append(" was not properly generated as ");
-            }
-            temp.append(pred.getPred().getPredName());
-
-            msg.add(temp.toString());
-            added.add(pred.getPred());
+        if (violatedPredicate.predicates().isEmpty()) {
+            return "";
         }
 
-        for (CrySLPredicate pred : contradictedPredicate) {
-            if (added.contains(pred)) {
-                continue;
-            }
-            msg.add(pred.getPredName() + " was not ensured (not relevant)");
+        int index = violatedPredicate.predicates().stream().findFirst().get().index();
+        builder.append(CrySLUtils.getIndexAsString(index));
+        builder.append(" parameter was not properly generated as ");
+
+        Collection<String> predNames = new ArrayList<>();
+        for (RequiredPredicate predicate : violatedPredicate.predicates()) {
+            predNames.add(predicate.predicate().getPredName());
         }
 
-        return String.join(" AND ", msg);
+        String preds = String.join(" OR ", predNames);
+        builder.append(preds);
+
+        return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), contradictedPredicate, relevantPredicates);
+        return Objects.hash(super.hashCode(), violatedPredicate);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof AlternativeReqPredicateError other
-                && Objects.equals(contradictedPredicate, other.getContradictedPredicate())
-                && Objects.equals(relevantPredicates, other.getRelevantPredicates());
+                && Objects.equals(violatedPredicate, other.getViolatedPredicate());
     }
 
     @Override

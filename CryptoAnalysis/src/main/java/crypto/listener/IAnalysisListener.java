@@ -1,12 +1,20 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.listener;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.extractparameter.ExtractParameterQuery;
-import crysl.rule.CrySLRule;
 import java.util.Collection;
 
 public interface IAnalysisListener {
@@ -14,10 +22,6 @@ public interface IAnalysisListener {
     void beforeAnalysis();
 
     void afterAnalysis();
-
-    void beforeReadingRuleset(String rulesetPath);
-
-    void afterReadingRuleset(String rulesetPath, Collection<CrySLRule> ruleset);
 
     void beforeCallGraphConstruction();
 

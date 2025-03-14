@@ -1,0 +1,11 @@
+SPEC tests.error.typestate.TypestateOptional
+
+EVENTS
+    Con1: TypestateOptional();
+
+    Op1: operation1();
+    Op2: operation2();
+    Op3: operation3();
+
+ORDER
+    Con1, Op1, Op2?, Op3

@@ -1,19 +1,25 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.listener;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
-import crypto.analysis.AbstractPredicate;
-import crypto.analysis.EnsuredPredicate;
 import crypto.analysis.IAnalysisSeed;
-import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.CallSiteWithExtractedValue;
+import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
-import crysl.rule.ISLConstraint;
-import java.util.Collection;
-import java.util.Map;
+import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.predicates.EnsuredPredicate;
+import crypto.predicates.UnEnsuredPredicate;
 import typestate.TransitionFunction;
 import wpds.impl.Weight;
 
@@ -27,21 +33,16 @@ public interface IResultsListener {
     void extractedBoomerangResults(
             ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results);
 
-    void collectedValues(
-            IAnalysisSeed seed, Collection<CallSiteWithExtractedValue> collectedValues);
+    void extractedParameterValues(
+            IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues);
 
-    void checkedConstraints(
+    void evaluatedConstraint(
             IAnalysisSeed seed,
-            Collection<ISLConstraint> constraints,
-            Collection<AbstractError> errors);
+            EvaluableConstraint constraint,
+            EvaluableConstraint.EvaluationResult result);
 
-    void generatedPredicate(
-            IAnalysisSeed fromSeed,
-            AbstractPredicate predicate,
-            IAnalysisSeed toSeed,
-            Statement statement);
+    void ensuredPredicates(IAnalysisSeed seed, Multimap<Statement, EnsuredPredicate> predicates);
 
-    void ensuredPredicates(
-            IAnalysisSeed seed,
-            Multimap<Statement, Map.Entry<EnsuredPredicate, Integer>> predicates);
+    void unEnsuredPredicates(
+            IAnalysisSeed seed, Multimap<Statement, UnEnsuredPredicate> predicates);
 }

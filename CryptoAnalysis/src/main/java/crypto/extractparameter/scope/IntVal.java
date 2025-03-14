@@ -1,10 +1,20 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.extractparameter.scope;
 
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.Method;
-import boomerang.scene.Pair;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.Method;
+import boomerang.scope.Pair;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
+import java.util.Objects;
 
 public class IntVal extends Val {
 
@@ -162,6 +172,21 @@ public class IntVal extends Val {
 
     @Override
     public String getVariableName() {
+        return String.valueOf(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) && obj instanceof IntVal other && value == other.value;
+    }
+
+    @Override
+    public String toString() {
         return "Int constant: " + value;
     }
 }

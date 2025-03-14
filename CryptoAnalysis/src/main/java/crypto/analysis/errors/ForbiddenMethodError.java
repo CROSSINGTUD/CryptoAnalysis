@@ -1,8 +1,18 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis.errors;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Statement;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -43,7 +53,7 @@ public class ForbiddenMethodError extends AbstractError {
 
         if (!getAlternatives().isEmpty()) {
             msg.append(". Instead, call one of the methods ");
-            String altMethods = formatMethodNames(alternatives);
+            String altMethods = CrySLUtils.formatMethodNames(alternatives);
             msg.append(altMethods);
         }
         return msg.toString();

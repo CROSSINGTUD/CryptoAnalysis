@@ -1,3 +1,12 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package tests.error.nevertypeof;
 
 import org.junit.Test;
@@ -19,7 +28,7 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         char[] value = new char[] {'a', 'l', 'l', 'o', 'w', 'e', 'd'};
         neverTypeOf.operation(value);
 
-        Assertions.neverTypeOfErrors(0);
+        Assertions.constraintErrors(neverTypeOf, 0);
     }
 
     @Test
@@ -27,7 +36,7 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         NeverTypeOf neverTypeOf = new NeverTypeOf();
         neverTypeOf.operation("notAllowed");
 
-        Assertions.neverTypeOfErrors(1);
+        Assertions.constraintErrors(neverTypeOf, 1);
     }
 
     @Test
@@ -40,6 +49,6 @@ public class NeverTypeOfTest extends UsagePatternTestingFramework {
         neverTypeOf.operation(transformedString);
         Assertions.extValue(0);
 
-        Assertions.neverTypeOfErrors(1);
+        Assertions.constraintErrors(neverTypeOf, 1);
     }
 }

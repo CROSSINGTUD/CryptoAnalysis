@@ -1,11 +1,21 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.jimple.SootCallGraph;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.soot.BoomerangPretransformer;
+import boomerang.scope.soot.SootFrameworkScope;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.preanalysis.TransformerSetup;
-import crysl.rule.CrySLRule;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,24 +27,29 @@ import soot.G;
 import soot.PackManager;
 import soot.Scene;
 import soot.SootMethod;
+import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 
 public class SootSetup extends FrameworkSetup {
 
     private final String sootClassPath;
+    private final DataFlowScope dataFlowScope;
 
     public SootSetup(
             String applicationPath,
             ScannerSettings.CallGraphAlgorithm algorithm,
-            String sootClassPath) {
+            String sootClassPath,
+            DataFlowScope dataFlowScope) {
         super(applicationPath, algorithm);
+
         this.sootClassPath = sootClassPath;
+        this.dataFlowScope = dataFlowScope;
     }
 
     @Override
     public void initializeFramework() {
         LOGGER.info("Setting up Soot...");
-        WATCH.start();
+        Stopwatch watch = Stopwatch.createStarted();
 
         G.reset();
         Options.v().set_whole_program(true);
@@ -93,16 +108,20 @@ public class SootSetup extends FrameworkSetup {
         Scene.v().loadNecessaryClasses();
         Scene.v().setEntryPoints(getEntryPoints());
 
-        WATCH.stop();
-        LOGGER.info("Soot setup done in {}", WATCH);
+        watch.stop();
+        LOGGER.info("Soot setup done in {}", watch);
     }
 
     @Override
-    public CallGraph constructCallGraph(Collection<CrySLRule> rules) {
+    public FrameworkScope createFrameworkScope() {
         PackManager.v().getPack("cg").apply();
-        TransformerSetup.v().setupPreTransformer(rules);
 
-        return new SootCallGraph();
+        BoomerangPretransformer.v().reset();
+        BoomerangPretransformer.v().apply();
+
+        CallGraph callGraph = Scene.v().getCallGraph();
+        Collection<SootMethod> entryPoints = Scene.v().getEntryPoints();
+        return new SootFrameworkScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
     }
 
     private List<SootMethod> getEntryPoints() {

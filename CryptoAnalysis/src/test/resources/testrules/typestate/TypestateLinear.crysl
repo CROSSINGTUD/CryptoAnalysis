@@ -1,0 +1,12 @@
+SPEC tests.error.typestate.TypestateLinear
+
+EVENTS
+    Con1: TypestateLinear();   // This constructor is allowed
+    Con2: TypestateLinear(_);  // This constructor leads to an error state
+
+    Op1: operation1();
+    Op2: operation2();
+    Op3: operation3();
+
+ORDER
+    Con1, Op1, Op2, Op3

@@ -1,7 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis.errors;
 
-import boomerang.scene.Statement;
+import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
+import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -33,7 +43,7 @@ public class TypestateError extends AbstractOrderError {
         msg.append(getErrorStatement().getInvokeExpr().getMethod());
         msg.append(getObjectType());
 
-        String altMethods = formatMethodNames(expectedMethodCalls);
+        String altMethods = CrySLUtils.formatMethodNames(expectedMethodCalls);
 
         if (!altMethods.isEmpty()) {
             msg.append(". Expected a call to one of the following methods ");

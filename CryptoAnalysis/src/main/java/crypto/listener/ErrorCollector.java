@@ -1,20 +1,24 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.listener;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.analysis.errors.AlternativeReqPredicateError;
-import crypto.analysis.errors.CallToError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.HardCodedError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
-import crypto.analysis.errors.InstanceOfError;
-import crypto.analysis.errors.NeverTypeOfError;
-import crypto.analysis.errors.NoCallToError;
 import crypto.analysis.errors.PredicateContradictionError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -45,11 +49,6 @@ public class ErrorCollector implements IErrorListener {
     }
 
     @Override
-    public void reportError(CallToError callToError) {
-        addErrorToCollection(callToError);
-    }
-
-    @Override
     public void reportError(ConstraintError constraintError) {
         addErrorToCollection(constraintError);
     }
@@ -60,11 +59,6 @@ public class ErrorCollector implements IErrorListener {
     }
 
     @Override
-    public void reportError(HardCodedError hardCodedError) {
-        addErrorToCollection(hardCodedError);
-    }
-
-    @Override
     public void reportError(ImpreciseValueExtractionError impreciseValueExtractionError) {
         addErrorToCollection(impreciseValueExtractionError);
     }
@@ -72,21 +66,6 @@ public class ErrorCollector implements IErrorListener {
     @Override
     public void reportError(IncompleteOperationError incompleteOperationError) {
         addErrorToCollection(incompleteOperationError);
-    }
-
-    @Override
-    public void reportError(InstanceOfError instanceOfError) {
-        addErrorToCollection(instanceOfError);
-    }
-
-    @Override
-    public void reportError(NeverTypeOfError neverTypeOfError) {
-        addErrorToCollection(neverTypeOfError);
-    }
-
-    @Override
-    public void reportError(NoCallToError noCallToError) {
-        addErrorToCollection(noCallToError);
     }
 
     @Override

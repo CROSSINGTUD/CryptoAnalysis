@@ -1,173 +1,164 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test;
 
-import boomerang.BackwardQuery;
-import boomerang.Boomerang;
-import boomerang.results.BackwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Method;
-import boomerang.scene.SootDataFlowScope;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
-import boomerang.scene.jimple.JimpleMethod;
-import boomerang.scene.jimple.SootCallGraph;
-import boomerang.util.AccessPath;
+import boomerang.scope.CallGraph;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Method;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
-import crypto.preanalysis.TransformerSetup;
+import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.Assert;
-import soot.Scene;
-import soot.SceneTransformer;
-import soot.options.Options;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import test.assertions.Assertion;
 import test.assertions.Assertions;
-import test.assertions.CallToErrorCountAssertion;
 import test.assertions.CallToForbiddenMethodAssertion;
 import test.assertions.ConstraintErrorCountAssertion;
-import test.assertions.ConstraintViolationAssertion;
-import test.assertions.DependentErrorAssertion;
+import test.assertions.ConstraintsEvaluatedAssertion;
+import test.assertions.ConstraintsNotRelevantAssertion;
+import test.assertions.ConstraintsSatisfiedAssertion;
+import test.assertions.ConstraintsViolatedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
-import test.assertions.HasGeneratedPredicateAssertion;
-import test.assertions.HasNotGeneratedPredicateAssertion;
 import test.assertions.ImpreciseValueExtractionErrorCountAssertion;
-import test.assertions.InAcceptingStateAssertion;
 import test.assertions.IncompleteOperationErrorCountAssertion;
-import test.assertions.InstanceOfErrorCountAssertion;
-import test.assertions.MissingTypestateChange;
-import test.assertions.NeverTypeOfErrorCountAssertion;
-import test.assertions.NoCallToErrorCountAssertion;
-import test.assertions.NoMissingTypestateChange;
-import test.assertions.NotHardCodedErrorCountAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
-import test.assertions.NotInAcceptingStateAssertion;
 import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
-import test.core.selfrunning.AbstractTestingFramework;
-import test.core.selfrunning.ImprecisionException;
-import wpds.impl.Weight;
+import test.assertions.states.MayBeInAcceptingStateAssertion;
+import test.assertions.states.MustBeInAcceptingStateAssertion;
+import test.assertions.states.MustNotBeInAcceptingStateAssertion;
+import test.assertions.states.StateAssertion;
+import test.framework.SootTestSetup;
+import test.framework.TestSetup;
 
-public abstract class UsagePatternTestingFramework extends AbstractTestingFramework {
+public abstract class UsagePatternTestingFramework {
 
-    private class TestScanner extends CryptoScanner {
+    private static final Logger LOGGER = LoggerFactory.getLogger("AnalysisTests");
 
-        public void init() {
-            super.initialize();
+    private static Collection<CrySLRule> rules = new HashSet<>();
+    private static String rulesetPath = "";
+
+    @Rule public TestName testName = new TestName();
+
+    @Before
+    public void beforeTestCaseExecution() {
+        String testClassName = this.getClass().getName().replace("class ", "");
+        String testMethodName = testName.getMethodName();
+
+        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
+
+        CryptoScanner scanner = new CryptoScanner();
+
+        if (!rulesetPath.equals(getRulesetPath())) {
+            LOGGER.info("Updating rules to {}", getRulesetPath());
+
+            rulesetPath = getRulesetPath();
+            rules = scanner.readRules(rulesetPath);
+        } else {
+            LOGGER.info("Reusing rules from previous run");
         }
 
-        public void run() {
-            super.scan();
-        }
+        TestSetup testSetup = new SootTestSetup();
+        testSetup.initialize(testClassName, testMethodName);
 
-        @Override
-        public String getRulesetPath() {
-            return UsagePatternTestingFramework.this.getRulesetPath();
-        }
+        DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
+        FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
+        Method testMethod = testSetup.getTestMethod();
 
-        @Override
-        protected CallGraph constructCallGraph() {
-            TransformerSetup.v().setupPreTransformer(super.getRuleset());
-            return new SootCallGraph();
-        }
+        // Setup test listener
+        Collection<Assertion> assertions =
+                extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
+        IErrorListener errorListener = new UsagePatternErrorListener(assertions);
+        IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
 
-        @Override
-        protected DataFlowScope createDataFlowScope() {
-            return new TestDataFlowScope(super.getRuleset());
-        }
-    }
+        scanner.addErrorListener(errorListener);
+        scanner.addResultsListener(resultsListener);
 
-    @Override
-    protected SceneTransformer createAnalysisTransformer() throws ImprecisionException {
+        scanner.scan(frameworkScope, rules);
 
-        Options.v().setPhaseOption("jb", "use-original-names:false");
-        Options.v().set_keep_line_number(true);
+        // Evaluate results
+        Collection<Assertion> unsound = new ArrayList<>();
+        Collection<Assertion> imprecise = new ArrayList<>();
 
-        return new SceneTransformer() {
-
-            protected void internalTransform(String phaseName, Map<String, String> options) {
-
-                TestScanner scanner = new TestScanner();
-                scanner.init();
-
-                // Setup test listener
-                Collection<Assertion> assertions =
-                        extractBenchmarkMethods(
-                                JimpleMethod.of(sootTestMethod), scanner.getCallGraph());
-                IErrorListener errorListener = new UsagePatternErrorListener(assertions);
-                IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
-
-                // Setup scanner
-                scanner.addErrorListener(errorListener);
-                scanner.addResultsListener(resultsListener);
-
-                scanner.run();
-
-                // Evaluate results
-                List<Assertion> unsound = Lists.newLinkedList();
-                List<Assertion> imprecise = Lists.newLinkedList();
-
-                for (Assertion r : assertions) {
-                    if (!r.isSatisfied()) {
-                        unsound.add(r);
-                    }
-                }
-
-                for (Assertion r : assertions) {
-                    if (r.isImprecise()) {
-                        imprecise.add(r);
-                    }
-                }
-
-                StringBuilder errors = new StringBuilder();
-                if (!unsound.isEmpty()) {
-                    errors.append("\nUnsound results: \n").append(Joiner.on("\n").join(unsound));
-                }
-                if (!imprecise.isEmpty()) {
-                    errors.append("\nImprecise results: \n")
-                            .append(Joiner.on("\n").join(imprecise));
-                }
-                if (!errors.toString().isEmpty()) {
-                    Assert.fail(errors.toString());
-                }
+        for (Assertion r : assertions) {
+            if (r.isUnsound()) {
+                unsound.add(r);
             }
-        };
+        }
+
+        for (Assertion r : assertions) {
+            if (r.isImprecise()) {
+                imprecise.add(r);
+            }
+        }
+
+        StringBuilder errors = new StringBuilder();
+        if (!unsound.isEmpty()) {
+            errors.append("\nUnsound results: \n")
+                    .append(
+                            Joiner.on("\n")
+                                    .join(
+                                            unsound.stream()
+                                                    .map(Assertion::getErrorMessage)
+                                                    .toList()));
+        }
+        if (!imprecise.isEmpty()) {
+            errors.append("\nImprecise results: \n")
+                    .append(
+                            Joiner.on("\n")
+                                    .join(
+                                            imprecise.stream()
+                                                    .map(Assertion::getErrorMessage)
+                                                    .toList()));
+        }
+        if (!errors.toString().isEmpty()) {
+            Assert.fail(errors.toString());
+        }
+
+        Assume.assumeTrue(false);
     }
 
     protected abstract String getRulesetPath();
 
-    @Override
-    public List<String> getIncludeList() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<String> excludedPackages() {
-        return new ArrayList<>();
-    }
-
-    private Set<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
-        Set<Assertion> results = new HashSet<>();
+    private Collection<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
+        Collection<Assertion> results = new HashSet<>();
         extractBenchmarkMethods(testMethod, callGraph, results, new HashSet<>());
         return results;
     }
 
     private void extractBenchmarkMethods(
-            Method method, CallGraph callGraph, Set<Assertion> queries, Set<Method> visited) {
+            Method method,
+            CallGraph callGraph,
+            Collection<Assertion> queries,
+            Collection<Method> visited) {
         if (visited.contains(method)) {
             return;
         }
@@ -212,23 +203,48 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
             }
 
-            if (invocationName.startsWith("mustBeInAcceptingState")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isLocal()) {
+            if (invocationName.startsWith("evaluatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
                     continue;
                 }
 
-                Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
-
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new InAcceptingStateAssertion(pred, aliases));
-                }
+                queries.add(new ConstraintsEvaluatedAssertion(local, count.getIntValue()));
             }
 
-            if (invocationName.startsWith("violatedConstraint")) {
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new ConstraintViolationAssertion(pred));
+            if (invocationName.startsWith("satisfiedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
                 }
+
+                queries.add(new ConstraintsSatisfiedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("violatedConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsViolatedAssertion(local, count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("notRelevantConstraints")) {
+                Val local = invokeExpr.getArg(0);
+                Val count = invokeExpr.getArg(1);
+
+                if (!local.isLocal() || !count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new ConstraintsNotRelevantAssertion(local, count.getIntValue()));
             }
 
             if (invocationName.startsWith("hasEnsuredPredicate")) {
@@ -244,13 +260,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
+
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new HasEnsuredPredicateAssertion(pred, param));
-                    }
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
@@ -267,36 +280,28 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                         continue;
                     }
                     String predName = predNameParam.getStringValue();
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param, predName));
-                    }
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param, predName));
                 } else {
-                    for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                        queries.add(new NotHasEnsuredPredicateAssertion(pred, param));
-                    }
+                    queries.add(new NotHasEnsuredPredicateAssertion(statement, param));
                 }
             }
 
-            if (invocationName.startsWith("hasGeneratedPredicate")) {
+            if (invocationName.startsWith("mustBeInAcceptingState")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
                     continue;
                 }
 
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasGeneratedPredicateAssertion(pred, param));
-                }
+                queries.add(new MustBeInAcceptingStateAssertion(statement, param));
             }
 
-            if (invocationName.startsWith("hasNotGeneratedPredicate")) {
+            if (invocationName.startsWith("mayBeInAcceptingState")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
                     continue;
                 }
 
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new HasNotGeneratedPredicateAssertion(pred, param));
-                }
+                queries.add(new MayBeInAcceptingStateAssertion(statement, param));
             }
 
             if (invocationName.startsWith("mustNotBeInAcceptingState")) {
@@ -305,22 +310,22 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                     continue;
                 }
 
-                Set<Val> aliases = getAliasesForValue(callGraph, statement, param);
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new NotInAcceptingStateAssertion(pred, aliases));
-                }
+                queries.add(new MustNotBeInAcceptingStateAssertion(statement, param));
             }
 
-            if (invocationName.startsWith("missingTypestateChange")) {
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new MissingTypestateChange(pred));
-                }
-            }
+            if (invocationName.startsWith("assertState")) {
+                Val local = invokeExpr.getArg(0);
+                Val stateLabel = invokeExpr.getArg(1);
 
-            if (invocationName.startsWith("noMissingTypestateChange")) {
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new NoMissingTypestateChange(pred));
+                if (!local.isLocal()) {
+                    continue;
                 }
+
+                if (!stateLabel.isStringConstant()) {
+                    continue;
+                }
+
+                queries.add(new StateAssertion(statement, local, stateLabel.getStringValue()));
             }
 
             if (invocationName.startsWith("predicateErrors")) {
@@ -340,19 +345,31 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             }
 
             if (invocationName.startsWith("constraintErrors")) {
-                Val param = invokeExpr.getArg(0);
+                Val seed = invokeExpr.getArg(0);
+                Val param = invokeExpr.getArg(1);
+
+                if (!seed.isLocal()) {
+                    continue;
+                }
+
                 if (!param.isIntConstant()) {
                     continue;
                 }
-                queries.add(new ConstraintErrorCountAssertion(param.getIntValue()));
+                queries.add(new ConstraintErrorCountAssertion(seed, param.getIntValue()));
             }
 
             if (invocationName.startsWith("typestateErrors")) {
-                Val param = invokeExpr.getArg(0);
+                Val seed = invokeExpr.getArg(0);
+                Val param = invokeExpr.getArg(1);
+
+                if (!seed.isLocal()) {
+                    continue;
+                }
+
                 if (!param.isIntConstant()) {
                     continue;
                 }
-                queries.add(new TypestateErrorCountAssertion(param.getIntValue()));
+                queries.add(new TypestateErrorCountAssertion(seed, param.getIntValue()));
             }
 
             if (invocationName.startsWith("incompleteOperationErrors")) {
@@ -378,66 +395,6 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
                 }
                 queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
             }
-
-            if (invocationName.startsWith("callToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new CallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("noCallToErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NoCallToErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("neverTypeOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NeverTypeOfErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("notHardCodedErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new NotHardCodedErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("instanceOfErrors")) {
-                Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new InstanceOfErrorCountAssertion(param.getIntValue()));
-            }
-
-            if (invocationName.startsWith("dependentError")) {
-                // extract parameters
-                List<Val> params = invokeExpr.getArgs();
-                if (!params.stream().allMatch(Val::isIntConstant)) {
-                    continue;
-                }
-                int thisErrorID = params.remove(0).getIntValue();
-                int[] precedingErrorIDs = params.stream().mapToInt(Val::getIntValue).toArray();
-                for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new DependentErrorAssertion(pred, thisErrorID, precedingErrorIDs));
-                }
-            }
-
-            // connect DependentErrorAssertions
-            Set<Assertion> depErrors =
-                    queries.stream()
-                            .filter(q -> q instanceof DependentErrorAssertion)
-                            .collect(Collectors.toSet());
-            depErrors.forEach(ass -> ((DependentErrorAssertion) ass).registerListeners(depErrors));
         }
     }
 
@@ -456,7 +413,10 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
 
             if (curr.containsInvokeExpr()) {
                 String invokedClassName =
-                        curr.getInvokeExpr().getMethod().getDeclaringClass().getName();
+                        curr.getInvokeExpr()
+                                .getMethod()
+                                .getDeclaringClass()
+                                .getFullyQualifiedName();
                 String assertionClassName = Assertions.class.getName();
 
                 if (!invokedClassName.equals(assertionClassName)) {
@@ -469,23 +429,5 @@ public abstract class UsagePatternTestingFramework extends AbstractTestingFramew
             workList.addAll(preds);
         }
         return res;
-    }
-
-    private Set<Val> getAliasesForValue(CallGraph callGraph, Statement stmt, Val val) {
-        Set<Val> aliases = new HashSet<>();
-        aliases.add(val);
-
-        for (Statement pred : stmt.getMethod().getControlFlowGraph().getPredsOf(stmt)) {
-            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, stmt);
-            BackwardQuery query = BackwardQuery.make(edge, val);
-
-            Boomerang solver = new Boomerang(callGraph, SootDataFlowScope.make(Scene.v()));
-            BackwardBoomerangResults<Weight.NoWeight> results = solver.solve(query);
-
-            for (AccessPath accessPath : results.getAllAliases()) {
-                aliases.add(accessPath.getBase());
-            }
-        }
-        return aliases;
     }
 }

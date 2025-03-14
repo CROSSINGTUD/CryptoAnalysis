@@ -1,10 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test.assertions;
-
-import test.Assertion;
 
 public class IncompleteOperationErrorCountAssertion implements Assertion {
 
-    private int expectedErrorCounts;
+    private final int expectedErrorCounts;
     private int actualErrorCounts;
 
     public IncompleteOperationErrorCountAssertion(int numberOfCounts) {
@@ -16,17 +23,17 @@ public class IncompleteOperationErrorCountAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedErrorCounts <= actualErrorCounts;
+    public boolean isUnsound() {
+        return expectedErrorCounts > actualErrorCounts;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedErrorCounts != actualErrorCounts;
+        return expectedErrorCounts < actualErrorCounts;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedErrorCounts
                 + " incomplete operation errors, but got "

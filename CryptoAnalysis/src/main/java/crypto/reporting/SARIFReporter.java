@@ -1,7 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.reporting;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.collect.Table;
@@ -186,7 +195,7 @@ public class SARIFReporter extends Reporter {
     }
 
     public String getFileName(WrappedClass c) {
-        return c.getName().replace(".", "/") + ".java";
+        return c.getFullyQualifiedName().replace(".", "/") + ".java";
     }
 
     public JSONArray getLocations(
@@ -208,7 +217,8 @@ public class SARIFReporter extends Reporter {
 
         location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
 
-        String fullyQualifiedLogicalName = c.getName().replace(".", "::") + "::" + methodName;
+        String fullyQualifiedLogicalName =
+                c.getFullyQualifiedName().replace(".", "::") + "::" + methodName;
         location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
 
         locations.put(location);
