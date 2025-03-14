@@ -1,13 +1,23 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.extractparameter.transformation;
 
-import boomerang.scene.AllocVal;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
-import boomerang.scene.Type;
-import boomerang.scene.Val;
+import boomerang.options.BoomerangOptions;
+import boomerang.scope.AllocVal;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import crypto.definition.Definitions;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +38,8 @@ public class MiscellaneousTransformation extends Transformation {
         return MISCELLANEOUS_SIGNATURES.contains(signature);
     }
 
-    protected MiscellaneousTransformation(Definitions.BoomerangOptionsDefinition definition) {
-        super(definition);
+    protected MiscellaneousTransformation(FrameworkScope frameworkScope, BoomerangOptions options) {
+        super(frameworkScope, options);
     }
 
     @Override

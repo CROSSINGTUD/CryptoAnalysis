@@ -1,11 +1,7 @@
 name: Maven Dependency Check
 description: Runs Maven's dependency analysis to identify unused and undeclared dependencies and fails the build if there are any warnings.
 
-on:
-  push:
-    branches-ignore:
-      - master
-      - develop
+on: [pull_request, workflow_dispatch]
 
 jobs:
   analyze-dependencies:

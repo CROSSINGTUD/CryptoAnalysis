@@ -1,17 +1,22 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
-import boomerang.scene.CallGraph;
-import com.google.common.base.Stopwatch;
-import crysl.rule.CrySLRule;
+import boomerang.scope.FrameworkScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
-import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class FrameworkSetup {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(FrameworkSetup.class);
-    protected static final Stopwatch WATCH = Stopwatch.createUnstarted();
 
     protected final String applicationPath;
     protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
@@ -24,5 +29,5 @@ public abstract class FrameworkSetup {
 
     public abstract void initializeFramework();
 
-    public abstract CallGraph constructCallGraph(Collection<CrySLRule> rules);
+    public abstract FrameworkScope createFrameworkScope();
 }

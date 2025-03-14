@@ -1,11 +1,21 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
@@ -57,6 +67,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             CryptoScanner scanner,
             Statement statement,
             Val fact,
+            FrameworkScope frameworkScope,
             ForwardBoomerangResults<TransitionFunction> results,
             CrySLRule specification) {
         super(scanner, statement, fact, results);
@@ -66,8 +77,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Definitions.ConstraintsDefinition definition =
                 new Definitions.ConstraintsDefinition(
-                        scanner.getCallGraph(),
-                        scanner.getDataFlowScope(),
+                        frameworkScope,
                         scanner.getTimeout(),
                         scanner.getSparsificationStrategy(),
                         scanner.getAnalysisReporter());
@@ -312,7 +322,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             int paramIndex = reqPred.index();
 
             if (paramIndex == -1) {
-                if (!statement.isAssign() || invokeExpr.isStaticInvokeExpr()) {
+                if (!statement.isAssignStmt() || invokeExpr.isStaticInvokeExpr()) {
                     continue;
                 }
 
@@ -619,7 +629,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     private boolean isPredicateGeneratingAssignStatement(
             Statement statement, CrySLPredicate predicate, CrySLMethod method) {
-        if (!statement.isAssign()) {
+        if (!statement.isAssignStmt()) {
             return false;
         }
 

@@ -1,6 +1,14 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package tests.jca;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -260,12 +268,5 @@ public class BouncyCastleTest extends UsagePatternTestingFramework {
         byte[] cipherText2 = engine2.processBlock(message, 0, message.length);
         Assertions.mustBeInAcceptingState(engine2);
         Assertions.hasEnsuredPredicate(cipherText2);
-    }
-
-    @Override
-    protected String getSootClassPath() {
-        String bouncyCastleJarPath =
-                new File("src/test/resources/bcprov-jdk18on-1.76.jar").getAbsolutePath();
-        return super.getSootClassPath() + File.pathSeparator + bouncyCastleJarPath;
     }
 }

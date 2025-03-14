@@ -1,7 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.reporting;
 
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import crypto.analysis.IAnalysisSeed;
@@ -49,7 +58,7 @@ public class CSVReporter extends Reporter {
         List<String> lineContents = new ArrayList<>();
 
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
-            String className = wrappedClass.getName();
+            String className = wrappedClass.getFullyQualifiedName();
 
             for (Map.Entry<Method, Set<AbstractError>> entry :
                     errorCollection.row(wrappedClass).entrySet()) {

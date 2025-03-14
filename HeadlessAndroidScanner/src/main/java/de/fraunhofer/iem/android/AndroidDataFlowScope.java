@@ -1,7 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package de.fraunhofer.iem.android;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -21,7 +30,7 @@ public class AndroidDataFlowScope extends CryptoAnalysisDataFlowScope {
             return true;
         }
 
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return declaringClassName.startsWith(ANDROID) || declaringClassName.startsWith(ANDROIDX);
     }
 
@@ -31,7 +40,7 @@ public class AndroidDataFlowScope extends CryptoAnalysisDataFlowScope {
             return true;
         }
 
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
         return declaringClassName.startsWith(ANDROID) || declaringClassName.startsWith(ANDROIDX);
     }
 }

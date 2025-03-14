@@ -1,3 +1,12 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package scanner.targets;
 
 import crypto.reporting.Reporter;
@@ -43,7 +52,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.TXT);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -61,7 +70,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.CSV);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -81,7 +90,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -99,7 +108,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(Reporter.ReportFormat.SARIF);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(report.exists());
     }
@@ -145,7 +154,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setReportFormats(formats);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(txtReport.exists());
         Assert.assertTrue(csvReport.exists());
@@ -166,7 +175,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         HeadlessJavaScanner scanner = createScanner(mavenProject);
         scanner.setReportDirectory(outputDir.getAbsolutePath());
         scanner.setVisualization(true);
-        scanner.run();
+        scanner.scan();
 
         Assert.assertTrue(vizFile.exists());
     }

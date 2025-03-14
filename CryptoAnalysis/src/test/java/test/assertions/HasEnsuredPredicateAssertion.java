@@ -1,11 +1,19 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test.assertions;
 
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import crypto.predicates.AbstractPredicate;
 import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
-import test.Assertion;
 
 public class HasEnsuredPredicateAssertion implements Assertion {
 
@@ -25,8 +33,8 @@ public class HasEnsuredPredicateAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return satisfied;
+    public boolean isUnsound() {
+        return !satisfied;
     }
 
     @Override
@@ -49,7 +57,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         if (predName == null) {
             return "Expected a predicate for "
                     + val.getVariableName()

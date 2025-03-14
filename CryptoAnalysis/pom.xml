@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.fraunhofer.iem</groupId>
         <artifactId>CryptoAnalysis-Parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -37,26 +37,52 @@
         <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
     </scm>
 
+    <properties>
+        <license.dir>${project.parent.basedir}</license.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Soot</artifactId>
+            <version>${spds.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>idealPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
-            <artifactId>testCore</artifactId>
+            <artifactId>synchronizedPDS</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>WPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
+            <version>${crysl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>soot</artifactId>
+            <version>${soot.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
@@ -76,25 +102,9 @@
             <version>1.4.0</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>WPDS</artifactId>
-            <version>${spdsVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>synchronizedPDS</artifactId>
-            <version>${spdsVersion}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.soot-oss</groupId>
-            <artifactId>soot</artifactId>
-            <version>${sootVersion}</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
         <dependency>
@@ -122,23 +132,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

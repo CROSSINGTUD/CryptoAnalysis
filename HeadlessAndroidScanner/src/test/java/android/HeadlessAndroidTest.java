@@ -1,3 +1,12 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package android;
 
 import crypto.analysis.errors.AlternativeReqPredicateError;
@@ -15,7 +24,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
     public void testFalseCrypt() {
         // From https://github.com/secure-software-engineering/FalseCrypt
         HeadlessAndroidScanner scanner = createScanner("FalseCrypt.apk");
-        scanner.run();
+        scanner.scan();
 
         addExpectedErrors(ConstraintError.class, 6);
         addExpectedErrors(RequiredPredicateError.class, 7);
@@ -58,7 +67,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -92,7 +101,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -126,7 +135,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -153,7 +162,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -180,7 +189,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 
@@ -207,7 +216,7 @@ public class HeadlessAndroidTest extends AbstractAndroidTest {
         addExpectedErrors(ConstraintError.class, 1);
         addExpectedErrors(TypestateError.class, 1);
 
-        scanner.run();
+        scanner.scan();
         assertErrors(scanner.getCollectedErrors());
     }
 }
