@@ -110,12 +110,6 @@
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.17</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -130,7 +124,6 @@
                         <ignoredUnusedDeclaredDependencies>
                             <!-- The logger api requires a concrete provider that is not used by this project: https://www.slf4j.org/manual.html -->
                             <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-simple</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependencies>org.bouncycastle:bcprov-jdk18on</ignoredUnusedDeclaredDependencies>
                         </ignoredUnusedDeclaredDependencies>
                     </configuration>
                     <executions>
