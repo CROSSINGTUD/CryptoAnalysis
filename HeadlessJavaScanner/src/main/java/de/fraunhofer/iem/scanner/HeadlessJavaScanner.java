@@ -79,7 +79,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void scan() {
         // Read rules
         LOGGER.info("Reading rules from {}", settings.getRulesetPath());
-        Collection<CrySLRule> rules = super.readRules(settings.getRulesetPath());
+        Collection<CrySLRule> rules = readRules(settings.getRulesetPath(), settings.getSootPath());
         LOGGER.info("Found {} rules in {}", rules.size(), settings.getRulesetPath());
 
         // Initialize the reporters before the analysis to catch errors early
