@@ -25,7 +25,9 @@ import crypto.listener.IResultsListener;
 import crypto.predicates.PredicateAnalysis;
 import crysl.CrySLParser;
 import crysl.rule.CrySLRule;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -55,9 +57,21 @@ public class CryptoScanner {
     }
 
     public final Collection<CrySLRule> readRules(String rulesetPath) {
+        return readRules(rulesetPath, "");
+    }
+
+    public final Collection<CrySLRule> readRules(String rulesetPath, String classPath) {
         try {
-            CrySLParser parser = new CrySLParser();
-            return parser.parseRulesFromDirectory(rulesetPath);
+            if (classPath.isEmpty()) {
+                CrySLParser parser = new CrySLParser();
+                return parser.parseRulesFromPath(rulesetPath);
+            } else {
+                Collection<String> pathSplits = Set.of(classPath.split(File.pathSeparator));
+                Collection<Path> paths = pathSplits.stream().map(Path::of).toList();
+
+                CrySLParser parser = new CrySLParser(paths);
+                return parser.parseRulesFromPath(rulesetPath);
+            }
         } catch (IOException e) {
             throw new CryptoAnalysisException("Could not read rules: " + e.getMessage());
         }

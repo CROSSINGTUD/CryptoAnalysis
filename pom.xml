@@ -60,7 +60,7 @@
 
         <spds.version>4.0.0</spds.version>
         <soot.version>4.6.0</soot.version>
-        <crysl.version>4.0.1</crysl.version>
+        <crysl.version>4.0.2</crysl.version>
     </properties>
 
     <dependencyManagement>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.0-jre</version>
+            <version>33.4.6-jre</version>
         </dependency>
         <dependency>
             <groupId>org.soot-oss</groupId>
@@ -110,12 +110,6 @@
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.17</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -130,7 +124,6 @@
                         <ignoredUnusedDeclaredDependencies>
                             <!-- The logger api requires a concrete provider that is not used by this project: https://www.slf4j.org/manual.html -->
                             <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-simple</ignoredUnusedDeclaredDependency>
-                            <ignoredUnusedDeclaredDependencies>org.bouncycastle:bcprov-jdk18on</ignoredUnusedDeclaredDependencies>
                         </ignoredUnusedDeclaredDependencies>
                     </configuration>
                     <executions>
@@ -192,7 +185,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.3</version>
                     <configuration>
                         <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
                         <reuseForks>false</reuseForks>
@@ -202,7 +195,7 @@
                         <dependency>
                             <groupId>org.apache.maven.surefire</groupId>
                             <artifactId>surefire-junit4</artifactId>
-                            <version>3.5.2</version>
+                            <version>3.5.3</version>
                         </dependency>
                         <dependency>
                             <groupId>junit</groupId>
@@ -231,7 +224,7 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>2.44.2</version>
+                    <version>2.44.3</version>
                     <configuration>
                         <pom>
                             <includes>
@@ -271,7 +264,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.14.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>

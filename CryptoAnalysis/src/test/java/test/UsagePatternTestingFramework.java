@@ -103,6 +103,7 @@ public abstract class UsagePatternTestingFramework {
         scanner.addResultsListener(resultsListener);
 
         scanner.scan(frameworkScope, rules);
+        scanner.reset();
 
         // Evaluate results
         Collection<Assertion> unsound = new ArrayList<>();
