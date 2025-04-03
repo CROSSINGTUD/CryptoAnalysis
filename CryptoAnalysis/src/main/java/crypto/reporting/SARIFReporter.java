@@ -62,7 +62,7 @@ public class SARIFReporter extends Reporter {
                                     + error.getRule().getClassName();
                     String errorMarker = error.toErrorMarkerString();
                     int lineNumber = error.getLineNumber();
-                    String statement = error.getErrorStatement().toString();
+
 
                     addResults(
                             violatedRule,
@@ -71,7 +71,6 @@ public class SARIFReporter extends Reporter {
                             methodName,
                             lineNumber,
                             methodName,
-                            statement,
                             errorMarker,
                             richText);
                 }
@@ -130,7 +129,6 @@ public class SARIFReporter extends Reporter {
             String methodName,
             int lineNumber,
             String method,
-            String statement,
             String text,
             String richText) {
         JSONObject result = new JSONObject();
@@ -141,7 +139,8 @@ public class SARIFReporter extends Reporter {
         result.put(SARIFConfig.MESSAGE_KEY, getMessage(text, richText));
         result.put(
                 SARIFConfig.LOCATIONS_KEY,
-                getLocations(c, methodName, lineNumber, method, statement));
+                getLocations(c, methodName, lineNumber, method));
+        result.put(SARIFConfig.LEVEL_KEY, errorType);
         results.put(result);
     }
 
@@ -190,14 +189,13 @@ public class SARIFReporter extends Reporter {
     }
 
     public JSONArray getLocations(
-            WrappedClass c, String methodName, int lineNumber, String method, String statement) {
+            WrappedClass c, String methodName, int lineNumber, String method) {
         JSONArray locations = new JSONArray();
         JSONObject location = new JSONObject();
 
         JSONObject region = new JSONObject();
         region.put(SARIFConfig.START_LINE_KEY, String.valueOf(lineNumber));
         region.put(SARIFConfig.METHOD_KEY, method);
-        region.put(SARIFConfig.STATEMENT_KEY, statement);
 
         JSONObject uri = new JSONObject();
         uri.put(SARIFConfig.URI_KEY, getFileName(c));

@@ -4,7 +4,7 @@ public class SARIFConfig {
 
     public static final String VERSION = "version";
     public static final String SARIF_VERSION = "sarifVersion";
-    public static final String SARIF_VERSION_NUMBER = "2.0.0";
+    public static final String SARIF_VERSION_NUMBER = "2.1.0";
     public static final String VERSION_NUMBER = "1.0.0";
     public static final String RUNS_KEY = "runs";
 
@@ -26,7 +26,7 @@ public class SARIFConfig {
     public static final String MIME_TYPE_VALUE = "text/java";
 
     public static final String RESULTS_KEY = "results";
-    public static final String VIOLATED_RULE_ID_KEY = "violatedRule";
+    public static final String VIOLATED_RULE_ID_KEY = "ruleId";
     public static final String ERROR_TYPE_KEY = "errorType";
     public static final String MESSAGE_KEY = "message";
     public static final String TEXT_KEY = "text";
@@ -54,4 +54,8 @@ public class SARIFConfig {
     public static final String REACHABLE_METHODS_KEY = "reachableMethods";
     public static final String EDGES_IN_CALL_GRAPH_KEY = "edgesInCallGraph";
     public static final String ENTRY_POINTS_KEY = "entryPoints";
+
+    public static final String LEVEL_KEY = "level";
+    public static final String INVOCATIONS_KEY = "invocations";
+    public static final String EXECUTION_SUCCESSFUL_KEY = "executionSuccessful";
 }
