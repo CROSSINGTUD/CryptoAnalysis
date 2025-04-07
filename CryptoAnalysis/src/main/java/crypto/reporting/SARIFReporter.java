@@ -219,10 +219,13 @@ public class SARIFReporter extends Reporter {
         physicalLocation.put(SARIFConfig.ARTIFACT_LOCATION_KEY, uri);
         physicalLocation.put(SARIFConfig.REGION_KEY, region);
 
+
+        String fullyQualifiedLogicalName =
+                c.getFullyQualifiedName().replace(".", "::") + "::" + methodName;
         JSONObject logicalLocation = new JSONObject();
         logicalLocation.put(
                 SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY,
-                c.getName().replace(".", "::") + "::" + methodName);
+                fullyQualifiedLogicalName);
 
 
         location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
