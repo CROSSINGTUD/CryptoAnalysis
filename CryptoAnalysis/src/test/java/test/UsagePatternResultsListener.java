@@ -1,10 +1,19 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test;
 
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.CallGraph;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.CallGraph;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
@@ -14,6 +23,7 @@ import crypto.listener.IResultsListener;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
+import test.assertions.Assertion;
 import test.assertions.ConstraintsEvaluatedAssertion;
 import test.assertions.ConstraintsNotRelevantAssertion;
 import test.assertions.ConstraintsSatisfiedAssertion;
@@ -45,12 +55,12 @@ public class UsagePatternResultsListener implements IResultsListener {
                 Statement statement = stateResult.getStmt();
 
                 Collection<Val> values = seed.getAliasesAtStatement(statement);
-                if (!values.contains(stateResult.getVal())) {
+                if (!values.contains(stateResult.getSeed())) {
                     continue;
                 }
 
                 Collection<State> states = seed.getStatesAtStatement(statement);
-                stateResult.computedStatesAtStatement(states);
+                stateResult.computedStates(states);
             }
         }
     }

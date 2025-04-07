@@ -1,9 +1,18 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.typestate;
 
-import boomerang.scene.ControlFlowGraph;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
 import crysl.rule.CrySLMethod;
 import crysl.rule.StateMachineGraph;
 import crysl.rule.StateNode;
@@ -86,7 +95,7 @@ public class IdealStateMachine {
 
         // Seeds may be generated from other seeds, e.g. SecretKey key = generator.generateKey().
         // In this case, we do a transition -1 -> 0
-        if (statement.isAssign() && !invokeExpr.isStaticInvokeExpr()) {
+        if (statement.isAssignStmt() && !invokeExpr.isStaticInvokeExpr()) {
             for (LabeledMatcherTransition transition : initialTransitions) {
                 if (transition.to().toString().equals("0")) {
                     return new TransitionFunction(transition, Collections.singleton(edge));

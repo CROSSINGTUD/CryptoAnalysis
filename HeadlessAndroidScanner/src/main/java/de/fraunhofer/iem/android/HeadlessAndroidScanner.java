@@ -1,19 +1,34 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package de.fraunhofer.iem.android;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.FrameworkScope;
+import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
+import crypto.reporting.ReporterFactory;
+import crysl.rule.CrySLRule;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HeadlessAndroidScanner extends CryptoScanner {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessAndroidScanner.class);
+
     private final AndroidSettings settings;
-    private FlowDroidSetup flowDroidSetup;
 
     public HeadlessAndroidScanner(
             String apkFile, String platformsDirectory, String rulesetDirectory) {
@@ -37,34 +52,36 @@ public class HeadlessAndroidScanner extends CryptoScanner {
         return new HeadlessAndroidScanner(androidSettings);
     }
 
-    @Override
-    public String getRulesetPath() {
-        return settings.getRulesetDirectory();
-    }
+    public void scan() {
+        LOGGER.info("Reading rules from {}", settings.getRulesetDirectory());
+        Collection<CrySLRule> rules = super.readRules(settings.getRulesetDirectory());
+        LOGGER.info("Found {} rules in {}", rules.size(), settings.getRulesetDirectory());
 
-    @Override
-    public CallGraph constructCallGraph() {
-        return flowDroidSetup.constructCallGraph(super.getRuleset());
-    }
+        // Initialize the reporters before the analysis to catch errors early
+        Collection<Reporter> reporters =
+                ReporterFactory.createReporters(
+                        settings.getReportFormats(), settings.getReportPath(), rules);
 
-    @Override
-    public DataFlowScope createDataFlowScope() {
-        return new AndroidDataFlowScope(super.getRuleset(), Collections.emptySet());
-    }
-
-    public void run() {
-        flowDroidSetup = new FlowDroidSetup(settings.getApkFile(), settings.getPlatformDirectory());
+        // Setup FlowDroid
+        FlowDroidSetup flowDroidSetup =
+                new FlowDroidSetup(settings.getApkFile(), settings.getPlatformDirectory());
         flowDroidSetup.setupFlowDroid();
         additionalFrameworkSetup();
 
-        // Initialize fields
-        super.initialize();
+        DataFlowScope dataFlowScope =
+                new CryptoAnalysisDataFlowScope(rules, Collections.emptySet());
+        super.getAnalysisReporter().beforeCallGraphConstruction();
+        FrameworkScope frameworkScope = flowDroidSetup.createFrameworkScope(dataFlowScope);
+        super.getAnalysisReporter().afterCallGraphConstruction(frameworkScope.getCallGraph());
 
         // Run the analysis
-        super.scan();
+        super.scan(frameworkScope, rules);
 
         // Report the errors
-        super.createReports(getReportFormats(), getReportDirectory(), isVisualization());
+        for (Reporter reporter : reporters) {
+            reporter.createAnalysisReport(
+                    super.getDiscoveredSeeds(), super.getCollectedErrors(), super.getStatistics());
+        }
     }
 
     public String getApkFile() {
@@ -73,6 +90,10 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
     public String getPlatformDirectory() {
         return settings.getPlatformDirectory();
+    }
+
+    public String getRulesetPath() {
+        return settings.getRulesetDirectory();
     }
 
     public Collection<Reporter.ReportFormat> getReportFormats() {

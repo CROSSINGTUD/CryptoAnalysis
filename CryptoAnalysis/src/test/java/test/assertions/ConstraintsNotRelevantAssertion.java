@@ -1,9 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test.assertions;
 
-import boomerang.scene.Val;
+import boomerang.scope.Val;
 import crypto.constraints.EvaluableConstraint;
 import java.util.Collection;
-import test.Assertion;
 
 public class ConstraintsNotRelevantAssertion implements Assertion {
 
@@ -26,17 +34,17 @@ public class ConstraintsNotRelevantAssertion implements Assertion {
     }
 
     @Override
-    public boolean isSatisfied() {
-        return expectedConstraints == actualConstraints;
+    public boolean isUnsound() {
+        return expectedConstraints > actualConstraints;
     }
 
     @Override
     public boolean isImprecise() {
-        return expectedConstraints != actualConstraints;
+        return expectedConstraints < actualConstraints;
     }
 
     @Override
-    public String toString() {
+    public String getErrorMessage() {
         return "Expected "
                 + expectedConstraints
                 + " irrelevant constraints on object "

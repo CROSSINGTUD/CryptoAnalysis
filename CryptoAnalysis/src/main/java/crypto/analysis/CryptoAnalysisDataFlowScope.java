@@ -1,8 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis;
 
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Method;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Method;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CryptoAnalysisDataFlowScope.class);
-    private static final String STRING_CLASS = "java.lang.String";
 
     private final Collection<String> ruleNames;
     private final Collection<String> ignoredSections;
@@ -29,13 +37,9 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     @Override
     public boolean isExcluded(DeclaredMethod method) {
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
 
         if (!method.getDeclaringClass().isApplicationClass()) {
-            return true;
-        }
-
-        if (declaringClassName.contains(STRING_CLASS)) {
             return true;
         }
 
@@ -48,13 +52,9 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     @Override
     public boolean isExcluded(Method method) {
-        String declaringClassName = method.getDeclaringClass().getName();
+        String declaringClassName = method.getDeclaringClass().getFullyQualifiedName();
 
         if (!method.getDeclaringClass().isApplicationClass()) {
-            return true;
-        }
-
-        if (declaringClassName.contains(STRING_CLASS)) {
             return true;
         }
 
@@ -66,14 +66,14 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
     }
 
     private boolean isOnIgnoredSectionList(Method method) {
-        String declaringClass = method.getDeclaringClass().getName();
+        String declaringClass = method.getDeclaringClass().getFullyQualifiedName();
         String methodName = declaringClass + "." + method.getName();
 
         return isOnIgnoredSectionList(declaringClass, methodName);
     }
 
     private boolean isOnIgnoredSectionList(DeclaredMethod declaredMethod) {
-        String declaringClass = declaredMethod.getDeclaringClass().getName();
+        String declaringClass = declaredMethod.getDeclaringClass().getFullyQualifiedName();
         String methodName = declaringClass + "." + declaredMethod.getName();
 
         return isOnIgnoredSectionList(declaringClass, methodName);

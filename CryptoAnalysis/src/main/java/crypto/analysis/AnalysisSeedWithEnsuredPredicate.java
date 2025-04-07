@@ -1,9 +1,18 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scene.InvokeExpr;
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.InvokeExpr;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.predicates.AbstractPredicate;

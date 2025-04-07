@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.fraunhofer.iem</groupId>
         <artifactId>CryptoAnalysis-Parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -38,6 +38,7 @@
     </scm>
 
     <properties>
+        <license.dir>${project.parent.basedir}</license.dir>
         <flowDroidVersion>2.14.1</flowDroidVersion>
     </properties>
 
@@ -47,13 +48,13 @@
             <artifactId>CryptoAnalysis</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow</artifactId>
-            <version>${flowDroidVersion}</version>
+            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+            <artifactId>CrySLParser</artifactId>
+            <version>${crysl.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
-            <artifactId>soot-infoflow-summaries</artifactId>
+            <artifactId>soot-infoflow</artifactId>
             <version>${flowDroidVersion}</version>
         </dependency>
         <dependency>
@@ -64,6 +65,12 @@
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Soot</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -85,23 +92,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

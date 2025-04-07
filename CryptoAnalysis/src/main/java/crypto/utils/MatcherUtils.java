@@ -1,7 +1,16 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.utils;
 
-import boomerang.scene.DeclaredMethod;
-import boomerang.scene.Type;
+import boomerang.scope.DeclaredMethod;
+import boomerang.scope.Type;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLRule;
 import java.util.ArrayList;
@@ -33,7 +42,7 @@ public class MatcherUtils {
         // '<init>'
         if (declaredMethod.isConstructor()) {
             // Strip the plain class name: java.lang.Object -> Object
-            String className = declaredMethod.getDeclaringClass().getName();
+            String className = declaredMethod.getDeclaringClass().getFullyQualifiedName();
             declaredName = className.substring(className.lastIndexOf(".") + 1);
         }
 

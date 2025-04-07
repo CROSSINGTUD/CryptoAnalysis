@@ -1,50 +1,48 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package test.assertions.states;
 
-import boomerang.scene.Statement;
-import boomerang.scene.Val;
+import boomerang.scope.Statement;
+import boomerang.scope.Val;
 import java.util.Collection;
-import test.Assertion;
 import typestate.finiteautomata.State;
 
-public class MayBeInAcceptingStateAssertion implements Assertion, StateResult {
+public class MayBeInAcceptingStateAssertion extends StateResult {
 
-    private final Statement statement;
-    private final Val val;
     private boolean satisfied;
+    private boolean checked;
 
     public MayBeInAcceptingStateAssertion(Statement statement, Val val) {
-        this.statement = statement;
-        this.val = val;
+        super(statement, val);
+
         this.satisfied = false;
+        this.checked = false;
     }
 
-    public Val getVal() {
-        return val;
-    }
-
-    public Statement getStmt() {
-        return statement;
-    }
-
-    public void computedStatesAtStatement(Collection<State> states) {
+    @Override
+    public void computedStates(Collection<State> states) {
+        // Check if any state is accepting
         for (State state : states) {
             satisfied |= state.isAccepting();
         }
+        checked = true;
     }
 
     @Override
-    public boolean isSatisfied() {
-        return satisfied;
+    public boolean isUnsound() {
+        return !checked || !satisfied;
     }
 
     @Override
-    public boolean isImprecise() {
-        return false;
-    }
-
-    @Override
-    public String toString() {
-        return val.getVariableName()
+    public String getErrorMessage() {
+        return seed.getVariableName()
                 + " @ "
                 + statement
                 + " @ line "

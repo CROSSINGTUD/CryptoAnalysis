@@ -1,0 +1,29 @@
+name: Maven Dependency Check
+description: Runs Maven's dependency analysis to identify unused and undeclared dependencies and fails the build if there are any warnings.
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  analyze-dependencies:
+    runs-on: ubuntu-latest
+    name: Analyze Dependencies
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # Set up Java version
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: adopt
+          java-package: jdk
+          java-version: 17
+      # Restores Maven dependencies
+      - name: Restore local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run dependency analysis
+        run: mvn dependency:analyze -DfailOnWarning

@@ -1,3 +1,12 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.visualization;
 
 import crypto.analysis.IAnalysisSeed;
@@ -41,8 +50,7 @@ public class Visualizer {
         }
     }
 
-    public void createVisualization(Collection<IAnalysisSeed> seeds)
-            throws ExecuteException, IOException {
+    public void createVisualization(Collection<IAnalysisSeed> seeds) throws IOException {
 
         Graphviz.GraphvizBuilder builder = Graphviz.digraph();
 
@@ -71,10 +79,14 @@ public class Visualizer {
         }
 
         Graphviz graphviz = builder.build();
-        graphviz.toFile(FileType.PNG).save(outputFile.getAbsolutePath(), VISUALIZATION_NAME);
-        LOGGER.info(
-                "Written visualization to {}",
-                outputFile.getAbsolutePath() + File.separator + VISUALIZATION_NAME + ".png");
+        try {
+            graphviz.toFile(FileType.PNG).save(outputFile.getAbsolutePath(), VISUALIZATION_NAME);
+            LOGGER.info(
+                    "Written visualization to {}",
+                    outputFile.getAbsolutePath() + File.separator + VISUALIZATION_NAME + ".png");
+        } catch (ExecuteException e) {
+            LOGGER.error("Could not create visualization: {}", e.getMessage());
+        }
     }
 
     private Cluster createClusterForSeed(

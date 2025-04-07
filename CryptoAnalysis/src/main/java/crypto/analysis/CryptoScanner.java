@@ -1,10 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.analysis;
 
-import boomerang.scene.CallGraph;
-import boomerang.scene.DataFlowScope;
-import boomerang.scene.Method;
-import boomerang.scene.WrappedClass;
-import boomerang.scene.sparse.SparseCFGCache;
+import boomerang.scope.FrameworkScope;
+import boomerang.scope.Method;
+import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.exceptions.CryptoAnalysisException;
@@ -16,34 +23,29 @@ import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crypto.predicates.PredicateAnalysis;
-import crypto.reporting.Reporter;
-import crypto.reporting.ReporterFactory;
-import crypto.visualization.Visualizer;
 import crysl.CrySLParser;
 import crysl.rule.CrySLRule;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.graphper.draw.ExecuteException;
+import sparse.SparsificationStrategy;
 
-public abstract class CryptoScanner {
+public class CryptoScanner {
 
     private final AnalysisReporter analysisReporter;
-    private final AnalysisPrinter analysisPrinter;
-    private final ErrorCollector errorCollector;
     private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds;
 
-    private CallGraph callGraph;
-    private Collection<CrySLRule> ruleset;
-    private DataFlowScope dataFlowScope;
+    private AnalysisPrinter analysisPrinter;
+    private ErrorCollector errorCollector;
 
-    protected CryptoScanner() {
+    public CryptoScanner() {
         this.analysisReporter = new AnalysisReporter();
         this.discoveredSeeds = new HashMap<>();
 
@@ -54,45 +56,32 @@ public abstract class CryptoScanner {
         addErrorListener(errorCollector);
     }
 
-    protected final void initialize() {
-        // Read the ruleset
-        analysisReporter.beforeReadingRuleset(getRulesetPath());
+    public final Collection<CrySLRule> readRules(String rulesetPath) {
+        return readRules(rulesetPath, "");
+    }
+
+    public final Collection<CrySLRule> readRules(String rulesetPath, String classPath) {
         try {
-            CrySLParser parser = new CrySLParser();
-            ruleset = parser.parseRulesFromDirectory(getRulesetPath());
+            if (classPath.isEmpty()) {
+                CrySLParser parser = new CrySLParser();
+                return parser.parseRulesFromPath(rulesetPath);
+            } else {
+                Collection<String> pathSplits = Set.of(classPath.split(File.pathSeparator));
+                Collection<Path> paths = pathSplits.stream().map(Path::of).toList();
+
+                CrySLParser parser = new CrySLParser(paths);
+                return parser.parseRulesFromPath(rulesetPath);
+            }
         } catch (IOException e) {
             throw new CryptoAnalysisException("Could not read rules: " + e.getMessage());
         }
-        analysisReporter.afterReadingRuleset(getRulesetPath(), ruleset);
-
-        // Construct the call graph
-        analysisReporter.beforeCallGraphConstruction();
-        callGraph = constructCallGraph();
-        analysisReporter.afterCallGraphConstruction(callGraph);
-
-        // Initialize the dataflow scope
-        dataFlowScope = createDataFlowScope();
     }
 
-    protected final void scan() {
-        // Check whether the fields have been initialized correctly
-        if (ruleset == null) {
-            throw new CryptoAnalysisException(
-                    "Cannot start the scan. The ruleset must not be null");
-        }
-        if (callGraph == null) {
-            throw new CryptoAnalysisException(
-                    "Cannot start the scan. The call graph must not be null");
-        }
-        if (dataFlowScope == null) {
-            throw new CryptoAnalysisException(
-                    "Cannot start the scan. The dataflow scope must not be null");
-        }
-
+    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> ruleset) {
         // Start analysis
         analysisReporter.beforeAnalysis();
 
-        SeedGenerator generator = new SeedGenerator(this, ruleset);
+        SeedGenerator generator = new SeedGenerator(this, frameworkScope, ruleset);
         List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
         analysisReporter.onDiscoveredSeeds(seeds);
 
@@ -113,56 +102,12 @@ public abstract class CryptoScanner {
         analysisReporter.afterAnalysis();
     }
 
-    protected final void createReports(
-            Collection<Reporter.ReportFormat> formats,
-            String reportDirectory,
-            boolean visualization) {
-        if (reportDirectory == null
-                && formats.stream()
-                        .anyMatch(
-                                e ->
-                                        Set.of(
-                                                        Reporter.ReportFormat.TXT,
-                                                        Reporter.ReportFormat.CSV,
-                                                        Reporter.ReportFormat.CSV_SUMMARY,
-                                                        Reporter.ReportFormat.SARIF)
-                                                .contains(e))) {
-            throw new RuntimeException("Cannot create report without existing report directory");
-        }
+    public final void reset() {
+        analysisPrinter = new AnalysisPrinter();
+        addAnalysisListener(analysisPrinter);
 
-        if (visualization && reportDirectory == null) {
-            throw new RuntimeException(
-                    "Cannot create visualization without existing report directory");
-        }
-
-        Collection<Reporter> reporters =
-                ReporterFactory.createReporters(formats, reportDirectory, ruleset);
-        for (Reporter reporter : reporters) {
-            reporter.createAnalysisReport(
-                    getDiscoveredSeeds(), getCollectedErrors(), getStatistics());
-        }
-
-        if (visualization) {
-            try {
-                Visualizer visualizer = new Visualizer(reportDirectory);
-                visualizer.createVisualization(getDiscoveredSeeds());
-            } catch (IOException | ExecuteException e) {
-                throw new CryptoAnalysisException(
-                        "Couldn't create visualization: " + e.getMessage());
-            }
-        }
-    }
-
-    public final Collection<CrySLRule> getRuleset() {
-        return ruleset;
-    }
-
-    public final CallGraph getCallGraph() {
-        return callGraph;
-    }
-
-    public final DataFlowScope getDataFlowScope() {
-        return dataFlowScope;
+        errorCollector = new ErrorCollector();
+        addErrorListener(errorCollector);
     }
 
     public final void addAnalysisListener(IAnalysisListener analysisListener) {
@@ -208,19 +153,11 @@ public abstract class CryptoScanner {
      *               Methods that may or must be overridden by subclasses                *
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    public abstract String getRulesetPath();
-
-    protected abstract CallGraph constructCallGraph();
-
-    protected DataFlowScope createDataFlowScope() {
-        return new CryptoAnalysisDataFlowScope(ruleset, Collections.emptySet());
-    }
-
-    public SparseCFGCache.SparsificationStrategy getSparsificationStrategy() {
-        return SparseCFGCache.SparsificationStrategy.NONE;
+    public SparsificationStrategy<?, ?> getSparsificationStrategy() {
+        return SparsificationStrategy.NONE;
     }
 
     public int getTimeout() {
-        return 10000;
+        return -1;
     }
 }

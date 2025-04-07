@@ -1,8 +1,17 @@
+/********************************************************************************
+ * Copyright (c) 2017 Fraunhofer IEM, Paderborn, Germany
+ * <p>
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ * <p>
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 package crypto.extractparameter.scope;
 
-import boomerang.scene.Type;
-import boomerang.scene.Val;
-import boomerang.scene.WrappedClass;
+import boomerang.scope.Type;
+import boomerang.scope.Val;
+import boomerang.scope.WrappedClass;
 import java.util.Arrays;
 
 public class StringType implements Type {

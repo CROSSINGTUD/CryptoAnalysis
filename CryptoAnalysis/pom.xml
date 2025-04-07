@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.fraunhofer.iem</groupId>
         <artifactId>CryptoAnalysis-Parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -37,26 +37,52 @@
         <url>https://github.com/CROSSINGTUD/CryptoAnalysis</url>
     </scm>
 
+    <properties>
+        <license.dir>${project.parent.basedir}</license.dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Soot</artifactId>
+            <version>${spds.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>idealPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
-            <artifactId>testCore</artifactId>
+            <artifactId>synchronizedPDS</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>WPDS</artifactId>
+            <version>${spds.version}</version>
         </dependency>
         <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
+            <version>${crysl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>soot</artifactId>
+            <version>${soot.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
@@ -67,18 +93,44 @@
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.18.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.18.2</version>
+            <version>2.18.3</version>
         </dependency>
         <dependency>
             <groupId>org.graphper</groupId>
             <artifactId>graph-support</artifactId>
             <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.17.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.crypto.tink</groupId>
+            <artifactId>tink</artifactId>
+            <version>1.17.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -86,23 +138,7 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
