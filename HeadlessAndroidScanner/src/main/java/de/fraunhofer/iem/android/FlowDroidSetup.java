@@ -35,11 +35,14 @@ public class FlowDroidSetup {
 
     private final File apkFile;
     private final File platformDir;
+    private final AndroidSettings.CallGraphAlgorithm cgAlgorithm;
     private SetupApplication flowDroid;
 
-    public FlowDroidSetup(String apkFile, String platformDir) {
+    public FlowDroidSetup(
+            String apkFile, String platformDir, AndroidSettings.CallGraphAlgorithm cgAlgorithm) {
         this.apkFile = new File(apkFile);
         this.platformDir = new File(platformDir);
+        this.cgAlgorithm = cgAlgorithm;
     }
 
     public void setupFlowDroid() {
@@ -65,7 +68,9 @@ public class FlowDroidSetup {
 
     private SetupApplication initializeFlowDroid() {
         InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
-        config.setCallgraphAlgorithm(InfoflowConfiguration.CallgraphAlgorithm.CHA);
+
+        InfoflowConfiguration.CallgraphAlgorithm algorithm = initCallGraphAlgorithm();
+        config.setCallgraphAlgorithm(algorithm);
         config.setCodeEliminationMode(InfoflowConfiguration.CodeEliminationMode.NoCodeElimination);
         config.getAnalysisFileConfig().setAndroidPlatformDir(platformDir);
         config.getAnalysisFileConfig().setTargetAPKFile(apkFile);
@@ -78,6 +83,15 @@ public class FlowDroidSetup {
         app.setSootConfig(initSootConfig());
 
         return app;
+    }
+
+    private InfoflowConfiguration.CallgraphAlgorithm initCallGraphAlgorithm() {
+        return switch (cgAlgorithm) {
+            case CHA -> InfoflowConfiguration.CallgraphAlgorithm.CHA;
+            case RTA -> InfoflowConfiguration.CallgraphAlgorithm.RTA;
+            case VTA -> InfoflowConfiguration.CallgraphAlgorithm.VTA;
+            case SPARK -> InfoflowConfiguration.CallgraphAlgorithm.SPARK;
+        };
     }
 
     private SootConfigForAndroid initSootConfig() {

@@ -11,7 +11,6 @@ package de.fraunhofer.iem.android;
 
 import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
-import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
@@ -64,12 +63,14 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
         // Setup FlowDroid
         FlowDroidSetup flowDroidSetup =
-                new FlowDroidSetup(settings.getApkFile(), settings.getPlatformDirectory());
+                new FlowDroidSetup(
+                        settings.getApkFile(),
+                        settings.getPlatformDirectory(),
+                        settings.getCallGraphAlgorithm());
         flowDroidSetup.setupFlowDroid();
         additionalFrameworkSetup();
 
-        DataFlowScope dataFlowScope =
-                new CryptoAnalysisDataFlowScope(rules, Collections.emptySet());
+        DataFlowScope dataFlowScope = new AndroidDataFlowScope(rules, Collections.emptySet());
         super.getAnalysisReporter().beforeCallGraphConstruction();
         FrameworkScope frameworkScope = flowDroidSetup.createFrameworkScope(dataFlowScope);
         super.getAnalysisReporter().afterCallGraphConstruction(frameworkScope.getCallGraph());
@@ -94,6 +95,14 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
     public String getRulesetPath() {
         return settings.getRulesetDirectory();
+    }
+
+    public AndroidSettings.CallGraphAlgorithm getCallGraphAlgorithm() {
+        return settings.getCallGraphAlgorithm();
+    }
+
+    public void setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm algorithm) {
+        settings.setCallGraphAlgorithm(algorithm);
     }
 
     public Collection<Reporter.ReportFormat> getReportFormats() {

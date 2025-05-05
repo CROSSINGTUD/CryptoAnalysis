@@ -165,9 +165,12 @@ java -jar HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar
       --platformDirectory <path-to-android-platform>
       --appPath <application-path>
 ```
-Optional parameters are `--reportPath` and `--reportFormat`. They have the same functionality as the `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar` (see above).
 
-If specified, the analysis generates a report file `CogniCrypt-Report.txt` along with the `.jimple` output of the classes the analysis found misuses in. The format of the report file follows that described above.
+Optional arguments are:
+* `--cg`: The call graph algorithm to use. Possible values are {CHA, RTA, VTA, SPARK}
+* `--reportPath`: Path to a directory to store the reports
+* `--reportFormat`: Report format(s)
+The arguments `--reportPath` and `--reportFormat` have the same functionality as the `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar` (see above).
 
 Again, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
 
