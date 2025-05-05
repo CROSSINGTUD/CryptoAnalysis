@@ -11,6 +11,7 @@ package settings;
 
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
+import de.fraunhofer.iem.android.AndroidSettings;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.util.Set;
 import org.junit.Assert;
@@ -26,6 +27,12 @@ public class CommandLineTest {
 
     private static final String RULES_DIR = "--rulesDir";
     private static final String EXAMPLE_RULES_DIR = "path/to/rules";
+
+    private static final String CG = "--cg";
+    private static final String CHA = "CHA";
+    private static final String RTA = "RTA";
+    private static final String VTA = "VTA";
+    private static final String SPARK = "SPARK";
 
     private static final String REPORT_PATH = "--reportPath";
     private static final String REPORT_FORMAT = "--reportFormat";
@@ -77,6 +84,106 @@ public class CommandLineTest {
 
         Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
         Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+    }
+
+    @Test
+    public void testDefaultCallGraph() {
+        String[] args =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR
+                };
+        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+
+        Assert.assertEquals(
+                scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+    }
+
+    @Test(expected = CryptoAnalysisParserException.class)
+    public void testWrongCallGraph() {
+        String[] args =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    CG,
+                    "superGraph"
+                };
+        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+
+        Assert.assertEquals(
+                scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+    }
+
+    @Test
+    public void testCallGraph() {
+        String[] chaArgs =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    CG,
+                    CHA
+                };
+        HeadlessAndroidScanner chaScanner = HeadlessAndroidScanner.createFromCLISettings(chaArgs);
+        Assert.assertEquals(
+                chaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+
+        String[] rtaArgs =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    CG,
+                    RTA
+                };
+        HeadlessAndroidScanner rtaScanner = HeadlessAndroidScanner.createFromCLISettings(rtaArgs);
+        Assert.assertEquals(
+                rtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.RTA);
+
+        String[] vtaArgs =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    CG,
+                    VTA
+                };
+        HeadlessAndroidScanner vtaScanner = HeadlessAndroidScanner.createFromCLISettings(vtaArgs);
+        Assert.assertEquals(
+                vtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.VTA);
+
+        String[] sparkArgs =
+                new String[] {
+                    APK_PATH,
+                    EXAMPLE_APK_PATH,
+                    PLATFORM_PATH,
+                    EXAMPLE_PLATFORM_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    CG,
+                    SPARK
+                };
+        HeadlessAndroidScanner sparkScanner =
+                HeadlessAndroidScanner.createFromCLISettings(sparkArgs);
+        Assert.assertEquals(
+                sparkScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.SPARK);
     }
 
     @Test
