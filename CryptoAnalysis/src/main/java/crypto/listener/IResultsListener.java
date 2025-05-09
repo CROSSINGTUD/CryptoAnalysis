@@ -21,7 +21,7 @@ import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
 import typestate.TransitionFunction;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 public interface IResultsListener {
 
@@ -31,7 +31,7 @@ public interface IResultsListener {
             IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results);
 
     void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results);
+            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results);
 
     void extractedParameterValues(
             IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues);

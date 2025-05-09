@@ -34,7 +34,7 @@ import test.assertions.NotHasEnsuredPredicateAssertion;
 import test.assertions.states.StateResult;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 public class UsagePatternResultsListener implements IResultsListener {
 
@@ -67,7 +67,7 @@ public class UsagePatternResultsListener implements IResultsListener {
 
     @Override
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {}
+            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {}
 
     @Override
     public void extractedParameterValues(
