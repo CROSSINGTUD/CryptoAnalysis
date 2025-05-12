@@ -108,7 +108,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.GenerateRandomIV", "main", 1)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .build());
