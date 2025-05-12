@@ -10,6 +10,7 @@
 package settings;
 
 import crypto.reporting.Reporter;
+import de.fraunhofer.iem.android.AndroidSettings;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.util.Set;
 import org.junit.Assert;
@@ -30,6 +31,39 @@ public class ProgramTest {
         Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
         Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
         Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+        Assert.assertEquals(
+                scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+    }
+
+    @Test
+    public void testCallGraph() {
+        HeadlessAndroidScanner chaScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        chaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.CHA);
+        Assert.assertEquals(
+                chaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+
+        HeadlessAndroidScanner rtaScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        rtaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.RTA);
+        Assert.assertEquals(
+                rtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.RTA);
+
+        HeadlessAndroidScanner vtaScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        vtaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.VTA);
+        Assert.assertEquals(
+                vtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.VTA);
+
+        HeadlessAndroidScanner sparkScanner =
+                new HeadlessAndroidScanner(
+                        EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
+        sparkScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.SPARK);
+        Assert.assertEquals(
+                sparkScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.SPARK);
     }
 
     @Test

@@ -6,6 +6,12 @@
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+        <file>
+            <source>src/main/resources/plugin.properties</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+    </files>
     <dependencySets>
         <dependencySet>
             <outputDirectory>/</outputDirectory>
