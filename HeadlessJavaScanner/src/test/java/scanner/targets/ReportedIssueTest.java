@@ -77,7 +77,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue70.ClientProtocolDecoder", "decryptAES", 1)
-                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 2)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .build());
