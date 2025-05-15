@@ -29,8 +29,9 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import typestate.TransitionFunction;
-import typestate.finiteautomata.ITransition;
+import typestate.TransitionFunctionImpl;
 import typestate.finiteautomata.State;
+import typestate.finiteautomata.Transition;
 
 public abstract class IAnalysisSeed implements IPredicateCheckListener {
 
@@ -79,18 +80,20 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
         Collection<TransitionFunction> transitions =
                 statementValWeightTable.row(statement).values();
         for (TransitionFunction transition : transitions) {
-            Collection<State> targetStates = getTargetStates(transition);
+            if (transition instanceof TransitionFunctionImpl transitionImpl) {
+                Collection<State> targetStates = getTargetStates(transitionImpl);
 
-            states.addAll(targetStates);
+                states.addAll(targetStates);
+            }
         }
 
         return states;
     }
 
-    private Collection<State> getTargetStates(TransitionFunction transitionFunction) {
+    private Collection<State> getTargetStates(TransitionFunctionImpl transitionFunction) {
         Collection<State> states = new HashSet<>();
 
-        for (ITransition transition : transitionFunction.values()) {
+        for (Transition transition : transitionFunction.getValues()) {
             states.add(transition.to());
         }
 

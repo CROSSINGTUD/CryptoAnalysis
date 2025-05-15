@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 public class TypestateAnalysisScope extends AnalysisScope {
 
@@ -63,7 +63,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
         }
 
         InvokeExpr invokeExpr = statement.getInvokeExpr();
-        DeclaredMethod declaredMethod = invokeExpr.getMethod();
+        DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
 
         Collection<ForwardSeedQuery> discoveredSeeds = new HashSet<>();
 
@@ -160,7 +160,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
         RuleTransitions rightSideRule = ruleTransitions.get(baseType);
         Collection<CrySLMethod> methods =
                 MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                        rightSideRule.getRule(), stmt.getInvokeExpr().getMethod());
+                        rightSideRule.getRule(), stmt.getInvokeExpr().getDeclaredMethod());
 
         if (methods.isEmpty()) {
             return seeds;
@@ -190,7 +190,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
         Collection<ForwardSeedQuery> seeds = new HashSet<>();
 
         CrySLRule baseTypeRule = ruleTransitions.get(baseType).getRule();
-        DeclaredMethod declaredMethod = stmt.getInvokeExpr().getMethod();
+        DeclaredMethod declaredMethod = stmt.getInvokeExpr().getDeclaredMethod();
         Collection<CrySLMethod> methods =
                 MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(baseTypeRule, declaredMethod);
 
@@ -220,8 +220,7 @@ public class TypestateAnalysisScope extends AnalysisScope {
                     BackwardQuery backwardQuery = BackwardQuery.make(backwardsEdge, paramVal);
                     Boomerang boomerang = new Boomerang(frameworkScope, options);
 
-                    BackwardBoomerangResults<Weight.NoWeight> results =
-                            boomerang.solve(backwardQuery);
+                    BackwardBoomerangResults<NoWeight> results = boomerang.solve(backwardQuery);
 
                     // TODO What happens when no value is found?
                     for (ForwardQuery query : results.getAllocationSites().keySet()) {
@@ -263,7 +262,8 @@ public class TypestateAnalysisScope extends AnalysisScope {
         Val rightOp = stmt.getRightOp();
 
         RuleTransitions rightSideRule = ruleTransitions.get(baseType);
-        if (isSeedGeneratingAssignment(rightSideRule.getRule(), stmt.getInvokeExpr().getMethod())) {
+        if (isSeedGeneratingAssignment(
+                rightSideRule.getRule(), stmt.getInvokeExpr().getDeclaredMethod())) {
             AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
             String leftClassName = leftOp.getType().toString();
 

@@ -34,7 +34,7 @@ import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
 import java.util.HashSet;
 import typestate.TransitionFunction;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 public class AnalysisReporter {
 
@@ -113,7 +113,7 @@ public class AnalysisReporter {
     }
 
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {
         for (IResultsListener listener : resultsListeners) {
             listener.extractedBoomerangResults(query, results);
         }

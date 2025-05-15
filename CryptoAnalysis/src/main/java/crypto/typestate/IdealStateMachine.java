@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import typestate.TransitionFunction;
+import typestate.TransitionFunctionImpl;
 
 /**
  * State machine that wraps a {@link StateMachineGraph} from a {@link crysl.rule.CrySLRule} and
@@ -82,14 +83,14 @@ public class IdealStateMachine {
             LabeledMatcherTransition transition =
                     new LabeledMatcherTransition(startNode, Collections.emptySet(), errorStateNode);
 
-            return new TransitionFunction(transition, Collections.singleton(edge));
+            return new TransitionFunctionImpl(transition, Collections.singleton(edge));
         }
 
         InvokeExpr invokeExpr = statement.getInvokeExpr();
-        DeclaredMethod declaredMethod = invokeExpr.getMethod();
+        DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
         for (LabeledMatcherTransition transition : initialTransitions) {
             if (transition.getMatching(declaredMethod).isPresent()) {
-                return new TransitionFunction(transition, Collections.singleton(edge));
+                return new TransitionFunctionImpl(transition, Collections.singleton(edge));
             }
         }
 
@@ -98,7 +99,7 @@ public class IdealStateMachine {
         if (statement.isAssignStmt() && !invokeExpr.isStaticInvokeExpr()) {
             for (LabeledMatcherTransition transition : initialTransitions) {
                 if (transition.to().toString().equals("0")) {
-                    return new TransitionFunction(transition, Collections.singleton(edge));
+                    return new TransitionFunctionImpl(transition, Collections.singleton(edge));
                 }
             }
         }
@@ -114,7 +115,7 @@ public class IdealStateMachine {
 
         LabeledMatcherTransition transition =
                 new LabeledMatcherTransition(startNode, expectedInitialMethods, errorState);
-        return new TransitionFunction(transition, Collections.singleton(edge));
+        return new TransitionFunctionImpl(transition, Collections.singleton(edge));
     }
 
     public Collection<LabeledMatcherTransition> getAllTransitions() {

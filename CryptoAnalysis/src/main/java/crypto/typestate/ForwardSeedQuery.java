@@ -15,6 +15,7 @@ import boomerang.scope.ControlFlowGraph;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
 import typestate.TransitionFunction;
+import typestate.TransitionFunctionOne;
 
 public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
 
@@ -37,7 +38,8 @@ public class ForwardSeedQuery extends WeightedForwardQuery<TransitionFunction> {
 
     public static ForwardSeedQuery makeQueryWithoutSpecification(
             ControlFlowGraph.Edge stmt, AllocVal fact) {
-        return new ForwardSeedQuery(stmt, fact, TransitionFunction.one(), RuleTransitions.of(null));
+        return new ForwardSeedQuery(
+                stmt, fact, TransitionFunctionOne.one(), RuleTransitions.of(null));
     }
 
     public boolean hasSpecification() {

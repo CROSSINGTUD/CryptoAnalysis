@@ -110,7 +110,7 @@ public class IncompleteOperationError extends AbstractOrderError {
         msg.append("Call to ");
 
         InvokeExpr invokeExpr = statement.getInvokeExpr();
-        msg.append(invokeExpr.getMethod().getName());
+        msg.append(invokeExpr.getDeclaredMethod().getName());
         msg.append(getObjectType());
         msg.append(
                 " is on a dataflow path with an incomplete operation. Potential missing call to one of the methods ");
