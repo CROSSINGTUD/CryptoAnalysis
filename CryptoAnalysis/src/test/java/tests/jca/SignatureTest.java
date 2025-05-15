@@ -17,7 +17,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import org.bouncycastle.util.encoders.Hex;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

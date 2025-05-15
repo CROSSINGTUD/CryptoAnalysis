@@ -10,7 +10,7 @@
 package tests.jca;
 
 import javax.servlet.http.Cookie;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

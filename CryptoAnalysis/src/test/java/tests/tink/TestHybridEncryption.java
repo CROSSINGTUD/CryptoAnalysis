@@ -17,12 +17,12 @@ import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.assertions.Assertions;
 
-@Ignore
+@Disabled
 public class TestHybridEncryption extends TestTinkPrimitives {
 
     @Override

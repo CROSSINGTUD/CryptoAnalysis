@@ -15,12 +15,12 @@ import com.google.crypto.tink.aead.AeadFactory;
 import com.google.crypto.tink.aead.AeadKeyTemplates;
 import com.google.crypto.tink.proto.KeyTemplate;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.assertions.Assertions;
 
-@Ignore
+@Disabled
 public class TestAEADCipher extends TestTinkPrimitives {
 
     @Override

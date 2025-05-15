@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import java.util.Optional;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.assertions.Assertion;
@@ -63,12 +62,15 @@ public abstract class UsagePatternTestingFramework {
     private static Collection<CrySLRule> rules = new HashSet<>();
     private static String rulesetPath = "";
 
-    @Rule public TestName testName = new TestName();
+    @BeforeEach
+    public void beforeTestCaseExecution(TestInfo testInfo) {
+        Optional<java.lang.reflect.Method> testMethodOpt = testInfo.getTestMethod();
+        if (testMethodOpt.isEmpty()) {
+            throw new RuntimeException("Test method not available");
+        }
 
-    @Before
-    public void beforeTestCaseExecution() {
-        String testClassName = this.getClass().getName().replace("class ", "");
-        String testMethodName = testName.getMethodName();
+        String testClassName = testMethodOpt.get().getDeclaringClass().getName();
+        String testMethodName = testMethodOpt.get().getName();
 
         LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
 
@@ -84,7 +86,7 @@ public abstract class UsagePatternTestingFramework {
         }
 
         TestSetup testSetup = new SootTestSetup();
-        testSetup.initialize(testClassName, testMethodName);
+        testSetup.initialize(buildClassPath(), testClassName, testMethodName);
 
         DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
         FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
@@ -138,13 +140,23 @@ public abstract class UsagePatternTestingFramework {
                                                     .toList()));
         }
         if (!errors.toString().isEmpty()) {
-            Assert.fail(errors.toString());
+            org.junit.jupiter.api.Assertions.fail(errors.toString());
         }
 
-        Assume.assumeTrue(false);
+        Assumptions.assumeTrue(false);
     }
 
     protected abstract String getRulesetPath();
+
+    protected String buildClassPath() {
+        String userDir = System.getProperty("user.dir");
+        String javaHome = System.getProperty("java.home");
+        if (javaHome == null || javaHome.isEmpty()) {
+            throw new RuntimeException("Could not get property java.home!");
+        }
+
+        return userDir + "/target/test-classes";
+    }
 
     private Collection<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
         Collection<Assertion> results = new HashSet<>();

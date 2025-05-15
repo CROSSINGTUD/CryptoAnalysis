@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

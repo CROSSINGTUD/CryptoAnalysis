@@ -20,12 +20,12 @@ import com.google.crypto.tink.signature.PublicKeySignFactory;
 import com.google.crypto.tink.signature.PublicKeyVerifyFactory;
 import com.google.crypto.tink.signature.SignatureKeyTemplates;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.assertions.Assertions;
 
-@Ignore
+@Disabled
 public class TestDigitalSignature extends TestTinkPrimitives {
 
     @Override

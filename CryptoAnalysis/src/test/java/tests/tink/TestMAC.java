@@ -16,12 +16,12 @@ import com.google.crypto.tink.mac.MacKeyTemplates;
 import com.google.crypto.tink.proto.HashType;
 import com.google.crypto.tink.proto.KeyTemplate;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.assertions.Assertions;
 
-@Ignore
+@Disabled
 public class TestMAC extends TestTinkPrimitives {
 
     @Override

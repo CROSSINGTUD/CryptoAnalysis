@@ -9,7 +9,7 @@
  ********************************************************************************/
 package tests.issues.issue318;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;

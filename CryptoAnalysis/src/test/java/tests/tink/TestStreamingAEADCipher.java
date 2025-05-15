@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.assertions.Assertions;
 
-@Ignore
+@Disabled
 public class TestStreamingAEADCipher extends TestTinkPrimitives {
 
     @Override

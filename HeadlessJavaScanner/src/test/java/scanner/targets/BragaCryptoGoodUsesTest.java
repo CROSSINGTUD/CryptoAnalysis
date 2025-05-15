@@ -17,8 +17,8 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;
@@ -807,7 +807,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
     // This test case corresponds to the following project in BragaCryptoBench:
     // https://bitbucket.org/alexmbraga/cryptogooduses/src/master/icv/completeValidation/
-    @Ignore("Boomerang cannot finish query computation ")
+    @Disabled("Boomerang cannot finish query computation ")
     @Test
     public void completeValidationExamples() {
         String mavenProjectPath =

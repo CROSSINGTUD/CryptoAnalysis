@@ -31,8 +31,8 @@ import java.security.cert.PKIXBuilderParameters;
 import java.security.cert.TrustAnchor;
 import java.util.Set;
 import javax.net.ssl.SSLParameters;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
@@ -57,7 +57,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
         Assertions.mustBeInAcceptingState(pKIXBuilderParameters0);
     }
 
-    @Ignore("Requires proper implementation of keyword 'elements'")
+    @Disabled("Requires proper implementation of keyword 'elements'")
     @Test
     @SuppressWarnings("ConstantConditions")
     public void sSLParametersValidTest1() {
@@ -70,7 +70,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
         Assertions.mustBeInAcceptingState(sSLParameters0);
     }
 
-    @Ignore("Requires proper implementation of keyword 'elements'")
+    @Disabled("Requires proper implementation of keyword 'elements'")
     @Test
     public void sSLParametersValidTest2() {
         // Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
@@ -81,7 +81,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
         Assertions.mustBeInAcceptingState(sSLParameters0);
     }
 
-    @Ignore("Requires proper implementation of keyword 'elements'")
+    @Disabled("Requires proper implementation of keyword 'elements'")
     @Test
     public void sSLParametersValidTest3() {
         // Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
@@ -92,7 +92,7 @@ public class CogniCryptTestGenTest extends UsagePatternTestingFramework {
         Assertions.mustBeInAcceptingState(sSLParameters0);
     }
 
-    @Ignore("Requires proper implementation of keyword 'elements'")
+    @Disabled("Requires proper implementation of keyword 'elements'")
     @Test
     public void sSLParametersInvalidTest2() {
         // Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296

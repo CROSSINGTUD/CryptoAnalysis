@@ -9,10 +9,10 @@
  ********************************************************************************/
 package tests.tink;
 
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import test.UsagePatternTestingFramework;
 
-@Ignore
+@Disabled
 public abstract class TestTinkPrimitives extends UsagePatternTestingFramework {
     /*@Override
     protected String getSootClassPath() {

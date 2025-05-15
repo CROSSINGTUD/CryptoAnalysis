@@ -14,7 +14,7 @@ import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.RequiredPredicateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;

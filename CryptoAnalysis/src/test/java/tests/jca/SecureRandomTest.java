@@ -11,7 +11,7 @@ package tests.jca;
 
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.TestConstants;
 import test.UsagePatternTestingFramework;
 import test.assertions.Assertions;
