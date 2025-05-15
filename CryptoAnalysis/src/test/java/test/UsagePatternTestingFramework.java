@@ -17,8 +17,6 @@ import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
@@ -27,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -178,14 +175,14 @@ public abstract class UsagePatternTestingFramework {
             InvokeExpr invokeExpr = statement.getInvokeExpr();
 
             if (!invokeExpr
-                    .getMethod()
+                    .getDeclaredMethod()
                     .getDeclaringClass()
                     .toString()
                     .equals(Assertions.class.getName())) {
                 continue;
             }
 
-            String invocationName = invokeExpr.getMethod().getName();
+            String invocationName = invokeExpr.getDeclaredMethod().getName();
 
             if (invocationName.startsWith("extValue")) {
                 Val param = invokeExpr.getArg(0);
@@ -399,10 +396,10 @@ public abstract class UsagePatternTestingFramework {
         }
     }
 
-    private Set<Statement> getPredecessorsNotBenchmark(Statement stmt) {
-        Set<Statement> res = Sets.newHashSet();
-        Set<Statement> visited = Sets.newHashSet();
-        LinkedList<Statement> workList = Lists.newLinkedList();
+    private Collection<Statement> getPredecessorsNotBenchmark(Statement stmt) {
+        Collection<Statement> res = new HashSet<>();
+        Collection<Statement> visited = new HashSet<>();
+        LinkedList<Statement> workList = new LinkedList<>();
         workList.add(stmt);
 
         while (!workList.isEmpty()) {
@@ -415,7 +412,7 @@ public abstract class UsagePatternTestingFramework {
             if (curr.containsInvokeExpr()) {
                 String invokedClassName =
                         curr.getInvokeExpr()
-                                .getMethod()
+                                .getDeclaredMethod()
                                 .getDeclaringClass()
                                 .getFullyQualifiedName();
                 String assertionClassName = Assertions.class.getName();

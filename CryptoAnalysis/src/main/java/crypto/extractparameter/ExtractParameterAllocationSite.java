@@ -30,7 +30,7 @@ public class ExtractParameterAllocationSite implements IAllocationSite {
          */
         if (Transformation.isTransformationExpression(stmt)) {
             InvokeExpr invokeExpr = stmt.getInvokeExpr();
-            DeclaredMethod declaredMethod = invokeExpr.getMethod();
+            DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
 
             if (declaredMethod.isConstructor()) {
                 Val base = invokeExpr.getBase();

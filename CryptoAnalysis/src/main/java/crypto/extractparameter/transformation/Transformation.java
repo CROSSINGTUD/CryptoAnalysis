@@ -26,7 +26,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.List;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 /**
  * Main class for transforming the allocation sites when using Boomerang to extract relevant
@@ -65,7 +65,7 @@ public abstract class Transformation {
     }
 
     private static Signature invokeExprToSignature(InvokeExpr invokeExpr) {
-        DeclaredMethod method = invokeExpr.getMethod();
+        DeclaredMethod method = invokeExpr.getDeclaredMethod();
 
         List<String> params = method.getParameterTypes().stream().map(Object::toString).toList();
         return new Signature(
@@ -132,7 +132,7 @@ public abstract class Transformation {
 
             BackwardQuery query = BackwardQuery.make(edge, val);
             Boomerang boomerang = new Boomerang(frameworkScope, options);
-            BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
+            BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
 
             for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
                 boomerangResults.putAll(forwardQuery.getAllocVal(), results.getPropagationType());

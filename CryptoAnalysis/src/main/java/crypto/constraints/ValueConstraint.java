@@ -64,6 +64,13 @@ public class ValueConstraint extends EvaluableConstraint {
             Collection<ExtractedValue> violatingValues = new HashSet<>();
 
             for (ExtractedValue extractedValue : parameter.extractedValues()) {
+                // Boomerang returns the array values and the array allocation site. We are only
+                // interested
+                // in the array values
+                if (extractedValue.val().isArrayAllocationVal()) {
+                    continue;
+                }
+
                 // TODO Extract call sites that are not part of the dataflow scope
                 if (extractedValue.val().equals(Val.zero())
                         || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
