@@ -61,6 +61,7 @@
         <spds.version>4.1.0</spds.version>
         <soot.version>4.6.0</soot.version>
         <crysl.version>4.0.2</crysl.version>
+        <junit.version>5.12.2</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -97,7 +98,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -191,6 +192,13 @@
                         <reuseForks>false</reuseForks>
                         <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-engine</artifactId>
+                            <version>${junit.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
 
                 <!-- Children need to include this plugin to build the correct jar artefacts -->
