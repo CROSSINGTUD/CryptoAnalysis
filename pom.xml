@@ -148,7 +148,7 @@
                                     <artifactItem>
                                         <groupId>de.fraunhofer.iem</groupId>
                                         <artifactId>BouncyCastle</artifactId>
-                                        <version>3.1.3</version>
+                                        <version>3.1.4</version>
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>

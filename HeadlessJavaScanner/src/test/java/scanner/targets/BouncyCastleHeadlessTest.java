@@ -109,7 +109,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "cbc_aes_example.CBCAESBouncyCastle", "processing", 2)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 4)
+                        .withTPs(ImpreciseValueExtractionError.class, 3)
                         .build());
 
         scanner.scan();
