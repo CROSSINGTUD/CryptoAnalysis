@@ -12,16 +12,15 @@ package tests.jca;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import org.junit.jupiter.api.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class SecureRandomTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class SecureRandomTest {
 
     @Test
     public void corSeed() throws GeneralSecurityException {

@@ -17,16 +17,16 @@ import com.google.crypto.tink.proto.KeyTemplate;
 import java.security.GeneralSecurityException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import test.TestConstants;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TINK)
 @Disabled
-public class TestAEADCipher extends TestTinkPrimitives {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.TINK_RULESET_PATH;
-    }
+public class TestAEADCipher {
 
     @Test
     public void generateNewAES128GCMKeySet() throws GeneralSecurityException {

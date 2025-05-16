@@ -36,11 +36,11 @@ import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
 import wpds.impl.NoWeight;
 
-public class UsagePatternResultsListener implements IResultsListener {
+public class TestRunnerResultsListener implements IResultsListener {
 
     private final Collection<Assertion> assertions;
 
-    public UsagePatternResultsListener(Collection<Assertion> assertions) {
+    public TestRunnerResultsListener(Collection<Assertion> assertions) {
         this.assertions = assertions;
     }
 

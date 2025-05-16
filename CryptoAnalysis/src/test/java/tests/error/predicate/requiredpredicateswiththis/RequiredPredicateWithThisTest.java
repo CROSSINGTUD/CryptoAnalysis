@@ -10,16 +10,15 @@
 package tests.error.predicate.requiredpredicateswiththis;
 
 import org.junit.jupiter.api.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class RequiredPredicateWithThisTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "requiredPredicateWithThis";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.REQUIRED_PREDICATE_WITH_THIS)
+public class RequiredPredicateWithThisTest {
 
     @Test
     public void positiveRequiredPredicateWithThis() {

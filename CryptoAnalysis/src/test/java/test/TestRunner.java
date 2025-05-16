@@ -25,10 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Optional;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInfo;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.assertions.Assertion;
@@ -55,35 +52,31 @@ import test.assertions.states.StateAssertion;
 import test.framework.SootTestSetup;
 import test.framework.TestSetup;
 
-public abstract class UsagePatternTestingFramework {
+public class TestRunner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("AnalysisTests");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestRunner.class);
 
-    private static Collection<CrySLRule> rules = new HashSet<>();
-    private static String rulesetPath = "";
+    private final CryptoScanner scanner;
+    private Collection<CrySLRule> rules;
 
-    @BeforeEach
-    public void beforeTestCaseExecution(TestInfo testInfo) {
-        Optional<java.lang.reflect.Method> testMethodOpt = testInfo.getTestMethod();
-        if (testMethodOpt.isEmpty()) {
-            throw new RuntimeException("Test method not available");
-        }
+    public TestRunner() {
+        this.scanner = new CryptoScanner();
+    }
 
-        String testClassName = testMethodOpt.get().getDeclaringClass().getName();
-        String testMethodName = testMethodOpt.get().getName();
-
-        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
-
-        CryptoScanner scanner = new CryptoScanner();
-
-        if (!rulesetPath.equals(getRulesetPath())) {
-            LOGGER.info("Updating rules to {}", getRulesetPath());
-
-            rulesetPath = getRulesetPath();
-            rules = scanner.readRules(rulesetPath);
+    public void initialize(String ruleset) {
+        String path;
+        if (Set.of(TestRules.BOUNCY_CASTLE, TestRules.JCA, TestRules.TINK).contains(ruleset)) {
+            path = TestRules.RULES_BASE_DIR + ruleset;
         } else {
-            LOGGER.info("Reusing rules from previous run");
+            path = TestRules.RULES_TEST_DIR + ruleset;
         }
+
+        rules = scanner.readRules(path);
+        LOGGER.info("Using rules from " + path);
+    }
+
+    public void runTest(String testClassName, String testMethodName) {
+        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
 
         TestSetup testSetup = new SootTestSetup();
         testSetup.initialize(buildClassPath(), testClassName, testMethodName);
@@ -95,8 +88,8 @@ public abstract class UsagePatternTestingFramework {
         // Setup test listener
         Collection<Assertion> assertions =
                 extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
-        IErrorListener errorListener = new UsagePatternErrorListener(assertions);
-        IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
+        IErrorListener errorListener = new TestRunnerErrorListener(assertions);
+        IResultsListener resultsListener = new TestRunnerResultsListener(assertions);
 
         scanner.addErrorListener(errorListener);
         scanner.addResultsListener(resultsListener);
@@ -142,11 +135,7 @@ public abstract class UsagePatternTestingFramework {
         if (!errors.toString().isEmpty()) {
             org.junit.jupiter.api.Assertions.fail(errors.toString());
         }
-
-        Assumptions.assumeTrue(false);
     }
-
-    protected abstract String getRulesetPath();
 
     protected String buildClassPath() {
         String userDir = System.getProperty("user.dir");

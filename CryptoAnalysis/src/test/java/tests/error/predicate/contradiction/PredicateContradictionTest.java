@@ -10,18 +10,17 @@
 package tests.error.predicate.contradiction;
 
 import org.junit.jupiter.api.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class PredicateContradictionTest extends UsagePatternTestingFramework {
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.PREDICATE_CONTRADICTION)
+public class PredicateContradictionTest {
 
     private static final String ENSURED_PRED = "generatedContradiction";
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "predicateContradiction";
-    }
 
     @Test
     public void positivePredicateContradictionTest() {
