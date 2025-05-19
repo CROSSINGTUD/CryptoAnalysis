@@ -12,17 +12,16 @@ package tests.jca;
 import java.security.GeneralSecurityException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.PBEKeySpec;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class ExtractValueTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class ExtractValueTest {
 
     @Test
     public void testInterProceduralStringFlow() throws GeneralSecurityException {

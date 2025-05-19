@@ -14,8 +14,8 @@ import crypto.reporting.Reporter;
 import de.fraunhofer.iem.android.AndroidSettings;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CommandLineTest {
 
@@ -52,38 +52,58 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
-        Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+        Assertions.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
+        Assertions.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+        Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testMissingApkPath() {
-        String[] args =
-                new String[] {PLATFORM_PATH, EXAMPLE_PLATFORM_PATH, RULES_DIR, EXAMPLE_RULES_DIR};
-        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                PLATFORM_PATH, EXAMPLE_PLATFORM_PATH, RULES_DIR, EXAMPLE_RULES_DIR
+                            };
+                    HeadlessAndroidScanner scanner =
+                            HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                    Assertions.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+                    Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                });
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testMissingPlatformPath() {
-        String[] args = new String[] {APK_PATH, EXAMPLE_APK_PATH, RULES_DIR, EXAMPLE_RULES_DIR};
-        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {APK_PATH, EXAMPLE_APK_PATH, RULES_DIR, EXAMPLE_RULES_DIR};
+                    HeadlessAndroidScanner scanner =
+                            HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                    Assertions.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
+                    Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                });
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testMissingRulesDir() {
-        String[] args =
-                new String[] {APK_PATH, EXAMPLE_APK_PATH, PLATFORM_PATH, EXAMPLE_PLATFORM_PATH};
-        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APK_PATH, EXAMPLE_APK_PATH, PLATFORM_PATH, EXAMPLE_PLATFORM_PATH
+                            };
+                    HeadlessAndroidScanner scanner =
+                            HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
-        Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+                    Assertions.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
+                    Assertions.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+                });
     }
 
     @Test
@@ -99,27 +119,33 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testWrongCallGraph() {
-        String[] args =
-                new String[] {
-                    APK_PATH,
-                    EXAMPLE_APK_PATH,
-                    PLATFORM_PATH,
-                    EXAMPLE_PLATFORM_PATH,
-                    RULES_DIR,
-                    EXAMPLE_RULES_DIR,
-                    CG,
-                    "superGraph"
-                };
-        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APK_PATH,
+                                EXAMPLE_APK_PATH,
+                                PLATFORM_PATH,
+                                EXAMPLE_PLATFORM_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                CG,
+                                "superGraph"
+                            };
+                    HeadlessAndroidScanner scanner =
+                            HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(
-                scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
+                    Assertions.assertEquals(
+                            scanner.getCallGraphAlgorithm(),
+                            AndroidSettings.CallGraphAlgorithm.CHA);
+                });
     }
 
     @Test
@@ -136,7 +162,7 @@ public class CommandLineTest {
                     CHA
                 };
         HeadlessAndroidScanner chaScanner = HeadlessAndroidScanner.createFromCLISettings(chaArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 chaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
 
         String[] rtaArgs =
@@ -151,7 +177,7 @@ public class CommandLineTest {
                     RTA
                 };
         HeadlessAndroidScanner rtaScanner = HeadlessAndroidScanner.createFromCLISettings(rtaArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 rtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.RTA);
 
         String[] vtaArgs =
@@ -166,7 +192,7 @@ public class CommandLineTest {
                     VTA
                 };
         HeadlessAndroidScanner vtaScanner = HeadlessAndroidScanner.createFromCLISettings(vtaArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 vtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.VTA);
 
         String[] sparkArgs =
@@ -182,7 +208,7 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner sparkScanner =
                 HeadlessAndroidScanner.createFromCLISettings(sparkArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 sparkScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.SPARK);
     }
 
@@ -202,7 +228,7 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getReportDirectory(), reportPath);
+        Assertions.assertEquals(scanner.getReportDirectory(), reportPath);
     }
 
     @Test
@@ -219,7 +245,7 @@ public class CommandLineTest {
                     "CMD"
                 };
         HeadlessAndroidScanner cmdScanner = HeadlessAndroidScanner.createFromCLISettings(cmdArgs);
-        Assert.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+        Assertions.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
 
         String[] txtArgs =
                 new String[] {
@@ -233,7 +259,7 @@ public class CommandLineTest {
                     "TXT"
                 };
         HeadlessAndroidScanner txtScanner = HeadlessAndroidScanner.createFromCLISettings(txtArgs);
-        Assert.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
+        Assertions.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
 
         String[] sarifArgs =
                 new String[] {
@@ -248,7 +274,8 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner sarifScanner =
                 HeadlessAndroidScanner.createFromCLISettings(sarifArgs);
-        Assert.assertEquals(sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
+        Assertions.assertEquals(
+                sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
 
         String[] csvArgs =
                 new String[] {
@@ -262,7 +289,7 @@ public class CommandLineTest {
                     "CSV"
                 };
         HeadlessAndroidScanner csvScanner = HeadlessAndroidScanner.createFromCLISettings(csvArgs);
-        Assert.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
+        Assertions.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
 
         String[] csvSummaryArgs =
                 new String[] {
@@ -277,7 +304,7 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner csvSummaryScanner =
                 HeadlessAndroidScanner.createFromCLISettings(csvSummaryArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 csvSummaryScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV_SUMMARY));
 
         String[] annotationArgs =
@@ -293,7 +320,7 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner annotationScanner =
                 HeadlessAndroidScanner.createFromCLISettings(annotationArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 annotationScanner.getReportFormats(),
                 Set.of(Reporter.ReportFormat.GITHUB_ANNOTATION));
 
@@ -310,7 +337,7 @@ public class CommandLineTest {
                 };
         HeadlessAndroidScanner multipleFormatsScanner =
                 HeadlessAndroidScanner.createFromCLISettings(multipleArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 multipleFormatsScanner.getReportFormats(),
                 Set.of(
                         Reporter.ReportFormat.CMD,
@@ -334,22 +361,27 @@ public class CommandLineTest {
                     reportPath
                 };
         HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
-        Assert.assertTrue(scanner.isVisualization());
+        Assertions.assertTrue(scanner.isVisualization());
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidVisualization() {
-        String[] args =
-                new String[] {
-                    APK_PATH,
-                    EXAMPLE_APK_PATH,
-                    PLATFORM_PATH,
-                    EXAMPLE_PLATFORM_PATH,
-                    RULES_DIR,
-                    EXAMPLE_RULES_DIR,
-                    VISUALIZATION,
-                };
-        HeadlessAndroidScanner scanner = HeadlessAndroidScanner.createFromCLISettings(args);
-        Assert.assertTrue(scanner.isVisualization());
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APK_PATH,
+                                EXAMPLE_APK_PATH,
+                                PLATFORM_PATH,
+                                EXAMPLE_PLATFORM_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                VISUALIZATION,
+                            };
+                    HeadlessAndroidScanner scanner =
+                            HeadlessAndroidScanner.createFromCLISettings(args);
+                    Assertions.assertTrue(scanner.isVisualization());
+                });
     }
 }

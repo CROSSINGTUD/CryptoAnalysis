@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * To run these test cases in Eclipse, specify your maven home path as JVM argument:
@@ -167,7 +167,7 @@ public abstract class AbstractHeadlessTest {
         }
 
         if (!report.isEmpty()) {
-            Assert.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
+            Assertions.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
         }
     }
 

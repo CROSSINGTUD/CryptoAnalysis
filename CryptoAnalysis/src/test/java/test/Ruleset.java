@@ -7,19 +7,16 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.tink;
+package test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-    TestAEADCipher.class,
-    TestDeterministicAEADCipher.class,
-    TestDigitalSignature.class,
-    TestHybridEncryption.class,
-    TestMAC.class,
-    TestStreamingAEADCipher.class
-})
-public class TestSuite {}
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Ruleset {
+
+    String value();
+}

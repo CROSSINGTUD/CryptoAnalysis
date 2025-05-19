@@ -15,20 +15,19 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.RSAKeyGenParameterSpec;
-import org.junit.Ignore;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class KeyPairTest extends UsagePatternTestingFramework {
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class KeyPairTest {
 
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
-
-    @Ignore("Requires to resolve the static field F4")
+    @Disabled("Requires to resolve the static field F4")
     @Test
     public void positiveRsaParameterSpecTest() throws GeneralSecurityException {
         int keySize = 4096;

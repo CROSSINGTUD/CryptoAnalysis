@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.error.imprecisevalueextraction;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "impreciseValueExtraction";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.IMPRECISE_VALUE_EXTRACTION)
+public class ImpreciseValueExtractionTest {
 
     @Test
     public void testCouldExtractInteger() {

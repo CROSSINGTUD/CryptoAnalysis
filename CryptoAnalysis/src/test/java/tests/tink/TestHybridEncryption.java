@@ -17,18 +17,18 @@ import com.google.crypto.tink.hybrid.EciesAeadHkdfPrivateKeyManager;
 import com.google.crypto.tink.hybrid.HybridDecryptFactory;
 import com.google.crypto.tink.hybrid.HybridEncryptFactory;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
-import test.TestConstants;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-@Ignore
-public class TestHybridEncryption extends TestTinkPrimitives {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.TINK_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TINK)
+@Disabled
+public class TestHybridEncryption {
 
     @Test
     public void generateNewECIES_P256_HKDF_HMAC_SHA256_AES128_GCMKeySet()

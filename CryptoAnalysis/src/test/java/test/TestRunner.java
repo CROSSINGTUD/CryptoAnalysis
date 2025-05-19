@@ -25,11 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.assertions.Assertion;
@@ -56,35 +52,34 @@ import test.assertions.states.StateAssertion;
 import test.framework.SootTestSetup;
 import test.framework.TestSetup;
 
-public abstract class UsagePatternTestingFramework {
+public class TestRunner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("AnalysisTests");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestRunner.class);
 
-    private static Collection<CrySLRule> rules = new HashSet<>();
-    private static String rulesetPath = "";
+    private final CryptoScanner scanner;
+    private Collection<CrySLRule> rules;
 
-    @Rule public TestName testName = new TestName();
+    public TestRunner() {
+        this.scanner = new CryptoScanner();
+    }
 
-    @Before
-    public void beforeTestCaseExecution() {
-        String testClassName = this.getClass().getName().replace("class ", "");
-        String testMethodName = testName.getMethodName();
-
-        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
-
-        CryptoScanner scanner = new CryptoScanner();
-
-        if (!rulesetPath.equals(getRulesetPath())) {
-            LOGGER.info("Updating rules to {}", getRulesetPath());
-
-            rulesetPath = getRulesetPath();
-            rules = scanner.readRules(rulesetPath);
+    public void initialize(String ruleset) {
+        String path;
+        if (Set.of(TestRules.BOUNCY_CASTLE, TestRules.JCA, TestRules.TINK).contains(ruleset)) {
+            path = TestRules.RULES_BASE_DIR + ruleset;
         } else {
-            LOGGER.info("Reusing rules from previous run");
+            path = TestRules.RULES_TEST_DIR + ruleset;
         }
 
+        rules = scanner.readRules(path);
+        LOGGER.info("Using rules from " + path);
+    }
+
+    public void runTest(String testClassName, String testMethodName) {
+        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
+
         TestSetup testSetup = new SootTestSetup();
-        testSetup.initialize(testClassName, testMethodName);
+        testSetup.initialize(buildClassPath(), testClassName, testMethodName);
 
         DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
         FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
@@ -93,8 +88,8 @@ public abstract class UsagePatternTestingFramework {
         // Setup test listener
         Collection<Assertion> assertions =
                 extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
-        IErrorListener errorListener = new UsagePatternErrorListener(assertions);
-        IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
+        IErrorListener errorListener = new TestRunnerErrorListener(assertions);
+        IResultsListener resultsListener = new TestRunnerResultsListener(assertions);
 
         scanner.addErrorListener(errorListener);
         scanner.addResultsListener(resultsListener);
@@ -138,13 +133,19 @@ public abstract class UsagePatternTestingFramework {
                                                     .toList()));
         }
         if (!errors.toString().isEmpty()) {
-            Assert.fail(errors.toString());
+            org.junit.jupiter.api.Assertions.fail(errors.toString());
         }
-
-        Assume.assumeTrue(false);
     }
 
-    protected abstract String getRulesetPath();
+    protected String buildClassPath() {
+        String userDir = System.getProperty("user.dir");
+        String javaHome = System.getProperty("java.home");
+        if (javaHome == null || javaHome.isEmpty()) {
+            throw new RuntimeException("Could not get property java.home!");
+        }
+
+        return userDir + "/target/test-classes";
+    }
 
     private Collection<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
         Collection<Assertion> results = new HashSet<>();

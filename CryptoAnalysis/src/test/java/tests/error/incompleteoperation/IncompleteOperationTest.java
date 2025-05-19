@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.error.incompleteoperation;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class IncompleteOperationTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "incompleteOperation";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.INCOMPLETE_OPERATION)
+public class IncompleteOperationTest {
 
     @Test
     public void testNoIncompleteOperation() {

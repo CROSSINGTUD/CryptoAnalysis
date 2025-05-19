@@ -17,8 +17,8 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;
@@ -272,7 +272,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
     }
 
     @Test
-    @Ignore("Requires implementation of the 'elements' keyword")
+    @Disabled("Requires implementation of the 'elements' keyword")
     public void sslExample() {
         String mavenProjectPath =
                 new File("../CryptoAnalysisTargets/SSLMisuseExample").getAbsolutePath();

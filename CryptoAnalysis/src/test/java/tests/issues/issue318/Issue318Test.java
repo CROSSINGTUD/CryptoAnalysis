@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.issues.issue318;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class Issue318Test extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "issue318";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.ISSUE_318)
+public class Issue318Test {
 
     @Test
     public void testIssue318() {

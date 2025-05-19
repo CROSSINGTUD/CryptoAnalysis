@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.error.nocallto;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class NoCallToTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "predefinedPredicates";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.PREDEFINED_PREDICATES)
+public class NoCallToTest {
 
     @Test
     public void positivePredicateWithoutConditionTest() {

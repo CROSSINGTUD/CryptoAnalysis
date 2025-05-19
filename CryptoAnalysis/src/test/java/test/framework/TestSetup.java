@@ -15,7 +15,7 @@ import boomerang.scope.Method;
 
 public interface TestSetup {
 
-    void initialize(String className, String testName);
+    void initialize(String classPath, String className, String testName);
 
     Method getTestMethod();
 

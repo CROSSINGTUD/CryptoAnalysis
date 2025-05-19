@@ -18,8 +18,8 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;
@@ -510,7 +510,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
     // This test case corresponds to the following project in BragaCryptoBench:
     // https://bitbucket.org/alexmbraga/cryptomisuses/src/master/icv/incompleteValidation/
-    @Ignore("Boomerang is causing an Assertion error")
+    @Disabled("Boomerang is causing an Assertion error")
     @Test
     public void incompleteValidationExamples() {
         String mavenProjectPath =

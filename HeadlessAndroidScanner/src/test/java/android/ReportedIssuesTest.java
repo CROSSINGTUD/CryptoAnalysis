@@ -15,8 +15,8 @@ import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ReportedIssuesTest extends AbstractAndroidTest {
 
@@ -28,6 +28,6 @@ public class ReportedIssuesTest extends AbstractAndroidTest {
 
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
 
-        Assert.assertTrue(errors.isEmpty());
+        Assertions.assertTrue(errors.isEmpty());
     }
 }

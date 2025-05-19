@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.MavenProject;
 
@@ -34,7 +34,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
     private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
     private static final String visualizationPath = rootPath + "visualization.png";
 
-    @Before
+    @BeforeEach
     public void setup() {
         outputDir.mkdir();
     }
@@ -54,7 +54,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setReportFormats(Reporter.ReportFormat.TXT);
         scanner.scan();
 
-        Assert.assertTrue(report.exists());
+        Assertions.assertTrue(report.exists());
     }
 
     @Test
@@ -72,7 +72,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setReportFormats(Reporter.ReportFormat.CSV);
         scanner.scan();
 
-        Assert.assertTrue(report.exists());
+        Assertions.assertTrue(report.exists());
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
         scanner.scan();
 
-        Assert.assertTrue(report.exists());
+        Assertions.assertTrue(report.exists());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setReportFormats(Reporter.ReportFormat.SARIF);
         scanner.scan();
 
-        Assert.assertTrue(report.exists());
+        Assertions.assertTrue(report.exists());
     }
 
     @Test
@@ -156,10 +156,10 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setReportFormats(formats);
         scanner.scan();
 
-        Assert.assertTrue(txtReport.exists());
-        Assert.assertTrue(csvReport.exists());
-        Assert.assertTrue(csvSummaryReport.exists());
-        Assert.assertTrue(sarifReport.exists());
+        Assertions.assertTrue(txtReport.exists());
+        Assertions.assertTrue(csvReport.exists());
+        Assertions.assertTrue(csvSummaryReport.exists());
+        Assertions.assertTrue(sarifReport.exists());
     }
 
     @Test
@@ -177,10 +177,10 @@ public class ReportFormatTest extends AbstractHeadlessTest {
         scanner.setVisualization(true);
         scanner.scan();
 
-        Assert.assertTrue(vizFile.exists());
+        Assertions.assertTrue(vizFile.exists());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         try {
             FileUtils.deleteDirectory(new File(rootPath));
