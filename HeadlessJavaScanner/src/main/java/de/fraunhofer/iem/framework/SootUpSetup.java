@@ -9,13 +9,17 @@
  ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
+import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 
 public class SootUpSetup extends FrameworkSetup {
 
-    public SootUpSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm) {
-        super(applicationPath, algorithm);
+    public SootUpSetup(
+            String applicationPath,
+            ScannerSettings.CallGraphAlgorithm algorithm,
+            DataFlowScope dataFlowScope) {
+        super(applicationPath, algorithm, dataFlowScope);
     }
 
     @Override

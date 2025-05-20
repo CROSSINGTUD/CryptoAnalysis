@@ -58,6 +58,11 @@
             <version>${spds.version}</version>
         </dependency>
         <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Opal</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+        <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
             <version>${crysl.version}</version>

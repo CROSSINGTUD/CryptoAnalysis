@@ -49,18 +49,24 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
-import test.framework.SootTestSetup;
+import test.framework.OpalTestSetup;
 import test.framework.TestSetup;
 
 public class TestRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestRunner.class);
 
+    private final TestSetup testSetup;
     private final CryptoScanner scanner;
     private Collection<CrySLRule> rules;
 
     public TestRunner() {
+        this.testSetup = createTestSetup();
         this.scanner = new CryptoScanner();
+    }
+
+    private TestSetup createTestSetup() {
+        return new OpalTestSetup();
     }
 
     public void initialize(String ruleset) {
@@ -78,7 +84,6 @@ public class TestRunner {
     public void runTest(String testClassName, String testMethodName) {
         LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
 
-        TestSetup testSetup = new SootTestSetup();
         testSetup.initialize(buildClassPath(), testClassName, testMethodName);
 
         DataFlowScope dataFlowScope = new TestDataFlowScope(rules);

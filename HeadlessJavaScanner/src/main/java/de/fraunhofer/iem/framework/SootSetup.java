@@ -33,17 +33,15 @@ import soot.options.Options;
 public class SootSetup extends FrameworkSetup {
 
     private final String sootClassPath;
-    private final DataFlowScope dataFlowScope;
 
     public SootSetup(
             String applicationPath,
             ScannerSettings.CallGraphAlgorithm algorithm,
             String sootClassPath,
             DataFlowScope dataFlowScope) {
-        super(applicationPath, algorithm);
+        super(applicationPath, algorithm, dataFlowScope);
 
         this.sootClassPath = sootClassPath;
-        this.dataFlowScope = dataFlowScope;
     }
 
     @Override

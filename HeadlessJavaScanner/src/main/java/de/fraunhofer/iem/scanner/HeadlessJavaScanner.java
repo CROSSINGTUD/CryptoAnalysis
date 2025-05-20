@@ -136,8 +136,12 @@ public class HeadlessJavaScanner extends CryptoScanner {
                             settings.getCallGraph(),
                             settings.getSootPath(),
                             dataFlowScope);
-            case SOOT_UP -> new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
-            case OPAL -> new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
+            case SOOT_UP ->
+                    new SootUpSetup(
+                            settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);
+            case OPAL ->
+                    new OpalSetup(
+                            settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);
         };
     }
 
@@ -220,6 +224,4 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void setTimeout(int timeout) {
         settings.setTimeout(timeout);
     }
-
-    public void additionalFrameworkSetup() {}
 }

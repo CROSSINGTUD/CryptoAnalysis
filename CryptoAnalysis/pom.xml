@@ -55,6 +55,12 @@
         </dependency>
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Opal</artifactId>
+            <version>${spds.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangPDS</artifactId>
             <version>${spds.version}</version>
         </dependency>
@@ -82,6 +88,12 @@
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
             <version>${soot.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>framework_2.13</artifactId>
+            <version>${opal.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.json/json -->
