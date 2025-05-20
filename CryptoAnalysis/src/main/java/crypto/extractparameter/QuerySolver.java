@@ -16,6 +16,7 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.scope.AllocVal;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
+import boomerang.scope.ValCollection;
 import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
 import crypto.extractparameter.transformation.Transformation;
@@ -99,7 +100,8 @@ public class QuerySolver {
 
     private ParameterWithExtractedValues extractedZeroValue(
             ExtractParameterQuery query, Collection<Type> types) {
-        ExtractedValue zeroVal = new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
+        ExtractedValue zeroVal =
+                new ExtractedValue(ValCollection.zero(), query.cfgEdge().getTarget(), types);
 
         return new ParameterWithExtractedValues(
                 query.cfgEdge().getTarget(),

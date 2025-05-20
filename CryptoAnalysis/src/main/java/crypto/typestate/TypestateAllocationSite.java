@@ -27,7 +27,7 @@ public class TypestateAllocationSite extends DefaultAllocationSite {
     @Override
     public Optional<AllocVal> getAllocationSite(Method method, Statement stmt, Val fact) {
         Statement statement = query.cfgEdge().getStart();
-        Val var = ((AllocVal) query.var()).getDelegate();
+        Val var = query.getAllocVal().getDelegate();
 
         if (stmt.equals(statement)) {
             if (stmt.isAssignStmt()) {

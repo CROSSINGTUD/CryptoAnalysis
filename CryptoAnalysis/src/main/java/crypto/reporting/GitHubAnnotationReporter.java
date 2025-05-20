@@ -79,14 +79,9 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
                                 + " violating CrySL rule for "
                                 + error.getRule().getClassName();
 
-                Integer line = error.getErrorStatement().getStartLineNumber();
+                Integer line = error.getErrorStatement().getLineNumber();
                 if (line == -1) {
                     line = null;
-                }
-
-                Integer column = error.getErrorStatement().getStartColumnNumber();
-                if (column == -1) {
-                    column = null;
                 }
 
                 if (sourceExists) {
@@ -96,7 +91,7 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
                             path.toString(),
                             line,
                             null,
-                            column,
+                            null,
                             null);
                 } else {
                     // fall back to a "global" annotation when the corresponding source file could
@@ -105,10 +100,6 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
 
                     if (line != null) {
                         message.append(System.lineSeparator()).append("at line ").append(line);
-                    }
-
-                    if (column != null) {
-                        message.append(System.lineSeparator()).append("at column ").append(column);
                     }
 
                     message.append(System.lineSeparator())

@@ -54,7 +54,7 @@ public abstract class AbstractError {
     }
 
     public int getLineNumber() {
-        return errorStmt.getStartLineNumber();
+        return errorStmt.getLineNumber();
     }
 
     public void addPrecedingError(AbstractError error) {

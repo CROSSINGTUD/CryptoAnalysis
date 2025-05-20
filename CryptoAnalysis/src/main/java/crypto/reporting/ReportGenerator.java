@@ -52,7 +52,7 @@ public class ReportGenerator {
             report.append("\t\tVariable: ").append(seed.getFact().getVariableName()).append("\n");
             report.append("\t\tType: ").append(seed.getType()).append("\n");
             report.append("\t\tStatement: ").append(seed.getOrigin()).append("\n");
-            report.append("\t\tLine: ").append(seed.getOrigin().getStartLineNumber()).append("\n");
+            report.append("\t\tLine: ").append(seed.getOrigin().getLineNumber()).append("\n");
             report.append("\t\tMethod: ").append(seed.getMethod()).append("\n");
             report.append("\t\tSecure: ").append(seed.isSecure()).append("\n");
         }

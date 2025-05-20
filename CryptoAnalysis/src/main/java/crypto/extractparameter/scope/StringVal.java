@@ -10,8 +10,8 @@
 package crypto.extractparameter.scope;
 
 import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.IArrayRef;
 import boomerang.scope.Method;
-import boomerang.scope.Pair;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
 
@@ -85,16 +85,6 @@ public class StringVal extends Val {
     }
 
     @Override
-    public boolean isStringBufferOrBuilder() {
-        return false;
-    }
-
-    @Override
-    public boolean isThrowableAllocationType() {
-        return false;
-    }
-
-    @Override
     public boolean isCast() {
         return false;
     }
@@ -165,7 +155,7 @@ public class StringVal extends Val {
     }
 
     @Override
-    public Pair<Val, Integer> getArrayBase() {
+    public IArrayRef getArrayBase() {
         throw new RuntimeException("String constant has no array base");
     }
 
