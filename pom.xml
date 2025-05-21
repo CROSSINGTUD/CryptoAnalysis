@@ -58,8 +58,9 @@
         <java.version>17</java.version>
         <skipTests>true</skipTests>
 
-        <spds.version>4.1.1-SNAPSHOT</spds.version>
+        <spds.version>4.2.0</spds.version>
         <soot.version>4.6.0</soot.version>
+        <sootup.version>2.0.0</sootup.version>
         <opal.version>5.0.0</opal.version>
         <crysl.version>4.0.2</crysl.version>
         <junit.version>5.12.2</junit.version>
