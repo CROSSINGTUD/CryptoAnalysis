@@ -63,6 +63,8 @@ public class TestRules {
 
     public static final String TRANSFORMATION = "transformation";
 
+    public static final String SEEDS = "seeds";
+
     public static final String ISSUE_314 = "issue314";
 
     public static final String ISSUE_318 = "issue318";

@@ -110,7 +110,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             DeclaredMethod foundCall = statement.getInvokeExpr().getDeclaredMethod();
             Collection<CrySLMethod> matchingCryslMethods =
                     MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                            seed.getSpecification(), foundCall);
+                            seed.getSpecification().getEvents(), foundCall);
 
             if (requiredCalls.stream().anyMatch(matchingCryslMethods::contains)) {
                 isCalled = true;

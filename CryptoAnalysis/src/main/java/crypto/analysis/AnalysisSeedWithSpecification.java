@@ -517,7 +517,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Collection<CrySLMethod> methods =
                 MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                        specification, statement.getInvokeExpr().getDeclaredMethod());
+                        specification.getEvents(), statement.getInvokeExpr().getDeclaredMethod());
         for (CrySLMethod method : methods) {
             if (isPredicateGeneratingAssignStatement(statement, predicate, method)) {
                 AbstractPredicate generatedPred =

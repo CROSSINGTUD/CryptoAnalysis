@@ -36,6 +36,9 @@ import test.assertions.ConstraintsEvaluatedAssertion;
 import test.assertions.ConstraintsNotRelevantAssertion;
 import test.assertions.ConstraintsSatisfiedAssertion;
 import test.assertions.ConstraintsViolatedAssertion;
+import test.assertions.DiscoveredPredicateSeedAssertion;
+import test.assertions.DiscoveredRuleSeedAssertion;
+import test.assertions.DiscoveredSeedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
@@ -49,7 +52,7 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
-import test.framework.SootUpTestSetup;
+import test.framework.SootTestSetup;
 import test.framework.TestSetup;
 
 public class TestRunner {
@@ -66,7 +69,7 @@ public class TestRunner {
     }
 
     private TestSetup createTestSetup() {
-        return new SootUpTestSetup();
+        return new SootTestSetup();
     }
 
     public void initialize(String ruleset) {
@@ -199,6 +202,36 @@ public class TestRunner {
                 for (Statement pred : getPredecessorsNotBenchmark(statement)) {
                     queries.add(new ExtractedValueAssertion(pred, param.getIntValue()));
                 }
+            }
+
+            if (invocationName.startsWith("discoveredSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                if (!count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new DiscoveredSeedAssertion(count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("discoveredRuleSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                if (!count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new DiscoveredRuleSeedAssertion(count.getIntValue()));
+            }
+
+            if (invocationName.startsWith("discoveredPredicateSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                if (!count.isIntConstant()) {
+                    continue;
+                }
+
+                queries.add(new DiscoveredPredicateSeedAssertion(count.getIntValue()));
             }
 
             if (invocationName.startsWith("callToForbiddenMethod")) {

@@ -12,7 +12,6 @@ package crypto.utils;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Type;
 import crysl.rule.CrySLMethod;
-import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,9 +21,9 @@ import java.util.Map;
 public class MatcherUtils {
 
     public static Collection<CrySLMethod> getMatchingCryslMethodsToDeclaredMethod(
-            CrySLRule rule, DeclaredMethod declaredMethod) {
+            Collection<CrySLMethod> events, DeclaredMethod declaredMethod) {
         Collection<CrySLMethod> matchingMethods = new HashSet<>();
-        for (CrySLMethod method : rule.getEvents()) {
+        for (CrySLMethod method : events) {
             if (matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {
                 matchingMethods.add(method);
             }
