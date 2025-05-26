@@ -49,8 +49,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import typestate.TransitionFunction;
-import typestate.finiteautomata.ITransition;
 import typestate.finiteautomata.State;
+import typestate.finiteautomata.Transition;
 
 public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
@@ -121,7 +121,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 continue;
             }
 
-            DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+            DeclaredMethod declaredMethod = statement.getInvokeExpr().getDeclaredMethod();
             Optional<CrySLForbiddenMethod> forbiddenMethod = isForbiddenMethod(declaredMethod);
 
             if (forbiddenMethod.isPresent()) {
@@ -180,7 +180,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 endPathOfPropagation.cellSet()) {
             Collection<CrySLMethod> expectedMethodsToBeCalled = new HashSet<>();
 
-            for (ITransition n : c.getValue().values()) {
+            for (Transition n : c.getValue().getValues()) {
                 if (n.to() == null) {
                     continue;
                 }
@@ -250,7 +250,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 }
 
                 // Only if the path does not end in an accepting state, the error should be reported
-                DeclaredMethod declaredMethod = statement.getInvokeExpr().getMethod();
+                DeclaredMethod declaredMethod = statement.getInvokeExpr().getDeclaredMethod();
                 if (isMethodToAcceptingState(declaredMethod)) {
                     continue;
                 }
@@ -517,7 +517,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Collection<CrySLMethod> methods =
                 MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                        specification, statement.getInvokeExpr().getMethod());
+                        specification, statement.getInvokeExpr().getDeclaredMethod());
         for (CrySLMethod method : methods) {
             if (isPredicateGeneratingAssignStatement(statement, predicate, method)) {
                 AbstractPredicate generatedPred =

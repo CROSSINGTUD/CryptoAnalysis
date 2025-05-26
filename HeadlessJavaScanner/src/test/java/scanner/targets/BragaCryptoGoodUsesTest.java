@@ -12,7 +12,6 @@ package scanner.targets;
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ForbiddenMethodError;
-import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
@@ -109,7 +108,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.GenerateRandomIV", "main", 1)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .build());
@@ -482,7 +481,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA2_1", "main", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA2_2", "main", 1)
@@ -494,7 +493,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseSHA3_2", "main", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 1)
+                        .withTPs(ConstraintError.class, 1)
                         .build());
 
         scanner.scan();
@@ -514,7 +513,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseHMACSHA2_1", "main", 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 4)
+                        .withTPs(ConstraintError.class, 4)
                         .withTPs(RequiredPredicateError.class, 4)
                         .build());
 

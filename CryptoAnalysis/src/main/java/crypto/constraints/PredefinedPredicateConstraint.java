@@ -107,7 +107,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                 continue;
             }
 
-            DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+            DeclaredMethod foundCall = statement.getInvokeExpr().getDeclaredMethod();
             Collection<CrySLMethod> matchingCryslMethods =
                     MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
                             seed.getSpecification(), foundCall);
@@ -145,7 +145,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                 continue;
             }
 
-            DeclaredMethod foundCall = statement.getInvokeExpr().getMethod();
+            DeclaredMethod foundCall = statement.getInvokeExpr().getDeclaredMethod();
             for (CrySLMethod method : notAllowedCalls) {
                 if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, foundCall)) {
                     IViolatedConstraint violatedConstraint = new ViolatedNoCallToConstraint(method);

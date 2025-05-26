@@ -22,7 +22,7 @@ import crypto.extractparameter.transformation.Transformation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import wpds.impl.Weight;
+import wpds.impl.NoWeight;
 
 public class QuerySolver {
 
@@ -44,7 +44,7 @@ public class QuerySolver {
         Boomerang boomerang = new Boomerang(definition.frameworkScope(), options);
 
         definition.reporter().beforeTriggeringBoomerangQuery(query);
-        BackwardBoomerangResults<Weight.NoWeight> results = boomerang.solve(query);
+        BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
         definition.reporter().afterTriggeringBoomerangQuery(query);
 
         definition.reporter().extractedBoomerangResults(query, results);
@@ -58,7 +58,7 @@ public class QuerySolver {
     }
 
     private ParameterWithExtractedValues extractValuesFromQueryResult(
-            ExtractParameterQuery query, BackwardBoomerangResults<Weight.NoWeight> results) {
+            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {
 
         Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();
         Collection<Type> propagatedTypes = results.getPropagationType();

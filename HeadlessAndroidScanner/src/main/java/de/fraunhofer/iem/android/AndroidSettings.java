@@ -41,6 +41,11 @@ public class AndroidSettings implements Callable<Integer> {
     private String rulesetDirectory = null;
 
     @CommandLine.Option(
+            names = {"--cg"},
+            description = {"The call graph algorithm"})
+    private String cgAlgorithm = null;
+
+    @CommandLine.Option(
             names = {"--reportPath"},
             description = "Path to a directory where the reports are stored")
     private String reportPath = null;
@@ -58,9 +63,18 @@ public class AndroidSettings implements Callable<Integer> {
             description = "Visualize the errors (requires --reportPath to be set)")
     private boolean visualization = false;
 
+    public enum CallGraphAlgorithm {
+        CHA,
+        RTA,
+        VTA,
+        SPARK
+    }
+
+    private CallGraphAlgorithm callGraphAlgorithm;
     private Collection<Reporter.ReportFormat> reportFormats;
 
     public AndroidSettings() {
+        callGraphAlgorithm = CallGraphAlgorithm.CHA;
         reportFormats = Set.of(Reporter.ReportFormat.CMD);
     }
 
@@ -68,6 +82,10 @@ public class AndroidSettings implements Callable<Integer> {
         CommandLine parser = new CommandLine(this);
         parser.setOptionsCaseInsensitive(true);
         int exitCode = parser.execute(settings);
+
+        if (cgAlgorithm != null) {
+            callGraphAlgorithm = parseCallGraphAlgorithm(cgAlgorithm);
+        }
 
         if (reportFormat != null) {
             reportFormats = parseReportFormatValues(reportFormat);
@@ -83,8 +101,19 @@ public class AndroidSettings implements Callable<Integer> {
         }
     }
 
-    private Collection<Reporter.ReportFormat> parseReportFormatValues(String[] settings)
-            throws CryptoAnalysisParserException {
+    private CallGraphAlgorithm parseCallGraphAlgorithm(String algorithm) {
+        return switch (algorithm.toLowerCase()) {
+            case "cha" -> CallGraphAlgorithm.CHA;
+            case "rta" -> CallGraphAlgorithm.RTA;
+            case "vta" -> CallGraphAlgorithm.VTA;
+            case "spark" -> CallGraphAlgorithm.SPARK;
+            default ->
+                    throw new CryptoAnalysisParserException(
+                            "Invalid call graph algorithm. Possible values are {CHA, RTA, VTA, SPARK");
+        };
+    }
+
+    private Collection<Reporter.ReportFormat> parseReportFormatValues(String[] settings) {
         Collection<Reporter.ReportFormat> formats = new HashSet<>();
 
         for (String format : settings) {
@@ -143,6 +172,14 @@ public class AndroidSettings implements Callable<Integer> {
 
     public void setRulesetDirectory(String rulesetDirectory) {
         this.rulesetDirectory = rulesetDirectory;
+    }
+
+    public CallGraphAlgorithm getCallGraphAlgorithm() {
+        return callGraphAlgorithm;
+    }
+
+    public void setCallGraphAlgorithm(CallGraphAlgorithm algorithm) {
+        this.callGraphAlgorithm = algorithm;
     }
 
     public Collection<Reporter.ReportFormat> getReportFormats() {
