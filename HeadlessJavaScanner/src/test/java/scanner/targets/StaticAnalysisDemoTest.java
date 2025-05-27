@@ -109,7 +109,7 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("main.Encrypt", "incorrectBigInteger", 0)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(

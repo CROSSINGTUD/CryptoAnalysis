@@ -13,6 +13,7 @@ import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
 import boomerang.scope.sootup.BoomerangPreInterceptor;
 import boomerang.scope.sootup.SootUpFrameworkScope;
+import com.google.common.base.Stopwatch;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,6 @@ import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.SootClassMember;
 import sootup.core.model.SourceType;
 import sootup.core.transform.BodyInterceptor;
-import sootup.interceptors.TypeAssigner;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.JavaSootMethod;
 import sootup.java.core.views.JavaView;
@@ -41,13 +41,19 @@ public class SootUpSetup extends FrameworkSetup {
 
     @Override
     public void initializeFramework() {
+        LOGGER.info("Setting up SootUp...");
+        Stopwatch watch = Stopwatch.createStarted();
+
         List<BodyInterceptor> interceptors =
-                List.of(new TypeAssigner(), new BoomerangPreInterceptor());
+                List.of(/*new LocalSplitter(), */ new BoomerangPreInterceptor());
         AnalysisInputLocation inputLocation =
                 new JavaClassPathAnalysisInputLocation(
                         applicationPath, SourceType.Application, interceptors);
 
         view = new JavaView(inputLocation);
+
+        watch.stop();
+        LOGGER.info("SootUp setup done in {}", watch);
     }
 
     @Override

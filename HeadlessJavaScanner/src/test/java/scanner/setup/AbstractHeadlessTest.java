@@ -89,7 +89,7 @@ public abstract class AbstractHeadlessTest {
         } else if (OPAL.equals(framework)) {
             return ScannerSettings.Framework.OPAL;
         } else {
-            return ScannerSettings.Framework.SOOT;
+            return ScannerSettings.Framework.SOOT_UP;
         }
     }
 

@@ -81,6 +81,7 @@ public class SootSetup extends FrameworkSetup {
          * it is disabled.
          */
         Options.v().setPhaseOption("jb.sils", "enabled:false");
+        Options.v().setPhaseOption("jb.dae", "enabled:false");
         // Options.v().setPhaseOption("jb", "use-original-names:true");
 
         // JAVA 8

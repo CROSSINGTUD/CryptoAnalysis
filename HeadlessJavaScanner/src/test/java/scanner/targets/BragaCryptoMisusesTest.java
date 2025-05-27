@@ -487,6 +487,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.ImproperKeyLen.ImproperKeySizeRSA3", "main", 1)
                         .withTPs(ConstraintError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.ImproperKeyLen.ImproperKeySizeRSA4", "main", 1)
@@ -496,10 +497,12 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.ImproperKeyLen.ImproperKeySizeRSA5", "main", 1)
                         .withTPs(ConstraintError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pkm.ImproperKeyLen.ImproperKeySizeRSA6", "main", 1)
                         .withTPs(ConstraintError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 1)
                         .build());
 
         scanner.scan();
@@ -715,7 +718,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 1)
+                        .withTPs(RequiredPredicateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("pdf.insecureDefault.InsecureDefault3DES", "main", 1)
@@ -1377,7 +1380,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(ForbiddenMethodError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .build());
 
         addErrorSpecification(

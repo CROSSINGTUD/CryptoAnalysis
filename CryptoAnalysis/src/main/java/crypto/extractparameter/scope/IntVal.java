@@ -177,6 +177,6 @@ public class IntVal extends Val {
 
     @Override
     public String toString() {
-        return "Int constant: " + value;
+        return String.valueOf(value);
     }
 }

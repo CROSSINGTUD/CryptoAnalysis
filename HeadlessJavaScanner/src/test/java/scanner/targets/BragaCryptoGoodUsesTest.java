@@ -1144,7 +1144,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.DoNotPrintDHSecret1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(RequiredPredicateError.class, 18)
                         .build());
 
         addErrorSpecification(

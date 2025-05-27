@@ -161,6 +161,6 @@ public class LongVal extends Val {
 
     @Override
     public String getVariableName() {
-        return "Long constant: " + value;
+        return String.valueOf(value);
     }
 }

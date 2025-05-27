@@ -161,6 +161,6 @@ public class StringVal extends Val {
 
     @Override
     public String getVariableName() {
-        return "String constant: " + value;
+        return value;
     }
 }
