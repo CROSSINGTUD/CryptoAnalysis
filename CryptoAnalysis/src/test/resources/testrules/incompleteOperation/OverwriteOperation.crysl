@@ -1,0 +1,12 @@
+SPEC tests.error.incompleteoperation.OverwriteOperation
+
+EVENTS
+    Con1: OverwriteOperation();
+    Con2: getInstance();
+    Con := Con1 | Con2;
+
+    Op1: operation1();
+    Op2: operation2();
+
+ORDER
+    Con, Op1, Op2

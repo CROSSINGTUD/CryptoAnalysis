@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import typestate.TransitionFunction;
 import typestate.TransitionFunctionImpl;
+import typestate.finiteautomata.Transition;
 
 /**
  * State machine that wraps a {@link StateMachineGraph} from a {@link crysl.rule.CrySLRule} and
@@ -91,14 +92,14 @@ public class IdealStateMachine {
                 LabeledMatcherTransition idTransition =
                         new LabeledMatcherTransition(startNode, Collections.emptySet(), startNode);
 
-                return new TransitionFunctionImpl(idTransition, Collections.singleton(edge));
+                return new TransitionFunctionImpl(idTransition, statement);
             }
 
             if (statement.containsInvokeExpr()) {
                 InvokeExpr invokeExpr = statement.getInvokeExpr();
                 DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
 
-                Set<LabeledMatcherTransition> matchingTransitions = new HashSet<>();
+                Set<Transition> matchingTransitions = new HashSet<>();
                 for (LabeledMatcherTransition transition : initialTransitions) {
                     if (transition.getMatching(declaredMethod).isPresent()) {
                         matchingTransitions.add(transition);
@@ -106,8 +107,7 @@ public class IdealStateMachine {
                 }
 
                 if (!matchingTransitions.isEmpty()) {
-                    return new TransitionFunctionImpl(
-                            matchingTransitions, Collections.singleton(edge));
+                    return new TransitionFunctionImpl(matchingTransitions, statement);
                 }
 
                 Collection<CrySLMethod> matchingMethods =
@@ -118,8 +118,7 @@ public class IdealStateMachine {
                     // Collections.singleton(edge));
                     for (LabeledMatcherTransition transition : initialTransitions) {
                         if (transition.to().toString().equals("0")) {
-                            return new TransitionFunctionImpl(
-                                    transition, Collections.singleton(edge));
+                            return new TransitionFunctionImpl(transition, statement);
                         }
                     }
                 }
@@ -137,7 +136,7 @@ public class IdealStateMachine {
 
         LabeledMatcherTransition transition =
                 new LabeledMatcherTransition(startNode, expectedInitialMethods, errorState);
-        return new TransitionFunctionImpl(transition, Collections.singleton(edge));
+        return new TransitionFunctionImpl(transition, statement);
     }
 
     public Collection<LabeledMatcherTransition> getAllTransitions() {

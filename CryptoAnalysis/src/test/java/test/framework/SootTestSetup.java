@@ -41,12 +41,12 @@ public class SootTestSetup implements TestSetup {
         Options.v().set_output_format(Options.output_format_none);
 
         Options.v().setPhaseOption("cg.cha", "on");
+        Options.v().setPhaseOption("jb", "use-original-names:true");
         Options.v().setPhaseOption("jb.sils", "enabled:false");
         Options.v().setPhaseOption("jb.dae", "enabled:false");
 
         Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classPath);
 
-        // Options.v().set_main_class(this.getTargetClass());
         SootClass sootTestCaseClass = Scene.v().forceResolve(className, SootClass.BODIES);
         sootTestCaseClass.setApplicationClass();
 

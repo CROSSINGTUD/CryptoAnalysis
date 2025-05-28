@@ -46,7 +46,8 @@ public class StaticAnalysisDemoTest extends AbstractHeadlessTest {
                         .build());
 
         addErrorSpecification(
-                new ErrorSpecification.Builder("example.IncompleteOperationErrorExample", "main", 1)
+                new ErrorSpecification.Builder(
+                                "example.IncompleteOperationErrorExample", "doUpdate", 0)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 

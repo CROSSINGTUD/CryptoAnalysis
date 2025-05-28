@@ -445,7 +445,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("br.fixedSeed.FixedSeed1", "main", 1)
                         .withTPs(RequiredPredicateError.class, 6)
                         .withTPs(TypestateError.class, 4)
-                        .withTPs(IncompleteOperationError.class, 4)
+                        .withTPs(IncompleteOperationError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("br.fixedSeed.FixedSeed2", "main", 1)

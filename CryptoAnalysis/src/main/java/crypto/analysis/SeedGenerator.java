@@ -239,7 +239,7 @@ public class SeedGenerator {
 
             seeds.add(seed);
 
-            if (result.results().isTimedout()) {
+            if (result.results().isTimedOut()) {
                 scanner.getAnalysisReporter().onTypestateAnalysisTimeout(seed);
             }
 

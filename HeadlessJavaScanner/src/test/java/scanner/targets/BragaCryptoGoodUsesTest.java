@@ -416,14 +416,14 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseExplicitMode1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(IncompleteOperationError.class, 3)
+                        .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(TypestateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseExplicitPadding1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(IncompleteOperationError.class, 3)
+                        .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(RequiredPredicateError.class, 1)
                         .withTPs(TypestateError.class, 2)
                         .build());
@@ -1202,14 +1202,14 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseRandomIVsForCFB", "main", 1)
                         .withTPs(RequiredPredicateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 3)
+                        .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.UseRandomIVsForCFB128", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 1)
-                        .withTPs(IncompleteOperationError.class, 3)
+                        .withTPs(IncompleteOperationError.class, 2)
                         .withTPs(TypestateError.class, 2)
                         .build());
 
