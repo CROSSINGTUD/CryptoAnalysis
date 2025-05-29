@@ -839,7 +839,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.NonAuthenticatedEphemeralECDH_128", "main", 1)
-                        .withNoErrors(ConstraintError.class)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -847,6 +847,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                                 "example.NonAuthenticatedEphemeralECDH_192", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -854,6 +855,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                                 "example.NonAuthenticatedEphemeralECDH_256", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -861,6 +863,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                                 "example.NonAuthenticatedEphemeralDH_2048", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         // positive test case
@@ -869,6 +872,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                                 "example.NonAuthenticatedDH_2048", "positiveTestCase", 0)
                         .withNoErrors(ConstraintError.class)
                         .withTPs(RequiredPredicateError.class, 9)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
@@ -878,6 +882,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                                 "example.NonAuthenticatedDH_2048", "negativeTestCase", 0)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(RequiredPredicateError.class, 9)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
@@ -1106,12 +1111,14 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("example.DoNotPrintECDHPrivKey1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.DoNotPrintECDHSecret1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
@@ -1144,13 +1151,15 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.DoNotPrintDHSecret1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
-                        .withTPs(RequiredPredicateError.class, 18)
+                        .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.DoNotPrintDHPrivKey1", "main", 1)
                         .withTPs(ConstraintError.class, 2)
                         .withTPs(RequiredPredicateError.class, 16)
+                        .withTPs(AlternativeReqPredicateError.class, 2)
                         .build());
 
         scanner.scan();

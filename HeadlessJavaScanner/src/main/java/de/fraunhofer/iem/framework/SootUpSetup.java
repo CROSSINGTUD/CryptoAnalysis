@@ -15,7 +15,8 @@ import boomerang.scope.sootup.BoomerangPreInterceptor;
 import boomerang.scope.sootup.SootUpFrameworkScope;
 import com.google.common.base.Stopwatch;
 import de.fraunhofer.iem.scanner.ScannerSettings;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
@@ -58,7 +59,7 @@ public class SootUpSetup extends FrameworkSetup {
 
     @Override
     public FrameworkScope createFrameworkScope() {
-        List<JavaSootMethod> entryPoints = new ArrayList<>();
+        Collection<JavaSootMethod> entryPoints = new HashSet<>();
         view.getClasses()
                 .forEach(
                         c -> {

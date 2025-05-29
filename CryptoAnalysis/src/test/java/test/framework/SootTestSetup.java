@@ -41,9 +41,14 @@ public class SootTestSetup implements TestSetup {
         Options.v().set_output_format(Options.output_format_none);
 
         Options.v().setPhaseOption("cg.cha", "on");
+
         Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb.dtr", "enabled:false");
         Options.v().setPhaseOption("jb.sils", "enabled:false");
+        Options.v().setPhaseOption("jb.ulp", "enabled:false");
         Options.v().setPhaseOption("jb.dae", "enabled:false");
+        Options.v().setPhaseOption("jb.uce", "enabled:false");
+        Options.v().setPhaseOption("jb.cbf", "enabled:false");
 
         Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classPath);
 

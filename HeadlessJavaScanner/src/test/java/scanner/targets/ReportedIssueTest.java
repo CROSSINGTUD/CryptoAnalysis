@@ -132,11 +132,17 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue103.Main", "main", 1)
-                        .withTPs(RequiredPredicateError.class, 4)
+                        .withTPs(RequiredPredicateError.class, 5)
                         .build());
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue137.Program", "main", 1)
+                        .withTPs(ConstraintError.class, 1)
+                        .withTPs(IncompleteOperationError.class, 1)
+                        .build());
+
+        addErrorSpecification(
+                new ErrorSpecification.Builder("issue137.NonDeterministic", "main", 1)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());

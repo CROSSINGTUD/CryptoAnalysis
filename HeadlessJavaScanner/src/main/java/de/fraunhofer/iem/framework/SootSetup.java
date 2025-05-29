@@ -75,14 +75,18 @@ public class SootSetup extends FrameworkSetup {
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_keep_line_number(true);
 
-        /* This phase is new in soot 4.3.0 and manipulates the jimple code in a
+        /* The 'sils' phase is new in Soot 4.3.0 and manipulates the jimple code in a
          * way that CryptoAnalysis is not able to find seeds in some cases (see
          * https://github.com/CROSSINGTUD/CryptoAnalysis/issues/293). Therefore,
-         * it is disabled.
+         * it always must be disabled.
          */
-        Options.v().setPhaseOption("jb.sils", "enabled:false");
-        Options.v().setPhaseOption("jb.dae", "enabled:false");
         Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb.dtr", "enabled:false");
+        Options.v().setPhaseOption("jb.sils", "enabled:false");
+        Options.v().setPhaseOption("jb.ulp", "enabled:false");
+        Options.v().setPhaseOption("jb.dae", "enabled:false");
+        Options.v().setPhaseOption("jb.uce", "enabled:false");
+        Options.v().setPhaseOption("jb.cbf", "enabled:false");
 
         // JAVA 8
         if (getJavaVersion() < 9) {
