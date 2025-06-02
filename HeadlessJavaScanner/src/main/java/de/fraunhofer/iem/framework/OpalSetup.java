@@ -78,25 +78,27 @@ public class OpalSetup extends FrameworkSetup {
         CallGraph callGraph = project.get(callGraphKey);
 
         ArraySeq<Method> entryPoints = project.allMethodsWithBody();
-        return new OpalFrameworkScope(project, callGraph, entryPoints.toSet(), dataFlowScope);
+        return new OpalFrameworkScope(
+                project, callGraph, entryPoints.<Method>toSet(), dataFlowScope);
     }
 
     public Config updateConfigWithEntryPoints(Config config, Seq<Method> entryPoints) {
         String key = InitialEntryPointsKey.ConfigKeyPrefix() + "entryPoints";
         List<Object> currentValues = config.getList(key).unwrapped();
 
-        Map<String, String> configValue = new HashMap<>();
         Iterator<Method> methodIterator = entryPoints.iterator();
         while (methodIterator.hasNext()) {
             Method method = methodIterator.next();
 
+            Map<String, String> configValue = new HashMap<>();
             configValue.put(
                     "declaringClass", method.classFile().thisType().toJava().replace(".", "/"));
             configValue.put("name", method.name());
+
+            currentValues.add(ConfigValueFactory.fromMap(configValue));
+            config = config.withValue(key, ConfigValueFactory.fromIterable(currentValues));
         }
 
-        currentValues.add(ConfigValueFactory.fromMap(configValue));
-        config = config.withValue(key, ConfigValueFactory.fromIterable(currentValues));
         config =
                 config.withValue(
                         InitialEntryPointsKey.ConfigKey() + "analysis",

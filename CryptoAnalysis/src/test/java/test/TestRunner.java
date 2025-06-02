@@ -52,7 +52,7 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
-import test.framework.SootTestSetup;
+import test.framework.OpalTestSetup;
 import test.framework.TestSetup;
 
 public class TestRunner {
@@ -69,7 +69,7 @@ public class TestRunner {
     }
 
     private TestSetup createTestSetup() {
-        return new SootTestSetup();
+        return new OpalTestSetup();
     }
 
     public void initialize(String ruleset) {

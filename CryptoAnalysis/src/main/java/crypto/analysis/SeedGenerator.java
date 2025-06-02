@@ -135,6 +135,10 @@ public class SeedGenerator {
         Type returnType = statement.getInvokeExpr().getDeclaredMethod().getReturnType();
         if (rules.containsKey(returnType.toString())) {
             Val leftOp = statement.getLeftOp();
+            if (isStackLocalUnused(statement, leftOp)) {
+                return Optional.empty();
+            }
+
             Val rightOp = statement.getRightOp();
             AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
 
@@ -146,6 +150,43 @@ public class SeedGenerator {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Check whether the target local of an assign statement is a stack local and whether it is
+     * subsequently used in a statement. This check is required because the IR's always create a
+     * stack local to model the push operation on the operand stack, even if there is no usage. For
+     * example, in the IR of the program
+     *
+     * <pre>{@code
+     * KeyGenerator g = KeyGenerator.getInstance(...);
+     * g.generateKey();
+     * }</pre>
+     *
+     * the call to <i>g.generateKey()</i> is transformed to <i>$s =
+     * virtualInvoke(g.generateKey())</i>. In this scenario, we can ignore the creation of a seed
+     * because <i>$s</i> does not really exist in the original program.
+     *
+     * @param statement the statement containing invoke expression
+     * @param local the target local if the statement is an assign statement
+     * @return true if the target local defined at the statement is not subsequently used
+     */
+    private boolean isStackLocalUnused(Statement statement, Val local) {
+        if (!local.isLocal() || !local.getVariableName().startsWith("$")) {
+            return false;
+        }
+
+        for (Statement stmt : statement.getMethod().getStatements()) {
+            if (stmt.equals(statement)) {
+                continue;
+            }
+
+            if (stmt.uses(local)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private Collection<ForwardSeedQuery> computePredicateSeeds(

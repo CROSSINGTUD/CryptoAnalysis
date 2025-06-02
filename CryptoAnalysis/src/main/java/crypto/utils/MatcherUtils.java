@@ -49,14 +49,6 @@ public class MatcherUtils {
             return false;
         }
 
-        // Compare class names
-        String cryslClassName = cryslMethod.getDeclaringClassName();
-        Type declaringClassType = declaredMethod.getDeclaringClass().getType();
-        if (!cryslClassName.equals(declaringClassType.toString())
-                && !declaringClassType.isSupertypeOf(cryslClassName)) {
-            return false;
-        }
-
         // Compare parameters
         List<Map.Entry<String, String>> cryslParameters = cryslMethod.getParameters();
         List<Type> declaredParameters = new ArrayList<>(declaredMethod.getParameterTypes());

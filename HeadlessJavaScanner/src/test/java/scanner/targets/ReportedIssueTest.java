@@ -132,7 +132,7 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("issue103.Main", "main", 1)
-                        .withTPs(RequiredPredicateError.class, 5)
+                        .withTPs(RequiredPredicateError.class, 4)
                         .build());
 
         addErrorSpecification(

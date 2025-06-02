@@ -17,6 +17,7 @@ import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.ForbiddenMethodError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -166,13 +167,13 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     /**
      * Check the ORDER section and report a corresponding {@link IncompleteOperationError} for each
-     * sequence of statements that do not end in an accepting state
+     * sequence of statements that does not end in an accepting state
      */
     private void evaluateIncompleteOperations() {
         Multimap<Statement, CrySLMethod> incompleteOperations = HashMultimap.create();
 
-        Map<Val, TransitionFunction> finalWeights = analysisResults.computeFinalWeights();
-        for (TransitionFunction weight : finalWeights.values()) {
+        Table<Statement, Val, TransitionFunction> weights = analysisResults.computeFinalWeights();
+        for (TransitionFunction weight : weights.values()) {
             for (Transition transition : weight.getStateChangeStatements().keySet()) {
                 State targetState = transition.to();
 
