@@ -119,9 +119,10 @@ public class SARIFReporter extends Reporter {
 
         JSONArray runs = new JSONArray();
         JSONObject run = new JSONObject();
+        JSONArray artifacts = new JSONArray(files.toMap().values());
 
         run.put(SARIFConfig.TOOL_KEY, getToolInfo());
-        run.put(SARIFConfig.FILES_KEY, files);
+        run.put(SARIFConfig.ARTIFACTS_KEY, artifacts);
         run.put(SARIFConfig.RESULTS_KEY, results);
         run.put(SARIFConfig.RESOURCES_KEY, resources);
         run.put(SARIFConfig.SUMMARY_KEY, getSummary());
@@ -166,6 +167,10 @@ public class SARIFReporter extends Reporter {
     private void addFile(WrappedClass c) {
         String filePath = getFileName(c);
         JSONObject mimeType = new JSONObject();
+        JSONObject mimeLocation = new JSONObject();
+
+        mimeLocation.put(SARIFConfig.URI_KEY, filePath);
+        mimeType.put(SARIFConfig.LOCATIONS_KEY, mimeLocation);
         mimeType.put(SARIFConfig.MIME_TYPE_KEY, SARIFConfig.MIME_TYPE_VALUE);
 
         files.put(filePath, mimeType);
@@ -173,14 +178,15 @@ public class SARIFReporter extends Reporter {
 
     public JSONObject getToolInfo() {
         JSONObject tool = new JSONObject();
+        JSONObject driver = new JSONObject();
 
         // TODO Put correct CryptoAnalysis version in report
-        tool.put(SARIFConfig.ANALYSIS_TOOL_NAME_KEY, SARIFConfig.ANALYSIS_TOOL_NAME_VALUE);
-        tool.put(SARIFConfig.VERSION, getClass().getPackage().getImplementationVersion());
-        tool.put(
-                SARIFConfig.SEMANTIC_VERSION_KEY,
-                getClass().getPackage().getImplementationVersion());
-        tool.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
+        driver.put(SARIFConfig.ANALYSIS_TOOL_NAME_KEY, SARIFConfig.ANALYSIS_TOOL_NAME_VALUE);
+        driver.put(SARIFConfig.TOOL_FULL_NAME_KEY, SARIFConfig.TOOL_FULL_NAME_VALUE);
+        driver.put(SARIFConfig.SEMANTIC_VERSION_KEY, SARIFConfig.SEMANTIC_VERSION_VALUE);
+        driver.put(SARIFConfig.LANGUAGE_KEY, SARIFConfig.LANGUAGE_VALUE);
+
+        tool.put("driver", driver);
 
         return tool;
     }
@@ -189,7 +195,7 @@ public class SARIFReporter extends Reporter {
         JSONObject message = new JSONObject();
 
         message.put(SARIFConfig.TEXT_KEY, text);
-        message.put(SARIFConfig.RICH_TEXT_KEY, richText);
+        message.put(SARIFConfig.MARKDOWN_KEY, richText);
 
         return message;
     }
@@ -205,21 +211,22 @@ public class SARIFReporter extends Reporter {
 
         JSONObject region = new JSONObject();
         region.put(SARIFConfig.START_LINE_KEY, String.valueOf(lineNumber));
-        region.put(SARIFConfig.METHOD_KEY, method);
-        region.put(SARIFConfig.STATEMENT_KEY, statement);
 
         JSONObject uri = new JSONObject();
         uri.put(SARIFConfig.URI_KEY, getFileName(c));
 
         JSONObject physicalLocation = new JSONObject();
-        physicalLocation.put(SARIFConfig.FILE_LOCATION_KEY, uri);
+        physicalLocation.put(SARIFConfig.ARTIFACT_LOCATION_KEY, uri);
         physicalLocation.put(SARIFConfig.REGION_KEY, region);
-
-        location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
 
         String fullyQualifiedLogicalName =
                 c.getFullyQualifiedName().replace(".", "::") + "::" + methodName;
-        location.put(SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
+        JSONObject logicalLocation = new JSONObject();
+        logicalLocation.put(
+                SARIFConfig.FULLY_QUALIFIED_LOGICAL_NAME_KEY, fullyQualifiedLogicalName);
+
+        location.put(SARIFConfig.PHYSICAL_LOCATION_KEY, physicalLocation);
+        location.put(SARIFConfig.LOGICAL_LOCATION_KEY, logicalLocation);
 
         locations.put(location);
 
