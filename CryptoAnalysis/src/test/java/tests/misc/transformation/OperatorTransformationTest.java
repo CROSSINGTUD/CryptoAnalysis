@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.misc.transformation;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class OperatorTransformationTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "transformation";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TRANSFORMATION)
+public class OperatorTransformationTest {
 
     @Test
     public void positiveLengthExprTest() {

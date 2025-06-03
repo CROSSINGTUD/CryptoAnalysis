@@ -48,6 +48,12 @@ public class AnalysisReporter {
         resultsListeners = new HashSet<>();
     }
 
+    public void clear() {
+        analysisListeners.clear();
+        errorListeners.clear();
+        resultsListeners.clear();
+    }
+
     public void addAnalysisListener(IAnalysisListener analysisListener) {
         analysisListeners.add(analysisListener);
     }

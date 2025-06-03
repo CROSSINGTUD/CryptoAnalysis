@@ -103,6 +103,8 @@ public class CryptoScanner {
     }
 
     public final void reset() {
+        analysisReporter.clear();
+
         analysisPrinter = new AnalysisPrinter();
         addAnalysisListener(analysisPrinter);
 

@@ -11,13 +11,14 @@ package scanner.targets;
 
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.MavenProject;
 
 public class TLSRuleTest extends AbstractHeadlessTest {
-    @Ignore
+
+    @Disabled
     @Test
     public void secureFileTransmitter() {
         String mavenProjectPath =

@@ -32,11 +32,11 @@ import test.assertions.PredicateContradictionErrorCountAssertion;
 import test.assertions.PredicateErrorCountAssertion;
 import test.assertions.TypestateErrorCountAssertion;
 
-public class UsagePatternErrorListener implements IErrorListener {
+public class TestRunnerErrorListener implements IErrorListener {
 
     private final Collection<Assertion> assertions;
 
-    public UsagePatternErrorListener(Collection<Assertion> assertions) {
+    public TestRunnerErrorListener(Collection<Assertion> assertions) {
         this.assertions = assertions;
     }
 
