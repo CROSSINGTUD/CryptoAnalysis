@@ -236,15 +236,13 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             boolean isSubType = false;
 
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                for (Type type : extractedValue.types()) {
-                    if (type.isNullType()) {
-                        continue;
-                    }
+            for (Type type : parameter.typesAtStatement()) {
+                if (type.isNullType()) {
+                    continue;
+                }
 
-                    if (type.isSubtypeOf(parameterType.getJavaType())) {
-                        isSubType = true;
-                    }
+                if (MatcherUtils.isTypeOrSubType(type.toString(), parameterType.getJavaType())) {
+                    isSubType = true;
                 }
             }
 

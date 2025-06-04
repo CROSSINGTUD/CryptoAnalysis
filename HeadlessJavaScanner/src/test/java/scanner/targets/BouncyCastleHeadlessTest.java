@@ -148,11 +148,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptOne", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withNoErrors(TypestateError.class)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptTwo", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(

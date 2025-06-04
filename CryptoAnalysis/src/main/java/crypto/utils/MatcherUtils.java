@@ -89,4 +89,12 @@ public class MatcherUtils {
         }
         return true;
     }
+
+    public static boolean isTypeOrSubType(String subType, String superType) {
+        try {
+            return Class.forName(superType).isAssignableFrom(Class.forName(subType));
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

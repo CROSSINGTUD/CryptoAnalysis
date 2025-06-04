@@ -11,6 +11,7 @@ package crypto.extractparameter;
 
 import boomerang.options.IAllocationSite;
 import boomerang.scope.AllocVal;
+import boomerang.scope.DataFlowScope;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Method;
@@ -22,6 +23,12 @@ import crypto.extractparameter.transformation.Transformation;
 import java.util.Optional;
 
 public class ExtractParameterAllocationSite implements IAllocationSite {
+
+    private final DataFlowScope dataFlowScope;
+
+    public ExtractParameterAllocationSite(DataFlowScope dataFlowScope) {
+        this.dataFlowScope = dataFlowScope;
+    }
 
     @Override
     public Optional<AllocVal> getAllocationSite(Method m, Statement stmt, Val fact) {
@@ -54,17 +61,26 @@ public class ExtractParameterAllocationSite implements IAllocationSite {
         }
 
         if (stmt.containsInvokeExpr()) {
+            DeclaredMethod declaredMethod = stmt.getInvokeExpr().getDeclaredMethod();
+            Type returnType = declaredMethod.getReturnType();
+
             /* If we have an invoke expression, we check if it corresponds to an
              * implemented transformation
              */
             if (Transformation.isTransformationExpression(stmt)) {
-                AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+                AllocVal allocVal = new TypedAllocVal(leftOp, stmt, rightOp, returnType);
+
+                return Optional.of(allocVal);
+            }
+
+            if (dataFlowScope.isExcluded(declaredMethod)) {
+                AllocVal allocVal = new TypedAllocVal(leftOp, stmt, rightOp, returnType);
 
                 return Optional.of(allocVal);
             }
         } else {
             if (OperatorTransformation.isOperatorTransformation(rightOp)) {
-                AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+                AllocVal allocVal = new TypedAllocVal(leftOp, stmt, rightOp, rightOp.getType());
 
                 return Optional.of(allocVal);
             }
@@ -76,7 +92,9 @@ public class ExtractParameterAllocationSite implements IAllocationSite {
                 Val castOp = rightOp.getCastOp();
 
                 if (isAllocationVal(castOp)) {
-                    return Optional.of(new AllocVal(leftOp, stmt, castOp));
+                    AllocVal allocVal = new TypedAllocVal(leftOp, stmt, castOp, rightOp.getType());
+
+                    return Optional.of(allocVal);
                 }
             }
 
@@ -94,7 +112,9 @@ public class ExtractParameterAllocationSite implements IAllocationSite {
 
             // Basic values: constants, array allocations and null
             if (isAllocationVal(rightOp)) {
-                return Optional.of(new AllocVal(leftOp, stmt, rightOp));
+                AllocVal allocVal = new TypedAllocVal(leftOp, stmt, rightOp, rightOp.getType());
+
+                return Optional.of(allocVal);
             }
         }
 

@@ -22,6 +22,7 @@ import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
 import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
 import sootup.core.inputlocation.AnalysisInputLocation;
+import sootup.core.model.SootClass;
 import sootup.core.model.SootClassMember;
 import sootup.core.model.SourceType;
 import sootup.core.transform.BodyInterceptor;
@@ -62,6 +63,7 @@ public class SootUpSetup extends FrameworkSetup {
     public FrameworkScope createFrameworkScope() {
         Collection<JavaSootMethod> entryPoints = new HashSet<>();
         view.getClasses()
+                .filter(SootClass::isApplicationClass)
                 .forEach(
                         c -> {
                             for (JavaSootMethod method : c.getMethods()) {
