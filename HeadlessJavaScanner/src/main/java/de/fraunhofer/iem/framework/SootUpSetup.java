@@ -26,7 +26,6 @@ import sootup.core.model.SootClass;
 import sootup.core.model.SootClassMember;
 import sootup.core.model.SourceType;
 import sootup.core.transform.BodyInterceptor;
-import sootup.interceptors.LocalSplitter;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.JavaSootMethod;
 import sootup.java.core.views.JavaView;
@@ -47,8 +46,7 @@ public class SootUpSetup extends FrameworkSetup {
         LOGGER.info("Setting up SootUp...");
         Stopwatch watch = Stopwatch.createStarted();
 
-        List<BodyInterceptor> interceptors =
-                List.of(new LocalSplitter(), new BoomerangPreInterceptor());
+        List<BodyInterceptor> interceptors = List.of(new BoomerangPreInterceptor());
         AnalysisInputLocation inputLocation =
                 new JavaClassPathAnalysisInputLocation(
                         applicationPath, SourceType.Application, interceptors);

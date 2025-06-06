@@ -11,6 +11,7 @@ package crypto.utils;
 
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Type;
+import crypto.analysis.ClassPathHandler;
 import crysl.rule.CrySLMethod;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +47,13 @@ public class MatcherUtils {
         }
 
         if (!cryslName.equals(declaredName)) {
+            return false;
+        }
+
+        // Compare class names
+        String cryslClassName = cryslMethod.getDeclaringClassName();
+        String declaredClassName = declaredMethod.getDeclaringClass().getFullyQualifiedName();
+        if (!isTypeOrSubType(cryslClassName, declaredClassName)) {
             return false;
         }
 
@@ -92,7 +100,10 @@ public class MatcherUtils {
 
     public static boolean isTypeOrSubType(String subType, String superType) {
         try {
-            return Class.forName(superType).isAssignableFrom(Class.forName(subType));
+            Class<?> subClass = Class.forName(subType, true, ClassPathHandler.getClassLoader());
+            Class<?> superClass = Class.forName(superType, true, ClassPathHandler.getClassLoader());
+
+            return superClass.isAssignableFrom(subClass);
         } catch (ClassNotFoundException e) {
             return false;
         }

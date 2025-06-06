@@ -79,7 +79,8 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void scan() {
         // Read rules
         LOGGER.info("Reading rules from {}", settings.getRulesetPath());
-        Collection<CrySLRule> rules = readRules(settings.getRulesetPath(), settings.getSootPath());
+        Collection<CrySLRule> rules =
+                readRules(settings.getRulesetPath(), settings.getAddClassPath());
         LOGGER.info("Found {} rules in {}", rules.size(), settings.getRulesetPath());
 
         // Initialize the reporters before the analysis to catch errors early
@@ -97,7 +98,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
         FrameworkScope frameworkScope = initializeFrameworkScope(dataFlowScope);
 
         // Run the analysis
-        super.scan(frameworkScope, rules);
+        super.scan(frameworkScope, rules, settings.getAddClassPath());
 
         // Report the errors
         for (Reporter reporter : reporters) {
@@ -134,7 +135,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
                     new SootSetup(
                             settings.getApplicationPath(),
                             settings.getCallGraph(),
-                            settings.getSootPath(),
+                            settings.getAddClassPath(),
                             dataFlowScope);
             case SOOT_UP ->
                     new SootUpSetup(
@@ -169,12 +170,12 @@ public class HeadlessJavaScanner extends CryptoScanner {
         settings.setCallGraph(callGraphAlgorithm);
     }
 
-    public String getSootClassPath() {
-        return settings.getSootPath();
+    public String getAddClassPath() {
+        return settings.getAddClassPath();
     }
 
-    public void setSootClassPath(String sootClassPath) {
-        settings.setSootPath(sootClassPath);
+    public void setAddClassPath(String sootClassPath) {
+        settings.setAddClassPath(sootClassPath);
     }
 
     public String getReportDirectory() {

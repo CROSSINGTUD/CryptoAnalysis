@@ -27,26 +27,19 @@ import java.util.Optional;
 
 public class TypestateAnalysisScope extends AnalysisScope {
 
-    private final FrameworkScope frameworkScope;
     private final Map<String, RuleTransitions> ruleTransitions;
 
     public TypestateAnalysisScope(
             FrameworkScope frameworkScope, Map<String, RuleTransitions> ruleTransitions) {
-        super(frameworkScope.getCallGraph());
+        super(frameworkScope);
 
         this.ruleTransitions = ruleTransitions;
-        this.frameworkScope = frameworkScope;
     }
 
     @Override
     protected Collection<? extends Query> generate(ControlFlowGraph.Edge edge) {
         Statement statement = edge.getStart();
         Collection<ForwardSeedQuery> discoveredSeeds = new LinkedHashSet<>();
-
-        // Check if method should not be analyzed TODO Move this to AnalysisScope
-        if (frameworkScope.getDataFlowScope().isExcluded(statement.getMethod())) {
-            return discoveredSeeds;
-        }
 
         // Check for seeds that originate from new expressions
         Collection<ForwardSeedQuery> newExprSeeds = computeSeedsFromNewExpressions(edge, statement);

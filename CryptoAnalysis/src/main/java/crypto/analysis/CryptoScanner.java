@@ -54,6 +54,8 @@ public class CryptoScanner {
 
         errorCollector = new ErrorCollector();
         addErrorListener(errorCollector);
+
+        ClassPathHandler.reset();
     }
 
     public final Collection<CrySLRule> readRules(String rulesetPath) {
@@ -77,11 +79,18 @@ public class CryptoScanner {
         }
     }
 
-    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> ruleset) {
+    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> rules) {
+        scan(frameworkScope, rules, "");
+    }
+
+    public final void scan(
+            FrameworkScope frameworkScope, Collection<CrySLRule> rules, String classpath) {
+        ClassPathHandler.initialize(classpath);
+
         // Start analysis
         analysisReporter.beforeAnalysis();
 
-        SeedGenerator generator = new SeedGenerator(this, frameworkScope, ruleset);
+        SeedGenerator generator = new SeedGenerator(this, frameworkScope, rules);
         List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
         analysisReporter.onDiscoveredSeeds(seeds);
 
@@ -110,6 +119,8 @@ public class CryptoScanner {
 
         errorCollector = new ErrorCollector();
         addErrorListener(errorCollector);
+
+        ClassPathHandler.reset();
     }
 
     public final void addAnalysisListener(IAnalysisListener analysisListener) {

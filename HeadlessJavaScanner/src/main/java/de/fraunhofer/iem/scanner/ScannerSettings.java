@@ -54,9 +54,9 @@ public class ScannerSettings implements Callable<Integer> {
     private String cg = null;
 
     @CommandLine.Option(
-            names = {"--sootPath"},
-            description = "The absolute path of the whole project")
-    private String sootPath = "";
+            names = {"--addClassPath"},
+            description = "Add classes to the classpath")
+    private String addClassPath = "";
 
     @CommandLine.Option(
             names = {"--reportPath"},
@@ -300,12 +300,12 @@ public class ScannerSettings implements Callable<Integer> {
         this.callGraphAlgorithm = callGraphAlgorithm;
     }
 
-    public String getSootPath() {
-        return sootPath;
+    public String getAddClassPath() {
+        return addClassPath;
     }
 
-    public void setSootPath(String sootPath) {
-        this.sootPath = sootPath;
+    public void setAddClassPath(String addClassPath) {
+        this.addClassPath = addClassPath;
     }
 
     public String getReportDirectory() {

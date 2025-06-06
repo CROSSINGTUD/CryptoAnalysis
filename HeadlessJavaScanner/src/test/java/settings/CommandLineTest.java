@@ -28,7 +28,7 @@ public class CommandLineTest {
 
     private static final String FRAMEWORK = "--framework";
     private static final String CALL_GRAPH = "--cg";
-    private static final String SOOT_PATH = "--sootPath";
+    private static final String ADD_CLASS_PATH = "--addClassPath";
     private static final String REPORT_PATH = "--reportPath";
     private static final String REPORT_FORMAT = "--reportFormat";
     private static final String VISUALIZATION = "--visualization";
@@ -166,15 +166,20 @@ public class CommandLineTest {
     }
 
     @Test
-    public void testSootPath() {
-        String sootPath = "path/to/soot";
+    public void testAddClassPath() {
+        String classPath = "path/to/class";
         String[] args =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, SOOT_PATH, sootPath
+                    APP_PATH,
+                    EXAMPLE_APP_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    ADD_CLASS_PATH,
+                    classPath
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assertions.assertEquals(scanner.getSootClassPath(), sootPath);
+        Assertions.assertEquals(scanner.getAddClassPath(), classPath);
     }
 
     @Test

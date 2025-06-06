@@ -24,7 +24,7 @@ import scanner.setup.MavenProject;
 public class ReportedIssueTest extends AbstractHeadlessTest {
 
     @Test
-    public void reportedIssues() {
+    public void reportedIssuesTest() {
         String mavenProjectPath =
                 new File("../CryptoAnalysisTargets/ReportedIssues").getAbsolutePath();
         MavenProject mavenProject = createAndCompile(mavenProjectPath);

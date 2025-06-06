@@ -29,7 +29,6 @@ import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.transform.BodyInterceptor;
 import sootup.core.types.ClassType;
-import sootup.interceptors.LocalSplitter;
 import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.JavaSootClass;
 import sootup.java.core.JavaSootMethod;
@@ -42,8 +41,7 @@ public class SootUpTestSetup implements TestSetup {
 
     @Override
     public void initialize(String classPath, String className, String testName) {
-        List<BodyInterceptor> interceptors =
-                List.of(new LocalSplitter(), new BoomerangPreInterceptor());
+        List<BodyInterceptor> interceptors = List.of(new BoomerangPreInterceptor());
 
         AnalysisInputLocation inputLocation =
                 new JavaClassPathAnalysisInputLocation(

@@ -14,6 +14,7 @@ import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Method;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,10 @@ public class CryptoAnalysisDataFlowScope implements DataFlowScope {
 
     private final Collection<String> ruleNames;
     private final Collection<String> ignoredSections;
+
+    public CryptoAnalysisDataFlowScope(Collection<CrySLRule> rules) {
+        this(rules, Collections.emptySet());
+    }
 
     public CryptoAnalysisDataFlowScope(
             Collection<CrySLRule> rules, Collection<String> ignoredSections) {

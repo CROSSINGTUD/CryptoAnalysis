@@ -68,7 +68,7 @@ public abstract class AbstractHeadlessTest {
         String applicationPath = mp.getBuildDirectory();
 
         HeadlessJavaScanner scanner = new HeadlessJavaScanner(applicationPath, rulesetPath);
-        scanner.setSootClassPath(
+        scanner.setAddClassPath(
                 mp.getBuildDirectory()
                         + (mp.getFullClassPath().isEmpty()
                                 ? ""
@@ -89,7 +89,7 @@ public abstract class AbstractHeadlessTest {
         } else if (OPAL.equals(framework)) {
             return ScannerSettings.Framework.OPAL;
         } else {
-            return ScannerSettings.Framework.SOOT;
+            return ScannerSettings.Framework.SOOT_UP;
         }
     }
 

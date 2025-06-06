@@ -83,7 +83,6 @@ public class SootSetup extends FrameworkSetup {
         Options.v().setPhaseOption("jb", "use-original-names:true");
         Options.v().setPhaseOption("jb.dtr", "enabled:false");
         Options.v().setPhaseOption("jb.sils", "enabled:false");
-        Options.v().setPhaseOption("jb.ulp", "enabled:false");
         Options.v().setPhaseOption("jb.dae", "enabled:false");
         Options.v().setPhaseOption("jb.uce", "enabled:false");
         Options.v().setPhaseOption("jb.cbf", "enabled:false");
