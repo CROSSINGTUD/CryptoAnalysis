@@ -122,7 +122,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             ConstraintError error =
                     new ConstraintError(
                             seed,
-                            seed.getOrigin(),
+                            seed.getInitialStatement(),
                             seed.getSpecification(),
                             this,
                             violatedConstraint);

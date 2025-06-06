@@ -139,7 +139,11 @@ public class BinaryConstraint extends EvaluableConstraint {
         IViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
         ConstraintError error =
                 new ConstraintError(
-                        seed, seed.getOrigin(), seed.getSpecification(), this, violatedConstraint);
+                        seed,
+                        seed.getInitialStatement(),
+                        seed.getSpecification(),
+                        this,
+                        violatedConstraint);
         errors.add(error);
 
         return EvaluationResult.ConstraintIsNotSatisfied;

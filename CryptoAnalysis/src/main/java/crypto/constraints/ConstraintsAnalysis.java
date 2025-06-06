@@ -151,7 +151,7 @@ public class ConstraintsAnalysis {
             }
         }
 
-        if (statement.equals(seed.getOrigin())) {
+        if (statement.equals(seed.getInitialStatement())) {
             if (predicate.getParameters().get(0).getName().equals("this")) {
                 result.add(new RequiredPredicate(predicate, statement, -1));
             }

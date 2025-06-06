@@ -12,6 +12,7 @@ package crypto.utils;
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractError;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,5 +46,15 @@ public class ErrorUtils {
         errorList.sort(Comparator.comparingInt(AbstractError::getLineNumber));
 
         return errorList;
+    }
+
+    public static List<AnalysisSeedWithSpecification> orderSeedsByInitialStatement(
+            Collection<AnalysisSeedWithSpecification> seeds) {
+        List<AnalysisSeedWithSpecification> orderedSeeds = new ArrayList<>(seeds);
+        orderedSeeds.sort(
+                Comparator.comparing((AnalysisSeedWithSpecification s) -> s.getMethod().toString())
+                        .thenComparingInt(s -> s.getInitialStatement().getLineNumber()));
+
+        return orderedSeeds;
     }
 }
