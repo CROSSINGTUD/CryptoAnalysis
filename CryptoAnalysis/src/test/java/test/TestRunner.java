@@ -52,12 +52,21 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
+import test.framework.OpalTestSetup;
 import test.framework.SootTestSetup;
+import test.framework.SootUpTestSetup;
 import test.framework.TestSetup;
 
 public class TestRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestRunner.class);
+
+    private static final String SOOT = "soot";
+    private static final String SOOT_UP = "sootup";
+    private static final String OPAL = "opal";
+
+    /** Use this variable to configure the framework when running the tests locally */
+    private static final String LOCAL_TEST_FRAMEWORK = SOOT;
 
     private final TestSetup testSetup;
     private final CryptoScanner scanner;
@@ -69,7 +78,22 @@ public class TestRunner {
     }
 
     private TestSetup createTestSetup() {
-        return new SootTestSetup();
+        String framework = System.getProperty("testSetup", LOCAL_TEST_FRAMEWORK);
+
+        switch (framework.toLowerCase()) {
+            case SOOT -> {
+                return new SootTestSetup();
+            }
+            case SOOT_UP -> {
+                return new SootUpTestSetup();
+            }
+            case OPAL -> {
+                return new OpalTestSetup();
+            }
+            default ->
+                    throw new IllegalArgumentException(
+                            "Cannot run tests with test setup " + framework);
+        }
     }
 
     public void initialize(String ruleset) {

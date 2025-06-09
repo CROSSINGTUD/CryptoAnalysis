@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
 import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
@@ -36,11 +38,15 @@ import sootup.java.core.views.JavaView;
 
 public class SootUpTestSetup implements TestSetup {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SootUpTestSetup.class);
+
     private JavaView view;
     private JavaSootMethod testMethod;
 
     @Override
     public void initialize(String classPath, String className, String testName) {
+        LOGGER.info("Setting up SootUp...");
+
         List<BodyInterceptor> interceptors = List.of(new BoomerangPreInterceptor());
 
         AnalysisInputLocation inputLocation =

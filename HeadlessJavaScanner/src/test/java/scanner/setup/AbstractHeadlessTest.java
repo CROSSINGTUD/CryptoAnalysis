@@ -29,9 +29,12 @@ import org.junit.jupiter.api.Assertions;
  */
 public abstract class AbstractHeadlessTest {
 
-    private static final String SOOT = "SOOT";
-    private static final String SOOT_UP = "SOOT_UP";
-    private static final String OPAL = "OPAL";
+    private static final String SOOT = "soot";
+    private static final String SOOT_UP = "sootup";
+    private static final String OPAL = "opal";
+
+    /** Use this variable to configure the framework when running the tests locally */
+    private static final String LOCAL_TEST_FRAMEWORK = SOOT_UP;
 
     protected static final String RULES_BASE_DIR =
             "."
@@ -80,16 +83,21 @@ public abstract class AbstractHeadlessTest {
     }
 
     private static ScannerSettings.Framework getFramework() {
-        String framework = System.getProperty("framework");
+        String framework = System.getProperty("framework", LOCAL_TEST_FRAMEWORK);
 
-        if (SOOT.equals(framework)) {
-            return ScannerSettings.Framework.SOOT;
-        } else if (SOOT_UP.equals(framework)) {
-            return ScannerSettings.Framework.SOOT_UP;
-        } else if (OPAL.equals(framework)) {
-            return ScannerSettings.Framework.OPAL;
-        } else {
-            return ScannerSettings.Framework.SOOT_UP;
+        switch (framework.toLowerCase()) {
+            case SOOT -> {
+                return ScannerSettings.Framework.SOOT;
+            }
+            case SOOT_UP -> {
+                return ScannerSettings.Framework.SOOT_UP;
+            }
+            case OPAL -> {
+                return ScannerSettings.Framework.OPAL;
+            }
+            default ->
+                    throw new IllegalArgumentException(
+                            "Cannot run tests with test setup " + framework);
         }
     }
 

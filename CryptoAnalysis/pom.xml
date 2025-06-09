@@ -208,23 +208,44 @@
     </build>
 
     <profiles>
+        <!-- This profile enforces the use of -DtestSetup when tests are executed -->
         <profile>
-            <!-- This profile enables the tests for the CryptoAnalysis module -->
-            <id>testAnalysis</id>
+            <id>enforce-test-setup</id>
             <activation>
                 <property>
-                    <name>runAnalysisTests</name>
-                    <value>true</value>
+                    <name>!skipTests</name>
                 </property>
             </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <!-- Override the skipTests execution from the parent pom -->
+                            <execution>
+                                <id>enforce-skip-tests</id>
+                                <phase>none</phase>
+                            </execution>
+                            <!-- Enforce the usage of '-DtestSetup' (e.g. -DtestSetup=Soot) -->
+                            <execution>
+                                <id>enforce-test-setup</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>testSetup</property>
+                                            <regex>^(Soot|SootUp|Opal)$</regex>
+                                            <message>The CryptoAnalysis build requires the "-DtestSetup" property to run the tests</message>
+                                        </requireProperty>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

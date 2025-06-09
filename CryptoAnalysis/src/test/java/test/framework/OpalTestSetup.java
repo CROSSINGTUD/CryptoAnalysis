@@ -37,16 +37,21 @@ import org.opalj.log.GlobalLogContext$;
 import org.opalj.log.OPALLogger;
 import org.opalj.tac.cg.CHACallGraphKey$;
 import org.opalj.tac.cg.CallGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.Option;
 import scala.jdk.javaapi.CollectionConverters;
 
 public class OpalTestSetup implements TestSetup {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpalTestSetup.class);
 
     private Project<URL> project;
     private org.opalj.br.Method testMethod;
 
     @Override
     public void initialize(String classPath, String className, String testName) {
+        LOGGER.info("Setting up Opal...");
         OPALLogger.updateLogger(GlobalLogContext$.MODULE$, DevNullLogger$.MODULE$);
 
         File[] testClassFiles = loadTestClassFiles(classPath, className);

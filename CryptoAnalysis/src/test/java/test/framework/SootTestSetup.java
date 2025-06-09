@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
@@ -28,10 +30,14 @@ import soot.options.Options;
 
 public class SootTestSetup implements TestSetup {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SootTestSetup.class);
+
     private SootMethod testMethod = null;
 
     @Override
     public void initialize(String classPath, String className, String testName) {
+        LOGGER.info("Setting up Soot...");
+
         G.reset();
 
         Options.v().set_whole_program(true);
