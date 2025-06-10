@@ -206,7 +206,7 @@ public class ScannerSettings implements Callable<Integer> {
 
         return switch (frameworkValue) {
             case "soot" -> Framework.SOOT;
-            case "soot_up" -> Framework.SOOT_UP;
+            case "sootup" -> Framework.SOOT_UP;
             case "opal" -> Framework.OPAL;
             default ->
                     throw new CryptoAnalysisParserException(

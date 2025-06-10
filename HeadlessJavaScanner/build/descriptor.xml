@@ -11,6 +11,14 @@
             <source>src/main/resources/plugin.properties</source>
             <outputDirectory>/</outputDirectory>
         </file>
+        <file>
+            <source>src/main/resources/simplelogger.properties</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+        <file>
+            <source>src/main/resources/reference.conf</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
     </files>
     <dependencySets>
         <dependencySet>

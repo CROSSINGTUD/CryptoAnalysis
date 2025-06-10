@@ -20,9 +20,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AnalysisPrinter implements IAnalysisListener {
+public class AnalysisTracker implements IAnalysisListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnalysisPrinter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnalysisTracker.class);
 
     private final AnalysisStatistics statistics = new AnalysisStatistics();
 
@@ -97,7 +97,7 @@ public class AnalysisPrinter implements IAnalysisListener {
 
     @Override
     public void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds) {
-        LOGGER.info("Analyzing {} seeds", discoveredSeeds.size());
+        LOGGER.info("Discovered {} seed(s). Starting their analysis...", discoveredSeeds.size());
     }
 
     @Override

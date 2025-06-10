@@ -34,7 +34,7 @@ public abstract class AbstractHeadlessTest {
     private static final String OPAL = "opal";
 
     /** Use this variable to configure the framework when running the tests locally */
-    private static final String LOCAL_TEST_FRAMEWORK = SOOT_UP;
+    private static final String LOCAL_TEST_FRAMEWORK = OPAL;
 
     protected static final String RULES_BASE_DIR =
             "."
