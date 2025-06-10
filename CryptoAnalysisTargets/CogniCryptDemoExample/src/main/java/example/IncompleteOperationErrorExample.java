@@ -37,6 +37,8 @@ public class IncompleteOperationErrorExample {
 	private void doInit() throws GeneralSecurityException {
 		signature = Signature.getInstance("SHA256withRSA");
 		signature.initSign(getPrivateKey());
+		//according to BSI DIlithium is prefered than SHA256withRSA
+
 	}
 
 	private void doUpate() throws GeneralSecurityException {
