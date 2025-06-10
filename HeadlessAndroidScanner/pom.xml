@@ -109,18 +109,6 @@
                     <outputDirectory>../apps</outputDirectory>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <!-- Override the skipTests execution from the parent pom -->
-                    <execution>
-                        <id>enforce-skip-tests</id>
-                        <phase>none</phase>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -156,7 +144,7 @@
                                         <requireProperty>
                                             <property>testSetup</property>
                                             <regex>^(FlowDroid)$</regex>
-                                            <message>The HeadlessJavaScanner build requires the "-DtestSetup" property to run the tests</message>
+                                            <message>The HeadlessAndroidScanner build requires the "-DtestSetup" property to run the tests</message>
                                         </requireProperty>
                                     </rules>
                                     <fail>true</fail>

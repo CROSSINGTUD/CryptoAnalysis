@@ -507,6 +507,6 @@ public class TestRunner {
             }
         }
 
-        throw new RuntimeException("Unable to find int value for param " + param);
+        throw new RuntimeException("Unable to find String value for param " + param);
     }
 }

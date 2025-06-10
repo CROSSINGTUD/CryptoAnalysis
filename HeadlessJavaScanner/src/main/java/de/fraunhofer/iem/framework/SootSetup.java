@@ -56,6 +56,15 @@ public class SootSetup extends FrameworkSetup {
             case CHA:
                 Options.v().setPhaseOption("cg.cha", "on");
                 break;
+            case RTA:
+                Options.v().setPhaseOption("cg.spark", "on");
+                Options.v().setPhaseOption("cg.spark", "rta:true");
+                Options.v().setPhaseOption("cg.spark", "on-fly-cg:false");
+                break;
+            case VTA:
+                Options.v().setPhaseOption("cg.spark", "on");
+                Options.v().setPhaseOption("cg.spark", "vta:true");
+                break;
             case SPARK_LIB:
                 Options.v().setPhaseOption("cg.spark", "on");
                 Options.v().setPhaseOption("cg", "library:any-subtype");

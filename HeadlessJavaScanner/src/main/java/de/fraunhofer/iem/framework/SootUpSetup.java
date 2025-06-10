@@ -21,6 +21,7 @@ import java.util.List;
 import sootup.callgraph.CallGraph;
 import sootup.callgraph.CallGraphAlgorithm;
 import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
+import sootup.callgraph.RapidTypeAnalysisAlgorithm;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.model.SootClass;
 import sootup.core.model.SootClassMember;
@@ -83,6 +84,9 @@ public class SootUpSetup extends FrameworkSetup {
         switch (callGraphAlgorithm) {
             case CHA -> {
                 return new ClassHierarchyAnalysisAlgorithm(view);
+            }
+            case RTA -> {
+                return new RapidTypeAnalysisAlgorithm(view);
             }
             default ->
                     throw new RuntimeException(

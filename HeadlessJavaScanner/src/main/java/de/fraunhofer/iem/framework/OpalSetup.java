@@ -31,6 +31,7 @@ import org.opalj.log.OPALLogger;
 import org.opalj.tac.cg.CHACallGraphKey$;
 import org.opalj.tac.cg.CallGraph;
 import org.opalj.tac.cg.CallGraphKey;
+import org.opalj.tac.cg.RTACallGraphKey$;
 import scala.collection.Iterator;
 import scala.collection.Seq;
 import scala.collection.immutable.ArraySeq;
@@ -78,8 +79,7 @@ public class OpalSetup extends FrameworkSetup {
         CallGraph callGraph = project.get(callGraphKey);
 
         ArraySeq<Method> entryPoints = project.allMethodsWithBody();
-        return new OpalFrameworkScope(
-                project, callGraph, entryPoints.<Method>toSet(), dataFlowScope);
+        return new OpalFrameworkScope(project, callGraph, entryPoints.toSet(), dataFlowScope);
     }
 
     public Config updateConfigWithEntryPoints(Config config, Seq<Method> entryPoints) {
@@ -112,6 +112,9 @@ public class OpalSetup extends FrameworkSetup {
         switch (callGraphAlgorithm) {
             case CHA -> {
                 return CHACallGraphKey$.MODULE$;
+            }
+            case RTA -> {
+                return RTACallGraphKey$.MODULE$;
             }
             default ->
                     throw new RuntimeException(
