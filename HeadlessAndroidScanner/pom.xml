@@ -139,6 +139,7 @@
                                 <goals>
                                     <goal>enforce</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <rules>
                                         <requireProperty>

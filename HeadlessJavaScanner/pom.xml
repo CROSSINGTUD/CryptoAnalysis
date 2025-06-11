@@ -68,6 +68,21 @@
             <version>${spds.version}</version>
         </dependency>
         <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>bytecode-representation_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>common_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>three-address-code_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+        <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
             <version>${crysl.version}</version>
@@ -142,6 +157,7 @@
                                 <goals>
                                     <goal>enforce</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <rules>
                                         <requireProperty>
