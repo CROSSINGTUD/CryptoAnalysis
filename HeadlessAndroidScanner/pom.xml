@@ -52,6 +52,8 @@
             <artifactId>CrySLParser</artifactId>
             <version>${crysl.version}</version>
         </dependency>
+
+        <!-- FlowDroid -->
         <dependency>
             <groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
             <artifactId>soot-infoflow</artifactId>
@@ -62,6 +64,8 @@
             <artifactId>soot-infoflow-android</artifactId>
             <version>${flowDroidVersion}</version>
         </dependency>
+
+        <!-- Boomerang -->
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
@@ -72,6 +76,15 @@
             <artifactId>boomerangScope-Soot</artifactId>
             <version>${spds.version}</version>
         </dependency>
+
+        <!-- Soot -->
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>soot</artifactId>
+            <version>${soot.version}</version>
+        </dependency>
+
+        <!-- Other dependencies -->
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
