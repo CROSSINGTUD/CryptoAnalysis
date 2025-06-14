@@ -1,8 +1,11 @@
-name: Build and test Java Scanner (Soot)
+name: Build and test HeadlessJavaScanner
 
 inputs:
   java-version:
     description: "Version to build the project with"
+    required: true
+  framework:
+    description: "The underlying framework to run the tests"
     required: true
 
 runs:
@@ -24,5 +27,5 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Run maven command
-      run: mvn clean verify -DrunSootTests
+      run: mvn clean verify -DtestSetup=${{ inputs.framework }}
       shell: bash

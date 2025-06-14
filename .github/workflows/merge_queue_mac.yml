@@ -9,8 +9,14 @@ env:
 jobs:
   # This name must be equal to the corresponding build_and_test action
   build-and-test-analysis:
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [Soot, SootUp, Opal]
+
+    name: Build and test CryptoAnalysis
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -18,27 +24,36 @@ jobs:
         uses: ./.github/actions/analysis
         with:
           java-version: ${{ env.JAVA_VERSION }}
+          framework: ${{ matrix.framework }}
 
   # This name must be equal to the corresponding build_and_test job
-  build-and-test-scanner-android:
+  build-and-test-android-scanner:
+    name: Build and test HeadlessAndroidScanner
     runs-on: macos-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Build and test Android Scanner
+      - name: Build and test HeadlessAndroidScanner
         uses: ./.github/actions/scanner-android
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
   # This name must be equal to the corresponding build_and_test job
-  build-and-test-scanner-soot:
+  build-and-test-java-scanner:
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [Soot, SootUp, Opal]
+
+    name: Build and test HeadlessJavaScanner
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Build and test JavaScanner with Soot
+      - name: Build and test HeadlessJavaScanner
         uses: ./.github/actions/scanner-soot
         with:
           java-version: ${{ env.JAVA_VERSION }}
+          framework: ${{ matrix.framework }}

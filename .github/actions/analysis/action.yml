@@ -4,6 +4,9 @@ inputs:
   java-version:
     description: "Version to build the project with"
     required: true
+  framework:
+    description: "The underlying framework to run the tests"
+    required: true
 
 runs:
   using: "composite"
@@ -24,5 +27,5 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Run maven command
-      run: mvn clean verify -DrunAnalysisTests
+      run: mvn clean verify -DtestSetup=${{ inputs.framework }}
       shell: bash

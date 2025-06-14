@@ -57,7 +57,7 @@
         <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
 
-        <spds.version>4.2.1-SNAPSHOT</spds.version>
+        <spds.version>4.3.0</spds.version>
         <soot.version>4.6.0</soot.version>
         <sootup.version>2.0.0</sootup.version>
         <opal.version>5.0.0</opal.version>
@@ -135,7 +135,7 @@
                                     <artifactItem>
                                         <groupId>de.darmstadt.tu.crossing</groupId>
                                         <artifactId>JavaCryptographicArchitecture</artifactId>
-                                        <version>3.1.2</version>
+                                        <version>3.1.4</version>
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
@@ -145,7 +145,7 @@
                                     <artifactItem>
                                         <groupId>de.fraunhofer.iem</groupId>
                                         <artifactId>BouncyCastle</artifactId>
-                                        <version>3.1.4</version>
+                                        <version>3.1.5</version>
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
@@ -165,7 +165,7 @@
                                     <artifactItem>
                                         <groupId>de.paderborn.uni</groupId>
                                         <artifactId>BouncyCastle-JCA</artifactId>
-                                        <version>3.1.3</version>
+                                        <version>3.1.6</version>
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>

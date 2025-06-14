@@ -1,4 +1,4 @@
-name: Build and test Android Scanner
+name: Build and test HeadlessAndroidScanner
 
 inputs:
   java-version:
@@ -29,5 +29,5 @@ runs:
         mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
       shell: bash
     - name: Run maven command
-      run: mvn clean verify -DrunAndroidTests
+      run: mvn clean verify -DtestSetup=FlowDroid
       shell: bash
