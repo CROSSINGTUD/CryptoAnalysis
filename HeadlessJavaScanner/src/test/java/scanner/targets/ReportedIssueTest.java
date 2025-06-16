@@ -15,7 +15,9 @@ import crypto.analysis.errors.IncompleteOperationError;
 import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
+import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
@@ -176,6 +178,9 @@ public class ReportedIssueTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("example.Issue271Kotlin", "testOk", 1)
                         .withNoErrors(IncompleteOperationError.class)
                         .build());
+
+        // Bug in Opal makes it impossible to run this test for now
+        Assumptions.assumeFalse(scanner.getFramework() == ScannerSettings.Framework.OPAL);
 
         scanner.scan();
         assertErrors(scanner.getCollectedErrors());
