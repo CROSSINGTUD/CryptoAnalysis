@@ -42,7 +42,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Build and test HeadlessAndroidScanner
-        uses: ./.github/actions/scanner-android
+        uses: ./.github/actions/android-scanner
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
@@ -60,7 +60,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Build and test HeadlessJavaScanner
-        uses: ./.github/actions/scanner-soot
+        uses: ./.github/actions/java-scanner
         with:
           java-version: ${{ env.JAVA_VERSION }}
           framework: ${{ matrix.framework }}

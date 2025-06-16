@@ -29,5 +29,5 @@ runs:
         mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
       shell: bash
     - name: Run maven command
-      run: mvn clean verify -DtestSetup=FlowDroid
+      run: mvn clean verify -f HeadlessAndroidScanner -DtestSetup=FlowDroid
       shell: bash
