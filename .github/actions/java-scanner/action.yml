@@ -26,6 +26,10 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    # We have to build CryptoAnalysis first
+    - name: Build CryptoAnalysis
+      run: mvn clean install -f CryptoAnalysis -DskipTests
+      shell: bash
     - name: Run maven command
       run: mvn clean verify -f HeadlessJavaScanner -DtestSetup=${{ inputs.framework }}
       shell: bash
