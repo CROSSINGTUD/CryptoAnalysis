@@ -91,12 +91,8 @@
             <artifactId>guava</artifactId>
             <version>33.4.8-jre</version>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- Logger API and provider -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -106,6 +102,20 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>2.0.17</version>
+        </dependency>
+
+        <!-- JUnit API and engine -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -119,8 +129,10 @@
                     <version>3.8.1</version>
                     <configuration>
                         <ignoredUnusedDeclaredDependencies>
-                            <!-- The logger api requires a concrete provider that is not used by this project: https://www.slf4j.org/manual.html -->
+                            <!-- The logger api requires a concrete provider that is not explicitly used by this project: https://www.slf4j.org/manual.html -->
                             <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-simple</ignoredUnusedDeclaredDependency>
+                            <!-- The JUnit api requires a concrete engine that is not explicitly used by this project -->
+                            <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter-engine</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
                     </configuration>
                     <executions>
@@ -281,13 +293,6 @@
                         </property>
                     </systemPropertyVariables>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${junit.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
