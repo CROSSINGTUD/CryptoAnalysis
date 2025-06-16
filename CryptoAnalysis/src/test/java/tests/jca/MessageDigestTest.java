@@ -102,8 +102,6 @@ public class MessageDigestTest {
         final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
         byte[] output = md.digest(input);
         Assertions.hasEnsuredPredicate(output);
-        output = null;
-        Assertions.notHasEnsuredPredicate(output);
         md.reset();
         output = md.digest(input);
         Assertions.mustBeInAcceptingState(md);

@@ -64,7 +64,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
                     + " @ "
                     + stmt
                     + " @ line "
-                    + stmt.getStartLineNumber();
+                    + stmt.getLineNumber();
         } else {
             return "Did not expect '"
                     + predName
@@ -73,7 +73,7 @@ public class NotHasEnsuredPredicateAssertion implements Assertion {
                     + " @ "
                     + stmt
                     + " @ line "
-                    + stmt.getStartLineNumber();
+                    + stmt.getLineNumber();
         }
     }
 }

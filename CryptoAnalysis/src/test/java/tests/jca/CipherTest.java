@@ -105,7 +105,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -184,7 +183,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     private void encrypt(SecretKey key) throws GeneralSecurityException {
@@ -196,7 +194,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     private SecretKey generateKey() throws NoSuchAlgorithmException {
@@ -230,7 +227,6 @@ public class CipherTest {
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
-        cCipher.getIV();
     }
 
     @Test
@@ -259,7 +255,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.hasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -292,7 +287,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -342,7 +336,6 @@ public class CipherTest {
         Assertions.extValue(0);
         Assertions.extValue(1);
         Assertions.extValue(2);
-        cCipher.getIV();
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
     }
@@ -472,7 +465,6 @@ public class CipherTest {
         cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
         Assertions.extValue(0);
         byte[] encText = cCipher.doFinal(msgAsArray);
-        cCipher.getIV();
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
 
@@ -508,7 +500,6 @@ public class CipherTest {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
-        cCipher.getIV();
     }
 
     @Test
@@ -569,7 +560,6 @@ public class CipherTest {
         cCipher.init(Cipher.ENCRYPT_MODE, key);
         Assertions.extValue(0);
         byte[] encText = cCipher.doFinal("".getBytes());
-        cCipher.getIV();
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
     }

@@ -10,6 +10,7 @@
 package scanner.targets;
 
 import crypto.analysis.errors.IncompleteOperationError;
+import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ public class MessageDigestExampleTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "MessageDigestExample.MessageDigestExample.Main", "getSHA256", 1)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 2)
                         .build());
 

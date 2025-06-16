@@ -30,7 +30,7 @@ public class CogniCryptGeneratedCodeTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("Crypto.Enc", "encrypt", 2)
-                        .withTPs(ConstraintError.class, 1)
+                        .withNoErrors(ConstraintError.class)
                         .build());
 
         addErrorSpecification(

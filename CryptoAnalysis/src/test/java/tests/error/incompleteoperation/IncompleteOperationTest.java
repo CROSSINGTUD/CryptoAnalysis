@@ -114,4 +114,32 @@ public class IncompleteOperationTest {
 
         Assertions.incompleteOperationErrors(2);
     }
+
+    @Test
+    public void testOverwriteSeedConstructor() {
+        OverwriteOperation operation = new OverwriteOperation();
+        operation.operation1();
+        Assertions.assertState(operation, "1");
+
+        // Overwrite the seed and continue with constructor call
+        operation = new OverwriteOperation();
+        Assertions.assertState(operation, "0");
+
+        Assertions.discoveredSeeds(2);
+        Assertions.incompleteOperationErrors(2);
+    }
+
+    @Test
+    public void testOverwriteSeedStatic() {
+        OverwriteOperation operation = OverwriteOperation.getInstance();
+        operation.operation1();
+        Assertions.assertState(operation, "1");
+
+        // Overwrite the seed with factory method
+        operation = OverwriteOperation.getInstance();
+        Assertions.assertState(operation, "0");
+
+        Assertions.discoveredSeeds(2);
+        Assertions.incompleteOperationErrors(2);
+    }
 }

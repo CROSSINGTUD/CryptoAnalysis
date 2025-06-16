@@ -42,6 +42,7 @@
     </properties>
 
     <dependencies>
+        <!-- Boomerang -->
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
@@ -50,6 +51,18 @@
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope-Soot</artifactId>
+            <version>${spds.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-SootUp</artifactId>
+            <version>${spds.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-Opal</artifactId>
             <version>${spds.version}</version>
             <scope>test</scope>
         </dependency>
@@ -73,24 +86,72 @@
             <artifactId>WPDS</artifactId>
             <version>${spds.version}</version>
         </dependency>
-        <dependency>
-            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
-            <artifactId>CrySLParser</artifactId>
-            <version>${crysl.version}</version>
-        </dependency>
+
+        <!-- Soot -->
         <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
             <version>${soot.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
+
+        <!-- SootUp -->
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.core</artifactId>
+            <version>${sootup.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.java.core</artifactId>
+            <version>${sootup.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.java.bytecode.frontend</artifactId>
+            <version>${sootup.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.callgraph</artifactId>
+            <version>${sootup.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Opal -->
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>common_2.13</artifactId>
+            <version>${opal.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>bytecode-representation_2.13</artifactId>
+            <version>${opal.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>three-address-code_2.13</artifactId>
+            <version>${opal.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Other dependencies -->
+        <dependency>
+            <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
+            <artifactId>CrySLParser</artifactId>
+            <version>${crysl.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20250517</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -106,14 +167,26 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.13.16</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.3.4</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -142,35 +215,94 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>build/descriptor.xml</descriptor>
-                    </descriptors>
-                    <outputDirectory>../apps</outputDirectory>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputDirectory>../apps</outputDirectory>
+
+                            <!-- Basic filters to avoid some merge conflicts from duplicate files. The
+                                 remaining warnings should not concern the JAR's execution -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/LICENSE*</exclude>
+                                        <exclude>META-INF/NOTICE*</exclude>
+                                        <exclude>META-INF/DEPENDENCIES</exclude>
+                                        <exclude>**/*.png</exclude>
+                                        <exclude>**/*.html</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+                                    <addHeader>false</addHeader>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
+        <!-- This profile enforces the use of -DtestSetup when tests are executed -->
         <profile>
-            <!-- This profile enables the tests for the CryptoAnalysis module -->
-            <id>testAnalysis</id>
+            <id>enforce-test-setup</id>
             <activation>
                 <property>
-                    <name>runAnalysisTests</name>
-                    <value>true</value>
+                    <name>!skipTests</name>
                 </property>
             </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <!-- Override the skipTests execution from the parent pom -->
+                            <execution>
+                                <id>enforce-skip-tests</id>
+                                <phase>none</phase>
+                            </execution>
+                            <!-- Enforce the usage of '-DtestSetup' (e.g. -DtestSetup=Soot) -->
+                            <execution>
+                                <id>enforce-test-setup</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>testSetup</property>
+                                            <regex>^(Soot|SootUp|Opal)$</regex>
+                                            <message>The CryptoAnalysis build requires the "-DtestSetup" property to run the tests</message>
+                                        </requireProperty>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

@@ -11,6 +11,7 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import boomerang.scope.ValCollection;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -72,7 +73,7 @@ public class ValueConstraint extends EvaluableConstraint {
                 }
 
                 // TODO Extract call sites that are not part of the dataflow scope
-                if (extractedValue.val().equals(Val.zero())
+                if (extractedValue.val().equals(ValCollection.zero())
                         || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
                     ImpreciseValueExtractionError error =
                             new ImpreciseValueExtractionError(

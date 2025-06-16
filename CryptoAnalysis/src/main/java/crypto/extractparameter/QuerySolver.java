@@ -16,6 +16,7 @@ import boomerang.results.BackwardBoomerangResults;
 import boomerang.scope.AllocVal;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
+import boomerang.scope.ValCollection;
 import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
 import crypto.extractparameter.transformation.Transformation;
@@ -33,7 +34,9 @@ public class QuerySolver {
         this.definition = definition;
         this.options =
                 BoomerangOptions.builder()
-                        .withAllocationSite(new ExtractParameterAllocationSite())
+                        .withAllocationSite(
+                                new ExtractParameterAllocationSite(
+                                        definition.frameworkScope().getDataFlowScope()))
                         .withAnalysisTimeout(definition.timeout())
                         .withSparsificationStrategy(definition.strategy())
                         .enableTrackStaticFieldAtEntryPointToClinit(true)
@@ -61,23 +64,37 @@ public class QuerySolver {
             ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {
 
         Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();
-        Collection<Type> propagatedTypes = results.getPropagationType();
 
         // If no allocation site has been found, add the zero value to indicate it
         if (allocSites.isEmpty()) {
-            return extractedZeroValue(query, propagatedTypes);
+            return extractedZeroValue(query, Collections.emptySet());
         }
 
         Collection<ExtractedValue> extractedValues = new HashSet<>();
+        Collection<Type> originalTypes = new HashSet<>();
         for (ForwardQuery allocSite : allocSites) {
+            Collection<Type> allTypes = new HashSet<>();
+
             AllocVal allocVal = allocSite.getAllocVal();
             Multimap<Val, Type> sites =
                     Transformation.transformAllocationSite(
                             allocVal, definition.frameworkScope(), options);
 
+            if (allocVal instanceof TypedAllocVal typedAllocVal) {
+                originalTypes.add(typedAllocVal.getType());
+                allTypes.add(typedAllocVal.getType());
+            }
+
+            if (sites.isEmpty()) {
+                ExtractedValue extractedValue =
+                        new ExtractedValue(
+                                allocVal.getAllocVal(), allocVal.getAllocStatement(), allTypes);
+                extractedValues.add(extractedValue);
+            }
+
             for (Val site : sites.keySet()) {
                 Collection<Type> types = sites.get(site);
-                types.addAll(propagatedTypes);
+                types.addAll(allTypes);
 
                 ExtractedValue extractedValue =
                         new ExtractedValue(site, allocVal.getAllocStatement(), types);
@@ -85,27 +102,27 @@ public class QuerySolver {
             }
         }
 
-        if (extractedValues.isEmpty()) {
-            return extractedZeroValue(query, propagatedTypes);
-        }
-
         return new ParameterWithExtractedValues(
                 query.cfgEdge().getTarget(),
                 query.var(),
                 query.getIndex(),
                 query.getVarNameInSpec(),
-                extractedValues);
+                extractedValues,
+                originalTypes);
     }
 
     private ParameterWithExtractedValues extractedZeroValue(
             ExtractParameterQuery query, Collection<Type> types) {
-        ExtractedValue zeroVal = new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
+        ExtractedValue zeroVal =
+                new ExtractedValue(ValCollection.zero(), query.cfgEdge().getTarget(), types);
 
         return new ParameterWithExtractedValues(
                 query.cfgEdge().getTarget(),
                 query.var(),
                 query.getIndex(),
                 query.getVarNameInSpec(),
-                Collections.singleton(zeroVal));
+                Collections.singleton(zeroVal),
+                // TODO Unknown type
+                Collections.emptySet());
     }
 }

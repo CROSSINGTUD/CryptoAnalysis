@@ -43,7 +43,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
-                new ErrorSpecification.Builder("example.IncompleteOperationErrorExample", "main", 1)
+                new ErrorSpecification.Builder(
+                                "example.IncompleteOperationErrorExample", "doUpdate", 0)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -80,7 +81,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
-                new ErrorSpecification.Builder("example.IncompleteOperationErrorExample", "main", 1)
+                new ErrorSpecification.Builder(
+                                "example.IncompleteOperationErrorExample", "doUpdate", 0)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 
@@ -120,7 +122,8 @@ public class IgnoreSectionsTest extends AbstractHeadlessTest {
                         .withNoErrors(IncompleteOperationError.class)
                         .build());
         addErrorSpecification(
-                new ErrorSpecification.Builder("example.IncompleteOperationErrorExample", "main", 1)
+                new ErrorSpecification.Builder(
+                                "example.IncompleteOperationErrorExample", "doUpdate", 0)
                         .withNoErrors(IncompleteOperationError.class)
                         .build());
 

@@ -24,6 +24,7 @@ import boomerang.scope.Type;
 import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import crypto.extractparameter.TypedAllocVal;
 import java.util.ArrayList;
 import java.util.List;
 import wpds.impl.NoWeight;
@@ -135,7 +136,12 @@ public abstract class Transformation {
             BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
 
             for (ForwardQuery forwardQuery : results.getAllocationSites().keySet()) {
-                boomerangResults.putAll(forwardQuery.getAllocVal(), results.getPropagationType());
+                AllocVal allocVal = forwardQuery.getAllocVal();
+                if (allocVal instanceof TypedAllocVal typedAllocVal) {
+                    boomerangResults.put(forwardQuery.getAllocVal(), typedAllocVal.getType());
+                } else {
+                    // TODO Unkwown type
+                }
             }
         }
 

@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
@@ -28,10 +30,14 @@ import soot.options.Options;
 
 public class SootTestSetup implements TestSetup {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SootTestSetup.class);
+
     private SootMethod testMethod = null;
 
     @Override
     public void initialize(String classPath, String className, String testName) {
+        LOGGER.info("Setting up Soot...");
+
         G.reset();
 
         Options.v().set_whole_program(true);
@@ -41,11 +47,16 @@ public class SootTestSetup implements TestSetup {
         Options.v().set_output_format(Options.output_format_none);
 
         Options.v().setPhaseOption("cg.cha", "on");
+
+        Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb.dtr", "enabled:false");
         Options.v().setPhaseOption("jb.sils", "enabled:false");
+        Options.v().setPhaseOption("jb.dae", "enabled:false");
+        Options.v().setPhaseOption("jb.uce", "enabled:false");
+        Options.v().setPhaseOption("jb.cbf", "enabled:false");
 
         Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classPath);
 
-        // Options.v().set_main_class(this.getTargetClass());
         SootClass sootTestCaseClass = Scene.v().forceResolve(className, SootClass.BODIES);
         sootTestCaseClass.setApplicationClass();
 
@@ -77,7 +88,7 @@ public class SootTestSetup implements TestSetup {
 
     @Override
     public Method getTestMethod() {
-        return JimpleMethod.of(testMethod);
+        return JimpleMethod.of(testMethod, Scene.v());
     }
 
     @Override

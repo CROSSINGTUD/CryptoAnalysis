@@ -59,7 +59,8 @@ public class ExtractParameterAnalysis {
 
             DeclaredMethod declaredMethod = statement.getInvokeExpr().getDeclaredMethod();
             Collection<CrySLMethod> methods =
-                    MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(rule, declaredMethod);
+                    MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
+                            rule.getEvents(), declaredMethod);
 
             for (CrySLMethod method : methods) {
                 Collection<ExtractParameterQuery> queries = getQueriesAtCallSite(statement, method);

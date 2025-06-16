@@ -28,8 +28,9 @@ public class RuleTransitions {
         if (rule == null) {
             return new RuleTransitions(null, IdealStateMachine.makeOne());
         }
+
         return new RuleTransitions(
-                rule, IdealStateMachine.makeStateMachine(rule.getUsagePattern()));
+                rule, IdealStateMachine.makeStateMachine(rule.getEvents(), rule.getUsagePattern()));
     }
 
     public CrySLRule getRule() {

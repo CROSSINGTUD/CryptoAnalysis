@@ -11,6 +11,7 @@ package crypto.analysis.errors;
 
 import boomerang.scope.Method;
 import boomerang.scope.Statement;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
@@ -54,7 +55,7 @@ public abstract class AbstractError {
     }
 
     public int getLineNumber() {
-        return errorStmt.getStartLineNumber();
+        return errorStmt.getLineNumber();
     }
 
     public void addPrecedingError(AbstractError error) {
@@ -86,7 +87,11 @@ public abstract class AbstractError {
     }
 
     protected String getObjectType() {
-        return " on object of type " + seed.getFact().getType();
+        if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
+            return " on object of type " + seedWithSpec.getSpecification().getClassName();
+        } else {
+            return " on object ";
+        }
     }
 
     @Override

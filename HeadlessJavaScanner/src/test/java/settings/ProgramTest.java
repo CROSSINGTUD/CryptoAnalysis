@@ -76,12 +76,12 @@ public class ProgramTest {
     }
 
     @Test
-    public void testSootPath() {
-        String sootPath = "path/to/soot";
+    public void testAddClassPath() {
+        String sootPath = "path/to/class";
         HeadlessJavaScanner scanner = new HeadlessJavaScanner(EXAMPLE_APP_PATH, EXAMPLE_RULES_DIR);
-        scanner.setSootClassPath(sootPath);
+        scanner.setAddClassPath(sootPath);
 
-        Assertions.assertEquals(scanner.getSootClassPath(), sootPath);
+        Assertions.assertEquals(scanner.getAddClassPath(), sootPath);
     }
 
     @Test

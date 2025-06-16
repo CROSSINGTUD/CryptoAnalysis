@@ -391,8 +391,8 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.predictablepbepassword.PredictablePBEPasswordBBCase2",
-                                "main",
-                                1)
+                                "key",
+                                0)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
         addErrorSpecification(
@@ -408,7 +408,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.predictablepbepassword.PredictablePBEPasswordABHCase2",
-                                "main",
+                                "key",
                                 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
@@ -425,7 +425,7 @@ public class CryptoGuardTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "example.predictablepbepassword.PredictablePBEPasswordABICase1",
-                                "main",
+                                "key",
                                 1)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());

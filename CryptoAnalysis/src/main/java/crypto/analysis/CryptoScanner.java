@@ -15,9 +15,9 @@ import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
 import crypto.analysis.errors.AbstractError;
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.listener.AnalysisPrinter;
 import crypto.listener.AnalysisReporter;
 import crypto.listener.AnalysisStatistics;
+import crypto.listener.AnalysisTracker;
 import crypto.listener.ErrorCollector;
 import crypto.listener.IAnalysisListener;
 import crypto.listener.IErrorListener;
@@ -42,18 +42,20 @@ public class CryptoScanner {
     private final AnalysisReporter analysisReporter;
     private final Map<IAnalysisSeed, IAnalysisSeed> discoveredSeeds;
 
-    private AnalysisPrinter analysisPrinter;
+    private AnalysisTracker analysisTracker;
     private ErrorCollector errorCollector;
 
     public CryptoScanner() {
         this.analysisReporter = new AnalysisReporter();
         this.discoveredSeeds = new HashMap<>();
 
-        analysisPrinter = new AnalysisPrinter();
-        addAnalysisListener(analysisPrinter);
+        analysisTracker = new AnalysisTracker();
+        addAnalysisListener(analysisTracker);
 
         errorCollector = new ErrorCollector();
         addErrorListener(errorCollector);
+
+        ClassPathHandler.reset();
     }
 
     public final Collection<CrySLRule> readRules(String rulesetPath) {
@@ -77,11 +79,18 @@ public class CryptoScanner {
         }
     }
 
-    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> ruleset) {
+    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> rules) {
+        scan(frameworkScope, rules, "");
+    }
+
+    public final void scan(
+            FrameworkScope frameworkScope, Collection<CrySLRule> rules, String classpath) {
+        ClassPathHandler.initialize(classpath);
+
         // Start analysis
         analysisReporter.beforeAnalysis();
 
-        SeedGenerator generator = new SeedGenerator(this, frameworkScope, ruleset);
+        SeedGenerator generator = new SeedGenerator(this, frameworkScope, rules);
         List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
         analysisReporter.onDiscoveredSeeds(seeds);
 
@@ -105,11 +114,13 @@ public class CryptoScanner {
     public final void reset() {
         analysisReporter.clear();
 
-        analysisPrinter = new AnalysisPrinter();
-        addAnalysisListener(analysisPrinter);
+        analysisTracker = new AnalysisTracker();
+        addAnalysisListener(analysisTracker);
 
         errorCollector = new ErrorCollector();
         addErrorListener(errorCollector);
+
+        ClassPathHandler.reset();
     }
 
     public final void addAnalysisListener(IAnalysisListener analysisListener) {
@@ -148,7 +159,7 @@ public class CryptoScanner {
     }
 
     public final AnalysisStatistics getStatistics() {
-        return analysisPrinter.getStatistics();
+        return analysisTracker.getStatistics();
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

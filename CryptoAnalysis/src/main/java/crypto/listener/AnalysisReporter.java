@@ -129,6 +129,10 @@ public class AnalysisReporter {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onDiscoveredSeeds(discoveredSeeds);
         }
+
+        for (IResultsListener resultsListener : resultsListeners) {
+            resultsListener.discoveredSeeds(discoveredSeeds);
+        }
     }
 
     public void onSeedStarted(IAnalysisSeed analysisSeed) {

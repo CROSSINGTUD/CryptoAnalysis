@@ -110,7 +110,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             DeclaredMethod foundCall = statement.getInvokeExpr().getDeclaredMethod();
             Collection<CrySLMethod> matchingCryslMethods =
                     MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                            seed.getSpecification(), foundCall);
+                            seed.getSpecification().getEvents(), foundCall);
 
             if (requiredCalls.stream().anyMatch(matchingCryslMethods::contains)) {
                 isCalled = true;
@@ -122,7 +122,7 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             ConstraintError error =
                     new ConstraintError(
                             seed,
-                            seed.getOrigin(),
+                            seed.getInitialStatement(),
                             seed.getSpecification(),
                             this,
                             violatedConstraint);
@@ -236,15 +236,13 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             boolean isSubType = false;
 
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                for (Type type : extractedValue.types()) {
-                    if (type.isNullType()) {
-                        continue;
-                    }
+            for (Type type : parameter.typesAtStatement()) {
+                if (type.isNullType()) {
+                    continue;
+                }
 
-                    if (type.isSubtypeOf(parameterType.getJavaType())) {
-                        isSubType = true;
-                    }
+                if (MatcherUtils.isTypeOrSubType(type.toString(), parameterType.getJavaType())) {
+                    isSubType = true;
                 }
             }
 

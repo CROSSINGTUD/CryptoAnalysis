@@ -13,6 +13,8 @@ import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
+import boomerang.scope.Val;
+import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.StateMachineGraph;
 import crysl.rule.StateNode;
@@ -23,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import typestate.TransitionFunction;
 import typestate.TransitionFunctionImpl;
+import typestate.finiteautomata.Transition;
 
 /**
  * State machine that wraps a {@link StateMachineGraph} from a {@link crysl.rule.CrySLRule} and
@@ -34,11 +37,13 @@ import typestate.TransitionFunctionImpl;
  */
 public class IdealStateMachine {
 
+    private final Collection<CrySLMethod> events;
     private final StateMachineGraph smg;
     private final Collection<LabeledMatcherTransition> transitions;
     private final Collection<LabeledMatcherTransition> initialTransitions;
 
-    private IdealStateMachine(StateMachineGraph smg) {
+    private IdealStateMachine(Collection<CrySLMethod> events, StateMachineGraph smg) {
+        this.events = events;
         this.smg = smg;
 
         transitions = new HashSet<>();
@@ -51,11 +56,13 @@ public class IdealStateMachine {
     /**
      * Create a state machine that is compatible with IDEal from a {@link StateMachineGraph}
      *
-     * @param smg the state machine graph
+     * @param events all events from {@link crysl.rule.CrySLRule}
+     * @param smg the state machine graph using the events
      * @return the constructed state machine with additional error transitions
      */
-    public static IdealStateMachine makeStateMachine(StateMachineGraph smg) {
-        return new IdealStateMachine(smg);
+    public static IdealStateMachine makeStateMachine(
+            Collection<CrySLMethod> events, StateMachineGraph smg) {
+        return new IdealStateMachine(events, smg);
     }
 
     /**
@@ -71,35 +78,49 @@ public class IdealStateMachine {
         smg.addNode(node);
         smg.createNewEdge(Collections.emptySet(), node, node);
 
-        return new IdealStateMachine(smg);
+        return new IdealStateMachine(Collections.emptySet(), smg);
     }
 
     public TransitionFunction getInitialWeight(ControlFlowGraph.Edge edge) {
         Statement statement = edge.getStart();
 
-        if (!statement.containsInvokeExpr()) {
-            WrappedState startNode = createWrappedState(smg.getStartNode());
-            ErrorStateNode errorStateNode = ErrorStateNode.getInstance();
-            LabeledMatcherTransition transition =
-                    new LabeledMatcherTransition(startNode, Collections.emptySet(), errorStateNode);
+        if (statement.isAssignStmt()) {
+            Val rightOp = statement.getRightOp();
 
-            return new TransitionFunctionImpl(transition, Collections.singleton(edge));
-        }
+            if (rightOp.isNewExpr()) {
+                WrappedState startNode = createWrappedState(smg.getStartNode());
+                LabeledMatcherTransition idTransition =
+                        new LabeledMatcherTransition(startNode, Collections.emptySet(), startNode);
 
-        InvokeExpr invokeExpr = statement.getInvokeExpr();
-        DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
-        for (LabeledMatcherTransition transition : initialTransitions) {
-            if (transition.getMatching(declaredMethod).isPresent()) {
-                return new TransitionFunctionImpl(transition, Collections.singleton(edge));
+                return new TransitionFunctionImpl(idTransition, statement);
             }
-        }
 
-        // Seeds may be generated from other seeds, e.g. SecretKey key = generator.generateKey().
-        // In this case, we do a transition -1 -> 0
-        if (statement.isAssignStmt() && !invokeExpr.isStaticInvokeExpr()) {
-            for (LabeledMatcherTransition transition : initialTransitions) {
-                if (transition.to().toString().equals("0")) {
-                    return new TransitionFunctionImpl(transition, Collections.singleton(edge));
+            if (statement.containsInvokeExpr()) {
+                InvokeExpr invokeExpr = statement.getInvokeExpr();
+                DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
+
+                Set<Transition> matchingTransitions = new HashSet<>();
+                for (LabeledMatcherTransition transition : initialTransitions) {
+                    if (transition.getMatching(declaredMethod).isPresent()) {
+                        matchingTransitions.add(transition);
+                    }
+                }
+
+                if (!matchingTransitions.isEmpty()) {
+                    return new TransitionFunctionImpl(matchingTransitions, statement);
+                }
+
+                Collection<CrySLMethod> matchingMethods =
+                        MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
+                                events, declaredMethod);
+                if (matchingMethods.isEmpty()) {
+                    // return new TransitionFunctionImpl(Set.copyOf(initialTransitions),
+                    // Collections.singleton(edge));
+                    for (LabeledMatcherTransition transition : initialTransitions) {
+                        if (transition.to().toString().equals("0")) {
+                            return new TransitionFunctionImpl(transition, statement);
+                        }
+                    }
                 }
             }
         }
@@ -115,7 +136,7 @@ public class IdealStateMachine {
 
         LabeledMatcherTransition transition =
                 new LabeledMatcherTransition(startNode, expectedInitialMethods, errorState);
-        return new TransitionFunctionImpl(transition, Collections.singleton(edge));
+        return new TransitionFunctionImpl(transition, statement);
     }
 
     public Collection<LabeledMatcherTransition> getAllTransitions() {
@@ -138,11 +159,6 @@ public class IdealStateMachine {
     }
 
     private void initializeErrorTransitions() {
-        Set<CrySLMethod> allMethods = new HashSet<>();
-        for (TransitionEdge edge : smg.getAllTransitions()) {
-            allMethods.addAll(edge.getLabel());
-        }
-
         for (StateNode node : smg.getNodes()) {
             // Collect the methods that are on an outgoing edge
             Collection<CrySLMethod> existingMethods = new HashSet<>();
@@ -151,7 +167,7 @@ public class IdealStateMachine {
             }
 
             // Remove the existing methods; all remaining methods lead to an error state
-            Collection<CrySLMethod> remainingMethods = new HashSet<>(allMethods);
+            Collection<CrySLMethod> remainingMethods = new HashSet<>(events);
             remainingMethods.removeAll(existingMethods);
 
             // Create the error state, where typestate errors are reported
@@ -164,14 +180,14 @@ public class IdealStateMachine {
             // Once in an error state, never leave it again
             ErrorStateNode errorState = ErrorStateNode.getInstance();
             LabeledMatcherTransition errorTransition =
-                    new LabeledMatcherTransition(repErrorState, allMethods, errorState);
+                    new LabeledMatcherTransition(repErrorState, events, errorState);
             transitions.add(errorTransition);
         }
 
         // Loop for final error state
         ErrorStateNode errorState = ErrorStateNode.getInstance();
         LabeledMatcherTransition transition =
-                new LabeledMatcherTransition(errorState, allMethods, errorState);
+                new LabeledMatcherTransition(errorState, events, errorState);
         transitions.add(transition);
     }
 

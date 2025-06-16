@@ -56,10 +56,11 @@
         <!-- See https://www.eclipse.org/projects/handbook/#ip-copyright-headers -->
         <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
-        <skipTests>true</skipTests>
 
-        <spds.version>4.1.0</spds.version>
+        <spds.version>4.3.0</spds.version>
         <soot.version>4.6.0</soot.version>
+        <sootup.version>2.0.0</sootup.version>
+        <opal.version>5.0.0</opal.version>
         <crysl.version>4.0.2</crysl.version>
         <junit.version>5.12.2</junit.version>
     </properties>
@@ -89,11 +90,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>33.4.8-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>org.soot-oss</groupId>
-            <artifactId>soot</artifactId>
-            <version>${soot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -139,7 +135,7 @@
                                     <artifactItem>
                                         <groupId>de.darmstadt.tu.crossing</groupId>
                                         <artifactId>JavaCryptographicArchitecture</artifactId>
-                                        <version>3.1.2</version>
+                                        <version>3.1.4</version>
                                         <classifier>ruleset</classifier>
                                         <type>zip</type>
                                         <overWrite>true</overWrite>
@@ -178,40 +174,6 @@
                                     </artifactItem>
                                 </artifactItems>
                             </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- Surefire plugin is included in profiles if the tests are actually executed -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
-                    <configuration>
-                        <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
-                        <reuseForks>false</reuseForks>
-                        <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.junit.jupiter</groupId>
-                            <artifactId>junit-jupiter-engine</artifactId>
-                            <version>${junit.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-
-                <!-- Children need to include this plugin to build the correct jar artefacts -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.7.1</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -278,6 +240,54 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Enforce the usage of '-DskipTests'. To run the tests build the submodules -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-skip-tests</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>skipTests</property>
+                                    <message>The whole project can only be build with the '-DskipTests' property</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
+                <configuration>
+                    <argLine>-Xmx8G -Xms256M -Xss8M -Dmaven.home="${maven.home}"</argLine>
+                    <reuseForks>false</reuseForks>
+                    <reportsDirectory>${project.basedir}/shippable/testresults</reportsDirectory>
+                    <systemPropertyVariables>
+                        <property>
+                            <name>testSetup</name>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <value>${testSetup}</value>
+                        </property>
+                    </systemPropertyVariables>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${junit.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <!-- This plugin is required for releases to Maven Central. If Javadoc is used,
@@ -431,28 +441,6 @@
                         <configuration>
                             <tagNameFormat>@{project.version}</tagNameFormat>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <!-- Use -DrunAllTests to enable running all tests -->
-            <id>allTests</id>
-            <activation>
-                <property>
-                    <name>runAllTests</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
