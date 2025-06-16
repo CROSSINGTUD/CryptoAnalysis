@@ -83,7 +83,7 @@ public abstract class AbstractHeadlessTest {
     }
 
     private static ScannerSettings.Framework getFramework() {
-        String framework = System.getProperty("framework", LOCAL_TEST_FRAMEWORK);
+        String framework = System.getProperty("testSetup", LOCAL_TEST_FRAMEWORK);
 
         switch (framework.toLowerCase()) {
             case SOOT -> {
