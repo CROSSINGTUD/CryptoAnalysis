@@ -82,43 +82,13 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      
-      - name: Fetch all tags
-        run: git fetch --tags
+        with:
+          fetch-depth: 0
 
-      - name: Extract Version from pom.xml
-        id: extract_version
-        run: |
-          VERSION=$(sed -n 's/.*<version>\(.*\)<\/version>.*/\1/p' pom.xml | head -n 1)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Get latest tag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
-      - name: Generate Release Notes
-        id: generate_notes
-        run: |
-          LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)
-          git log $LATEST_TAG..HEAD --merges --pretty=format:"%h" > merged_prs.txt
-
-          RELEASE_NOTES="Release Notes:\n\n"
-          
-          while IFS= read -r commit_hash; do
-            if git log -1 --pretty=format:"%s" $commit_hash | grep -iq "dependabot"; then
-              continue
-            fi
-
-            PR_NUMBER=$(git log -1 --pretty=format:"%s" $commit_hash | grep -oE "([Pp][Rr]|pull request) #[0-9]+" | grep -oE "[0-9]+" | head -n 1)
-
-            FIRST_COMMENT=$(gh pr view $PR_NUMBER --json body --jq '.body')
-
-            if [ -n "$FIRST_COMMENT" ]; then
-              RELEASE_NOTES+="- PR #$PR_NUMBER: $FIRST_COMMENT\n"
-            fi
-          done < merged_prs.txt
-
-          echo -e "$RELEASE_NOTES" > release_notes.txt
-          cat release_notes.txt
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      # Load the artifact files from the previous build
       - name: Load released files
         uses: actions/download-artifact@v4
         with:
@@ -127,7 +97,7 @@ jobs:
 
       - name: Create GitHub Release
         run: |
-          gh release create "$VERSION" ./apps/* --title "$VERSION" --notes-file release_notes.txt
+          gh release create ${{ env.tag }} ./apps/* --title ${{ env.tag }} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
