@@ -13,8 +13,8 @@ import crypto.reporting.Reporter;
 import de.fraunhofer.iem.android.AndroidSettings;
 import de.fraunhofer.iem.android.HeadlessAndroidScanner;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ProgramTest {
 
@@ -28,10 +28,10 @@ public class ProgramTest {
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
 
-        Assert.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
-        Assert.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
-        Assert.assertEquals(
+        Assertions.assertEquals(scanner.getApkFile(), EXAMPLE_APK_PATH);
+        Assertions.assertEquals(scanner.getPlatformDirectory(), EXAMPLE_PLATFORM_PATH);
+        Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+        Assertions.assertEquals(
                 scanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
     }
 
@@ -41,28 +41,28 @@ public class ProgramTest {
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         chaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.CHA);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 chaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.CHA);
 
         HeadlessAndroidScanner rtaScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         rtaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.RTA);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 rtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.RTA);
 
         HeadlessAndroidScanner vtaScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         vtaScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.VTA);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 vtaScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.VTA);
 
         HeadlessAndroidScanner sparkScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         sparkScanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.SPARK);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 sparkScanner.getCallGraphAlgorithm(), AndroidSettings.CallGraphAlgorithm.SPARK);
     }
 
@@ -74,7 +74,7 @@ public class ProgramTest {
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         scanner.setReportDirectory(reportPath);
 
-        Assert.assertEquals(scanner.getReportDirectory(), reportPath);
+        Assertions.assertEquals(scanner.getReportDirectory(), reportPath);
     }
 
     @Test
@@ -83,38 +83,39 @@ public class ProgramTest {
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         cmdScanner.setReportFormats(Reporter.ReportFormat.CMD);
-        Assert.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+        Assertions.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
 
         HeadlessAndroidScanner txtScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         txtScanner.setReportFormats(Reporter.ReportFormat.TXT);
-        Assert.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
+        Assertions.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
 
         HeadlessAndroidScanner sarifScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         sarifScanner.setReportFormats(Reporter.ReportFormat.SARIF);
-        Assert.assertEquals(sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
+        Assertions.assertEquals(
+                sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
 
         HeadlessAndroidScanner csvScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         csvScanner.setReportFormats(Reporter.ReportFormat.CSV);
-        Assert.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
+        Assertions.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
 
         HeadlessAndroidScanner csvSummaryScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         csvSummaryScanner.setReportFormats(Reporter.ReportFormat.CSV_SUMMARY);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 csvSummaryScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV_SUMMARY));
 
         HeadlessAndroidScanner annotationScanner =
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         annotationScanner.setReportFormats(Reporter.ReportFormat.GITHUB_ANNOTATION);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 annotationScanner.getReportFormats(),
                 Set.of(Reporter.ReportFormat.GITHUB_ANNOTATION));
 
@@ -123,7 +124,7 @@ public class ProgramTest {
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         multipleFormatsScanner.setReportFormats(
                 Reporter.ReportFormat.CMD, Reporter.ReportFormat.TXT, Reporter.ReportFormat.CSV);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 multipleFormatsScanner.getReportFormats(),
                 Set.of(
                         Reporter.ReportFormat.CMD,
@@ -137,6 +138,6 @@ public class ProgramTest {
                 new HeadlessAndroidScanner(
                         EXAMPLE_APK_PATH, EXAMPLE_PLATFORM_PATH, EXAMPLE_RULES_DIR);
         scanner.setVisualization(true);
-        Assert.assertTrue(scanner.isVisualization());
+        Assertions.assertTrue(scanner.isVisualization());
     }
 }

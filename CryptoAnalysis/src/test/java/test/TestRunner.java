@@ -25,11 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.assertions.Assertion;
@@ -40,6 +36,9 @@ import test.assertions.ConstraintsEvaluatedAssertion;
 import test.assertions.ConstraintsNotRelevantAssertion;
 import test.assertions.ConstraintsSatisfiedAssertion;
 import test.assertions.ConstraintsViolatedAssertion;
+import test.assertions.DiscoveredPredicateSeedAssertion;
+import test.assertions.DiscoveredRuleSeedAssertion;
+import test.assertions.DiscoveredSeedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.ForbiddenMethodErrorCountAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
@@ -53,38 +52,66 @@ import test.assertions.states.MayBeInAcceptingStateAssertion;
 import test.assertions.states.MustBeInAcceptingStateAssertion;
 import test.assertions.states.MustNotBeInAcceptingStateAssertion;
 import test.assertions.states.StateAssertion;
+import test.framework.OpalTestSetup;
 import test.framework.SootTestSetup;
+import test.framework.SootUpTestSetup;
 import test.framework.TestSetup;
 
-public abstract class UsagePatternTestingFramework {
+public class TestRunner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("AnalysisTests");
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestRunner.class);
 
-    private static Collection<CrySLRule> rules = new HashSet<>();
-    private static String rulesetPath = "";
+    private static final String SOOT = "soot";
+    private static final String SOOT_UP = "sootup";
+    private static final String OPAL = "opal";
 
-    @Rule public TestName testName = new TestName();
+    /** Use this variable to configure the framework when running the tests locally */
+    private static final String LOCAL_TEST_FRAMEWORK = SOOT;
 
-    @Before
-    public void beforeTestCaseExecution() {
-        String testClassName = this.getClass().getName().replace("class ", "");
-        String testMethodName = testName.getMethodName();
+    private final TestSetup testSetup;
+    private final CryptoScanner scanner;
+    private Collection<CrySLRule> rules;
 
-        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
+    public TestRunner() {
+        this.testSetup = createTestSetup();
+        this.scanner = new CryptoScanner();
+    }
 
-        CryptoScanner scanner = new CryptoScanner();
+    private TestSetup createTestSetup() {
+        String framework = System.getProperty("testSetup", LOCAL_TEST_FRAMEWORK);
 
-        if (!rulesetPath.equals(getRulesetPath())) {
-            LOGGER.info("Updating rules to {}", getRulesetPath());
+        switch (framework.toLowerCase()) {
+            case SOOT -> {
+                return new SootTestSetup();
+            }
+            case SOOT_UP -> {
+                return new SootUpTestSetup();
+            }
+            case OPAL -> {
+                return new OpalTestSetup();
+            }
+            default ->
+                    throw new IllegalArgumentException(
+                            "Cannot run tests with test setup " + framework);
+        }
+    }
 
-            rulesetPath = getRulesetPath();
-            rules = scanner.readRules(rulesetPath);
+    public void initialize(String ruleset) {
+        String path;
+        if (Set.of(TestRules.BOUNCY_CASTLE, TestRules.JCA, TestRules.TINK).contains(ruleset)) {
+            path = TestRules.RULES_BASE_DIR + ruleset;
         } else {
-            LOGGER.info("Reusing rules from previous run");
+            path = TestRules.RULES_TEST_DIR + ruleset;
         }
 
-        TestSetup testSetup = new SootTestSetup();
-        testSetup.initialize(testClassName, testMethodName);
+        rules = scanner.readRules(path);
+        LOGGER.info("Using rules from " + path);
+    }
+
+    public void runTest(String testClassName, String testMethodName) {
+        LOGGER.info("Running test '{}' in class '{}'", testMethodName, testClassName);
+
+        testSetup.initialize(buildClassPath(), testClassName, testMethodName);
 
         DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
         FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
@@ -93,8 +120,8 @@ public abstract class UsagePatternTestingFramework {
         // Setup test listener
         Collection<Assertion> assertions =
                 extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
-        IErrorListener errorListener = new UsagePatternErrorListener(assertions);
-        IResultsListener resultsListener = new UsagePatternResultsListener(assertions);
+        IErrorListener errorListener = new TestRunnerErrorListener(assertions);
+        IResultsListener resultsListener = new TestRunnerResultsListener(assertions);
 
         scanner.addErrorListener(errorListener);
         scanner.addResultsListener(resultsListener);
@@ -138,13 +165,19 @@ public abstract class UsagePatternTestingFramework {
                                                     .toList()));
         }
         if (!errors.toString().isEmpty()) {
-            Assert.fail(errors.toString());
+            org.junit.jupiter.api.Assertions.fail(errors.toString());
         }
-
-        Assume.assumeTrue(false);
     }
 
-    protected abstract String getRulesetPath();
+    protected String buildClassPath() {
+        String userDir = System.getProperty("user.dir");
+        String javaHome = System.getProperty("java.home");
+        if (javaHome == null || javaHome.isEmpty()) {
+            throw new RuntimeException("Could not get property java.home!");
+        }
+
+        return userDir + "/target/test-classes";
+    }
 
     private Collection<Assertion> extractBenchmarkMethods(Method testMethod, CallGraph callGraph) {
         Collection<Assertion> results = new HashSet<>();
@@ -177,7 +210,7 @@ public abstract class UsagePatternTestingFramework {
             if (!invokeExpr
                     .getDeclaredMethod()
                     .getDeclaringClass()
-                    .toString()
+                    .getFullyQualifiedName()
                     .equals(Assertions.class.getName())) {
                 continue;
             }
@@ -186,13 +219,32 @@ public abstract class UsagePatternTestingFramework {
 
             if (invocationName.startsWith("extValue")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
+                int countVal = getIntValueFromAssertion(method, param);
 
                 for (Statement pred : getPredecessorsNotBenchmark(statement)) {
-                    queries.add(new ExtractedValueAssertion(pred, param.getIntValue()));
+                    queries.add(new ExtractedValueAssertion(pred, countVal));
                 }
+            }
+
+            if (invocationName.startsWith("discoveredSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new DiscoveredSeedAssertion(countVal));
+            }
+
+            if (invocationName.startsWith("discoveredRuleSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new DiscoveredRuleSeedAssertion(countVal));
+            }
+
+            if (invocationName.startsWith("discoveredPredicateSeeds")) {
+                Val count = invokeExpr.getArg(0);
+
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new DiscoveredPredicateSeedAssertion(countVal));
             }
 
             if (invocationName.startsWith("callToForbiddenMethod")) {
@@ -205,61 +257,62 @@ public abstract class UsagePatternTestingFramework {
                 Val local = invokeExpr.getArg(0);
                 Val count = invokeExpr.getArg(1);
 
-                if (!local.isLocal() || !count.isIntConstant()) {
-                    continue;
+                if (!local.isLocal()) {
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                queries.add(new ConstraintsEvaluatedAssertion(local, count.getIntValue()));
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new ConstraintsEvaluatedAssertion(local, countVal));
             }
 
             if (invocationName.startsWith("satisfiedConstraints")) {
                 Val local = invokeExpr.getArg(0);
                 Val count = invokeExpr.getArg(1);
 
-                if (!local.isLocal() || !count.isIntConstant()) {
-                    continue;
+                if (!local.isLocal()) {
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                queries.add(new ConstraintsSatisfiedAssertion(local, count.getIntValue()));
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new ConstraintsSatisfiedAssertion(local, countVal));
             }
 
             if (invocationName.startsWith("violatedConstraints")) {
                 Val local = invokeExpr.getArg(0);
                 Val count = invokeExpr.getArg(1);
 
-                if (!local.isLocal() || !count.isIntConstant()) {
-                    continue;
+                if (!local.isLocal()) {
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                queries.add(new ConstraintsViolatedAssertion(local, count.getIntValue()));
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new ConstraintsViolatedAssertion(local, countVal));
             }
 
             if (invocationName.startsWith("notRelevantConstraints")) {
                 Val local = invokeExpr.getArg(0);
                 Val count = invokeExpr.getArg(1);
 
-                if (!local.isLocal() || !count.isIntConstant()) {
-                    continue;
+                if (!local.isLocal()) {
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                queries.add(new ConstraintsNotRelevantAssertion(local, count.getIntValue()));
+                int countVal = getIntValueFromAssertion(method, count);
+                queries.add(new ConstraintsNotRelevantAssertion(local, countVal));
             }
 
             if (invocationName.startsWith("hasEnsuredPredicate")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
                 if (invokeExpr.getArgs().size() == 2) {
                     // predicate name is passed as parameter
                     Val predNameParam = invokeExpr.getArg(1);
-                    if (!predNameParam.isStringConstant()) {
-                        continue;
-                    }
-                    String predName = predNameParam.getStringValue();
-                    queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
+                    String predName = getStringValueFromAssertion(method, predNameParam);
 
+                    queries.add(new HasEnsuredPredicateAssertion(statement, param, predName));
                 } else {
                     queries.add(new HasEnsuredPredicateAssertion(statement, param));
                 }
@@ -268,16 +321,14 @@ public abstract class UsagePatternTestingFramework {
             if (invocationName.startsWith("notHasEnsuredPredicate")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
                 if (invokeExpr.getArgs().size() == 2) {
                     // predicate name is passed as parameter
                     Val predNameParam = invokeExpr.getArg(1);
-                    if (!predNameParam.isStringConstant()) {
-                        continue;
-                    }
-                    String predName = predNameParam.getStringValue();
+                    String predName = getStringValueFromAssertion(method, predNameParam);
+
                     queries.add(new NotHasEnsuredPredicateAssertion(statement, param, predName));
                 } else {
                     queries.add(new NotHasEnsuredPredicateAssertion(statement, param));
@@ -287,7 +338,7 @@ public abstract class UsagePatternTestingFramework {
             if (invocationName.startsWith("mustBeInAcceptingState")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
                 queries.add(new MustBeInAcceptingStateAssertion(statement, param));
@@ -296,7 +347,7 @@ public abstract class UsagePatternTestingFramework {
             if (invocationName.startsWith("mayBeInAcceptingState")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
                 queries.add(new MayBeInAcceptingStateAssertion(statement, param));
@@ -305,7 +356,7 @@ public abstract class UsagePatternTestingFramework {
             if (invocationName.startsWith("mustNotBeInAcceptingState")) {
                 Val param = invokeExpr.getArg(0);
                 if (!param.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
                 queries.add(new MustNotBeInAcceptingStateAssertion(statement, param));
@@ -316,30 +367,25 @@ public abstract class UsagePatternTestingFramework {
                 Val stateLabel = invokeExpr.getArg(1);
 
                 if (!local.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                if (!stateLabel.isStringConstant()) {
-                    continue;
-                }
-
-                queries.add(new StateAssertion(statement, local, stateLabel.getStringValue()));
+                String state = getStringValueFromAssertion(method, stateLabel);
+                queries.add(new StateAssertion(statement, local, state));
             }
 
             if (invocationName.startsWith("predicateErrors")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new PredicateErrorCountAssertion(param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+
+                queries.add(new PredicateErrorCountAssertion(intVal));
             }
 
             if (invocationName.startsWith("predicateContradictionErrors")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new PredicateContradictionErrorCountAssertion(param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+
+                queries.add(new PredicateContradictionErrorCountAssertion(intVal));
             }
 
             if (invocationName.startsWith("constraintErrors")) {
@@ -347,13 +393,11 @@ public abstract class UsagePatternTestingFramework {
                 Val param = invokeExpr.getArg(1);
 
                 if (!seed.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new ConstraintErrorCountAssertion(seed, param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+                queries.add(new ConstraintErrorCountAssertion(seed, intVal));
             }
 
             if (invocationName.startsWith("typestateErrors")) {
@@ -361,37 +405,32 @@ public abstract class UsagePatternTestingFramework {
                 Val param = invokeExpr.getArg(1);
 
                 if (!seed.isLocal()) {
-                    continue;
+                    throw new RuntimeException("Cannot create assertion @ " + statement);
                 }
 
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new TypestateErrorCountAssertion(seed, param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+                queries.add(new TypestateErrorCountAssertion(seed, intVal));
             }
 
             if (invocationName.startsWith("incompleteOperationErrors")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new IncompleteOperationErrorCountAssertion(param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+
+                queries.add(new IncompleteOperationErrorCountAssertion(intVal));
             }
 
             if (invocationName.startsWith("forbiddenMethodErrors")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new ForbiddenMethodErrorCountAssertion(param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+
+                queries.add(new ForbiddenMethodErrorCountAssertion(intVal));
             }
 
             if (invocationName.startsWith("impreciseValueExtractionErrors")) {
                 Val param = invokeExpr.getArg(0);
-                if (!param.isIntConstant()) {
-                    continue;
-                }
-                queries.add(new ImpreciseValueExtractionErrorCountAssertion(param.getIntValue()));
+                int intVal = getIntValueFromAssertion(method, param);
+
+                queries.add(new ImpreciseValueExtractionErrorCountAssertion(intVal));
             }
         }
     }
@@ -427,5 +466,47 @@ public abstract class UsagePatternTestingFramework {
             workList.addAll(preds);
         }
         return res;
+    }
+
+    private int getIntValueFromAssertion(Method method, Val param) {
+        if (param.isIntConstant()) {
+            return param.getIntValue();
+        }
+
+        for (Statement statement : method.getStatements()) {
+            if (statement.isAssignStmt()) {
+                Val leftOp = statement.getLeftOp();
+                Val rightOp = statement.getRightOp();
+
+                if (leftOp.equals(param)) {
+                    if (rightOp.isIntConstant()) {
+                        return rightOp.getIntValue();
+                    }
+                }
+            }
+        }
+
+        throw new RuntimeException("Unable to find int value for param " + param);
+    }
+
+    private String getStringValueFromAssertion(Method method, Val param) {
+        if (param.isStringConstant()) {
+            return param.getStringValue();
+        }
+
+        for (Statement statement : method.getStatements()) {
+            if (statement.isAssignStmt()) {
+                Val leftOp = statement.getLeftOp();
+                Val rightOp = statement.getRightOp();
+
+                if (leftOp.equals(param)) {
+                    if (rightOp.isStringConstant()) {
+                        return rightOp.getStringValue();
+                    }
+                }
+            }
+        }
+
+        throw new RuntimeException("Unable to find String value for param " + param);
     }
 }

@@ -64,7 +64,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
                     + " @ "
                     + stmt
                     + " @ line "
-                    + stmt.getStartLineNumber();
+                    + stmt.getLineNumber();
         } else {
             return "Expected '"
                     + predName
@@ -73,7 +73,7 @@ public class HasEnsuredPredicateAssertion implements Assertion {
                     + " @ "
                     + stmt
                     + " @ line "
-                    + stmt.getStartLineNumber();
+                    + stmt.getLineNumber();
         }
     }
 }

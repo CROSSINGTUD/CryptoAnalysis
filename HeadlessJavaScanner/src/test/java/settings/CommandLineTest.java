@@ -15,8 +15,8 @@ import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CommandLineTest {
 
@@ -28,7 +28,7 @@ public class CommandLineTest {
 
     private static final String FRAMEWORK = "--framework";
     private static final String CALL_GRAPH = "--cg";
-    private static final String SOOT_PATH = "--sootPath";
+    private static final String ADD_CLASS_PATH = "--addClassPath";
     private static final String REPORT_PATH = "--reportPath";
     private static final String REPORT_FORMAT = "--reportFormat";
     private static final String VISUALIZATION = "--visualization";
@@ -40,62 +40,79 @@ public class CommandLineTest {
         String[] args = new String[] {APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR};
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getApplicationPath(), EXAMPLE_APP_PATH);
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
-        Assert.assertEquals(
+        Assertions.assertEquals(scanner.getApplicationPath(), EXAMPLE_APP_PATH);
+        Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+        Assertions.assertEquals(
                 scanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
-        Assert.assertEquals(scanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
-        Assert.assertFalse(scanner.isVisualization());
+        Assertions.assertEquals(scanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+        Assertions.assertFalse(scanner.isVisualization());
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testMissingApplicationPath() {
-        String[] args = new String[] {RULES_DIR, EXAMPLE_RULES_DIR};
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args = new String[] {RULES_DIR, EXAMPLE_RULES_DIR};
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                    Assertions.assertEquals(scanner.getRulesetPath(), EXAMPLE_RULES_DIR);
+                });
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testMissingRulesDir() {
-        String[] args = new String[] {APP_PATH, EXAMPLE_APP_PATH};
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args = new String[] {APP_PATH, EXAMPLE_APP_PATH};
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getApplicationPath(), APP_PATH);
+                    Assertions.assertEquals(scanner.getApplicationPath(), APP_PATH);
+                });
     }
 
     @Test
     public void testFramework() {
         String[] sootArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "Soot"
                 };
         HeadlessJavaScanner sootScanner = HeadlessJavaScanner.createFromCLISettings(sootArgs);
-        Assert.assertEquals(sootScanner.getFramework(), ScannerSettings.Framework.SOOT);
+        Assertions.assertEquals(sootScanner.getFramework(), ScannerSettings.Framework.SOOT);
 
         String[] sootUpArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT_UP"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SootUp"
                 };
         HeadlessJavaScanner sootUpScanner = HeadlessJavaScanner.createFromCLISettings(sootUpArgs);
-        Assert.assertEquals(sootUpScanner.getFramework(), ScannerSettings.Framework.SOOT_UP);
+        Assertions.assertEquals(sootUpScanner.getFramework(), ScannerSettings.Framework.SOOT_UP);
 
         String[] opalArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "OPAL"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "Opal"
                 };
         HeadlessJavaScanner opalScanner = HeadlessJavaScanner.createFromCLISettings(opalArgs);
-        Assert.assertEquals(opalScanner.getFramework(), ScannerSettings.Framework.OPAL);
+        Assertions.assertEquals(opalScanner.getFramework(), ScannerSettings.Framework.OPAL);
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidFramework() {
-        String[] args =
-                new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "WALA"
-                };
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(scanner.getFramework(), ScannerSettings.Framework.SOOT);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APP_PATH,
+                                EXAMPLE_APP_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                FRAMEWORK,
+                                "WALA"
+                            };
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+                    Assertions.assertEquals(scanner.getFramework(), ScannerSettings.Framework.SOOT);
+                });
     }
 
     @Test
@@ -105,7 +122,7 @@ public class CommandLineTest {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "CHA"
                 };
         HeadlessJavaScanner chaScanner = HeadlessJavaScanner.createFromCLISettings(chaArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 chaScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
 
         String[] sparkArgs =
@@ -113,7 +130,7 @@ public class CommandLineTest {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "SPARK"
                 };
         HeadlessJavaScanner sparkScanner = HeadlessJavaScanner.createFromCLISettings(sparkArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 sparkScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.SPARK);
 
         String[] sparkLibArgs =
@@ -122,32 +139,47 @@ public class CommandLineTest {
                 };
         HeadlessJavaScanner sparkLibScanner =
                 HeadlessJavaScanner.createFromCLISettings(sparkLibArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 sparkLibScanner.getCallGraphAlgorithm(),
                 ScannerSettings.CallGraphAlgorithm.SPARK_LIB);
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidCallGraph() {
-        String[] args =
-                new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "RTA"
-                };
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(
-                scanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APP_PATH,
+                                EXAMPLE_APP_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                CALL_GRAPH,
+                                "RTA"
+                            };
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+                    Assertions.assertEquals(
+                            scanner.getCallGraphAlgorithm(),
+                            ScannerSettings.CallGraphAlgorithm.CHA);
+                });
     }
 
     @Test
-    public void testSootPath() {
-        String sootPath = "path/to/soot";
+    public void testAddClassPath() {
+        String classPath = "path/to/class";
         String[] args =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, SOOT_PATH, sootPath
+                    APP_PATH,
+                    EXAMPLE_APP_PATH,
+                    RULES_DIR,
+                    EXAMPLE_RULES_DIR,
+                    ADD_CLASS_PATH,
+                    classPath
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getSootClassPath(), sootPath);
+        Assertions.assertEquals(scanner.getAddClassPath(), classPath);
     }
 
     @Test
@@ -164,7 +196,7 @@ public class CommandLineTest {
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
 
-        Assert.assertEquals(scanner.getReportDirectory(), reportPath);
+        Assertions.assertEquals(scanner.getReportDirectory(), reportPath);
     }
 
     @Test
@@ -174,28 +206,29 @@ public class CommandLineTest {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, REPORT_FORMAT, "CMD"
                 };
         HeadlessJavaScanner cmdScanner = HeadlessJavaScanner.createFromCLISettings(cmdArgs);
-        Assert.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+        Assertions.assertEquals(cmdScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
 
         String[] txtArgs =
                 new String[] {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, REPORT_FORMAT, "TXT"
                 };
         HeadlessJavaScanner txtScanner = HeadlessJavaScanner.createFromCLISettings(txtArgs);
-        Assert.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
+        Assertions.assertEquals(txtScanner.getReportFormats(), Set.of(Reporter.ReportFormat.TXT));
 
         String[] sarifArgs =
                 new String[] {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, REPORT_FORMAT, "SARIF"
                 };
         HeadlessJavaScanner sarifScanner = HeadlessJavaScanner.createFromCLISettings(sarifArgs);
-        Assert.assertEquals(sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
+        Assertions.assertEquals(
+                sarifScanner.getReportFormats(), Set.of(Reporter.ReportFormat.SARIF));
 
         String[] csvArgs =
                 new String[] {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, REPORT_FORMAT, "CSV"
                 };
         HeadlessJavaScanner csvScanner = HeadlessJavaScanner.createFromCLISettings(csvArgs);
-        Assert.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
+        Assertions.assertEquals(csvScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV));
 
         String[] csvSummaryArgs =
                 new String[] {
@@ -208,7 +241,7 @@ public class CommandLineTest {
                 };
         HeadlessJavaScanner csvSummaryScanner =
                 HeadlessJavaScanner.createFromCLISettings(csvSummaryArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 csvSummaryScanner.getReportFormats(), Set.of(Reporter.ReportFormat.CSV_SUMMARY));
 
         String[] annotationArgs =
@@ -222,7 +255,7 @@ public class CommandLineTest {
                 };
         HeadlessJavaScanner annotationScanner =
                 HeadlessJavaScanner.createFromCLISettings(annotationArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 annotationScanner.getReportFormats(),
                 Set.of(Reporter.ReportFormat.GITHUB_ANNOTATION));
 
@@ -237,7 +270,7 @@ public class CommandLineTest {
                 };
         HeadlessJavaScanner multipleFormatsScanner =
                 HeadlessJavaScanner.createFromCLISettings(multipleArgs);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 multipleFormatsScanner.getReportFormats(),
                 Set.of(
                         Reporter.ReportFormat.CMD,
@@ -245,19 +278,24 @@ public class CommandLineTest {
                         Reporter.ReportFormat.CSV));
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidReportFormat() {
-        String[] args =
-                new String[] {
-                    APP_PATH,
-                    EXAMPLE_APP_PATH,
-                    RULES_DIR,
-                    EXAMPLE_RULES_DIR,
-                    REPORT_FORMAT,
-                    "CMD,XTX"
-                };
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(scanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APP_PATH,
+                                EXAMPLE_APP_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                REPORT_FORMAT,
+                                "CMD,XTX"
+                            };
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+                    Assertions.assertEquals(
+                            scanner.getReportFormats(), Set.of(Reporter.ReportFormat.CMD));
+                });
     }
 
     @Test
@@ -274,17 +312,25 @@ public class CommandLineTest {
                     reportPath
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertTrue(scanner.isVisualization());
+        Assertions.assertTrue(scanner.isVisualization());
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidVisualization() {
-        String[] args =
-                new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, VISUALIZATION
-                };
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertTrue(scanner.isVisualization());
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    String[] args =
+                            new String[] {
+                                APP_PATH,
+                                EXAMPLE_APP_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                VISUALIZATION
+                            };
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+                    Assertions.assertTrue(scanner.isVisualization());
+                });
     }
 
     @Test
@@ -300,7 +346,7 @@ public class CommandLineTest {
                     pathToFile
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 scanner.getIgnoredSections(),
                 List.of("example.class", "example.class.method", "example.*"));
     }
@@ -318,22 +364,26 @@ public class CommandLineTest {
                     String.valueOf(timeout)
                 };
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(scanner.getTimeout(), timeout);
+        Assertions.assertEquals(scanner.getTimeout(), timeout);
     }
 
-    @Test(expected = CryptoAnalysisParserException.class)
+    @Test
     public void testInvalidTimeout() {
-        int timeout = -10;
-        String[] args =
-                new String[] {
-                    APP_PATH,
-                    EXAMPLE_APP_PATH,
-                    RULES_DIR,
-                    EXAMPLE_RULES_DIR,
-                    TIMEOUT,
-                    String.valueOf(timeout)
-                };
-        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
-        Assert.assertEquals(scanner.getTimeout(), timeout);
+        Assertions.assertThrows(
+                CryptoAnalysisParserException.class,
+                () -> {
+                    int timeout = -10;
+                    String[] args =
+                            new String[] {
+                                APP_PATH,
+                                EXAMPLE_APP_PATH,
+                                RULES_DIR,
+                                EXAMPLE_RULES_DIR,
+                                TIMEOUT,
+                                String.valueOf(timeout)
+                            };
+                    HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
+                    Assertions.assertEquals(scanner.getTimeout(), timeout);
+                });
     }
 }

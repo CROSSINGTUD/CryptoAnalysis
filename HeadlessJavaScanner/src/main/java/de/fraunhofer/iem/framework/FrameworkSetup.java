@@ -9,6 +9,7 @@
  ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
+import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import org.slf4j.Logger;
@@ -20,11 +21,15 @@ public abstract class FrameworkSetup {
 
     protected final String applicationPath;
     protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
+    protected final DataFlowScope dataFlowScope;
 
     protected FrameworkSetup(
-            String applicationPath, ScannerSettings.CallGraphAlgorithm callGraphAlgorithm) {
+            String applicationPath,
+            ScannerSettings.CallGraphAlgorithm callGraphAlgorithm,
+            DataFlowScope dataFlowScope) {
         this.applicationPath = applicationPath;
         this.callGraphAlgorithm = callGraphAlgorithm;
+        this.dataFlowScope = dataFlowScope;
     }
 
     public abstract void initializeFramework();

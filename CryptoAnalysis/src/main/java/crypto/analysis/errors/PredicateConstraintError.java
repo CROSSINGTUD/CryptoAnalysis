@@ -33,7 +33,7 @@ public class PredicateConstraintError extends AbstractError {
     private final CrySLPredicate predicate;
 
     public PredicateConstraintError(AnalysisSeedWithSpecification seed, CrySLPredicate predicate) {
-        super(seed, seed.getOrigin(), seed.getSpecification());
+        super(seed, seed.getInitialStatement(), seed.getSpecification());
 
         this.predicate = predicate;
     }

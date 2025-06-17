@@ -79,7 +79,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
 
     @Override
     public void beforePredicateChecks(Collection<IAnalysisSeed> seeds) {
-        relevantStatements.put(getOrigin(), -1);
+        relevantStatements.put(getInitialStatement(), -1);
         for (Statement statement : statementValWeightTable.rowKeySet()) {
             if (!statement.containsInvokeExpr()) {
                 continue;
@@ -124,7 +124,7 @@ public class AnalysisSeedWithEnsuredPredicate extends IAnalysisSeed {
             return;
         }
 
-        if (statement.equals(getOrigin())) {
+        if (statement.equals(getInitialStatement())) {
             return;
         }
 

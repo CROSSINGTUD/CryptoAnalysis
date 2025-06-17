@@ -9,8 +9,6 @@
  ********************************************************************************/
 package scanner.targets;
 
-import static org.junit.Assume.assumeTrue;
-
 import crypto.analysis.errors.AlternativeReqPredicateError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.IncompleteOperationError;
@@ -18,17 +16,18 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;
 
 public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
 
-    @Before
+    @BeforeEach
     public void checkJavaVersion() {
-        assumeTrue(getVersion() >= 9);
+        Assumptions.assumeTrue(getVersion() >= 9);
     }
 
     private static int getVersion() {
@@ -82,7 +81,8 @@ public class SootJava9ConfigurationTest extends AbstractHeadlessTest {
                         .build());
 
         addErrorSpecification(
-                new ErrorSpecification.Builder("example.IncompleteOperationErrorExample", "main", 1)
+                new ErrorSpecification.Builder(
+                                "example.IncompleteOperationErrorExample", "doUpdate", 0)
                         .withTPs(IncompleteOperationError.class, 1)
                         .build());
 

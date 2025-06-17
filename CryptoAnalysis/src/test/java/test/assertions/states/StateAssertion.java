@@ -49,14 +49,11 @@ public class StateAssertion extends StateResult {
                     + " @ "
                     + statement
                     + " @ line "
-                    + statement.getStartLineNumber()
+                    + statement.getLineNumber()
                     + " is expected to be in state "
                     + stateLabel;
         } else {
-            return statement
-                    + " @ line "
-                    + statement.getStartLineNumber()
-                    + " has not been checked";
+            return statement + " @ line " + statement.getLineNumber() + " has not been checked";
         }
     }
 }

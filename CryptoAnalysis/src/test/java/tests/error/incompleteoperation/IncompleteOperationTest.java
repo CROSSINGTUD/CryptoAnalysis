@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.error.incompleteoperation;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class IncompleteOperationTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "incompleteOperation";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.INCOMPLETE_OPERATION)
+public class IncompleteOperationTest {
 
     @Test
     public void testNoIncompleteOperation() {
@@ -113,6 +112,34 @@ public class IncompleteOperationTest extends UsagePatternTestingFramework {
             operations2.operation3();
         }
 
+        Assertions.incompleteOperationErrors(2);
+    }
+
+    @Test
+    public void testOverwriteSeedConstructor() {
+        OverwriteOperation operation = new OverwriteOperation();
+        operation.operation1();
+        Assertions.assertState(operation, "1");
+
+        // Overwrite the seed and continue with constructor call
+        operation = new OverwriteOperation();
+        Assertions.assertState(operation, "0");
+
+        Assertions.discoveredSeeds(2);
+        Assertions.incompleteOperationErrors(2);
+    }
+
+    @Test
+    public void testOverwriteSeedStatic() {
+        OverwriteOperation operation = OverwriteOperation.getInstance();
+        operation.operation1();
+        Assertions.assertState(operation, "1");
+
+        // Overwrite the seed with factory method
+        operation = OverwriteOperation.getInstance();
+        Assertions.assertState(operation, "0");
+
+        Assertions.discoveredSeeds(2);
         Assertions.incompleteOperationErrors(2);
     }
 }

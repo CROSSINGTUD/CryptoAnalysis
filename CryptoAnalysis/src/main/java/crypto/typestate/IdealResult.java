@@ -7,19 +7,16 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.tink;
+package crypto.typestate;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import boomerang.results.ForwardBoomerangResults;
+import typestate.TransitionFunction;
 
-@RunWith(Suite.class)
-@SuiteClasses({
-    TestAEADCipher.class,
-    TestDeterministicAEADCipher.class,
-    TestDigitalSignature.class,
-    TestHybridEncryption.class,
-    TestMAC.class,
-    TestStreamingAEADCipher.class
-})
-public class TestSuite {}
+/**
+ * Wrapper class to store the IDEal results for a single query
+ *
+ * @param query the solved query
+ * @param results the results for the query
+ */
+public record IdealResult(
+        ForwardSeedQuery query, ForwardBoomerangResults<TransitionFunction> results) {}

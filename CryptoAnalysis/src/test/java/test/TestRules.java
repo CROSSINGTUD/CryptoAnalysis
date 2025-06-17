@@ -11,7 +11,7 @@ package test;
 
 import java.io.File;
 
-public class TestConstants {
+public class TestRules {
 
     public static final String RULES_BASE_DIR =
             "."
@@ -25,14 +25,6 @@ public class TestConstants {
                     + "rules"
                     + File.separator;
 
-    public static final String JCA_RULESET_PATH =
-            RULES_BASE_DIR + "JavaCryptographicArchitecture" + File.separator;
-
-    public static final String BOUNCY_CASTLE_RULESET_PATH =
-            RULES_BASE_DIR + "BouncyCastle" + File.separator;
-
-    public static final String TINK_RULESET_PATH = RULES_BASE_DIR + "Tink" + File.separator;
-
     public static final String RULES_TEST_DIR =
             "."
                     + File.separator
@@ -44,4 +36,36 @@ public class TestConstants {
                     + File.separator
                     + "testrules"
                     + File.separator;
+
+    public static final String JCA = "JavaCryptographicArchitecture";
+
+    public static final String BOUNCY_CASTLE = "BouncyCastle";
+
+    public static final String TINK = "Tink";
+
+    public static final String CONSTRAINTS = "constraints";
+
+    public static final String IMPRECISE_VALUE_EXTRACTION = "impreciseValueExtraction";
+
+    public static final String INCOMPLETE_OPERATION = "incompleteOperation";
+
+    public static final String PREDEFINED_PREDICATES = "predefinedPredicates";
+
+    public static final String PREDICATE_CONTRADICTION = "predicateContradiction";
+
+    public static final String PREDICATE_IMPLICATION = "predicateImplication";
+
+    public static final String REQUIRED_PREDICATES = "requiredPredicates";
+
+    public static final String REQUIRED_PREDICATE_WITH_THIS = "requiredPredicateWithThis";
+
+    public static final String TYPESTATE = "typestate";
+
+    public static final String TRANSFORMATION = "transformation";
+
+    public static final String SEEDS = "seeds";
+
+    public static final String ISSUE_314 = "issue314";
+
+    public static final String ISSUE_318 = "issue318";
 }

@@ -1,8 +1,11 @@
-name: Build and test Android Scanner
+name: Build and test HeadlessJavaScanner
 
 inputs:
   java-version:
     description: "Version to build the project with"
+    required: true
+  framework:
+    description: "The underlying framework to run the tests"
     required: true
 
 runs:
@@ -23,11 +26,10 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-      # Android 15 (android-35) is the latest version
-    - name: Copy Android platforms to test resources
-      run: |
-        mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
+    # We have to build CryptoAnalysis first
+    - name: Build CryptoAnalysis
+      run: mvn clean install -f CryptoAnalysis -DskipTests
       shell: bash
     - name: Run maven command
-      run: mvn clean verify -DrunAndroidTests
+      run: mvn clean verify -f HeadlessJavaScanner -DtestSetup=${{ inputs.framework }}
       shell: bash

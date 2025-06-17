@@ -13,6 +13,12 @@ public class Assertions {
 
     public static void extValue(int pos) {}
 
+    public static void discoveredSeeds(int i) {}
+
+    public static void discoveredRuleSeeds(int i) {}
+
+    public static void discoveredPredicateSeeds(int i) {}
+
     public static void mustBeInAcceptingState(Object o) {}
 
     public static void mayBeInAcceptingState(Object o) {}

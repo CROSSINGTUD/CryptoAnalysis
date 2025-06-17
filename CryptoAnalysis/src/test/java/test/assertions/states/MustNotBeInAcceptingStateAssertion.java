@@ -46,7 +46,7 @@ public class MustNotBeInAcceptingStateAssertion extends StateResult {
                 + " @ "
                 + statement
                 + " @ line "
-                + statement.getStartLineNumber()
+                + statement.getLineNumber()
                 + " must not be in accepting state";
     }
 }

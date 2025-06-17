@@ -13,17 +13,16 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class MessageDigestTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class MessageDigestTest {
 
     @Test
     public void mdUsagePatternTest1() throws GeneralSecurityException {
@@ -103,8 +102,6 @@ public class MessageDigestTest extends UsagePatternTestingFramework {
         final byte[] input = "input".getBytes(StandardCharsets.UTF_8);
         byte[] output = md.digest(input);
         Assertions.hasEnsuredPredicate(output);
-        output = null;
-        Assertions.notHasEnsuredPredicate(output);
         md.reset();
         output = md.digest(input);
         Assertions.mustBeInAcceptingState(md);

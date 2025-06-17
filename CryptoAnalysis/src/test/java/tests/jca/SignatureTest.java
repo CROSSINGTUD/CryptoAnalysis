@@ -17,19 +17,18 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import org.bouncycastle.util.encoders.Hex;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class SignatureTest extends UsagePatternTestingFramework {
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class SignatureTest {
 
     private static final byte[] tData = Hex.decode("355F697E8B868B65B25A04E18D782AFA");
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
 
     @Test
     public void testSignature2() throws GeneralSecurityException {

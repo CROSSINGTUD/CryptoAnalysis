@@ -27,7 +27,7 @@ public class IncompleteOperationErrorExample {
 		
 		IncompleteOperationErrorExample ex = new IncompleteOperationErrorExample();
 		ex.doInit();
-		ex.doUpate();
+		ex.doUpdate();
 		ex.doSign();
 	}
 
@@ -39,7 +39,7 @@ public class IncompleteOperationErrorExample {
 		signature.initSign(getPrivateKey());
 	}
 
-	private void doUpate() throws GeneralSecurityException {
+	private void doUpdate() throws GeneralSecurityException {
 		signature.update("test".getBytes());
 	}
 

@@ -10,7 +10,6 @@
 package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
-import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.FrameworkScope;
 import boomerang.scope.InvokeExpr;
@@ -42,7 +41,6 @@ import crysl.rule.CrySLRule;
 import crysl.rule.StateNode;
 import crysl.rule.TransitionEdge;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -169,60 +167,51 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     /**
      * Check the ORDER section and report a corresponding {@link IncompleteOperationError} for each
-     * sequence of statements that do not end in an accepting state
+     * sequence of statements that does not end in an accepting state
      */
     private void evaluateIncompleteOperations() {
-        Table<ControlFlowGraph.Edge, Val, TransitionFunction> endPathOfPropagation =
-                analysisResults.getObjectDestructingStatements();
-        Map<ControlFlowGraph.Edge, Collection<CrySLMethod>> incompleteOperations = new HashMap<>();
+        Multimap<Statement, CrySLMethod> incompleteOperations = HashMultimap.create();
 
-        for (Table.Cell<ControlFlowGraph.Edge, Val, TransitionFunction> c :
-                endPathOfPropagation.cellSet()) {
-            Collection<CrySLMethod> expectedMethodsToBeCalled = new HashSet<>();
+        Table<Statement, Val, TransitionFunction> weights = analysisResults.computeFinalWeights();
+        for (TransitionFunction weight : weights.values()) {
+            for (Transition transition : weight.getStateChangeStatements().keySet()) {
+                State targetState = transition.to();
 
-            for (Transition n : c.getValue().getValues()) {
-                if (n.to() == null) {
+                if (targetState.isAccepting()) {
                     continue;
                 }
 
-                if (n.to().isAccepting()) {
-                    continue;
-                }
+                if (targetState instanceof WrappedState wrappedState) {
+                    for (TransitionEdge t : specification.getUsagePattern().getAllTransitions()) {
+                        if (t.from().equals(t.to())) {
+                            continue;
+                        }
 
-                if (!(n.to() instanceof WrappedState wrappedState)) {
-                    continue;
-                }
+                        if (t.getLeft().equals(wrappedState.delegate())) {
+                            Collection<Statement> lastStatements =
+                                    weight.getStateChangeStatements().get(transition);
+                            Collection<CrySLMethod> labels = t.getLabel();
 
-                for (TransitionEdge t : specification.getUsagePattern().getAllTransitions()) {
-                    if (t.getLeft().equals(wrappedState.delegate()) && !t.from().equals(t.to())) {
-                        Collection<CrySLMethod> labels = t.getLabel();
-                        expectedMethodsToBeCalled.addAll(labels);
+                            for (Statement stmt : lastStatements) {
+                                incompleteOperations.putAll(stmt, labels);
+                            }
+                        }
                     }
                 }
-            }
-
-            if (!expectedMethodsToBeCalled.isEmpty()) {
-                incompleteOperations.put(c.getRowKey(), expectedMethodsToBeCalled);
             }
         }
 
         // No incomplete operations were found
-        if (incompleteOperations.entrySet().isEmpty()) {
+        if (incompleteOperations.keySet().isEmpty()) {
             return;
         }
 
         /* If there is only one incomplete operation, then there is only one dataflow path. Hence,
          * the error can be reported directly.
          */
-        if (incompleteOperations.entrySet().size() == 1) {
-            Map.Entry<ControlFlowGraph.Edge, Collection<CrySLMethod>> entry =
-                    incompleteOperations.entrySet().iterator().next();
-            Collection<CrySLMethod> methodsToBeCalled = entry.getValue();
-            Statement statement = entry.getKey().getTarget();
-
-            if (statement.isThrowStmt()) {
-                return;
-            }
+        if (incompleteOperations.keySet().size() == 1) {
+            Statement statement = incompleteOperations.keySet().iterator().next();
+            Collection<CrySLMethod> methodsToBeCalled = incompleteOperations.get(statement);
 
             IncompleteOperationError incompleteOperationError =
                     new IncompleteOperationError(this, statement, specification, methodsToBeCalled);
@@ -235,15 +224,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
          * 1) A dataflow path ends in an accepting state: No error is reported
          * 2) A dataflow path does not end in an accepting state: Report the error on the last used statement on this path
          */
-        if (incompleteOperations.size() > 1) {
-            for (Map.Entry<ControlFlowGraph.Edge, Collection<CrySLMethod>> entry :
-                    incompleteOperations.entrySet()) {
-                Collection<CrySLMethod> expectedMethodsToBeCalled = entry.getValue();
-                Statement statement = entry.getKey().getTarget();
-
-                if (statement.isThrowStmt()) {
-                    continue;
-                }
+        if (incompleteOperations.keySet().size() > 1) {
+            for (Statement statement : incompleteOperations.keySet()) {
+                Collection<CrySLMethod> expectedMethodsToBeCalled =
+                        incompleteOperations.get(statement);
 
                 if (!statement.containsInvokeExpr()) {
                     continue;
@@ -517,7 +501,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Collection<CrySLMethod> methods =
                 MatcherUtils.getMatchingCryslMethodsToDeclaredMethod(
-                        specification, statement.getInvokeExpr().getDeclaredMethod());
+                        specification.getEvents(), statement.getInvokeExpr().getDeclaredMethod());
         for (CrySLMethod method : methods) {
             if (isPredicateGeneratingAssignStatement(statement, predicate, method)) {
                 AbstractPredicate generatedPred =

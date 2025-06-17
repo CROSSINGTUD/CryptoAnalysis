@@ -9,22 +9,88 @@
  ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
+import boomerang.scope.DataFlowScope;
 import boomerang.scope.FrameworkScope;
+import boomerang.scope.sootup.BoomerangPreInterceptor;
+import boomerang.scope.sootup.SootUpFrameworkScope;
+import com.google.common.base.Stopwatch;
 import de.fraunhofer.iem.scanner.ScannerSettings;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import sootup.callgraph.CallGraph;
+import sootup.callgraph.CallGraphAlgorithm;
+import sootup.callgraph.ClassHierarchyAnalysisAlgorithm;
+import sootup.callgraph.RapidTypeAnalysisAlgorithm;
+import sootup.core.inputlocation.AnalysisInputLocation;
+import sootup.core.model.SootClass;
+import sootup.core.model.SootClassMember;
+import sootup.core.model.SourceType;
+import sootup.core.transform.BodyInterceptor;
+import sootup.java.bytecode.frontend.inputlocation.JavaClassPathAnalysisInputLocation;
+import sootup.java.core.JavaSootMethod;
+import sootup.java.core.views.JavaView;
 
 public class SootUpSetup extends FrameworkSetup {
 
-    public SootUpSetup(String applicationPath, ScannerSettings.CallGraphAlgorithm algorithm) {
-        super(applicationPath, algorithm);
+    private JavaView view;
+
+    public SootUpSetup(
+            String applicationPath,
+            ScannerSettings.CallGraphAlgorithm algorithm,
+            DataFlowScope dataFlowScope) {
+        super(applicationPath, algorithm, dataFlowScope);
     }
 
     @Override
     public void initializeFramework() {
-        throw new UnsupportedOperationException("Not implemented");
+        LOGGER.info("Setting up SootUp...");
+        Stopwatch watch = Stopwatch.createStarted();
+
+        List<BodyInterceptor> interceptors = List.of(new BoomerangPreInterceptor());
+        AnalysisInputLocation inputLocation =
+                new JavaClassPathAnalysisInputLocation(
+                        applicationPath, SourceType.Application, interceptors);
+
+        view = new JavaView(inputLocation);
+
+        watch.stop();
+        LOGGER.info("SootUp setup done in {}", watch);
     }
 
     @Override
     public FrameworkScope createFrameworkScope() {
-        throw new UnsupportedOperationException("Not implemented");
+        Collection<JavaSootMethod> entryPoints = new HashSet<>();
+        view.getClasses()
+                .filter(SootClass::isApplicationClass)
+                .forEach(
+                        c -> {
+                            for (JavaSootMethod method : c.getMethods()) {
+                                if (method.hasBody()) {
+                                    entryPoints.add(method);
+                                }
+                            }
+                        });
+
+        CallGraphAlgorithm algorithm = getCallGraphAlgorithm(view);
+        CallGraph callGraph =
+                algorithm.initialize(
+                        entryPoints.stream().map(SootClassMember::getSignature).toList());
+
+        return new SootUpFrameworkScope(view, callGraph, entryPoints, dataFlowScope);
+    }
+
+    private CallGraphAlgorithm getCallGraphAlgorithm(JavaView view) {
+        switch (callGraphAlgorithm) {
+            case CHA -> {
+                return new ClassHierarchyAnalysisAlgorithm(view);
+            }
+            case RTA -> {
+                return new RapidTypeAnalysisAlgorithm(view);
+            }
+            default ->
+                    throw new RuntimeException(
+                            "SootUp does not support call graph algorithm " + callGraphAlgorithm);
+        }
     }
 }

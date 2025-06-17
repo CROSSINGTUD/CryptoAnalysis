@@ -10,6 +10,7 @@
 package crypto.extractparameter;
 
 import boomerang.scope.Statement;
+import boomerang.scope.Type;
 import boomerang.scope.Val;
 import java.util.Collection;
 
@@ -18,4 +19,5 @@ public record ParameterWithExtractedValues(
         Val param,
         int index,
         String varName,
-        Collection<ExtractedValue> extractedValues) {}
+        Collection<ExtractedValue> extractedValues,
+        Collection<Type> typesAtStatement) {}

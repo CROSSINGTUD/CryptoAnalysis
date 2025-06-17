@@ -15,6 +15,8 @@ import boomerang.scope.CallGraph;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
+import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ExtractParameterQuery;
@@ -23,11 +25,15 @@ import crypto.listener.IResultsListener;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
 import java.util.Collection;
+import java.util.HashSet;
 import test.assertions.Assertion;
 import test.assertions.ConstraintsEvaluatedAssertion;
 import test.assertions.ConstraintsNotRelevantAssertion;
 import test.assertions.ConstraintsSatisfiedAssertion;
 import test.assertions.ConstraintsViolatedAssertion;
+import test.assertions.DiscoveredPredicateSeedAssertion;
+import test.assertions.DiscoveredRuleSeedAssertion;
+import test.assertions.DiscoveredSeedAssertion;
 import test.assertions.ExtractedValueAssertion;
 import test.assertions.HasEnsuredPredicateAssertion;
 import test.assertions.NotHasEnsuredPredicateAssertion;
@@ -36,11 +42,11 @@ import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
 import wpds.impl.NoWeight;
 
-public class UsagePatternResultsListener implements IResultsListener {
+public class TestRunnerResultsListener implements IResultsListener {
 
     private final Collection<Assertion> assertions;
 
-    public UsagePatternResultsListener(Collection<Assertion> assertions) {
+    public TestRunnerResultsListener(Collection<Assertion> assertions) {
         this.assertions = assertions;
     }
 
@@ -61,6 +67,49 @@ public class UsagePatternResultsListener implements IResultsListener {
 
                 Collection<State> states = seed.getStatesAtStatement(statement);
                 stateResult.computedStates(states);
+            }
+        }
+    }
+
+    @Override
+    public void discoveredSeeds(Collection<IAnalysisSeed> seeds) {
+        Collection<DiscoveredSeedAssertion> seedAssertions = new HashSet<>();
+        Collection<DiscoveredRuleSeedAssertion> ruleSeedAssertions = new HashSet<>();
+        Collection<DiscoveredPredicateSeedAssertion> predicateSeedAssertions = new HashSet<>();
+
+        for (Assertion a : assertions) {
+            if (a instanceof DiscoveredSeedAssertion assertion) {
+                seedAssertions.add(assertion);
+            }
+
+            if (a instanceof DiscoveredRuleSeedAssertion assertion) {
+                ruleSeedAssertions.add(assertion);
+            }
+
+            if (a instanceof DiscoveredPredicateSeedAssertion assertion) {
+                predicateSeedAssertions.add(assertion);
+            }
+        }
+
+        for (IAnalysisSeed seed : seeds) {
+            if (seed instanceof AnalysisSeedWithSpecification) {
+                for (DiscoveredSeedAssertion a : seedAssertions) {
+                    a.increaseCount();
+                }
+
+                for (DiscoveredRuleSeedAssertion a : ruleSeedAssertions) {
+                    a.increaseCount();
+                }
+            }
+
+            if (seed instanceof AnalysisSeedWithEnsuredPredicate) {
+                for (DiscoveredSeedAssertion a : seedAssertions) {
+                    a.increaseCount();
+                }
+
+                for (DiscoveredPredicateSeedAssertion a : predicateSeedAssertions) {
+                    a.increaseCount();
+                }
             }
         }
     }

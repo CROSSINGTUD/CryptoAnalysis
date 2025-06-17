@@ -9,20 +9,19 @@
  ********************************************************************************/
 package tests.error.predicate.requiredpredicate;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class RequiredPredicatesTest extends UsagePatternTestingFramework {
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.REQUIRED_PREDICATES)
+public class RequiredPredicatesTest {
 
     private static final String ENSURED_PREDICATE = "requiredPredicateWasEnsured";
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "requiredPredicates";
-    }
 
     //
     // OBJECTS OF SAME CLASS AS PARAMS
@@ -488,7 +487,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
     }
 
     // multi predicates
-    @Ignore(
+    @Disabled(
             "Cannot be tested since negated conditions in the REQUIRES section are not supported"
                     + "Alternative predicates on different objects o1 and o2 (p1[o1] || p2[o2]) have to be rewritten as"
                     + "!p1[o1] => p2[o2]; and !p2[o2] => p1[o1];")
@@ -1012,7 +1011,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
     // IMPLICATE
 
     // same predicate
-    @Ignore
+    @Disabled
     @Test
     public void pred1onPos1_IMPL_pred1onPos2() {
         A pred1onA = new A();
@@ -1043,7 +1042,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void pred1onPos1_IMPL_notPred1onPos2() {
         A pred1onA = new A();
@@ -1074,7 +1073,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void notPred1onPos1_IMPL_pred1onPos2() {
         A pred1onA = new A();
@@ -1105,7 +1104,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void notPred1onPos1_IMPL_notPred1onPos2() {
         A pred1onA = new A();
@@ -1137,7 +1136,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
     }
 
     // multi predicates
-    @Ignore
+    @Disabled
     @Test
     public void pred1onPos1_IMPL_pred2onPos2() {
         A pred1onA = new A();
@@ -1172,7 +1171,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void pred1onP1_IMPL_notPred2onP2() {
         A pred1onA = new A();
@@ -1207,7 +1206,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void notPred1onP1_IMPL_pred2onP2() {
         A pred1onA = new A();
@@ -1242,7 +1241,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void notPred1onP1_IMPL_notPred2onP2() {
         A pred1onA = new A();
@@ -1279,7 +1278,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
 
     // OR WITH IMPLICATION
     // same predicate
-    @Ignore
+    @Disabled
     @Test
     public void pred1onPos1_OR_pred2onPos1_IMPL_pred1onPos2() {
         A pred1onA = new A();
@@ -1314,7 +1313,7 @@ public class RequiredPredicatesTest extends UsagePatternTestingFramework {
         Assertions.predicateErrors(1); // only the missing will be reported
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void pred2onPos1_IMPL_pred1onPos2_OR_pred2onPos2() {
         A pred1onA = new A();

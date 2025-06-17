@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Running the tests requires an Android platform. Since they are licensed and quite large, they
@@ -124,7 +124,7 @@ public abstract class AbstractAndroidTest {
         }
 
         if (!report.isEmpty()) {
-            Assert.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
+            Assertions.fail("Tests not executed as planned:\n\t" + String.join("\n\t", report));
         }
     }
 

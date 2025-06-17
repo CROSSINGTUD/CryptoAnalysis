@@ -98,7 +98,9 @@ public class FlowDroidSetup {
         return new SootConfigForAndroid() {
             @Override
             public void setSootOptions(Options options, InfoflowConfiguration config) {
+                options.setPhaseOption("jb", "use-original-names:true");
                 options.setPhaseOption("jb.sils", "enabled:false");
+                options.setPhaseOption("jb.dae", "enabled:false");
 
                 options.set_include(new ArrayList<>());
                 options.set_exclude(List.of("android.*", "androidx.*"));

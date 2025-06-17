@@ -48,6 +48,12 @@ public class AnalysisReporter {
         resultsListeners = new HashSet<>();
     }
 
+    public void clear() {
+        analysisListeners.clear();
+        errorListeners.clear();
+        resultsListeners.clear();
+    }
+
     public void addAnalysisListener(IAnalysisListener analysisListener) {
         analysisListeners.add(analysisListener);
     }
@@ -122,6 +128,10 @@ public class AnalysisReporter {
     public void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onDiscoveredSeeds(discoveredSeeds);
+        }
+
+        for (IResultsListener resultsListener : resultsListeners) {
+            resultsListener.discoveredSeeds(discoveredSeeds);
         }
     }
 
