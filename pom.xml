@@ -61,7 +61,7 @@
         <soot.version>4.6.0</soot.version>
         <sootup.version>2.0.0</sootup.version>
         <opal.version>5.0.0</opal.version>
-        <crysl.version>4.0.2</crysl.version>
+        <crysl.version>4.0.3</crysl.version>
         <junit.version>5.13.1</junit.version>
     </properties>
 
