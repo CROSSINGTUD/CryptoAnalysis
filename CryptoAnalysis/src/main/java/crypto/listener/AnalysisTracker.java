@@ -9,13 +9,13 @@
  ********************************************************************************/
 package crypto.listener;
 
+import boomerang.BackwardQuery;
 import boomerang.scope.CallGraph;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import com.google.common.base.Stopwatch;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.ExtractParameterQuery;
 import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +118,7 @@ public class AnalysisTracker implements IAnalysisListener {
     }
 
     @Override
-    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void beforeTriggeringBoomerangQuery(BackwardQuery query) {
         LOGGER.debug(
                 "Triggering Boomerang query for value {} @ {}",
                 query.var(),
@@ -126,7 +126,7 @@ public class AnalysisTracker implements IAnalysisListener {
     }
 
     @Override
-    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void afterTriggeringBoomerangQuery(BackwardQuery query) {
         LOGGER.debug(
                 "Finished Boomerang query for value {} @ {}",
                 query.var(),

@@ -19,8 +19,8 @@ import crypto.analysis.errors.ImpreciseValueExtractionError;
 import crypto.constraints.violations.IViolatedConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
@@ -62,32 +62,30 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
-            Collection<ExtractedValue> violatingValues = new HashSet<>();
+            Collection<TransformedValue> violatingValues = new HashSet<>();
 
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+            for (TransformedValue value : parameter.extractedValues()) {
+                Val val = value.getTransformedVal();
                 // Boomerang returns the array values and the array allocation site. We are only
-                // interested
-                // in the array values
-                if (extractedValue.val().isArrayAllocationVal()) {
+                // interested in the array values
+                if (val.isArrayAllocationVal()) {
                     continue;
                 }
 
                 // TODO Extract call sites that are not part of the dataflow scope
-                if (extractedValue.val().equals(ValCollection.zero())
-                        || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
+                if (val.equals(ValCollection.zero()) || (!val.isConstant() && !val.isNull())) {
                     ImpreciseValueExtractionError error =
                             new ImpreciseValueExtractionError(
                                     seed, parameter.statement(), seed.getSpecification(), this);
                     errors.add(error);
                 } else {
                     // TODO Make this case sensitive?
-                    String valAsString =
-                            convertConstantToString(extractedValue.val()).toLowerCase();
+                    String valAsString = convertConstantToString(val).toLowerCase();
                     valAsString =
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
                     if (!allowedValues.contains(valAsString)) {
-                        violatingValues.add(extractedValue);
+                        violatingValues.add(value);
                     }
                 }
             }

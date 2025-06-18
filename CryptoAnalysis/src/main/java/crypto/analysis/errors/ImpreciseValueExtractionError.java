@@ -13,8 +13,8 @@ import boomerang.scope.Statement;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
@@ -36,7 +36,7 @@ public class ImpreciseValueExtractionError extends AbstractConstraintsError {
             Statement statement,
             CrySLRule rule,
             ParameterWithExtractedValues parameter,
-            ExtractedValue value,
+            TransformedValue value,
             EvaluableConstraint constraint) {
         super(seed, statement, rule);
 

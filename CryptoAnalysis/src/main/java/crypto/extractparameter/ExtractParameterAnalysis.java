@@ -9,7 +9,6 @@
  ********************************************************************************/
 package crypto.extractparameter;
 
-import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
@@ -36,10 +35,10 @@ public class ExtractParameterAnalysis {
 
     public Collection<ParameterWithExtractedValues> extractParameters(
             Collection<Statement> statements, CrySLRule rule) {
-        Collection<ExtractParameterQuery> queries = computeQueries(statements, rule);
+        Collection<ExtractParameterInfo> queries = computeQueries(statements, rule);
 
         Collection<ParameterWithExtractedValues> result = new HashSet<>();
-        for (ExtractParameterQuery query : queries) {
+        for (ExtractParameterInfo query : queries) {
             ParameterWithExtractedValues extractedValues = solveQuery(query);
 
             result.add(extractedValues);
@@ -48,9 +47,9 @@ public class ExtractParameterAnalysis {
         return result;
     }
 
-    public Collection<ExtractParameterQuery> computeQueries(
+    public Collection<ExtractParameterInfo> computeQueries(
             Collection<Statement> statements, CrySLRule rule) {
-        Collection<ExtractParameterQuery> result = new HashSet<>();
+        Collection<ExtractParameterInfo> result = new HashSet<>();
 
         for (Statement statement : statements) {
             if (!statement.containsInvokeExpr()) {
@@ -63,7 +62,7 @@ public class ExtractParameterAnalysis {
                             rule.getEvents(), declaredMethod);
 
             for (CrySLMethod method : methods) {
-                Collection<ExtractParameterQuery> queries = getQueriesAtCallSite(statement, method);
+                Collection<ExtractParameterInfo> queries = getQueriesAtCallSite(statement, method);
 
                 result.addAll(queries);
             }
@@ -72,40 +71,22 @@ public class ExtractParameterAnalysis {
         return result;
     }
 
-    private Collection<ExtractParameterQuery> getQueriesAtCallSite(
+    private Collection<ExtractParameterInfo> getQueriesAtCallSite(
             Statement statement, CrySLMethod method) {
-        Collection<ExtractParameterQuery> result = new HashSet<>();
+        Collection<ExtractParameterInfo> result = new HashSet<>();
 
         for (int i = 0; i < method.getParameters().size(); i++) {
             String parameter = method.getParameters().get(i).getKey();
 
-            Collection<ExtractParameterQuery> queries =
-                    getQueriesForParameter(statement, i, parameter);
-            result.addAll(queries);
+            Val param = statement.getInvokeExpr().getArg(i);
+            ExtractParameterInfo info = new ExtractParameterInfo(statement, param, i, parameter);
+            result.add(info);
         }
 
         return result;
     }
 
-    private Collection<ExtractParameterQuery> getQueriesForParameter(
-            Statement statement, int index, String parameter) {
-        Collection<ExtractParameterQuery> result = new HashSet<>();
-
-        Val param = statement.getInvokeExpr().getArg(index);
-
-        Collection<Statement> predecessors =
-                statement.getMethod().getControlFlowGraph().getPredsOf(statement);
-        for (Statement pred : predecessors) {
-            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
-
-            ExtractParameterQuery query = new ExtractParameterQuery(edge, param, index, parameter);
-            result.add(query);
-        }
-
-        return result;
-    }
-
-    public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
+    public ParameterWithExtractedValues solveQuery(ExtractParameterInfo query) {
         return querySolver.solveQuery(query);
     }
 }

@@ -10,7 +10,7 @@
 package crypto.constraints.violations;
 
 import crypto.constraints.ValueConstraint;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLValueConstraint;
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.Collection;
  * @param constraint the violated constraint
  */
 public record ViolatedValueConstraint(
-        CrySLValueConstraint constraint, Collection<ExtractedValue> violatingValues, int index)
+        CrySLValueConstraint constraint, Collection<TransformedValue> violatingValues, int index)
         implements IViolatedConstraint {
 
     @Override
@@ -36,13 +36,13 @@ public record ViolatedValueConstraint(
                     String.join(
                             ", ",
                             violatingValues.stream()
-                                    .map(value -> value.val().getVariableName())
+                                    .map(value -> value.getTransformedVal().getVariableName())
                                     .toList());
             builder.append(values);
         } else {
             builder.append(" (with value ");
 
-            String value = violatingValues.iterator().next().val().getVariableName();
+            String value = violatingValues.iterator().next().getTransformedVal().getVariableName();
             builder.append(value);
         }
 

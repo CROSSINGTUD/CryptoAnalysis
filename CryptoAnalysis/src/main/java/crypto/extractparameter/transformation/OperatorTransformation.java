@@ -9,83 +9,91 @@
  ********************************************************************************/
 package crypto.extractparameter.transformation;
 
-import boomerang.options.BoomerangOptions;
 import boomerang.scope.AllocVal;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Statement;
-import boomerang.scope.Type;
 import boomerang.scope.Val;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import crypto.extractparameter.scope.IntType;
+import crypto.extractparameter.AllocationSiteGraph;
+import crypto.extractparameter.TransformedValue;
 import crypto.extractparameter.scope.IntVal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
-/**
- * Class for transformations that do not belong to invoke expressions. This class expects an assign
- * statement where the right operation is a value that can be transformed.
- */
-public class OperatorTransformation extends Transformation {
-
-    protected OperatorTransformation(FrameworkScope frameworkScope, BoomerangOptions options) {
-        super(frameworkScope, options);
-    }
-
-    public static boolean isOperatorTransformation(Val val) {
-        if (val.isLengthExpr()) {
-            return true;
-        }
-
-        return false;
-    }
+public class OperatorTransformation implements ITransformation {
 
     @Override
-    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
-        return HashMultimap.create();
-    }
+    public Collection<Val> computeRequiredValues(Statement statement) {
+        if (statement.isAssignStmt()) {
+            Val rightOp = statement.getRightOp();
 
-    protected Multimap<Val, Type> evaluateOperator(Statement statement, Val val) {
-        if (val.isLengthExpr()) {
-            return evaluateLengthOperator(statement, val);
-        }
+            if (rightOp.isLengthExpr()) {
+                Val lengthOp = rightOp.getLengthOp();
 
-        return HashMultimap.create();
-    }
-
-    /**
-     * Evaluates and transforms assign statements where the right side is a length expression for
-     * arrays, e.g. for
-     *
-     * <pre>{@code
-     * String[] arr = new String[] {"H", "i"};
-     * int length = arr.length;
-     * }</pre>
-     *
-     * the transformation extracts the value 2.
-     *
-     * @param statement the assign statement
-     * @param lengthExpr the length expression
-     * @return all possible length values with the type 'int'
-     */
-    private Multimap<Val, Type> evaluateLengthOperator(Statement statement, Val lengthExpr) {
-        Val lengthOp = lengthExpr.getLengthOp();
-
-        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, lengthOp);
-        Multimap<Val, Type> extractedSites = extractAllocValues(allocSites);
-
-        Multimap<Val, Type> result = HashMultimap.create();
-        for (Val extractedSite : extractedSites.keySet()) {
-            if (extractedSite.isArrayAllocationVal()) {
-                Val arrLength = extractedSite.getArrayAllocationSize();
-
-                result.put(arrLength, new IntType());
-            } else if (extractedSite.isStringConstant()) {
-                int stringLength = extractedSite.getStringValue().length();
-                IntVal intVal = new IntVal(stringLength, statement.getMethod());
-
-                result.put(intVal, intVal.getType());
+                return Collections.singleton(lengthOp);
             }
         }
 
-        return result;
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Collection<TransformedValue> transformAllocationSite(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        if (statement.isAssignStmt()) {
+            Val rightOp = statement.getRightOp();
+
+            if (rightOp.isLengthExpr()) {
+                return evaluateLengthExpr(allocVal, rightOp, graph, transformation);
+            }
+        }
+
+        return Collections.emptySet();
+    }
+
+    private Collection<TransformedValue> evaluateLengthExpr(
+            AllocVal allocVal,
+            Val lengthExpr,
+            AllocationSiteGraph graph,
+            TransformationHandler transformation) {
+        Val lengthOp = lengthExpr.getLengthOp();
+        Collection<AllocVal> allocSites = graph.getAllocSites(lengthOp);
+
+        Collection<TransformedValue> extractedValues = new HashSet<>();
+        for (AllocVal allocSite : allocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(allocSite, graph);
+            extractedValues.addAll(values);
+        }
+
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue value : extractedValues) {
+            Val val = value.getTransformedVal();
+
+            if (val.isArrayAllocationVal()) {
+                Val arrLength = val.getArrayAllocationSize();
+
+                TransformedValue transVal =
+                        new TransformedValue(arrLength, allocVal.getAllocStatement(), value);
+                transformedValues.add(transVal);
+            } else if (val.isStringConstant()) {
+                int stringLength = val.getStringValue().length();
+                IntVal intVal = new IntVal(stringLength, allocVal.getAllocStatement().getMethod());
+
+                TransformedValue transVal =
+                        new TransformedValue(intVal, allocVal.getAllocStatement(), value);
+                transformedValues.add(transVal);
+            } else {
+                TransformedValue transVal =
+                        new TransformedValue(
+                                allocVal.getAllocVal(),
+                                allocVal.getAllocStatement(),
+                                Collections.emptySet(),
+                                Collections.singleton(value));
+                transformedValues.add(transVal);
+            }
+        }
+
+        return transformedValues;
     }
 }

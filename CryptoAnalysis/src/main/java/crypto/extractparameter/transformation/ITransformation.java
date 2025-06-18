@@ -7,15 +7,19 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package crypto.extractparameter;
+package crypto.extractparameter.transformation;
 
+import boomerang.scope.AllocVal;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import crypto.extractparameter.AllocationSiteGraph;
+import crypto.extractparameter.TransformedValue;
 import java.util.Collection;
 
-public record ParameterWithExtractedValues(
-        Statement statement,
-        Val param,
-        int index,
-        String varName,
-        Collection<TransformedValue> extractedValues) {}
+public interface ITransformation {
+
+    Collection<Val> computeRequiredValues(Statement statement);
+
+    Collection<TransformedValue> transformAllocationSite(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation);
+}

@@ -34,7 +34,7 @@ public class ExtractedValueAssertion implements Assertion {
 
             // TODO Maybe distinguish between "MayExtracted" and "MustExtracted"
             if (parameter.extractedValues().stream()
-                    .anyMatch(v -> v.val().equals(ValCollection.zero()))) {
+                    .anyMatch(v -> v.getTransformedVal().equals(ValCollection.zero()))) {
                 continue;
             }
 

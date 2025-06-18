@@ -9,18 +9,18 @@
  ********************************************************************************/
 package crypto.constraints.violations;
 
-import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
 
 /**
  * Represents a violation of the predefined predicate 'notHardCoded[$variable]'
  *
  * @param parameter the parameter with its extracted values
- * @param extractedValue the concrete hard coded value
+ * @param value the concrete hard coded value
  */
 public record ViolatedNotHardCodedConstraint(
-        ParameterWithExtractedValues parameter, ExtractedValue extractedValue)
+        ParameterWithExtractedValues parameter, TransformedValue value)
         implements IViolatedConstraint {
 
     @Override

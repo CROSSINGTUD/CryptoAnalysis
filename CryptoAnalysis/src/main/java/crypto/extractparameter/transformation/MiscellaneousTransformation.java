@@ -9,67 +9,97 @@
  ********************************************************************************/
 package crypto.extractparameter.transformation;
 
-import boomerang.options.BoomerangOptions;
 import boomerang.scope.AllocVal;
-import boomerang.scope.FrameworkScope;
+import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
-import boomerang.scope.Type;
 import boomerang.scope.Val;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import boomerang.utils.MethodWrapper;
+import crypto.extractparameter.AllocationSiteGraph;
+import crypto.extractparameter.TransformedValue;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Class for transformations that do not belong to a specific type of transformation. */
-public class MiscellaneousTransformation extends Transformation {
+public class MiscellaneousTransformation implements ITransformation {
 
-    private static final Signature HEX_DECODE =
-            new Signature(
+    private final MethodWrapper HEX_DECODE =
+            new MethodWrapper(
                     "org.bouncycastle.util.encoders.Hex",
                     "byte[]",
                     "decode",
                     List.of("java.lang.String"));
 
-    private static final Collection<Signature> MISCELLANEOUS_SIGNATURES = Set.of(HEX_DECODE);
+    @Override
+    public Collection<Val> computeRequiredValues(Statement statement) {
+        if (!statement.containsInvokeExpr()) {
+            return Collections.emptySet();
+        }
 
-    protected static boolean isMiscellaneousTransformation(Signature signature) {
-        return MISCELLANEOUS_SIGNATURES.contains(signature);
-    }
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
+        DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
+        MethodWrapper calledMethod = declaredMethod.toMethodWrapper();
 
-    protected MiscellaneousTransformation(FrameworkScope frameworkScope, BoomerangOptions options) {
-        super(frameworkScope, options);
+        if (calledMethod.equals(HEX_DECODE)) {
+            Val arg = invokeExpr.getArg(0);
+
+            return Set.of(arg);
+        }
+
+        return Collections.emptySet();
     }
 
     @Override
-    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
-        if (signature.equals(HEX_DECODE)) {
-            return evaluateHexDecode(statement);
+    public Collection<TransformedValue> transformAllocationSite(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        if (!statement.containsInvokeExpr()) {
+            return Collections.emptySet();
         }
 
-        return HashMultimap.create();
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
+        MethodWrapper methodWrapper = invokeExpr.getDeclaredMethod().toMethodWrapper();
+
+        if (methodWrapper.equals(HEX_DECODE)) {
+            return evaluateHexDecode(allocVal, graph, transformation);
+        }
+
+        return Collections.emptySet();
     }
 
-    private Multimap<Val, Type> evaluateHexDecode(Statement statement) {
-        InvokeExpr invokeExpr = statement.getInvokeExpr();
-        Val param = invokeExpr.getArg(0);
+    private Collection<TransformedValue> evaluateHexDecode(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        Val arg = statement.getInvokeExpr().getArg(0);
+        Collection<AllocVal> allocSites = graph.getAllocSites(arg);
 
-        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, param);
-        Multimap<Val, Type> extractedParams = extractAllocValues(allocSites);
-
-        Multimap<Val, Type> result = HashMultimap.create();
-        for (Val extractedParam : extractedParams.keySet()) {
-            if (!extractedParam.isStringConstant()) {
-                continue;
-            }
-
-            Collection<Type> types = extractedParams.get(extractedParam);
-            types.add(extractedParam.getType());
-
-            result.putAll(extractedParam, types);
+        Collection<TransformedValue> extractedValues = new HashSet<>();
+        for (AllocVal allocSite : allocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(allocSite, graph);
+            extractedValues.addAll(values);
         }
 
-        return result;
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue value : extractedValues) {
+            Val val = value.getTransformedVal();
+
+            if (val.isStringConstant()) {
+                TransformedValue transVal = new TransformedValue(val, statement, value);
+                transformedValues.add(transVal);
+            } else {
+                TransformedValue transVal =
+                        new TransformedValue(
+                                allocVal.getAllocVal(),
+                                statement,
+                                Collections.emptySet(),
+                                Collections.singleton(value));
+                transformedValues.add(transVal);
+            }
+        }
+
+        return transformedValues;
     }
 }

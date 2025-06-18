@@ -9,181 +9,320 @@
  ********************************************************************************/
 package crypto.extractparameter.transformation;
 
-import boomerang.options.BoomerangOptions;
 import boomerang.scope.AllocVal;
-import boomerang.scope.FrameworkScope;
+import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
-import boomerang.scope.Type;
 import boomerang.scope.Val;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import boomerang.utils.MethodWrapper;
+import crypto.extractparameter.AllocationSiteGraph;
+import crypto.extractparameter.TransformedValue;
 import crypto.extractparameter.scope.StringVal;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Class for all transformations from the class {@link java.lang.String}. */
-public class StringTransformation extends Transformation {
+public class StringTransformation implements ITransformation {
 
-    private static final Signature TO_CHAR_ARRAY =
-            new Signature("java.lang.String", "char[]", "toCharArray");
-    private static final Signature GET_BYTES =
-            new Signature("java.lang.String", "byte[]", "getBytes");
-    private static final Signature GET_BYTES_WITH_PARAM =
-            new Signature("java.lang.String", "byte[]", "getBytes", List.of("java.lang.String"));
-    private static final Signature TO_UPPER_CASE =
-            new Signature("java.lang.String", "java.lang.String", "toUpperCase");
-    private static final Signature TO_UPPER_CASE_WITH_PARAM =
-            new Signature(
-                    "java.lang.String",
+    private final MethodWrapper TO_CHAR_ARRAY =
+            new MethodWrapper("java.lang.String", "toCharArray", "char[]");
+    private final MethodWrapper GET_BYTES =
+            new MethodWrapper("java.lang.String", "getBytes", "byte[]");
+    private final MethodWrapper GET_BYTES_WITH_PARAM =
+            new MethodWrapper(
+                    "java.lang.String", "getBytes", "byte[]", List.of("java.lang.String"));
+
+    private final MethodWrapper TO_UPPER_CASE =
+            new MethodWrapper("java.lang.String", "toUpperCase", "java.lang.String");
+    private final MethodWrapper TO_UPPER_CASE_WITH_PARAM =
+            new MethodWrapper(
                     "java.lang.String",
                     "toUpperCase",
-                    List.of("java.util.Locale"));
-    private static final Signature TO_LOWER_CASE =
-            new Signature("java.lang.String", "java.lang.String", "toLowerCase");
-    private static final Signature TO_LOWER_CASE_WITH_PARAM =
-            new Signature(
                     "java.lang.String",
+                    List.of("java.util.Locale"));
+
+    private final MethodWrapper TO_LOWER_CASE =
+            new MethodWrapper("java.lang.String", "toLowerCase", "java.lang.String");
+    private final MethodWrapper TO_LOWER_CASE_WITH_PARAM =
+            new MethodWrapper(
                     "java.lang.String",
                     "toLowerCase",
-                    List.of("java.util.Locale"));
-    private static final Signature REPLACE =
-            new Signature(
                     "java.lang.String",
+                    List.of("java.util.Locale"));
+
+    private final MethodWrapper REPLACE =
+            new MethodWrapper(
                     "java.lang.String",
                     "replace",
+                    "java.lang.String",
                     List.of("java.lang.CharSequence", "java.lang.CharSequence"));
 
-    /** Signatures for methods where the base is the corresponding transformed value */
-    private static final Collection<Signature> STRING_BASE =
-            Set.of(
-                    TO_CHAR_ARRAY,
-                    GET_BYTES,
-                    GET_BYTES_WITH_PARAM,
-                    TO_UPPER_CASE,
-                    TO_UPPER_CASE_WITH_PARAM,
-                    TO_LOWER_CASE,
-                    TO_LOWER_CASE_WITH_PARAM);
+    @Override
+    public Collection<Val> computeRequiredValues(Statement statement) {
+        if (!statement.containsInvokeExpr()) {
+            return Collections.emptySet();
+        }
 
-    private static final Collection<Signature> STRING_SIGNATURES =
-            Set.of(
-                    TO_CHAR_ARRAY,
-                    GET_BYTES,
-                    GET_BYTES_WITH_PARAM,
-                    TO_UPPER_CASE,
-                    TO_UPPER_CASE_WITH_PARAM,
-                    TO_LOWER_CASE,
-                    TO_LOWER_CASE_WITH_PARAM,
-                    REPLACE);
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
+        DeclaredMethod declaredMethod = invokeExpr.getDeclaredMethod();
+        MethodWrapper calledMethod = declaredMethod.toMethodWrapper();
 
-    protected static boolean isStringTransformation(Signature signature) {
-        return STRING_SIGNATURES.contains(signature);
-    }
+        if (Set.of(TO_CHAR_ARRAY, GET_BYTES, GET_BYTES_WITH_PARAM).contains(calledMethod)) {
+            Val base = invokeExpr.getBase();
 
-    protected StringTransformation(FrameworkScope frameworkScope, BoomerangOptions options) {
-        super(frameworkScope, options);
+            return Set.of(base);
+        }
+
+        if (Set.of(TO_UPPER_CASE, TO_UPPER_CASE_WITH_PARAM, TO_LOWER_CASE, TO_LOWER_CASE_WITH_PARAM)
+                .contains(calledMethod)) {
+            Val base = invokeExpr.getBase();
+
+            return Set.of(base);
+        }
+
+        if (calledMethod.equals(REPLACE)) {
+            Val base = invokeExpr.getBase();
+            Val arg1 = invokeExpr.getArg(0);
+            Val arg2 = invokeExpr.getArg(1);
+
+            return Set.of(base, arg1, arg2);
+        }
+
+        return Collections.emptySet();
     }
 
     @Override
-    protected Multimap<Val, Type> evaluateExpression(Statement statement, Signature signature) {
-        if (STRING_BASE.contains(signature)) {
-            return evaluateStringAsBase(statement);
+    public Collection<TransformedValue> transformAllocationSite(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        if (!statement.containsInvokeExpr()) {
+            return Collections.emptySet();
         }
 
-        if (signature.equals(REPLACE)) {
-            return evaluateReplaceCharSequence(statement);
+        InvokeExpr invokeExpr = statement.getInvokeExpr();
+        MethodWrapper methodWrapper = invokeExpr.getDeclaredMethod().toMethodWrapper();
+
+        if (Set.of(TO_CHAR_ARRAY, GET_BYTES, GET_BYTES_WITH_PARAM).contains(methodWrapper)) {
+            return evaluateStringBase(allocVal, graph, transformation);
         }
 
-        return HashMultimap.create();
+        if (Set.of(TO_UPPER_CASE, TO_UPPER_CASE_WITH_PARAM).contains(methodWrapper)) {
+            return evaluateToUpperCase(allocVal, graph, transformation);
+        }
+
+        if (Set.of(TO_LOWER_CASE, TO_LOWER_CASE_WITH_PARAM).contains(methodWrapper)) {
+            return evaluateToLowerCase(allocVal, graph, transformation);
+        }
+
+        if (methodWrapper.equals(REPLACE)) {
+            return evaluateReplace(allocVal, graph, transformation);
+        }
+
+        return Collections.emptySet();
     }
 
-    /**
-     * Evaluate and transform all String expressions where only the base is relevant, e.g. in
-     *
-     * <pre>{@code
-     * String s = "test";
-     * char[] c = s.toCharArray();
-     * }</pre>
-     *
-     * the call to 's.toCharArray()' requires only the value of the base 's'.
-     *
-     * @param statement the statement with a corresponding invoked expression
-     * @return all possible values for the base and their propagated types
-     */
-    private Multimap<Val, Type> evaluateStringAsBase(Statement statement) {
-        InvokeExpr invokeExpr = statement.getInvokeExpr();
-        Val base = invokeExpr.getBase();
+    private Collection<TransformedValue> evaluateStringBase(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        Val base = statement.getInvokeExpr().getBase();
+        Collection<AllocVal> allocSites = graph.getAllocSites(base);
 
-        Multimap<AllocVal, Type> allocSites = computeAllocSites(statement, base);
+        Collection<TransformedValue> extractedValues = new HashSet<>();
+        for (AllocVal allocSite : allocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(allocSite, graph);
+            extractedValues.addAll(values);
+        }
 
-        Multimap<Val, Type> result = HashMultimap.create();
-        for (AllocVal allocSite : allocSites.keySet()) {
-            Multimap<Val, Type> transformedAllocSites =
-                    Transformation.transformAllocationSite(allocSite, frameworkScope, options);
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue value : extractedValues) {
+            Val val = value.getTransformedVal();
 
-            for (Val transformedVal : transformedAllocSites.keySet()) {
-                if (!transformedVal.isStringConstant()) {
-                    continue;
-                }
-
-                Collection<Type> types = transformedAllocSites.get(transformedVal);
-                types.add(transformedVal.getType());
-
-                result.putAll(transformedVal, types);
+            if (val.isStringConstant()) {
+                TransformedValue transVal = new TransformedValue(val, statement, value);
+                transformedValues.add(transVal);
+            } else {
+                TransformedValue transVal =
+                        new TransformedValue(
+                                allocVal.getAllocVal(),
+                                statement,
+                                Collections.emptySet(),
+                                Collections.singleton(value));
+                transformedValues.add(transVal);
             }
         }
 
-        return result;
+        return transformedValues;
     }
 
-    /**
-     * Evaluates and transforms the expression s.replace(a, b). This includes all possible
-     * combinations that can be extracted for s, a and b.
-     *
-     * @param statement the statement with the replace expression
-     * @return all possible results and their types
-     */
-    private Multimap<Val, Type> evaluateReplaceCharSequence(Statement statement) {
+    private Collection<TransformedValue> evaluateToUpperCase(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        Val base = statement.getInvokeExpr().getBase();
+        Collection<AllocVal> allocSites = graph.getAllocSites(base);
+
+        Collection<TransformedValue> extractedValues = new HashSet<>();
+        for (AllocVal allocSite : allocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(allocSite, graph);
+            extractedValues.addAll(values);
+        }
+
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue value : extractedValues) {
+            Val val = value.getTransformedVal();
+
+            if (val.isStringConstant()) {
+                String baseString = val.getStringValue();
+                String transformedString = baseString.toUpperCase();
+
+                StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+                TransformedValue transVal = new TransformedValue(stringVal, statement, value);
+
+                transformedValues.add(transVal);
+            } else {
+                TransformedValue transVal =
+                        new TransformedValue(
+                                allocVal.getAllocVal(),
+                                statement,
+                                Collections.emptySet(),
+                                Collections.singleton(value));
+                transformedValues.add(transVal);
+            }
+        }
+
+        return transformedValues;
+    }
+
+    private Collection<TransformedValue> evaluateToLowerCase(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
+        Val base = statement.getInvokeExpr().getBase();
+        Collection<AllocVal> allocSites = graph.getAllocSites(base);
+
+        Collection<TransformedValue> extractedValues = new HashSet<>();
+        for (AllocVal allocSite : allocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(allocSite, graph);
+            extractedValues.addAll(values);
+        }
+
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue value : extractedValues) {
+            Val val = value.getTransformedVal();
+
+            if (val.isStringConstant()) {
+                String baseString = val.getStringValue();
+                String transformedString = baseString.toLowerCase();
+
+                StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+                TransformedValue transVal = new TransformedValue(stringVal, statement, value);
+
+                transformedValues.add(transVal);
+            } else {
+                TransformedValue transVal =
+                        new TransformedValue(
+                                allocVal.getAllocVal(),
+                                statement,
+                                Collections.emptySet(),
+                                Collections.singleton(value));
+                transformedValues.add(transVal);
+            }
+        }
+
+        return transformedValues;
+    }
+
+    private Collection<TransformedValue> evaluateReplace(
+            AllocVal allocVal, AllocationSiteGraph graph, TransformationHandler transformation) {
+        Statement statement = allocVal.getAllocStatement();
         InvokeExpr invokeExpr = statement.getInvokeExpr();
 
         Val base = invokeExpr.getBase();
-        Val param1 = invokeExpr.getArg(0);
-        Val param2 = invokeExpr.getArg(1);
+        Val arg1 = invokeExpr.getArg(0);
+        Val arg2 = invokeExpr.getArg(1);
 
-        Multimap<AllocVal, Type> allocBases = computeAllocSites(statement, base);
-        Multimap<AllocVal, Type> allocParams1 = computeAllocSites(statement, param1);
-        Multimap<AllocVal, Type> allocParams2 = computeAllocSites(statement, param2);
+        Collection<AllocVal> baseAllocSites = graph.getAllocSites(base);
+        Collection<AllocVal> arg1AllocSites = graph.getAllocSites(arg1);
+        Collection<AllocVal> arg2AllocSites = graph.getAllocSites(arg2);
 
-        Multimap<Val, Type> extractedBases = extractAllocValues(allocBases);
-        Multimap<Val, Type> extractedParams1 = extractAllocValues(allocParams1);
-        Multimap<Val, Type> extractedParams2 = extractAllocValues(allocParams2);
+        Collection<TransformedValue> extractedBaseValues = new HashSet<>();
+        for (AllocVal baseAllocSite : baseAllocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(baseAllocSite, graph);
+            extractedBaseValues.addAll(values);
+        }
 
-        Multimap<Val, Type> result = HashMultimap.create();
-        for (Val extractedBase : extractedBases.keySet()) {
-            for (Val extractedParam1 : extractedParams1.keySet()) {
-                for (Val extractedParam2 : extractedParams2.keySet()) {
-                    if (!extractedBase.isStringConstant()
-                            || !extractedParam1.isStringConstant()
-                            || !extractedParam2.isStringConstant()) {
-                        continue;
+        Collection<TransformedValue> extractedArg1AllocSites = new HashSet<>();
+        for (AllocVal arg1AllocSite : arg1AllocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(arg1AllocSite, graph);
+            extractedArg1AllocSites.addAll(values);
+        }
+
+        Collection<TransformedValue> extractedArg2AllocSites = new HashSet<>();
+        for (AllocVal arg2AllocSite : arg2AllocSites) {
+            Collection<TransformedValue> values =
+                    transformation.transformAllocationSite(arg2AllocSite, graph);
+            extractedArg2AllocSites.addAll(values);
+        }
+
+        Collection<TransformedValue> transformedValues = new HashSet<>();
+        for (TransformedValue extractedBase : extractedBaseValues) {
+            for (TransformedValue extractedArg1 : extractedArg1AllocSites) {
+                for (TransformedValue extractedArg2 : extractedArg2AllocSites) {
+
+                    Collection<TransformedValue> knownValues = new HashSet<>();
+                    Collection<TransformedValue> unknownValues = new HashSet<>();
+
+                    if (extractedBase.getTransformedVal().isStringConstant()) {
+                        knownValues.add(extractedBase);
+                    } else {
+                        unknownValues.add(extractedBase);
                     }
 
-                    String stringBase = extractedBase.getStringValue();
-                    String stringParam1 = extractedParam1.getStringValue();
-                    String stringParam2 = extractedParam2.getStringValue();
+                    if (extractedArg1.getTransformedVal().isStringConstant()) {
+                        knownValues.add(extractedArg1);
+                    } else {
+                        unknownValues.add(extractedArg1);
+                    }
 
-                    String transformedString = stringBase.replace(stringParam1, stringParam2);
-                    StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+                    if (extractedArg2.getTransformedVal().isStringConstant()) {
+                        knownValues.add(extractedArg2);
+                    } else {
+                        unknownValues.add(extractedArg2);
+                    }
 
-                    Collection<Type> types = extractedBases.get(extractedBase);
-                    types.add(stringVal.getType());
+                    if (!unknownValues.isEmpty()) {
+                        // At least one variable is not a String -> Cannot evaluate 's.replace(a,
+                        // b)'
+                        TransformedValue value =
+                                new TransformedValue(
+                                        allocVal.getAllocVal(),
+                                        statement,
+                                        knownValues,
+                                        unknownValues);
+                        transformedValues.add(value);
+                    } else {
+                        // Evaluate 's.replace(a, b)'
+                        String baseString = extractedBase.getTransformedVal().getStringValue();
+                        String arg1String = extractedArg1.getTransformedVal().getStringValue();
+                        String arg2String = extractedArg2.getTransformedVal().getStringValue();
 
-                    result.putAll(stringVal, types);
+                        String transformedString = baseString.replace(arg1String, arg2String);
+                        StringVal stringVal =
+                                new StringVal(transformedString, statement.getMethod());
+                        TransformedValue value =
+                                new TransformedValue(stringVal, statement, knownValues);
+
+                        transformedValues.add(value);
+                    }
                 }
             }
         }
 
-        return result;
+        return transformedValues;
     }
 }

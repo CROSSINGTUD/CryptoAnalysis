@@ -22,8 +22,8 @@ import crypto.constraints.violations.ViolatedInstanceOfConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedNoCallToConstraint;
 import crypto.constraints.violations.ViolatedNotHardCodedConstraint;
-import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
@@ -33,6 +33,7 @@ import crysl.rule.ICrySLPredicateParameter;
 import crysl.rule.ISLConstraint;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -185,8 +186,8 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         }
 
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                for (Type type : extractedValue.types()) {
+            for (TransformedValue value : parameter.extractedValues()) {
+                for (Type type : value.getTrackedTypes()) {
                     if (type.toString().equals(parameterType.getJavaType())) {
                         IViolatedConstraint violatedConstraint =
                                 new ViolatedNeverTypeOfConstraint(
@@ -236,7 +237,12 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             boolean isSubType = false;
 
-            for (Type type : parameter.typesAtStatement()) {
+            Collection<Type> typesAtStatement = new HashSet<>();
+            for (TransformedValue value : parameter.extractedValues()) {
+                typesAtStatement.add(value.getTransformedVal().getType());
+            }
+
+            for (Type type : typesAtStatement) {
                 if (type.isNullType()) {
                     continue;
                 }
@@ -283,10 +289,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         }
 
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                if (isHardCoded(extractedValue)) {
+            for (TransformedValue value : parameter.extractedValues()) {
+                if (isHardCoded(value)) {
                     IViolatedConstraint violatedConstraint =
-                            new ViolatedNotHardCodedConstraint(parameter, extractedValue);
+                            new ViolatedNotHardCodedConstraint(parameter, value);
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -304,12 +310,12 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         return result;
     }
 
-    private boolean isHardCoded(ExtractedValue extractedValue) {
-        if (extractedValue.val().isConstant()) {
+    private boolean isHardCoded(TransformedValue value) {
+        if (value.getTransformedVal().isConstant()) {
             return true;
         }
 
-        Statement statement = extractedValue.initialStatement();
+        Statement statement = value.getStatement();
         if (statement.isAssignStmt()) {
             Val rightOp = statement.getRightOp();
 

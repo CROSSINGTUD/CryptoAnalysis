@@ -14,6 +14,7 @@ import boomerang.scope.IArrayRef;
 import boomerang.scope.Method;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
+import java.util.Objects;
 
 public class StringVal extends Val {
 
@@ -161,6 +162,25 @@ public class StringVal extends Val {
 
     @Override
     public String getVariableName() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        StringVal stringVal = (StringVal) o;
+        return Objects.equals(value, stringVal.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), value);
+    }
+
+    @Override
+    public String toString() {
         return value;
     }
 }
