@@ -27,5 +27,5 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Run maven command
-      run: mvn clean verify -DtestSetup=${{ inputs.framework }}
+      run: mvn clean verify -f CryptoAnalysis -DtestSetup=${{ inputs.framework }}
       shell: bash

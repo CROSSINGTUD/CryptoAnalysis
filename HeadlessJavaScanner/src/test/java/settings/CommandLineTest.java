@@ -76,21 +76,21 @@ public class CommandLineTest {
     public void testFramework() {
         String[] sootArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "Soot"
                 };
         HeadlessJavaScanner sootScanner = HeadlessJavaScanner.createFromCLISettings(sootArgs);
         Assertions.assertEquals(sootScanner.getFramework(), ScannerSettings.Framework.SOOT);
 
         String[] sootUpArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SOOT_UP"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "SootUp"
                 };
         HeadlessJavaScanner sootUpScanner = HeadlessJavaScanner.createFromCLISettings(sootUpArgs);
         Assertions.assertEquals(sootUpScanner.getFramework(), ScannerSettings.Framework.SOOT_UP);
 
         String[] opalArgs =
                 new String[] {
-                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "OPAL"
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, FRAMEWORK, "Opal"
                 };
         HeadlessJavaScanner opalScanner = HeadlessJavaScanner.createFromCLISettings(opalArgs);
         Assertions.assertEquals(opalScanner.getFramework(), ScannerSettings.Framework.OPAL);
