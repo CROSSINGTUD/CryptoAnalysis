@@ -11,7 +11,6 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
-import boomerang.scope.ValCollection;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -21,6 +20,7 @@ import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
+import crypto.extractparameter.scope.UnknownVal;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;
@@ -72,8 +72,7 @@ public class ValueConstraint extends EvaluableConstraint {
                     continue;
                 }
 
-                // TODO Extract call sites that are not part of the dataflow scope
-                if (val.equals(ValCollection.zero()) || (!val.isConstant() && !val.isNull())) {
+                if (val.equals(UnknownVal.getInstance()) || (!val.isConstant() && !val.isNull())) {
                     ImpreciseValueExtractionError error =
                             new ImpreciseValueExtractionError(
                                     seed, parameter.statement(), seed.getSpecification(), this);

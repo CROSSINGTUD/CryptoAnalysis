@@ -28,8 +28,8 @@ public class MiscellaneousTransformation implements ITransformation {
     private final MethodWrapper HEX_DECODE =
             new MethodWrapper(
                     "org.bouncycastle.util.encoders.Hex",
-                    "byte[]",
                     "decode",
+                    "byte[]",
                     List.of("java.lang.String"));
 
     @Override

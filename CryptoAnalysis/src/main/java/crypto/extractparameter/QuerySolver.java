@@ -18,8 +18,8 @@ import boomerang.scope.AllocVal;
 import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
-import boomerang.scope.ValCollection;
 import crypto.definition.Definitions;
+import crypto.extractparameter.scope.UnknownVal;
 import crypto.extractparameter.transformation.ITransformation;
 import crypto.extractparameter.transformation.TransformationHandler;
 import java.util.Collection;
@@ -56,7 +56,8 @@ public class QuerySolver {
 
         // If no allocation site has been found, add the zero value to indicate it
         if (transformedValues.isEmpty()) {
-            TransformedValue zeroVal = new TransformedValue(ValCollection.zero(), info.statement());
+            TransformedValue zeroVal =
+                    new TransformedValue(UnknownVal.getInstance(), info.statement());
 
             return new ParameterWithExtractedValues(
                     info.statement(),

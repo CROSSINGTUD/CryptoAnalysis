@@ -10,9 +10,9 @@
 package test.assertions;
 
 import boomerang.scope.Statement;
-import boomerang.scope.ValCollection;
 import com.google.common.collect.Multimap;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.scope.UnknownVal;
 import java.util.Collection;
 
 public class ExtractedValueAssertion implements Assertion {
@@ -34,7 +34,7 @@ public class ExtractedValueAssertion implements Assertion {
 
             // TODO Maybe distinguish between "MayExtracted" and "MustExtracted"
             if (parameter.extractedValues().stream()
-                    .anyMatch(v -> v.getTransformedVal().equals(ValCollection.zero()))) {
+                    .anyMatch(v -> v.getTransformedVal().equals(UnknownVal.getInstance()))) {
                 continue;
             }
 

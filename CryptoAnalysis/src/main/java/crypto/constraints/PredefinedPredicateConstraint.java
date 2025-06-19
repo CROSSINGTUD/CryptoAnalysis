@@ -24,6 +24,7 @@ import crypto.constraints.violations.ViolatedNoCallToConstraint;
 import crypto.constraints.violations.ViolatedNotHardCodedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
+import crypto.extractparameter.scope.UnknownType;
 import crypto.utils.CrySLUtils;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
@@ -188,6 +189,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             for (TransformedValue value : parameter.extractedValues()) {
                 for (Type type : value.getTrackedTypes()) {
+                    if (type.equals(UnknownType.getInstance())) {
+                        // TODO Discuss if an error should be reported when the type is unknown
+                    }
+
                     if (type.toString().equals(parameterType.getJavaType())) {
                         IViolatedConstraint violatedConstraint =
                                 new ViolatedNeverTypeOfConstraint(
@@ -245,6 +250,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             for (Type type : typesAtStatement) {
                 if (type.isNullType()) {
                     continue;
+                }
+
+                if (type.equals(UnknownType.getInstance())) {
+                    // TODO Report imprecise extraction error when the type is not known
                 }
 
                 if (MatcherUtils.isTypeOrSubType(type.toString(), parameterType.getJavaType())) {
