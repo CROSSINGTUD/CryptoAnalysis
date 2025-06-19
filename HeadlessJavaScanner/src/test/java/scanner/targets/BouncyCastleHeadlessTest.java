@@ -274,9 +274,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "testSHA256DigestTwo", 0)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(
