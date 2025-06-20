@@ -13,6 +13,7 @@ import boomerang.scope.AllocVal;
 import boomerang.scope.Val;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,14 +23,14 @@ public class TransformationHandler {
 
     private final Collection<ITransformation> transformations;
 
-    public TransformationHandler() {
+    public TransformationHandler(FrameworkHandler frameworkHandler) {
         this.transformations =
                 Set.of(
-                        new StringTransformation(),
-                        new OperatorTransformation(),
-                        new BigIntegerTransformation(),
-                        new WrapperTransformation(),
-                        new MiscellaneousTransformation());
+                        new StringTransformation(frameworkHandler),
+                        new OperatorTransformation(frameworkHandler),
+                        new BigIntegerTransformation(frameworkHandler),
+                        new WrapperTransformation(frameworkHandler),
+                        new MiscellaneousTransformation(frameworkHandler));
     }
 
     public Collection<ITransformation> getTransformations() {

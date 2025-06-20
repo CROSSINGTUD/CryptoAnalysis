@@ -10,10 +10,10 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.sootup.BoomerangPreInterceptor;
-import boomerang.scope.sootup.SootUpFrameworkScope;
 import com.google.common.base.Stopwatch;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootUpScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class SootUpSetup extends FrameworkSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope() {
+    public CryptoAnalysisScope createFrameworkScope() {
         Collection<JavaSootMethod> entryPoints = new HashSet<>();
         view.getClasses()
                 .filter(SootClass::isApplicationClass)
@@ -77,7 +77,7 @@ public class SootUpSetup extends FrameworkSetup {
                 algorithm.initialize(
                         entryPoints.stream().map(SootClassMember::getSignature).toList());
 
-        return new SootUpFrameworkScope(view, callGraph, entryPoints, dataFlowScope);
+        return new CryptoAnalysisSootUpScope(view, callGraph, entryPoints, dataFlowScope);
     }
 
     private CallGraphAlgorithm getCallGraphAlgorithm(JavaView view) {

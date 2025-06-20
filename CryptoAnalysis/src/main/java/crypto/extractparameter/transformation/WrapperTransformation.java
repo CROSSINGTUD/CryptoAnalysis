@@ -12,22 +12,27 @@ package crypto.extractparameter.transformation;
 import boomerang.scope.AllocVal;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
+import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import boomerang.utils.MethodWrapper;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.IntVal;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WrapperTransformation implements ITransformation {
+public class WrapperTransformation extends AbstractTransformation implements ITransformation {
 
     private final MethodWrapper INTEGER_PARSE_INT =
             new MethodWrapper("java.lang.Integer", "parseInt", "int", List.of("java.lang.String"));
+
+    public WrapperTransformation(FrameworkHandler frameworkHandler) {
+        super(frameworkHandler);
+    }
 
     @Override
     public Collection<Val> computeRequiredValues(Statement statement) {
@@ -96,7 +101,9 @@ public class WrapperTransformation implements ITransformation {
                 // Try to evaluate Integer.parseInt; if not possible, we return the extracted value
                 try {
                     int parsedInt = Integer.parseInt(val.getStringValue());
-                    IntVal intVal = new IntVal(parsedInt, statement.getMethod());
+                    Method method = statement.getMethod();
+
+                    Val intVal = frameworkHandler.createIntConstant(parsedInt, method);
                     TransformedValue transVal = new TransformedValue(intVal, statement, value);
 
                     transformedValues.add(transVal);

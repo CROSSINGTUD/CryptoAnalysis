@@ -10,16 +10,21 @@
 package crypto.extractparameter.transformation;
 
 import boomerang.scope.AllocVal;
+import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.IntVal;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class OperatorTransformation implements ITransformation {
+public class OperatorTransformation extends AbstractTransformation implements ITransformation {
+
+    public OperatorTransformation(FrameworkHandler frameworkHandler) {
+        super(frameworkHandler);
+    }
 
     @Override
     public Collection<Val> computeRequiredValues(Statement statement) {
@@ -78,7 +83,8 @@ public class OperatorTransformation implements ITransformation {
                 transformedValues.add(transVal);
             } else if (val.isStringConstant()) {
                 int stringLength = val.getStringValue().length();
-                IntVal intVal = new IntVal(stringLength, allocVal.getAllocStatement().getMethod());
+                Method method = allocVal.getAllocStatement().getMethod();
+                Val intVal = frameworkHandler.createIntConstant(stringLength, method);
 
                 TransformedValue transVal =
                         new TransformedValue(intVal, allocVal.getAllocStatement(), value);

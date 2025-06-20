@@ -30,6 +30,7 @@
 
     <modules>
         <module>CryptoAnalysis</module>
+        <module>CryptoAnalysisScopes</module>
         <module>HeadlessAndroidScanner</module>
         <module>HeadlessJavaScanner</module>
     </modules>
@@ -57,67 +58,44 @@
         <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
 
-        <spds.version>4.3.0</spds.version>
+        <spds.version>4.3.1-SNAPSHOT</spds.version>
         <soot.version>4.6.0</soot.version>
         <sootup.version>2.0.0</sootup.version>
         <opal.version>5.0.0</opal.version>
         <crysl.version>4.0.3</crysl.version>
         <junit.version>5.13.1</junit.version>
+        <guava.version>33.4.8-jre</guava.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Logger API and provider -->
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>CryptoAnalysis</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>2.0.17</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>HeadlessAndroidScanner</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>2.0.17</version>
+            </dependency>
+
+            <!-- JUnit API and engine -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>HeadlessJavaScanner</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
-        </dependency>
-
-        <!-- Logger API and provider -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.17</version>
-        </dependency>
-
-        <!-- JUnit API and engine -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <pluginManagement>

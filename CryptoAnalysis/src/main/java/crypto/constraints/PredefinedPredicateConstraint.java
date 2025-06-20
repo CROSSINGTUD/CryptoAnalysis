@@ -24,7 +24,7 @@ import crypto.constraints.violations.ViolatedNoCallToConstraint;
 import crypto.constraints.violations.ViolatedNotHardCodedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.UnknownType;
+import crypto.extractparameter.UnknownType;
 import crypto.utils.CrySLUtils;
 import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;

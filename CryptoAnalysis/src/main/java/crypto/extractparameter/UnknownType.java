@@ -7,14 +7,25 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package crypto.extractparameter.scope;
+package crypto.extractparameter;
 
 import boomerang.scope.Type;
 import boomerang.scope.Val;
 import boomerang.scope.WrappedClass;
-import java.util.Arrays;
 
-public class StringType implements Type {
+public class UnknownType implements Type {
+
+    private static UnknownType instance;
+
+    private UnknownType() {}
+
+    public static UnknownType getInstance() {
+        if (instance == null) {
+            instance = new UnknownType();
+        }
+
+        return instance;
+    }
 
     @Override
     public boolean isNullType() {
@@ -33,26 +44,26 @@ public class StringType implements Type {
 
     @Override
     public Type getArrayBaseType() {
-        throw new RuntimeException("String type has no array base");
+        throw new RuntimeException("Unknown type is not an array type");
     }
 
     @Override
     public WrappedClass getWrappedClass() {
-        throw new RuntimeException("String type has no declaring class");
+        throw new RuntimeException("Unknown type has no declaring class");
     }
 
     @Override
-    public boolean doesCastFail(Type targetVal, Val target) {
+    public boolean doesCastFail(Type type, Val val) {
+        return true;
+    }
+
+    @Override
+    public boolean isSubtypeOf(String s) {
         return false;
     }
 
     @Override
-    public boolean isSubtypeOf(String type) {
-        return false;
-    }
-
-    @Override
-    public boolean isSupertypeOf(String subType) {
+    public boolean isSupertypeOf(String s) {
         return false;
     }
 
@@ -62,12 +73,7 @@ public class StringType implements Type {
     }
 
     @Override
-    public int hashCode() {
-        return Arrays.hashCode(new Object[] {"java.lang.String"});
-    }
-
-    @Override
     public String toString() {
-        return "java.lang.String";
+        return "<UnknownType>";
     }
 }

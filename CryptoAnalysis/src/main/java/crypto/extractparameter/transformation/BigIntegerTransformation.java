@@ -12,13 +12,13 @@ package crypto.extractparameter.transformation;
 import boomerang.scope.AllocVal;
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
+import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import boomerang.utils.MethodWrapper;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.IntVal;
-import crypto.extractparameter.scope.LongVal;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BigIntegerTransformation implements ITransformation {
+public class BigIntegerTransformation extends AbstractTransformation implements ITransformation {
 
     private final MethodWrapper BIG_INTEGER_CONSTRUCTOR_STRING =
             new MethodWrapper(
@@ -37,6 +37,10 @@ public class BigIntegerTransformation implements ITransformation {
     private final MethodWrapper BIG_INTEGER_VALUE_OF =
             new MethodWrapper(
                     "java.math.BigInteger", "valueOf", "java.math.BigInteger", List.of("long"));
+
+    public BigIntegerTransformation(FrameworkHandler frameworkHandler) {
+        super(frameworkHandler);
+    }
 
     @Override
     public Collection<Val> computeRequiredValues(Statement statement) {
@@ -123,7 +127,7 @@ public class BigIntegerTransformation implements ITransformation {
                     intValue = Integer.MAX_VALUE;
                 }
 
-                IntVal intVal = new IntVal(intValue, statement.getMethod());
+                Val intVal = frameworkHandler.createIntConstant(intValue, statement.getMethod());
                 TransformedValue transVal = new TransformedValue(intVal, statement, value);
 
                 transformedValues.add(transVal);
@@ -202,7 +206,8 @@ public class BigIntegerTransformation implements ITransformation {
                         intValue = Integer.MAX_VALUE;
                     }
 
-                    IntVal intVal = new IntVal(intValue, statement.getMethod());
+                    Val intVal =
+                            frameworkHandler.createIntConstant(intValue, statement.getMethod());
                     TransformedValue transVal =
                             new TransformedValue(intVal, statement, knownValues, unknownValues);
 
@@ -232,7 +237,8 @@ public class BigIntegerTransformation implements ITransformation {
 
             if (val.isLongConstant()) {
                 // Instead of a BigInteger, we continue propagating the long value
-                LongVal longVal = new LongVal(val.getLongValue(), statement.getMethod());
+                Method method = statement.getMethod();
+                Val longVal = frameworkHandler.createLongConstant(val.getLongValue(), method);
                 TransformedValue transVal = new TransformedValue(longVal, statement, value);
 
                 transformedValues.add(transVal);

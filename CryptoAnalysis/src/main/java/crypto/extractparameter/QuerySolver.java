@@ -19,7 +19,6 @@ import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import crypto.definition.Definitions;
-import crypto.extractparameter.scope.UnknownVal;
 import crypto.extractparameter.transformation.ITransformation;
 import crypto.extractparameter.transformation.TransformationHandler;
 import java.util.Collection;
@@ -37,12 +36,12 @@ public class QuerySolver {
 
     public QuerySolver(Definitions.QuerySolverDefinition definition) {
         this.definition = definition;
-        this.transformation = new TransformationHandler();
+        this.transformation = new TransformationHandler(definition.scope().getFrameworkHandler());
         this.options =
                 BoomerangOptions.builder()
                         .withAllocationSite(
                                 new ExtractParameterAllocationSite(
-                                        definition.frameworkScope().getDataFlowScope(),
+                                        definition.scope().asFrameworkScope().getDataFlowScope(),
                                         transformation.getTransformations()))
                         .withAnalysisTimeout(definition.timeout())
                         .withSparsificationStrategy(definition.strategy())
@@ -110,7 +109,7 @@ public class QuerySolver {
             BackwardQuery query = BackwardQuery.make(edge, val);
 
             definition.reporter().beforeTriggeringBoomerangQuery(query);
-            Boomerang boomerang = new Boomerang(definition.frameworkScope(), options);
+            Boomerang boomerang = new Boomerang(definition.scope().asFrameworkScope(), options);
             BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
             definition.reporter().afterTriggeringBoomerangQuery(query);
 

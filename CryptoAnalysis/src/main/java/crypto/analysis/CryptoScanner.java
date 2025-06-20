@@ -9,7 +9,6 @@
  ********************************************************************************/
 package crypto.analysis;
 
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
@@ -25,6 +24,7 @@ import crypto.listener.IResultsListener;
 import crypto.predicates.PredicateAnalysis;
 import crysl.CrySLParser;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -79,18 +79,18 @@ public class CryptoScanner {
         }
     }
 
-    public final void scan(FrameworkScope frameworkScope, Collection<CrySLRule> rules) {
-        scan(frameworkScope, rules, "");
+    public final void scan(CryptoAnalysisScope scope, Collection<CrySLRule> rules) {
+        scan(scope, rules, "");
     }
 
     public final void scan(
-            FrameworkScope frameworkScope, Collection<CrySLRule> rules, String classpath) {
+            CryptoAnalysisScope scope, Collection<CrySLRule> rules, String classpath) {
         ClassPathHandler.initialize(classpath);
 
         // Start analysis
         analysisReporter.beforeAnalysis();
 
-        SeedGenerator generator = new SeedGenerator(this, frameworkScope, rules);
+        SeedGenerator generator = new SeedGenerator(this, scope, rules);
         List<IAnalysisSeed> seeds = new ArrayList<>(generator.computeSeeds());
         analysisReporter.onDiscoveredSeeds(seeds);
 

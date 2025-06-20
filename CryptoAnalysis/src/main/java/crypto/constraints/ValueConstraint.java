@@ -20,7 +20,7 @@ import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.UnknownVal;
+import crypto.extractparameter.UnknownVal;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
 import crysl.rule.ISLConstraint;

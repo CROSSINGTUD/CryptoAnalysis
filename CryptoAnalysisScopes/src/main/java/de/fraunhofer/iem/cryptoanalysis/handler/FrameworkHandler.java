@@ -7,17 +7,17 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package test.framework;
+package de.fraunhofer.iem.cryptoanalysis.handler;
 
-import boomerang.scope.DataFlowScope;
 import boomerang.scope.Method;
-import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import boomerang.scope.Val;
+import org.jspecify.annotations.NonNull;
 
-public interface TestSetup {
+public interface FrameworkHandler {
 
-    void initialize(String classPath, String className, String testName);
+    Val createIntConstant(@NonNull int value, @NonNull Method method);
 
-    Method getTestMethod();
+    Val createLongConstant(@NonNull long value, @NonNull Method method);
 
-    CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope);
+    Val createStringConstant(@NonNull String value, @NonNull Method method);
 }

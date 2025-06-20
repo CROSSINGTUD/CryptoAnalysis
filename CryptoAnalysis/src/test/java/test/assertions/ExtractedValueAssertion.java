@@ -12,7 +12,7 @@ package test.assertions;
 import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.extractparameter.ParameterWithExtractedValues;
-import crypto.extractparameter.scope.UnknownVal;
+import crypto.extractparameter.UnknownVal;
 import java.util.Collection;
 
 public class ExtractedValueAssertion implements Assertion {

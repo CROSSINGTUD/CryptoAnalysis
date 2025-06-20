@@ -10,11 +10,11 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
-import boomerang.scope.opal.OpalFrameworkScope;
 import com.google.common.base.Stopwatch;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValueFactory;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisOpalScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.net.URL;
@@ -74,12 +74,12 @@ public class OpalSetup extends FrameworkSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope() {
+    public CryptoAnalysisScope createFrameworkScope() {
         CallGraphKey callGraphKey = getCallGraphAlgorithm();
         CallGraph callGraph = project.get(callGraphKey);
 
         ArraySeq<Method> entryPoints = project.allMethodsWithBody();
-        return new OpalFrameworkScope(project, callGraph, entryPoints.toSet(), dataFlowScope);
+        return new CryptoAnalysisOpalScope(project, callGraph, entryPoints.toSet(), dataFlowScope);
     }
 
     public Config updateConfigWithEntryPoints(Config config, Seq<Method> entryPoints) {

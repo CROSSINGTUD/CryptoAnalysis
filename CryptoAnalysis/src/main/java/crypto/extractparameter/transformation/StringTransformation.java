@@ -17,14 +17,14 @@ import boomerang.scope.Val;
 import boomerang.utils.MethodWrapper;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.scope.StringVal;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class StringTransformation implements ITransformation {
+public class StringTransformation extends AbstractTransformation implements ITransformation {
 
     private final MethodWrapper TO_CHAR_ARRAY =
             new MethodWrapper("java.lang.String", "toCharArray", "char[]");
@@ -58,6 +58,10 @@ public class StringTransformation implements ITransformation {
                     "replace",
                     "java.lang.String",
                     List.of("java.lang.CharSequence", "java.lang.CharSequence"));
+
+    public StringTransformation(FrameworkHandler frameworkHandler) {
+        super(frameworkHandler);
+    }
 
     @Override
     public Collection<Val> computeRequiredValues(Statement statement) {
@@ -178,7 +182,9 @@ public class StringTransformation implements ITransformation {
                 String baseString = val.getStringValue();
                 String transformedString = baseString.toUpperCase();
 
-                StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+                Val stringVal =
+                        frameworkHandler.createStringConstant(
+                                transformedString, statement.getMethod());
                 TransformedValue transVal = new TransformedValue(stringVal, statement, value);
 
                 transformedValues.add(transVal);
@@ -217,7 +223,9 @@ public class StringTransformation implements ITransformation {
                 String baseString = val.getStringValue();
                 String transformedString = baseString.toLowerCase();
 
-                StringVal stringVal = new StringVal(transformedString, statement.getMethod());
+                Val stringVal =
+                        frameworkHandler.createStringConstant(
+                                transformedString, statement.getMethod());
                 TransformedValue transVal = new TransformedValue(stringVal, statement, value);
 
                 transformedValues.add(transVal);
@@ -312,8 +320,9 @@ public class StringTransformation implements ITransformation {
                         String arg2String = extractedArg2.getTransformedVal().getStringValue();
 
                         String transformedString = baseString.replace(arg1String, arg2String);
-                        StringVal stringVal =
-                                new StringVal(transformedString, statement.getMethod());
+                        Val stringVal =
+                                frameworkHandler.createStringConstant(
+                                        transformedString, statement.getMethod());
                         TransformedValue value =
                                 new TransformedValue(stringVal, statement, knownValues);
 

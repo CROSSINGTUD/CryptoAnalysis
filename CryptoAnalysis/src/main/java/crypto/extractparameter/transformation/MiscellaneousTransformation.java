@@ -17,13 +17,14 @@ import boomerang.scope.Val;
 import boomerang.utils.MethodWrapper;
 import crypto.extractparameter.AllocationSiteGraph;
 import crypto.extractparameter.TransformedValue;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MiscellaneousTransformation implements ITransformation {
+public class MiscellaneousTransformation extends AbstractTransformation implements ITransformation {
 
     private final MethodWrapper HEX_DECODE =
             new MethodWrapper(
@@ -31,6 +32,10 @@ public class MiscellaneousTransformation implements ITransformation {
                     "decode",
                     "byte[]",
                     List.of("java.lang.String"));
+
+    public MiscellaneousTransformation(FrameworkHandler frameworkHandler) {
+        super(frameworkHandler);
+    }
 
     @Override
     public Collection<Val> computeRequiredValues(Statement statement) {

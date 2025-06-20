@@ -55,7 +55,7 @@ public class TypestateAllocationSite extends DefaultAllocationSite {
 
             if (leftOp.equals(fact)) {
                 InvokeExpr invokeExpr = stmt.getInvokeExpr();
-                
+
                 if (dataFlowScope.isExcluded(invokeExpr.getDeclaredMethod())) {
                     AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
 

@@ -69,7 +69,7 @@ public class ConstraintsAnalysis {
 
         Definitions.ExtractParameterDefinition parameterDefinition =
                 new Definitions.ExtractParameterDefinition(
-                        definition.frameworkScope(),
+                        definition.scope(),
                         definition.timeout(),
                         definition.strategy(),
                         definition.reporter());

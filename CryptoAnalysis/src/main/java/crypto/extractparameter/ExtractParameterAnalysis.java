@@ -26,7 +26,7 @@ public class ExtractParameterAnalysis {
     public ExtractParameterAnalysis(Definitions.ExtractParameterDefinition definition) {
         Definitions.QuerySolverDefinition querySolverDefinition =
                 new Definitions.QuerySolverDefinition(
-                        definition.frameworkScope(),
+                        definition.scope(),
                         definition.timeout(),
                         definition.strategy(),
                         definition.reporter());

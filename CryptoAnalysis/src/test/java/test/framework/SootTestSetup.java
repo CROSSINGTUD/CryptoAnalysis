@@ -10,11 +10,11 @@
 package test.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Method;
 import boomerang.scope.soot.BoomerangPretransformer;
-import boomerang.scope.soot.SootFrameworkScope;
 import boomerang.scope.soot.jimple.JimpleMethod;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootScope;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,13 +92,13 @@ public class SootTestSetup implements TestSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope) {
         PackManager.v().getPack("cg").apply();
 
         BoomerangPretransformer.v().reset();
         BoomerangPretransformer.v().apply();
 
-        return new SootFrameworkScope(
+        return new CryptoAnalysisSootScope(
                 Scene.v(),
                 Scene.v().getCallGraph(),
                 Collections.singleton(testMethod),

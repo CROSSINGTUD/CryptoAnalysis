@@ -10,12 +10,12 @@
 package test.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Method;
-import boomerang.scope.opal.OpalFrameworkScope;
 import boomerang.scope.opal.tac.OpalMethod;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValueFactory;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisOpalScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -105,10 +105,10 @@ public class OpalTestSetup implements TestSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope) {
         CallGraph callGraph = project.get(CHACallGraphKey$.MODULE$);
 
-        return new OpalFrameworkScope(
+        return new CryptoAnalysisOpalScope(
                 project,
                 callGraph,
                 CollectionConverters.asScala(Set.of(testMethod)).toSet(),
