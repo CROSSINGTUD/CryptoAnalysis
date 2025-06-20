@@ -61,6 +61,6 @@ public class SootUpFrameworkHandler implements FrameworkHandler {
             return value instanceof AbstractBinopExpr;
         }
 
-        throw new RuntimeException("Need JimpleUpVal to evaluate value");
+        return false;
     }
 }

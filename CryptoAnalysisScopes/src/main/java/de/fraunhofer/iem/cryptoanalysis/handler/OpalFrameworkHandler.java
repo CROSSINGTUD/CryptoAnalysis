@@ -60,6 +60,6 @@ public class OpalFrameworkHandler implements FrameworkHandler {
             return value.astID() == BinaryExpr$.MODULE$.ASTID();
         }
 
-        throw new RuntimeException("Need OpalVal to evaluate value");
+        return false;
     }
 }

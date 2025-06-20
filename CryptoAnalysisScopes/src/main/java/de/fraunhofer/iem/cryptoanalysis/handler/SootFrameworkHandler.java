@@ -57,6 +57,6 @@ public class SootFrameworkHandler implements FrameworkHandler {
             return value instanceof BinopExpr;
         }
 
-        throw new RuntimeException("Need JimpleVal to evaluate value");
+        return false;
     }
 }
