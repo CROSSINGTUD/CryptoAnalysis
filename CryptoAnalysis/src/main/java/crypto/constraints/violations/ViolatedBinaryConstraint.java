@@ -41,7 +41,7 @@ public record ViolatedBinaryConstraint(BinaryConstraint constraint) implements I
         } else if (constraint instanceof BinaryConstraint binaryConstraint) {
             addMessageForBinaryConstraint(sb, binaryConstraint, depth);
         } else if (constraint instanceof PredefinedPredicateConstraint predicateConstraint) {
-
+            addMessageForPredicateConstraint(sb, predicateConstraint, depth);
         }
     }
 

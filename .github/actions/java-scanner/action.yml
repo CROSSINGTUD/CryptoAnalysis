@@ -27,6 +27,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     # We have to build CryptoAnalysis first
+    - name: Build CryptoAnalysisScopes
+      run: mvn clean install -f CryptoAnalysisScopes -DskipTests
+      shell: bash
     - name: Build CryptoAnalysis
       run: mvn clean install -f CryptoAnalysis -DskipTests
       shell: bash

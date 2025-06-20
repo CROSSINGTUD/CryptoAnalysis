@@ -29,6 +29,9 @@ runs:
         mv $ANDROID_SDK_ROOT/platforms/android-35/ HeadlessAndroidScanner/src/test/resources/platforms/
       shell: bash
     # We have to build CryptoAnalysis first
+    - name: Build CryptoAnalysisScopes
+      run: mvn clean install -f CryptoAnalysisScopes -DskipTests
+      shell: bash
     - name: Build CryptoAnalysis
       run: mvn clean install -f CryptoAnalysis -DskipTests
       shell: bash
