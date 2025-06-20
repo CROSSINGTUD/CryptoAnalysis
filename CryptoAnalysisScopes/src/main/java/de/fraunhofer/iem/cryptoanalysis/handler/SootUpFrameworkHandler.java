@@ -14,9 +14,11 @@ import boomerang.scope.Val;
 import boomerang.scope.sootup.jimple.JimpleUpMethod;
 import boomerang.scope.sootup.jimple.JimpleUpVal;
 import org.jspecify.annotations.NonNull;
+import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.constant.IntConstant;
 import sootup.core.jimple.common.constant.LongConstant;
 import sootup.core.jimple.common.constant.StringConstant;
+import sootup.core.jimple.common.expr.AbstractBinopExpr;
 import sootup.java.core.language.JavaJimple;
 
 public class SootUpFrameworkHandler implements FrameworkHandler {
@@ -49,5 +51,16 @@ public class SootUpFrameworkHandler implements FrameworkHandler {
 
         throw new RuntimeException(
                 "Cannot create String constant in SootUp without JimpleUpMethod");
+    }
+
+    @Override
+    public boolean isBinaryExpr(@NonNull Val val) {
+        if (val instanceof JimpleUpVal jimpleUpVal) {
+            Value value = jimpleUpVal.getDelegate();
+
+            return value instanceof AbstractBinopExpr;
+        }
+
+        throw new RuntimeException("Need JimpleUpVal to evaluate value");
     }
 }

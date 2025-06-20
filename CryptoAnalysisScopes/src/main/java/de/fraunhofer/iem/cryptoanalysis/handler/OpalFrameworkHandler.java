@@ -13,7 +13,10 @@ import boomerang.scope.Method;
 import boomerang.scope.Val;
 import boomerang.scope.opal.tac.OpalMethod;
 import boomerang.scope.opal.tac.OpalVal;
+import boomerang.scope.opal.transformation.TacLocal;
 import org.jspecify.annotations.NonNull;
+import org.opalj.tac.BinaryExpr$;
+import org.opalj.tac.Expr;
 import org.opalj.tac.IntConst;
 import org.opalj.tac.LongConst;
 import org.opalj.tac.StringConst;
@@ -47,5 +50,16 @@ public class OpalFrameworkHandler implements FrameworkHandler {
         }
 
         throw new RuntimeException("Cannot create String constant without OpalMethod");
+    }
+
+    @Override
+    public boolean isBinaryExpr(@NonNull Val val) {
+        if (val instanceof OpalVal opalVal) {
+            Expr<TacLocal> value = opalVal.delegate();
+
+            return value.astID() == BinaryExpr$.MODULE$.ASTID();
+        }
+
+        throw new RuntimeException("Need OpalVal to evaluate value");
     }
 }

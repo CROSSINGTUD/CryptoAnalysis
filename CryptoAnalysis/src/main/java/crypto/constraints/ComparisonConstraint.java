@@ -141,7 +141,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 boolean satisfied = isOperatorSatisfied(leftValue, rightValue);
 
                 if (!satisfied) {
-                    IViolatedConstraint violatedConstraint = new ViolatedComparisonConstraint(this);
+                    IViolatedConstraint violatedConstraint =
+                            new ViolatedComparisonConstraint(statement, this);
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -165,9 +166,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
                                 seed,
                                 statement,
                                 seed.getSpecification(),
-                                value.parameter(),
-                                value.impreciseValue(),
-                                this);
+                                this,
+                                value.impreciseValue());
                 errors.add(error);
             }
         }

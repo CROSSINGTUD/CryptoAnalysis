@@ -14,6 +14,8 @@ import boomerang.scope.Val;
 import boomerang.scope.soot.jimple.JimpleMethod;
 import boomerang.scope.soot.jimple.JimpleVal;
 import org.jspecify.annotations.NonNull;
+import soot.Value;
+import soot.jimple.BinopExpr;
 import soot.jimple.IntConstant;
 import soot.jimple.LongConstant;
 import soot.jimple.StringConstant;
@@ -45,5 +47,16 @@ public class SootFrameworkHandler implements FrameworkHandler {
         }
 
         throw new RuntimeException("Cannot create String constant without JimpleMethod");
+    }
+
+    @Override
+    public boolean isBinaryExpr(@NonNull Val val) {
+        if (val instanceof JimpleVal jimpleVal) {
+            Value value = jimpleVal.getDelegate();
+
+            return value instanceof BinopExpr;
+        }
+
+        throw new RuntimeException("Need JimpleVal to evaluate value");
     }
 }

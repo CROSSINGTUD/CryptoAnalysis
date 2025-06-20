@@ -31,6 +31,8 @@ import java.util.HashSet;
 public class ValueConstraint extends EvaluableConstraint {
 
     private final CrySLValueConstraint constraint;
+    private final Collection<TransformedValue> satisfiedValues;
+    private final Collection<TransformedValue> violatingValues;
 
     public ValueConstraint(
             AnalysisSeedWithSpecification seed,
@@ -40,6 +42,8 @@ public class ValueConstraint extends EvaluableConstraint {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;
+        this.satisfiedValues = new HashSet<>();
+        this.violatingValues = new HashSet<>();
     }
 
     @Override
@@ -62,7 +66,7 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
-            Collection<TransformedValue> violatingValues = new HashSet<>();
+            Collection<TransformedValue> wrongValues = new HashSet<>();
 
             for (TransformedValue value : parameter.extractedValues()) {
                 Val val = value.getTransformedVal();
@@ -75,7 +79,11 @@ public class ValueConstraint extends EvaluableConstraint {
                 if (val.equals(UnknownVal.getInstance()) || (!val.isConstant() && !val.isNull())) {
                     ImpreciseValueExtractionError error =
                             new ImpreciseValueExtractionError(
-                                    seed, parameter.statement(), seed.getSpecification(), this);
+                                    seed,
+                                    parameter.statement(),
+                                    seed.getSpecification(),
+                                    this,
+                                    value);
                     errors.add(error);
                 } else {
                     // TODO Make this case sensitive?
@@ -84,14 +92,17 @@ public class ValueConstraint extends EvaluableConstraint {
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
                     if (!allowedValues.contains(valAsString)) {
+                        wrongValues.add(value);
                         violatingValues.add(value);
+                    } else {
+                        satisfiedValues.add(value);
                     }
                 }
             }
 
-            if (!violatingValues.isEmpty()) {
+            if (!wrongValues.isEmpty()) {
                 IViolatedConstraint violatedConstraint =
-                        new ViolatedValueConstraint(constraint, violatingValues, parameter.index());
+                        new ViolatedValueConstraint(constraint, wrongValues, parameter.index());
                 ConstraintError error =
                         new ConstraintError(
                                 seed,
@@ -108,6 +119,18 @@ public class ValueConstraint extends EvaluableConstraint {
         } else {
             return EvaluationResult.ConstraintIsNotSatisfied;
         }
+    }
+
+    public String getVarName() {
+        return constraint.getVar().getVarName();
+    }
+
+    public Collection<TransformedValue> getSatisfiedValues() {
+        return satisfiedValues;
+    }
+
+    public Collection<TransformedValue> getViolatingValues() {
+        return violatingValues;
     }
 
     private Collection<String> formatAllowedValues(Collection<String> originalValues) {

@@ -100,6 +100,10 @@ public abstract class EvaluableConstraint {
         return !errors.isEmpty();
     }
 
+    public Multimap<Statement, ParameterWithExtractedValues> getExtractedValues() {
+        return extractedValues;
+    }
+
     public Collection<AbstractConstraintsError> getErrors() {
         return errors;
     }

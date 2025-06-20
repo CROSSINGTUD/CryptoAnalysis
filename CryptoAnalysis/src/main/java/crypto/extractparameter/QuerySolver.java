@@ -41,6 +41,7 @@ public class QuerySolver {
                 BoomerangOptions.builder()
                         .withAllocationSite(
                                 new ExtractParameterAllocationSite(
+                                        definition.scope().getFrameworkHandler(),
                                         definition.scope().asFrameworkScope().getDataFlowScope(),
                                         transformation.getTransformations()))
                         .withAnalysisTimeout(definition.timeout())

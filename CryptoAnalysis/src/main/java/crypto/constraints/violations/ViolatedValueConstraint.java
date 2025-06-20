@@ -26,36 +26,23 @@ public record ViolatedValueConstraint(
 
     @Override
     public String getErrorMessage() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(CrySLUtils.getIndexAsString(index));
+        StringBuilder sb = new StringBuilder();
 
-        if (violatingValues.size() > 1) {
-            builder.append(" (with values ");
-
-            String values =
-                    String.join(
-                            ", ",
-                            violatingValues.stream()
-                                    .map(value -> value.getTransformedVal().getVariableName())
-                                    .toList());
-            builder.append(values);
-        } else {
-            builder.append(" (with value ");
-
-            String value = violatingValues.iterator().next().getTransformedVal().getVariableName();
-            builder.append(value);
+        for (TransformedValue value : violatingValues) {
+            sb.append("\n|- ")
+                    .append(CrySLUtils.getIndexAsString(index))
+                    .append(" with value ")
+                    .append(value.getTransformedVal().getVariableName())
+                    .append(" should be any of {")
+                    .append(getExpectedValuesAsString())
+                    .append("} (")
+                    .append(value.getStatement())
+                    .append(" @ line ")
+                    .append(value.getStatement().getLineNumber())
+                    .append(")");
         }
 
-        builder.append(")");
-        builder.append(" should be any of ");
-        builder.append("{");
-
-        String expectedValues = getExpectedValuesAsString();
-        builder.append(expectedValues);
-
-        builder.append("}");
-
-        return builder.toString();
+        return sb.toString();
     }
 
     private String getExpectedValuesAsString() {

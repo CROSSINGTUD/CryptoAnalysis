@@ -10,10 +10,8 @@
 package crypto.analysis.errors;
 
 import boomerang.scope.Statement;
-import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
@@ -21,26 +19,17 @@ import java.util.Objects;
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
     private final EvaluableConstraint violatedConstraint;
+    private final TransformedValue value;
 
     public ImpreciseValueExtractionError(
             IAnalysisSeed seed,
             Statement errorStmt,
             CrySLRule rule,
-            EvaluableConstraint constraint) {
+            EvaluableConstraint constraint,
+            TransformedValue value) {
         super(seed, errorStmt, rule);
         this.violatedConstraint = constraint;
-    }
-
-    public ImpreciseValueExtractionError(
-            AnalysisSeedWithSpecification seed,
-            Statement statement,
-            CrySLRule rule,
-            ParameterWithExtractedValues parameter,
-            TransformedValue value,
-            EvaluableConstraint constraint) {
-        super(seed, statement, rule);
-
-        violatedConstraint = constraint;
+        this.value = value;
     }
 
     public EvaluableConstraint getViolatedConstraint() {
@@ -49,9 +38,30 @@ public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
     @Override
     public String toErrorMarkerString() {
-        return "Constraint \""
-                + violatedConstraint
-                + "\" could not be evaluated due to insufficient information.";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Constraint \"")
+                .append(violatedConstraint)
+                .append("\" could not be evaluated due to the following reasons:");
+        preOrderTransformedValues(sb, value, 0);
+
+        return sb.toString();
+    }
+
+    private void preOrderTransformedValues(StringBuilder sb, TransformedValue value, int depth) {
+        sb.append("\n");
+        sb.append("\t".repeat(depth));
+        sb.append("|- Could not evaluate expression \"")
+                .append(value.getTransformedVal())
+                .append("\" in class \"")
+                .append(value.getTransformedVal().m().getDeclaringClass())
+                .append("\" @ ")
+                .append(value.getStatement())
+                .append(" @ line ")
+                .append(value.getStatement().getLineNumber());
+
+        for (TransformedValue unknownValue : value.getUnknownValues()) {
+            preOrderTransformedValues(sb, unknownValue, depth + 1);
+        }
     }
 
     @Override

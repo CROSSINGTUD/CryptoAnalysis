@@ -18,16 +18,21 @@ import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import crypto.extractparameter.transformation.ITransformation;
+import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Optional;
 
 public class ExtractParameterAllocationSite implements IAllocationSite {
 
+    private final FrameworkHandler frameworkHandler;
     private final DataFlowScope dataFlowScope;
     private final Collection<ITransformation> transformations;
 
     public ExtractParameterAllocationSite(
-            DataFlowScope dataFlowScope, Collection<ITransformation> transformations) {
+            FrameworkHandler frameworkHandler,
+            DataFlowScope dataFlowScope,
+            Collection<ITransformation> transformations) {
+        this.frameworkHandler = frameworkHandler;
         this.dataFlowScope = dataFlowScope;
         this.transformations = transformations;
     }
@@ -109,6 +114,11 @@ public class ExtractParameterAllocationSite implements IAllocationSite {
 
                 return Optional.of(allocVal);
             }
+        }
+
+        if (frameworkHandler.isBinaryExpr(rightOp)) {
+            AllocVal allocVal = new AllocVal(leftOp, statement, rightOp);
+            return Optional.of(allocVal);
         }
 
         if (isAllocationVal(rightOp)) {

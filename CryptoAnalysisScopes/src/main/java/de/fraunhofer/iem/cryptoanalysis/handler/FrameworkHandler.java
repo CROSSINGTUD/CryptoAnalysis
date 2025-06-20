@@ -20,4 +20,6 @@ public interface FrameworkHandler {
     Val createLongConstant(@NonNull long value, @NonNull Method method);
 
     Val createStringConstant(@NonNull String value, @NonNull Method method);
+
+    boolean isBinaryExpr(@NonNull Val val);
 }
