@@ -20,11 +20,23 @@ import crypto.utils.CrySLUtils;
  */
 public record ViolatedNeverTypeOfConstraint(
         ParameterWithExtractedValues parameter, String notAllowedType)
-        implements IViolatedConstraint {
+        implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
         return CrySLUtils.getIndexAsString(parameter.index())
+                + " @ "
+                + parameter.statement()
+                + " should never be of type "
+                + notAllowedType;
+    }
+
+    @Override
+    public String getSimplifiedMessage(int depth) {
+        return "\n"
+                + "\t".repeat(depth)
+                + "|- "
+                + CrySLUtils.getIndexAsString(parameter.index())
                 + " @ "
                 + parameter.statement()
                 + " should never be of type "

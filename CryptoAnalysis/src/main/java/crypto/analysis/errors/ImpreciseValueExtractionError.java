@@ -11,69 +11,59 @@ package crypto.analysis.errors;
 
 import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
-import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.TransformedValue;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
-    private final EvaluableConstraint violatedConstraint;
-    private final TransformedValue value;
+    private final ImpreciseValueConstraint violatedConstraint;
+    private final ParameterWithExtractedValues parameter;
 
     public ImpreciseValueExtractionError(
             IAnalysisSeed seed,
             Statement errorStmt,
             CrySLRule rule,
-            EvaluableConstraint constraint,
-            TransformedValue value) {
+            ImpreciseValueConstraint violatedConstraint,
+            ParameterWithExtractedValues parameter) {
         super(seed, errorStmt, rule);
-        this.violatedConstraint = constraint;
-        this.value = value;
+
+        this.violatedConstraint = violatedConstraint;
+        this.parameter = parameter;
     }
 
-    public EvaluableConstraint getViolatedConstraint() {
+    public ImpreciseValueConstraint getViolatedConstraint() {
         return violatedConstraint;
+    }
+
+    public ParameterWithExtractedValues getParameter() {
+        return parameter;
     }
 
     @Override
     public String toErrorMarkerString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Constraint \"")
-                .append(violatedConstraint)
-                .append("\" could not be evaluated due to the following reasons:");
-        preOrderTransformedValues(sb, value, 0);
-
-        return sb.toString();
-    }
-
-    private void preOrderTransformedValues(StringBuilder sb, TransformedValue value, int depth) {
-        sb.append("\n");
-        sb.append("\t".repeat(depth));
-        sb.append("|- Could not evaluate expression \"")
-                .append(value.getTransformedVal())
-                .append("\" in class \"")
-                .append(value.getTransformedVal().m().getDeclaringClass())
-                .append("\" @ ")
-                .append(value.getStatement())
-                .append(" @ line ")
-                .append(value.getStatement().getLineNumber());
-
-        for (TransformedValue unknownValue : value.getUnknownValues()) {
-            preOrderTransformedValues(sb, unknownValue, depth + 1);
-        }
+        return "Could not extract a value for parameter \""
+                + parameter.param()
+                + "\" ("
+                + parameter.varName()
+                + ") to evaluate the constraint \""
+                + violatedConstraint
+                + "\":"
+                + violatedConstraint.getErrorMessage();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), violatedConstraint);
+        return Objects.hash(super.hashCode(), violatedConstraint, parameter);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof ImpreciseValueExtractionError other
-                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
+                && Objects.equals(violatedConstraint, other.getViolatedConstraint())
+                && Objects.equals(parameter, other.getParameter());
     }
 
     @Override

@@ -13,20 +13,8 @@ import crypto.utils.CrySLUtils;
 import crysl.rule.CrySLMethod;
 import java.util.Collection;
 
-/**
- * Represents a violation of the predefined predicate 'callTo[$methods]'
- *
- * @param requiredMethods the methods that are expected to be called
- */
-public record ViolatedCallToConstraint(Collection<CrySLMethod> requiredMethods)
-        implements ViolatedConstraint {
-
-    @Override
-    public String getErrorMessage() {
-        return "Call to one of the methods "
-                + CrySLUtils.formatMethodNames(requiredMethods)
-                + " is missing";
-    }
+public record SatisfiedCallToConstraint(Collection<CrySLMethod> requiredMethods)
+        implements SatisfiedConstraint {
 
     @Override
     public String getSimplifiedMessage(int depth) {
@@ -34,6 +22,6 @@ public record ViolatedCallToConstraint(Collection<CrySLMethod> requiredMethods)
                 + "\t".repeat(depth)
                 + "|- Call to one of the methods "
                 + CrySLUtils.formatMethodNames(requiredMethods)
-                + " is missing";
+                + " found";
     }
 }

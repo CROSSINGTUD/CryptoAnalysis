@@ -22,23 +22,34 @@ import java.util.Collection;
  * @param constraint the violated constraint
  */
 public record ViolatedComparisonConstraint(Statement statement, ComparisonConstraint constraint)
-        implements IViolatedConstraint {
+        implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
+        return getSimplifiedMessage(0);
+    }
+
+    @Override
+    public String getSimplifiedMessage(int depth) {
         StringBuilder sb = new StringBuilder();
 
         Collection<ParameterWithExtractedValues> params =
                 constraint.getExtractedValues().get(statement);
         for (ParameterWithExtractedValues param : params) {
-            sb.append("\n|- ")
+            sb.append("\n")
+                    .append("\t".repeat(depth))
+                    .append("|- ")
                     .append(CrySLUtils.getIndexAsString(param.index()))
-                    .append(" (")
+                    .append(" \"")
+                    .append(param.param().getVariableName())
+                    .append("\" (")
                     .append(param.varName())
                     .append(") evaluates to:");
 
             for (TransformedValue value : param.extractedValues()) {
-                sb.append("\n\t|- ")
+                sb.append("\n")
+                        .append("\t".repeat(depth + 1))
+                        .append("|- ")
                         .append(value.getTransformedVal().getVariableName())
                         .append(" @ ")
                         .append(value.getStatement())

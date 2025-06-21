@@ -15,8 +15,11 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.constraints.violations.SatisfiedComparisonConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
 import crypto.constraints.violations.ViolatedComparisonConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLArithmeticConstraint;
@@ -24,7 +27,6 @@ import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ICrySLPredicateParameter;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -59,7 +61,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
     }
 
     @Override
-    public ISLConstraint getConstraint() {
+    public CrySLComparisonConstraint getConstraint() {
         return constraint;
     }
 
@@ -141,8 +143,10 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 boolean satisfied = isOperatorSatisfied(leftValue, rightValue);
 
                 if (!satisfied) {
-                    IViolatedConstraint violatedConstraint =
+                    ViolatedConstraint violatedConstraint =
                             new ViolatedComparisonConstraint(statement, this);
+                    violatedConstraints.add(violatedConstraint);
+
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -151,6 +155,10 @@ public class ComparisonConstraint extends EvaluableConstraint {
                                     this,
                                     violatedConstraint);
                     errors.add(error);
+                } else {
+                    SatisfiedConstraint satisfiedConstraint =
+                            new SatisfiedComparisonConstraint(statement, this);
+                    satisfiedConstraints.add(satisfiedConstraint);
                 }
             }
         }
@@ -161,13 +169,20 @@ public class ComparisonConstraint extends EvaluableConstraint {
         for (ImpreciseResult result : impreciseResults) {
             // TODO Consider imprecise constants
             if (result instanceof ImpreciseResult.ImpreciseExtractedValue value) {
+                ImpreciseValueConstraint impreciseConstraint =
+                        new ImpreciseValueConstraint(
+                                this,
+                                value.parameter(),
+                                Collections.singleton(value.impreciseValue()));
+                impreciseConstraints.add(impreciseConstraint);
+
                 ImpreciseValueExtractionError error =
                         new ImpreciseValueExtractionError(
                                 seed,
                                 statement,
                                 seed.getSpecification(),
-                                this,
-                                value.impreciseValue());
+                                impreciseConstraint,
+                                value.parameter());
                 errors.add(error);
             }
         }

@@ -10,26 +10,11 @@
 package crypto.constraints.violations;
 
 import crypto.extractparameter.ParameterWithExtractedValues;
-import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
 
-/**
- * Represents a violation of the predefined predicate 'notHardCoded[$variable]'
- *
- * @param parameter the parameter with its extracted values
- * @param value the concrete hard coded value
- */
-public record ViolatedNotHardCodedConstraint(
-        ParameterWithExtractedValues parameter, TransformedValue value)
-        implements ViolatedConstraint {
-
-    @Override
-    public String getErrorMessage() {
-        return CrySLUtils.getIndexAsString(parameter.index())
-                + " @ "
-                + parameter.statement()
-                + " should never be hard coded";
-    }
+public record SatisfiedNeverTypeOfConstraint(
+        ParameterWithExtractedValues parameter, String notAllowedType)
+        implements SatisfiedConstraint {
 
     @Override
     public String getSimplifiedMessage(int depth) {
@@ -39,6 +24,7 @@ public record ViolatedNotHardCodedConstraint(
                 + CrySLUtils.getIndexAsString(parameter.index())
                 + " @ "
                 + parameter.statement()
-                + " should never be hard coded";
+                + " is never of type "
+                + notAllowedType;
     }
 }

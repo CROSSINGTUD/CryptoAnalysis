@@ -15,45 +15,17 @@ import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
 import java.util.Collection;
 
-/**
- * Represents the violation of a {@link ValueConstraint}
- *
- * @param constraint the violated constraint
- */
-public record ViolatedValueConstraint(
+public record SatisfiedValueConstraint(
         ValueConstraint constraint,
         ParameterWithExtractedValues parameter,
-        Collection<TransformedValue> violatingValues)
-        implements ViolatedConstraint {
-
-    @Override
-    public String getErrorMessage() {
-        StringBuilder sb = new StringBuilder();
-
-        for (TransformedValue value : violatingValues) {
-            sb.append("\n|- ")
-                    .append(CrySLUtils.getIndexAsString(parameter.index()))
-                    .append(" \"")
-                    .append(parameter.param().getVariableName())
-                    .append("\" with value ")
-                    .append(value.getTransformedVal().getVariableName())
-                    .append(" should be any of {")
-                    .append(getExpectedValuesAsString())
-                    .append("} (extracted @ ")
-                    .append(value.getStatement())
-                    .append(" @ line ")
-                    .append(value.getStatement().getLineNumber())
-                    .append(")");
-        }
-
-        return sb.toString();
-    }
+        Collection<TransformedValue> satisfiedValues)
+        implements SatisfiedConstraint {
 
     @Override
     public String getSimplifiedMessage(int depth) {
         StringBuilder sb = new StringBuilder();
 
-        for (TransformedValue value : violatingValues) {
+        for (TransformedValue value : satisfiedValues) {
             sb.append("\n")
                     .append("\t".repeat(depth))
                     .append("|- ")
@@ -64,16 +36,12 @@ public record ViolatedValueConstraint(
                     .append(constraint.getConstraint().getVarName())
                     .append(") with value ")
                     .append(value.getTransformedVal().getVariableName())
-                    .append(" violates the constraint @ ")
+                    .append(" satisfies the constraint @ ")
                     .append(parameter.statement())
                     .append(" @ line ")
                     .append(parameter.statement().getLineNumber());
         }
 
         return sb.toString();
-    }
-
-    private String getExpectedValuesAsString() {
-        return String.join(", ", constraint.getConstraint().getValueRange());
     }
 }

@@ -16,8 +16,14 @@ import boomerang.scope.Val;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.SatisfiedCallToConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
+import crypto.constraints.violations.SatisfiedInstanceOfConstraint;
+import crypto.constraints.violations.SatisfiedNeverTypeOfConstraint;
+import crypto.constraints.violations.SatisfiedNoCallToConstraint;
+import crypto.constraints.violations.SatisfiedNotHardCodedConstraint;
 import crypto.constraints.violations.ViolatedCallToConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedInstanceOfConstraint;
 import crypto.constraints.violations.ViolatedNeverTypeOfConstraint;
 import crypto.constraints.violations.ViolatedNoCallToConstraint;
@@ -120,7 +126,9 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         }
 
         if (!isCalled) {
-            IViolatedConstraint violatedConstraint = new ViolatedCallToConstraint(requiredCalls);
+            ViolatedConstraint violatedConstraint = new ViolatedCallToConstraint(requiredCalls);
+            violatedConstraints.add(violatedConstraint);
+
             ConstraintError error =
                     new ConstraintError(
                             seed,
@@ -131,6 +139,9 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             errors.add(error);
 
             return EvaluationResult.ConstraintIsNotSatisfied;
+        } else {
+            SatisfiedConstraint satisfiedConstraint = new SatisfiedCallToConstraint(requiredCalls);
+            satisfiedConstraints.add(satisfiedConstraint);
         }
 
         return EvaluationResult.ConstraintIsSatisfied;
@@ -150,7 +161,9 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             DeclaredMethod foundCall = statement.getInvokeExpr().getDeclaredMethod();
             for (CrySLMethod method : notAllowedCalls) {
                 if (MatcherUtils.matchCryslMethodAndDeclaredMethod(method, foundCall)) {
-                    IViolatedConstraint violatedConstraint = new ViolatedNoCallToConstraint(method);
+                    ViolatedConstraint violatedConstraint = new ViolatedNoCallToConstraint(method);
+                    violatedConstraints.add(violatedConstraint);
+
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -161,6 +174,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                     errors.add(error);
 
                     result = EvaluationResult.ConstraintIsNotSatisfied;
+                } else {
+                    SatisfiedConstraint satisfiedConstraint =
+                            new SatisfiedNoCallToConstraint(method);
+                    satisfiedConstraints.add(satisfiedConstraint);
                 }
             }
         }
@@ -194,9 +211,11 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                     }
 
                     if (type.toString().equals(parameterType.getJavaType())) {
-                        IViolatedConstraint violatedConstraint =
+                        ViolatedConstraint violatedConstraint =
                                 new ViolatedNeverTypeOfConstraint(
                                         parameter, parameterType.getJavaType());
+                        violatedConstraints.add(violatedConstraint);
+
                         ConstraintError error =
                                 new ConstraintError(
                                         seed,
@@ -207,6 +226,11 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                         errors.add(error);
 
                         result = EvaluationResult.ConstraintIsNotSatisfied;
+                    } else {
+                        SatisfiedConstraint satisfiedConstraint =
+                                new SatisfiedNeverTypeOfConstraint(
+                                        parameter, parameterType.getJavaType());
+                        satisfiedConstraints.add(satisfiedConstraint);
                     }
                 }
             }
@@ -262,8 +286,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
             }
 
             if (!isSubType) {
-                IViolatedConstraint violatedConstraint =
+                ViolatedConstraint violatedConstraint =
                         new ViolatedInstanceOfConstraint(parameter, parameterType.getJavaType());
+                violatedConstraints.add(violatedConstraint);
+
                 ConstraintError error =
                         new ConstraintError(
                                 seed,
@@ -274,6 +300,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                 errors.add(error);
 
                 result = EvaluationResult.ConstraintIsNotSatisfied;
+            } else {
+                SatisfiedConstraint satisfiedConstraint =
+                        new SatisfiedInstanceOfConstraint(parameter, parameterType.getJavaType());
+                satisfiedConstraints.add(satisfiedConstraint);
             }
         }
 
@@ -300,8 +330,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
         for (ParameterWithExtractedValues parameter : relevantExtractedValues) {
             for (TransformedValue value : parameter.extractedValues()) {
                 if (isHardCoded(value)) {
-                    IViolatedConstraint violatedConstraint =
+                    ViolatedConstraint violatedConstraint =
                             new ViolatedNotHardCodedConstraint(parameter, value);
+                    violatedConstraints.add(violatedConstraint);
+
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -312,6 +344,10 @@ public class PredefinedPredicateConstraint extends EvaluableConstraint {
                     errors.add(error);
 
                     result = EvaluationResult.ConstraintIsNotSatisfied;
+                } else {
+                    SatisfiedConstraint satisfiedConstraint =
+                            new SatisfiedNotHardCodedConstraint(parameter, value);
+                    satisfiedConstraints.add(satisfiedConstraint);
                 }
             }
         }

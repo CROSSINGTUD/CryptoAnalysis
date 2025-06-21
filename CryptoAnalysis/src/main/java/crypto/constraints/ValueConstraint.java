@@ -15,15 +15,16 @@ import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
+import crypto.constraints.violations.SatisfiedValueConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import crypto.extractparameter.UnknownVal;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -31,8 +32,6 @@ import java.util.HashSet;
 public class ValueConstraint extends EvaluableConstraint {
 
     private final CrySLValueConstraint constraint;
-    private final Collection<TransformedValue> satisfiedValues;
-    private final Collection<TransformedValue> violatingValues;
 
     public ValueConstraint(
             AnalysisSeedWithSpecification seed,
@@ -42,12 +41,10 @@ public class ValueConstraint extends EvaluableConstraint {
         super(seed, statements, extractedValues);
 
         this.constraint = constraint;
-        this.satisfiedValues = new HashSet<>();
-        this.violatingValues = new HashSet<>();
     }
 
     @Override
-    public ISLConstraint getConstraint() {
+    public CrySLValueConstraint getConstraint() {
         return constraint;
     }
 
@@ -66,7 +63,9 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
+            Collection<TransformedValue> correctValues = new HashSet<>();
             Collection<TransformedValue> wrongValues = new HashSet<>();
+            Collection<TransformedValue> unknownValues = new HashSet<>();
 
             for (TransformedValue value : parameter.extractedValues()) {
                 Val val = value.getTransformedVal();
@@ -76,33 +75,33 @@ public class ValueConstraint extends EvaluableConstraint {
                     continue;
                 }
 
-                if (val.equals(UnknownVal.getInstance()) || (!val.isConstant() && !val.isNull())) {
-                    ImpreciseValueExtractionError error =
-                            new ImpreciseValueExtractionError(
-                                    seed,
-                                    parameter.statement(),
-                                    seed.getSpecification(),
-                                    this,
-                                    value);
-                    errors.add(error);
-                } else {
+                if (val.isConstant() || val.isNull()) {
                     // TODO Make this case sensitive?
                     String valAsString = convertConstantToString(val).toLowerCase();
                     valAsString =
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
-                    if (!allowedValues.contains(valAsString)) {
-                        wrongValues.add(value);
-                        violatingValues.add(value);
+                    if (allowedValues.contains(valAsString)) {
+                        correctValues.add(value);
                     } else {
-                        satisfiedValues.add(value);
+                        wrongValues.add(value);
                     }
+                } else {
+                    unknownValues.add(value);
                 }
             }
 
+            if (!correctValues.isEmpty()) {
+                SatisfiedConstraint satisfiedConstraint =
+                        new SatisfiedValueConstraint(this, parameter, correctValues);
+                satisfiedConstraints.add(satisfiedConstraint);
+            }
+
             if (!wrongValues.isEmpty()) {
-                IViolatedConstraint violatedConstraint =
-                        new ViolatedValueConstraint(constraint, wrongValues, parameter.index());
+                ViolatedConstraint violatedConstraint =
+                        new ViolatedValueConstraint(this, parameter, wrongValues);
+                violatedConstraints.add(violatedConstraint);
+
                 ConstraintError error =
                         new ConstraintError(
                                 seed,
@@ -112,6 +111,21 @@ public class ValueConstraint extends EvaluableConstraint {
                                 violatedConstraint);
                 errors.add(error);
             }
+
+            if (!unknownValues.isEmpty()) {
+                ImpreciseValueConstraint violatedConstraint =
+                        new ImpreciseValueConstraint(this, parameter, unknownValues);
+                impreciseConstraints.add(violatedConstraint);
+
+                ImpreciseValueExtractionError error =
+                        new ImpreciseValueExtractionError(
+                                seed,
+                                parameter.statement(),
+                                seed.getSpecification(),
+                                violatedConstraint,
+                                parameter);
+                errors.add(error);
+            }
         }
 
         if (errors.isEmpty()) {
@@ -119,18 +133,6 @@ public class ValueConstraint extends EvaluableConstraint {
         } else {
             return EvaluationResult.ConstraintIsNotSatisfied;
         }
-    }
-
-    public String getVarName() {
-        return constraint.getVar().getVarName();
-    }
-
-    public Collection<TransformedValue> getSatisfiedValues() {
-        return satisfiedValues;
-    }
-
-    public Collection<TransformedValue> getViolatingValues() {
-        return violatingValues;
     }
 
     private Collection<String> formatAllowedValues(Collection<String> originalValues) {
