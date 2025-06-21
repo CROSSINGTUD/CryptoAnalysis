@@ -88,7 +88,9 @@ public class ReportGenerator {
                             .append(" violating CrySL rule for ")
                             .append(error.getRule().getClassName())
                             .append("\n");
-                    report.append("\t\t\t").append(error.toErrorMarkerString()).append("\n");
+                    report.append("\t\t\t")
+                            .append(error.toErrorMarkerString().replace("\n", "\n\t\t\t"))
+                            .append("\n");
                     report.append("\t\t\tat statement: ")
                             .append(error.getErrorStatement())
                             .append("\n");

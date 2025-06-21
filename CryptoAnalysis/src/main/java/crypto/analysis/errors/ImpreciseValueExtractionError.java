@@ -12,58 +12,45 @@ package crypto.analysis.errors;
 import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.violations.ImpreciseValueConstraint;
-import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
     private final ImpreciseValueConstraint violatedConstraint;
-    private final ParameterWithExtractedValues parameter;
 
     public ImpreciseValueExtractionError(
             IAnalysisSeed seed,
             Statement errorStmt,
             CrySLRule rule,
-            ImpreciseValueConstraint violatedConstraint,
-            ParameterWithExtractedValues parameter) {
+            ImpreciseValueConstraint violatedConstraint) {
         super(seed, errorStmt, rule);
 
         this.violatedConstraint = violatedConstraint;
-        this.parameter = parameter;
     }
 
     public ImpreciseValueConstraint getViolatedConstraint() {
         return violatedConstraint;
     }
 
-    public ParameterWithExtractedValues getParameter() {
-        return parameter;
-    }
-
     @Override
     public String toErrorMarkerString() {
-        return "Could not extract a value for parameter \""
-                + parameter.param()
-                + "\" ("
-                + parameter.varName()
-                + ") to evaluate the constraint \""
+        return "Could not evaluate the constraint \""
                 + violatedConstraint
-                + "\":"
+                + "\" due to insufficient information:"
                 + violatedConstraint.getErrorMessage();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), violatedConstraint, parameter);
+        return Objects.hash(super.hashCode(), violatedConstraint);
     }
 
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj)
                 && obj instanceof ImpreciseValueExtractionError other
-                && Objects.equals(violatedConstraint, other.getViolatedConstraint())
-                && Objects.equals(parameter, other.getParameter());
+                && Objects.equals(violatedConstraint, other.getViolatedConstraint());
     }
 
     @Override

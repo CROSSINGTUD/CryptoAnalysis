@@ -69,7 +69,7 @@ public class SARIFReporter extends Reporter {
                             errorType
                                     + " violating CrySL rule for "
                                     + error.getRule().getClassName();
-                    String errorMarker = error.toErrorMarkerString();
+                    String errorMarker = sanitizeMessage(error.toErrorMarkerString());
                     int lineNumber = error.getLineNumber();
                     String statement = error.getErrorStatement().toString();
 
@@ -91,6 +91,10 @@ public class SARIFReporter extends Reporter {
         JSONObject sarif = makeSARIF();
 
         writeToFile(sarif);
+    }
+
+    private String sanitizeMessage(String message) {
+        return message.replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t");
     }
 
     private void writeToFile(JSONObject sarif) {

@@ -9,15 +9,14 @@
  ********************************************************************************/
 package crypto.constraints.violations;
 
+import com.google.common.collect.Multimap;
 import crypto.constraints.EvaluableConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import java.util.Collection;
 
 public record ImpreciseValueConstraint(
         EvaluableConstraint constraint,
-        ParameterWithExtractedValues parameter,
-        Collection<TransformedValue> impreciseValues) {
+        Multimap<ParameterWithExtractedValues, TransformedValue> impreciseValues) {
 
     public String getErrorMessage() {
         return getSimplifiedMessage(0);
@@ -25,14 +24,18 @@ public record ImpreciseValueConstraint(
 
     public String getSimplifiedMessage(int depth) {
         StringBuilder sb = new StringBuilder();
-        for (TransformedValue value : impreciseValues) {
-            preOrderTransformedValues(sb, value, depth);
+
+        for (ParameterWithExtractedValues parameter : impreciseValues.keySet()) {
+            for (TransformedValue value : impreciseValues.get(parameter)) {
+                preOrderTransformedValues(sb, value, depth);
+            }
         }
 
         return sb.toString();
     }
 
     private void preOrderTransformedValues(StringBuilder sb, TransformedValue value, int depth) {
+        // TODO Add the parameter but only on the first layer
         sb.append("\n");
         sb.append("\t".repeat(depth));
         sb.append("|- Could not evaluate expression \"")

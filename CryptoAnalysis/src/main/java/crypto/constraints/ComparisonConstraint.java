@@ -11,6 +11,7 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -166,26 +167,22 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
     private void handleImpreciseResult(
             Statement statement, Collection<ImpreciseResult> impreciseResults) {
+        Multimap<ParameterWithExtractedValues, TransformedValue> multimap = HashMultimap.create();
+
         for (ImpreciseResult result : impreciseResults) {
             // TODO Consider imprecise constants
             if (result instanceof ImpreciseResult.ImpreciseExtractedValue value) {
-                ImpreciseValueConstraint impreciseConstraint =
-                        new ImpreciseValueConstraint(
-                                this,
-                                value.parameter(),
-                                Collections.singleton(value.impreciseValue()));
-                impreciseConstraints.add(impreciseConstraint);
-
-                ImpreciseValueExtractionError error =
-                        new ImpreciseValueExtractionError(
-                                seed,
-                                statement,
-                                seed.getSpecification(),
-                                impreciseConstraint,
-                                value.parameter());
-                errors.add(error);
+                multimap.put(value.parameter(), value.impreciseValue());
             }
         }
+
+        ImpreciseValueConstraint impreciseConstraint = new ImpreciseValueConstraint(this, multimap);
+        impreciseConstraints.add(impreciseConstraint);
+
+        ImpreciseValueExtractionError error =
+                new ImpreciseValueExtractionError(
+                        seed, statement, seed.getSpecification(), impreciseConstraint);
+        errors.add(error);
     }
 
     @Override

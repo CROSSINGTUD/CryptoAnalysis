@@ -11,6 +11,7 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
@@ -113,8 +114,12 @@ public class ValueConstraint extends EvaluableConstraint {
             }
 
             if (!unknownValues.isEmpty()) {
+                Multimap<ParameterWithExtractedValues, TransformedValue> multimap =
+                        HashMultimap.create();
+                multimap.putAll(parameter, unknownValues);
+
                 ImpreciseValueConstraint violatedConstraint =
-                        new ImpreciseValueConstraint(this, parameter, unknownValues);
+                        new ImpreciseValueConstraint(this, multimap);
                 impreciseConstraints.add(violatedConstraint);
 
                 ImpreciseValueExtractionError error =
@@ -122,8 +127,7 @@ public class ValueConstraint extends EvaluableConstraint {
                                 seed,
                                 parameter.statement(),
                                 seed.getSpecification(),
-                                violatedConstraint,
-                                parameter);
+                                violatedConstraint);
                 errors.add(error);
             }
         }
