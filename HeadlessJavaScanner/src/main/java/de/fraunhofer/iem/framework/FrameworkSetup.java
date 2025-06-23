@@ -10,7 +10,7 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,5 +34,5 @@ public abstract class FrameworkSetup {
 
     public abstract void initializeFramework();
 
-    public abstract FrameworkScope createFrameworkScope();
+    public abstract CryptoAnalysisScope createFrameworkScope();
 }

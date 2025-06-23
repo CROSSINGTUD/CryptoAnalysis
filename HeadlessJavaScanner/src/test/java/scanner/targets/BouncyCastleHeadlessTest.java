@@ -107,7 +107,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "cbc_aes_example.CBCAESBouncyCastle", "processing", 2)
                         .withTPs(RequiredPredicateError.class, 4)
-                        .withTPs(ImpreciseValueExtractionError.class, 3)
+                        .withTPs(ImpreciseValueExtractionError.class, 7)
                         .build());
 
         scanner.scan();
@@ -274,9 +274,8 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "testSHA256DigestTwo", 0)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(

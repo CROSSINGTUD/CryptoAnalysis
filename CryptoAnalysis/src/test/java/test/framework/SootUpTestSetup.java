@@ -10,11 +10,11 @@
 package test.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Method;
 import boomerang.scope.sootup.BoomerangPreInterceptor;
-import boomerang.scope.sootup.SootUpFrameworkScope;
 import boomerang.scope.sootup.jimple.JimpleUpMethod;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootUpScope;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -81,12 +81,12 @@ public class SootUpTestSetup implements TestSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope) {
         Collection<JavaSootMethod> entryPoints = Set.of(testMethod);
         CallGraphAlgorithm cha = new ClassHierarchyAnalysisAlgorithm(view);
 
         CallGraph callGraph =
                 cha.initialize(entryPoints.stream().map(SootClassMember::getSignature).toList());
-        return new SootUpFrameworkScope(view, callGraph, entryPoints, dataFlowScope);
+        return new CryptoAnalysisSootUpScope(view, callGraph, entryPoints, dataFlowScope);
     }
 }

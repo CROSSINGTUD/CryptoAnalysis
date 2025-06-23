@@ -7,32 +7,31 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package crypto.extractparameter.scope;
+package crypto.extractparameter;
 
 import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.IArrayRef;
 import boomerang.scope.Method;
 import boomerang.scope.Type;
 import boomerang.scope.Val;
-import java.util.Objects;
 
-public class IntVal extends Val {
+public class UnknownVal extends Val {
 
-    private final int value;
+    private static UnknownVal instance;
 
-    public IntVal(int value, Method method) {
-        this(value, method, null);
-    }
+    private UnknownVal() {}
 
-    private IntVal(int value, Method method, ControlFlowGraph.Edge edge) {
-        super(method, edge);
+    public static UnknownVal getInstance() {
+        if (instance == null) {
+            instance = new UnknownVal();
+        }
 
-        this.value = value;
+        return instance;
     }
 
     @Override
     public Type getType() {
-        return new IntType();
+        return UnknownType.getInstance();
     }
 
     @Override
@@ -47,12 +46,12 @@ public class IntVal extends Val {
 
     @Override
     public Type getNewExprType() {
-        throw new RuntimeException("Int constant is not a new expression");
+        throw new RuntimeException("Unknown Val is not a new expression");
     }
 
     @Override
-    public Val asUnbalanced(ControlFlowGraph.Edge stmt) {
-        return new IntVal(value, m, stmt);
+    public Val asUnbalanced(ControlFlowGraph.Edge edge) {
+        throw new RuntimeException("Unknown Val should not be propagated");
     }
 
     @Override
@@ -67,7 +66,7 @@ public class IntVal extends Val {
 
     @Override
     public Val getArrayAllocationSize() {
-        throw new RuntimeException("Int constant is not an array allocation expression");
+        throw new RuntimeException("Unknown Val is not an array allocation val");
     }
 
     @Override
@@ -82,7 +81,7 @@ public class IntVal extends Val {
 
     @Override
     public String getStringValue() {
-        throw new RuntimeException("Int constant has no String value");
+        throw new RuntimeException("Unknown Val is not a String constant");
     }
 
     @Override
@@ -92,7 +91,7 @@ public class IntVal extends Val {
 
     @Override
     public Val getCastOp() {
-        throw new RuntimeException("Int constant is not a cast expression");
+        throw new RuntimeException("Unknown Val is not a cast expression");
     }
 
     @Override
@@ -107,7 +106,7 @@ public class IntVal extends Val {
 
     @Override
     public Val getInstanceOfOp() {
-        throw new RuntimeException("Int constant is not an instanceOf expression");
+        throw new RuntimeException("Unknown Val is not an instanceOf expression");
     }
 
     @Override
@@ -117,12 +116,12 @@ public class IntVal extends Val {
 
     @Override
     public Val getLengthOp() {
-        throw new RuntimeException("Int constant is not a length expression");
+        throw new RuntimeException("Unknown Val is not a length expression");
     }
 
     @Override
     public boolean isIntConstant() {
-        return true;
+        return false;
     }
 
     @Override
@@ -132,12 +131,12 @@ public class IntVal extends Val {
 
     @Override
     public Type getClassConstantType() {
-        throw new RuntimeException("Int constant is not a class constant");
+        throw new RuntimeException("Unknown Val is not a class constant");
     }
 
     @Override
-    public Val withNewMethod(Method callee) {
-        return new IntVal(value, callee);
+    public Val withNewMethod(Method method) {
+        throw new RuntimeException("Unknown Val should not be propagated");
     }
 
     @Override
@@ -147,36 +146,26 @@ public class IntVal extends Val {
 
     @Override
     public int getIntValue() {
-        return value;
+        throw new RuntimeException("Unknown Val is not an int constant");
     }
 
     @Override
     public long getLongValue() {
-        throw new RuntimeException("Int constant is not a long value");
+        throw new RuntimeException("Unknown Val is not a long constant");
     }
 
     @Override
     public IArrayRef getArrayBase() {
-        throw new RuntimeException("Int constant has no array base");
+        throw new RuntimeException("Unknown Val has no array base");
     }
 
     @Override
     public String getVariableName() {
-        return String.valueOf(value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), value);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj) && obj instanceof IntVal other && value == other.value;
+        return "<unknown>";
     }
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return getVariableName();
     }
 }

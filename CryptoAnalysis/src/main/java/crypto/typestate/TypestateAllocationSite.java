@@ -11,6 +11,8 @@ package crypto.typestate;
 
 import boomerang.options.DefaultAllocationSite;
 import boomerang.scope.AllocVal;
+import boomerang.scope.DataFlowScope;
+import boomerang.scope.InvokeExpr;
 import boomerang.scope.Method;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
@@ -19,9 +21,11 @@ import java.util.Optional;
 public class TypestateAllocationSite extends DefaultAllocationSite {
 
     private final ForwardSeedQuery query;
+    private final DataFlowScope dataFlowScope;
 
-    public TypestateAllocationSite(ForwardSeedQuery query) {
+    public TypestateAllocationSite(ForwardSeedQuery query, DataFlowScope dataFlowScope) {
         this.query = query;
+        this.dataFlowScope = dataFlowScope;
     }
 
     @Override
@@ -29,6 +33,7 @@ public class TypestateAllocationSite extends DefaultAllocationSite {
         Statement statement = query.cfgEdge().getStart();
         Val var = query.getAllocVal().getDelegate();
 
+        // Make sure that we always return the original allocation site
         if (stmt.equals(statement)) {
             if (stmt.isAssignStmt()) {
                 Val leftOp = stmt.getLeftOp();
@@ -40,6 +45,22 @@ public class TypestateAllocationSite extends DefaultAllocationSite {
                 AllocVal allocVal = new AllocVal(var, stmt, var);
 
                 return Optional.of(allocVal);
+            }
+        }
+
+        // Include allocation sites from a non-project function call
+        if (stmt.isAssignStmt() && stmt.containsInvokeExpr()) {
+            Val leftOp = stmt.getLeftOp();
+            Val rightOp = stmt.getRightOp();
+
+            if (leftOp.equals(fact)) {
+                InvokeExpr invokeExpr = stmt.getInvokeExpr();
+
+                if (dataFlowScope.isExcluded(invokeExpr.getDeclaredMethod())) {
+                    AllocVal allocVal = new AllocVal(leftOp, stmt, rightOp);
+
+                    return Optional.of(allocVal);
+                }
             }
         }
 

@@ -10,7 +10,6 @@
 package de.fraunhofer.iem.scanner;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisException;
@@ -19,6 +18,7 @@ import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.visualization.Visualizer;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
@@ -95,7 +95,7 @@ public class HeadlessJavaScanner extends CryptoScanner {
         // Set up the framework
         DataFlowScope dataFlowScope =
                 new CryptoAnalysisDataFlowScope(rules, settings.getIgnoredSections());
-        FrameworkScope frameworkScope = initializeFrameworkScope(dataFlowScope);
+        CryptoAnalysisScope frameworkScope = initializeFrameworkScope(dataFlowScope);
 
         // Run the analysis
         super.scan(frameworkScope, rules, settings.getAddClassPath());
@@ -118,13 +118,14 @@ public class HeadlessJavaScanner extends CryptoScanner {
         }
     }
 
-    public FrameworkScope initializeFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope initializeFrameworkScope(DataFlowScope dataFlowScope) {
         FrameworkSetup frameworkSetup = setupFramework(dataFlowScope);
         frameworkSetup.initializeFramework();
 
         super.getAnalysisReporter().beforeCallGraphConstruction();
-        FrameworkScope frameworkScope = frameworkSetup.createFrameworkScope();
-        super.getAnalysisReporter().afterCallGraphConstruction(frameworkScope.getCallGraph());
+        CryptoAnalysisScope frameworkScope = frameworkSetup.createFrameworkScope();
+        super.getAnalysisReporter()
+                .afterCallGraphConstruction(frameworkScope.asFrameworkScope().getCallGraph());
 
         return frameworkScope;
     }

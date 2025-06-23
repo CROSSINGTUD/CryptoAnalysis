@@ -11,7 +11,6 @@ package crypto.analysis;
 
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.DeclaredMethod;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
@@ -40,6 +39,7 @@ import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
 import crysl.rule.StateNode;
 import crysl.rule.TransitionEdge;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             CryptoScanner scanner,
             Statement statement,
             Val fact,
-            FrameworkScope frameworkScope,
+            CryptoAnalysisScope scope,
             ForwardBoomerangResults<TransitionFunction> results,
             CrySLRule specification) {
         super(scanner, statement, fact, results);
@@ -75,7 +75,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Definitions.ConstraintsDefinition definition =
                 new Definitions.ConstraintsDefinition(
-                        frameworkScope,
+                        scope,
                         scanner.getTimeout(),
                         scanner.getSparsificationStrategy(),
                         scanner.getAnalysisReporter());

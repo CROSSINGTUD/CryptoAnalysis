@@ -12,7 +12,7 @@ package crypto.analysis.errors;
 import boomerang.scope.Statement;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
 public class ConstraintError extends AbstractConstraintsError {
 
     private final EvaluableConstraint evaluableConstraint;
-    private final IViolatedConstraint violatedConstraint;
+    private final ViolatedConstraint violatedConstraint;
 
     /**
      * Constructs a ConstraintError for a violated constraint
@@ -36,14 +36,14 @@ public class ConstraintError extends AbstractConstraintsError {
             Statement statement,
             CrySLRule rule,
             EvaluableConstraint evaluableConstraint,
-            IViolatedConstraint violatedConstraint) {
+            ViolatedConstraint violatedConstraint) {
         super(seed, statement, rule);
 
         this.evaluableConstraint = evaluableConstraint;
         this.violatedConstraint = violatedConstraint;
     }
 
-    public IViolatedConstraint getViolatedConstraint() {
+    public ViolatedConstraint getViolatedConstraint() {
         return violatedConstraint;
     }
 
@@ -53,7 +53,7 @@ public class ConstraintError extends AbstractConstraintsError {
                 + evaluableConstraint
                 + "\" on object "
                 + getSeed().getFact().getVariableName()
-                + " is violated due to the following reason: "
+                + " is violated due to the following reason:"
                 + violatedConstraint.getErrorMessage();
     }
 

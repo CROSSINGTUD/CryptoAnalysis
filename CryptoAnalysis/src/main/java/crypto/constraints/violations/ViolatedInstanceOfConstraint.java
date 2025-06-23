@@ -14,11 +14,23 @@ import crypto.utils.CrySLUtils;
 
 public record ViolatedInstanceOfConstraint(
         ParameterWithExtractedValues parameter, String notAllowedInstance)
-        implements IViolatedConstraint {
+        implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
         return CrySLUtils.getIndexAsString(parameter.index())
+                + " @ "
+                + parameter.statement()
+                + " should not be an instance of class "
+                + notAllowedInstance;
+    }
+
+    @Override
+    public String getSimplifiedMessage(int depth) {
+        return "\n"
+                + "\t".repeat(depth)
+                + "|- "
+                + CrySLUtils.getIndexAsString(parameter.index())
                 + " @ "
                 + parameter.statement()
                 + " should not be an instance of class "

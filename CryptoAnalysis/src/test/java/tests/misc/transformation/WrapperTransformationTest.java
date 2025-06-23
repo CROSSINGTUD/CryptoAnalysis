@@ -10,6 +10,7 @@
 package tests.misc.transformation;
 
 import java.math.BigInteger;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import test.Ruleset;
@@ -42,6 +43,18 @@ public class WrapperTransformationTest {
         Assertions.violatedConstraint();
 
         Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
+    public void unknownIntegerParseIntTest() {
+        String randomString = UUID.randomUUID().toString();
+        int value = Integer.parseInt(randomString);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.integerParseIntConstraint(value);
+        Assertions.extValue(0);
+
+        Assertions.impreciseValueExtractionErrors(1);
     }
 
     @Test

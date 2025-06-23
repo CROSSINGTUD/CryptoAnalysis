@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.fraunhofer.iem</groupId>
         <artifactId>CryptoAnalysis-Parent</artifactId>
-        <version>4.2.2</version>
+        <version>4.2.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -47,6 +47,11 @@
             <artifactId>CryptoAnalysis</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>CryptoAnalysisScopes</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Boomerang -->
         <dependency>
@@ -62,11 +67,6 @@
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope-SootUp</artifactId>
-            <version>${spds.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.fraunhofer.iem</groupId>
-            <artifactId>boomerangScope-Opal</artifactId>
             <version>${spds.version}</version>
         </dependency>
 
@@ -118,6 +118,14 @@
 
         <!-- Other dependencies -->
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
             <version>${crysl.version}</version>
@@ -133,6 +141,11 @@
             <version>1.4.3</version>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.7.7</version>
@@ -140,10 +153,19 @@
 
         <!-- Test dependencies -->
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.19.0</version>
-            <scope>test</scope>
+            <version>2.18.0</version>
+            <!-- Required for SootUp; once SootUp uses a new version, this can be set to test only -->
+            <!-- <scope>test</scope> -->
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>

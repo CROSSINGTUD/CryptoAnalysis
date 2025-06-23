@@ -9,6 +9,7 @@
  ********************************************************************************/
 package test;
 
+import boomerang.BackwardQuery;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.CallGraph;
@@ -19,7 +20,6 @@ import crypto.analysis.AnalysisSeedWithEnsuredPredicate;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.listener.IResultsListener;
 import crypto.predicates.EnsuredPredicate;
@@ -116,7 +116,7 @@ public class TestRunnerResultsListener implements IResultsListener {
 
     @Override
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {}
+            BackwardQuery query, BackwardBoomerangResults<NoWeight> results) {}
 
     @Override
     public void extractedParameterValues(

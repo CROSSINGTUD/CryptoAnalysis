@@ -7,17 +7,9 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package crypto.extractparameter;
+package crypto.constraints.violations;
 
-import boomerang.scope.Statement;
-import boomerang.scope.Type;
-import boomerang.scope.Val;
-import java.util.Collection;
+public interface SatisfiedConstraint {
 
-public record ExtractedValue(Val val, Statement initialStatement, Collection<Type> types) {
-
-    @Override
-    public String toString() {
-        return "Extracted Value: " + val.getVariableName() + " with types " + types;
-    }
+    String getSimplifiedMessage(int depth);
 }

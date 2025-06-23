@@ -19,11 +19,20 @@ import java.util.Collection;
  * @param requiredMethods the methods that are expected to be called
  */
 public record ViolatedCallToConstraint(Collection<CrySLMethod> requiredMethods)
-        implements IViolatedConstraint {
+        implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
         return "Call to one of the methods "
+                + CrySLUtils.formatMethodNames(requiredMethods)
+                + " is missing";
+    }
+
+    @Override
+    public String getSimplifiedMessage(int depth) {
+        return "\n"
+                + "\t".repeat(depth)
+                + "|- Call to one of the methods "
                 + CrySLUtils.formatMethodNames(requiredMethods)
                 + " is missing";
     }

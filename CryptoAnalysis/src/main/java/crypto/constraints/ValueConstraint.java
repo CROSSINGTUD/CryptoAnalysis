@@ -11,19 +11,21 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
-import boomerang.scope.ValCollection;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
+import crypto.constraints.violations.SatisfiedValueConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.constraints.violations.ViolatedValueConstraint;
 import crypto.exceptions.CryptoAnalysisException;
-import crypto.extractparameter.ExtractedValue;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLSplitter;
 import crysl.rule.CrySLValueConstraint;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -43,7 +45,7 @@ public class ValueConstraint extends EvaluableConstraint {
     }
 
     @Override
-    public ISLConstraint getConstraint() {
+    public CrySLValueConstraint getConstraint() {
         return constraint;
     }
 
@@ -62,45 +64,69 @@ public class ValueConstraint extends EvaluableConstraint {
         allowedValues = formatAllowedValues(allowedValues);
 
         for (ParameterWithExtractedValues parameter : relevantParameters) {
-            Collection<ExtractedValue> violatingValues = new HashSet<>();
+            Collection<TransformedValue> correctValues = new HashSet<>();
+            Collection<TransformedValue> wrongValues = new HashSet<>();
+            Collection<TransformedValue> unknownValues = new HashSet<>();
 
-            for (ExtractedValue extractedValue : parameter.extractedValues()) {
+            for (TransformedValue value : parameter.extractedValues()) {
+                Val val = value.getTransformedVal();
                 // Boomerang returns the array values and the array allocation site. We are only
-                // interested
-                // in the array values
-                if (extractedValue.val().isArrayAllocationVal()) {
+                // interested in the array values
+                if (val.isArrayAllocationVal()) {
                     continue;
                 }
 
-                // TODO Extract call sites that are not part of the dataflow scope
-                if (extractedValue.val().equals(ValCollection.zero())
-                        || (!extractedValue.val().isConstant() && !extractedValue.val().isNull())) {
-                    ImpreciseValueExtractionError error =
-                            new ImpreciseValueExtractionError(
-                                    seed, parameter.statement(), seed.getSpecification(), this);
-                    errors.add(error);
-                } else {
+                if (val.isConstant() || val.isNull()) {
                     // TODO Make this case sensitive?
-                    String valAsString =
-                            convertConstantToString(extractedValue.val()).toLowerCase();
+                    String valAsString = convertConstantToString(val).toLowerCase();
                     valAsString =
                             checkForSplitterValue(valAsString, constraint.getVar().getSplitter());
 
-                    if (!allowedValues.contains(valAsString)) {
-                        violatingValues.add(extractedValue);
+                    if (allowedValues.contains(valAsString)) {
+                        correctValues.add(value);
+                    } else {
+                        wrongValues.add(value);
                     }
+                } else {
+                    unknownValues.add(value);
                 }
             }
 
-            if (!violatingValues.isEmpty()) {
-                IViolatedConstraint violatedConstraint =
-                        new ViolatedValueConstraint(constraint, violatingValues, parameter.index());
+            if (!correctValues.isEmpty()) {
+                SatisfiedConstraint satisfiedConstraint =
+                        new SatisfiedValueConstraint(this, parameter, correctValues);
+                satisfiedConstraints.add(satisfiedConstraint);
+            }
+
+            if (!wrongValues.isEmpty()) {
+                ViolatedConstraint violatedConstraint =
+                        new ViolatedValueConstraint(this, parameter, wrongValues);
+                violatedConstraints.add(violatedConstraint);
+
                 ConstraintError error =
                         new ConstraintError(
                                 seed,
                                 parameter.statement(),
                                 seed.getSpecification(),
                                 this,
+                                violatedConstraint);
+                errors.add(error);
+            }
+
+            if (!unknownValues.isEmpty()) {
+                Multimap<ParameterWithExtractedValues, TransformedValue> multimap =
+                        HashMultimap.create();
+                multimap.putAll(parameter, unknownValues);
+
+                ImpreciseValueConstraint violatedConstraint =
+                        new ImpreciseValueConstraint(this, multimap);
+                impreciseConstraints.add(violatedConstraint);
+
+                ImpreciseValueExtractionError error =
+                        new ImpreciseValueExtractionError(
+                                seed,
+                                parameter.statement(),
+                                seed.getSpecification(),
                                 violatedConstraint);
                 errors.add(error);
             }
@@ -165,9 +191,17 @@ public class ValueConstraint extends EvaluableConstraint {
 
     @Override
     public String toString() {
-        return constraint.getVar().getVarName()
-                + " in {"
-                + String.join(", ", constraint.getValueRange())
-                + "}";
+        String varName = constraint.getVarName();
+        if (constraint.getVar().getSplitter() != null) {
+            varName =
+                    switch (constraint.getVar().getSplitter().getIndex()) {
+                        case 0 -> "alg(" + varName + ")";
+                        case 1 -> "mode(" + varName + ")";
+                        case 2 -> "pad(" + varName + ")";
+                        default -> varName;
+                    };
+        }
+
+        return varName + " in {" + String.join(", ", constraint.getValueRange()) + "}";
     }
 }

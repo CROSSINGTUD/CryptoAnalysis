@@ -10,12 +10,12 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.soot.BoomerangPretransformer;
-import boomerang.scope.soot.SootFrameworkScope;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public class SootSetup extends FrameworkSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope() {
+    public CryptoAnalysisScope createFrameworkScope() {
         PackManager.v().getPack("cg").apply();
 
         BoomerangPretransformer.v().reset();
@@ -132,7 +132,7 @@ public class SootSetup extends FrameworkSetup {
 
         CallGraph callGraph = Scene.v().getCallGraph();
         Collection<SootMethod> entryPoints = Scene.v().getEntryPoints();
-        return new SootFrameworkScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
+        return new CryptoAnalysisSootScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
     }
 
     private List<SootMethod> getEntryPoints() {

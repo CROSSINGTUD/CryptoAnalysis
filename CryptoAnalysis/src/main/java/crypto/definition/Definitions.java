@@ -12,6 +12,7 @@ package crypto.definition;
 import boomerang.scope.FrameworkScope;
 import crypto.listener.AnalysisReporter;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.Collection;
 import sparse.SparsificationStrategy;
 
@@ -27,19 +28,19 @@ public interface Definitions {
             FrameworkScope frameworkScope, Collection<CrySLRule> rules, int timeout) {}
 
     record ConstraintsDefinition(
-            FrameworkScope frameworkScope,
+            CryptoAnalysisScope scope,
             int timeout,
             SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
 
     record ExtractParameterDefinition(
-            FrameworkScope frameworkScope,
+            CryptoAnalysisScope scope,
             int timeout,
             SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}
 
     record QuerySolverDefinition(
-            FrameworkScope frameworkScope,
+            CryptoAnalysisScope scope,
             int timeout,
             SparsificationStrategy<?, ?> strategy,
             AnalysisReporter reporter) {}

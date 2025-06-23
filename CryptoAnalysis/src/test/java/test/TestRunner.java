@@ -11,7 +11,6 @@ package test;
 
 import boomerang.scope.CallGraph;
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Method;
 import boomerang.scope.Statement;
@@ -21,6 +20,7 @@ import crypto.analysis.CryptoScanner;
 import crypto.listener.IErrorListener;
 import crypto.listener.IResultsListener;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -114,12 +114,13 @@ public class TestRunner {
         testSetup.initialize(buildClassPath(), testClassName, testMethodName);
 
         DataFlowScope dataFlowScope = new TestDataFlowScope(rules);
-        FrameworkScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
+        CryptoAnalysisScope frameworkScope = testSetup.createFrameworkScope(dataFlowScope);
         Method testMethod = testSetup.getTestMethod();
 
         // Setup test listener
         Collection<Assertion> assertions =
-                extractBenchmarkMethods(testMethod, frameworkScope.getCallGraph());
+                extractBenchmarkMethods(
+                        testMethod, frameworkScope.asFrameworkScope().getCallGraph());
         IErrorListener errorListener = new TestRunnerErrorListener(assertions);
         IResultsListener resultsListener = new TestRunnerResultsListener(assertions);
 

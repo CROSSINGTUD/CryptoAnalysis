@@ -125,6 +125,14 @@ public class CommandLineTest {
         Assertions.assertEquals(
                 chaScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.CHA);
 
+        String[] rtaArgs =
+                new String[] {
+                    APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "RTA"
+                };
+        HeadlessJavaScanner rtaScanner = HeadlessJavaScanner.createFromCLISettings(rtaArgs);
+        Assertions.assertEquals(
+                rtaScanner.getCallGraphAlgorithm(), ScannerSettings.CallGraphAlgorithm.RTA);
+
         String[] sparkArgs =
                 new String[] {
                     APP_PATH, EXAMPLE_APP_PATH, RULES_DIR, EXAMPLE_RULES_DIR, CALL_GRAPH, "SPARK"
@@ -156,7 +164,7 @@ public class CommandLineTest {
                                 RULES_DIR,
                                 EXAMPLE_RULES_DIR,
                                 CALL_GRAPH,
-                                "RTA"
+                                "SUPER_GRAPH"
                             };
                     HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(args);
                     Assertions.assertEquals(

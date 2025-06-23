@@ -9,6 +9,7 @@
  ********************************************************************************/
 package tests.error.imprecisevalueextraction;
 
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import test.Ruleset;
@@ -84,5 +85,15 @@ public class ImpreciseValueExtractionTest {
         // known
         Assertions.impreciseValueExtractionErrors(1);
         Assertions.constraintErrors(extraction2, 0);
+    }
+
+    @Test
+    public void testCouldNotExtractTransformedValue() {
+        String randomString = UUID.randomUUID().toString();
+        int intVal = Integer.parseInt(randomString);
+
+        ImpreciseValueExtraction extraction = new ImpreciseValueExtraction(intVal);
+        Assertions.constraintErrors(extraction, 0);
+        Assertions.impreciseValueExtractionErrors(1);
     }
 }

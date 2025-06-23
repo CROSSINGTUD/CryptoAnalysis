@@ -10,48 +10,35 @@
 package crypto.analysis.errors;
 
 import boomerang.scope.Statement;
-import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
-import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ExtractedValue;
-import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.constraints.violations.ImpreciseValueConstraint;
 import crysl.rule.CrySLRule;
 import java.util.Objects;
 
 public class ImpreciseValueExtractionError extends AbstractConstraintsError {
 
-    private final EvaluableConstraint violatedConstraint;
+    private final ImpreciseValueConstraint violatedConstraint;
 
     public ImpreciseValueExtractionError(
             IAnalysisSeed seed,
             Statement errorStmt,
             CrySLRule rule,
-            EvaluableConstraint constraint) {
+            ImpreciseValueConstraint violatedConstraint) {
         super(seed, errorStmt, rule);
-        this.violatedConstraint = constraint;
+
+        this.violatedConstraint = violatedConstraint;
     }
 
-    public ImpreciseValueExtractionError(
-            AnalysisSeedWithSpecification seed,
-            Statement statement,
-            CrySLRule rule,
-            ParameterWithExtractedValues parameter,
-            ExtractedValue value,
-            EvaluableConstraint constraint) {
-        super(seed, statement, rule);
-
-        violatedConstraint = constraint;
-    }
-
-    public EvaluableConstraint getViolatedConstraint() {
+    public ImpreciseValueConstraint getViolatedConstraint() {
         return violatedConstraint;
     }
 
     @Override
     public String toErrorMarkerString() {
-        return "Constraint \""
+        return "Could not evaluate the constraint \""
                 + violatedConstraint
-                + "\" could not be evaluated due to insufficient information.";
+                + "\" due to insufficient information:"
+                + violatedConstraint.getErrorMessage();
     }
 
     @Override

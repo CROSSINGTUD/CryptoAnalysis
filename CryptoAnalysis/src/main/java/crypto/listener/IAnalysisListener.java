@@ -9,12 +9,12 @@
  ********************************************************************************/
 package crypto.listener;
 
+import boomerang.BackwardQuery;
 import boomerang.scope.CallGraph;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
-import crypto.extractparameter.ExtractParameterQuery;
 import java.util.Collection;
 
 public interface IAnalysisListener {
@@ -31,9 +31,9 @@ public interface IAnalysisListener {
 
     void afterTypestateAnalysis();
 
-    void beforeTriggeringBoomerangQuery(ExtractParameterQuery query);
+    void beforeTriggeringBoomerangQuery(BackwardQuery query);
 
-    void afterTriggeringBoomerangQuery(ExtractParameterQuery query);
+    void afterTriggeringBoomerangQuery(BackwardQuery query);
 
     void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds);
 

@@ -55,7 +55,6 @@ public class TypestateAnalysis {
         Collection<Query> seeds = analysisScope.computeSeeds();
 
         Collection<IdealResult> results = new LinkedHashSet<>();
-
         for (Query seed : seeds) {
             if (seed instanceof ForwardSeedQuery query) {
                 ForwardBoomerangResults<TransitionFunction> result =
@@ -115,7 +114,9 @@ public class TypestateAnalysis {
             @Override
             public BoomerangOptions boomerangOptions() {
                 return BoomerangOptions.builder()
-                        .withAllocationSite(new TypestateAllocationSite(seedQuery))
+                        .withAllocationSite(
+                                new TypestateAllocationSite(
+                                        seedQuery, definition.frameworkScope().getDataFlowScope()))
                         .withStaticFieldStrategy(Strategies.StaticFieldStrategy.FLOW_SENSITIVE)
                         .withAnalysisTimeout(definition.timeout())
                         .enableAllowMultipleQueries(true)

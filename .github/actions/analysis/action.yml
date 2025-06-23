@@ -26,6 +26,9 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    - name: Build CryptoAnalysisScopes
+      run: mvn clean install -f CryptoAnalysisScopes -DskipTests
+      shell: bash
     - name: Run maven command
       run: mvn clean verify -f CryptoAnalysis -DtestSetup=${{ inputs.framework }}
       shell: bash

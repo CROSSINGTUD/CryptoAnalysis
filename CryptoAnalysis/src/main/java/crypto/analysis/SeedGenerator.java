@@ -13,7 +13,6 @@ import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.AllocVal;
 import boomerang.scope.ControlFlowGraph;
 import boomerang.scope.DeclaredMethod;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
 import boomerang.scope.Type;
@@ -27,6 +26,7 @@ import crypto.utils.MatcherUtils;
 import crysl.rule.CrySLMethod;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -39,14 +39,14 @@ import typestate.TransitionFunction;
 public class SeedGenerator {
 
     private final CryptoScanner scanner;
-    private final FrameworkScope frameworkScope;
+    private final CryptoAnalysisScope scope;
     private final Map<String, CrySLRule> rules;
     private final TypestateAnalysis typestateAnalysis;
 
     public SeedGenerator(
-            CryptoScanner scanner, FrameworkScope frameworkScope, Collection<CrySLRule> ruleset) {
+            CryptoScanner scanner, CryptoAnalysisScope scope, Collection<CrySLRule> ruleset) {
         this.scanner = scanner;
-        this.frameworkScope = frameworkScope;
+        this.scope = scope;
 
         this.rules = new HashMap<>();
         for (CrySLRule rule : ruleset) {
@@ -54,7 +54,8 @@ public class SeedGenerator {
         }
 
         Definitions.TypestateDefinition definition =
-                new Definitions.TypestateDefinition(frameworkScope, ruleset, scanner.getTimeout());
+                new Definitions.TypestateDefinition(
+                        scope.asFrameworkScope(), ruleset, scanner.getTimeout());
         typestateAnalysis = new TypestateAnalysis(definition);
     }
 
@@ -273,7 +274,7 @@ public class SeedGenerator {
 
                 seed =
                         new AnalysisSeedWithSpecification(
-                                scanner, stmt, fact, frameworkScope, result.results(), rule);
+                                scanner, stmt, fact, scope, result.results(), rule);
             } else {
                 seed = new AnalysisSeedWithEnsuredPredicate(scanner, stmt, fact, result.results());
             }

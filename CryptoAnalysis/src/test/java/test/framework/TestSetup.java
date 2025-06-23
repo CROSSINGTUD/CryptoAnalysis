@@ -10,8 +10,8 @@
 package test.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.Method;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 
 public interface TestSetup {
 
@@ -19,5 +19,5 @@ public interface TestSetup {
 
     Method getTestMethod();
 
-    FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope);
+    CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope);
 }

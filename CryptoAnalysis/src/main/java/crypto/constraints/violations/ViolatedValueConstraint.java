@@ -10,9 +10,9 @@
 package crypto.constraints.violations;
 
 import crypto.constraints.ValueConstraint;
-import crypto.extractparameter.ExtractedValue;
+import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crypto.utils.CrySLUtils;
-import crysl.rule.CrySLValueConstraint;
 import java.util.Collection;
 
 /**
@@ -21,44 +21,59 @@ import java.util.Collection;
  * @param constraint the violated constraint
  */
 public record ViolatedValueConstraint(
-        CrySLValueConstraint constraint, Collection<ExtractedValue> violatingValues, int index)
-        implements IViolatedConstraint {
+        ValueConstraint constraint,
+        ParameterWithExtractedValues parameter,
+        Collection<TransformedValue> violatingValues)
+        implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(CrySLUtils.getIndexAsString(index));
+        StringBuilder sb = new StringBuilder();
 
-        if (violatingValues.size() > 1) {
-            builder.append(" (with values ");
-
-            String values =
-                    String.join(
-                            ", ",
-                            violatingValues.stream()
-                                    .map(value -> value.val().getVariableName())
-                                    .toList());
-            builder.append(values);
-        } else {
-            builder.append(" (with value ");
-
-            String value = violatingValues.iterator().next().val().getVariableName();
-            builder.append(value);
+        for (TransformedValue value : violatingValues) {
+            sb.append("\n|- ")
+                    .append(CrySLUtils.getIndexAsString(parameter.index()))
+                    .append(" \"")
+                    .append(parameter.param().getVariableName())
+                    .append("\" with value ")
+                    .append(value.getTransformedVal().getVariableName())
+                    .append(" should be any of {")
+                    .append(getExpectedValuesAsString())
+                    .append("} (extracted @ ")
+                    .append(value.getStatement())
+                    .append(" @ line ")
+                    .append(value.getStatement().getLineNumber())
+                    .append(")");
         }
 
-        builder.append(")");
-        builder.append(" should be any of ");
-        builder.append("{");
+        return sb.toString();
+    }
 
-        String expectedValues = getExpectedValuesAsString();
-        builder.append(expectedValues);
+    @Override
+    public String getSimplifiedMessage(int depth) {
+        StringBuilder sb = new StringBuilder();
 
-        builder.append("}");
+        for (TransformedValue value : violatingValues) {
+            sb.append("\n")
+                    .append("\t".repeat(depth))
+                    .append("|- ")
+                    .append(CrySLUtils.getIndexAsString(parameter.index()))
+                    .append(" \"")
+                    .append(parameter.param().getVariableName())
+                    .append("\" (")
+                    .append(constraint.getConstraint().getVarName())
+                    .append(") with value ")
+                    .append(value.getTransformedVal().getVariableName())
+                    .append(" violates the constraint @ ")
+                    .append(parameter.statement())
+                    .append(" @ line ")
+                    .append(parameter.statement().getLineNumber());
+        }
 
-        return builder.toString();
+        return sb.toString();
     }
 
     private String getExpectedValuesAsString() {
-        return String.join(", ", constraint.getValueRange());
+        return String.join(", ", constraint.getConstraint().getValueRange());
     }
 }

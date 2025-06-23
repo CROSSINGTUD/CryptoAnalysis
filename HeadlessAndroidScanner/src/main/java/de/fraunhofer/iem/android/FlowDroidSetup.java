@@ -10,10 +10,10 @@
 package de.fraunhofer.iem.android;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.soot.BoomerangPretransformer;
-import boomerang.scope.soot.SootFrameworkScope;
 import com.google.common.base.Stopwatch;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootScope;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +55,7 @@ public class FlowDroidSetup {
         LOGGER.info("FlowDroid setup done in {} ", stopwatch);
     }
 
-    public FrameworkScope createFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope createFrameworkScope(DataFlowScope dataFlowScope) {
         flowDroid.constructCallgraph();
 
         BoomerangPretransformer.v().reset();
@@ -63,7 +63,7 @@ public class FlowDroidSetup {
 
         CallGraph callGraph = Scene.v().getCallGraph();
         Collection<SootMethod> entryPoints = Scene.v().getEntryPoints();
-        return new SootFrameworkScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
+        return new CryptoAnalysisSootScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
     }
 
     private SetupApplication initializeFlowDroid() {
