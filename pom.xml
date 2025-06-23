@@ -58,7 +58,7 @@
         <license.dir>${project.basedir}</license.dir>
         <java.version>17</java.version>
 
-        <spds.version>4.3.1</spds.version>
+        <spds.version>4.3.2</spds.version>
         <soot.version>4.6.0</soot.version>
         <sootup.version>2.0.0</sootup.version>
         <opal.version>5.0.0</opal.version>
