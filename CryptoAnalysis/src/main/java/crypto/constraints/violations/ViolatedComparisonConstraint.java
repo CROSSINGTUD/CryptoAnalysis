@@ -36,6 +36,10 @@ public record ViolatedComparisonConstraint(Statement statement, ComparisonConstr
         Collection<ParameterWithExtractedValues> params =
                 constraint.getExtractedValues().get(statement);
         for (ParameterWithExtractedValues param : params) {
+            if (!constraint.getConstraint().getInvolvedVarNames().contains(param.varName())) {
+                continue;
+            }
+
             sb.append("\n")
                     .append("\t".repeat(depth))
                     .append("|- ")

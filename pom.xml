@@ -112,6 +112,10 @@
                             <!-- The JUnit api requires a concrete engine that is not explicitly used by this project -->
                             <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter-engine</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
+                        <ignoredNonTestScopedDependencies>
+                            <!-- Required for SootUp 2.0.0; once SootUp uses a new version, this can be removed -->
+                            <ignoredNonTestScopedDependency>commons-io:commons-io</ignoredNonTestScopedDependency>
+                        </ignoredNonTestScopedDependencies>
                     </configuration>
                     <executions>
                         <execution>

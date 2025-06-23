@@ -109,6 +109,7 @@ public class ScannerSettings implements Callable<Integer> {
         VTA,
         SPARK,
         SPARK_LIB,
+        ALLOC_SITE_BASED
     }
 
     public enum Framework {
@@ -150,7 +151,11 @@ public class ScannerSettings implements Callable<Integer> {
         supportedCGAlgorithms.putAll(
                 Framework.SOOT_UP, Set.of(CallGraphAlgorithm.CHA, CallGraphAlgorithm.RTA));
         supportedCGAlgorithms.putAll(
-                Framework.OPAL, Set.of(CallGraphAlgorithm.CHA, CallGraphAlgorithm.RTA));
+                Framework.OPAL,
+                Set.of(
+                        CallGraphAlgorithm.CHA,
+                        CallGraphAlgorithm.RTA,
+                        CallGraphAlgorithm.ALLOC_SITE_BASED));
     }
 
     public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -220,8 +225,11 @@ public class ScannerSettings implements Callable<Integer> {
 
         return switch (callGraphValue) {
             case "cha" -> CallGraphAlgorithm.CHA;
+            case "rta" -> CallGraphAlgorithm.RTA;
+            case "vta" -> CallGraphAlgorithm.VTA;
             case "spark" -> CallGraphAlgorithm.SPARK;
             case "sparklib" -> CallGraphAlgorithm.SPARK_LIB;
+            case "allocsitebased" -> CallGraphAlgorithm.ALLOC_SITE_BASED;
             default ->
                     throw new CryptoAnalysisParserException(
                             "Incorrect call graph value: " + option);

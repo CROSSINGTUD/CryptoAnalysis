@@ -53,7 +53,7 @@ public record ViolatedBinaryConstraint(BinaryConstraint constraint) implements V
                 .append(constraint)
                 .append("\" evaluates to <")
                 .append(constraint.isSatisfied())
-                .append("> due to the following reason:");
+                .append(">:");
 
         sb.append("\n")
                 .append("\t".repeat(depth + 1))
@@ -61,7 +61,7 @@ public record ViolatedBinaryConstraint(BinaryConstraint constraint) implements V
                 .append(leftConstraint)
                 .append("\" evaluates to <")
                 .append(leftConstraint.isSatisfied())
-                .append("> due to the following reason:");
+                .append(">:");
         addMessageForConstraint(sb, leftConstraint, depth + 2);
 
         sb.append("\n")
@@ -70,7 +70,7 @@ public record ViolatedBinaryConstraint(BinaryConstraint constraint) implements V
                 .append(rightConstraint)
                 .append("\" evaluates to <")
                 .append(rightConstraint.isSatisfied())
-                .append("> due to the following reason:");
+                .append(">:");
         addMessageForConstraint(sb, rightConstraint, depth + 2);
     }
 

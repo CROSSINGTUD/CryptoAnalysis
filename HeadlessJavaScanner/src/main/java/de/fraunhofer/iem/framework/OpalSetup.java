@@ -28,6 +28,7 @@ import org.opalj.br.analyses.cg.InitialEntryPointsKey;
 import org.opalj.log.DevNullLogger$;
 import org.opalj.log.GlobalLogContext$;
 import org.opalj.log.OPALLogger;
+import org.opalj.tac.cg.AllocationSiteBasedPointsToCallGraphKey$;
 import org.opalj.tac.cg.CHACallGraphKey$;
 import org.opalj.tac.cg.CallGraph;
 import org.opalj.tac.cg.CallGraphKey;
@@ -115,6 +116,9 @@ public class OpalSetup extends FrameworkSetup {
             }
             case RTA -> {
                 return RTACallGraphKey$.MODULE$;
+            }
+            case ALLOC_SITE_BASED -> {
+                return AllocationSiteBasedPointsToCallGraphKey$.MODULE$;
             }
             default ->
                     throw new RuntimeException(
