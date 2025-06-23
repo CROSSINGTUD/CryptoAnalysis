@@ -9,103 +9,124 @@
  ********************************************************************************/
 package crypto.extractparameter;
 
+import boomerang.BackwardQuery;
 import boomerang.Boomerang;
 import boomerang.ForwardQuery;
 import boomerang.options.BoomerangOptions;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.scope.AllocVal;
-import boomerang.scope.Type;
+import boomerang.scope.ControlFlowGraph;
+import boomerang.scope.Statement;
 import boomerang.scope.Val;
-import com.google.common.collect.Multimap;
 import crypto.definition.Definitions;
-import crypto.extractparameter.transformation.Transformation;
+import crypto.extractparameter.transformation.ITransformation;
+import crypto.extractparameter.transformation.TransformationHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import wpds.impl.NoWeight;
 
 public class QuerySolver {
 
     private final Definitions.QuerySolverDefinition definition;
+    private final TransformationHandler transformation;
     private final BoomerangOptions options;
 
     public QuerySolver(Definitions.QuerySolverDefinition definition) {
         this.definition = definition;
+        this.transformation = new TransformationHandler(definition.scope().getFrameworkHandler());
         this.options =
                 BoomerangOptions.builder()
-                        .withAllocationSite(new ExtractParameterAllocationSite())
+                        .withAllocationSite(
+                                new ExtractParameterAllocationSite(
+                                        definition.scope().getFrameworkHandler(),
+                                        definition.scope().asFrameworkScope().getDataFlowScope(),
+                                        transformation.getTransformations()))
                         .withAnalysisTimeout(definition.timeout())
                         .withSparsificationStrategy(definition.strategy())
-                        .enableTrackStaticFieldAtEntryPointToClinit(true)
                         .build();
     }
 
-    public ParameterWithExtractedValues solveQuery(ExtractParameterQuery query) {
-        Boomerang boomerang = new Boomerang(definition.frameworkScope(), options);
-
-        definition.reporter().beforeTriggeringBoomerangQuery(query);
-        BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
-        definition.reporter().afterTriggeringBoomerangQuery(query);
-
-        definition.reporter().extractedBoomerangResults(query, results);
-        if (results.isTimedout()) {
-            definition
-                    .reporter()
-                    .onExtractParameterAnalysisTimeout(query.var(), query.cfgEdge().getTarget());
-        }
-
-        return extractValuesFromQueryResult(query, results);
-    }
-
-    private ParameterWithExtractedValues extractValuesFromQueryResult(
-            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {
-
-        Collection<ForwardQuery> allocSites = results.getAllocationSites().keySet();
-        Collection<Type> propagatedTypes = results.getPropagationType();
+    public ParameterWithExtractedValues solveQuery(ExtractParameterInfo info) {
+        AllocationSiteGraph graph = computeAllocationSiteGraph(info.param(), info.statement());
+        Collection<TransformedValue> transformedValues =
+                transformation.computeTransformedValues(graph);
 
         // If no allocation site has been found, add the zero value to indicate it
-        if (allocSites.isEmpty()) {
-            return extractedZeroValue(query, propagatedTypes);
+        if (transformedValues.isEmpty()) {
+            TransformedValue zeroVal =
+                    new TransformedValue(UnknownVal.getInstance(), info.statement());
+
+            return new ParameterWithExtractedValues(
+                    info.statement(),
+                    info.param(),
+                    info.index(),
+                    info.varNameInSpec(),
+                    Collections.singleton(zeroVal));
         }
 
-        Collection<ExtractedValue> extractedValues = new HashSet<>();
-        for (ForwardQuery allocSite : allocSites) {
-            AllocVal allocVal = allocSite.getAllocVal();
-            Multimap<Val, Type> sites =
-                    Transformation.transformAllocationSite(
-                            allocVal, definition.frameworkScope(), options);
+        return new ParameterWithExtractedValues(
+                info.statement(),
+                info.param(),
+                info.index(),
+                info.varNameInSpec(),
+                transformedValues);
+    }
 
-            for (Val site : sites.keySet()) {
-                Collection<Type> types = sites.get(site);
-                types.addAll(propagatedTypes);
+    private AllocationSiteGraph computeAllocationSiteGraph(Val sourceVal, Statement statement) {
+        Collection<AllocVal> initialAllocSites = computeAllocationSites(sourceVal, statement);
 
-                ExtractedValue extractedValue =
-                        new ExtractedValue(site, allocVal.getAllocStatement(), types);
-                extractedValues.add(extractedValue);
+        AllocationSiteGraph graph = new AllocationSiteGraph(sourceVal);
+        graph.addValToAllocSiteEdge(sourceVal, initialAllocSites);
+
+        Queue<AllocVal> workList = new LinkedList<>(initialAllocSites);
+        while (!workList.isEmpty()) {
+            AllocVal allocVal = workList.poll();
+            Statement allocStmt = allocVal.getAllocStatement();
+
+            for (ITransformation transformation : transformation.getTransformations()) {
+                Collection<Val> requiredValues = transformation.computeRequiredValues(allocStmt);
+                graph.addAllocSiteToValEdge(allocVal, requiredValues);
+
+                for (Val val : requiredValues) {
+                    Collection<AllocVal> allocSites = computeAllocationSites(val, allocStmt);
+                    graph.addValToAllocSiteEdge(val, allocSites);
+
+                    workList.addAll(allocSites);
+                }
             }
         }
 
-        if (extractedValues.isEmpty()) {
-            return extractedZeroValue(query, propagatedTypes);
-        }
-
-        return new ParameterWithExtractedValues(
-                query.cfgEdge().getTarget(),
-                query.var(),
-                query.getIndex(),
-                query.getVarNameInSpec(),
-                extractedValues);
+        return graph;
     }
 
-    private ParameterWithExtractedValues extractedZeroValue(
-            ExtractParameterQuery query, Collection<Type> types) {
-        ExtractedValue zeroVal = new ExtractedValue(Val.zero(), query.cfgEdge().getTarget(), types);
+    private Collection<AllocVal> computeAllocationSites(Val val, Statement statement) {
+        Collection<AllocVal> result = new HashSet<>();
 
-        return new ParameterWithExtractedValues(
-                query.cfgEdge().getTarget(),
-                query.var(),
-                query.getIndex(),
-                query.getVarNameInSpec(),
-                Collections.singleton(zeroVal));
+        for (Statement pred : statement.getMethod().getControlFlowGraph().getPredsOf(statement)) {
+            ControlFlowGraph.Edge edge = new ControlFlowGraph.Edge(pred, statement);
+            BackwardQuery query = BackwardQuery.make(edge, val);
+
+            definition.reporter().beforeTriggeringBoomerangQuery(query);
+            Boomerang boomerang = new Boomerang(definition.scope().asFrameworkScope(), options);
+            BackwardBoomerangResults<NoWeight> results = boomerang.solve(query);
+            definition.reporter().afterTriggeringBoomerangQuery(query);
+
+            definition.reporter().extractedBoomerangResults(query, results);
+            if (results.isTimedout()) {
+                definition
+                        .reporter()
+                        .onExtractParameterAnalysisTimeout(
+                                query.var(), query.cfgEdge().getTarget());
+            }
+
+            for (ForwardQuery allocSite : results.getAllocationSites().keySet()) {
+                result.add(allocSite.getAllocVal());
+            }
+        }
+
+        return result;
     }
 }

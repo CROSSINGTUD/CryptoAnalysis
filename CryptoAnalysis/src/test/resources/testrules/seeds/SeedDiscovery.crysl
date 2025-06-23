@@ -1,0 +1,24 @@
+SPEC tests.seeds.SeedDiscovery
+
+OBJECTS
+    tests.seeds.SeedTarget target;
+
+    java.lang.String posPredSeedReturn;
+    java.lang.String posPredSeedParam;
+
+    java.lang.String negPredSeedReturn;
+    java.lang.String negPredSeedParam;
+
+EVENTS
+    Con: SeedDiscovery();
+    SeedReturn: target = seedFromReturn();
+
+    PosPredSeedReturn: posPredSeedReturn = predicateSeedFromReturn();
+    PosPredSeedParam: predicateSeedFromParameter(posPredSeedParam);
+
+    NegPredSeedReturn: negPredSeedReturn = predicateSeedFromReturn();
+    NegPredSeedParam: predicateSeedFromParameter(negPredSeedParam);
+
+ENSURES
+    generatedPredSeedReturn[posPredSeedReturn];
+    generatedPredSeedParam[posPredSeedParam];

@@ -11,20 +11,23 @@ package crypto.constraints;
 
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
 import crypto.analysis.errors.ImpreciseValueExtractionError;
-import crypto.constraints.violations.IViolatedConstraint;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.constraints.violations.SatisfiedComparisonConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
 import crypto.constraints.violations.ViolatedComparisonConstraint;
-import crypto.extractparameter.ExtractedValue;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
+import crypto.extractparameter.TransformedValue;
 import crysl.rule.CrySLArithmeticConstraint;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLObject;
 import crysl.rule.CrySLPredicate;
 import crysl.rule.ICrySLPredicateParameter;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -59,7 +62,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
     }
 
     @Override
-    public ISLConstraint getConstraint() {
+    public CrySLComparisonConstraint getConstraint() {
         return constraint;
     }
 
@@ -141,7 +144,10 @@ public class ComparisonConstraint extends EvaluableConstraint {
                 boolean satisfied = isOperatorSatisfied(leftValue, rightValue);
 
                 if (!satisfied) {
-                    IViolatedConstraint violatedConstraint = new ViolatedComparisonConstraint(this);
+                    ViolatedConstraint violatedConstraint =
+                            new ViolatedComparisonConstraint(statement, this);
+                    violatedConstraints.add(violatedConstraint);
+
                     ConstraintError error =
                             new ConstraintError(
                                     seed,
@@ -150,6 +156,10 @@ public class ComparisonConstraint extends EvaluableConstraint {
                                     this,
                                     violatedConstraint);
                     errors.add(error);
+                } else {
+                    SatisfiedConstraint satisfiedConstraint =
+                            new SatisfiedComparisonConstraint(statement, this);
+                    satisfiedConstraints.add(satisfiedConstraint);
                 }
             }
         }
@@ -157,20 +167,22 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
     private void handleImpreciseResult(
             Statement statement, Collection<ImpreciseResult> impreciseResults) {
+        Multimap<ParameterWithExtractedValues, TransformedValue> multimap = HashMultimap.create();
+
         for (ImpreciseResult result : impreciseResults) {
             // TODO Consider imprecise constants
             if (result instanceof ImpreciseResult.ImpreciseExtractedValue value) {
-                ImpreciseValueExtractionError error =
-                        new ImpreciseValueExtractionError(
-                                seed,
-                                statement,
-                                seed.getSpecification(),
-                                value.parameter(),
-                                value.impreciseValue(),
-                                this);
-                errors.add(error);
+                multimap.put(value.parameter(), value.impreciseValue());
             }
         }
+
+        ImpreciseValueConstraint impreciseConstraint = new ImpreciseValueConstraint(this, multimap);
+        impreciseConstraints.add(impreciseConstraint);
+
+        ImpreciseValueExtractionError error =
+                new ImpreciseValueExtractionError(
+                        seed, statement, seed.getSpecification(), impreciseConstraint);
+        errors.add(error);
     }
 
     @Override
@@ -344,9 +356,9 @@ public class ComparisonConstraint extends EvaluableConstraint {
             Collection<ImpreciseResult> impreciseResults = new HashSet<>();
 
             for (ParameterWithExtractedValues parameter : values) {
-                for (ExtractedValue value : parameter.extractedValues()) {
-                    if (value.val().isIntConstant()) {
-                        preciseValues.add(value.val().getIntValue());
+                for (TransformedValue value : parameter.extractedValues()) {
+                    if (value.getTransformedVal().isIntConstant()) {
+                        preciseValues.add(value.getTransformedVal().getIntValue());
                     } else {
                         ImpreciseResult.ImpreciseExtractedValue result =
                                 new ImpreciseResult.ImpreciseExtractedValue(parameter, value);
@@ -408,8 +420,8 @@ public class ComparisonConstraint extends EvaluableConstraint {
             Collection<ImpreciseResult> impreciseResults = new HashSet<>();
 
             for (ParameterWithExtractedValues parameter : values) {
-                for (ExtractedValue extractedValue : parameter.extractedValues()) {
-                    Val val = extractedValue.val();
+                for (TransformedValue value : parameter.extractedValues()) {
+                    Val val = value.getTransformedVal();
 
                     if (val.isArrayAllocationVal()) {
                         Val arrLength = val.getArrayAllocationSize();
@@ -421,20 +433,18 @@ public class ComparisonConstraint extends EvaluableConstraint {
                             preciseValues.add(arrLength.getIntValue());
                         } else {
                             ImpreciseResult impreciseResult =
-                                    new ImpreciseResult.ImpreciseExtractedValue(
-                                            parameter, extractedValue);
+                                    new ImpreciseResult.ImpreciseExtractedValue(parameter, value);
                             impreciseResults.add(impreciseResult);
                         }
                     } else if (val.isStringConstant()) {
-                        String value = val.getStringValue();
-                        preciseValues.add(value.length());
+                        String stringVal = val.getStringValue();
+                        preciseValues.add(stringVal.length());
                     } else if (val.isIntConstant()) {
-                        int value = val.getIntValue();
-                        preciseValues.add(String.valueOf(value).length());
+                        int intVal = val.getIntValue();
+                        preciseValues.add(String.valueOf(intVal).length());
                     } else {
                         ImpreciseResult impreciseResult =
-                                new ImpreciseResult.ImpreciseExtractedValue(
-                                        parameter, extractedValue);
+                                new ImpreciseResult.ImpreciseExtractedValue(parameter, value);
                         impreciseResults.add(impreciseResult);
                     }
                 }
@@ -476,7 +486,7 @@ public class ComparisonConstraint extends EvaluableConstraint {
 
     private sealed interface ImpreciseResult {
         record ImpreciseExtractedValue(
-                ParameterWithExtractedValues parameter, ExtractedValue impreciseValue)
+                ParameterWithExtractedValues parameter, TransformedValue impreciseValue)
                 implements ImpreciseResult {}
 
         record ImpreciseConstant(CrySLObject object) implements ImpreciseResult {}

@@ -20,18 +20,17 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import org.junit.Ignore;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class OutputStreamTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class OutputStreamTest {
 
     // Usage Pattern for CipherOutputStream
     @Test
@@ -123,7 +122,7 @@ public class OutputStreamTest extends UsagePatternTestingFramework {
 
     // Usage Pattern tests for DigestOutputStream
     @Test
-    @Ignore
+    @Disabled
     public void UsagePatternTestDOSCallToForbiddenMethod()
             throws GeneralSecurityException, IOException {
         OutputStream os = Files.newOutputStream(Paths.get(".\\resources\\dos.txt"));

@@ -20,18 +20,18 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
 import java.security.GeneralSecurityException;
-import org.junit.Ignore;
-import org.junit.Test;
-import test.TestConstants;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-@Ignore
-public class TestStreamingAEADCipher extends TestTinkPrimitives {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.TINK_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TINK)
+@Disabled
+public class TestStreamingAEADCipher {
 
     @Test
     public void generateNewAES128_CTR_HMAC_SHA256_4KBKeySet() throws GeneralSecurityException {

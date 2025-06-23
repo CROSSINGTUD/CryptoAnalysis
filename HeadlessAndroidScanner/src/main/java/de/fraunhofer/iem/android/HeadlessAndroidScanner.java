@@ -10,12 +10,12 @@
 package de.fraunhofer.iem.android;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,8 +72,9 @@ public class HeadlessAndroidScanner extends CryptoScanner {
 
         DataFlowScope dataFlowScope = new AndroidDataFlowScope(rules, Collections.emptySet());
         super.getAnalysisReporter().beforeCallGraphConstruction();
-        FrameworkScope frameworkScope = flowDroidSetup.createFrameworkScope(dataFlowScope);
-        super.getAnalysisReporter().afterCallGraphConstruction(frameworkScope.getCallGraph());
+        CryptoAnalysisScope frameworkScope = flowDroidSetup.createFrameworkScope(dataFlowScope);
+        super.getAnalysisReporter()
+                .afterCallGraphConstruction(frameworkScope.asFrameworkScope().getCallGraph());
 
         // Run the analysis
         super.scan(frameworkScope, rules);

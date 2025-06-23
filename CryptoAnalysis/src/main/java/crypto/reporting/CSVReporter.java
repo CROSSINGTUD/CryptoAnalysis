@@ -76,7 +76,7 @@ public class CSVReporter extends Reporter {
                                     methodName, // method
                                     error.getErrorStatement().toString(), // statement
                                     String.valueOf(error.getLineNumber()), // line number
-                                    error.toErrorMarkerString() // message
+                                    sanitizeMessage(error.toErrorMarkerString()) // message
                                     );
 
                     String line = Joiner.on(CSV_SEPARATOR).join(lineFields);
@@ -88,6 +88,10 @@ public class CSVReporter extends Reporter {
         }
 
         writeToFile(lineContents);
+    }
+
+    private String sanitizeMessage(String message) {
+        return message.replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t");
     }
 
     public void writeToFile(List<String> contents) {

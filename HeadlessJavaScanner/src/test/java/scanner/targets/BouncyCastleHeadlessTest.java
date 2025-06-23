@@ -18,7 +18,7 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import de.fraunhofer.iem.scanner.HeadlessJavaScanner;
 import java.io.File;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import scanner.setup.AbstractHeadlessTest;
 import scanner.setup.ErrorSpecification;
 import scanner.setup.MavenProject;
@@ -35,12 +35,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder("animamea.AmAESCrypto", "getMACOne", 1)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("animamea.AmAESCrypto", "getMACTwo", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -52,7 +50,6 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder("gwt_crypto.GMacTest", "performTestOne", 0)
                         .withTPs(ConstraintError.class, 1)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 3)
                         .withTPs(AlternativeReqPredicateError.class, 1)
                         .withTPs(IncompleteOperationError.class, 1)
@@ -110,7 +107,7 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "cbc_aes_example.CBCAESBouncyCastle", "processing", 2)
                         .withTPs(RequiredPredicateError.class, 4)
-                        .withTPs(ImpreciseValueExtractionError.class, 3)
+                        .withTPs(ImpreciseValueExtractionError.class, 7)
                         .build());
 
         scanner.scan();
@@ -151,11 +148,10 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptOne", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
+                        .withNoErrors(TypestateError.class)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("crypto.RSAEngineTest", "testEncryptTwo", 0)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .withTPs(TypestateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -249,14 +245,12 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
                 new ErrorSpecification.Builder(
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "unwrapAES", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "inflatable_donkey.KeyBlobCurve25519Unwrap", "wrapAES", 2)
                         .withTPs(ForbiddenMethodError.class, 1)
-                        .withTPs(TypestateError.class, 1)
                         .withTPs(RequiredPredicateError.class, 1)
                         .build());
         addErrorSpecification(
@@ -274,15 +268,14 @@ public class BouncyCastleHeadlessTest extends AbstractHeadlessTest {
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "TestSHA256DigestOne", 0)
-                        .withTPs(TypestateError.class, 2)
+                        .withTPs(TypestateError.class, 1)
                         .withTPs(ImpreciseValueExtractionError.class, 1)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
                                 "pluotsorbet.BouncyCastleSHA256", "testSHA256DigestTwo", 0)
-                        .withTPs(ConstraintError.class, 2)
+                        .withTPs(ImpreciseValueExtractionError.class, 4)
                         .withTPs(TypestateError.class, 1)
-                        .withTPs(ImpreciseValueExtractionError.class, 2)
                         .build());
 
         addErrorSpecification(

@@ -9,6 +9,8 @@
  ********************************************************************************/
 package de.fraunhofer.iem.scanner;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 import crypto.exceptions.CryptoAnalysisParserException;
 import crypto.reporting.Reporter;
@@ -54,9 +56,9 @@ public class ScannerSettings implements Callable<Integer> {
     private String cg = null;
 
     @CommandLine.Option(
-            names = {"--sootPath"},
-            description = "The absolute path of the whole project")
-    private String sootPath = "";
+            names = {"--addClassPath"},
+            description = "Add classes to the classpath")
+    private String addClassPath = "";
 
     @CommandLine.Option(
             names = {"--reportPath"},
@@ -103,8 +105,11 @@ public class ScannerSettings implements Callable<Integer> {
 
     public enum CallGraphAlgorithm {
         CHA,
+        RTA,
+        VTA,
         SPARK,
         SPARK_LIB,
+        ALLOC_SITE_BASED
     }
 
     public enum Framework {
@@ -119,6 +124,8 @@ public class ScannerSettings implements Callable<Integer> {
         ALIAS_AWARE,
     }
 
+    private final Multimap<Framework, CallGraphAlgorithm> supportedCGAlgorithms;
+
     private CallGraphAlgorithm callGraphAlgorithm;
     private Framework framework;
     private Collection<Reporter.ReportFormat> reportFormats;
@@ -131,6 +138,24 @@ public class ScannerSettings implements Callable<Integer> {
         framework = Framework.SOOT;
         ignoredSections = new ArrayList<>();
         sparseStrategy = SparseStrategy.NONE;
+
+        supportedCGAlgorithms = HashMultimap.create();
+        supportedCGAlgorithms.putAll(
+                Framework.SOOT,
+                Set.of(
+                        CallGraphAlgorithm.CHA,
+                        CallGraphAlgorithm.RTA,
+                        CallGraphAlgorithm.VTA,
+                        CallGraphAlgorithm.SPARK,
+                        CallGraphAlgorithm.SPARK_LIB));
+        supportedCGAlgorithms.putAll(
+                Framework.SOOT_UP, Set.of(CallGraphAlgorithm.CHA, CallGraphAlgorithm.RTA));
+        supportedCGAlgorithms.putAll(
+                Framework.OPAL,
+                Set.of(
+                        CallGraphAlgorithm.CHA,
+                        CallGraphAlgorithm.RTA,
+                        CallGraphAlgorithm.ALLOC_SITE_BASED));
     }
 
     public void parseSettingsFromCLI(String[] settings) throws CryptoAnalysisParserException {
@@ -144,6 +169,15 @@ public class ScannerSettings implements Callable<Integer> {
 
         if (cg != null) {
             callGraphAlgorithm = parseCallGraphOption(cg);
+
+            Collection<CallGraphAlgorithm> algorithms = supportedCGAlgorithms.get(framework);
+            if (!algorithms.contains(callGraphAlgorithm)) {
+                throw new CryptoAnalysisParserException(
+                        "Framework "
+                                + framework
+                                + " does not support the call graph algorithm "
+                                + callGraphAlgorithm);
+            }
         }
 
         if (reportFormat != null) {
@@ -177,7 +211,7 @@ public class ScannerSettings implements Callable<Integer> {
 
         return switch (frameworkValue) {
             case "soot" -> Framework.SOOT;
-            case "soot_up" -> Framework.SOOT_UP;
+            case "sootup" -> Framework.SOOT_UP;
             case "opal" -> Framework.OPAL;
             default ->
                     throw new CryptoAnalysisParserException(
@@ -191,8 +225,11 @@ public class ScannerSettings implements Callable<Integer> {
 
         return switch (callGraphValue) {
             case "cha" -> CallGraphAlgorithm.CHA;
+            case "rta" -> CallGraphAlgorithm.RTA;
+            case "vta" -> CallGraphAlgorithm.VTA;
             case "spark" -> CallGraphAlgorithm.SPARK;
             case "sparklib" -> CallGraphAlgorithm.SPARK_LIB;
+            case "allocsitebased" -> CallGraphAlgorithm.ALLOC_SITE_BASED;
             default ->
                     throw new CryptoAnalysisParserException(
                             "Incorrect call graph value: " + option);
@@ -300,12 +337,12 @@ public class ScannerSettings implements Callable<Integer> {
         this.callGraphAlgorithm = callGraphAlgorithm;
     }
 
-    public String getSootPath() {
-        return sootPath;
+    public String getAddClassPath() {
+        return addClassPath;
     }
 
-    public void setSootPath(String sootPath) {
-        this.sootPath = sootPath;
+    public void setAddClassPath(String addClassPath) {
+        this.addClassPath = addClassPath;
     }
 
     public String getReportDirectory() {

@@ -10,17 +10,17 @@
 package tests.misc.transformation;
 
 import java.math.BigInteger;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class WrapperTransformationTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "transformation";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TRANSFORMATION)
+public class WrapperTransformationTest {
 
     @Test
     public void positiveIntegerParseIntTest() {
@@ -43,6 +43,18 @@ public class WrapperTransformationTest extends UsagePatternTestingFramework {
         Assertions.violatedConstraint();
 
         Assertions.constraintErrors(constraint, 1);
+    }
+
+    @Test
+    public void unknownIntegerParseIntTest() {
+        String randomString = UUID.randomUUID().toString();
+        int value = Integer.parseInt(randomString);
+
+        WrapperConstraint constraint = new WrapperConstraint();
+        constraint.integerParseIntConstraint(value);
+        Assertions.extValue(0);
+
+        Assertions.impreciseValueExtractionErrors(1);
     }
 
     @Test

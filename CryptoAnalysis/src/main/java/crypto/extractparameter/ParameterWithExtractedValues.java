@@ -18,4 +18,4 @@ public record ParameterWithExtractedValues(
         Val param,
         int index,
         String varName,
-        Collection<ExtractedValue> extractedValues) {}
+        Collection<TransformedValue> extractedValues) {}

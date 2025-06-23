@@ -10,12 +10,12 @@
 package de.fraunhofer.iem.framework;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import boomerang.scope.soot.BoomerangPretransformer;
-import boomerang.scope.soot.SootFrameworkScope;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import crypto.exceptions.CryptoAnalysisException;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisSootScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,17 +33,15 @@ import soot.options.Options;
 public class SootSetup extends FrameworkSetup {
 
     private final String sootClassPath;
-    private final DataFlowScope dataFlowScope;
 
     public SootSetup(
             String applicationPath,
             ScannerSettings.CallGraphAlgorithm algorithm,
             String sootClassPath,
             DataFlowScope dataFlowScope) {
-        super(applicationPath, algorithm);
+        super(applicationPath, algorithm, dataFlowScope);
 
         this.sootClassPath = sootClassPath;
-        this.dataFlowScope = dataFlowScope;
     }
 
     @Override
@@ -57,6 +55,15 @@ public class SootSetup extends FrameworkSetup {
         switch (callGraphAlgorithm) {
             case CHA:
                 Options.v().setPhaseOption("cg.cha", "on");
+                break;
+            case RTA:
+                Options.v().setPhaseOption("cg.spark", "on");
+                Options.v().setPhaseOption("cg.spark", "rta:true");
+                Options.v().setPhaseOption("cg.spark", "on-fly-cg:false");
+                break;
+            case VTA:
+                Options.v().setPhaseOption("cg.spark", "on");
+                Options.v().setPhaseOption("cg.spark", "vta:true");
                 break;
             case SPARK_LIB:
                 Options.v().setPhaseOption("cg.spark", "on");
@@ -77,13 +84,17 @@ public class SootSetup extends FrameworkSetup {
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_keep_line_number(true);
 
-        /* This phase is new in soot 4.3.0 and manipulates the jimple code in a
+        /* The 'sils' phase is new in Soot 4.3.0 and manipulates the jimple code in a
          * way that CryptoAnalysis is not able to find seeds in some cases (see
          * https://github.com/CROSSINGTUD/CryptoAnalysis/issues/293). Therefore,
-         * it is disabled.
+         * it always must be disabled.
          */
+        Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb.dtr", "enabled:false");
         Options.v().setPhaseOption("jb.sils", "enabled:false");
-        // Options.v().setPhaseOption("jb", "use-original-names:true");
+        Options.v().setPhaseOption("jb.dae", "enabled:false");
+        Options.v().setPhaseOption("jb.uce", "enabled:false");
+        Options.v().setPhaseOption("jb.cbf", "enabled:false");
 
         // JAVA 8
         if (getJavaVersion() < 9) {
@@ -113,7 +124,7 @@ public class SootSetup extends FrameworkSetup {
     }
 
     @Override
-    public FrameworkScope createFrameworkScope() {
+    public CryptoAnalysisScope createFrameworkScope() {
         PackManager.v().getPack("cg").apply();
 
         BoomerangPretransformer.v().reset();
@@ -121,7 +132,7 @@ public class SootSetup extends FrameworkSetup {
 
         CallGraph callGraph = Scene.v().getCallGraph();
         Collection<SootMethod> entryPoints = Scene.v().getEntryPoints();
-        return new SootFrameworkScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
+        return new CryptoAnalysisSootScope(Scene.v(), callGraph, entryPoints, dataFlowScope);
     }
 
     private List<SootMethod> getEntryPoints() {

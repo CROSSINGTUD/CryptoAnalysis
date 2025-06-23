@@ -19,17 +19,16 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class CipherTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.JCA_RULESET_PATH;
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.JCA)
+public class CipherTest {
 
     @Test
     public void noInit() throws GeneralSecurityException {
@@ -106,7 +105,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -185,7 +183,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     private void encrypt(SecretKey key) throws GeneralSecurityException {
@@ -197,7 +194,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     private SecretKey generateKey() throws NoSuchAlgorithmException {
@@ -231,7 +227,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
-        cCipher.getIV();
     }
 
     @Test
@@ -260,7 +255,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.hasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -293,7 +287,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
-        cCipher.getIV();
     }
 
     @Test
@@ -343,7 +336,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         Assertions.extValue(0);
         Assertions.extValue(1);
         Assertions.extValue(2);
-        cCipher.getIV();
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
     }
@@ -473,7 +465,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         cCipher.init(Cipher.ENCRYPT_MODE, keyEnc);
         Assertions.extValue(0);
         byte[] encText = cCipher.doFinal(msgAsArray);
-        cCipher.getIV();
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
 
@@ -509,7 +500,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         byte[] encText = cCipher.doFinal("".getBytes());
         Assertions.mustBeInAcceptingState(cCipher);
         Assertions.notHasEnsuredPredicate(encText);
-        cCipher.getIV();
     }
 
     @Test
@@ -570,7 +560,6 @@ public class CipherTest extends UsagePatternTestingFramework {
         cCipher.init(Cipher.ENCRYPT_MODE, key);
         Assertions.extValue(0);
         byte[] encText = cCipher.doFinal("".getBytes());
-        cCipher.getIV();
         Assertions.notHasEnsuredPredicate(encText);
         Assertions.mustBeInAcceptingState(cCipher);
     }

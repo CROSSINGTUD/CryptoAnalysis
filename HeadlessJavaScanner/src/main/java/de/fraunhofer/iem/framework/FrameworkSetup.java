@@ -9,7 +9,8 @@
  ********************************************************************************/
 package de.fraunhofer.iem.framework;
 
-import boomerang.scope.FrameworkScope;
+import boomerang.scope.DataFlowScope;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.scanner.ScannerSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +21,18 @@ public abstract class FrameworkSetup {
 
     protected final String applicationPath;
     protected final ScannerSettings.CallGraphAlgorithm callGraphAlgorithm;
+    protected final DataFlowScope dataFlowScope;
 
     protected FrameworkSetup(
-            String applicationPath, ScannerSettings.CallGraphAlgorithm callGraphAlgorithm) {
+            String applicationPath,
+            ScannerSettings.CallGraphAlgorithm callGraphAlgorithm,
+            DataFlowScope dataFlowScope) {
         this.applicationPath = applicationPath;
         this.callGraphAlgorithm = callGraphAlgorithm;
+        this.dataFlowScope = dataFlowScope;
     }
 
     public abstract void initializeFramework();
 
-    public abstract FrameworkScope createFrameworkScope();
+    public abstract CryptoAnalysisScope createFrameworkScope();
 }

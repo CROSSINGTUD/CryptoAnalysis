@@ -9,17 +9,17 @@
  ********************************************************************************/
 package tests.error.imprecisevalueextraction;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "impreciseValueExtraction";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.IMPRECISE_VALUE_EXTRACTION)
+public class ImpreciseValueExtractionTest {
 
     @Test
     public void testCouldExtractInteger() {
@@ -85,5 +85,15 @@ public class ImpreciseValueExtractionTest extends UsagePatternTestingFramework {
         // known
         Assertions.impreciseValueExtractionErrors(1);
         Assertions.constraintErrors(extraction2, 0);
+    }
+
+    @Test
+    public void testCouldNotExtractTransformedValue() {
+        String randomString = UUID.randomUUID().toString();
+        int intVal = Integer.parseInt(randomString);
+
+        ImpreciseValueExtraction extraction = new ImpreciseValueExtraction(intVal);
+        Assertions.constraintErrors(extraction, 0);
+        Assertions.impreciseValueExtractionErrors(1);
     }
 }

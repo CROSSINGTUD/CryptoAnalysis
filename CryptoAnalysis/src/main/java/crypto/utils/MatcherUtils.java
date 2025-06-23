@@ -11,8 +11,8 @@ package crypto.utils;
 
 import boomerang.scope.DeclaredMethod;
 import boomerang.scope.Type;
+import crypto.analysis.ClassPathHandler;
 import crysl.rule.CrySLMethod;
-import crysl.rule.CrySLRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,9 +22,9 @@ import java.util.Map;
 public class MatcherUtils {
 
     public static Collection<CrySLMethod> getMatchingCryslMethodsToDeclaredMethod(
-            CrySLRule rule, DeclaredMethod declaredMethod) {
+            Collection<CrySLMethod> events, DeclaredMethod declaredMethod) {
         Collection<CrySLMethod> matchingMethods = new HashSet<>();
-        for (CrySLMethod method : rule.getEvents()) {
+        for (CrySLMethod method : events) {
             if (matchCryslMethodAndDeclaredMethod(method, declaredMethod)) {
                 matchingMethods.add(method);
             }
@@ -52,9 +52,8 @@ public class MatcherUtils {
 
         // Compare class names
         String cryslClassName = cryslMethod.getDeclaringClassName();
-        Type declaringClassType = declaredMethod.getDeclaringClass().getType();
-        if (!cryslClassName.equals(declaringClassType.toString())
-                && !declaringClassType.isSupertypeOf(cryslClassName)) {
+        String declaredClassName = declaredMethod.getDeclaringClass().getFullyQualifiedName();
+        if (!isTypeOrSubType(cryslClassName, declaredClassName)) {
             return false;
         }
 
@@ -97,5 +96,16 @@ public class MatcherUtils {
             }
         }
         return true;
+    }
+
+    public static boolean isTypeOrSubType(String subType, String superType) {
+        try {
+            Class<?> subClass = Class.forName(subType, true, ClassPathHandler.getClassLoader());
+            Class<?> superClass = Class.forName(superType, true, ClassPathHandler.getClassLoader());
+
+            return superClass.isAssignableFrom(subClass);
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.fraunhofer.iem</groupId>
         <artifactId>CryptoAnalysis-Parent</artifactId>
-        <version>4.2.2</version>
+        <version>4.2.3-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -45,7 +45,15 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>CryptoAnalysis</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>CryptoAnalysisScopes</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Boomerang -->
         <dependency>
             <groupId>de.fraunhofer.iem</groupId>
             <artifactId>boomerangScope</artifactId>
@@ -57,25 +65,112 @@
             <version>${spds.version}</version>
         </dependency>
         <dependency>
+            <groupId>de.fraunhofer.iem</groupId>
+            <artifactId>boomerangScope-SootUp</artifactId>
+            <version>${spds.version}</version>
+        </dependency>
+
+        <!-- Soot -->
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>soot</artifactId>
+            <version>${soot.version}</version>
+        </dependency>
+
+        <!-- SootUp -->
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.core</artifactId>
+            <version>${sootup.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.java.core</artifactId>
+            <version>${sootup.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.java.bytecode.frontend</artifactId>
+            <version>${sootup.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.soot-oss</groupId>
+            <artifactId>sootup.callgraph</artifactId>
+            <version>${sootup.version}</version>
+        </dependency>
+
+        <!-- Opal -->
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>bytecode-representation_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>common_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>three-address-code_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
+
+        <!-- Other dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.darmstadt.tu.crossing.CrySL</groupId>
             <artifactId>CrySLParser</artifactId>
             <version>${crysl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.13.16</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.7.7</version>
         </dependency>
+
+        <!-- Test dependencies -->
         <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-invoker</artifactId>
-            <version>3.3.0</version>
-            <scope>test</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.19.0</version>
+            <version>2.18.0</version>
+            <!-- Required for SootUp; once SootUp uses a new version, this can be set to test only -->
+            <!-- <scope>test</scope> -->
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-invoker</artifactId>
+            <version>3.3.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -88,107 +183,100 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>de.fraunhofer.iem.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptors>
-                        <descriptor>build/descriptor.xml</descriptor>
-                    </descriptors>
-                    <outputDirectory>../apps</outputDirectory>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputDirectory>../apps</outputDirectory>
+
+                            <!-- Basic filters to avoid some merge conflicts from duplicate files. The
+                                 remaining warnings should not concern the JAR's execution -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/LICENSE*</exclude>
+                                        <exclude>META-INF/NOTICE*</exclude>
+                                        <exclude>META-INF/DEPENDENCIES</exclude>
+                                        <exclude>**/*.png</exclude>
+                                        <exclude>**/*.html</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>de.fraunhofer.iem.Main</mainClass>
+                                </transformer>
+                                <!-- The reference.conf files are required for Opal -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                    <resource>reference.conf</resource>
+                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+                                    <addHeader>false</addHeader>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
+        <!-- This profile enforces the use of -DtestSetup when tests are executed -->
         <profile>
-            <!-- This profile enables the tests and runs them with Soot -->
-            <id>testSoot</id>
+            <id>enforce-test-setup</id>
             <activation>
                 <property>
-                    <name>runSootTests</name>
-                    <value>true</value>
+                    <name>!skipTests</name>
                 </property>
             </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <systemProperties>
-                                <property>
-                                    <name>framework</name>
-                                    <value>SOOT</value>
-                                </property>
-                            </systemProperties>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- This profile enables the tests and runs them with Soot-Up -->
-            <id>testSootUp</id>
-            <activation>
-                <property>
-                    <name>runSootUpTests</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <systemProperties>
-                                <property>
-                                    <name>framework</name>
-                                    <value>SOOT_UP</value>
-                                </property>
-                            </systemProperties>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- This profile enables the tests and runs them with Opal -->
-            <id>testOpal</id>
-            <activation>
-                <property>
-                    <name>runOpalTests</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <systemProperties>
-                                <property>
-                                    <name>framework</name>
-                                    <value>OPAL</value>
-                                </property>
-                            </systemProperties>
-                        </configuration>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <!-- Override the skipTests execution from the parent pom -->
+                            <execution>
+                                <id>enforce-skip-tests</id>
+                                <phase>none</phase>
+                            </execution>
+                            <!-- Enforce the usage of '-DtestSetup' (e.g. -DtestSetup=Soot) -->
+                            <execution>
+                                <id>enforce-test-setup</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <phase>test</phase>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>testSetup</property>
+                                            <regex>^(Soot|SootUp|Opal)$</regex>
+                                            <message>The HeadlessJavaScanner build requires the "-DtestSetup" property to run the tests</message>
+                                        </requireProperty>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

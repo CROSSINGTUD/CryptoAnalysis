@@ -27,6 +27,7 @@ import ideal.IDEALSeedSolver;
 import ideal.StoreIDEALResultHandler;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import sync.pds.solver.WeightFunctions;
 import typestate.TransitionFunction;
@@ -49,29 +50,33 @@ public class TypestateAnalysis {
         resultHandler = new StoreIDEALResultHandler<>();
     }
 
-    public void runTypestateAnalysis() {
+    public Collection<IdealResult> runTypestateAnalysis() {
         // Compute all seeds in the program
         Collection<Query> seeds = analysisScope.computeSeeds();
 
+        Collection<IdealResult> results = new LinkedHashSet<>();
         for (Query seed : seeds) {
-            if (!(seed instanceof ForwardSeedQuery query)) {
-                continue;
+            if (seed instanceof ForwardSeedQuery query) {
+                ForwardBoomerangResults<TransitionFunction> result =
+                        runTypestateAnalysisForSeed(query);
+                results.add(new IdealResult(query, result));
             }
-
-            runTypestateAnalysisForSeed(query);
         }
+
+        return results;
     }
 
-    private void runTypestateAnalysisForSeed(ForwardSeedQuery query) {
+    public ForwardBoomerangResults<TransitionFunction> runTypestateAnalysisForSeed(
+            ForwardSeedQuery query) {
         // Initialize typestate function
         Collection<LabeledMatcherTransition> transitions = query.getAllTransitions();
         TypestateFunction typestateFunction = new TypestateFunction(transitions);
 
-        // Initialize and run IDE with Aliasing
+        // Initialize and run IDEal
         IDEALAnalysisDefinition<TransitionFunction> idealDefinition =
                 getIdealAnalysisDefinition(query, typestateFunction);
         IDEALAnalysis<TransitionFunction> idealAnalysis = new IDEALAnalysis<>(idealDefinition);
-        idealAnalysis.run(query);
+        return idealAnalysis.run(query);
     }
 
     private IDEALAnalysisDefinition<TransitionFunction> getIdealAnalysisDefinition(
@@ -109,7 +114,9 @@ public class TypestateAnalysis {
             @Override
             public BoomerangOptions boomerangOptions() {
                 return BoomerangOptions.builder()
-                        .withAllocationSite(new TypestateAllocationSite(seedQuery))
+                        .withAllocationSite(
+                                new TypestateAllocationSite(
+                                        seedQuery, definition.frameworkScope().getDataFlowScope()))
                         .withStaticFieldStrategy(Strategies.StaticFieldStrategy.FLOW_SENSITIVE)
                         .withAnalysisTimeout(definition.timeout())
                         .enableAllowMultipleQueries(true)

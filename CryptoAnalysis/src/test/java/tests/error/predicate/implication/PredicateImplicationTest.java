@@ -9,17 +9,16 @@
  ********************************************************************************/
 package tests.error.predicate.implication;
 
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class PredicateImplicationTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "predicateImplication";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.PREDICATE_IMPLICATION)
+public class PredicateImplicationTest {
 
     @Test
     public void testImplicationSatisfiedOnReturn() {

@@ -13,11 +13,10 @@ import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.ConstraintError;
-import crypto.constraints.violations.IViolatedConstraint;
 import crypto.constraints.violations.ViolatedBinaryConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLConstraint;
-import crysl.rule.ISLConstraint;
 import java.util.Collection;
 
 /**
@@ -50,7 +49,7 @@ public class BinaryConstraint extends EvaluableConstraint {
     }
 
     @Override
-    public ISLConstraint getConstraint() {
+    public CrySLConstraint getConstraint() {
         return constraint;
     }
 
@@ -136,10 +135,14 @@ public class BinaryConstraint extends EvaluableConstraint {
             }
         }
 
-        IViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
+        ViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
         ConstraintError error =
                 new ConstraintError(
-                        seed, seed.getOrigin(), seed.getSpecification(), this, violatedConstraint);
+                        seed,
+                        seed.getInitialStatement(),
+                        seed.getSpecification(),
+                        this,
+                        violatedConstraint);
         errors.add(error);
 
         return EvaluationResult.ConstraintIsNotSatisfied;

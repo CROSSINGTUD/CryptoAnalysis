@@ -39,8 +39,9 @@ public class TypestateError extends AbstractOrderError {
     public String toErrorMarkerString() {
         final StringBuilder msg = new StringBuilder();
 
-        msg.append("Unexpected call to method ");
-        msg.append(getErrorStatement().getInvokeExpr().getDeclaredMethod());
+        msg.append("Unexpected call to method \"");
+        msg.append(getErrorStatement().getInvokeExpr().getDeclaredMethod().getName());
+        msg.append("\"");
         msg.append(getObjectType());
 
         String altMethods = CrySLUtils.formatMethodNames(expectedMethodCalls);

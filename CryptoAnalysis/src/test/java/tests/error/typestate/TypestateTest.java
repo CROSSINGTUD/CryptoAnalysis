@@ -11,17 +11,16 @@ package tests.error.typestate;
 
 import crypto.typestate.ErrorStateNode;
 import crypto.typestate.ReportingErrorStateNode;
-import org.junit.Test;
-import test.TestConstants;
-import test.UsagePatternTestingFramework;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.Ruleset;
+import test.TestRules;
+import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
-public class TypestateTest extends UsagePatternTestingFramework {
-
-    @Override
-    protected String getRulesetPath() {
-        return TestConstants.RULES_TEST_DIR + "typestate";
-    }
+@ExtendWith(TestRunnerInterceptor.class)
+@Ruleset(TestRules.TYPESTATE)
+public class TypestateTest {
 
     @Test
     public void correctLinearCallSequenceTest() {

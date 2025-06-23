@@ -9,6 +9,7 @@
  ********************************************************************************/
 package crypto.listener;
 
+import boomerang.BackwardQuery;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.CallGraph;
@@ -16,10 +17,10 @@ import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.IAnalysisSeed;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
+import java.util.Collection;
 import typestate.TransitionFunction;
 import wpds.impl.NoWeight;
 
@@ -30,8 +31,9 @@ public interface IResultsListener {
     void typestateAnalysisResults(
             IAnalysisSeed seed, ForwardBoomerangResults<TransitionFunction> results);
 
-    void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results);
+    void discoveredSeeds(Collection<IAnalysisSeed> seeds);
+
+    void extractedBoomerangResults(BackwardQuery query, BackwardBoomerangResults<NoWeight> results);
 
     void extractedParameterValues(
             IAnalysisSeed seed, Multimap<Statement, ParameterWithExtractedValues> extractedValues);

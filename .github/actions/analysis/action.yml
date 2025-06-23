@@ -4,6 +4,9 @@ inputs:
   java-version:
     description: "Version to build the project with"
     required: true
+  framework:
+    description: "The underlying framework to run the tests"
+    required: true
 
 runs:
   using: "composite"
@@ -23,6 +26,9 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    - name: Build CryptoAnalysisScopes
+      run: mvn clean install -f CryptoAnalysisScopes -DskipTests
+      shell: bash
     - name: Run maven command
-      run: mvn clean verify -DrunAnalysisTests
+      run: mvn clean verify -f CryptoAnalysis -DtestSetup=${{ inputs.framework }}
       shell: bash

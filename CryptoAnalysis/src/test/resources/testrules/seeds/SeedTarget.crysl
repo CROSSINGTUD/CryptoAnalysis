@@ -1,0 +1,7 @@
+SPEC tests.seeds.SeedTarget
+
+EVENTS
+    Con: SeedTarget();
+
+ORDER
+    Con

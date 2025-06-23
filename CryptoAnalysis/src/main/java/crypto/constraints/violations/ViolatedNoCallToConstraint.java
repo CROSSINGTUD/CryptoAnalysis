@@ -17,10 +17,19 @@ import crysl.rule.CrySLMethod;
  *
  * @param method the methods that must not be called
  */
-public record ViolatedNoCallToConstraint(CrySLMethod method) implements IViolatedConstraint {
+public record ViolatedNoCallToConstraint(CrySLMethod method) implements ViolatedConstraint {
 
     @Override
     public String getErrorMessage() {
         return "Call to " + CrySLUtils.formatMethodName(method) + " not allowed";
+    }
+
+    @Override
+    public String getSimplifiedMessage(int depth) {
+        return "\n"
+                + "\t".repeat(depth)
+                + "Call to "
+                + CrySLUtils.formatMethodName(method)
+                + " not allowed";
     }
 }

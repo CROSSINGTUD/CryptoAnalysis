@@ -14,6 +14,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.errors.AbstractConstraintsError;
+import crypto.constraints.violations.ImpreciseValueConstraint;
+import crypto.constraints.violations.SatisfiedConstraint;
+import crypto.constraints.violations.ViolatedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLComparisonConstraint;
 import crysl.rule.CrySLConstraint;
@@ -41,6 +44,10 @@ public abstract class EvaluableConstraint {
     protected final Multimap<Statement, ParameterWithExtractedValues> extractedValues;
     protected final Collection<AbstractConstraintsError> errors;
 
+    protected final Collection<SatisfiedConstraint> satisfiedConstraints;
+    protected final Collection<ViolatedConstraint> violatedConstraints;
+    protected final Collection<ImpreciseValueConstraint> impreciseConstraints;
+
     public enum EvaluationResult {
         /** Returned if the constraint is satisfied with the given information */
         ConstraintIsSatisfied,
@@ -63,6 +70,10 @@ public abstract class EvaluableConstraint {
         this.statements = statements;
         this.extractedValues = extractedValues;
         this.errors = new HashSet<>();
+
+        this.satisfiedConstraints = new HashSet<>();
+        this.violatedConstraints = new HashSet<>();
+        this.impreciseConstraints = new HashSet<>();
     }
 
     public static EvaluableConstraint getInstance(
@@ -100,8 +111,24 @@ public abstract class EvaluableConstraint {
         return !errors.isEmpty();
     }
 
+    public Multimap<Statement, ParameterWithExtractedValues> getExtractedValues() {
+        return extractedValues;
+    }
+
     public Collection<AbstractConstraintsError> getErrors() {
         return errors;
+    }
+
+    public Collection<SatisfiedConstraint> getSatisfiedConstraints() {
+        return satisfiedConstraints;
+    }
+
+    public Collection<ViolatedConstraint> getViolatedConstraints() {
+        return violatedConstraints;
+    }
+
+    public Collection<ImpreciseValueConstraint> getImpreciseConstraints() {
+        return impreciseConstraints;
     }
 
     private static Multimap<Statement, ParameterWithExtractedValues>

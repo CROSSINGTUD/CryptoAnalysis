@@ -12,7 +12,6 @@ package crypto.analysis;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.Method;
 import boomerang.scope.Statement;
-import boomerang.scope.Type;
 import boomerang.scope.Val;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -46,16 +45,16 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
     protected final Multimap<Statement, EnsuredPredicate> ensuredPredicates;
     protected final Multimap<Statement, UnEnsuredPredicate> unEnsuredPredicates;
 
-    private final Statement origin;
+    private final Statement initialStatement;
     private final Val fact;
 
     public IAnalysisSeed(
             CryptoScanner scanner,
-            Statement origin,
+            Statement initialStatement,
             Val fact,
             ForwardBoomerangResults<TransitionFunction> results) {
         this.scanner = scanner;
-        this.origin = origin;
+        this.initialStatement = initialStatement;
         this.fact = fact;
         this.analysisResults = results;
 
@@ -93,7 +92,7 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
     private Collection<State> getTargetStates(TransitionFunctionImpl transitionFunction) {
         Collection<State> states = new HashSet<>();
 
-        for (Transition transition : transitionFunction.getValues()) {
+        for (Transition transition : transitionFunction.getStateChangeStatements().keySet()) {
             states.add(transition.to());
         }
 
@@ -109,19 +108,15 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
     }
 
     public Method getMethod() {
-        return origin.getMethod();
+        return initialStatement.getMethod();
     }
 
-    public Statement getOrigin() {
-        return origin;
+    public Statement getInitialStatement() {
+        return initialStatement;
     }
 
     public Val getFact() {
         return fact;
-    }
-
-    public Type getType() {
-        return fact.getType();
     }
 
     public boolean isSecure() {
@@ -225,17 +220,17 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof IAnalysisSeed other
-                && Objects.equals(origin, other.origin)
+                && Objects.equals(initialStatement, other.initialStatement)
                 && Objects.equals(fact, other.fact);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(origin, fact);
+        return Objects.hash(initialStatement, fact);
     }
 
     @Override
     public String toString() {
-        return fact.getVariableName() + " at " + origin;
+        return fact.getVariableName() + " at " + initialStatement;
     }
 }

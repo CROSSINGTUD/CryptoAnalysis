@@ -10,7 +10,6 @@
 package de.fraunhofer.iem.scanner;
 
 import boomerang.scope.DataFlowScope;
-import boomerang.scope.FrameworkScope;
 import crypto.analysis.CryptoAnalysisDataFlowScope;
 import crypto.analysis.CryptoScanner;
 import crypto.exceptions.CryptoAnalysisException;
@@ -19,6 +18,7 @@ import crypto.reporting.Reporter;
 import crypto.reporting.ReporterFactory;
 import crypto.visualization.Visualizer;
 import crysl.rule.CrySLRule;
+import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import de.fraunhofer.iem.framework.FrameworkSetup;
 import de.fraunhofer.iem.framework.OpalSetup;
 import de.fraunhofer.iem.framework.SootSetup;
@@ -79,7 +79,8 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void scan() {
         // Read rules
         LOGGER.info("Reading rules from {}", settings.getRulesetPath());
-        Collection<CrySLRule> rules = readRules(settings.getRulesetPath(), settings.getSootPath());
+        Collection<CrySLRule> rules =
+                readRules(settings.getRulesetPath(), settings.getAddClassPath());
         LOGGER.info("Found {} rules in {}", rules.size(), settings.getRulesetPath());
 
         // Initialize the reporters before the analysis to catch errors early
@@ -94,10 +95,10 @@ public class HeadlessJavaScanner extends CryptoScanner {
         // Set up the framework
         DataFlowScope dataFlowScope =
                 new CryptoAnalysisDataFlowScope(rules, settings.getIgnoredSections());
-        FrameworkScope frameworkScope = initializeFrameworkScope(dataFlowScope);
+        CryptoAnalysisScope frameworkScope = initializeFrameworkScope(dataFlowScope);
 
         // Run the analysis
-        super.scan(frameworkScope, rules);
+        super.scan(frameworkScope, rules, settings.getAddClassPath());
 
         // Report the errors
         for (Reporter reporter : reporters) {
@@ -117,13 +118,14 @@ public class HeadlessJavaScanner extends CryptoScanner {
         }
     }
 
-    public FrameworkScope initializeFrameworkScope(DataFlowScope dataFlowScope) {
+    public CryptoAnalysisScope initializeFrameworkScope(DataFlowScope dataFlowScope) {
         FrameworkSetup frameworkSetup = setupFramework(dataFlowScope);
         frameworkSetup.initializeFramework();
 
         super.getAnalysisReporter().beforeCallGraphConstruction();
-        FrameworkScope frameworkScope = frameworkSetup.createFrameworkScope();
-        super.getAnalysisReporter().afterCallGraphConstruction(frameworkScope.getCallGraph());
+        CryptoAnalysisScope frameworkScope = frameworkSetup.createFrameworkScope();
+        super.getAnalysisReporter()
+                .afterCallGraphConstruction(frameworkScope.asFrameworkScope().getCallGraph());
 
         return frameworkScope;
     }
@@ -134,10 +136,14 @@ public class HeadlessJavaScanner extends CryptoScanner {
                     new SootSetup(
                             settings.getApplicationPath(),
                             settings.getCallGraph(),
-                            settings.getSootPath(),
+                            settings.getAddClassPath(),
                             dataFlowScope);
-            case SOOT_UP -> new SootUpSetup(settings.getApplicationPath(), settings.getCallGraph());
-            case OPAL -> new OpalSetup(settings.getApplicationPath(), settings.getCallGraph());
+            case SOOT_UP ->
+                    new SootUpSetup(
+                            settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);
+            case OPAL ->
+                    new OpalSetup(
+                            settings.getApplicationPath(), settings.getCallGraph(), dataFlowScope);
         };
     }
 
@@ -165,12 +171,12 @@ public class HeadlessJavaScanner extends CryptoScanner {
         settings.setCallGraph(callGraphAlgorithm);
     }
 
-    public String getSootClassPath() {
-        return settings.getSootPath();
+    public String getAddClassPath() {
+        return settings.getAddClassPath();
     }
 
-    public void setSootClassPath(String sootClassPath) {
-        settings.setSootPath(sootClassPath);
+    public void setAddClassPath(String sootClassPath) {
+        settings.setAddClassPath(sootClassPath);
     }
 
     public String getReportDirectory() {
@@ -220,6 +226,4 @@ public class HeadlessJavaScanner extends CryptoScanner {
     public void setTimeout(int timeout) {
         settings.setTimeout(timeout);
     }
-
-    public void additionalFrameworkSetup() {}
 }

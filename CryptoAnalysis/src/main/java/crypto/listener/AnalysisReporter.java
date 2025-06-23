@@ -9,6 +9,7 @@
  ********************************************************************************/
 package crypto.listener;
 
+import boomerang.BackwardQuery;
 import boomerang.results.BackwardBoomerangResults;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.CallGraph;
@@ -27,7 +28,6 @@ import crypto.analysis.errors.RequiredPredicateError;
 import crypto.analysis.errors.TypestateError;
 import crypto.analysis.errors.UncaughtExceptionError;
 import crypto.constraints.EvaluableConstraint;
-import crypto.extractparameter.ExtractParameterQuery;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.predicates.EnsuredPredicate;
 import crypto.predicates.UnEnsuredPredicate;
@@ -46,6 +46,12 @@ public class AnalysisReporter {
         analysisListeners = new HashSet<>();
         errorListeners = new HashSet<>();
         resultsListeners = new HashSet<>();
+    }
+
+    public void clear() {
+        analysisListeners.clear();
+        errorListeners.clear();
+        resultsListeners.clear();
     }
 
     public void addAnalysisListener(IAnalysisListener analysisListener) {
@@ -100,20 +106,20 @@ public class AnalysisReporter {
         }
     }
 
-    public void beforeTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void beforeTriggeringBoomerangQuery(BackwardQuery query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.beforeTriggeringBoomerangQuery(query);
         }
     }
 
-    public void afterTriggeringBoomerangQuery(ExtractParameterQuery query) {
+    public void afterTriggeringBoomerangQuery(BackwardQuery query) {
         for (IAnalysisListener listener : analysisListeners) {
             listener.afterTriggeringBoomerangQuery(query);
         }
     }
 
     public void extractedBoomerangResults(
-            ExtractParameterQuery query, BackwardBoomerangResults<NoWeight> results) {
+            BackwardQuery query, BackwardBoomerangResults<NoWeight> results) {
         for (IResultsListener listener : resultsListeners) {
             listener.extractedBoomerangResults(query, results);
         }
@@ -122,6 +128,10 @@ public class AnalysisReporter {
     public void onDiscoveredSeeds(Collection<IAnalysisSeed> discoveredSeeds) {
         for (IAnalysisListener analysisListener : analysisListeners) {
             analysisListener.onDiscoveredSeeds(discoveredSeeds);
+        }
+
+        for (IResultsListener resultsListener : resultsListeners) {
+            resultsListener.discoveredSeeds(discoveredSeeds);
         }
     }
 

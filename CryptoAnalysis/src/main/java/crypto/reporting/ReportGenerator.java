@@ -12,12 +12,14 @@ package crypto.reporting;
 import boomerang.scope.Method;
 import boomerang.scope.WrappedClass;
 import com.google.common.collect.Table;
+import crypto.analysis.AnalysisSeedWithSpecification;
 import crypto.analysis.IAnalysisSeed;
 import crypto.analysis.errors.AbstractError;
 import crypto.listener.AnalysisStatistics;
 import crypto.utils.ErrorUtils;
 import crysl.rule.CrySLRule;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,12 +49,23 @@ public class ReportGenerator {
         }
 
         report.append("\nAnalyzed Objects:\n");
+        Collection<AnalysisSeedWithSpecification> seedsWithSpec = new HashSet<>();
         for (IAnalysisSeed seed : seeds) {
+            if (seed instanceof AnalysisSeedWithSpecification seedWithSpec) {
+                seedsWithSpec.add(seedWithSpec);
+            }
+        }
+
+        List<AnalysisSeedWithSpecification> orderedSeeds =
+                ErrorUtils.orderSeedsByInitialStatement(seedsWithSpec);
+        for (AnalysisSeedWithSpecification seed : orderedSeeds) {
             report.append("\tObject:\n");
             report.append("\t\tVariable: ").append(seed.getFact().getVariableName()).append("\n");
-            report.append("\t\tType: ").append(seed.getType()).append("\n");
-            report.append("\t\tStatement: ").append(seed.getOrigin()).append("\n");
-            report.append("\t\tLine: ").append(seed.getOrigin().getStartLineNumber()).append("\n");
+            report.append("\t\tType: ").append(seed.getSpecification().getClassName()).append("\n");
+            report.append("\t\tStatement: ").append(seed.getInitialStatement()).append("\n");
+            report.append("\t\tLine: ")
+                    .append(seed.getInitialStatement().getLineNumber())
+                    .append("\n");
             report.append("\t\tMethod: ").append(seed.getMethod()).append("\n");
             report.append("\t\tSecure: ").append(seed.isSecure()).append("\n");
         }
@@ -75,7 +88,9 @@ public class ReportGenerator {
                             .append(" violating CrySL rule for ")
                             .append(error.getRule().getClassName())
                             .append("\n");
-                    report.append("\t\t\t").append(error.toErrorMarkerString()).append("\n");
+                    report.append("\t\t\t")
+                            .append(error.toErrorMarkerString().replace("\n", "\n\t\t\t"))
+                            .append("\n");
                     report.append("\t\t\tat statement: ")
                             .append(error.getErrorStatement())
                             .append("\n");
