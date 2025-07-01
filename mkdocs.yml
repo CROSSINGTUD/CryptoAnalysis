@@ -9,6 +9,7 @@ nav:
       - Installation: installation.md
       - First Steps: getting-started.md
       - Example Analyses: examples.md
+      - Error Types: error-types.md
 
 theme:
   name: material
