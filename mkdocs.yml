@@ -1,6 +1,6 @@
 site_name: "CryptoAnalysis Documentation"
-site_url: https://secure-software-engineering.github.io/CryptoAnalysis/
-repo_url: https://github.com/secure-software-engineering/CryptoAnalysis/
+site_url: https://crossingtud.github.io/CryptoAnalysis/
+repo_url: https://github.com/CROSSINGTUD/CryptoAnalysis/
 edit_uri: edit/develop/docs/
 
 nav:
