@@ -8,18 +8,20 @@ on:
     paths:
       - 'mkdocs.yml'
       - 'docs/**'
-      - '.github/worklflows/gh-pages.yml'
-    pull_request_target:
-      types:
-        - opened
-        - reopened
-        - synchronize
-        - closed
-      paths:
-        - 'mkdocs.yml'
-        - 'docs/**'
-        - '.github/worklflows/gh-pages.yml'
-  concurrency: pages
+      - '.github/workflows/gh-pages.yml'
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+    paths:
+      - 'mkdocs.yml'
+      - 'docs/**'
+      - '.github/workflows/gh-pages.yml'
+  concurrency:
+    group: gh-pages
+    cancel-in-progress: true
 
   permissions:
     pages: write
