@@ -1,0 +1,37 @@
+site_name: "CryptoAnalysis Documentation"
+site_url: https://secure-software-engineering.github.io/CryptoAnalysis/
+repo_url: https://github.com/secure-software-engineering/CryptoAnalysis/
+edit_uri: edit/develop/docs/
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - First Steps: getting-started.md
+      - Example Analyses: examples.md
+
+theme:
+  name: material
+  logo: ./img/CryptoAnalysisLogo.png
+  #  favicon: ./img/icon.png
+  palette:
+    primary: orange
+  features:
+    - navigation.sections
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - admonition
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  version:
+    provider: mike
