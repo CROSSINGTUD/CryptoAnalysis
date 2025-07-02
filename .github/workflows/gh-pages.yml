@@ -6,19 +6,23 @@ on:
       - master
       - develop
     paths:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - '.github/workflows/gh-pages.yml'
+      - mkdocs.yml
+      - docs/**
+      - .github/workflows/gh-pages.yml
   pull_request_target:
+    branches:
+      - master
+      - develop
     types:
       - opened
       - reopened
       - synchronize
       - closed
     paths:
-      - 'mkdocs.yml'
-      - 'docs/**'
-      - '.github/workflows/gh-pages.yml'
+      - mkdocs.yml
+      - docs/**
+      - .github/workflows/gh-pages.yml
+
 concurrency:
   group: gh-pages
   cancel-in-progress: true
@@ -34,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
