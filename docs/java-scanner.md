@@ -1,6 +1,6 @@
 # CogniCrypt<sub>SAST</sub> for Java Applications
 
-The `HeadlessJavaScanner` implements an interface for CogniCrypt<sub>SAST</sub> that allows the analysis of Java applications. You can use it as an CLI tool or run it programmatically.
+The `HeadlessJavaScanner` implements an interface for CogniCrypt<sub>SAST</sub> that allows the analysis of Java applications. You can use it as an CLI tool or run it programmatically with a dependency.
 
 ## HeadlessJavaScanner as CLI tool
 CogniCrypt<sub>SAST</sub> can be started as CLI tool via the file `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar`. You can build this file yourself (see the [installation](installation.md)) or download the last released version from the [GitHub releases](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). The following list explains required and optional CLI options. See the [examples](examples.md) for concrete use cases
@@ -18,7 +18,7 @@ The underlying static analysis framework. The framework is used to read the targ
 - `Opal`: Use [Opal](https://github.com/opalj/opal) as the underlying framework
 
 #### --cg \<call_graph\>
-The call graph algorithm to construct the call graph for the analysis. Note that depending on the selected framework, the available algorithms differ. Possible values:
+The call graph algorithm to construct the call graph for the analysis. Note that depending on the selected framework, the available algorithms differ. For each framework, `CHA` is the default algorithm. Possible values:
 
 | Framework | Call Graph Algorithms           |
 |-----------|---------------------------------|
@@ -72,3 +72,54 @@ to avoid analyzing dataflows within this method. In general, the argument allows
 
 #### --timeout \<timeout\>
 A timeout in milliseconds for Boomerang queries. In rare cases, Boomerang queries may require a lot of time to finish the pointer analysis. Using this argument allows the abortion of queries after some time. By default, no timeout is used.
+
+## HeadlessJavaScanner with a dependency
+CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding `setter` method. Include the following dependency in your project and instantiate the `HeadlessJavaScanner`:
+
+```pom
+<dependency>
+    <groupId>de.fraunhofer.iem</groupId>
+    <artifactId>HeadlessJavaScanner</artifactId>
+    <version>x.y.z</version>
+</dependency>
+```
+
+You have two options to instantiate the `HeadlessJavaScanner` and continue with its results:
+
+### Instantiation via CLI structure
+A call to `createFromCLISettings(String[])` simulates the instantiation via the CLI. This can look like this:
+```java
+public class Example {
+    
+    public static void main(String[] args) {
+        String[] myArgs = new String[] {"--appPath", "path/to/app", "--rulesDir", "path/to/rules"};
+        HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(myArgs);
+        scanner.run();
+        
+        // Read the errors
+        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+        
+        // Continue with the collected errors
+    }
+}
+
+```
+
+### Instantiation via constructor
+The `HeadlessJavaScanner` has a public constructor that requires the required arguments:
+```java
+public class Example {
+    
+    public static void main(String[] args) {
+        HeadlessJavaScanner scanner = new HeadlessJavaScanner("path/to/app", "path/to/rules");
+        scanner.setFramework(ScannerSettings.Framework.SootUp);
+        scanner.setCallGraphAlgorithm(ScannerSettings.CallGraphAlgorithm.RTA);
+        scanner.run();
+
+        // Read the errors
+        Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
+
+        // Continue with the collected errors
+    }
+}
+```

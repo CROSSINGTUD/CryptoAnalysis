@@ -8,6 +8,7 @@ nav:
   - Getting Started:
       - Installation and Setup: installation-and-setup.md
       - HeadlessJavaScanner: java-scanner.md
+      - HeadlessAndroidScanner: android-scanner.md
       - Error Types: error-types.md
 
 theme:
