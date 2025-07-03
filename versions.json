@@ -2,6 +2,9 @@
   {
     "version": "documentation_preview",
     "title": "PR Preview documentation",
-    "aliases": []
+    "aliases": [],
+    "properties": {
+      "hidden": "true"
+    }
   }
 ]
