@@ -7,8 +7,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Installation and Setup: installation-and-setup.md
-      - First Steps: getting-started.md
-      - Example Analyses: examples.md
+      - HeadlessJavaScanner: java-scanner.md
       - Error Types: error-types.md
 
 theme:
