@@ -2,6 +2,9 @@
   {
     "version": "fix_documentation_preview",
     "title": "PR Preview fix_documentation",
-    "aliases": []
+    "aliases": [],
+    "properties": {
+      "hidden": "true"
+    }
   }
 ]
