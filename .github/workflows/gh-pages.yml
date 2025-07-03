@@ -54,6 +54,11 @@ jobs:
       # Sanitize head_ref name
       - run: echo "DOC_VERSION_NAME=$(echo ${{ github.head_ref }} | sed "s/[^a-zA-Z0-9._-]/_/g" )" >> $GITHUB_ENV
 
+      - name: Configure git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
       # on PR events..
       - name: Deploy Doc in Subdirectory
         if: startsWith(github.event_name, 'pull_request')
