@@ -10,7 +10,7 @@ The packaged `jar` artefacts including all dependencies can be found in the crea
 ## Including the project as dependency
 You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use case, include the following dependencies in your project (replace `x.y.z` with the most recent version):
 - CryptoAnalysis and its scopes
-```pom
+```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>CryptoAnalysis</artifactId>
@@ -23,7 +23,7 @@ You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use c
 </dependency>
 ```
 - HeadlessJavaScanner
-```pom
+```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>HeadlessJavaScanner</artifactId>
@@ -31,7 +31,7 @@ You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use c
 </dependency> 
 ```
 - HeadlessAndroidScanner
-```pom
+```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>HeadlessAndroidScanner</artifactId>
@@ -42,12 +42,13 @@ You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use c
 ## Use as a GitHub action
 CogniCrypt<sub>SAST</sub> can be used as a GitHub action.
 
+```
 - name: Run CogniCrypt
   uses: CROSSINGTUD/CryptoAnalysis@<version>
   with:
-  appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
-  basePath: "CryptoAnalysisTargets/HelloWorld"
-
+    appPath: "CryptoAnalysisTargets/HelloWorld/HelloWorld.jar"
+    basePath: "CryptoAnalysisTargets/HelloWorld"
+```
 The `appPath` needs to be configured to point to a compiled version of your application.
 
 The `basePath` is used to relate paths in the analyzed jar and the source tree. Class `com.example` is searched for at `basePath/com/example`.

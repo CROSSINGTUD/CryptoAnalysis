@@ -10,6 +10,7 @@ nav:
       - HeadlessJavaScanner: java-scanner.md
       - HeadlessAndroidScanner: android-scanner.md
       - Error Types: error-types.md
+      - API: api.md
 
 theme:
   name: material

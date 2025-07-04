@@ -7,9 +7,14 @@ CogniCrypt<sub>SAST</sub> can be started as CLI tool via the file `HeadlessAndro
 
 ### Required options
 The HeadlessJavaScanner requires two arguments:
-- `--apkFile` The path of the apk file to be analyzed.
-- `--platformDirectory` The path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/tools/releases/platforms?hl=de). Under the Android SDK location you find a folder `platforms`. Supply the `HeadlessAndroidScanner` with the path to this folder.
-- `--rulesDir` The path to the directory of the CrySL (source code format) rule files. The source code for the rules can be found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+#### --apkFile \<path_to_apk_file\>
+The path of the apk file to be analyzed.
+
+#### --platformDirectory \<path_to_platform_dir\> 
+The path to the android SDK platforms. The platforms are obtainable via [Android Studio](https://developer.android.com/tools/releases/platforms?hl=de). Under the Android SDK location you find a folder `platforms`. Supply the `HeadlessAndroidScanner` with the path to this folder.
+
+#### --rulesDir \<path_to_rules\>
+The path to the directory of the CrySL (source code format) rule files. The scanner supports basic directories and zip files. The source code for the rules can be found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 
 ### Optional arguments
 #### --cg \<call_graph\>
@@ -36,7 +41,7 @@ Creates a file `visualization.png` in the report path directory that visualizes 
 ## HeadlessAndroidScanner with a dependency
 CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding `setter` method. Include the following dependency in your project and instantiate the `HeadlessJavaScanner`:
 
-```pom
+```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>HeadlessAndroidScanner</artifactId>

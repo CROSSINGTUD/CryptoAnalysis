@@ -7,8 +7,11 @@ CogniCrypt<sub>SAST</sub> can be started as CLI tool via the file `HeadlessJavaS
 
 ### Required options
 The HeadlessJavaScanner requires two arguments:
-- `--appPath` The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories).
-- `--rulesDir` The path to the directory of the CrySL (source code format) rule files. The source code for the rules can be found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
+#### --appPath \<path_to_app\>
+The path of the application to be analyzed (.jar file or the root compilation output folder which contains the .class files in subdirectories).
+
+#### --rulesDir \<path_to_rules\>
+The path to the directory of the CrySL (source code format) rule files. The scanner supports basic directories and zip files. The source code for the rules can be found [here](https://github.com/CROSSINGTUD/Crypto-API-Rules).
 
 ### Optional arguments
 #### --framework \<framework\>
@@ -76,7 +79,7 @@ A timeout in milliseconds for Boomerang queries. In rare cases, Boomerang querie
 ## HeadlessJavaScanner with a dependency
 CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding `setter` method. Include the following dependency in your project and instantiate the `HeadlessJavaScanner`:
 
-```pom
+```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
     <artifactId>HeadlessJavaScanner</artifactId>
@@ -96,7 +99,7 @@ public class Example {
         HeadlessJavaScanner scanner = HeadlessJavaScanner.createFromCLISettings(myArgs);
         scanner.run();
         
-        // Read the errors
+        // Get the errors
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
         
         // Continue with the collected errors
@@ -112,11 +115,12 @@ public class Example {
     
     public static void main(String[] args) {
         HeadlessJavaScanner scanner = new HeadlessJavaScanner("path/to/app", "path/to/rules");
+        // Some more configuration
         scanner.setFramework(ScannerSettings.Framework.SootUp);
         scanner.setCallGraphAlgorithm(ScannerSettings.CallGraphAlgorithm.RTA);
         scanner.run();
 
-        // Read the errors
+        // Get the errors
         Table<WrappedClass, Method, Set<AbstractError>> errors = scanner.getCollectedErrors();
 
         // Continue with the collected errors
