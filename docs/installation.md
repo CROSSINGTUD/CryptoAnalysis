@@ -9,7 +9,7 @@ The packaged `jar` artefacts including all dependencies can be found in the crea
 
 ## Including the project as dependency
 You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use case, include the following dependencies in your project (replace `x.y.z` with the most recent version):
-- CryptoAnalysis and its scopes
+* CryptoAnalysis and its scopes
 ```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
@@ -22,7 +22,7 @@ You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use c
     <version>x.y.z</version>
 </dependency>
 ```
-- HeadlessJavaScanner
+* HeadlessJavaScanner
 ```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
@@ -30,7 +30,7 @@ You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use c
     <version>x.y.z</version>
 </dependency> 
 ```
-- HeadlessAndroidScanner
+* HeadlessAndroidScanner
 ```
 <dependency>
     <groupId>de.fraunhofer.iem</groupId>
@@ -59,8 +59,8 @@ An example of how to use the GitHub action can be found in the [CryptoAnalysis-d
 
 ## Running tests
 The project is configured to run the tests in each module and for each framework separately. If you plan to run the tests, use the following commands:
-- Test CryptoAnalysis: `mvn clean verify -f CryptoAnalysis -DtestSetup=<framework>`
-- Test the HeadlessJavaScanner: `mvn clean verify -f HeadlessJavaScanner -DtestSetup=<framework>`
-- Test the HeadlessAndroidScanner: `mvn clean verify -f HeadlessAndroidScanner -DtestSetup=FlowDroid`
+* Test CryptoAnalysis: `mvn clean verify -f CryptoAnalysis -DtestSetup=<framework>`
+* Test the HeadlessJavaScanner: `mvn clean verify -f HeadlessJavaScanner -DtestSetup=<framework>`
+* Test the HeadlessAndroidScanner: `mvn clean verify -f HeadlessAndroidScanner -DtestSetup=FlowDroid`
 
 Replace `<framework>` with `Soot`, `SootUp` or `Opal` to run the tests with the corresponding underlying framework.

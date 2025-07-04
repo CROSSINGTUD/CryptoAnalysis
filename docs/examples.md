@@ -44,7 +44,7 @@ java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar \\
                --reportPath ./output/ \\
                --visualization
 ```
-Observe that we use `Soot` as the underlying analysis framework, we print the report to the command line, and we enable the visualization. CogniCrypt<sub>SAST</sub> runs the analysis and prints a report to the command line. In total, it reports 3 ConstraintErrors, 2 RequiredPredicateErrors and 1 IncompleteOperationError, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
+Observe that we use `Soot` as the underlying analysis framework, we print the report to the command line, and we enable the visualization. CogniCrypt<sub>SAST</sub> runs the analysis and reports 3 ConstraintErrors, 2 RequiredPredicateErrors and 1 IncompleteOperationError, and their positions in the original programs. Additionally, since we use `--visualization`, it creates the following image `visualization.png` in the directory `./output/`:
 
 ![visualization.png](img/visualization.png)
 

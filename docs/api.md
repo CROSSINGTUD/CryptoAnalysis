@@ -17,9 +17,10 @@ Include the `HeadlessJavaScanner` module in your project:
 
 ## Defining a listener
 `CryptoAnalysis` defines a set of listeners that are informed during the analysis. There are 3 types of listeners:
-- `IAnalysisListener`: Listener that tracks events during the analysis (e.g. the start of the typestate analysis, the analysis of seeds etc.)
-- `IResultsListener`: Listener that tracks intermediate analysis results (e.g. typestate analysis results, Boomerang query results etc.)
-- `IErrorListener`: Listener that tracks the report of detected errors
+
+* `IAnalysisListener`: Listener that tracks events during the analysis (e.g. the start of the typestate analysis, the analysis of seeds etc.)
+* `IResultsListener`: Listener that tracks intermediate analysis results (e.g. typestate analysis results, Boomerang query results etc.)
+* `IErrorListener`: Listener that tracks the report of detected errors
 
 Since we are interested in the starting and end points of solving Boomerang queries, we define an `IAnalysisListener` and consider the methods that are called when Boomerang queries are triggered:
 

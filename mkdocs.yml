@@ -6,7 +6,7 @@ edit_uri: edit/develop/docs/
 nav:
   - Home: index.md
   - Getting Started:
-      - Installation and Setup: installation-and-setup.md
+      - Installation and Setup: installation.md
       - HeadlessJavaScanner: java-scanner.md
       - HeadlessAndroidScanner: android-scanner.md
       - Error Types: error-types.md
@@ -15,10 +15,11 @@ nav:
 
 theme:
   name: material
-  logo: ./img/CryptoAnalysisLogo.png
-  #  favicon: ./img/icon.png
+  logo: ./img/logo.jpg
+  #  favicon: ./img/icon.jpg
   palette:
-    primary: orange
+    primary: light green
+    ascent: light blue
   features:
     - navigation.sections
 
