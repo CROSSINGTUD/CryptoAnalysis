@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/documentation_preview/installation/">
+        <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/documentation_preview/android-scanner/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../java-scanner/">
       
       
-        <link rel="next" href="../java-scanner/">
+        <link rel="next" href="../error-types/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Installation and Setup - CryptoAnalysis Documentation</title>
+        <title>HeadlessAndroidScanner - CryptoAnalysis Documentation</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation-and-setup" class="md-skip">
+        <a href="#cognicryptsast-for-android-applications" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation and Setup
+              HeadlessAndroidScanner
             
           </span>
         </div>
@@ -294,32 +294,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Installation and Setup
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -330,62 +308,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#building-the-project" class="md-nav__link">
-    <span class="md-ellipsis">
-      Building the project
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#including-the-project-as-dependency" class="md-nav__link">
-    <span class="md-ellipsis">
-      Including the project as dependency
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-as-a-github-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use as a GitHub action
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      Running tests
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -418,10 +340,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../android-scanner/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    HeadlessAndroidScanner
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -432,6 +376,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#headlessandroidscanner-as-cli-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      HeadlessAndroidScanner as CLI tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HeadlessAndroidScanner as CLI tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required options
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#headlessandroidscanner-with-a-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      HeadlessAndroidScanner with a dependency
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HeadlessAndroidScanner with a dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-via-cli-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiation via CLI structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-via-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiation via constructor
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -540,38 +570,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#building-the-project" class="md-nav__link">
+  <a href="#headlessandroidscanner-as-cli-tool" class="md-nav__link">
     <span class="md-ellipsis">
-      Building the project
+      HeadlessAndroidScanner as CLI tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HeadlessAndroidScanner as CLI tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required options
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#including-the-project-as-dependency" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#optional-arguments" class="md-nav__link">
     <span class="md-ellipsis">
-      Including the project as dependency
+      Optional arguments
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#use-as-a-github-action" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use as a GitHub action
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-tests" class="md-nav__link">
+  <a href="#headlessandroidscanner-with-a-dependency" class="md-nav__link">
     <span class="md-ellipsis">
-      Running tests
+      HeadlessAndroidScanner with a dependency
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="HeadlessAndroidScanner with a dependency">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-via-cli-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiation via CLI structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instantiation-via-constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Instantiation via constructor
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -594,15 +654,55 @@
   
 
 
-<h1 id="installation-and-setup">Installation and Setup</h1>
-<h2 id="building-the-project">Building the project</h2>
-<p>CogniCrypt<sub>SAST</sub> uses Maven as build tool. You can compile this project and build the executable <code>jar</code> files via the command
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>mvn clean package -DskipTests
+<h1 id="cognicryptsast-for-android-applications">CogniCrypt<sub>SAST</sub> for Android Applications</h1>
+<p>The <code>HeadlessAndroidScanner</code> implements an interface for CogniCrypt<sub>SAST</sub> that allows the analysis of Android applications. You can use it as an CLI tool or run it programmatically with a dependency.</p>
+<h2 id="headlessandroidscanner-as-cli-tool">HeadlessAndroidScanner as CLI tool</h2>
+<p>CogniCrypt<sub>SAST</sub> can be started as CLI tool via the file <code>HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar</code>. You can build this file yourself (see the <a href="../installation/">installation</a>) or download the last released version from the <a href="https://github.com/CROSSINGTUD/CryptoAnalysis/releases">GitHub releases</a>. The following list explains required and optional CLI options. See the <a href="../examples/">examples</a> for concrete use cases</p>
+<h3 id="required-options">Required options</h3>
+<p>The HeadlessJavaScanner requires two arguments:</p>
+<p><strong>--apkFile &lt;path_to_apk_file&gt;</strong></p>
+<p>The path of the apk file to be analyzed.</p>
+<p><strong>--platformDirectory &lt;path_to_platform_dir&gt;</strong></p>
+<p>The path to the android SDK platforms. The platforms are obtainable via <a href="https://developer.android.com/tools/releases/platforms?hl=de">Android Studio</a>. Under the Android SDK location you find a folder <code>platforms</code>. Supply the <code>HeadlessAndroidScanner</code> with the path to this folder.</p>
+<p><strong>--rulesDir &lt;path_to_rules&gt;</strong></p>
+<p>The path to the directory of the CrySL (source code format) rule files. The scanner supports basic directories and zip files. The source code for the rules can be found <a href="https://github.com/CROSSINGTUD/Crypto-API-Rules">here</a>.</p>
+<h3 id="optional-arguments">Optional arguments</h3>
+<p><strong>--cg &lt;call_graph&gt;</strong></p>
+<p>The call graph algorithm to construct the call graph for the analysis. Possible values:</p>
+<ul>
+<li><code>CHA</code> (default)</li>
+<li><code>RTA</code></li>
+<li><code>VTA</code></li>
+<li><code>SPARK</code></li>
+</ul>
+<p><strong>--reportPath &lt;report_path&gt;</strong></p>
+<p>Relative or absolute path for a directory to write the reports and visualization into.</p>
+<p><strong>--reportFormat &lt;format1,format2,...&gt;</strong></p>
+<p>The format(s) of the report. CogniCrypt<sub>SAST</sub> supports different formats to create an analysis report with the detected errors. Except the <code>CMD</code> value, all values require the <code>--reportPath</code> argument to be set. Multiple values can be concatenated by a comma (e.g. <code>CMD,TXT</code>). Possible values:</p>
+<ul>
+<li><code>CMD</code>: Prints a formatted output to <code>System.out</code> (default).</li>
+<li><code>TXT</code>: Creates a file <code>CryptoAnalysis-Report.txt</code> in the report path directory that contains a formatted output. The report is equivalent to the <code>CMD</code> output.</li>
+<li><code>SARIF</code>: Creates a file <code>CryptoAnalysis-Report.json</code> in the report path directory that is formatted in the <a href="https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html">SARIF 2.1</a> format.</li>
+<li><code>CSV</code>: Creates a file <code>CryptoAnalysis-Report.csv</code> in the report path directory that is formatted in the csv format.</li>
+<li><code>CSV_SUMMARY</code>: Creates a file <code>CryptoAnalysis-Report-Summary.csv</code> in the report path directory that is formatted in the csv format. Compared to the <code>CSV</code> option, this version contains only a summary of the analysis results, e.g. only the total numbers of each error type.</li>
+</ul>
+<p><strong>--visualization</strong></p>
+<p>Creates a file <code>visualization.png</code> in the report path directory that visualizes the connection of detected errors. This argument requires the <code>--reportPath</code> argument to be set.</p>
+<h2 id="headlessandroidscanner-with-a-dependency">HeadlessAndroidScanner with a dependency</h2>
+<p>CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding <code>setter</code> method. Include the following dependency in your project and instantiate the <code>HeadlessJavaScanner</code>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;dependency&gt;
+    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
+    &lt;artifactId&gt;HeadlessAndroidScanner&lt;/artifactId&gt;
+    &lt;version&gt;x.y.z&lt;/version&gt;
+&lt;/dependency&gt;
 </code></pre></div></td></tr></table></div>
-The packaged <code>jar</code> artefacts including all dependencies can be found in the created <code>/apps</code> directory. Building requires at least Java 17.</p>
-<h2 id="including-the-project-as-dependency">Including the project as dependency</h2>
-<p>You can find CogniCrypt<sub>SAST</sub> on Maven Central. Depending on your use case, include the following dependencies in your project (replace <code>x.y.z</code> with the most recent version):</p>
-<p>CryptoAnalysis and its scopes:
+<p>You have two options to instantiate the <code>HeadlessAndroidScanner</code> and continue with its results:</p>
+<h3 id="instantiation-via-cli-structure">Instantiation via CLI structure</h3>
+<p>A call to <code>createFromCLISettings(String[])</code> simulates the instantiation via the CLI. This can look like this:
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -612,63 +712,51 @@ The packaged <code>jar</code> artefacts including all dependencies can be found 
 <span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
-<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;dependency&gt;
-    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
-    &lt;artifactId&gt;CryptoAnalysis&lt;/artifactId&gt;
-    &lt;version&gt;x.y.z&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
-    &lt;artifactId&gt;CryptoAnalysis-Scopes&lt;/artifactId&gt;
-    &lt;version&gt;x.y.z&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre></div></td></tr></table></div>
-HeadlessJavaScanner:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;dependency&gt;
-    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
-    &lt;artifactId&gt;HeadlessJavaScanner&lt;/artifactId&gt;
-    &lt;version&gt;x.y.z&lt;/version&gt;
-&lt;/dependency&gt; 
-</code></pre></div></td></tr></table></div>
-HeadlessAndroidScanner:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;dependency&gt;
-    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
-    &lt;artifactId&gt;HeadlessAndroidScanner&lt;/artifactId&gt;
-    &lt;version&gt;x.y.z&lt;/version&gt;
-&lt;/dependency&gt; 
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Example</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">myArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;--appPath&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;platformDirectory&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/platforms&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--rulesDir&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/rules&quot;</span><span class="p">};</span>
+<span class="w">        </span><span class="n">HeadlessAndroidScanner</span><span class="w"> </span><span class="n">scanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HeadlessAndroidScanner</span><span class="p">.</span><span class="na">createFromCLISettings</span><span class="p">(</span><span class="n">myArgs</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">run</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Read the errors</span>
+<span class="w">        </span><span class="n">Table</span><span class="o">&lt;</span><span class="n">WrappedClass</span><span class="p">,</span><span class="w"> </span><span class="n">Method</span><span class="p">,</span><span class="w"> </span><span class="n">Set</span><span class="o">&lt;</span><span class="n">AbstractError</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scanner</span><span class="p">.</span><span class="na">getCollectedErrors</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Continue with the collected errors</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div></td></tr></table></div></p>
-<h2 id="use-as-a-github-action">Use as a GitHub action</h2>
-<p>CogniCrypt<sub>SAST</sub> can be used as a GitHub action.</p>
-<p><div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>- name: Run CogniCrypt
-  uses: CROSSINGTUD/CryptoAnalysis@&lt;version&gt;
-  with:
-    appPath: &quot;CryptoAnalysisTargets/HelloWorld/HelloWorld.jar&quot;
-    basePath: &quot;CryptoAnalysisTargets/HelloWorld&quot;
-</code></pre></div></td></tr></table></div>
-The <code>appPath</code> needs to be configured to point to a compiled version of your application.</p>
-<p>The <code>basePath</code> is used to relate paths in the analyzed jar and the source tree. Class <code>com.example</code> is searched for at <code>basePath/com/example</code>.</p>
-<p>See <a href="https://github.com/CROSSINGTUD/CryptoAnalysis/blob/develop/action.yml">action.yml</a> for all input options.</p>
-<p>An example of how to use the GitHub action can be found in the <a href="https://github.com/CROSSINGTUD/CryptoAnalysis-demo/actions">CryptoAnalysis-demo repository</a>.</p>
-<h2 id="running-tests">Running tests</h2>
-<p>The project is configured to run the tests in each module and for each framework separately. If you plan to run the tests, use the following commands:</p>
-<ul>
-<li>Test CryptoAnalysis: <code>mvn clean verify -f CryptoAnalysis -DtestSetup=&lt;framework&gt;</code></li>
-<li>Test the HeadlessJavaScanner: <code>mvn clean verify -f HeadlessJavaScanner -DtestSetup=&lt;framework&gt;</code></li>
-<li>Test the HeadlessAndroidScanner: <code>mvn clean verify -f HeadlessAndroidScanner -DtestSetup=FlowDroid</code></li>
-</ul>
-<p>Replace <code>&lt;framework&gt;</code> with <code>Soot</code>, <code>SootUp</code> or <code>Opal</code> to run the tests with the corresponding underlying framework.</p>
+<h3 id="instantiation-via-constructor">Instantiation via constructor</h3>
+<p>The <code>HeadlessAndroidScanner</code> has a public constructor that requires the required arguments:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Example</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">HeadlessJavaScanner</span><span class="w"> </span><span class="n">scanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HeadlessJavaScanner</span><span class="p">(</span><span class="s">&quot;path/to/app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/platforms&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/rules&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">setCallGraphAlgorithm</span><span class="p">(</span><span class="n">AndroidSettings</span><span class="p">.</span><span class="na">CallGraphAlgorithm</span><span class="p">.</span><span class="na">SPARK</span><span class="p">);</span>
+<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">run</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Read the errors</span>
+<span class="w">        </span><span class="n">Table</span><span class="o">&lt;</span><span class="n">WrappedClass</span><span class="p">,</span><span class="w"> </span><span class="n">Method</span><span class="p">,</span><span class="w"> </span><span class="n">Set</span><span class="o">&lt;</span><span class="n">AbstractError</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">errors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scanner</span><span class="p">.</span><span class="na">getCollectedErrors</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Continue with the collected errors</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
 
 
 

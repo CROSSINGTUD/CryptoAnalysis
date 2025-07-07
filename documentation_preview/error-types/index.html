@@ -11,8 +11,10 @@
         <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/documentation_preview/error-types/">
       
       
-        <link rel="prev" href="../examples/">
+        <link rel="prev" href="../android-scanner/">
       
+      
+        <link rel="next" href="../examples/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -61,7 +63,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-green" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -92,7 +94,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="CryptoAnalysis Documentation" class="md-header__button md-logo" aria-label="CryptoAnalysis Documentation" data-md-component="logo">
       
-  <img src="../img/CryptoAnalysisLogo.png" alt="logo">
+  <img src="../img/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -201,7 +203,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="CryptoAnalysis Documentation" class="md-nav__button md-logo" aria-label="CryptoAnalysis Documentation" data-md-component="logo">
       
-  <img src="../img/CryptoAnalysisLogo.png" alt="logo">
+  <img src="../img/logo.jpg" alt="logo">
 
     </a>
     CryptoAnalysis Documentation
@@ -300,7 +302,7 @@
   
   
   <span class="md-ellipsis">
-    Installation
+    Installation and Setup
     
   </span>
   
@@ -318,12 +320,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../java-scanner/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    First Steps
+    HeadlessJavaScanner
     
   </span>
   
@@ -341,12 +343,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/" class="md-nav__link">
+      <a href="../android-scanner/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Example Analyses
+    HeadlessAndroidScanner
     
   </span>
   
@@ -373,6 +375,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Error Types
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -385,6 +400,134 @@
 
       </a>
       
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constrainterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConstraintError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forbiddenmethoderror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ForbiddenMethodError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#imprecisevalueextractionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ImpreciseValueExtractionError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#incompleteoperationerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      IncompleteOperationError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typestateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      TypestateError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requiredpredicateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      RequiredPredicateError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternativerequiredpredicateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      AlternativeRequiredPredicateError
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -417,6 +560,77 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#constrainterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ConstraintError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forbiddenmethoderror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ForbiddenMethodError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#imprecisevalueextractionerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      ImpreciseValueExtractionError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#incompleteoperationerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      IncompleteOperationError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typestateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      TypestateError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#requiredpredicateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      RequiredPredicateError
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternativerequiredpredicateerror" class="md-nav__link">
+    <span class="md-ellipsis">
+      AlternativeRequiredPredicateError
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -435,6 +649,278 @@
 
 
 <h1 id="error-types">Error Types</h1>
+<p>CryptoAnalysis reports various kinds of errors that violate the sections in a CrySL rule. On this page, we give an overview and examples of the different error types. Note that the examples contain simple rules and programs to emphasize the concrete violation, they may not be part of the actual ruleset.</p>
+<h2 id="constrainterror">ConstraintError</h2>
+<p>CryptoAnalysis reports a <code>ConstraintError</code> if a constraint from the <code>CONSTRAINTS</code> section is violated. For example, consider the following rule <code>KeyGenerator.crysl</code>:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.KeyGenerator
+
+OBJECTS
+    java.lang.String algorithm;
+    int keySize;
+
+EVENTS
+    Ins: getInstance(algorithm);
+    Init: init(keySize);
+
+CONSTRAINTS
+    algorithm in {&quot;AES&quot;} =&gt; keySize in {128, 256};
+</code></pre></div></td></tr></table></div>
+and the following program that violates the constraint
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ConstraintErrorExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">keyGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;AES&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">keyGen</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="mi">64</span><span class="p">);</span><span class="w"> </span><span class="c1">// Key size of 64 is not allowed</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+CryptoAnalysis reports a <code>ConstraintError</code> indicating that the constraint from the rule is violated. Note that the constraint is evaluated as a logical expression <code>A =&gt; B</code> that is violated when <code>A</code> is satisfied and <code>B</code> is violated. Depending on the constraints and the logical expressions, the error messages may vary.</p>
+<h2 id="forbiddenmethoderror">ForbiddenMethodError</h2>
+<p>CryptoAnalysis reports a ForbiddenMethodError if there is a call to method from the FORBIDDEN section. For example, consider the following rule <code>PBEKeySpec.crysl</code>:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.spec.PBEKeySpec
+
+FORBIDDEN
+    PBEKeySpec(char[]);
+</code></pre></div></td></tr></table></div>
+and the program
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ForbiddenMethodErrorExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">byte</span><span class="o">[]</span><span class="p">{</span><span class="sc">&#39;p&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;w&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;d&#39;</span><span class="p">};</span>
+<span class="w">        </span><span class="n">PBEKeySpec</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PBEKeySpec</span><span class="p">(</span><span class="n">password</span><span class="p">);</span><span class="w"> </span><span class="c1">// This constructor call is forbidden</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+CryptoAnalysis reports a <code>ForbiddenMethodError</code> because the rule does not allow the call to the constructor that has only <code>char[]</code> as parameter.</p>
+<h2 id="imprecisevalueextractionerror">ImpreciseValueExtractionError</h2>
+<p>CryptoAnalysis reports an <code>ImpreciseValueExtractionError</code> if it is not able to extract required information to evaluate constraints from the <code>CONSTRAINTS</code> section. For example, consider the following rule <code>KeyGenerator.crysl</code>:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+
+OBJECTS
+    java.lang.String algorithm;
+
+EVENTS
+    Con: getInstance(algorithm);
+
+CONSTRAINTS
+    algorithm in {&quot;AES&quot;};
+</code></pre></div></td></tr></table></div>
+and the program
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImpreciseValueExtractionError</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">alg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readFromInput</span><span class="p">();</span><span class="w"> </span><span class="c1">// Assumption: readFromInput() returns some dynamic input</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">keyGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="n">alg</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div></p>
+<p>CryptoAnalysis reports a <code>ImpreciseValueExtractionError</code> for the constraint <code>algorithm in {"AES"}</code> because it cannot statically evaluate the return value of <code>readFromInput()</code>.</p>
+<h2 id="incompleteoperationerror">IncompleteOperationError</h2>
+<p>CryptoAnalysis reports an <code>IncompleteOperationError</code> if the operations in the <code>ORDER</code> sections are not completed. For example, consider the following rule <code>KeyGenerator.crysl</code>:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+
+EVENTS
+    Con: getInstance(_);
+    Init: init(_);
+    Gen: generateKey();
+
+ORDER
+   Con, Init, Gen
+</code></pre></div></td></tr></table></div>
+and the program
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">IncompleteOperationErrorExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">kg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;AES&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">kg</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="mi">128</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+CryptoAnalysis reports an <code>IncompleteOperationError</code> because a call to <code>generateKey()</code> is missing to complete the sequence of operations in the <code>ORDER</code> section. In this example, the incomplete operation renders the code dead because the <code>KeyGenerator</code> is initialized but not used.</p>
+<h2 id="typestateerror">TypestateError</h2>
+<p>CryptoAnalysis reports a <code>TypestateError</code> if the order of operations in the <code>ORDER</code> section is violated. For example, consider the following rule <code>KeyGenerator.crysl</code>:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+
+EVENTS
+    Con: getInstance(_);
+    Init: init(_);
+    Gen: generateKey();
+
+ORDER
+    Con, Init, Gen
+</code></pre></div></td></tr></table></div>
+and the program
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TypestateErrorExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">kg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;AES&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Con</span>
+<span class="w">        </span><span class="c1">// Missing call to kg.init(...)</span>
+<span class="w">        </span><span class="n">Key</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kg</span><span class="p">.</span><span class="na">generateKey</span><span class="p">();</span><span class="w"> </span><span class="c1">// Gen</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+CryptoAnalysis reports a <code>TypestateError</code> because the call sequence misses the event <code>Init</code> that is defined with a call to <code>init(...)</code>.</p>
+<h2 id="requiredpredicateerror">RequiredPredicateError</h2>
+<p>CryptoAnalysis reports a <code>RequiredPredicateError</code> if a predicate from the <code>REQUIRES</code> section is not ensured. For example, consider the following rules <code>KeyGenerator.crysl</code>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+
+OBJECTS
+    java.lang.String algorithm;
+    java.security.Key key;
+
+EVENTS
+    Con: getInstance(algorithm);
+    Gen: key = generateKey(); // Define the return value from the call to generateKey()
+
+ORDER
+    Con, Gen
+
+CONSTRAINTS
+    algorithm in {&quot;AES&quot;};
+
+ENSURES
+    generatedKey[key]; // If the KeyGenerator is secure, it ensures the predicate &#39;generatedKey&#39; on the returned value &#39;key&#39;
+</code></pre></div></td></tr></table></div>
+and <code>Key.crysl</code>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.Key
+
+REQUIRES
+    generatedKey[this]; // A key requires the predicate &#39;generatedKey&#39; when it is instantiated (this)
+</code></pre></div></td></tr></table></div>
+and the program
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RequiredPredicateErrorExample</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">kg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;DES&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// &quot;DES&quot; causes a ConstraintError, i.e. the rule is violated and kg not secure and cannot ensure any predicates</span>
+<span class="w">        </span><span class="n">Key</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kg</span><span class="p">.</span><span class="na">generateKey</span><span class="p">();</span><span class="w"> </span><span class="c1">// kg does not ensure a predicate on the key such that the required predicate &#39;generatedKey&#39; is violated in the rule Key.crysl</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+CryptoAnalysis reports a <code>RequiredPredicateError</code> because the algorithm DES is not allowed such that the rule for the KeyGenerator is violated and kg is not secure. Therefore, kg does not ensure any predicates which violates the <code>REQUIRES</code> section from the rule <code>Key.crysl</code>.
+Note that CryptoAnalysis also reports a <code>ConstraintError</code> for the violated algorithm constraint and connects it to the <code>RequiredPredicateError</code>. In this scenario, the <code>ConstraintError</code> causes the <code>RequiredPredicateError</code> and we have the following connection:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>TODO Add picture
+</code></pre></div></td></tr></table></div></p>
+<h2 id="alternativerequiredpredicateerror">AlternativeRequiredPredicateError</h2>
+<p>CryptoAnalysis reports an <code>AlternativeRequiredPredicateError</code> if a predicate with alternatives from the <code>REQUIRES</code> section is not ensured. Conceptually, this error is the same as a <code>RequiredPredicateError</code>. The difference is that CryptoAnalysis reports an <code>AlternativeRequiredPredicateError</code> if no alternatives are ensured. For example, we have the following rule <code>Cipher.crysl</code>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.Cipher
+
+OBJECTS
+    java.security.Key key;
+
+EVENTS
+    Con: getInstance(_);
+    Init: init(_, key);
+
+REQUIRES
+    generatedKey[key] || generatedPubKey[key] || generatedPrivKey[key]; // Alternatives: key is a (symmetric) key, public key or private key
+</code></pre></div></td></tr></table></div>
+An <code>AlternativePredicateError</code> indicates that no alternative is ensured, i.e. a given key is not a correctly generated symmetric, public or private key.</p>
 
 
 
