@@ -1,15 +1,7 @@
-name: Deploy Documentation
+name: Preview Documentation
 
 on:
-  push:
-    branches:
-      - master
-      - develop
-    paths:
-      - mkdocs.yml
-      - docs/**
-      - .github/workflows/gh-pages.yml
-  pull_request_target:
+  pull_request:
     branches:
       - master
       - develop
@@ -23,10 +15,6 @@ on:
       - docs/**
       - .github/workflows/gh-pages.yml
 
-concurrency:
-  group: gh-pages
-  cancel-in-progress: true
-
 permissions:
   pages: write
   deployments: write
@@ -34,7 +22,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  manage:
+  preview-doc:
+    name: Preview Documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -59,7 +48,7 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      # on PR events..
+      # On PR events..
       - name: Deploy Doc in Subdirectory
         if: startsWith(github.event_name, 'pull_request')
         run: mike deploy ${{ env.DOC_VERSION_NAME }}_preview -t "PR Preview ${{ env.DOC_VERSION_NAME }}" --push && mike props ${{ env.DOC_VERSION_NAME }}_preview --set-string hidden=true --push
@@ -71,15 +60,7 @@ jobs:
           message: |
             [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.DOC_VERSION_NAME }}_preview/).
 
-      # on PR close - delete preview
+      # On PR close - delete preview
       - name: Delete the Deployed Preview
         if: startsWith(github.event_name, 'pull_request') && github.event.action == 'closed'
         run: mike delete ${{ env.DOC_VERSION_NAME }}_preview --push
-
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.base_ref == 'develop'
-        run: mike deploy develop --push --update-aliases develop latest
-
-      - name: Deploy Doc Version for New Release
-        if: github.event_name == 'push' && github.base_ref == 'master'
-        run: mike deploy "$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed "s/[^a-zA-Z0-9._-]/_/g" )" --push
