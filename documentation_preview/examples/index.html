@@ -11,10 +11,10 @@
         <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/documentation_preview/examples/">
       
       
-        <link rel="prev" href="../getting-started/">
+        <link rel="prev" href="../error-types/">
       
       
-        <link rel="next" href="../error-types/">
+        <link rel="next" href="../api/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Example Analyses - CryptoAnalysis Documentation</title>
+        <title>Examples - CryptoAnalysis Documentation</title>
       
     
     
@@ -63,7 +63,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="orange" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-green" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#example-analyses" class="md-skip">
+        <a href="#example-analysis" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="CryptoAnalysis Documentation" class="md-header__button md-logo" aria-label="CryptoAnalysis Documentation" data-md-component="logo">
       
-  <img src="../img/CryptoAnalysisLogo.png" alt="logo">
+  <img src="../img/logo.jpg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Example Analyses
+              Examples
             
           </span>
         </div>
@@ -203,7 +203,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="CryptoAnalysis Documentation" class="md-nav__button md-logo" aria-label="CryptoAnalysis Documentation" data-md-component="logo">
       
-  <img src="../img/CryptoAnalysisLogo.png" alt="logo">
+  <img src="../img/logo.jpg" alt="logo">
 
     </a>
     CryptoAnalysis Documentation
@@ -302,7 +302,7 @@
   
   
   <span class="md-ellipsis">
-    Installation
+    Installation and Setup
     
   </span>
   
@@ -320,12 +320,58 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../java-scanner/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    First Steps
+    HeadlessJavaScanner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../android-scanner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    HeadlessAndroidScanner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Error Types
     
   </span>
   
@@ -357,7 +403,7 @@
   
   
   <span class="md-ellipsis">
-    Example Analyses
+    Examples
     
   </span>
   
@@ -376,12 +422,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../error-types/" class="md-nav__link">
+      <a href="../api/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Error Types
+    API
     
   </span>
   
@@ -436,7 +482,82 @@
   
 
 
-<h1 id="example-analyses">Example Analyses</h1>
+<h1 id="example-analysis">Example Analysis</h1>
+<p>To show how CogniCrypt<sub>SAST</sub> works, we consider the following code example:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.security.GeneralSecurityException</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.crypto.KeyGenerator</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.crypto.SecretKey</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.crypto.spec.SecretKeySpec</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">javax.crypto.Cipher</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Example</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">GeneralSecurityException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// &quot;DES&quot; is not allowed -&gt; ConstraintError</span>
+<span class="w">        </span><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">generator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;DES&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// l1</span>
+
+<span class="w">        </span><span class="c1">// Key size of 64 is not allowed -&gt; ConstraintError</span>
+<span class="w">        </span><span class="n">generator</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="mi">64</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// KeyGenerator is not correctly initialized. Hence, the generated</span>
+<span class="w">        </span><span class="c1">// key is not secure -&gt; RequiredPredicateError</span>
+<span class="w">        </span><span class="n">SecretKey</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">generator</span><span class="p">.</span><span class="na">generateKey</span><span class="p">();</span><span class="w"> </span><span class="c1">// l2</span>
+
+<span class="w">        </span><span class="c1">// &quot;DES&quot; is not allowed -&gt; ConstraintError</span>
+<span class="w">        </span><span class="n">Cipher</span><span class="w"> </span><span class="n">cipher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cipher</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;DES&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// l3</span>
+
+<span class="w">        </span><span class="c1">// &quot;key&quot; is not securely generated -&gt; RequiredPredicateError</span>
+<span class="w">        </span><span class="n">cipher</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">Cipher</span><span class="p">.</span><span class="na">ENCRYPT_MODE</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Cipher object is initialized but not used for encryption -&gt; IncompleteOperationError</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<p>Using the <a href="https://github.com/CROSSINGTUD/Crypto-API-Rules/tree/master/JavaCryptographicArchitecture/src">JCA rules</a>, we can use the <code>HeadlessJavaScanner</code> to analyze the compiled version of this program:</p>
+<p><div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code>java -jar HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar \\
+               --appPath ./Example.jar \\
+               --rulesDir ./JCA-CrySL-rules.zip \\
+               --framework Soot \\
+               --reportFormat CMD \\
+               --reportPath ./output/ \\
+               --visualization
+</code></pre></div></td></tr></table></div>
+Observe that we use <code>Soot</code> as the underlying analysis framework, we print the report to the command line, and we enable the visualization. CogniCrypt<sub>SAST</sub> runs the analysis and reports 3 ConstraintErrors, 2 RequiredPredicateErrors and 1 IncompleteOperationError, and their positions in the original programs. Additionally, since we use <code>--visualization</code>, it creates the following image <code>visualization.png</code> in the directory <code>./output/</code>:</p>
+<p><img alt="visualization.png" src="../img/visualization.png" /></p>
+<p>You can see that two ConstraintErrors on the object <code>l1</code> (KeyGenerator) cause a RequiredPredicateError on the object <code>l2</code> (SecretKey) which in turn causes a RequiredPredicateError on the object <code>l3</code> (Cipher). Additionally, there is another ConstraintError and IncompleteOperationError on the Cipher object. Note that the variables and statements correspond to the intermediate representation Jimple. You can match the variables to the command line output that lists all analyzed objects.</p>
 
 
 
