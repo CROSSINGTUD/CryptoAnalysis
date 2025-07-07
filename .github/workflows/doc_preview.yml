@@ -15,6 +15,9 @@ on:
       - docs/**
       - .github/workflows/gh-pages.yml
 
+concurrency:
+  group: gh-pages
+
 permissions:
   pages: write
   deployments: write
