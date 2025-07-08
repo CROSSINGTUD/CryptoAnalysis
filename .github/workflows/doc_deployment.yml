@@ -1,4 +1,5 @@
-name: Deploy Documentation
+name: Documentation Deployment
+description: Deploy the documentation to GitHub pages when modified
 
 on:
   push:

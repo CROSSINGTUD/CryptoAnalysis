@@ -1,7 +1,8 @@
-name: Preview Documentation
+name: Documentation Preview
+description: Create a preview for the documentation when modified and add a link to the PR
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - master
       - develop
@@ -62,7 +63,7 @@ jobs:
         with:
           recreate: true
           message: |
-            [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.DOC_VERSION_NAME }}_preview/).
+            Detected changes in documentation files: [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.DOC_VERSION_NAME }}_preview/).
 
       # On PR close - delete preview
       - name: Delete the Deployed Preview
