@@ -2,30 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/</loc>
-         <lastmod>2025-07-07</lastmod>
-    </url>
-    <url>
-         <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/android-scanner/</loc>
-         <lastmod>2025-07-07</lastmod>
-    </url>
-    <url>
-         <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/api/</loc>
-         <lastmod>2025-07-07</lastmod>
+         <lastmod>2025-07-08</lastmod>
     </url>
     <url>
          <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/error-types/</loc>
-         <lastmod>2025-07-07</lastmod>
+         <lastmod>2025-07-08</lastmod>
     </url>
     <url>
          <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/examples/</loc>
-         <lastmod>2025-07-07</lastmod>
+         <lastmod>2025-07-08</lastmod>
+    </url>
+    <url>
+         <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/getting-started/</loc>
+         <lastmod>2025-07-08</lastmod>
     </url>
     <url>
          <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/installation/</loc>
-         <lastmod>2025-07-07</lastmod>
-    </url>
-    <url>
-         <loc>https://crossingtud.github.io/CryptoAnalysis/documentation_preview/java-scanner/</loc>
-         <lastmod>2025-07-07</lastmod>
+         <lastmod>2025-07-08</lastmod>
     </url>
 </urlset>
