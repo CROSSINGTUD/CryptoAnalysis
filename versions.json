@@ -1,5 +1,10 @@
 [
   {
+    "version": "fix_doc_actions_preview",
+    "title": "PR Preview fix_doc_actions",
+    "aliases": []
+  },
+  {
     "version": "documentation_preview",
     "title": "PR Preview documentation",
     "aliases": [],
