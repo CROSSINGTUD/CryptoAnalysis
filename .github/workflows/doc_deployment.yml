@@ -4,25 +4,24 @@ description: Deploy the documentation to GitHub pages when modified
 on:
   push:
     branches:
-      - master
       - develop
     paths:
       - mkdocs.yml
       - docs/**
       - .github/workflows/gh-pages.yml
+    tags:
+      - '*'
 
 concurrency:
   group: gh-pages
-
-permissions:
-  pages: write
-  deployments: write
-  contents: write
 
 jobs:
   deploy-doc:
     name: Deploy Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,12 +35,26 @@ jobs:
           python-version: 3.x
 
       - name: Install Dependencies
-        run: pip install mike mkdocs-material mkdocs-tooltips git+https://github.com/RedisLabs/mkdocs-include.git git+https://github.com/swissiety/LspLexer4Pygments.git
+        run: pip install mike mkdocs mkdocs-material pymdown-extensions
 
+      - name: Configure git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Build Docs
+        run: mkdocs build --site-dir site
+
+      # On push/merge to develop: Deploy the current doc as default/latest
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.base_ref == 'develop'
-        run: mike deploy develop --push --update-aliases develop latest
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          mike deploy --push --update-aliases develop latest
 
+      # On tag creation (i.e. new release): Deploy to directory with tag
       - name: Deploy Doc Version for New Release
-        if: github.event_name == 'push' && github.base_ref == 'master'
-        run: mike deploy "$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed "s/[^a-zA-Z0-9._-]/_/g" )" --push
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          VERSION=${{ github.ref_name }}
+          mike deploy --push "$VERSION"
+          mike set-default --push "$VERSION"
