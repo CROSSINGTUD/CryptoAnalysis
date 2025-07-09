@@ -2,7 +2,10 @@
   {
     "version": "fix_doc_actions_preview",
     "title": "PR Preview fix_doc_actions",
-    "aliases": []
+    "aliases": [],
+    "properties": {
+      "hidden": "true"
+    }
   },
   {
     "version": "documentation_preview",
