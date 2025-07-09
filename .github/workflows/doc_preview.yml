@@ -2,7 +2,7 @@ name: Documentation Preview
 description: Create a preview for the documentation when modified and add a link to the PR
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - master
       - develop
@@ -19,22 +19,19 @@ on:
 concurrency:
   group: gh-pages
 
-permissions:
-  pages: write
-  deployments: write
-  contents: write
-  pull-requests: write
-
 jobs:
   preview-doc:
     name: Preview Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -42,30 +39,39 @@ jobs:
           python-version: 3.x
 
       - name: Install Dependencies
-        run: pip install mike mkdocs-material mkdocs-tooltips git+https://github.com/RedisLabs/mkdocs-include.git git+https://github.com/swissiety/LspLexer4Pygments.git
-
-      # Sanitize head_ref name
-      - run: echo "DOC_VERSION_NAME=$(echo ${{ github.head_ref }} | sed "s/[^a-zA-Z0-9._-]/_/g" )" >> $GITHUB_ENV
+        run: pip install mkdocs mkdocs-material pymdown-extensions
 
       - name: Configure git user
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
+      - name: Build Docs
+        run: mkdocs build --site-dir site
+
       # On PR events..
-      - name: Deploy Doc in Subdirectory
-        if: startsWith(github.event_name, 'pull_request')
-        run: mike deploy ${{ env.DOC_VERSION_NAME }}_preview -t "PR Preview ${{ env.DOC_VERSION_NAME }}" --push && mike props ${{ env.DOC_VERSION_NAME }}_preview --set-string hidden=true --push
+      - name: Deploy Preview
+        if: github.event.action != 'closed'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          destination_dir: pr-${{ github.event.pull_request.number }}
 
       - name: Comment Link to Preview
-        if: startsWith(github.event_name, 'pull_request') && github.event.action != 'closed'
+        if: github.event.action != 'closed'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
           message: |
-            Detected changes in documentation files: [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ env.DOC_VERSION_NAME }}_preview/).
+            Detected changes in documentation files: [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}/
 
       # On PR close - delete preview
       - name: Delete the Deployed Preview
-        if: startsWith(github.event_name, 'pull_request') && github.event.action == 'closed'
-        run: mike delete ${{ env.DOC_VERSION_NAME }}_preview --push
+        if: github.event.action == 'closed'
+        run: |
+          git checkout -b gh-pages
+          git rm -rf pr-${{ github.event.pull_request.number }}
+          git commit --allow-empty -m "Remove preview for PR #${{ github.event.pull_request.number }}"
+          git push origin gh-pages
