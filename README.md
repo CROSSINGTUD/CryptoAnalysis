@@ -173,10 +173,3 @@ Optional arguments are:
 The arguments `--reportPath` and `--reportFormat` have the same functionality as the `HeadlessJavaScanner-x.y.z-jar-with-dependencies.jar` (see above).
 
 Again, depending on the analyzed application, the analysis may require a lot of memory and a large stack size. Remember to set the necessary heap size (e.g. -Xmx8g) and stack size (e.g. -Xss60m).
-
-## How can I contribute?
-We hare happy for every contribution from the community!
-
-* [Contributing](CONTRIBUTING.md) for details on issues and merge requests.
-* [Coding Guidles](CODING.md) for this project.
-

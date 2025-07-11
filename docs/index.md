@@ -11,4 +11,11 @@ CogniCrypt<sub>SAST</sub> provides the following features:
 * A wide range of different error types that explain the violations of CrySL specifications
 * An API to configure your own analysis
 
-We provide examples and a quick start [here](examples.md)
+This documentation covers the following aspects:
+
+* The [installation and setup](installation.md) for the project
+* A tutorial on how to use CongiCrypt<sub>SAST</sub> for [Java](java-scanner.md) and [Android](android-scanner.md) applications
+* A [list with examples](error-types.md) for all reported error types
+* [Examples](examples.md) of running CogniCrypt<sub>SAST</sub> with a Java application
+* A [description of the API](api.md) that allows the extension of CogniCrypt<sub>SAST</sub>
+* Information about [contributing](contributing.md) to this project

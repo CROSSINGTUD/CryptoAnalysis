@@ -12,6 +12,7 @@ nav:
       - Error Types: error-types.md
       - Examples: examples.md
       - API: api.md
+      - Contributing: contributing.md
 
 theme:
   name: material
