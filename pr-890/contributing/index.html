@@ -8,13 +8,11 @@
       
       
       
-        <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/api/">
+        <link rel="canonical" href="https://crossingtud.github.io/CryptoAnalysis/contributing/">
       
       
-        <link rel="prev" href="../examples/">
+        <link rel="prev" href="../api/">
       
-      
-        <link rel="next" href="../contributing/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +20,7 @@
     
     
       
-        <title>API - CryptoAnalysis Documentation</title>
+        <title>Contributing - CryptoAnalysis Documentation</title>
       
     
     
@@ -72,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#api-of-cryptoanalysis" class="md-skip">
+        <a href="#contributing" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              API
+              Contributing
             
           </span>
         </div>
@@ -409,6 +407,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -426,7 +447,7 @@
   
   
   <span class="md-ellipsis">
-    API
+    Contributing
     
   </span>
   
@@ -439,7 +460,7 @@
   
   
   <span class="md-ellipsis">
-    API
+    Contributing
     
   </span>
   
@@ -462,38 +483,53 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#basic-example-idea" class="md-nav__link">
+  <a href="#coding-guidelines" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic example idea
+      Coding Guidelines
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#including-the-dependencies" class="md-nav__link">
+  <a href="#workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      Including the dependencies
+      Workflow
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#defining-a-listener" class="md-nav__link">
+  <a href="#branches" class="md-nav__link">
     <span class="md-ellipsis">
-      Defining a listener
+      Branches
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branching
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#set-up-and-run-the-headlessandroidscanner" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#naming-branches" class="md-nav__link">
     <span class="md-ellipsis">
-      Set up and run the HeadlessAndroidScanner
+      Naming Branches
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -501,29 +537,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Contributing
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -563,38 +576,53 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#basic-example-idea" class="md-nav__link">
+  <a href="#coding-guidelines" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic example idea
+      Coding Guidelines
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#including-the-dependencies" class="md-nav__link">
+  <a href="#workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      Including the dependencies
+      Workflow
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#defining-a-listener" class="md-nav__link">
+  <a href="#branches" class="md-nav__link">
     <span class="md-ellipsis">
-      Defining a listener
+      Branches
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Branches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#branching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branching
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#set-up-and-run-the-headlessandroidscanner" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#naming-branches" class="md-nav__link">
     <span class="md-ellipsis">
-      Set up and run the HeadlessAndroidScanner
+      Naming Branches
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -617,127 +645,37 @@
   
 
 
-<h1 id="api-of-cryptoanalysis">API of CryptoAnalysis</h1>
-<p>The <code>CryptoAnalysis</code> module contains the static analysis components. It allows the configuration of CogniCrypt<sub>SAST</sub> to match your own needs. The following example shows an alternative configuration with SootUp.</p>
-<h2 id="basic-example-idea">Basic example idea</h2>
-<p>For research purposes, we are interested in the number of triggered Boomerang queries and the accumulated time to solve the queries. Thereby, we consider only SootUp as the underlying static analysis framework and <code>RTA</code> as the call graph algorithm.</p>
-<h2 id="including-the-dependencies">Including the dependencies</h2>
-<p>Include the <code>HeadlessJavaScanner</code> module in your project:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;dependency&gt;
-    &lt;groupId&gt;de.fraunhofer.iem&lt;/groupId&gt;
-    &lt;artifactId&gt;HeadlessJavaScanner&lt;/artifactId&gt;
-    &lt;version&gt;x.y.z&lt;/version&gt;
-&lt;/dependency&gt;
+<h1 id="contributing">Contributing</h1>
+<p>We hare happy for every contribution from the community! Please consider the following aspects when contributing to this project.</p>
+<h2 id="coding-guidelines">Coding Guidelines</h2>
+<p>We aim for keeping the code as clean as possible. To do so, we follow the Google style guide for Java/Android. To format the code, run the command</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>mvn<span class="w"> </span>spotless:apply
 </code></pre></div></td></tr></table></div>
-<h2 id="defining-a-listener">Defining a listener</h2>
-<p><code>CryptoAnalysis</code> defines a set of listeners that are informed during the analysis. There are 3 types of listeners:</p>
+<p>before committing your changes.</p>
+<h2 id="workflow">Workflow</h2>
+<p>We aim for the following workflow:</p>
+<p>1) Create a fork from this repository</p>
+<p>2) Create a new branch and push your changes to it</p>
+<p>3) Open a pull request against the <code>develop</code> branch from this repository</p>
 <ul>
-<li><code>IAnalysisListener</code>: Listener that tracks events during the analysis (e.g. the start of the typestate analysis, the analysis of seeds etc.)</li>
-<li><code>IResultsListener</code>: Listener that tracks intermediate analysis results (e.g. typestate analysis results, Boomerang query results etc.)</li>
-<li><code>IErrorListener</code>: Listener that tracks the report of detected errors</li>
+<li>The pull request should contain a small description of the changes and why they are needed</li>
 </ul>
-<p>Since we are interested in the starting and end points of solving Boomerang queries, we define an <code>IAnalysisListener</code> and consider the methods that are called when Boomerang queries are triggered:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">QueryTrackingListener</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">IAnalysisListener</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="c1">// Keep track of the triggered queries</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">triggeredQueries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="c1">// Watch to measure the accumulated time for each query</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Stopwatch</span><span class="w"> </span><span class="n">watch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Stopwatch</span><span class="p">.</span><span class="na">createUnstarted</span><span class="p">();</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getTriggeredQueries</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">triggeredQueries</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getWatchTime</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">watch</span><span class="p">.</span><span class="na">toString</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">beforeTriggeringBoomerangQuery</span><span class="p">(</span><span class="n">BackwardQuery</span><span class="w"> </span><span class="n">query</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">watch</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="nd">@Override</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">afterTriggeringBoomerangQuery</span><span class="p">(</span><span class="n">BackwardQuery</span><span class="w"> </span><span class="n">query</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">watch</span><span class="p">.</span><span class="na">stop</span><span class="p">();</span>
-<span class="w">        </span><span class="n">triggeredQueries</span><span class="o">++</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-<h2 id="set-up-and-run-the-headlessandroidscanner">Set up and run the HeadlessAndroidScanner</h2>
-<p>We can use the API of the <code>HeadlessJavaScanner</code> to configure CogniCrypt<sub>SAST</sub> to run with our own listener:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">BoomerangQueryTracking</span><span class="w"> </span><span class="p">{</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">HeadlessJavaScanner</span><span class="w"> </span><span class="n">scanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HeadlessJavaScanner</span><span class="p">(</span><span class="s">&quot;path/to/app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;path/to/rules&quot;</span><span class="p">);</span>
-
-<span class="w">        </span><span class="c1">// We are only interested in SootUp with RTA</span>
-<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">setFramework</span><span class="p">(</span><span class="n">ScannerSettings</span><span class="p">.</span><span class="na">Framework</span><span class="p">.</span><span class="na">SootUp</span><span class="p">);</span>
-<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">setCallGraphAlgorithm</span><span class="p">(</span><span class="n">ScannerSettings</span><span class="p">.</span><span class="na">CallGraphAlgorithm</span><span class="p">.</span><span class="na">RTA</span><span class="p">);</span>
-
-<span class="w">        </span><span class="c1">// We do not need a report</span>
-<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">setReportFormats</span><span class="p">(</span><span class="n">Collections</span><span class="p">.</span><span class="na">emptySet</span><span class="p">());</span>
-
-<span class="w">        </span><span class="c1">// Add our own listener</span>
-<span class="w">        </span><span class="n">QueryTrackingListener</span><span class="w"> </span><span class="n">listener</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">QueryTrackingListener</span><span class="p">();</span>
-<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">addAnalysisListener</span><span class="p">(</span><span class="n">listener</span><span class="p">);</span>
-
-<span class="w">        </span><span class="c1">// Run the scanner and print the results</span>
-<span class="w">        </span><span class="n">scanner</span><span class="p">.</span><span class="na">run</span><span class="p">();</span>
-<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Triggered Boomerang queries: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">listener</span><span class="p">.</span><span class="na">getTriggeredQueries</span><span class="p">());</span>
-<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Time for solving all queries: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">listener</span><span class="p">.</span><span class="na">getWatchTime</span><span class="p">());</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
+<p>4) Wait for a review or approval</p>
+<p>When adding your changes, please make sure that all tests are passing. We have corresponding GitHub actions that check whether there are any problems. You can also check the status locally (see <a href="../installation/">Installation and Setup</a>).</p>
+<h2 id="branches">Branches</h2>
+<p>This repository contains two central branches. The <strong>master</strong> and the <strong>develop</strong> branch. The <code>develop</code> branch is default. Both branches are protected against direct write access, thus Pull Requests are necessary to push into them. Other branches are unprotected and can be created and deleted by a contributor</p>
+<p>The <code>master</code> branch holds the latest stable release of the application.</p>
+<p>The <code>develop</code> branch holds the latest development version of the application.</p>
+<p>New branches should always target <code>develop</code>. Once, we decide to release a new version, we merge the changes from the <code>develop</code> branch into the <code>master</code> branch and deploy the changes to Maven Central.</p>
+<h3 id="branching">Branching</h3>
+<p>Since <code>master</code> and <code>develop</code> branches are protected, working with branches is mandatory.</p>
+<p>In general, each branch shall only be responsible for one idea. This way we try to minimize the amount of changes in all branches, which makes it easier to review.</p>
+<h3 id="naming-branches">Naming Branches</h3>
+<p>Branch names should be declarative, meaning the name of a branch shall always yield what it's ultimately going to change. Since a branch can target different aspects of development (e.g. feature, bug-fix, refactoring, etc.) their names shall have that information also included by adding a <em>PREFIX</em>. The scheme of a branch name look as follows: <code>PREFIX/tell-what-it-does</code></p>
+<p>For example, we suggest the following prefixes:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>feature/    // For new features
+fix/        // Fixes a bug
 </code></pre></div></td></tr></table></div>
 
 
