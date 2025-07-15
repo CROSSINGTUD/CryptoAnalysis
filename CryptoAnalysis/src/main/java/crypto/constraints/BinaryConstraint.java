@@ -12,12 +12,14 @@ package crypto.constraints;
 import boomerang.scope.Statement;
 import com.google.common.collect.Multimap;
 import crypto.analysis.AnalysisSeedWithSpecification;
+import crypto.analysis.errors.AbstractConstraintsError;
 import crypto.analysis.errors.ConstraintError;
 import crypto.constraints.violations.ViolatedBinaryConstraint;
 import crypto.constraints.violations.ViolatedConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crysl.rule.CrySLConstraint;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * A binary constraint represents two constraints 'left' and 'right' that are connected by a logical
@@ -58,6 +60,8 @@ public class BinaryConstraint extends EvaluableConstraint {
         EvaluationResult leftResult = leftConstraint.evaluate();
         EvaluationResult rightResult = rightConstraint.evaluate();
 
+        Collection<Statement> violatingStatements = new HashSet<>();
+
         switch (constraint.getOperator()) {
             case implies -> {
                 if (leftResult == EvaluationResult.ConstraintIsNotSatisfied) {
@@ -85,6 +89,11 @@ public class BinaryConstraint extends EvaluableConstraint {
                         return EvaluationResult.ConstraintIsSatisfied;
                     }
                 }
+
+                // Constraint is not satisfied -> Only consider right sides for implications
+                for (AbstractConstraintsError error : rightConstraint.getErrors()) {
+                    violatingStatements.add(error.getErrorStatement());
+                }
             }
             case or -> {
                 if (leftResult == EvaluationResult.ConstraintIsNotRelevant
@@ -99,6 +108,19 @@ public class BinaryConstraint extends EvaluableConstraint {
                 if (rightResult == EvaluationResult.ConstraintIsSatisfied) {
                     return EvaluationResult.ConstraintIsSatisfied;
                 }
+
+                // Constraint is not satisfied
+                if (leftResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    for (AbstractConstraintsError error : leftConstraint.getErrors()) {
+                        violatingStatements.add(error.getErrorStatement());
+                    }
+                }
+
+                if (rightResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    for (AbstractConstraintsError error : rightConstraint.getErrors()) {
+                        violatingStatements.add(error.getErrorStatement());
+                    }
+                }
             }
             case and -> {
                 if (leftResult == EvaluationResult.ConstraintIsNotRelevant) {
@@ -112,6 +134,19 @@ public class BinaryConstraint extends EvaluableConstraint {
                 if (leftResult == EvaluationResult.ConstraintIsSatisfied
                         && rightResult == EvaluationResult.ConstraintIsSatisfied) {
                     return EvaluationResult.ConstraintIsSatisfied;
+                }
+
+                // Constraint is not satisfied
+                if (leftResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    for (AbstractConstraintsError error : leftConstraint.getErrors()) {
+                        violatingStatements.add(error.getErrorStatement());
+                    }
+                }
+
+                if (rightResult == EvaluationResult.ConstraintIsNotSatisfied) {
+                    for (AbstractConstraintsError error : rightConstraint.getErrors()) {
+                        violatingStatements.add(error.getErrorStatement());
+                    }
                 }
             }
             case eq -> {
@@ -135,15 +170,13 @@ public class BinaryConstraint extends EvaluableConstraint {
             }
         }
 
-        ViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
-        ConstraintError error =
-                new ConstraintError(
-                        seed,
-                        seed.getInitialStatement(),
-                        seed.getSpecification(),
-                        this,
-                        violatedConstraint);
-        errors.add(error);
+        for (Statement statement : violatingStatements) {
+            ViolatedConstraint violatedConstraint = new ViolatedBinaryConstraint(this);
+            ConstraintError error =
+                    new ConstraintError(
+                            seed, statement, seed.getSpecification(), this, violatedConstraint);
+            errors.add(error);
+        }
 
         return EvaluationResult.ConstraintIsNotSatisfied;
     }
