@@ -20,6 +20,9 @@ import java.util.Objects;
 
 public abstract class AbstractError {
 
+    private static int idCounter = 0;
+
+    private final int errorId;
     private final IAnalysisSeed seed;
     private final Statement errorStmt;
     private final CrySLRule rule;
@@ -28,6 +31,7 @@ public abstract class AbstractError {
     private final Collection<AbstractError> subsequentErrors;
 
     public AbstractError(IAnalysisSeed seed, Statement errorStmt, CrySLRule rule) {
+        this.errorId = idCounter++;
         this.seed = seed;
         this.errorStmt = errorStmt;
         this.rule = rule;
@@ -37,6 +41,10 @@ public abstract class AbstractError {
     }
 
     public abstract String toErrorMarkerString();
+
+    public int getErrorId() {
+        return errorId;
+    }
 
     public IAnalysisSeed getSeed() {
         return seed;
