@@ -39,9 +39,11 @@ public class SARIFConfig {
     public static final String MIME_TYPE_VALUE = "text/java";
 
     public static final String RESULTS_KEY = "results";
-    public static final String ERROR_ID_KEY = "id";
+    public static final String ERROR_ID_KEY = "errorId";
     public static final String VIOLATED_RULE_ID_KEY = "ruleId";
     public static final String ERROR_TYPE_KEY = "errorType";
+    public static final String PRECEDING_ERRORS_KEY = "precedingErrors";
+    public static final String SUBSEQUENT_ERRORS_KEY = "subsequentErrors";
     public static final String MESSAGE_KEY = "message";
     public static final String TEXT_KEY = "text";
     public static final String MARKDOWN_KEY = "markdown";
@@ -49,7 +51,6 @@ public class SARIFConfig {
     public static final String PHYSICAL_LOCATION_KEY = "physicalLocation";
     public static final String ARTIFACT_LOCATION_KEY = "artifactLocation";
     public static final String LOGICAL_LOCATION_KEY = "logicalLocations";
-    public static final String RELATED_LOCATIONS_KEY = "relatedLocations";
 
     public static final String URI_KEY = "uri";
     public static final String INDEX_KEY = "index";

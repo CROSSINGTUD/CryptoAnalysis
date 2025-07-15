@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class SARIFReporter extends Reporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SARIFReporter.class);
-    private static final String FILE_ENDING = ".json";
+    private static final String FILE_ENDING = ".sarif.json";
 
     private final Map<String, Integer> errorCountMap;
 
@@ -121,13 +121,24 @@ public class SARIFReporter extends Reporter {
         errorObject.put(SARIFConfig.VIOLATED_RULE_ID_KEY, error.getRule().getClassName());
         errorObject.put(SARIFConfig.MESSAGE_KEY, createMessageObject(error));
         errorObject.put(SARIFConfig.LOCATIONS_KEY, createLocationsObject(error, uriLocation));
-        errorObject.put(
-                SARIFConfig.RELATED_LOCATIONS_KEY,
-                createPrecedingAndSubsequentErrorsObject(error, uriLocation));
 
         JSONObject properties = new JSONObject();
         properties.put(SARIFConfig.ERROR_ID_KEY, error.getErrorId());
         properties.put(SARIFConfig.ERROR_TYPE_KEY, error.getClass().getSimpleName());
+
+        JSONArray preErrors = new JSONArray();
+        for (AbstractError preError : error.getPrecedingErrors()) {
+            preErrors.put(preError.getErrorId());
+        }
+
+        JSONArray subErrors = new JSONArray();
+        for (AbstractError subError : error.getSubsequentErrors()) {
+            subErrors.put(subError.getErrorId());
+        }
+
+        properties.put(SARIFConfig.PRECEDING_ERRORS_KEY, preErrors);
+        properties.put(SARIFConfig.SUBSEQUENT_ERRORS_KEY, subErrors);
+
         errorObject.put(SARIFConfig.PROPERTIES_KEY, properties);
 
         return errorObject;
@@ -135,40 +146,6 @@ public class SARIFReporter extends Reporter {
 
     private String sanitizeMessage(String message) {
         return message.replace("\\", "\\\\").replace("\n", "\\n").replace("\t", "\\t");
-    }
-
-    private JSONArray createPrecedingAndSubsequentErrorsObject(AbstractError error, int uriIndex) {
-        JSONArray relatedLocations = new JSONArray();
-
-        for (AbstractError preError : error.getPrecedingErrors()) {
-            JSONObject preObject = new JSONObject();
-            preObject.put(SARIFConfig.ERROR_ID_KEY, preError.getErrorId());
-
-            JSONObject message = new JSONObject();
-            message.put(SARIFConfig.TEXT_KEY, "preceding");
-            preObject.put(SARIFConfig.MESSAGE_KEY, message);
-
-            preObject.put(
-                    SARIFConfig.PHYSICAL_LOCATION_KEY,
-                    createPhysicalLocationObject(preError, uriIndex));
-            relatedLocations.put(preObject);
-        }
-
-        for (AbstractError subError : error.getSubsequentErrors()) {
-            JSONObject subObject = new JSONObject();
-            subObject.put(SARIFConfig.ERROR_ID_KEY, subError.getErrorId());
-
-            JSONObject message = new JSONObject();
-            message.put(SARIFConfig.TEXT_KEY, "subsequent");
-            subObject.put(SARIFConfig.MESSAGE_KEY, message);
-
-            subObject.put(
-                    SARIFConfig.PHYSICAL_LOCATION_KEY,
-                    createPhysicalLocationObject(subError, uriIndex));
-            relatedLocations.put(subObject);
-        }
-
-        return relatedLocations;
     }
 
     private JSONArray createLocationsObject(AbstractError error, int uriIndex) {
@@ -221,7 +198,7 @@ public class SARIFReporter extends Reporter {
         JSONObject functionObject = new JSONObject();
         functionObject.put(
                 SARIFConfig.NAME_KEY, error.getErrorStatement().getMethod().getSubSignature());
-        functionObject.put(SARIFConfig.KIND_KEY, "function");
+        functionObject.put(SARIFConfig.KIND_KEY, "method");
         logicalLocation.put(functionObject);
 
         return logicalLocation;
