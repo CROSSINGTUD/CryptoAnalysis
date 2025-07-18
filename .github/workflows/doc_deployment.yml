@@ -1,0 +1,60 @@
+name: Documentation Deployment
+description: Deploy the documentation to GitHub pages when modified
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - mkdocs.yml
+      - docs/**
+      - .github/workflows/gh-pages.yml
+    tags:
+      - '*'
+
+concurrency:
+  group: gh-pages
+
+jobs:
+  deploy-doc:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install Dependencies
+        run: pip install mike mkdocs mkdocs-material pymdown-extensions
+
+      - name: Configure git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Build Docs
+        run: mkdocs build --site-dir site
+
+      # On push/merge to develop: Deploy the current doc as default/latest
+      - name: Deploy to GitHub Pages
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          mike deploy --push --update-aliases latest
+
+      # On tag creation (i.e. new release): Deploy to directory with tag
+      - name: Deploy Doc Version for New Release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          VERSION=${{ github.ref_name }}
+          mike deploy --push "$VERSION"
+          mike set-default --push "$VERSION"
