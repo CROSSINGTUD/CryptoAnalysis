@@ -53,7 +53,7 @@ public class QueryTrackingListener implements IAnalysisListener {
 }
 ```
 
-## Set up and run the HeadlessAndroidScanner
+## Set up and run the HeadlessJavaScanner
 We can use the API of the `HeadlessJavaScanner` to configure CogniCrypt<sub>SAST</sub> to run with our own listener:
 
 ```java

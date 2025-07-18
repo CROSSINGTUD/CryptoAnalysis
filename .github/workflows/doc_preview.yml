@@ -33,45 +33,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Create Documentation Preview
+        uses: secure-software-engineering/actions/pages/doc-preview@develop
         with:
-          python-version: 3.x
-
-      - name: Install Dependencies
-        run: pip install mkdocs mkdocs-material pymdown-extensions
-
-      - name: Configure git user
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-      - name: Build Docs
-        run: mkdocs build --site-dir site
-
-      # On PR events..
-      - name: Deploy Preview
-        if: github.event.action != 'closed'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          publish_branch: gh-pages
-          destination_dir: pr-${{ github.event.pull_request.number }}
-
-      - name: Comment Link to Preview
-        if: github.event.action != 'closed'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          recreate: true
-          message: |
-            Detected changes in documentation files: [Documentation Preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}/)
-
-      # On PR close - delete preview
-      - name: Delete the Deployed Preview
-        if: github.event.action == 'closed'
-        run: |
-          git checkout -b gh-pages
-          git rm -rf pr-${{ github.event.pull_request.number }}
-          git commit --allow-empty -m "Remove preview for PR #${{ github.event.pull_request.number }}"
-          git push origin gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+          preview-name: pr-${{ github.event.pull_request.number }}
+          preview-title: Preview for PR-${{ github.event.pull_request.number }}
