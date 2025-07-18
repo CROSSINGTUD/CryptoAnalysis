@@ -416,6 +416,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#general-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      General information
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#constrainterror" class="md-nav__link">
     <span class="md-ellipsis">
       ConstraintError
@@ -590,6 +599,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#general-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      General information
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#constrainterror" class="md-nav__link">
     <span class="md-ellipsis">
       ConstraintError
@@ -673,6 +691,19 @@
 
 <h1 id="error-types">Error Types</h1>
 <p>CryptoAnalysis reports various kinds of errors that violate the sections in a CrySL rule. On this page, we give an overview and examples of the different error types. Note that the examples contain simple rules and programs to emphasize the concrete violation, they may not be part of the actual ruleset.</p>
+<h2 id="general-information">General information</h2>
+<p>CryptoAnalysis operates on an intermediate representation (three address code) of the original code. Therefore, the reported statements may be simplified and variable names may differ. To compensate for these deviations, CryptoAnalysis reports among the error types the classes, statements and line numbers of the error location. Hence, one should be able to find the exact error locations in the original code.</p>
+<p>Additionally, CryptoAnalysis performs small transformations on the original code. Primarily, this step includes extracting direct parameters into multiple statements. For example, the statement</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">KeyGenerator</span><span class="w"> </span><span class="n">kg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KeyGenerator</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="s">&quot;AES&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;BC&quot;</span><span class="p">);</span>
+</code></pre></div></td></tr></table></div>
+<p>is transformed to</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nv">varReplacer0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;AES&quot;</span><span class="p">;</span>
+<span class="nv">varReplacer1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;BC&quot;</span><span class="p">;</span>
+<span class="nv">kg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>KeyGenerator.getInstance<span class="o">(</span>varReplacer0,<span class="w"> </span>varReplacer1<span class="o">)</span><span class="p">;</span>
+</code></pre></div></td></tr></table></div>
+<p>Depending on the error type, CryptoAnalysis may report an error at the first two statements, although these statements do not exist in this form in the original code. Using the reported line numbers, one can map the statement to the original statement because the line numbers are kept from the original code. These transformations can be identified by the <code>varReplacer</code> name.</p>
 <h2 id="constrainterror">ConstraintError</h2>
 <p>CryptoAnalysis reports a <code>ConstraintError</code> if a constraint from the <code>CONSTRAINTS</code> section is violated. For example, consider the following rule <code>KeyGenerator.crysl</code>:
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -752,7 +783,7 @@ CryptoAnalysis reports a <code>ForbiddenMethodError</code> because the rule does
 <span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
-<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.KeyGenerator
 
 OBJECTS
     java.lang.String algorithm;
@@ -789,7 +820,7 @@ and the program
 <span class="normal">6</span>
 <span class="normal">7</span>
 <span class="normal">8</span>
-<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.KeyGenerator
 
 EVENTS
     Con: getInstance(_);
@@ -825,7 +856,7 @@ CryptoAnalysis reports an <code>IncompleteOperationError</code> because a call t
 <span class="normal">6</span>
 <span class="normal">7</span>
 <span class="normal">8</span>
-<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.KeyGenerator
 
 EVENTS
     Con: getInstance(_);
@@ -872,7 +903,7 @@ CryptoAnalysis reports a <code>TypestateError</code> because the call sequence m
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
-<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC java.security.KeyGenerator
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code>SPEC javax.crypto.KeyGenerator
 
 OBJECTS
     java.lang.String algorithm;
@@ -916,9 +947,9 @@ and the program
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 CryptoAnalysis reports a <code>RequiredPredicateError</code> because the algorithm DES is not allowed such that the rule for the KeyGenerator is violated and kg is not secure. Therefore, kg does not ensure any predicates which violates the <code>REQUIRES</code> section from the rule <code>Key.crysl</code>.
-Note that CryptoAnalysis also reports a <code>ConstraintError</code> for the violated algorithm constraint and connects it to the <code>RequiredPredicateError</code>. In this scenario, the <code>ConstraintError</code> causes the <code>RequiredPredicateError</code> and we have the following connection:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>TODO Add picture
-</code></pre></div></td></tr></table></div></p>
+Note that CryptoAnalysis also reports a <code>ConstraintError</code> for the violated algorithm constraint and connects it to the <code>RequiredPredicateError</code>. In this scenario, the <code>ConstraintError</code> causes the <code>RequiredPredicateError</code> and we have the following connection:</p>
+<p><img alt="required_predicate_example.png" src="../img/required_predicate_example.png" /></p>
+<p>Note that CryptoAnalysis operates on the intermediate representation of the original program code. Hence, the variable names may differ. In this case, <code>l1</code> corresponds <code>kg</code> and <code>l2</code> corresponds to <code>key</code>.</p>
 <h2 id="alternativerequiredpredicateerror">AlternativeRequiredPredicateError</h2>
 <p>CryptoAnalysis reports an <code>AlternativeRequiredPredicateError</code> if a predicate with alternatives from the <code>REQUIRES</code> section is not ensured. Conceptually, this error is the same as a <code>RequiredPredicateError</code>. The difference is that CryptoAnalysis reports an <code>AlternativeRequiredPredicateError</code> if no alternatives are ensured. For example, we have the following rule <code>Cipher.crysl</code>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
