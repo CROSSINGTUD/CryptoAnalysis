@@ -31,7 +31,7 @@ public class ReportFormatTest extends AbstractHeadlessTest {
     private static final String csvReportPath = rootPath + "CryptoAnalysis-Report.csv";
     private static final String csvSummaryReportPath =
             rootPath + "CryptoAnalysis-Report-Summary.csv";
-    private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.json";
+    private static final String sarifReportPath = rootPath + "CryptoAnalysis-Report.sarif.json";
     private static final String visualizationPath = rootPath + "visualization.png";
 
     @BeforeEach

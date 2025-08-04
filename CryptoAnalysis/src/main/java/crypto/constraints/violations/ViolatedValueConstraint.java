@@ -64,7 +64,14 @@ public record ViolatedValueConstraint(
                     .append(constraint.getConstraint().getVarName())
                     .append(") with value ")
                     .append(value.getTransformedVal().getVariableName())
-                    .append(" violates the constraint @ ")
+                    .append(" violates the constraint in class ")
+                    .append(
+                            parameter
+                                    .statement()
+                                    .getMethod()
+                                    .getDeclaringClass()
+                                    .getFullyQualifiedName())
+                    .append(" @ ")
                     .append(parameter.statement())
                     .append(" @ line ")
                     .append(parameter.statement().getLineNumber());
