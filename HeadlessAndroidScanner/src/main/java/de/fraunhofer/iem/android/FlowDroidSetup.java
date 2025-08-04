@@ -98,7 +98,13 @@ public class FlowDroidSetup {
         return new SootConfigForAndroid() {
             @Override
             public void setSootOptions(Options options, InfoflowConfiguration config) {
-                options.setPhaseOption("jb", "use-original-names:true");
+                /* TODO
+                 *  Needs to be disabled because of unknown behavior of Soot.
+                 *  See:
+                 *  - https://github.com/soot-oss/soot/issues/2083
+                 *  - https://github.com/CROSSINGTUD/CryptoAnalysis/issues/908
+                 */
+                // options.setPhaseOption("jb", "use-original-names:true");
                 options.setPhaseOption("jb.sils", "enabled:false");
                 options.setPhaseOption("jb.dae", "enabled:false");
 
