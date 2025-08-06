@@ -78,10 +78,8 @@ You can checkout a pre-compiled version of **CogniCrypt<sub>SAST</sub>** [here](
 
 The packaged  `jar` artifacts including all dependencies can be found in `/apps`. Building requires at least Java 17.
 
-
 ## How can I contribute?
 We hare happy for every contribution from the community!
 
 * [Contributing](CONTRIBUTING.md) for details on issues and merge requests.
 * [Coding Guidles](CODING.md) for this project.
-
