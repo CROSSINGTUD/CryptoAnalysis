@@ -13,7 +13,6 @@ import boomerang.scope.Statement;
 import crypto.constraints.ComparisonConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import crypto.utils.CrySLUtils;
 import java.util.Collection;
 
 /**
@@ -42,26 +41,28 @@ public record ViolatedComparisonConstraint(Statement statement, ComparisonConstr
 
             sb.append("\n")
                     .append("\t".repeat(depth))
-                    .append("|- ")
-                    .append(CrySLUtils.getIndexAsString(param.index()))
+                    .append("|- Extracted the following violating values for parameter ")
                     .append(" \"")
                     .append(param.param().getVariableName())
                     .append("\" (")
                     .append(param.varName())
-                    .append(") evaluates to:");
+                    .append(") @")
+                    .append(param.statement())
+                    .append(" @ line ")
+                    .append(param.statement().getLineNumber())
+                    .append(":");
 
             for (TransformedValue value : param.extractedValues()) {
                 sb.append("\n")
                         .append("\t".repeat(depth + 1))
-                        .append("|- ")
+                        .append("|- Value ")
                         .append(value.getTransformedVal().getVariableName())
-                        .append(" @ ")
-                        .append(value.getStatement())
-                        .append(" @ line ")
-                        .append(value.getStatement().getLineNumber())
                         .append(" in class \"")
                         .append(value.getStatement().getMethod().getDeclaringClass())
-                        .append("\"");
+                        .append("\" @")
+                        .append(value.getStatement())
+                        .append(" @ line ")
+                        .append(value.getStatement().getLineNumber());
             }
         }
 

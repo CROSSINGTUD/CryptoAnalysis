@@ -138,7 +138,7 @@
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>1.4.3</version>
+            <version>1.4.4</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -251,7 +251,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <version>3.6.1</version>
                         <executions>
                             <!-- Override the skipTests execution from the parent pom -->
                             <execution>
