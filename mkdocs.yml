@@ -6,17 +6,21 @@ edit_uri: edit/develop/docs/
 nav:
   - Home: index.md
   - Getting Started:
-      - Installation: installation.md
-      - First Steps: getting-started.md
-      - Example Analyses: examples.md
+      - Installation and Setup: installation.md
+      - CogniCrypt<sub>SAST</sub> for Java: java-scanner.md
+      - CogniCrypt<sub>SAST</sub> for Android: android-scanner.md
       - Error Types: error-types.md
+      - Examples: examples.md
+      - API: api.md
+      - Contributing: contributing.md
 
 theme:
   name: material
-  logo: ./img/CryptoAnalysisLogo.png
-  #  favicon: ./img/icon.png
+  logo: ./img/logo.jpg
+  #  favicon: ./img/icon.jpg
   palette:
-    primary: orange
+    primary: light green
+    ascent: light blue
   features:
     - navigation.sections
 
