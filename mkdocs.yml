@@ -7,8 +7,8 @@ nav:
   - Home: index.md
   - Getting Started:
       - Installation and Setup: installation.md
-      - HeadlessJavaScanner: java-scanner.md
-      - HeadlessAndroidScanner: android-scanner.md
+      - CogniCrypt<sub>SAST</sub> for Java: java-scanner.md
+      - CogniCrypt<sub>SAST</sub> for Android: android-scanner.md
       - Error Types: error-types.md
       - Examples: examples.md
       - API: api.md
