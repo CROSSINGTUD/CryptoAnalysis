@@ -1,10 +1,8 @@
 name: Documentation Preview
-description: Create a preview for the documentation when modified and add a link to the PR
 
 on:
   pull_request:
     branches:
-      - master
       - develop
     types:
       - opened
@@ -14,7 +12,7 @@ on:
     paths:
       - mkdocs.yml
       - docs/**
-      - .github/workflows/gh-pages.yml
+      - .github/workflows/doc_preview.yml
 
 concurrency:
   group: gh-pages
@@ -34,8 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create Documentation Preview
-        uses: secure-software-engineering/actions/documentation/handle-pr-preview@develop
+        uses: secure-software-engineering/actions/documentation/handle-pr-preview@fix/documentation-deployment
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           preview-name: pr-${{ github.event.pull_request.number }}
           preview-title: Preview for PR-${{ github.event.pull_request.number }}
