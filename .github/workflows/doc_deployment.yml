@@ -8,16 +8,19 @@ on:
     paths:
       - mkdocs.yml
       - docs/**
-      - .github/workflows/gh-pages.yml
-    tags:
-      - '*'
+      - .github/workflows/doc_deployment.yml
+    create:
+      tags:
+        - '*'
 
 concurrency:
   group: gh-pages
 
 jobs:
-  deploy-doc:
-    name: Deploy Documentation
+  # On push/merge to develop: Deploy the current doc as default/latest
+  deploy-doc-snapshots:
+    name: Deploy Snapshot Documentation
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,34 +30,42 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Extract Maven Version
+        id: version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Deploy Snapshot Documentation
+        uses: secure-software-engineering/actions/documentation/handle-deployment@fix/documentation-deployment
         with:
-          python-version: 3.x
+          name: ${{ steps.version.outputs.version }}
+          title: ${{ steps.version.outputs.version }}
 
-      - name: Install Dependencies
-        run: pip install mike mkdocs mkdocs-material pymdown-extensions
+  # On tag creation (i.e. new release): Deploy a stable version to directory with tag
+  deploy-doc-stable:
+    name: Deploy Stable Documentation
+    if: ${{ github.event_name == 'create' && github.ref_type == 'tag' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-      - name: Configure git user
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract Latest Tag
+        id: latest_tag
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-      - name: Build Docs
-        run: mkdocs build --site-dir site
-
-      # On push/merge to develop: Deploy the current doc as default/latest
-      - name: Deploy to GitHub Pages
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          mike deploy --push --update-aliases latest
-
-      # On tag creation (i.e. new release): Deploy to directory with tag
-      - name: Deploy Doc Version for New Release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          VERSION=${{ github.ref_name }}
-          mike deploy --push "$VERSION"
-          mike set-default --push "$VERSION"
+      - name: Deploy Stable Documentation
+        uses: secure-software-engineering/actions/documentation/handle-deployment@fix/documentation-deployment
+        with:
+          name: ${{ steps.latest_tag.outputs.tag }}
+          title: ${{ steps.latest_tag.outputs.tag }}
+          stable: true
