@@ -5,10 +5,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - mkdocs.yml
-      - docs/**
-      - .github/workflows/doc_deployment.yml
     create:
       tags:
         - '*'
@@ -55,17 +51,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 0
-
-      - name: Extract Latest Tag
-        id: latest_tag
-        run: |
-          TAG=$(git describe --tags --abbrev=0)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Deploy Stable Documentation
         uses: secure-software-engineering/actions/documentation/handle-deployment@fix/documentation-deployment
         with:
-          name: ${{ steps.latest_tag.outputs.tag }}
-          title: ${{ steps.latest_tag.outputs.tag }}
+          name: ${{ github.ref_name }}
+          title: ${{ github.ref_name }}
           stable: true
