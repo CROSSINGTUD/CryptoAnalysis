@@ -6,7 +6,7 @@ The `HeadlessAndroidScanner` implements an interface for CogniCrypt<sub>SAST</su
 CogniCrypt<sub>SAST</sub> can be started as CLI tool via the file `HeadlessAndroidScanner-x.y.z-jar-with-dependencies.jar`. You can build this file yourself (see the [installation](installation.md)) or download the last released version from the [GitHub releases](https://github.com/CROSSINGTUD/CryptoAnalysis/releases). The following list explains required and optional CLI options. See the [examples](examples.md) for concrete use cases
 
 ### Required options
-The HeadlessJavaScanner requires three arguments:
+The HeadlessAndroidScanner requires three arguments:
 
 - **--apkFile &lt;path_to_apk_file&gt;**
 
@@ -49,7 +49,7 @@ The HeadlessJavaScanner requires three arguments:
     Creates a file `visualization.png` in the report path directory that visualizes the connection of detected errors. This argument requires the `--reportPath` argument to be set.
 
 ## HeadlessAndroidScanner with a dependency
-CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding `setter` method. Include the following dependency in your project and instantiate the `HeadlessJavaScanner`:
+CogniCrypt<sub>SAST</sub> provides a simple API that allows its usage inside a program. Its usage does not deviate from the CLI tool; for each argument, there is a corresponding `setter` method. Include the following dependency in your project and instantiate the `HeadlessAndroidScanner`:
 
 ```
 <dependency>
@@ -81,12 +81,12 @@ public class Example {
 ```
 
 ### Instantiation via constructor
-The `HeadlessAndroidScanner` has a public constructor that requires the required arguments:
+The `HeadlessAndroidScanner` has a public constructor that accepts the required arguments:
 ```java
 public class Example {
     
     public static void main(String[] args) {
-        HeadlessJavaScanner scanner = new HeadlessJavaScanner("path/to/app", "path/to/platforms", "path/to/rules");
+        HeadlessAndroidScanner scanner = new HeadlessAndroidScanner("path/to/app", "path/to/platforms", "path/to/rules");
         scanner.setCallGraphAlgorithm(AndroidSettings.CallGraphAlgorithm.SPARK);
         scanner.run();
 
