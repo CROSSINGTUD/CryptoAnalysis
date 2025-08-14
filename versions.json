@@ -1,5 +1,12 @@
 [
   {
+    "version": "5.0.2-SNAPSHOT",
+    "title": "5.0.2-SNAPSHOT",
+    "aliases": [
+      "latest"
+    ]
+  },
+  {
     "version": "5.0.1-SNAPSHOT",
     "title": "5.0.1-SNAPSHOT",
     "aliases": []
@@ -7,8 +14,6 @@
   {
     "version": "5.0.1",
     "title": "5.0.1",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   }
 ]
