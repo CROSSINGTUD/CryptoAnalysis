@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create Documentation Preview
-        uses: secure-software-engineering/actions/documentation/handle-pr-preview@fix/documentation-deployment
+        uses: secure-software-engineering/actions/documentation/handle-pr-preview@develop
         with:
           preview-name: pr-${{ github.event.pull_request.number }}
           preview-title: Preview for PR-${{ github.event.pull_request.number }}

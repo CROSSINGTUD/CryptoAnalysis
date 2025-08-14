@@ -1,13 +1,12 @@
 name: Documentation Deployment
-description: Deploy the documentation to GitHub pages when modified
 
 on:
   push:
     branches:
       - develop
-    create:
-      tags:
-        - '*'
+  create:
+    tags:
+      - '*'
 
 concurrency:
   group: gh-pages
@@ -34,7 +33,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Deploy Snapshot Documentation
-        uses: secure-software-engineering/actions/documentation/handle-deployment@fix/documentation-deployment
+        uses: secure-software-engineering/actions/documentation/handle-deployment@develop
         with:
           name: ${{ steps.version.outputs.version }}
           title: ${{ steps.version.outputs.version }}
@@ -55,7 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Deploy Stable Documentation
-        uses: secure-software-engineering/actions/documentation/handle-deployment@fix/documentation-deployment
+        uses: secure-software-engineering/actions/documentation/handle-deployment@develop
         with:
           name: ${{ github.ref_name }}
           title: ${{ github.ref_name }}
