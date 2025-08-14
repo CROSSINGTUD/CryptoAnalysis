@@ -37,7 +37,9 @@ public class CSVReporter extends Reporter {
     private enum Headers {
         ErrorId,
         ErrorType,
-        ViolatingClass,
+        PrecedingErrors,
+        SubsequentErrors,
+        ViolatedRule,
         Class,
         Method,
         Statement,
@@ -54,7 +56,6 @@ public class CSVReporter extends Reporter {
             Collection<IAnalysisSeed> seeds,
             Table<WrappedClass, Method, Set<AbstractError>> errorCollection,
             AnalysisStatistics statistics) {
-        int idCount = 0;
         List<String> lineContents = new ArrayList<>();
 
         for (WrappedClass wrappedClass : errorCollection.rowKeySet()) {
@@ -67,10 +68,25 @@ public class CSVReporter extends Reporter {
                 List<AbstractError> orderedErrors =
                         ErrorUtils.orderErrorsByLineNumber(entry.getValue());
                 for (AbstractError error : orderedErrors) {
+                    String preErrors =
+                            String.join(
+                                    ",",
+                                    error.getPrecedingErrors().stream()
+                                            .map(e -> String.valueOf(e.getErrorId()))
+                                            .toList());
+                    String subErrors =
+                            String.join(
+                                    ",",
+                                    error.getSubsequentErrors().stream()
+                                            .map(e -> String.valueOf(e.getErrorId()))
+                                            .toList());
+
                     List<String> lineFields =
                             Arrays.asList(
-                                    String.valueOf(idCount), // id
+                                    String.valueOf(error.getErrorId()), // id
                                     error.getClass().getSimpleName(), // error type
+                                    preErrors, // preceding errors
+                                    subErrors, // subsequent errors
                                     error.getRule().getClassName(), // violating class
                                     className, // class
                                     methodName, // method
@@ -81,8 +97,6 @@ public class CSVReporter extends Reporter {
 
                     String line = Joiner.on(CSV_SEPARATOR).join(lineFields);
                     lineContents.add(line);
-
-                    idCount++;
                 }
             }
         }

@@ -247,7 +247,7 @@ public class BinaryConstraintTest {
         Assertions.satisfiedConstraints(falseOrFalse, 0);
         Assertions.violatedConstraints(falseOrFalse, 2);
         Assertions.notRelevantConstraints(falseOrFalse, 4);
-        Assertions.constraintErrors(falseOrFalse, 2);
+        Assertions.constraintErrors(falseOrFalse, 3);
     }
 
     @Test
@@ -362,6 +362,6 @@ public class BinaryConstraintTest {
         Assertions.satisfiedConstraints(falseAndFalse, 0);
         Assertions.violatedConstraints(falseAndFalse, 2);
         Assertions.notRelevantConstraints(falseAndFalse, 4);
-        Assertions.constraintErrors(falseAndFalse, 2);
+        Assertions.constraintErrors(falseAndFalse, 3);
     }
 }

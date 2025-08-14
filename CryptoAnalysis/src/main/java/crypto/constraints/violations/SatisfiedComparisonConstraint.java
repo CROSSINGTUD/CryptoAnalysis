@@ -13,7 +13,6 @@ import boomerang.scope.Statement;
 import crypto.constraints.ComparisonConstraint;
 import crypto.extractparameter.ParameterWithExtractedValues;
 import crypto.extractparameter.TransformedValue;
-import crypto.utils.CrySLUtils;
 import java.util.Collection;
 
 public record SatisfiedComparisonConstraint(Statement statement, ComparisonConstraint constraint)
@@ -32,26 +31,28 @@ public record SatisfiedComparisonConstraint(Statement statement, ComparisonConst
 
             sb.append("\n")
                     .append("\t".repeat(depth))
-                    .append("|- ")
-                    .append(CrySLUtils.getIndexAsString(param.index()))
+                    .append("|- Extracted the following satisfying values for parameter ")
                     .append(" \"")
                     .append(param.param().getVariableName())
                     .append("\" (")
                     .append(param.varName())
-                    .append(") evaluates to:");
+                    .append(") @")
+                    .append(param.statement())
+                    .append(" @ line ")
+                    .append(param.statement().getLineNumber())
+                    .append(":");
 
             for (TransformedValue value : param.extractedValues()) {
                 sb.append("\n")
                         .append("\t".repeat(depth + 1))
                         .append("|- ")
                         .append(value.getTransformedVal().getVariableName())
-                        .append(" @ ")
-                        .append(value.getStatement())
-                        .append(" @ line ")
-                        .append(value.getStatement().getLineNumber())
                         .append(" in class \"")
                         .append(value.getStatement().getMethod().getDeclaringClass())
-                        .append("\"");
+                        .append("\" @ ")
+                        .append(value.getStatement())
+                        .append(" @ line ")
+                        .append(value.getStatement().getLineNumber());
             }
         }
 

@@ -213,3 +213,4 @@ buildNumber.properties
 
 .flattened-pom.xml
 /shippable/testresults/
+site/

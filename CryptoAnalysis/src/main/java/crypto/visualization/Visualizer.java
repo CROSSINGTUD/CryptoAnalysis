@@ -51,7 +51,6 @@ public class Visualizer {
     }
 
     public void createVisualization(Collection<IAnalysisSeed> seeds) throws IOException {
-
         Graphviz.GraphvizBuilder builder = Graphviz.digraph();
 
         Map<AbstractError, WrappedNode> errorToNode = new HashMap<>();

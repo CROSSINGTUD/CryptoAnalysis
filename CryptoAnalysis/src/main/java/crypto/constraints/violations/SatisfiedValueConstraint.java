@@ -36,7 +36,14 @@ public record SatisfiedValueConstraint(
                     .append(constraint.getConstraint().getVarName())
                     .append(") with value ")
                     .append(value.getTransformedVal().getVariableName())
-                    .append(" satisfies the constraint @ ")
+                    .append(" satisfies the constraint in class ")
+                    .append(
+                            parameter
+                                    .statement()
+                                    .getMethod()
+                                    .getDeclaringClass()
+                                    .getFullyQualifiedName())
+                    .append(" @ ")
                     .append(parameter.statement())
                     .append(" @ line ")
                     .append(parameter.statement().getLineNumber());
