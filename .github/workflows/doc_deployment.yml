@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-  create:
     tags:
       - '*'
 
@@ -41,7 +40,7 @@ jobs:
   # On tag creation (i.e. new release): Deploy a stable version to directory with tag
   deploy-doc-stable:
     name: Deploy Stable Documentation
-    if: ${{ github.event_name == 'create' && github.ref_type == 'tag' }}
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
