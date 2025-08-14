@@ -1,0 +1,38 @@
+name: Documentation Preview
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+    paths:
+      - mkdocs.yml
+      - docs/**
+      - .github/workflows/doc_preview.yml
+
+concurrency:
+  group: gh-pages
+
+jobs:
+  preview-doc:
+    name: Preview Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Documentation Preview
+        uses: secure-software-engineering/actions/documentation/handle-pr-preview@develop
+        with:
+          preview-name: pr-${{ github.event.pull_request.number }}
+          preview-title: Preview for PR-${{ github.event.pull_request.number }}
