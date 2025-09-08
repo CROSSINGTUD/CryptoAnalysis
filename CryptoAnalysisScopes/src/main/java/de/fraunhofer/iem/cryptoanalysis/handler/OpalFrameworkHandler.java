@@ -11,6 +11,7 @@ package de.fraunhofer.iem.cryptoanalysis.handler;
 
 import boomerang.scope.Method;
 import boomerang.scope.Val;
+import boomerang.scope.opal.OpalScopeConverter;
 import boomerang.scope.opal.tac.OpalMethod;
 import boomerang.scope.opal.tac.OpalVal;
 import boomerang.scope.opal.transformation.TacLocal;
@@ -28,7 +29,7 @@ public class OpalFrameworkHandler implements FrameworkHandler {
     @Override
     public Val createIntConstant(@NonNull int value, @NonNull Method method) {
         if (method instanceof OpalMethod opalMethod) {
-            return OpalVal.createUnsafe(new IntConst(PC, value), opalMethod);
+            return OpalScopeConverter.createOpalValUnsafe(new IntConst(PC, value), opalMethod);
         }
 
         throw new RuntimeException("Cannot create int constant without OpalMethod");
@@ -37,7 +38,7 @@ public class OpalFrameworkHandler implements FrameworkHandler {
     @Override
     public Val createLongConstant(@NonNull long value, @NonNull Method method) {
         if (method instanceof OpalMethod opalMethod) {
-            return OpalVal.createUnsafe(new LongConst(PC, value), opalMethod);
+            return OpalScopeConverter.createOpalValUnsafe(new LongConst(PC, value), opalMethod);
         }
 
         throw new RuntimeException("Cannot create long constant without OpalMethod");
@@ -46,7 +47,7 @@ public class OpalFrameworkHandler implements FrameworkHandler {
     @Override
     public Val createStringConstant(@NonNull String value, @NonNull Method method) {
         if (method instanceof OpalMethod opalMethod) {
-            return OpalVal.createUnsafe(new StringConst(PC, value), opalMethod);
+            return OpalScopeConverter.createOpalValUnsafe(new StringConst(PC, value), opalMethod);
         }
 
         throw new RuntimeException("Cannot create String constant without OpalMethod");

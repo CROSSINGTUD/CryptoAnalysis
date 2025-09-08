@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import typestate.StatementSequence;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
@@ -174,7 +175,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Table<Statement, Val, TransitionFunction> weights = analysisResults.computeFinalWeights();
         for (TransitionFunction weight : weights.values()) {
-            for (Transition transition : weight.getStateChangeStatements().keySet()) {
+            for (Transition transition : weight.getStateChangeSequences().keySet()) {
                 State targetState = transition.to();
 
                 if (targetState.isAccepting()) {
@@ -188,9 +189,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         }
 
                         if (t.getLeft().equals(wrappedState.delegate())) {
-                            Collection<Statement> lastStatements =
-                                    weight.getStateChangeStatements().get(transition);
                             Collection<CrySLMethod> labels = t.getLabel();
+
+                            Collection<StatementSequence> stmtSequences =
+                                    weight.getStateChangeSequences().get(transition);
+                            Collection<Statement> lastStatements =
+                                    stmtSequences.stream()
+                                            .map(
+                                                    e ->
+                                                            e.getSequence()
+                                                                    .get(e.getSequence().size() - 1)
+                                                                    .getStatement())
+                                            .toList();
 
                             for (Statement stmt : lastStatements) {
                                 incompleteOperations.putAll(stmt, labels);
@@ -418,6 +428,19 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateMayNotBeReached);
             }
 
+            /* To ensure a predicate with an 'after' condition, we have to make sure that there is
+             * no sequence of calls that does not contain an event from the 'after' event. If there
+             * is a sequence, we cannot ensure the predicate (over approximation)
+             */
+            if (predicate instanceof CrySLCondPredicate condPredicate) {
+                boolean generatingEventMissing =
+                        isGeneratingEventMissing(statement, condPredicate.getConditionalEvents());
+
+                if (generatingEventMissing) {
+                    allViolations.add(UnEnsuredPredicate.Violations.GeneratingEventIsNotCalled);
+                }
+            }
+
             if (isIndirectlyEnsured) {
                 propagateIndirectlyEnsuredPredicate(
                         predicate.toNormalCrySLPredicate(), statement, allViolations);
@@ -426,6 +449,45 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         predicate.toNormalCrySLPredicate(), statement, allViolations);
             }
         }
+    }
+
+    private boolean isGeneratingEventMissing(Statement statement, Collection<CrySLMethod> events) {
+        Collection<TransitionFunction> weights = statementValWeightTable.row(statement).values();
+
+        for (TransitionFunction weight : weights) {
+            Collection<StatementSequence> sequences = weight.getStateChangeSequences().values();
+
+            /* Check whether there is a sequence of calls that does not contain a method
+             * from the 'after' condition;
+             */
+            for (StatementSequence sequence : sequences) {
+                if (isSequenceWithoutEvent(sequence, events)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSequenceWithoutEvent(
+            StatementSequence sequence, Collection<CrySLMethod> events) {
+        for (StatementSequence.Entry entry : sequence.getSequence()) {
+            Statement statement = entry.getStatement();
+
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
+
+            DeclaredMethod declaredMethod = statement.getInvokeExpr().getDeclaredMethod();
+            for (CrySLMethod event : events) {
+                // If the call matches at least one event, there is a corresponding call
+                if (MatcherUtils.matchCryslMethodAndDeclaredMethod(event, declaredMethod)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void propagateIndirectlyEnsuredPredicate(
@@ -639,7 +701,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         // Predicate has a condition, i.e. "after" is specified -> Active predicate for
         // corresponding states
         if (ensPred instanceof CrySLCondPredicate condPred) {
-            if (isConditionalState(condPred.getConditionalMethods(), stateNode)) {
+            if (isConditionalState(condPred.getConditionalNodes(), stateNode)) {
                 return true;
             }
         }
@@ -681,7 +743,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 return true;
             }
 
-            for (StateNode s : condNegPred.getConditionalMethods()) {
+            for (StateNode s : condNegPred.getConditionalNodes()) {
                 if (WrappedState.of(s).equals(stateNode)) {
                     return true;
                 }

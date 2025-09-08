@@ -1,0 +1,13 @@
+SPEC tests.misc.flowsensitivity.PredicateReceiver
+
+OBJECTS
+    java.lang.String word;
+
+EVENTS
+    Gen: word = generateWord();
+
+ORDER
+    Gen*
+
+ENSURES
+    generatedWord[word] after Gen;
