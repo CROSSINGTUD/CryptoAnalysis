@@ -75,7 +75,7 @@ public class PredicateImplicationTest {
 
         // i == 10 => generatedReceiver
         Receiver receiver = generator.generateReceiver();
-        Assertions.notHasEnsuredPredicate(receiver);
+        Assertions.hasEnsuredPredicate(receiver);
 
         // Condition satisfied (true) => predicate has to be ensured (false)
         receiver.condition(10);

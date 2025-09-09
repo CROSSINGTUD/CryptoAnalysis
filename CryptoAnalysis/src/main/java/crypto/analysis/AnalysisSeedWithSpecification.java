@@ -41,7 +41,9 @@ import crysl.rule.CrySLRule;
 import crysl.rule.StateNode;
 import crysl.rule.TransitionEdge;
 import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,11 +60,15 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
     private final CrySLRule specification;
 
     private final ConstraintsAnalysis constraintsAnalysis;
-    private boolean internalConstraintsSatisfied;
 
     private final Collection<Statement> allCallsOnObject;
     private final Multimap<Statement, Integer> relevantStatements = HashMultimap.create();
     private final Collection<AbstractPredicate> indirectlyEnsuredPredicates = new HashSet<>();
+
+    private record PredicateToPropagate(
+            CrySLPredicate predicate,
+            Statement statement,
+            Collection<UnEnsuredPredicate.Violations> violations) {}
 
     public AnalysisSeedWithSpecification(
             CryptoScanner scanner,
@@ -372,27 +378,57 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
     @Override
     public void propagatePredicates() {
-        // Check whether all constraints from the CONSTRAINTS and REQUIRES section is satisfied
-        boolean satisfiesConstraintSystem = isConstraintSystemSatisfied();
+        Collection<PredicateToPropagate> predsToPropagate = new ArrayList<>();
+        Collection<PredicateToPropagate> indirectPredsToPropagate = new ArrayList<>();
 
         Collection<CrySLPredicate> predsToBeEnsured = specification.getPredicates();
         for (CrySLPredicate predToBeEnsured : predsToBeEnsured) {
-            propagatePredicate(predToBeEnsured, satisfiesConstraintSystem);
+            Map<Statement, Collection<UnEnsuredPredicate.Violations>> predResults =
+                    propagatePredicate(predToBeEnsured);
+
+            for (Statement statement : predResults.keySet()) {
+                Collection<UnEnsuredPredicate.Violations> violations = predResults.get(statement);
+
+                predsToPropagate.add(
+                        new PredicateToPropagate(
+                                predToBeEnsured.toNormalCrySLPredicate(), statement, violations));
+            }
         }
 
         for (AbstractPredicate indirectPred : indirectlyEnsuredPredicates) {
-            propagatePredicate(indirectPred.getPredicate(), satisfiesConstraintSystem, true);
+            CrySLPredicate predicate = indirectPred.getPredicate();
+            Map<Statement, Collection<UnEnsuredPredicate.Violations>> predResults =
+                    propagatePredicate(predicate);
+
+            for (Statement statement : predResults.keySet()) {
+                Collection<UnEnsuredPredicate.Violations> violations = predResults.get(statement);
+
+                indirectPredsToPropagate.add(
+                        new PredicateToPropagate(
+                                predicate.toNormalCrySLPredicate(), statement, violations));
+            }
+        }
+
+        // Propagate predicates
+        propagatePredicates(predsToPropagate, false);
+        propagatePredicates(indirectPredsToPropagate, true);
+    }
+
+    private void propagatePredicates(
+            Collection<PredicateToPropagate> predsToPropagate, boolean isIndirectlyEnsured) {
+        for (PredicateToPropagate predicate : predsToPropagate) {
+            if (isIndirectlyEnsured) {
+                propagateIndirectlyEnsuredPredicate(
+                        predicate.predicate(), predicate.statement(), predicate.violations());
+            } else {
+                propagateEnsuredPredicate(
+                        predicate.predicate(), predicate.statement(), predicate.violations());
+            }
         }
     }
 
-    private void propagatePredicate(CrySLPredicate predicate, boolean satisfiesConstraintSystem) {
-        propagatePredicate(predicate, satisfiesConstraintSystem, false);
-    }
-
-    private void propagatePredicate(
-            CrySLPredicate predicate,
-            boolean satisfiesConstraintSystem,
-            boolean isIndirectlyEnsured) {
+    private Map<Statement, Collection<UnEnsuredPredicate.Violations>> propagatePredicate(
+            CrySLPredicate predicate) {
         Collection<UnEnsuredPredicate.Violations> violations = new HashSet<>();
 
         // Check whether there is a ForbiddenMethodError from previous checks
@@ -400,15 +436,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             violations.add(UnEnsuredPredicate.Violations.CallToForbiddenMethod);
         }
 
-        if (!satisfiesConstraintSystem) {
-            // violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
-        }
-
-        // Check whether there is a predicate condition and whether it is satisfied
-        if (constraintsAnalysis.isPredConditionViolated(predicate)) {
-            violations.add(UnEnsuredPredicate.Violations.ConditionIsNotSatisfied);
-        }
-
+        Map<Statement, Collection<UnEnsuredPredicate.Violations>> result = new HashMap<>();
         for (Statement statement : relevantStatements.keySet()) {
             Collection<UnEnsuredPredicate.Violations> allViolations = new HashSet<>(violations);
 
@@ -425,6 +453,11 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
             if (!consErrors.isEmpty() || !predErrors.isEmpty()) {
                 allViolations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
+            }
+
+            // Check whether there is a predicate condition and whether it is satisfied
+            if (constraintsAnalysis.isPredConditionViolated(predicate, callsAtStatement)) {
+                violations.add(UnEnsuredPredicate.Violations.ConditionIsNotSatisfied);
             }
 
             /* Check for all states whether an accepting state is reached:
@@ -459,14 +492,10 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                 }
             }
 
-            if (isIndirectlyEnsured) {
-                propagateIndirectlyEnsuredPredicate(
-                        predicate.toNormalCrySLPredicate(), statement, allViolations);
-            } else {
-                propagateEnsuredPredicate(
-                        predicate.toNormalCrySLPredicate(), statement, allViolations);
-            }
+            result.put(statement, allViolations);
         }
+
+        return result;
     }
 
     private Collection<Statement> getCallsAtStatement(Statement statement) {
@@ -857,7 +886,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         constraintsAnalysis.initialize();
         Collection<AbstractConstraintsError> violatedConstraints =
                 constraintsAnalysis.evaluateConstraints();
-        this.internalConstraintsSatisfied = violatedConstraints.isEmpty();
 
         for (AbstractConstraintsError error : violatedConstraints) {
             this.addError(error);
@@ -865,19 +893,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         }
 
         scanner.getAnalysisReporter().afterConstraintsCheck(this, violatedConstraints.size());
-    }
-
-    /**
-     * Check, whether the internal constraints and predicate constraints are satisfied. Requires a
-     * previous call to {@link #checkInternalConstraints()}
-     *
-     * @return true if all internal and required predicate constraints are satisfied
-     */
-    private boolean isConstraintSystemSatisfied() {
-        Collection<AbstractConstraintsError> violatedPredicates =
-                constraintsAnalysis.evaluateRequiredPredicates();
-
-        return internalConstraintsSatisfied && violatedPredicates.isEmpty();
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
