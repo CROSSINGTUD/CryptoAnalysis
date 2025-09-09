@@ -920,10 +920,7 @@ public class BragaCryptoGoodUsesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("example.RandomMessageNonceECDSA", "main", 1)
-                        .withFPs(
-                                RequiredPredicateError.class,
-                                2,
-                                "setSeed is correctly called (cf. https://github.com/CROSSINGTUD/CryptoAnalysis/issues/295")
+                        .withNoErrors(RequiredPredicateError.class)
                         .build());
 
         // positive test case

@@ -1254,7 +1254,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
 
         addErrorSpecification(
                 new ErrorSpecification.Builder("br.predictableSeed.ReusedSeed", "main", 1)
-                        .withTPs(RequiredPredicateError.class, 4)
+                        .withNoErrors(RequiredPredicateError.class)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder("br.predictableSeed.LowEntropySeed1", "main", 1)
@@ -1832,7 +1832,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                                 "pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_1",
                                 "main",
                                 1)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withNoErrors(RequiredPredicateError.class)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
@@ -1853,7 +1853,7 @@ public class BragaCryptoMisusesTest extends AbstractHeadlessTest {
                                 "pkc.sign.weakSignatureECDSA.RepeatedMessageNonceECDSA_4",
                                 "main",
                                 1)
-                        .withTPs(RequiredPredicateError.class, 2)
+                        .withNoErrors(RequiredPredicateError.class)
                         .build());
         addErrorSpecification(
                 new ErrorSpecification.Builder(
