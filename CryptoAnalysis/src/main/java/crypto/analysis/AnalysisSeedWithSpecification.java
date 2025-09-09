@@ -14,6 +14,7 @@ import boomerang.scope.DeclaredMethod;
 import boomerang.scope.InvokeExpr;
 import boomerang.scope.Statement;
 import boomerang.scope.Val;
+import boomerang.utils.MethodWrapper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
@@ -42,6 +43,7 @@ import crysl.rule.TransitionEdge;
 import de.fraunhofer.iem.cryptoanalysis.scope.CryptoAnalysisScope;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -399,7 +401,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         }
 
         if (!satisfiesConstraintSystem) {
-            violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
+            // violations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
         }
 
         // Check whether there is a predicate condition and whether it is satisfied
@@ -408,6 +410,23 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
         }
 
         for (Statement statement : relevantStatements.keySet()) {
+            Collection<UnEnsuredPredicate.Violations> allViolations = new HashSet<>(violations);
+
+            /* Check whether there is a constraint violation on a statement up until the current statement.
+             * This includes the statements that have been called until the current statement. For example,
+             * we have a sequence Con -> A -> B -> C and the current statement is B, then we evaluate the
+             * constraints only on the statements Con, A, B because C has not been called yet
+             */
+            Collection<Statement> callsAtStatement = getCallsAtStatement(statement);
+            Collection<AbstractConstraintsError> consErrors =
+                    constraintsAnalysis.evaluateConstraints(callsAtStatement);
+            Collection<AbstractConstraintsError> predErrors =
+                    constraintsAnalysis.evaluateRequiredPredicates(callsAtStatement);
+
+            if (!consErrors.isEmpty() || !predErrors.isEmpty()) {
+                allViolations.add(UnEnsuredPredicate.Violations.ConstraintsAreNotSatisfied);
+            }
+
             /* Check for all states whether an accepting state is reached:
              * 1) All states are accepting -> Predicate is generated
              * 2) No state is accepting -> Predicate is definitely not generated
@@ -421,7 +440,6 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
             boolean someStatesNonGenerating =
                     states.stream().anyMatch(s -> !doesStateGeneratePredicate(s, predicate));
 
-            Collection<UnEnsuredPredicate.Violations> allViolations = new HashSet<>(violations);
             if (allStatesNonGenerating) {
                 allViolations.add(UnEnsuredPredicate.Violations.GeneratingStateIsNeverReached);
             } else if (someStatesNonGenerating) {
@@ -449,6 +467,56 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         predicate.toNormalCrySLPredicate(), statement, allViolations);
             }
         }
+    }
+
+    private Collection<Statement> getCallsAtStatement(Statement statement) {
+        Collection<TransitionFunction> weights = statementValWeightTable.row(statement).values();
+
+        Collection<Statement> calls = new HashSet<>();
+        for (TransitionFunction weight : weights) {
+            Collection<StatementSequence> sequences = weight.getStateChangeSequences().values();
+
+            for (StatementSequence sequence : sequences) {
+                Collection<Statement> statements = sanitizeStatements(sequence);
+
+                calls.addAll(statements);
+            }
+        }
+
+        return calls;
+    }
+
+    /**
+     * Method to sanitize duplicate statements from a call sequence. This method returns a set with
+     * the statements sanitizes from the end of the sequence. For example, if we have a sequence Con
+     * -> A -> B -> A, then the method returns a set with Con, B, A where A is the second one in the
+     * sequence. This way, we can ensure that the call to A is the last 'state' of the call sequence
+     * and possible violations at the first A are overridden.
+     *
+     * @param sequence the sequence to sanitize
+     * @return the sanitized statements
+     */
+    private Collection<Statement> sanitizeStatements(StatementSequence sequence) {
+        Collection<Statement> sanitizedStatements = new HashSet<>();
+        Collection<MethodWrapper> addedMethods = new HashSet<>();
+
+        List<StatementSequence.Entry> entries = sequence.getSequence();
+        for (int i = entries.size() - 1; i >= 0; i--) {
+            Statement statement = entries.get(i).getStatement();
+
+            if (!statement.containsInvokeExpr()) {
+                continue;
+            }
+
+            MethodWrapper declaredMethod =
+                    statement.getInvokeExpr().getDeclaredMethod().toMethodWrapper();
+            if (!addedMethods.contains(declaredMethod)) {
+                addedMethods.add(declaredMethod);
+                sanitizedStatements.add(statement);
+            }
+        }
+
+        return sanitizedStatements;
     }
 
     private boolean isGeneratingEventMissing(Statement statement, Collection<CrySLMethod> events) {

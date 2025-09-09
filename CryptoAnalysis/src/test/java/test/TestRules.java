@@ -63,7 +63,9 @@ public class TestRules {
 
     public static final String TRANSFORMATION = "transformation";
 
-    public static final String FLOW_SENSITIVITY = "flowSensitivity";
+    public static final String FLOW_SENSITIVITY_CONSTRAINTS = "flowSensitivity/constraints";
+
+    public static final String FLOW_SENSITIVITY_PREDICATES = "flowSensitivity/predicates";
 
     public static final String SEEDS = "seeds";
 

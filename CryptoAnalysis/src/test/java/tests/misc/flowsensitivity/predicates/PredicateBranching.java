@@ -7,13 +7,13 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.misc.flowsensitivity;
+package tests.misc.flowsensitivity.predicates;
 
-public class PredicateGenerator {
+public class PredicateBranching {
 
-    public PredicateGenerator() {}
+    public PredicateBranching() {}
 
-    public PredicateReceiver generate() {
-        return () -> "secret";
-    }
+    public void operation1() {}
+
+    public void operation2() {}
 }

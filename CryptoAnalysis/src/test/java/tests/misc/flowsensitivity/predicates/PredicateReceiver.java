@@ -7,7 +7,7 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.misc.flowsensitivity;
+package tests.misc.flowsensitivity.predicates;
 
 public interface PredicateReceiver {
 

@@ -72,6 +72,18 @@ public class KeyPairTest {
     }
 
     @Test
+    public void test() throws GeneralSecurityException {
+        int keySize = 4096;
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        RSAKeyGenParameterSpec parameters =
+                new RSAKeyGenParameterSpec(keySize, BigInteger.valueOf(65537));
+        Assertions.hasEnsuredPredicate(parameters);
+        generator.initialize(parameters);
+        KeyPair keyPair = generator.generateKeyPair();
+        Assertions.hasEnsuredPredicate(keyPair);
+    }
+
+    @Test
     public void negativeRsaParameterSpecTestBigInteger() throws GeneralSecurityException {
         // Since 3.0.0: key size of 2048 is not allowed
         int keySize = 2048;

@@ -1,4 +1,4 @@
-SPEC tests.misc.flowsensitivity.PredicateReceiver
+SPEC tests.misc.flowsensitivity.predicates.PredicateReceiver
 
 OBJECTS
     java.lang.String word;

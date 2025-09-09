@@ -1,4 +1,4 @@
-SPEC tests.misc.flowsensitivity.PredicateBranching
+SPEC tests.misc.flowsensitivity.predicates.PredicateBranching
 
 EVENTS
     Con: PredicateBranching();

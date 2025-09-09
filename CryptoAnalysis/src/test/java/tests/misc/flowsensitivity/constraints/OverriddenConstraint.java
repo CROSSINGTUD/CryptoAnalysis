@@ -7,13 +7,11 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.misc.flowsensitivity;
+package tests.misc.flowsensitivity.constraints;
 
-public class PredicateBranching {
+public class OverriddenConstraint {
 
-    public PredicateBranching() {}
+    public OverriddenConstraint() {}
 
-    public void operation1() {}
-
-    public void operation2() {}
+    public void operation(@SuppressWarnings("unused") int i) {}
 }

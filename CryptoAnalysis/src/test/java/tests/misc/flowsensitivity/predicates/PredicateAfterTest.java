@@ -7,7 +7,7 @@
  * <p>
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
-package tests.misc.flowsensitivity;
+package tests.misc.flowsensitivity.predicates;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import test.TestRunnerInterceptor;
 import test.assertions.Assertions;
 
 @ExtendWith(TestRunnerInterceptor.class)
-@Ruleset(TestRules.FLOW_SENSITIVITY)
+@Ruleset(TestRules.FLOW_SENSITIVITY_PREDICATES)
 public class PredicateAfterTest {
 
     private boolean staticallyUnknown() {
