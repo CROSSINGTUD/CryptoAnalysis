@@ -53,7 +53,7 @@
         <opal.version>5.0.0</opal.version>
         <crysl.version>4.0.5</crysl.version>
         <junit.version>5.13.4</junit.version>
-        <guava.version>33.4.8-jre</guava.version>
+        <guava.version>33.5.0-jre</guava.version>
     </properties>
 
     <dependencyManagement>
