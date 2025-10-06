@@ -66,7 +66,7 @@ public class TestRunner {
     private static final String OPAL = "opal";
 
     /** Use this variable to configure the framework when running the tests locally */
-    private static final String LOCAL_TEST_FRAMEWORK = SOOT;
+    private static final String LOCAL_TEST_FRAMEWORK = SOOT_UP;
 
     private final TestSetup testSetup;
     private final CryptoScanner scanner;

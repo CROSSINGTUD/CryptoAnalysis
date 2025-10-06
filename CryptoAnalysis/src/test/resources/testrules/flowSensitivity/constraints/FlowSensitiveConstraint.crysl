@@ -1,0 +1,18 @@
+SPEC tests.misc.flowsensitivity.constraints.FlowSensitiveConstraint
+
+OBJECTS
+    int i;
+
+EVENTS
+    Con: FlowSensitiveConstraint();
+    Op1: operation1();
+    Op2: operation2(i);
+
+ORDER
+    Con, Op1, Op2
+
+CONSTRAINTS
+    i == 10;
+
+ENSURES
+    generatedConstraint[this] after Con;

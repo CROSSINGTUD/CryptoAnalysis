@@ -1,0 +1,17 @@
+SPEC tests.misc.flowsensitivity.constraints.OverriddenConstraint
+
+OBJECTS
+    int i;
+
+EVENTS
+    Con: OverriddenConstraint();
+    Op: operation(i);
+
+ORDER
+    Con, Op*
+
+CONSTRAINTS
+    i == 10;
+
+ENSURES
+    generatedConstraint[this] after Con;

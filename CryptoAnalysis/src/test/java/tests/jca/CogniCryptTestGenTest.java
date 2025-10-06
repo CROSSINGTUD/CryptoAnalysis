@@ -461,12 +461,10 @@ public class CogniCryptTestGenTest {
     public void messageDigestInvalidTest12() throws NoSuchAlgorithmException, DigestException {
         // Related to issue 296: https://github.com/CROSSINGTUD/CryptoAnalysis/issues/296
         int off = 0;
-        byte[] inByteArr = null;
         int len = 0;
         byte[] out = null;
 
         MessageDigest messageDigest0 = MessageDigest.getInstance("SHA-256");
-        out = messageDigest0.digest(inByteArr);
         // update is skipped
         messageDigest0.digest(out, off, len);
         Assertions.notHasEnsuredPredicate(out);

@@ -1,0 +1,12 @@
+SPEC tests.misc.flowsensitivity.predicates.PredicateBranching
+
+EVENTS
+    Con: PredicateBranching();
+    Op1: operation1();
+    Op2: operation2();
+
+ORDER
+    Con, Op1?, Op2
+
+ENSURES
+    generatedPredicateBranching[this] after Op1;

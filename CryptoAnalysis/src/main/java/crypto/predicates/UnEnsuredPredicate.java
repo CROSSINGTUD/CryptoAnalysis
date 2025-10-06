@@ -62,7 +62,13 @@ public class UnEnsuredPredicate extends AbstractPredicate {
          * Violation if there is no dataflow path where the seed reaches an accepting state to
          * generate a predicate.
          */
-        GeneratingStateIsNeverReached
+        GeneratingStateIsNeverReached,
+
+        /**
+         * Violation if an accepting state is reached, but the predicate has an 'after' condition
+         * and the event is not called
+         */
+        GeneratingEventIsNotCalled
     }
 
     public UnEnsuredPredicate(
