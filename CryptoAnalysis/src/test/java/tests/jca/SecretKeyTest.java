@@ -288,7 +288,7 @@ public class SecretKeyTest {
 
         public byte[] encrypt(String plainText) throws GeneralSecurityException {
             byte[] encText = this.cipher.doFinal(plainText.getBytes());
-            Assertions.hasEnsuredPredicate(encText);
+            Assertions.notHasEnsuredPredicate(encText);
             return encText;
         }
     }
