@@ -196,9 +196,14 @@ public class TestRunner {
         }
         visited.add(method);
 
-        for (CallGraph.Edge callSite : callGraph.edgesInto(method)) {
-            Method callee = callSite.tgt();
-            extractBenchmarkMethods(callee, callGraph, queries, visited);
+        for (Statement statement : method.getStatements()) {
+            for (CallGraph.Edge edge : callGraph.edgesOutOf(statement)) {
+                Method callee = edge.tgt();
+
+                if (callee.isDefined()) {
+                    extractBenchmarkMethods(callee, callGraph, queries, visited);
+                }
+            }
         }
 
         for (Statement statement : method.getStatements()) {
