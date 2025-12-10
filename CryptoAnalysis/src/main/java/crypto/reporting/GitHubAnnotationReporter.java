@@ -156,12 +156,6 @@ public class GitHubAnnotationReporter extends CommandLineReporter {
         setSummary(summary.toString());
 
         System.out.println("::endgroup::");
-
-        super.createAnalysisReport(seeds, errorCollection, statistics);
-
-        if (errorCount != 0) {
-            System.exit(1);
-        }
     }
 
     private Path classToSourcePath(WrappedClass clazz) {
