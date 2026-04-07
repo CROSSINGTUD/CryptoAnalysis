@@ -93,7 +93,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>3.10.0</version>
                     <configuration>
                         <ignoredUnusedDeclaredDependencies>
                             <!-- The logger api requires a concrete provider that is not explicitly used by this project: https://www.slf4j.org/manual.html -->
