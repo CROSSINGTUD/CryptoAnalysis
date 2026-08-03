@@ -1,4 +1,4 @@
-name: Test Internal Action
+name: Test CryptoAnalysis Action
 
 on: [pull_request, workflow_dispatch]
 

@@ -12,9 +12,9 @@ jobs:
         uses: actions/checkout@v4
       # Set up Java version
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: adopt
+          distribution: temurin
           java-package: jdk
           java-version: 17
       # Restores Maven dependencies

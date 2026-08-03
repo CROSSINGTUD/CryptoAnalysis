@@ -146,6 +146,12 @@
             <version>${opal.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>static-analysis-infrastructure_2.13</artifactId>
+            <version>${opal.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Other dependencies -->
         <dependency>

@@ -92,7 +92,7 @@ public abstract class IAnalysisSeed implements IPredicateCheckListener {
     private Collection<State> getTargetStates(TransitionFunctionImpl transitionFunction) {
         Collection<State> states = new HashSet<>();
 
-        for (Transition transition : transitionFunction.getStateChangeStatements().keySet()) {
+        for (Transition transition : transitionFunction.getStateChangeSequences().keySet()) {
             states.add(transition.to());
         }
 
