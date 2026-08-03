@@ -10,9 +10,9 @@ runs:
   steps:
     # Set up Java version
     - name: Set up Java ${{ inputs.java-version }}
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
-        distribution: adopt
+        distribution: temurin
         java-package: jdk
         java-version: ${{ inputs.java-version }}
     # Restores Maven dependecies
