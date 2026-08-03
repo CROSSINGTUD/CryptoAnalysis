@@ -155,6 +155,26 @@ public class UnknownVal extends Val {
     }
 
     @Override
+    public boolean isFloatConstant() {
+        return false;
+    }
+
+    @Override
+    public float getFloatValue() {
+        throw new RuntimeException("Unknown Val is not a float constant");
+    }
+
+    @Override
+    public boolean isDoubleConstant() {
+        return false;
+    }
+
+    @Override
+    public double getDoubleValue() {
+        throw new RuntimeException("Unknown Val is not a double constant");
+    }
+
+    @Override
     public IArrayRef getArrayBase() {
         throw new RuntimeException("Unknown Val has no array base");
     }

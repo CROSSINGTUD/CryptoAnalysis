@@ -14,7 +14,7 @@ import boomerang.scope.Val;
 import boomerang.scope.sootup.jimple.JimpleUpMethod;
 import boomerang.scope.sootup.jimple.JimpleUpVal;
 import org.jspecify.annotations.NonNull;
-import sootup.core.jimple.basic.Value;
+import sootup.core.jimple.common.Value;
 import sootup.core.jimple.common.constant.IntConstant;
 import sootup.core.jimple.common.constant.LongConstant;
 import sootup.core.jimple.common.constant.StringConstant;
@@ -44,7 +44,7 @@ public class SootUpFrameworkHandler implements FrameworkHandler {
     @Override
     public Val createStringConstant(@NonNull String value, @NonNull Method method) {
         if (method instanceof JimpleUpMethod jimpleUpMethod) {
-            StringConstant constant = JavaJimple.getInstance().newStringConstant(value);
+            StringConstant constant = JavaJimple.newStringConstant(value);
 
             return new JimpleUpVal(constant, jimpleUpMethod);
         }

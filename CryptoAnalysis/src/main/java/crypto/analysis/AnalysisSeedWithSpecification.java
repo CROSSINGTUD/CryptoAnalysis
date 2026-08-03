@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import typestate.StatementSequence;
 import typestate.TransitionFunction;
 import typestate.finiteautomata.State;
 import typestate.finiteautomata.Transition;
@@ -174,7 +175,7 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
 
         Table<Statement, Val, TransitionFunction> weights = analysisResults.computeFinalWeights();
         for (TransitionFunction weight : weights.values()) {
-            for (Transition transition : weight.getStateChangeStatements().keySet()) {
+            for (Transition transition : weight.getStateChangeSequences().keySet()) {
                 State targetState = transition.to();
 
                 if (targetState.isAccepting()) {
@@ -188,9 +189,18 @@ public class AnalysisSeedWithSpecification extends IAnalysisSeed {
                         }
 
                         if (t.getLeft().equals(wrappedState.delegate())) {
-                            Collection<Statement> lastStatements =
-                                    weight.getStateChangeStatements().get(transition);
                             Collection<CrySLMethod> labels = t.getLabel();
+
+                            Collection<StatementSequence> stmtSequences =
+                                    weight.getStateChangeSequences().get(transition);
+                            Collection<Statement> lastStatements =
+                                    stmtSequences.stream()
+                                            .map(
+                                                    e ->
+                                                            e.getSequence()
+                                                                    .get(e.getSequence().size() - 1)
+                                                                    .getStatement())
+                                            .toList();
 
                             for (Statement stmt : lastStatements) {
                                 incompleteOperations.putAll(stmt, labels);

@@ -10,7 +10,6 @@
 package crypto.extractparameter;
 
 import boomerang.scope.Type;
-import boomerang.scope.Val;
 import boomerang.scope.WrappedClass;
 
 public class UnknownType implements Type {
@@ -50,11 +49,6 @@ public class UnknownType implements Type {
     @Override
     public WrappedClass getWrappedClass() {
         throw new RuntimeException("Unknown type has no declaring class");
-    }
-
-    @Override
-    public boolean doesCastFail(Type type, Val val) {
-        return true;
     }
 
     @Override

@@ -115,7 +115,7 @@ public class QuerySolver {
             definition.reporter().afterTriggeringBoomerangQuery(query);
 
             definition.reporter().extractedBoomerangResults(query, results);
-            if (results.isTimedout()) {
+            if (results.isTimedOut()) {
                 definition
                         .reporter()
                         .onExtractParameterAnalysisTimeout(

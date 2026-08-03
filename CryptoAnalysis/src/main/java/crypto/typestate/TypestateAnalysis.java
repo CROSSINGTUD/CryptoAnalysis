@@ -11,7 +11,6 @@ package crypto.typestate;
 
 import boomerang.Query;
 import boomerang.WeightedForwardQuery;
-import boomerang.debugger.Debugger;
 import boomerang.options.BoomerangOptions;
 import boomerang.results.ForwardBoomerangResults;
 import boomerang.scope.ControlFlowGraph;
@@ -23,7 +22,6 @@ import crysl.rule.CrySLRule;
 import ideal.IDEALAnalysis;
 import ideal.IDEALAnalysisDefinition;
 import ideal.IDEALResultHandler;
-import ideal.IDEALSeedSolver;
 import ideal.StoreIDEALResultHandler;
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,12 +91,6 @@ public class TypestateAnalysis {
                             ControlFlowGraph.Edge, Val, ControlFlowGraph.Edge, TransitionFunction>
                     weightFunctions() {
                 return typestateFunction;
-            }
-
-            @Override
-            public Debugger<TransitionFunction> debugger(
-                    IDEALSeedSolver<TransitionFunction> idealSeedSolver) {
-                return new Debugger<>();
             }
 
             @Override
