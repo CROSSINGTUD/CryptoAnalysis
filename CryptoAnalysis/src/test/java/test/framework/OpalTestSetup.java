@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.opalj.br.ClassFile;
+import org.opalj.br.ClassType;
 import org.opalj.br.MethodDescriptor$;
-import org.opalj.br.ObjectType;
 import org.opalj.br.analyses.Project;
 import org.opalj.br.analyses.Project$;
 import org.opalj.br.analyses.cg.InitialEntryPointsKey;
@@ -59,7 +59,7 @@ public class OpalTestSetup implements TestSetup {
 
         // Load the class that contains the test method
         Option<ClassFile> testClass =
-                project.classFile(ObjectType.apply(className.replace(".", "/")));
+                project.classFile(ClassType.apply(className.replace(".", "/")));
         if (testClass.isEmpty()) {
             throw new RuntimeException("Could not find class " + className);
         }

@@ -115,6 +115,11 @@
             <artifactId>three-address-code_2.13</artifactId>
             <version>${opal.version}</version>
         </dependency>
+        <dependency>
+            <groupId>de.opal-project</groupId>
+            <artifactId>static-analysis-infrastructure_2.13</artifactId>
+            <version>${opal.version}</version>
+        </dependency>
 
         <!-- Other dependencies -->
         <dependency>
