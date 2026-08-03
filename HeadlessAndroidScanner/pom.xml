@@ -39,7 +39,7 @@
 
     <properties>
         <license.dir>${project.parent.basedir}</license.dir>
-        <flowDroidVersion>2.14.1</flowDroidVersion>
+        <flowDroidVersion>2.15.1</flowDroidVersion>
     </properties>
 
     <dependencies>
