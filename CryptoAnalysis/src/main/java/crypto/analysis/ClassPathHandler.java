@@ -44,7 +44,7 @@ public class ClassPathHandler {
                         .toList();
 
         classLoader =
-                new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getSystemClassLoader());
+                new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getPlatformClassLoader());
     }
 
     public static URLClassLoader getClassLoader() {
