@@ -19,6 +19,8 @@ import de.fraunhofer.iem.cryptoanalysis.handler.FrameworkHandler;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OperatorTransformation extends AbstractTransformation implements ITransformation {
 
@@ -36,6 +38,13 @@ public class OperatorTransformation extends AbstractTransformation implements IT
 
                 return Collections.singleton(lengthOp);
             }
+            if (frameworkHandler.isBinaryExpr(rightOp) && isArithmeticExpression(statement)) {
+                // Try to extract operands from the binary expression
+                Collection<Val> operands = extractArithmeticOperands(rightOp, statement);
+                if (!operands.isEmpty()) {
+                    return operands;
+                }
+            }
         }
 
         return Collections.emptySet();
@@ -50,6 +59,9 @@ public class OperatorTransformation extends AbstractTransformation implements IT
 
             if (rightOp.isLengthExpr()) {
                 return evaluateLengthExpr(allocVal, rightOp, graph, transformation);
+            }
+            if (frameworkHandler.isBinaryExpr(rightOp) && isArithmeticExpression(statement)) {
+                return evaluateArithmeticExpression(allocVal, rightOp, graph, transformation);
             }
         }
 
@@ -101,5 +113,105 @@ public class OperatorTransformation extends AbstractTransformation implements IT
         }
 
         return transformedValues;
+    }
+
+    private boolean isArithmeticExpression(Statement statement) {
+        String stmtStr = statement.toString();
+
+        // Look for arithmetic patterns but exclude string operations and method calls
+        boolean hasArithmetic = stmtStr.contains(" + ") || stmtStr.contains(" - ") ||
+                stmtStr.contains(" * ") || stmtStr.contains(" / ") ||
+                stmtStr.contains(" % ");
+
+        // Make sure it's not a method call or string operation
+        boolean isMethodCall = stmtStr.contains("invoke") || stmtStr.contains(".");
+        boolean isStringConcat = stmtStr.contains("\"") && stmtStr.contains(" + ");
+
+        return hasArithmetic && !isMethodCall && !isStringConcat;
+    }
+
+    private Collection<Val> extractArithmeticOperands(Val binaryExpr, Statement statement) {
+        if (isConstantArithmetic(statement.toString())) {
+            return Collections.emptySet();
+        }
+        return Collections.emptySet();
+    }
+
+    private Collection<TransformedValue> evaluateArithmeticExpression(
+            AllocVal allocVal, Val binaryExpr, AllocationSiteGraph graph, TransformationHandler transformation) {
+
+        Statement statement = allocVal.getAllocStatement();
+        String stmtStr = statement.toString();
+
+        // Handle constant arithmetic first
+        if (isConstantArithmetic(stmtStr)) {
+            return evaluateConstantArithmetic(allocVal, stmtStr);
+        }
+        return createUnknownTransformedValue(allocVal);
+    }
+
+    private boolean isConstantArithmetic(String statementStr) {
+        // Match patterns like: var = number operator number
+        Pattern constantPattern = Pattern.compile(".*=\\s*(-?\\d+)\\s*([+\\-*/])\\s*(-?\\d+).*");
+        return constantPattern.matcher(statementStr).matches();
+    }
+
+    private Collection<TransformedValue> evaluateConstantArithmetic(AllocVal allocVal, String statementStr) {
+        try {
+            // Extract numbers and operator using regex
+            Pattern pattern = Pattern.compile(".*=\\s*(-?\\d+)\\s*([+\\-*/])\\s*(-?\\d+).*");
+            Matcher matcher = pattern.matcher(statementStr);
+
+            if (matcher.matches()) {
+                int leftValue = Integer.parseInt(matcher.group(1));
+                String operator = matcher.group(2);
+                int rightValue = Integer.parseInt(matcher.group(3));
+
+                Integer result = performArithmeticOperation(leftValue, rightValue, operator);
+
+                if (result != null) {
+                    Method method = allocVal.getAllocStatement().getMethod();
+                    Val intVal = frameworkHandler.createIntConstant(result, method);
+
+                    TransformedValue value = new TransformedValue(intVal, allocVal.getAllocStatement(), Collections.emptySet());
+                    return Collections.singleton(value);
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return createUnknownTransformedValue(allocVal);
+    }
+
+    private Integer performArithmeticOperation(int left, int right, String operator) {
+        try {
+            switch (operator) {
+                case "+":
+                    return Math.addExact(left, right);
+                case "-":
+                    return Math.subtractExact(left, right);
+                case "*":
+                    return Math.multiplyExact(left, right);
+                case "/":
+                    if (right == 0) return null;
+                    return left / right;
+                case "%":
+                    if (right == 0) return null;
+                    return left % right;
+                default:
+                    return null;
+            }
+        } catch (ArithmeticException e) {
+            return null;
+        }
+    }
+
+    private Collection<TransformedValue> createUnknownTransformedValue(AllocVal allocVal) {
+        TransformedValue unknownValue = new TransformedValue(
+                allocVal.getAllocVal(),
+                allocVal.getAllocStatement(),
+                Collections.emptySet(),
+                Collections.emptySet());
+        return Collections.singleton(unknownValue);
     }
 }
